@@ -2,7 +2,6 @@ export type User = {
   id: string;
   createAt: Date;
   updateAt: Date;
-
   firstName: string;
   lastName: string;
   email: string;
@@ -14,7 +13,6 @@ export type User = {
   isVerifyEmail: boolean;
   verifyEmailToken?: string;
   verifyEmailTokenExpiresAt?: Date;
-
   lastActiveAt: Date;
   isResetPassword: boolean;
   provider: Provider;
