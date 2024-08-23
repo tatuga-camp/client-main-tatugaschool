@@ -1,9 +1,3 @@
-import { FileOnAssignment } from "./FileOnAssignment";
-import { School } from "./School";
-import { SkillOnAssignment } from "./SkillOnAssignment";
-import { StudentOnAssignment } from "./StudentOnAssignment";
-import { Subject } from "./Subject";
-
 export interface Assignment {
   id: string;
   createAt: Date;
@@ -15,10 +9,5 @@ export interface Assignment {
   beginDate: Date;
   dueDate: Date;
   subjectId: string;
-  subject: Subject;
   schoolId: string;
-  school: School;
-  fileOnAssignments: FileOnAssignment[];
-  studentOnAssignments: StudentOnAssignment[];
-  skillOnAssignments: SkillOnAssignment[];
 }

@@ -1,22 +1,3 @@
-import { Assignment } from "./Assignment";
-import { Attendance } from "./Attendance";
-import { AttendanceRow } from "./AttendanceRow";
-import { AttendanceTable } from "./AttendanceTable";
-import { Class } from "./Class";
-import { CommentOnAssignmentStudent } from "./CommentOnAssignmentStudent";
-import { CommentOnAssignmentTeacher } from "./CommentOnAssignmentTeacher";
-import { FileOnAssignment } from "./FileOnAssignment";
-import { FileOnStudentOnAssignment } from "./FileOnStudentOnAssignment";
-import { School } from "./School";
-import { ScoreOnStudent } from "./ScoreOnStudent";
-import { ScoreOnSubject } from "./ScoreOnSubject";
-import { SkillOnAssignment } from "./SkillOnAssignment";
-import { SkillOnStudentAssignment } from "./SkillOnStudentAssignment";
-import { StudentOnAssignment } from "./StudentOnAssignment";
-import { StudentOnSubject } from "./StudentOnSubject";
-import { TeacherOnSubject } from "./TeacherOnSubject";
-import { User } from "./user";
-
 export interface Subject {
   id: string;
   createAt: Date;
@@ -29,22 +10,4 @@ export interface Subject {
   classId: string;
   userId: string;
   schoolId: string;
-  class: Class;
-  user: User;
-  school: School;
-  studentOnSubjects: StudentOnSubject[];
-  assignments: Assignment[];
-  scoreOnSubjects: ScoreOnSubject[];
-  attendanceRows: AttendanceRow[];
-  teacherOnSubjects: TeacherOnSubject[];
-  attendanceTables: AttendanceTable[];
-  attendances: Attendance[];
-  scoreOnStudents: ScoreOnStudent[];
-  fileOnAssignments: FileOnAssignment[];
-  studentOnAssignments: StudentOnAssignment[];
-  fileOnStudentOnAssignments: FileOnStudentOnAssignment[];
-  commentOnAssignmentStudents: CommentOnAssignmentStudent[];
-  commentOnAssignmentTeachers: CommentOnAssignmentTeacher[];
-  skillOnAssignments: SkillOnAssignment[];
-  skillOnStudentAssignments: SkillOnStudentAssignment[];
 }

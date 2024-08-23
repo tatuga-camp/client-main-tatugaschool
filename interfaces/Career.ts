@@ -1,5 +1,3 @@
-import { SkillOnCareer } from "./SkillOnCareer";
-
 export interface Career {
   id: string;
   createAt: Date;
@@ -7,6 +5,4 @@ export interface Career {
   title: string;
   describe: string;
   keywords: string;
-  vector: number[];
-  skillOnCareers: SkillOnCareer[];
 }

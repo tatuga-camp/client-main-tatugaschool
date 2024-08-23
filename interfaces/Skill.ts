@@ -1,7 +1,3 @@
-import { SkillOnAssignment } from "./SkillOnAssignment";
-import { SkillOnCareer } from "./SkillOnCareer";
-import { SkillOnStudentAssignment } from "./SkillOnStudentAssignment";
-
 export interface Skill {
   id: string;
   createAt: Date;
@@ -10,7 +6,4 @@ export interface Skill {
   description: string;
   keywords: string;
   vector: number[];
-  skillOnAssignments: SkillOnAssignment[];
-  skillOnStudentAssignments: SkillOnStudentAssignment[];
-  skillOnCareers: SkillOnCareer[];
 }

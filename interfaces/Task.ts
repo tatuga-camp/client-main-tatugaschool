@@ -1,8 +1,4 @@
-import { Board } from "./Board";
-import { Colum } from "./Colum";
-import { MemberOnTeam } from "./MemberOnTeam";
-import { School } from "./School";
-import { Team } from "./Team";
+import { MemberOnTeam } from ".";
 
 export interface Task {
   id: string;
@@ -15,11 +11,7 @@ export interface Task {
   assigneeId?: string;
   assignee?: MemberOnTeam;
   teamId: string;
-  team: Team;
   schoolId: string;
-  school: School;
   boardId: string;
-  board: Board;
   columId: string;
-  colum: Colum;
 }

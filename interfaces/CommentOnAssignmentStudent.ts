@@ -1,8 +1,3 @@
-import { School } from "./School";
-import { Student } from "./Student";
-import { StudentOnAssignment } from "./StudentOnAssignment";
-import { Subject } from "./Subject";
-
 export interface CommentOnAssignmentStudent {
   id: string;
   createAt: Date;
@@ -14,11 +9,7 @@ export interface CommentOnAssignmentStudent {
   picture: string;
   number: string;
   subjectId: string;
-  subject: Subject;
   schoolId: string;
-  school: School;
   studentId: string;
-  student: Student;
   studentOnAssignmentId: string;
-  studentOnAssignment: StudentOnAssignment;
 }

@@ -1,7 +1,4 @@
-import { Status, MemberRole } from "./MemberOnSchool";
-import { School } from "./School";
-import { Subject } from "./Subject";
-import { User } from "./user";
+import { MemberRole, Status } from "./MemberOnSchool";
 
 export interface TeacherOnSubject {
   id: string;
@@ -17,7 +14,4 @@ export interface TeacherOnSubject {
   userId: string;
   subjectId: string;
   schoolId: string;
-  user: User;
-  subject: Subject;
-  school: School;
 }
