@@ -8,7 +8,7 @@ axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL;
 axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
 axios.defaults.headers.common['Content-Type'] = 'application/json';
 
-type ResponseGetMeService = {
+type ResponseUserService = {
     id: string;
     createAt: string;
     updateAt: string;
@@ -27,12 +27,15 @@ type ResponseGetMeService = {
     deleteAt: string | null;
   };
 
-export async function GetMeService(): Promise<ResponseGetMeService> {
+export async function UserService(): Promise<ResponseUserService> {
   try {
-    const response = await axios.get('/v1/users/me');
+    const response = await axios({
+      method: "GET",
+      url: '/v1/users/me',
+    });
     return response.data;
   } catch (error: any) {
-    console.error("Get Me request failed:", error.response.data);
+    console.error("User request failed:", error.response.data);
     throw error?.response?.data;
   }
 }
