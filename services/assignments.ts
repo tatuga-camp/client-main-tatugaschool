@@ -28,7 +28,6 @@ export async function CreateAssignmentService(
   input: RequestCreateAssignmentService
 ): Promise<ResponseCreateAssignmentService> {
   try {
-    const cookies = parseCookies();
     const response = await axios({
       method: "POST",
       url: `/v1/assignments`,
@@ -53,7 +52,7 @@ type ResponseGetAssignmentsService = {
   beginDate: string;
   dueDate: string | null;
   isAllowDeleteWork: boolean;
-  vector: any[]; // Adjust type based on your vector's data structure
+  vector: any[];
   subjectId: string;
   schoolId: string;
   userId: string;
