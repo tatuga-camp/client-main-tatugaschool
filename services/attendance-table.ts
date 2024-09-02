@@ -1,6 +1,8 @@
 import axios from "axios";
 import { parseCookies } from "nookies";
-import { Attendance, AttendanceRow, AttendanceTable } from "../interfaces";
+
+import { Assignment } from "@/interfaces/Assignment";
+import { AttendanceTable } from "@/interfaces/AttendanceTable";
 
 const cookies = parseCookies();
 const access_token = cookies.access_token;
@@ -77,6 +79,61 @@ export async function CreateAttendanceTableService(
     return response.data;
   } catch (error: any) {
     console.error("Failed to create Attendance Table:", error.response?.data);
+    throw error?.response?.data;
+  }
+}
+
+type RequestUpdateAssignmentService = {
+  query: {
+    assignmentId: string;
+  };
+  body: {
+    title?: string;
+    description?: string;
+    maxScore?: number;
+    weight?: number;
+    beginDate?: string;
+    dueDate?: string;
+  };
+};
+
+type ResponseUpdateAssignmentService = Assignment;
+
+export async function UpdateAssignmentService(
+  input: RequestUpdateAssignmentService
+): Promise<ResponseUpdateAssignmentService> {
+  try {
+    const response = await axios({
+      method: "PATCH",
+      url: `/v1/assignments/${input.query.assignmentId}`,
+      data: { ...input.body },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Update Assignment request failed:", error.response.data);
+    throw error?.response?.data;
+  }
+}
+
+type RequestDeleteAssignmentService = {
+  assignmentId: string;
+};
+
+type ResponseDeleteAssignmentService = {
+  message: string;
+};
+
+export async function DeleteAssignmentService(
+  input: RequestDeleteAssignmentService
+): Promise<ResponseDeleteAssignmentService> {
+  try {
+    const response = await axios({
+      method: "DELETE",
+      url: `/v1/assignments/${input.assignmentId}`,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Delete Assignment request failed:", error.response.data);
     throw error?.response?.data;
   }
 }
