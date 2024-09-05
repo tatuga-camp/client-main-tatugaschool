@@ -78,6 +78,9 @@ export async function GetAssignmentsBySubjectIdService(
     throw error?.response?.data;
   }
 }
+type RequestGetAssignmentByIdService = {
+  assignmentId: string;
+};
 
 type ResponseGetAssignmentByIdService = {
   id: string;
@@ -97,12 +100,12 @@ type ResponseGetAssignmentByIdService = {
 };
 
 export async function GetAssignmentByIdService(
-  assignmentId: string
+  input: RequestGetAssignmentByIdService
 ): Promise<ResponseGetAssignmentByIdService> {
   try {
     const response = await axios({
       method: "GET",
-      url: `/v1/assignments/${assignmentId}`,
+      url: `/v1/assignments/${input.assignmentId}`,
     });
     return response.data;
   } catch (error: any) {
@@ -163,18 +166,21 @@ export async function UpdateAssignmentService(
     throw error?.response?.data;
   }
 }
+type RequestDeleteAssignmentService = {
+  assignmentId: string;
+};
 
 type ResponseDeleteAssignmentService = {
   message: string;
 };
 
 export async function DeleteAssignmentService(
-  assignmentId: string
+  input: RequestDeleteAssignmentService
 ): Promise<ResponseDeleteAssignmentService> {
   try {
     const response = await axios({
       method: "DELETE",
-      url: `/v1/assignments/${assignmentId}`,
+      url: `/v1/assignments/${input.assignmentId}`,
     });
     return response.data;
   } catch (error: any) {
