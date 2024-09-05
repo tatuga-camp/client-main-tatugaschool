@@ -8,14 +8,17 @@ const access_token = cookies.access_token;
 axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL;
 axios.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
 axios.defaults.headers.common["Content-Type"] = "application/json";
+type RequestGetAttendanceByIdService = {
+  attendanceId: string;
+};
 
 export async function GetAttendanceByIdService(
-  attendanceId: string
+  input: RequestGetAttendanceByIdService
 ): Promise<Attendance> {
   try {
     const response = await axios({
       method: "GET",
-      url: `/v1/attendances/${attendanceId}`,
+      url: `/v1/attendances/${input.attendanceId}`,
     });
     return response.data;
   } catch (error: any) {
