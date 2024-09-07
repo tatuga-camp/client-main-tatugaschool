@@ -41,26 +41,7 @@ type RequestSignUpService = {
   provider: string;
 };
 
-type ResponseSignUpService = {
-  id: string;
-  createAt: string;
-  updateAt: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  role: string;
-  isVerifyEmail: boolean;
-  verifyEmailToken?: string;
-  verifyEmailTokenExpiresAt?: string;
-  lastActiveAt: string;
-  isResetPassword: boolean;
-  provider: string;
-  deleteAt?: string;
-  resetPasswordToken?: string;
-  resetPasswordTokenExpiresAt?: string;
-};
-
+type ResponseSignUpService = User;
 export async function SignUpService(
   input: RequestSignUpService
 ): Promise<ResponseSignUpService> {

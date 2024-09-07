@@ -1,5 +1,6 @@
 import axios from "axios";
 import { parseCookies } from "nookies";
+import { Assignment } from "../interfaces";
 
 const cookies = parseCookies();
 const access_token = cookies.access_token;
@@ -17,18 +18,7 @@ type RequestCreateAssignmentService = {
   subjectId: string;
 };
 
-type ResponseCreateAssignmentService = {
-  id: string;
-  createAt: string;
-  updateAt: string;
-  title: string;
-  description: string;
-  maxScore: number;
-  weight: number;
-  beginDate: string;
-  schoolId: string;
-  userId: string;
-};
+type ResponseCreateAssignmentService = Assignment;
 
 export async function CreateAssignmentService(
   input: RequestCreateAssignmentService
@@ -47,30 +37,15 @@ export async function CreateAssignmentService(
   }
 }
 
-type ResponseGetAssignmentsService = {
-  id: string;
-  createAt: string;
-  updateAt: string;
-  title: string;
-  description: string;
-  maxScore: number;
-  weight: number;
-  beginDate: string;
-  dueDate: string | null;
-  isAllowDeleteWork: boolean;
-  vector: any[];
-  subjectId: string;
-  schoolId: string;
-  userId: string;
-};
+type ResponseGetAssignmentsService = Assignment[];
 
-export async function GetAssignmentsBySubjectIdService(
-  subjectId: string
-): Promise<ResponseGetAssignmentsService[]> {
+export async function GetAssignmentsBySubjectIdService(input: {
+  subjectId: string;
+}): Promise<ResponseGetAssignmentsService[]> {
   try {
     const response = await axios({
       method: "GET",
-      url: `/v1/assignments/subject/${subjectId}`,
+      url: `/v1/assignments/subject/${input.subjectId}`,
     });
     return response.data;
   } catch (error: any) {
@@ -82,22 +57,7 @@ type RequestGetAssignmentByIdService = {
   assignmentId: string;
 };
 
-type ResponseGetAssignmentByIdService = {
-  id: string;
-  createAt: string;
-  updateAt: string;
-  title: string;
-  description: string;
-  maxScore: number;
-  weight: number;
-  beginDate: string;
-  dueDate: string | null;
-  isAllowDeleteWork: boolean;
-  vector: any[];
-  subjectId: string;
-  schoolId: string;
-  userId: string;
-};
+type ResponseGetAssignmentByIdService = Assignment;
 
 export async function GetAssignmentByIdService(
   input: RequestGetAssignmentByIdService
@@ -129,22 +89,7 @@ type RequestUpdateAssignmentService = {
   };
 };
 
-type ResponseUpdateAssignmentService = {
-  id: string;
-  createAt: string;
-  updateAt: string;
-  title: string;
-  description: string;
-  maxScore: number;
-  weight: number;
-  beginDate: string;
-  dueDate?: string;
-  isAllowDeleteWork: boolean;
-  vector: any[];
-  subjectId: string;
-  schoolId: string;
-  userId: string;
-};
+type ResponseUpdateAssignmentService = Assignment;
 
 export async function UpdateAssignmentService(
   input: RequestUpdateAssignmentService

@@ -1,7 +1,5 @@
 import axios from "axios";
 import { parseCookies } from "nookies";
-
-import { Assignment } from "@/interfaces/Assignment";
 import { AttendanceTable } from "@/interfaces/AttendanceTable";
 
 const cookies = parseCookies();
@@ -92,15 +90,14 @@ type RequestUpdateAttendanceTableService = {
   };
 };
 
-type ResponseUpdateAttendanceService = AttendanceTable;
+type ResponseUpdateAttendanceTableService = AttendanceTable;
 
-
-export async function UpdateAttendanceService(
+export async function UpdateAttendanceTableService(
   input: RequestUpdateAttendanceTableService
-): Promise<ResponseUpdateAttendanceService> {
+): Promise<ResponseUpdateAttendanceTableService> {
   try {
     const response = await axios({
-      method: 'PATCH',
+      method: "PATCH",
       url: `/v1/attendance-tables/${input.query.attendanceTableId}`,
       data: {
         ...input.body,
@@ -108,7 +105,10 @@ export async function UpdateAttendanceService(
     });
     return response.data;
   } catch (error: any) {
-    console.error('Update Attendance Table request failed:', error.response?.data);
+    console.error(
+      "Update Attendance Table request failed:",
+      error.response?.data
+    );
     throw error?.response?.data;
   }
 }
@@ -125,12 +125,15 @@ export async function DeleteAttendanceService(
 ): Promise<ResponseDeleteAttendanceTableService> {
   try {
     const response = await axios({
-      method: 'DELETE',
+      method: "DELETE",
       url: `/v1/attendance-tables/${input.attendanceTableId}`,
     });
     return response.data;
   } catch (error: any) {
-    console.error('Delete Attendance Table request failed:', error.response?.data);
+    console.error(
+      "Delete Attendance Table request failed:",
+      error.response?.data
+    );
     throw error?.response?.data;
   }
 }
