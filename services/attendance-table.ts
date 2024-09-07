@@ -82,58 +82,55 @@ export async function CreateAttendanceTableService(
     throw error?.response?.data;
   }
 }
-
-type RequestUpdateAssignmentService = {
+type RequestUpdateAttendanceTableService = {
   query: {
-    assignmentId: string;
+    attendanceTableId: string;
   };
   body: {
     title?: string;
     description?: string;
-    maxScore?: number;
-    weight?: number;
-    beginDate?: string;
-    dueDate?: string;
   };
 };
 
-type ResponseUpdateAssignmentService = Assignment;
+type ResponseUpdateAttendanceService = AttendanceTable;
 
-export async function UpdateAssignmentService(
-  input: RequestUpdateAssignmentService
-): Promise<ResponseUpdateAssignmentService> {
+
+export async function UpdateAttendanceService(
+  input: RequestUpdateAttendanceTableService
+): Promise<ResponseUpdateAttendanceService> {
   try {
     const response = await axios({
-      method: "PATCH",
-      url: `/v1/assignments/${input.query.assignmentId}`,
-      data: { ...input.body },
+      method: 'PATCH',
+      url: `/v1/attendance-tables/${input.query.attendanceTableId}`,
+      data: {
+        ...input.body,
+      },
     });
     return response.data;
   } catch (error: any) {
-    console.error("Update Assignment request failed:", error.response.data);
+    console.error('Update Attendance Table request failed:', error.response?.data);
     throw error?.response?.data;
   }
 }
-
-type RequestDeleteAssignmentService = {
-  assignmentId: string;
+type RequestDeleteAttendanceTableService = {
+  attendanceTableId: string;
 };
 
-type ResponseDeleteAssignmentService = {
+type ResponseDeleteAttendanceTableService = {
   message: string;
 };
 
-export async function DeleteAssignmentService(
-  input: RequestDeleteAssignmentService
-): Promise<ResponseDeleteAssignmentService> {
+export async function DeleteAttendanceService(
+  input: RequestDeleteAttendanceTableService
+): Promise<ResponseDeleteAttendanceTableService> {
   try {
     const response = await axios({
-      method: "DELETE",
-      url: `/v1/assignments/${input.assignmentId}`,
+      method: 'DELETE',
+      url: `/v1/attendance-tables/${input.attendanceTableId}`,
     });
     return response.data;
   } catch (error: any) {
-    console.error("Delete Assignment request failed:", error.response.data);
+    console.error('Delete Attendance Table request failed:', error.response?.data);
     throw error?.response?.data;
   }
 }
