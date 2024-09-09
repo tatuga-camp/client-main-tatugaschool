@@ -1,4 +1,4 @@
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { parseCookies } from "nookies";
 import { Task } from "../interfaces";
 
@@ -27,14 +27,13 @@ export async function CreateTaskService(
   input: RequestCreateTaskService
 ): Promise<ResponseCreateTaskService> {
   try {
-    const user = await axios({
+    const response = await axios({
       method: "POST",
       url: `/v1/tasks`,
       data: { ...input },
     });
-    return user.data;
+    return response.data;
   } catch (error: any) {
-    console.error("Create Task request failed:", error.response.data);
     throw error?.response?.data;
   }
 }
@@ -58,60 +57,75 @@ export async function UpdateTaskService(
   input: RequestUpdateTaskService
 ): Promise<ResponseUpdateTaskService> {
   try {
-    const user = await axios({
+    const response = await axios({
       method: "PATCH",
-      url: `/v1/tasks`,
+      url: `/v1/tasks/${input.taskId}`,
       data: { ...input },
     });
-    return user.data;
+    return response.data;
   } catch (error: any) {
-    console.error("Update Task request failed:", error.response.data);
     throw error?.response?.data;
   }
 }
+
+type RequestGetTaskByIdService = {
+  taskId: string;
+};
+
+type ResponseGetTaskByIdService = Task;
 
 export async function GetTaskByIdService(
-  taskId: string
-): Promise<ResponseCreateTaskService> {
+  input: RequestGetTaskByIdService
+): Promise<ResponseGetTaskByIdService> {
   try {
     const response = await axios({
       method: "GET",
-      url: `/v1/tasks/${taskId}`,
+      url: `/v1/tasks/${input.taskId}`,
     });
     return response.data;
   } catch (error: any) {
-    console.error("Get Task by ID request failed:", error.response.data);
     throw error?.response?.data;
   }
 }
+
+type RequestGetTasksByColumnService = {
+  columnId: string;
+};
+
+type ResponseGetTasksByColumnService = Task[];
 
 export async function GetTasksByColumnService(
-  columnId: string
-): Promise<ResponseCreateTaskService[]> {
+  input: RequestGetTasksByColumnService
+): Promise<ResponseGetTasksByColumnService> {
   try {
     const response = await axios({
       method: "GET",
-      url: `/v1/tasks/column/${columnId}`,
+      url: `/v1/tasks/column/${input.columnId}`,
     });
     return response.data;
   } catch (error: any) {
-    console.error("Get Tasks by Column request failed:", error.response.data);
     throw error?.response?.data;
   }
 }
 
+type RequestDeleteTaskService = {
+  taskId: string;
+};
+
+type ResponseDeleteTaskService = {
+  message: string;
+};
+
 export async function DeleteTaskService(
-  taskId: string
-): Promise<{ message: string }> {
+  input: RequestDeleteTaskService
+): Promise<ResponseDeleteTaskService> {
   try {
     const response = await axios({
       method: "DELETE",
-      url: `/v1/tasks`,
-      data: { taskId },
+      url: `/v1/tasks/${input.taskId}`,
     });
     return response.data;
   } catch (error: any) {
-    console.error("Delete Task request failed:", error.response.data);
     throw error?.response?.data;
   }
 }
