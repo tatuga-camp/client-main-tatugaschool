@@ -19,6 +19,15 @@ type RequestCreateCommentTeacher = {
   studentOnAssignmentId: string;
 };
 
+type RequestUpdateCommentService = {
+  commentAssignmentId: string;
+  content: string;
+};
+
+type RequestDeleteCommentService = {
+  commentAssignmentId: string;
+};
+
 type ResponseCreateComment = {
   id: string;
   createAt: string;
@@ -48,10 +57,6 @@ export async function CreateCommentStudentService(
     });
     return response.data;
   } catch (error: any) {
-    console.error(
-      "Create Comment Student request failed:",
-      error.response.data
-    );
     throw error?.response?.data;
   }
 }
@@ -67,122 +72,106 @@ export async function CreateCommentTeacherService(
     });
     return response.data;
   } catch (error: any) {
-    console.error(
-      "Create Comment Teacher request failed:",
-      error.response.data
-    );
     throw error?.response?.data;
   }
 }
 
+type RequestGetCommentService = {
+  studentOnAssignmentId: string;
+};
+
 export async function GetCommentStudentService(
-  studentOnAssignmentId: string
+  input: RequestGetCommentService
 ): Promise<ResponseCreateComment> {
   try {
     const response = await axios({
       method: "GET",
-      url: `/v1/comment-assignments/studentOnAssignmentId/${studentOnAssignmentId}/student`,
+      url: `/v1/comment-assignments/studentOnAssignmentId/${input.studentOnAssignmentId}/student`,
     });
     return response.data;
   } catch (error: any) {
-    console.error("Get Comment Student request failed:", error.response.data);
     throw error?.response?.data;
   }
 }
 
 export async function GetCommentTeacherService(
-  studentOnAssignmentId: string
+  input: RequestGetCommentService
 ): Promise<ResponseCreateComment> {
   try {
     const response = await axios({
       method: "GET",
-      url: `/v1/comment-assignments/studentOnAssignmentId/${studentOnAssignmentId}/teacher`,
+      url: `/v1/comment-assignments/studentOnAssignmentId/${input.studentOnAssignmentId}/teacher`,
     });
     return response.data;
   } catch (error: any) {
-    console.error("Get Comment Teacher request failed:", error.response.data);
     throw error?.response?.data;
   }
 }
 
 export async function UpdateCommentStudentService(
-  commentAssignmentId: string,
-  content: string
+  input: RequestUpdateCommentService
 ): Promise<ResponseCreateComment> {
   try {
     const response = await axios({
       method: "PATCH",
       url: `/v1/comment-assignments/student`,
       data: {
-        query: { commentAssignmentId },
-        body: { content },
+        query: { commentAssignmentId: input.commentAssignmentId },
+        body: { content: input.content },
       },
     });
     return response.data;
   } catch (error: any) {
-    console.error(
-      "Update Comment Student request failed:",
-      error.response.data
-    );
     throw error?.response?.data;
   }
 }
 
 export async function UpdateCommentTeacherService(
-  commentAssignmentId: string,
-  content: string
+  input: RequestUpdateCommentService
 ): Promise<ResponseCreateComment> {
   try {
     const response = await axios({
       method: "PATCH",
       url: `/v1/comment-assignments/teacher`,
       data: {
-        query: { commentAssignmentId },
-        body: { content },
+        query: { commentAssignmentId: input.commentAssignmentId },
+        body: { content: input.content },
       },
     });
     return response.data;
   } catch (error: any) {
-    console.error(
-      "Update Comment Teacher request failed:",
-      error.response.data
-    );
     throw error?.response?.data;
   }
 }
 
+type ResponseDeleteCommentService = {
+  message: string;
+};
+
 export async function DeleteCommentStudentService(
-  commentAssignmentId: string
-): Promise<{ message: string }> {
+  input: RequestDeleteCommentService
+): Promise<ResponseDeleteCommentService> {
   try {
     const response = await axios({
       method: "DELETE",
-      url: `/v1/comment-assignments/${commentAssignmentId}/student`,
+      url: `/v1/comment-assignments/${input.commentAssignmentId}/student`,
     });
     return response.data;
   } catch (error: any) {
-    console.error(
-      "Delete Comment Student request failed:",
-      error.response.data
-    );
     throw error?.response?.data;
   }
 }
 
 export async function DeleteCommentTeacherService(
-  commentAssignmentId: string
-): Promise<{ message: string }> {
+  input: RequestDeleteCommentService
+): Promise<ResponseDeleteCommentService> {
   try {
     const response = await axios({
       method: "DELETE",
-      url: `/v1/comment-assignments/${commentAssignmentId}/teacher`,
+      url: `/v1/comment-assignments/${input.commentAssignmentId}/teacher`,
     });
     return response.data;
   } catch (error: any) {
-    console.error(
-      "Delete Comment Teacher request failed:",
-      error.response.data
-    );
     throw error?.response?.data;
   }
 }
