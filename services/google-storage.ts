@@ -8,25 +8,26 @@ axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL;
 axios.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
 axios.defaults.headers.common["Content-Type"] = "application/json";
 
-type ResponseGoogleStorageSignedURL = {
+type RequestGetSignedURL = {
+  fileName: string;
+  fileType: string;
+};
+
+type ResponseGetSignedURL = {
   signURL: string;
   originalURL: string;
   contentType: string;
   fileName: string;
 };
 
-export async function GetGoogleStorageSignedURL(
-  fileName: string,
-  fileType: string
-): Promise<ResponseGoogleStorageSignedURL> {
+export async function getSignedURLStudentService(
+  input: RequestGetSignedURL
+): Promise<ResponseGetSignedURL> {
   try {
     const response = await axios({
       method: "GET",
-      url: `/v1/google-storage/get-signURL/teacher`,
-      params: {
-        fileName: fileName,
-        fileType: fileType,
-      },
+      url: "/v1/google-storage/get-signURL/student",
+      params: { ...input },
     });
     return response.data;
   } catch (error: any) {
@@ -35,43 +36,18 @@ export async function GetGoogleStorageSignedURL(
   }
 }
 
-type RequestCreateFileAssignmentService = {
-  type: string;
-  url: string;
-  size: number;
-  assignmentId: string;
-  studentOnAssignmentId: string;
-};
-
-type ResponseCreateFileAssignmentService = {
-  id: string;
-  createAt: string;
-  updateAt: string;
-  type: string;
-  url: string;
-  size: number;
-  subjectId: string;
-  schoolId: string;
-  assignmentId: string;
-  studentId: string;
-  studentOnAssignmentId: string;
-};
-
-export async function CreateFileAssignmentService(
-  input: RequestCreateFileAssignmentService
-): Promise<ResponseCreateFileAssignmentService> {
+export async function getSignedURLTeacherService(
+  input: RequestGetSignedURL
+): Promise<ResponseGetSignedURL> {
   try {
     const response = await axios({
-      method: "POST",
-      url: `/v1/file-assignments`,
-      data: { ...input },
+      method: "GET",
+      url: "/v1/google-storage/get-signURL/teacher",
+      params: { ...input },
     });
     return response.data;
   } catch (error: any) {
-    console.error(
-      "Create File Assignment request failed:",
-      error.response.data
-    );
+    console.error("Get Signed URL request failed:", error.response.data);
     throw error?.response?.data;
   }
 }
