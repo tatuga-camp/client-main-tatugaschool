@@ -29,6 +29,16 @@ type ResponseCreateFileOnStudentAssignmentsService = {
   studentOnAssignmentId: string;
 };
 
+type RequestGetFileOnStudentAssignmentsByStudentOnAssignmentIdService = {
+  studentOnAssignmentId: string;
+};
+
+type ResponseGetFileOnStudentAssignmentsService = ResponseCreateFileOnStudentAssignmentsService[];
+
+type RequestDeleteFileOnStudentAssignmentsService = {
+  fileOnStudentAssignmentId: string;
+};
+
 export async function CreateFileOnStudentAssignmentsService(
   input: RequestCreateFileOnStudentAssignmentsService
 ): Promise<ResponseCreateFileOnStudentAssignmentsService> {
@@ -40,65 +50,60 @@ export async function CreateFileOnStudentAssignmentsService(
     });
     return response.data;
   } catch (error: any) {
-    console.error("Create File request failed:", error.response.data);
     throw error?.response?.data;
   }
 }
 
 export async function GetFileOnStudentAssignmentsByStudentOnAssignmentIdService(
-  studentOnAssignmentId: string
-): Promise<ResponseCreateFileOnStudentAssignmentsService[]> {
+  input: RequestGetFileOnStudentAssignmentsByStudentOnAssignmentIdService
+): Promise<ResponseGetFileOnStudentAssignmentsService> {
   try {
     const response = await axios({
       method: "GET",
-      url: `/v1/file-on-student-assignments/student-on-assignment/${studentOnAssignmentId}/student`,
+      url: `/v1/file-on-student-assignments/student-on-assignment/${input.studentOnAssignmentId}/student`,
     });
     return response.data;
   } catch (error: any) {
-    console.error("Get File request failed:", error.response.data);
     throw error?.response?.data;
   }
 }
 
 export async function GetFileOnStudentAssignmentsByTeacherOnAssignmentIdService(
-  studentOnAssignmentId: string
-): Promise<ResponseCreateFileOnStudentAssignmentsService[]> {
+  input: RequestGetFileOnStudentAssignmentsByStudentOnAssignmentIdService
+): Promise<ResponseGetFileOnStudentAssignmentsService> {
   try {
     const response = await axios({
       method: "GET",
-      url: `/v1/file-on-student-assignments/student-on-assignment/${studentOnAssignmentId}/teacher`,
+      url: `/v1/file-on-student-assignments/student-on-assignment/${input.studentOnAssignmentId}/teacher`,
     });
     return response.data;
   } catch (error: any) {
-    console.error("Get File request failed:", error.response.data);
     throw error?.response?.data;
   }
 }
 
 export async function DeleteFileOnStudentAssignmentsService(
-  fileOnStudentAssignmentId: string
+  input: RequestDeleteFileOnStudentAssignmentsService
 ): Promise<void> {
   try {
     await axios({
       method: "DELETE",
-      url: `/v1/file-on-student-assignments/${fileOnStudentAssignmentId}/student`,
+      url: `/v1/file-on-student-assignments/${input.fileOnStudentAssignmentId}/student`,
     });
   } catch (error: any) {
-    console.error("Delete File request failed:", error.response.data);
     throw error?.response?.data;
   }
 }
 
 export async function DeleteFileOnTeacherAssignmentsService(
-  fileOnStudentAssignmentId: string
+  input: RequestDeleteFileOnStudentAssignmentsService
 ): Promise<void> {
   try {
     await axios({
       method: "DELETE",
-      url: `/v1/file-on-student-assignments/${fileOnStudentAssignmentId}/teacher`,
+      url: `/v1/file-on-student-assignments/${input.fileOnStudentAssignmentId}/teacher`,
     });
   } catch (error: any) {
-    console.error("Delete File request failed:", error.response.data);
     throw error?.response?.data;
   }
 }
