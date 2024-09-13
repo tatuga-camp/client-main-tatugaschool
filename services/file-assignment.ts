@@ -1,3 +1,4 @@
+import { FileOnAssignment } from "@/interfaces";
 import axios from "axios";
 import { parseCookies } from "nookies";
 
@@ -17,17 +18,7 @@ type RequestCreateFileAssignmentService = {
   schoolId: string;
 };
 
-type ResponseCreateFileAssignmentService = {
-  id: string;
-  createAt: string;
-  updateAt: string;
-  type: string;
-  url: string;
-  size: number;
-  subjectId: string;
-  schoolId: string;
-  assignmentId: string;
-};
+type ResponseCreateFileAssignmentService = FileOnAssignment;
 
 type RequestGetFileAssignmentService = {
   assignmentId: string;

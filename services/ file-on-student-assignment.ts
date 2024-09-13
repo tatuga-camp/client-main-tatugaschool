@@ -1,3 +1,4 @@
+import { FileOnStudentOnAssignment } from "@/interfaces";
 import axios from "axios";
 import { parseCookies } from "nookies";
 
@@ -8,6 +9,7 @@ axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL;
 axios.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
 axios.defaults.headers.common["Content-Type"] = "application/json";
 
+
 type RequestCreateFileOnStudentAssignmentsService = {
   type: string;
   url: string;
@@ -15,29 +17,7 @@ type RequestCreateFileOnStudentAssignmentsService = {
   studentOnAssignmentId: string;
 };
 
-type ResponseCreateFileOnStudentAssignmentsService = {
-  id: string;
-  createAt: string;
-  updateAt: string;
-  type: string;
-  url: string;
-  size: number;
-  subjectId: string;
-  schoolId: string;
-  assignmentId: string;
-  studentId: string;
-  studentOnAssignmentId: string;
-};
-
-type RequestGetFileOnStudentAssignmentsByStudentOnAssignmentIdService = {
-  studentOnAssignmentId: string;
-};
-
-type ResponseGetFileOnStudentAssignmentsService = ResponseCreateFileOnStudentAssignmentsService[];
-
-type RequestDeleteFileOnStudentAssignmentsService = {
-  fileOnStudentAssignmentId: string;
-};
+type ResponseCreateFileOnStudentAssignmentsService = FileOnStudentOnAssignment;
 
 export async function CreateFileOnStudentAssignmentsService(
   input: RequestCreateFileOnStudentAssignmentsService
@@ -53,6 +33,13 @@ export async function CreateFileOnStudentAssignmentsService(
     throw error?.response?.data;
   }
 }
+
+
+type RequestGetFileOnStudentAssignmentsByStudentOnAssignmentIdService = {
+  studentOnAssignmentId: string;
+};
+
+type ResponseGetFileOnStudentAssignmentsService = FileOnStudentOnAssignment[];
 
 export async function GetFileOnStudentAssignmentsByStudentOnAssignmentIdService(
   input: RequestGetFileOnStudentAssignmentsByStudentOnAssignmentIdService
@@ -82,27 +69,47 @@ export async function GetFileOnStudentAssignmentsByTeacherOnAssignmentIdService(
   }
 }
 
+
+type RequestDeleteFileOnStudentAssignmentsService = {
+  fileOnStudentAssignmentId: string;
+};
+
+type ResponseDeleteFileOnStudentAssignmentsService = {
+  message: string;
+};
+
+
 export async function DeleteFileOnStudentAssignmentsService(
   input: RequestDeleteFileOnStudentAssignmentsService
-): Promise<void> {
+): Promise<ResponseDeleteFileOnStudentAssignmentsService> {
   try {
-    await axios({
+    const response = await axios({
       method: "DELETE",
       url: `/v1/file-on-student-assignments/${input.fileOnStudentAssignmentId}/student`,
     });
+    return response.data;
   } catch (error: any) {
     throw error?.response?.data;
   }
 }
 
+
+type RequestDeleteFileOnTeacherAssignmentsService = {
+  fileOnStudentAssignmentId: string;
+};
+
+type ResponseDeleteFileOnTeacherAssignmentsService = {
+  message: string;
+};
 export async function DeleteFileOnTeacherAssignmentsService(
-  input: RequestDeleteFileOnStudentAssignmentsService
-): Promise<void> {
+  input: RequestDeleteFileOnTeacherAssignmentsService
+): Promise<ResponseDeleteFileOnTeacherAssignmentsService> {
   try {
-    await axios({
+    const response = await axios({
       method: "DELETE",
       url: `/v1/file-on-student-assignments/${input.fileOnStudentAssignmentId}/teacher`,
     });
+    return response.data;
   } catch (error: any) {
     throw error?.response?.data;
   }

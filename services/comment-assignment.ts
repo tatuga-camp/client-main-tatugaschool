@@ -1,3 +1,4 @@
+import { CommentOnAssignmentStudent, CommentOnAssignmentTeacher } from "@/interfaces";
 import axios from "axios";
 import { parseCookies } from "nookies";
 
@@ -28,27 +29,11 @@ type RequestDeleteCommentService = {
   commentAssignmentId: string;
 };
 
-type ResponseCreateComment = {
-  id: string;
-  createAt: string;
-  updateAt: string;
-  content: string;
-  title: string;
-  firstName: string;
-  lastName: string;
-  picture: string;
-  role: string;
-  status: string;
-  schoolId: string;
-  studentId: string;
-  studentOnAssignmentId: string;
-  teacherOnSubjectId?: string;
-  userId?: string;
-};
+type ResponseCommentOnAssignmentComment = CommentOnAssignmentStudent | CommentOnAssignmentTeacher;
 
 export async function CreateCommentStudentService(
   input: RequestCreateCommentStudent
-): Promise<ResponseCreateComment> {
+): Promise<ResponseCommentOnAssignmentComment> {
   try {
     const response = await axios({
       method: "POST",
@@ -63,7 +48,7 @@ export async function CreateCommentStudentService(
 
 export async function CreateCommentTeacherService(
   input: RequestCreateCommentTeacher
-): Promise<ResponseCreateComment> {
+): Promise<ResponseCommentOnAssignmentComment> {
   try {
     const response = await axios({
       method: "POST",
@@ -82,7 +67,7 @@ type RequestGetCommentService = {
 
 export async function GetCommentStudentService(
   input: RequestGetCommentService
-): Promise<ResponseCreateComment> {
+): Promise<ResponseCommentOnAssignmentComment> {
   try {
     const response = await axios({
       method: "GET",
@@ -96,7 +81,7 @@ export async function GetCommentStudentService(
 
 export async function GetCommentTeacherService(
   input: RequestGetCommentService
-): Promise<ResponseCreateComment> {
+): Promise<ResponseCommentOnAssignmentComment> {
   try {
     const response = await axios({
       method: "GET",
@@ -110,7 +95,7 @@ export async function GetCommentTeacherService(
 
 export async function UpdateCommentStudentService(
   input: RequestUpdateCommentService
-): Promise<ResponseCreateComment> {
+): Promise<ResponseCommentOnAssignmentComment> {
   try {
     const response = await axios({
       method: "PATCH",
@@ -128,7 +113,7 @@ export async function UpdateCommentStudentService(
 
 export async function UpdateCommentTeacherService(
   input: RequestUpdateCommentService
-): Promise<ResponseCreateComment> {
+): Promise<ResponseCommentOnAssignmentComment> {
   try {
     const response = await axios({
       method: "PATCH",

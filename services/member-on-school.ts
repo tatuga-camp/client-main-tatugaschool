@@ -1,3 +1,4 @@
+import { MemberOnSchool } from "@/interfaces";
 import axios from "axios";
 import { parseCookies } from "nookies";
 
@@ -14,19 +15,7 @@ type RequestCreateMemberOnSchoolService = {
   schoolId: string;
 };
 
-export type ResponseMemberOnSchoolService = {
-  id: string;
-  role: string;
-  status: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  photo: string;
-  userId: string;
-  schoolId: string;
-  createdAt: string;
-  updatedAt: string;
-};
+export type ResponseMemberOnSchoolService = MemberOnSchool;
 
 export async function CreateMemberOnSchoolService(
   input: RequestCreateMemberOnSchoolService

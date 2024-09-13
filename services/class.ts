@@ -1,3 +1,5 @@
+import { Class } from "@/interfaces";
+import { Pagination } from "@/interfaces/Pagination";
 import axios from "axios";
 import { parseCookies } from "nookies";
 
@@ -8,25 +10,9 @@ axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL;
 axios.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
 axios.defaults.headers.common["Content-Type"] = "application/json";
 
-type RequestCreateClassService = {
-  title: string;
-  level: string;
-  description: string;
-  educationYear: string;
-  schoolId: string;
-};
+type RequestCreateClassService = Class;
 
-type ResponseCreateClassService = {
-  id: string;
-  createAt: string;
-  updateAt: string;
-  title: string;
-  level: string;
-  description: string;
-  educationYear: string;
-  order: number;
-  schoolId: string;
-};
+type ResponseCreateClassService = Class;
 
 export async function CreateClassService(
   input: RequestCreateClassService
@@ -49,24 +35,8 @@ type RequestGetClassService = {
 };
 
 type ResponseGetClassService = {
-  data: Array<{
-    id: string;
-    createAt: string;
-    updateAt: string;
-    title: string;
-    level: string;
-    description: string;
-    educationYear: string;
-    order: number;
-    schoolId: string;
-  }>;
-  meta: {
-    total: number;
-    lastPage: number;
-    currentPage: number;
-    prev: number;
-    next: number;
-  };
+  data: Class[];
+  meta: Pagination;
 };
 
 export async function GetClassesBySchoolIdService(
@@ -89,17 +59,7 @@ type RequestGetClassByIdService = {
   classId: string;
 };
 
-type ResponseGetClassByIdService = {
-  id: string;
-  createAt: string;
-  updateAt: string;
-  title: string;
-  level: string;
-  description: string;
-  educationYear: string;
-  order: number;
-  schoolId: string;
-};
+type ResponseGetClassByIdService = Class;
 
 export async function GetClassByIdService(
   input: RequestGetClassByIdService
@@ -125,17 +85,7 @@ type RequestUpdateClassService = {
   educationYear: string;
 };
 
-type ResponseUpdateClassService = {
-  id: string;
-  createAt: string;
-  updateAt: string;
-  title: string;
-  level: string;
-  description: string;
-  educationYear: string;
-  order: number;
-  schoolId: string;
-};
+type ResponseUpdateClassService = Class;
 
 export async function UpdateClassService(
   input: RequestUpdateClassService
@@ -180,17 +130,7 @@ type RequestReorderClassesService = {
   classIds: string[];
 };
 
-type ResponseReorderClassesService = {
-  id: string;
-  createAt: string;
-  updateAt: string;
-  title: string;
-  level: string;
-  description: string;
-  educationYear: string;
-  order: number;
-  schoolId: string;
-};
+type ResponseReorderClassesService = Class;
 
 export async function ReorderClassesService(
   input: RequestReorderClassesService

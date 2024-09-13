@@ -1,3 +1,4 @@
+import { ScoreOnStudent } from "@/interfaces";
 import axios from "axios";
 import { parseCookies } from "nookies";
 
@@ -14,15 +15,7 @@ type RequestCreateScoreOnStudentService = {
   score: number;
 };
 
-export type ResponseScoreOnStudentService = {
-  id: string;
-  score: number;
-  studentOnSubjectId: string;
-  scoreOnSubjectId: string;
-  createdAt: string;
-  updatedAt: string;
-  isDeleted: boolean;
-};
+export type ResponseScoreOnStudentService = ScoreOnStudent;
 
 export async function CreateScoreOnStudentService(
   input: RequestCreateScoreOnStudentService

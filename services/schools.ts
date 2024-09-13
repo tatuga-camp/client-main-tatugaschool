@@ -1,3 +1,4 @@
+import { School } from "@/interfaces";
 import axios from "axios";
 import { parseCookies } from "nookies";
 
@@ -13,21 +14,7 @@ type RequestCreateSchoolService = {
   description: string;
 };
 
-export type ResponseSchoolService = {
-  id: string;
-  title: string;
-  description: string;
-  createdAt: string;
-  updatedAt: string;
-  plan: string;
-  totalStorage: number;
-  isDeleted: boolean;
-  stripeCustomerId: string;
-  stripePriceId: string | null;
-  stripeSubscriptionId: string | null;
-  stripeSubscriptionExpireAt: string | null;
-  billingManagerId: string;
-};
+export type ResponseSchoolService = School;
 
 export async function CreateSchoolService(
   input: RequestCreateSchoolService
@@ -72,14 +59,19 @@ type RequestDeleteSchoolService = {
   schoolId: string;
 };
 
+type ResponseDeleteSchoolService = {
+  message: string;
+}
+
 export async function DeleteSchoolService(
   input: RequestDeleteSchoolService
-): Promise<void> {
+): Promise<ResponseDeleteSchoolService> {
   try {
-    await axios({
+    const response = await axios({
       method: "DELETE",
       url: `/v1/schools/${input.schoolId}`,
     });
+    return response.data;
   } catch (error: any) {
     throw error?.response?.data;
   }

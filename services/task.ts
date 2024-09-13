@@ -9,17 +9,7 @@ axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL;
 axios.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
 axios.defaults.headers.common["Content-Type"] = "application/json";
 
-type RequestCreateTaskService = {
-  title: string;
-  description: string;
-  deadline: string;
-  isCompleted: boolean;
-  assigneeId: string;
-  teamId: string;
-  schoolId: string;
-  boardId: string;
-  columId: string;
-};
+type RequestCreateTaskService = Task;
 
 type ResponseCreateTaskService = Task;
 
@@ -38,19 +28,7 @@ export async function CreateTaskService(
   }
 }
 
-type RequestUpdateTaskService = {
-  taskId: string;
-  title: string;
-  description: string;
-  deadline: string;
-  isCompleted: boolean;
-  assigneeId: string;
-  teamId: string;
-  schoolId: string;
-  boardId: string;
-  columId: string;
-};
-
+type RequestUpdateTaskService = Task;
 type ResponseUpdateTaskService = Task;
 
 export async function UpdateTaskService(
@@ -59,7 +37,7 @@ export async function UpdateTaskService(
   try {
     const response = await axios({
       method: "PATCH",
-      url: `/v1/tasks/${input.taskId}`,
+      url: `/v1/tasks/${input.id}`,
       data: { ...input },
     });
     return response.data;
