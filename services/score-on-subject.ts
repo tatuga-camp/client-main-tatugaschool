@@ -35,12 +35,12 @@ export async function CreateScoreOnSubjectService(
   }
 }
 
-type RequestGetScoresBySubjectIdService = {
+type RequestGetScoresOnSubjectBySubjectIdService = {
   subjectId: string;
 };
 
-export async function GetScoresBySubjectIdService(
-  input: RequestGetScoresBySubjectIdService
+export async function GetScoresOnSubjectBySubjectIdService(
+  input: RequestGetScoresOnSubjectBySubjectIdService
 ): Promise<ResponseScoreOnSubjectService[]> {
   try {
     const response = await axios({
@@ -49,7 +49,10 @@ export async function GetScoresBySubjectIdService(
     });
     return response.data;
   } catch (error: any) {
-    console.error("Failed to fetch scores by subject ID:", error.response?.data);
+    console.error(
+      "Failed to fetch scores by subject ID:",
+      error.response?.data
+    );
     throw error?.response?.data;
   }
 }

@@ -1,4 +1,4 @@
-import { CommentOnAssignmentStudent, CommentOnAssignmentTeacher } from "@/interfaces";
+import { CommentOnAssignment } from "@/interfaces";
 import axios from "axios";
 import { parseCookies } from "nookies";
 
@@ -29,7 +29,7 @@ type RequestDeleteCommentService = {
   commentAssignmentId: string;
 };
 
-type ResponseCommentOnAssignmentComment = CommentOnAssignmentStudent | CommentOnAssignmentTeacher;
+type ResponseCommentOnAssignmentComment = CommentOnAssignment;
 
 export async function CreateCommentStudentService(
   input: RequestCreateCommentStudent
@@ -64,7 +64,7 @@ export async function CreateCommentTeacherService(
 type RequestGetCommentService = {
   studentOnAssignmentId: string;
 };
-
+export type ResponseGetCommentService = CommentOnAssignment[];
 export async function GetCommentStudentService(
   input: RequestGetCommentService
 ): Promise<ResponseCommentOnAssignmentComment> {
@@ -81,7 +81,7 @@ export async function GetCommentStudentService(
 
 export async function GetCommentTeacherService(
   input: RequestGetCommentService
-): Promise<ResponseCommentOnAssignmentComment> {
+): Promise<ResponseGetCommentService> {
   try {
     const response = await axios({
       method: "GET",

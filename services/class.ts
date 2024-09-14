@@ -34,10 +34,7 @@ type RequestGetClassService = {
   schoolId: string;
 };
 
-type ResponseGetClassService = {
-  data: Class[];
-  meta: Pagination;
-};
+type ResponseGetClassService = Pagination<Class>;
 
 export async function GetClassesBySchoolIdService(
   input: RequestGetClassService
