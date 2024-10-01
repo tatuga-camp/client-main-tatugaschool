@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import styled from "styled-components";
+import Image from 'next/image';
 
 const SignUpPage = () => {
   const [name, setName] = useState("");
@@ -31,154 +31,65 @@ const SignUpPage = () => {
   };
 
   return (
-    <SignUpContainer>
-      <LogoSection>
-        <img src="/logo.svg" alt="Tatuga School Logo" />
-        <h1>Tatuga School</h1>
-      </LogoSection>
-      <SignUpForm onSubmit={handleSignUp}>
-        <h2>Sign up</h2>
-        <Input
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 px-4">
+      <div className="flex flex-col items-center justify-center mb-8 text-center">
+        <Image src="/logo.svg" alt="Tatuga School Logo" width={60} height={60} />
+        <h1 className="text-lg font-semibold mt-4">Tatuga School</h1>
+      </div>
+      <form
+        className="bg-white p-8 sm:p-16 rounded-xl shadow-lg w-full max-w-md text-center flex flex-col"
+        onSubmit={handleSignUp}
+      >
+        <h2 className="text-2xl font-bold mb-6">Sign up</h2>
+        <input
           type="text"
           placeholder="Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
+          className="w-full p-3 sm:p-4 mb-4 border border-gray-300 rounded-lg"
         />
-        <Input
+        <input
           type="email"
           placeholder="E-mail"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          className="w-full p-3 sm:p-4 mb-4 border border-gray-300 rounded-lg"
         />
-        <Input
+        <input
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          className="w-full p-3 sm:p-4 mb-4 border border-gray-300 rounded-lg"
         />
-        <Input
+        <input
           type="password"
           placeholder="Confirm Password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
+          className="w-full p-3 sm:p-4 mb-4 border border-gray-300 rounded-lg"
         />
-        {errorMessage && <ErrorText>{errorMessage}</ErrorText>}
-        <SignUpButton type="submit">Sign up</SignUpButton>
-      </SignUpForm>
-      <Footer>
-        <img src="/logo-ted-fund.svg" alt="Logo ted fund" />
-        <FooterText>
+        {errorMessage && <p className="text-red-500 text-sm mb-4">{errorMessage}</p>}
+        <button
+          type="submit"
+          className="w-full p-3 sm:p-4 bg-purple-700 text-white rounded-lg font-semibold hover:bg-purple-600 transition duration-300"
+        >
+          Sign up
+        </button>
+      </form>
+      <div className="flex flex-col items-center justify-center mt-8 text-center">
+        <Image src="/logo-ted-fund.svg" alt="Logo ted fund" width={40} height={40} />
+        <p className="text-sm text-gray-600 mt-4 max-w-xs">
           สนับสนุนโดยกองทุนพัฒนาผู้ประกอบการเทคโนโลยี และนวัตกรรม (TED FUND)
           สำนักงานคณะกรรมการอุดมศึกษา วิทยาศาสตร์ วิจัยและนวัตกรรม
-        </FooterText>
-      </Footer>
-    </SignUpContainer>
+        </p>
+      </div>
+    </div>
   );
 };
 
 export default SignUpPage;
-
-// Styled-components
-
-const SignUpContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  background-color: #f7f7f9;
-`;
-
-const LogoSection = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 2rem;
-
-  img {
-    width: 60px;
-    height: auto;
-    margin-right: 1rem;
-  }
-
-  h1 {
-    margin: 0;
-    font-size: 1.25rem;
-    font-weight: 600;
-  }
-`;
-
-const SignUpForm = styled.form`
-  background: white;
-  padding: 80px 40px;
-  border-radius: 40px;
-  box-shadow: 0px 12px 24px rgba(145, 158, 171, 0.12);
-  text-align: center;
-  width: 600px;
-  height: 628px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-
-  h2 {
-    margin-bottom: 24px;
-    font-size: 1.5rem;
-    font-weight: 700;
-  }
-`;
-
-const Input = styled.input`
-  width: 100%;
-  padding: 1rem;
-  margin: 0.5rem 0;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-`;
-
-const SignUpButton = styled.button`
-  width: 100%;
-  padding: 1rem;
-  background-color: #5f3dc4;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 1rem;
-
-  &:hover {
-    background-color: #482ab4;
-  }
-`;
-
-const ErrorText = styled.p`
-  color: red;
-  margin-top: -10px;
-  font-size: 0.875rem;
-`;
-
-const Footer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 20px;
-
-  img {
-    height: 40px;
-    margin-right: 1rem;
-  }
-`;
-
-const FooterText = styled.p`
-  font-size: 0.875rem;
-  color: #6e6e6e;
-  max-width: 507px;
-  margin: 0;
-  text-align: left;
-`;

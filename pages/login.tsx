@@ -25,12 +25,15 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <div className="flex items-center justify-center mb-8">
-        <Image src="/logo.svg" alt="Tatuga School Logo" width={50} height={50} />
-        <h1 className="text-lg font-semibold ml-4">Tatuga School</h1>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 px-4">
+      <div className="flex flex-col items-center justify-center mb-8 text-center">
+        <Image src="/logo.svg" alt="Tatuga School Logo" width={60} height={60} />
+        <h1 className="text-lg font-semibold mt-4">Tatuga School</h1>
       </div>
-      <form className="bg-white p-16 rounded-2xl shadow-lg text-center w-96" onSubmit={handleLogin}>
+      <form
+        className="bg-white p-8 sm:p-16 rounded-2xl shadow-lg text-center w-full max-w-md sm:w-96"
+        onSubmit={handleLogin}
+      >
         <h2 className="text-2xl font-bold mb-6">Log in</h2>
         <input
           type="email"
@@ -38,7 +41,7 @@ const LoginPage = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full p-4 mb-4 border border-gray-300 rounded-lg"
+          className="w-full p-3 sm:p-4 mb-4 border border-gray-300 rounded-lg"
         />
         <input
           type="password"
@@ -46,7 +49,7 @@ const LoginPage = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          className="w-full p-4 mb-2 border border-gray-300 rounded-lg"
+          className="w-full p-3 sm:p-4 mb-2 border border-gray-300 rounded-lg"
         />
         <a
           onClick={handleForgotPassword}
@@ -56,7 +59,7 @@ const LoginPage = () => {
         </a>
         <button
           type="submit"
-          className="w-full p-4 bg-purple-700 text-white rounded-lg font-semibold hover:bg-purple-600 transition duration-300"
+          className="w-full p-3 sm:p-4 bg-purple-700 text-white rounded-lg font-semibold hover:bg-purple-600 transition duration-300"
         >
           Log in
         </button>
@@ -67,9 +70,9 @@ const LoginPage = () => {
           Sign up
         </a>
       </form>
-      <div className="flex items-center justify-center mt-8">
-        <Image src="/logo-ted-fund.svg" alt="Logo ted fund" width={150} height={150} />
-        <p className="text-sm text-gray-600 text-left max-w-xs">
+      <div className="flex flex-col items-center justify-center mt-8 text-center">
+        <Image src="/logo-ted-fund.svg" alt="Logo ted fund" width={40} height={40} />
+        <p className="text-sm text-gray-600 mt-4 max-w-xs">
           สนับสนุนโดยกองทุนพัฒนาผู้ประกอบการเทคโนโลยี และนวัตกรรม (TED FUND)
           สำนักงานคณะกรรมการอุดมศึกษา วิทยาศาสตร์ วิจัยและนวัตกรรม
         </p>
