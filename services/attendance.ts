@@ -1,13 +1,8 @@
-import axios from "axios";
-import { parseCookies } from "nookies";
+
 import { Attendance } from "../interfaces";
+import createAxiosInstance from "./apiService";
 
-const cookies = parseCookies();
-const access_token = cookies.access_token;
-
-axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL;
-axios.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
-axios.defaults.headers.common["Content-Type"] = "application/json";
+const axiosInstance = createAxiosInstance();
 type RequestGetAttendanceByIdService = {
   attendanceId: string;
 };
@@ -16,7 +11,7 @@ export async function GetAttendanceByIdService(
   input: RequestGetAttendanceByIdService
 ): Promise<Attendance> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "GET",
       url: `/v1/attendances/${input.attendanceId}`,
     });
@@ -47,7 +42,7 @@ export async function UpdateAttendanceService(
   input: RequestUpdateAttendanceService
 ): Promise<ResponseUpdateAttendanceService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "PATCH",
       url: `/v1/attendances/${input.query.attendanceId}`,
       data: input.body,

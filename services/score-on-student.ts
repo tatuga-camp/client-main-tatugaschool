@@ -1,13 +1,8 @@
 import { ScoreOnStudent } from "@/interfaces";
-import axios from "axios";
-import { parseCookies } from "nookies";
 
-const cookies = parseCookies();
-const access_token = cookies.access_token;
+import createAxiosInstance from "./apiService";
 
-axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL;
-axios.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
-axios.defaults.headers.common["Content-Type"] = "application/json";
+const axiosInstance = createAxiosInstance();
 
 type RequestCreateScoreOnStudentService = {
   studentOnSubjectId: string;
@@ -21,7 +16,7 @@ export async function CreateScoreOnStudentService(
   input: RequestCreateScoreOnStudentService
 ): Promise<ResponseScoreOnStudentService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "POST",
       url: "/v1/score-on-students",
       data: { ...input },
@@ -41,7 +36,7 @@ export async function GetScoresBySubjectIdService(
   input: RequestGetScoresBySubjectIdService
 ): Promise<ResponseScoreOnStudentService[]> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "GET",
       url: `/v1/score-on-students/subject/${input.subjectId}`,
     });
@@ -60,7 +55,7 @@ export async function GetScoresByStudentOnSubjectIdService(
   input: RequestGetScoresByStudentOnSubjectIdService
 ): Promise<ResponseScoreOnStudentService[]> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "GET",
       url: `/v1/score-on-students/studentOnSubject/${input.studentOnSubjectId}`,
     });
@@ -82,7 +77,7 @@ export type ResponseDeleteScoreOnStudentService = {
     input: RequestDeleteScoreOnStudentService
   ): Promise<ResponseDeleteScoreOnStudentService> {
     try {
-      const response = await axios({
+      const response = await axiosInstance({
         method: "DELETE",
         url: `/v1/score-on-students/${input.scoreOnStudentId}`,
       });

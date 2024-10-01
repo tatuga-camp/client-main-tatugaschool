@@ -1,13 +1,8 @@
 import { FileOnAssignment } from "@/interfaces";
-import axios from "axios";
-import { parseCookies } from "nookies";
 
-const cookies = parseCookies();
-const access_token = cookies.access_token;
+import createAxiosInstance from "./apiService";
 
-axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL;
-axios.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
-axios.defaults.headers.common["Content-Type"] = "application/json";
+const axiosInstance = createAxiosInstance();
 
 type RequestCreateFileAssignmentService = {
   type: string;
@@ -38,7 +33,7 @@ export async function CreateFileAssignmentService(
   input: RequestCreateFileAssignmentService
 ): Promise<ResponseCreateFileAssignmentService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "POST",
       url: "/v1/file-assignments",
       data: { ...input },
@@ -53,7 +48,7 @@ export async function GetFileAssignmentService(
   input: RequestGetFileAssignmentService
 ): Promise<ResponseGetFileAssignmentService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "GET",
       url: `/v1/file-assignments/assignment/${input.assignmentId}`,
     });
@@ -67,7 +62,7 @@ export async function DeleteFileAssignmentService(
   input: RequestDeleteFileAssignmentService
 ): Promise<ResponseDeleteFileAssignmentService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "DELETE",
       url: `/v1/file-assignments/${input.fileOnAssignmentId}`,
     });

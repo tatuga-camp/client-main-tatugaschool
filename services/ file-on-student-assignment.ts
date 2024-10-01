@@ -1,14 +1,7 @@
 import { FileOnStudentOnAssignment } from "@/interfaces";
-import axios from "axios";
-import { parseCookies } from "nookies";
+import createAxiosInstance from "./apiService";
 
-const cookies = parseCookies();
-const access_token = cookies.access_token;
-
-axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL;
-axios.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
-axios.defaults.headers.common["Content-Type"] = "application/json";
-
+const axiosInstance = createAxiosInstance();
 
 type RequestCreateFileOnStudentAssignmentsService = {
   type: string;
@@ -23,7 +16,7 @@ export async function CreateFileOnStudentAssignmentsService(
   input: RequestCreateFileOnStudentAssignmentsService
 ): Promise<ResponseCreateFileOnStudentAssignmentsService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "POST",
       url: `/v1/file-on-student-assignments`,
       data: { ...input },
@@ -45,7 +38,7 @@ export async function GetFileOnStudentAssignmentsByStudentOnAssignmentIdService(
   input: RequestGetFileOnStudentAssignmentsByStudentOnAssignmentIdService
 ): Promise<ResponseGetFileOnStudentAssignmentsService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "GET",
       url: `/v1/file-on-student-assignments/student-on-assignment/${input.studentOnAssignmentId}/student`,
     });
@@ -59,7 +52,7 @@ export async function GetFileOnStudentAssignmentsByTeacherOnAssignmentIdService(
   input: RequestGetFileOnStudentAssignmentsByStudentOnAssignmentIdService
 ): Promise<ResponseGetFileOnStudentAssignmentsService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "GET",
       url: `/v1/file-on-student-assignments/student-on-assignment/${input.studentOnAssignmentId}/teacher`,
     });
@@ -83,7 +76,7 @@ export async function DeleteFileOnStudentAssignmentsService(
   input: RequestDeleteFileOnStudentAssignmentsService
 ): Promise<ResponseDeleteFileOnStudentAssignmentsService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "DELETE",
       url: `/v1/file-on-student-assignments/${input.fileOnStudentAssignmentId}/student`,
     });
@@ -105,7 +98,7 @@ export async function DeleteFileOnTeacherAssignmentsService(
   input: RequestDeleteFileOnTeacherAssignmentsService
 ): Promise<ResponseDeleteFileOnTeacherAssignmentsService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "DELETE",
       url: `/v1/file-on-student-assignments/${input.fileOnStudentAssignmentId}/teacher`,
     });

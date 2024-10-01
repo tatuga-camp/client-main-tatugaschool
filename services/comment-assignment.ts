@@ -1,13 +1,8 @@
 import { CommentOnAssignment } from "@/interfaces";
-import axios from "axios";
-import { parseCookies } from "nookies";
 
-const cookies = parseCookies();
-const access_token = cookies.access_token;
+import createAxiosInstance from "./apiService";
 
-axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL;
-axios.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
-axios.defaults.headers.common["Content-Type"] = "application/json";
+const axiosInstance = createAxiosInstance();
 
 type RequestCreateCommentStudent = {
   content: string;
@@ -35,7 +30,7 @@ export async function CreateCommentStudentService(
   input: RequestCreateCommentStudent
 ): Promise<ResponseCommentOnAssignmentComment> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "POST",
       url: `/v1/comment-assignments/student`,
       data: { ...input },
@@ -50,7 +45,7 @@ export async function CreateCommentTeacherService(
   input: RequestCreateCommentTeacher
 ): Promise<ResponseCommentOnAssignmentComment> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "POST",
       url: `/v1/comment-assignments/teacher`,
       data: { ...input },
@@ -69,7 +64,7 @@ export async function GetCommentStudentService(
   input: RequestGetCommentService
 ): Promise<ResponseCommentOnAssignmentComment> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "GET",
       url: `/v1/comment-assignments/studentOnAssignmentId/${input.studentOnAssignmentId}/student`,
     });
@@ -83,7 +78,7 @@ export async function GetCommentTeacherService(
   input: RequestGetCommentService
 ): Promise<ResponseGetCommentService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "GET",
       url: `/v1/comment-assignments/studentOnAssignmentId/${input.studentOnAssignmentId}/teacher`,
     });
@@ -97,7 +92,7 @@ export async function UpdateCommentStudentService(
   input: RequestUpdateCommentService
 ): Promise<ResponseCommentOnAssignmentComment> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "PATCH",
       url: `/v1/comment-assignments/student`,
       data: {
@@ -115,7 +110,7 @@ export async function UpdateCommentTeacherService(
   input: RequestUpdateCommentService
 ): Promise<ResponseCommentOnAssignmentComment> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "PATCH",
       url: `/v1/comment-assignments/teacher`,
       data: {
@@ -137,7 +132,7 @@ export async function DeleteCommentStudentService(
   input: RequestDeleteCommentService
 ): Promise<ResponseDeleteCommentService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "DELETE",
       url: `/v1/comment-assignments/${input.commentAssignmentId}/student`,
     });
@@ -151,7 +146,7 @@ export async function DeleteCommentTeacherService(
   input: RequestDeleteCommentService
 ): Promise<ResponseDeleteCommentService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "DELETE",
       url: `/v1/comment-assignments/${input.commentAssignmentId}/teacher`,
     });

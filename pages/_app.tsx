@@ -10,8 +10,6 @@ const prompt = Prompt({
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <div className={prompt.className}>
-      {" "}
-      {}
       <Component {...pageProps} />
     </div>
   );

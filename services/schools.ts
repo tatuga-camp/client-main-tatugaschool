@@ -1,13 +1,8 @@
 import { School } from "@/interfaces";
-import axios from "axios";
-import { parseCookies } from "nookies";
 
-const cookies = parseCookies();
-const access_token = cookies.access_token;
+import createAxiosInstance from "./apiService";
 
-axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL;
-axios.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
-axios.defaults.headers.common["Content-Type"] = "application/json";
+const axiosInstance = createAxiosInstance();
 
 type RequestCreateSchoolService = {
   title: string;
@@ -20,7 +15,7 @@ export async function CreateSchoolService(
   input: RequestCreateSchoolService
 ): Promise<ResponseSchoolService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "POST",
       url: "/v1/schools",
       data: { ...input },
@@ -44,7 +39,7 @@ export async function UpdateSchoolService(
   input: RequestUpdateSchoolService
 ): Promise<ResponseSchoolService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "PATCH",
       url: `/v1/schools/${input.query.schoolId}`,
       data: input.body,
@@ -67,7 +62,7 @@ export async function DeleteSchoolService(
   input: RequestDeleteSchoolService
 ): Promise<ResponseDeleteSchoolService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "DELETE",
       url: `/v1/schools/${input.schoolId}`,
     });
@@ -85,7 +80,7 @@ export async function GetSchoolService(
   input: RequestGetSchoolService
 ): Promise<ResponseSchoolService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "GET",
       url: `/v1/schools/${input.schoolId}`,
     });
