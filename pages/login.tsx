@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import Image from "next/image";
 import { useRouter } from "next/router";
+import { Footer, InputField, LogoSection } from "@/components";
+import { SignInService } from "@/services";
 
 
 const LoginPage = () => {
@@ -16,12 +17,10 @@ const LoginPage = () => {
     try {
       const response = await SignInService({ email, password });
       console.log("Login successful:", response);
+      
+      localStorage.setItem("token", response.access_token);
 
-      // เก็บ token ใน localStorage หรือ cookie ตามความต้องการ
-      // เช่น localStorage.setItem("token", response.access_token);
-
-      // เปลี่ยนหน้าไปยัง home หลังจากเข้าสู่ระบบสำเร็จ
-      router.push("/home");
+      router.push("/");
     } catch (err) {
       console.error("Login failed:", err);
       setError("Invalid email or password");
@@ -38,15 +37,7 @@ const LoginPage = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 px-4">
-      <div className="flex flex-col items-center justify-center mb-8 text-center">
-        <Image
-          src="/logo.svg"
-          alt="Tatuga School Logo"
-          width={60}
-          height={60}
-        />
-        <h1 className="text-lg font-semibold mt-4">Tatuga School</h1>
-      </div>
+      <LogoSection title="Tatuga School" />
       <form
         className="bg-white p-8 sm:p-16 rounded-2xl shadow-lg text-center w-full max-w-md sm:w-96"
         onSubmit={handleLogin}
@@ -54,21 +45,17 @@ const LoginPage = () => {
         <h2 className="text-2xl font-bold mb-6">Log in</h2>
         {error && <p className="text-red-500 mb-4">{error}</p>}{" "}
         {/* แสดงข้อผิดพลาด */}
-        <input
+        <InputField
           type="email"
           placeholder="E-mail"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          required
-          className="w-full p-3 sm:p-4 mb-4 border border-gray-300 rounded-lg"
         />
-        <input
+        <InputField
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          required
-          className="w-full p-3 sm:p-4 mb-2 border border-gray-300 rounded-lg"
         />
         <a
           onClick={handleForgotPassword}
@@ -89,24 +76,10 @@ const LoginPage = () => {
           Sign up
         </a>
       </form>
-      <div className="flex flex-col items-center justify-center mt-8 text-center">
-        <Image
-          src="/logo-ted-fund.svg"
-          alt="Logo ted fund"
-          width={40}
-          height={40}
-        />
-        <p className="text-sm text-gray-600 mt-4 max-w-xs">
-          สนับสนุนโดยกองทุนพัฒนาผู้ประกอบการเทคโนโลยี และนวัตกรรม (TED FUND)
-          สำนักงานคณะกรรมการอุดมศึกษา วิทยาศาสตร์ วิจัยและนวัตกรรม
-        </p>
-      </div>
+      <Footer />
     </div>
   );
 };
 
 export default LoginPage;
-function SignInService(arg0: { email: string; password: string; }) {
-  throw new Error("Function not implemented.");
-}
 
