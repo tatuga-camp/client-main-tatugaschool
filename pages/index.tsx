@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
 
-import { setCookie, destroyCookie, parseCookies } from "nookies";
+import { destroyCookie, parseCookies } from "nookies";
 
 
 export default function Home() {
@@ -17,13 +17,13 @@ export default function Home() {
     console.log("Cookie deleted successfully", { cookies });
     
     console.log("Logged out successfully");
-    router.push("/login");
+    router.push("/auth/login");
   };
 
   return (
     <div>
       <h1>Welcome to the Home Page</h1>
-      <Link href="/login">Login </Link>
+      <Link href="/auth/login">Login </Link>
 
       <button onClick={handleLogout} className="p-2 bg-red-500 text-white rounded">
         Log Out

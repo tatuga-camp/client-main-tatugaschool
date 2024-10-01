@@ -7,9 +7,7 @@ function SignUpPage() {
   return (
     <AuthLayout>
       <AuthHeader />
-
       <SignUpForm />
-
       <AuthFooter />
     </AuthLayout>
   );

@@ -19,8 +19,12 @@ export const LoginForm = () => {
             const response = await SignInService({ email, password });
             console.log("Login successful:", response);
 
-            setCookie(null, "access_token", response.accessToken);
-            setCookie(null, "refresh_token", response.refreshToken);
+            setCookie(null, "access_token", response.accessToken, {
+                path: "/",
+            });
+            setCookie(null, "refresh_token", response.refreshToken, {
+                path: "/",
+            });
 
             setLoading(false);
 
@@ -37,7 +41,7 @@ export const LoginForm = () => {
     };
 
     const handleSignUp = () => {
-        router.push("/signup");
+        router.push("/auth/signup");
     };
     return (
 

@@ -4,8 +4,11 @@ import { setCookie } from "nookies";
 
 export async function middleware(req: NextRequest) {
   const refreshToken = req.cookies.get("refresh_token");
-  
-  if (req.nextUrl.pathname === "/login" || req.nextUrl.pathname === "/signup") {
+ 
+  if (
+    req.nextUrl.pathname === "/auth/login" ||
+    req.nextUrl.pathname === "/auth/signup"
+  ) {
     if (refreshToken) {
       const homeUrl = `${req.nextUrl.origin}/`;
       return NextResponse.redirect(homeUrl);
@@ -15,30 +18,26 @@ export async function middleware(req: NextRequest) {
   }
 
   if (!refreshToken) {
-    const loginUrl = `${req.nextUrl.origin}/login`;
+    const loginUrl = `${req.nextUrl.origin}/auth/login`;
     return NextResponse.redirect(loginUrl);
   }
 
-  if (refreshToken) {
-    try {
-      const newTokens = await RefreshTokenService({
-        refreshToken: refreshToken.value,
-      });
+  try {
+    const newTokens = await RefreshTokenService({
+      refreshToken: refreshToken.value,
+    });
 
-      const response = NextResponse.next();
-      setCookie({ res: response }, "access_token", newTokens.accessToken);
-      setCookie({ res: response }, "refresh_token", newTokens.refreshToken);
-      return response;
-    } catch (error) {
-      const loginUrl = `${req.nextUrl.origin}/login`;
-      return NextResponse.redirect(loginUrl);
-    }
+    const response = NextResponse.next();
+    setCookie({ res: response }, "access_token", newTokens.accessToken);
+    setCookie({ res: response }, "refresh_token", newTokens.refreshToken);
+    return response;
+  } catch (error) {
+    const loginUrl = `${req.nextUrl.origin}/auth/login`;
+    return NextResponse.redirect(loginUrl);
   }
 
-  return NextResponse.next();
 }
 
-
 export const config = {
-  matcher: ["/", "/login", "/signup"],
+  matcher: ["/", "/auth/login", "/auth/signup"],
 };
