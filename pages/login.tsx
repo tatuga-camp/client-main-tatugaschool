@@ -1,33 +1,50 @@
 import React, { useState } from "react";
-import Image from 'next/image';
+import Image from "next/image";
+import { useRouter } from "next/router";
+
 
 const LoginPage = () => {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
-  // Function to handle login
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Logging in with:", { email, password });
-    // You can integrate your authentication logic here.
+    setError(null);
+
+    try {
+      const response = await SignInService({ email, password });
+      console.log("Login successful:", response);
+
+      // เก็บ token ใน localStorage หรือ cookie ตามความต้องการ
+      // เช่น localStorage.setItem("token", response.access_token);
+
+      // เปลี่ยนหน้าไปยัง home หลังจากเข้าสู่ระบบสำเร็จ
+      router.push("/home");
+    } catch (err) {
+      console.error("Login failed:", err);
+      setError("Invalid email or password");
+    }
   };
 
-  // Function to handle forgot password
   const handleForgotPassword = () => {
     console.log("Redirect to forgot password page");
-    // You can implement navigation to the forget password page here.
   };
 
-  // Function to handle sign-up
   const handleSignUp = () => {
-    console.log("Redirect to sign-up page");
-    // You can implement navigation to the sign-up page here.
+    router.push("/signup");
   };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 px-4">
       <div className="flex flex-col items-center justify-center mb-8 text-center">
-        <Image src="/logo.svg" alt="Tatuga School Logo" width={60} height={60} />
+        <Image
+          src="/logo.svg"
+          alt="Tatuga School Logo"
+          width={60}
+          height={60}
+        />
         <h1 className="text-lg font-semibold mt-4">Tatuga School</h1>
       </div>
       <form
@@ -35,6 +52,8 @@ const LoginPage = () => {
         onSubmit={handleLogin}
       >
         <h2 className="text-2xl font-bold mb-6">Log in</h2>
+        {error && <p className="text-red-500 mb-4">{error}</p>}{" "}
+        {/* แสดงข้อผิดพลาด */}
         <input
           type="email"
           placeholder="E-mail"
@@ -71,7 +90,12 @@ const LoginPage = () => {
         </a>
       </form>
       <div className="flex flex-col items-center justify-center mt-8 text-center">
-        <Image src="/logo-ted-fund.svg" alt="Logo ted fund" width={40} height={40} />
+        <Image
+          src="/logo-ted-fund.svg"
+          alt="Logo ted fund"
+          width={40}
+          height={40}
+        />
         <p className="text-sm text-gray-600 mt-4 max-w-xs">
           สนับสนุนโดยกองทุนพัฒนาผู้ประกอบการเทคโนโลยี และนวัตกรรม (TED FUND)
           สำนักงานคณะกรรมการอุดมศึกษา วิทยาศาสตร์ วิจัยและนวัตกรรม
@@ -82,3 +106,7 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
+function SignInService(arg0: { email: string; password: string; }) {
+  throw new Error("Function not implemented.");
+}
+
