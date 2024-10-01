@@ -64,7 +64,7 @@ export const SignUpForm = () => {
     return (
 
         <form
-            className="bg-white w-full md:w-[600px] h-[628px] p-[80px_40px] rounded-[40px] shadow-[0_12px_24px_rgba(145,158,171,0.12)] text-center"
+            className="bg-white w-full md:w-[600px] p-[80px_40px] rounded-[40px] shadow-[0_12px_24px_rgba(145,158,171,0.12)] text-center"
             onSubmit={handleSignUp}
         >
             <h2 className="text-[24px] font-bold mb-[40px]">Sign up</h2>

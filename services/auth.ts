@@ -87,7 +87,7 @@ export async function ForgotPasswordService(
   try {
     const response = await axiosInstance({
       method: "POST",
-      url: "/v1/auth/forget-password",
+      url: "/v1/auth/forgot-password",
       data: { ...input },
     });
     return response.data;
