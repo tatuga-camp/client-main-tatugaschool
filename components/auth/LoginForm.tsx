@@ -1,109 +1,103 @@
 import React, { useState } from "react";
-import { useRouter } from "next/router";
 import { SignInService } from "@/services";
 import { setCookie } from "nookies";
+import Link from "next/link";
+import Swal from "sweetalert2";
+import { ErrorMessages } from "../../interfaces";
+import { useRouter } from "next-nprogress-bar";
+
 export const LoginForm = () => {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-    const router = useRouter();
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState<string | null>(null);
-    const [loading, setLoading] = useState(false);
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-    const handleLogin = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError(null);
-        setLoading(true);
+    try {
+      Swal.fire({
+        title: "Please wait...",
+        text: "We are processing your request",
+        showConfirmButton: false,
+        willOpen: () => {
+          Swal.showLoading();
+        },
+      });
+      const response = await SignInService({ email, password });
+      console.log("Login successful:", response);
 
-        try {
-            const response = await SignInService({ email, password });
-            console.log("Login successful:", response);
+      setCookie(null, "access_token", response.accessToken, {
+        path: "/",
+      });
+      setCookie(null, "refresh_token", response.refreshToken, {
+        path: "/",
+      });
 
-            setCookie(null, "access_token", response.accessToken, {
-                path: "/",
-            });
-            setCookie(null, "refresh_token", response.refreshToken, {
-                path: "/",
-            });
+      router.push("/");
+      Swal.fire({
+        title: "Login Success!",
+        text: "You are now logged in",
+        icon: "success",
+      });
+    } catch (error) {
+      console.log(error);
+      let result = error as ErrorMessages;
+      Swal.fire({
+        title: result.error ? result.error : "Something Went Wrong",
+        text: result.message.toString(),
+        footer: result.statusCode
+          ? "Code Error: " + result.statusCode?.toString()
+          : "",
+        icon: "error",
+      });
+    }
+  };
 
-            setLoading(false);
+  return (
+    <form
+      className="bg-white p-10 w-11/12 md:w-96 lg:w-4/12 drop-shadow rounded-md text-center"
+      onSubmit={handleLogin}
+    >
+      <h2 className="text-[24px] font-bold mb-[40px]">Log in</h2>
 
-            router.push("/");
-        } catch (err) {
-            setLoading(false);
-            console.error("Login failed:", err);
-            setError("Invalid email or password");
-        }
-    };
+      <input
+        type="email"
+        placeholder="E-mail"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        required
+        className="w-full p-[16px] mb-[20px] border border-gray-300 rounded-lg"
+      />
+      <input
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        required
+        className="w-full p-[16px] mb-[20px] border border-gray-300 rounded-lg"
+      />
+      <Link
+        href={"/auth/forget-password"}
+        className="block text-left hover:underline text-[14px] text-[#6E6E6E] mb-[40px]"
+      >
+        Forget password?
+      </Link>
 
-    const handleForgotPassword = () => {
-        router.push("/auth/forget-password");
-    };
+      <button
+        type="submit"
+        className="w-full flex items-center justify-center h-5 p-5 bg-secondary-color text-white rounded-md font-semibold
+           hover:bg-primary-color transition duration-300"
+      >
+        Log in
+      </button>
 
-    const handleSignUp = () => {
-        router.push("/auth/signup");
-    };
-    return (
-
-        <form
-            className="bg-white w-full md:w-[600px] p-[80px_40px] rounded-[40px] shadow-[0_12px_24px_rgba(145,158,171,0.12)] text-center"
-            onSubmit={handleLogin}
-        >
-            <h2 className="text-[24px] font-bold mb-[40px]">Log in</h2>
-            {error && <p className="text-red-500 mb-4">{error}</p>}
-            <input
-                type="email"
-                placeholder="E-mail"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full p-[16px] mb-[20px] border border-gray-300 rounded-lg"
-            />
-            <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full p-[16px] mb-[20px] border border-gray-300 rounded-lg"
-            />
-            <a
-                onClick={handleForgotPassword}
-                className="block text-left text-[14px] text-[#6E6E6E] mb-[40px] cursor-pointer"
-            >
-                Forget password?
-            </a>
-            {loading ?
-                <button
-                    type="submit"
-                    className="w-full p-4 bg-[#5F3DC4] text-white rounded-lg font-semibold hover:bg-[#482ab4] transition duration-300 flex items-center justify-center space-x-2"
-                >
-                    <svg
-                        className="animate-spin h-5 w-5 text-white"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                    >
-                        <path
-                            fill="currentColor"
-                            d="M12 4v2a8 8 0 1 0 8 8h2A10 10 0 1 1 12 4z"
-                        />
-                    </svg>
-                    <span>Loading...</span>
-                </button>
-                : <button
-                    type="submit"
-                    className="w-full p-[16px] bg-[#5F3DC4] text-white rounded-[8px] font-semibold hover:bg-[#482ab4] transition duration-300"
-                >
-                    Log in
-                </button>}
-            <a
-                onClick={handleSignUp}
-                className="block mt-[20px] text-[14px] text-[#6E6E6E] cursor-pointer"
-            >
-                Sign up
-            </a>
-        </form>
-    )
-}
+      <Link
+        href="/auth/sign-up"
+        className=" h-5 p-5 ring-0 flex items-center justify-center mt-[20px] hover:ring-1
+         hover:ring-primary-color rounded-md  text-[14px] text-[#6E6E6E]"
+      >
+        No Account ?
+      </Link>
+    </form>
+  );
+};
