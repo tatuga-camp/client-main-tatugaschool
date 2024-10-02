@@ -4,11 +4,12 @@ import { AuthFooter } from "@/components/auth/AuthFooter";
 import { LoginForm } from "@/components/auth/LoginForm";
 
 const LoginPage = () => {
-
   return (
     <AuthLayout>
-      <AuthHeader />
-      <LoginForm />
+      <div className="w-full  flex-col  flex justify-center items-center gap-5">
+        <AuthHeader />
+        <LoginForm />
+      </div>
       <AuthFooter />
     </AuthLayout>
   );

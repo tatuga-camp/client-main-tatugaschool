@@ -33,7 +33,7 @@ type RequestSignUpService = {
   firstName: string;
   lastName: string;
   phone: string;
-  provider: string;
+  provider: "LOCAL" | "GOOGLE";
 };
 
 type ResponseSignUpService = User;
