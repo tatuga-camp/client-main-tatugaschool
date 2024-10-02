@@ -1,13 +1,7 @@
-import axios from "axios";
-import { parseCookies } from "nookies";
 import { Attendance, AttendanceRow } from "../interfaces";
+import createAxiosInstance from "./apiService";
 
-const cookies = parseCookies();
-const access_token = cookies.access_token;
-
-axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL;
-axios.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
-axios.defaults.headers.common["Content-Type"] = "application/json";
+const axiosInstance = createAxiosInstance();
 
 type RequestGetAttendanceRowService = {
   attendanceRowId: string;
@@ -17,7 +11,7 @@ export async function GetAttendanceRowService(
   input: RequestGetAttendanceRowService
 ): Promise<AttendanceRow[]> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "GET",
       url: `/v1/attendance-rows?attendanceRowId=${input.attendanceRowId}`,
     });
@@ -41,7 +35,7 @@ export async function GetAttendanceRowByIdService(
   input: RequestGetAttendanceRowByIdService
 ): Promise<ResponseGetAttendanceRowByIdService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "GET",
       url: `/v1/attendance-rows/${input.attendanceRowId}`,
     });
@@ -71,7 +65,7 @@ export async function CreateAttendanceRowService(
   input: RequestCreateAttendanceRowService
 ): Promise<ResponseCreateAttendanceRowService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "POST",
       url: "/v1/attendance-rows/",
       data: { ...input },
@@ -103,7 +97,7 @@ export async function UpdateAttendanceRowService(
   input: RequestUpdateAttendanceRowService
 ): Promise<AttendanceRow> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "PATCH",
       url: `/v1/attendance-rows/${input.query.attendanceRowId}`,
       data: input.body,
@@ -124,7 +118,7 @@ export async function DeleteAttendanceRowService(
   input: RequestDeleteAttendanceRowService
 ) {
   try {
-    await axios({
+    await axiosInstance({
       method: "DELETE",
       url: `/v1/attendance-rows/${input.attendanceRowId}`,
     });

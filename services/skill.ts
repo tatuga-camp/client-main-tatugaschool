@@ -1,13 +1,8 @@
 import { Skill } from "@/interfaces";
-import axios from "axios";
-import { parseCookies } from "nookies";
 
-const cookies = parseCookies();
-const access_token = cookies.access_token;
+import createAxiosInstance from "./apiService";
 
-axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL;
-axios.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
-axios.defaults.headers.common["Content-Type"] = "application/json";
+const axiosInstance = createAxiosInstance();
 
 type RequestCreateSkillService = {
   title: string;
@@ -21,7 +16,7 @@ export async function CreateSkillService(
   input: RequestCreateSkillService
 ): Promise<ResponseCreateSkillService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "POST",
       url: `/v1/skills`,
       data: { ...input },
@@ -48,7 +43,7 @@ export async function UpdateSkillService(
   input: RequestUpdateSkillService
 ): Promise<ResponseUpdateSkillService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "PATCH",
       url: `/v1/skills/${input.query.skillId}`,
       data: { ...input.body },
@@ -72,7 +67,7 @@ export async function DeleteSkillService(
   input: RequestDeleteSkillService
 ): Promise<ResponseDeleteSkillService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "DELETE",
       url: `/v1/skills/${input.skillId}`,
     });

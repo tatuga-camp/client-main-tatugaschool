@@ -1,14 +1,8 @@
 import { SkillOnAssignment } from "@/interfaces";
-import axios from "axios";
-import { parseCookies } from "nookies";
 
-const cookies = parseCookies();
-const access_token = cookies.access_token;
+import createAxiosInstance from "./apiService";
 
-axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL;
-axios.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
-axios.defaults.headers.common["Content-Type"] = "application/json";
-
+const axiosInstance = createAxiosInstance();
 type RequestCreateSkillOnAssignmentService = {
   skillId: string;
   assignmentId: string;
@@ -20,7 +14,7 @@ export async function CreateSkillOnAssignmentService(
   input: RequestCreateSkillOnAssignmentService
 ): Promise<ResponseCreateSkillOnAssignmentService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "POST",
       url: `/v1/skill-on-assignments`,
       data: { ...input },
@@ -45,7 +39,7 @@ export async function GetSkillOnAssignmentByAssignmentIdService(
   input: RequestGetSkillOnAssignmentByAssignmentIdService
 ): Promise<ResponseGetSkillOnAssignmentByAssignmentIdService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "GET",
       url: `/v1/skill-on-assignments/assignment/${input.assignmentId}`,
     });
@@ -71,7 +65,7 @@ export async function DeleteSkillOnAssignmentService(
   input: RequestDeleteSkillOnAssignmentService
 ): Promise<ResponseDeleteSkillOnAssignmentService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "DELETE",
       url: `/v1/skill-on-assignments/${input.skillOnAssignmentId}`,
     });

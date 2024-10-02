@@ -1,13 +1,8 @@
 import { StudentOnSubject } from "@/interfaces";
-import axios from "axios";
-import { parseCookies } from "nookies";
 
-const cookies = parseCookies();
-const access_token = cookies.access_token;
+import createAxiosInstance from "./apiService";
 
-axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL;
-axios.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
-axios.defaults.headers.common["Content-Type"] = "application/json";
+const axiosInstance = createAxiosInstance();
 
 type RequestCreateStudentOnSubjectService = {
   studentId: string;
@@ -20,7 +15,7 @@ export async function CreateStudentOnSubjectService(
   input: RequestCreateStudentOnSubjectService
 ): Promise<ResponseCreateStudentOnSubjectService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "POST",
       url: `/v1/student-on-subjects`,
       data: input,
@@ -42,7 +37,7 @@ export async function GetStudentOnSubjectBySubjectService(
   input: RequestGetStudentOnSubjectBySubjectService
 ): Promise<ResponseGetStudentOnSubjectBySubjectService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "GET",
       url: `/v1/student-on-subjects/subject/${input.subjectId}`,
     });
@@ -63,7 +58,7 @@ export async function GetStudentOnSubjectByStudentService(
   input: RequestGetStudentOnSubjectByStudentService
 ): Promise<ResponseGetStudentOnSubjectByStudentService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "GET",
       url: `/v1/student-on-subjects/student/${input.studentId}`,
     });
@@ -84,7 +79,7 @@ export async function GetStudentOnSubjectByIdService(
   input: RequestGetStudentOnSubjectByIdService
 ): Promise<ResponseGetStudentOnSubjectByIdService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "GET",
       url: `/v1/student-on-subjects/${input.studentOnSubjectId}`,
     });
@@ -107,7 +102,7 @@ export async function DeleteStudentOnSubjectService(
   input: RequestDeleteStudentOnSubjectService
 ): Promise<ResponseDeleteStudentOnSubjectService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "DELETE",
       url: `/v1/student-on-subjects/${input.studentOnSubjectId}`,
     });

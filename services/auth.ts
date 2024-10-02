@@ -1,26 +1,21 @@
-import axios from "axios";
-import { parseCookies } from "nookies";
 import { User } from "../interfaces";
 
-const cookies = parseCookies();
-const access_token = cookies.access_token;
+import createAxiosInstance from "./apiService";
 
-axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL;
-axios.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
-axios.defaults.headers.common["Content-Type"] = "application/json";
+const axiosInstance = createAxiosInstance();
 
 type RequestSignInService = {
   email: string;
   password: string;
 };
 
-type ResponseSignInService = { access_token: string; user: User };
+type ResponseSignInService = { accessToken: string; refreshToken: string };
 
 export async function SignInService(
   input: RequestSignInService
 ): Promise<ResponseSignInService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "POST",
       url: "/v1/auth/sign-in",
       data: { ...input },
@@ -46,7 +41,7 @@ export async function SignUpService(
   input: RequestSignUpService
 ): Promise<ResponseSignUpService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "POST",
       url: "/v1/auth/sign-up",
       data: { ...input },
@@ -68,7 +63,7 @@ export async function VerifyEmailService(
   input: RequestVerifyEmailService
 ): Promise<ResponseVerifyEmailService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "POST",
       url: "/v1/auth/verify-email",
       data: { ...input },
@@ -90,9 +85,9 @@ export async function ForgotPasswordService(
   input: RequestForgotPasswordService
 ): Promise<ResponseForgotPasswordService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "POST",
-      url: "/v1/auth/forget-password",
+      url: "/v1/auth/forgot-password",
       data: { ...input },
     });
     return response.data;
@@ -113,7 +108,7 @@ export async function ResetPasswordService(
   input: RequestResetPasswordService
 ): Promise<ResponseResetPasswordService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "PATCH",
       url: "/v1/auth/reset-password",
       data: { ...input },
@@ -138,7 +133,7 @@ export async function RefreshTokenService(
   input: RequestRefreshTokenService
 ): Promise<ResponseRefreshTokenService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "POST",
       url: "/v1/auth/refresh-token",
       data: { ...input },
@@ -163,7 +158,7 @@ export async function StudentRefetchTokenService(
   input: RequestStudentRefetchTokenService
 ): Promise<ResponseStudentRefetchTokenService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "POST",
       url: "/v1/auth/student-refetch-token",
       data: { ...input },
@@ -189,7 +184,7 @@ export async function StudentSignInService(
   input: RequestStudentSignInService
 ): Promise<ResponseStudentSignInService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "POST",
       url: "/v1/auth/student-sign-in",
       data: { ...input },

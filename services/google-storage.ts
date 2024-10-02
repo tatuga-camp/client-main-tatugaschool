@@ -1,12 +1,8 @@
-import axios from "axios";
-import { parseCookies } from "nookies";
 
-const cookies = parseCookies();
-const access_token = cookies.access_token;
 
-axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL;
-axios.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
-axios.defaults.headers.common["Content-Type"] = "application/json";
+import createAxiosInstance from "./apiService";
+
+const axiosInstance = createAxiosInstance();
 
 type RequestGetSignedURL = {
   fileName: string;
@@ -24,7 +20,7 @@ export async function getSignedURLStudentService(
   input: RequestGetSignedURL
 ): Promise<ResponseGetSignedURL> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "GET",
       url: "/v1/google-storage/get-signURL/student",
       params: { ...input },
@@ -40,7 +36,7 @@ export async function getSignedURLTeacherService(
   input: RequestGetSignedURL
 ): Promise<ResponseGetSignedURL> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "GET",
       url: "/v1/google-storage/get-signURL/teacher",
       params: { ...input },

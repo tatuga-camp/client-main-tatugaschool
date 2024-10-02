@@ -1,14 +1,7 @@
-import axios from "axios";
-import { parseCookies } from "nookies";
 import { AttendanceTable } from "@/interfaces/AttendanceTable";
+import createAxiosInstance from "./apiService";
 
-const cookies = parseCookies();
-const access_token = cookies.access_token;
-
-axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL;
-axios.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
-axios.defaults.headers.common["Content-Type"] = "application/json";
-
+const axiosInstance = createAxiosInstance();
 type RequestGetAttendanceTablesService = {
   subjectId: string;
 };
@@ -19,7 +12,7 @@ export async function GetAttendanceTablesService(
   input: RequestGetAttendanceTablesService
 ): Promise<ResponseGetAttendanceTablesService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "GET",
       url: `/v1/attendance-tables`,
       params: { subjectId: input.subjectId },
@@ -42,7 +35,7 @@ export async function GetAttendanceTableByIdService(
   input: RequestGetAttendanceTableByIdService
 ): Promise<ResponseGetAttendanceTableByIdService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "GET",
       url: `/v1/attendance-tables/${input.attendanceTableId}`,
     });
@@ -68,7 +61,7 @@ export async function CreateAttendanceTableService(
   input: RequestCreateAttendanceTableService
 ): Promise<ResponseCreateAttendanceTableService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "POST",
       url: "/v1/attendance-tables/",
       data: input,
@@ -96,7 +89,7 @@ export async function UpdateAttendanceTableService(
   input: RequestUpdateAttendanceTableService
 ): Promise<ResponseUpdateAttendanceTableService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "PATCH",
       url: `/v1/attendance-tables/${input.query.attendanceTableId}`,
       data: {
@@ -124,7 +117,7 @@ export async function DeleteAttendanceService(
   input: RequestDeleteAttendanceTableService
 ): Promise<ResponseDeleteAttendanceTableService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "DELETE",
       url: `/v1/attendance-tables/${input.attendanceTableId}`,
     });

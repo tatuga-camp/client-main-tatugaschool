@@ -1,13 +1,7 @@
-import axios from "axios";
-import { parseCookies } from "nookies";
 import { Assignment } from "../interfaces";
+import createAxiosInstance from "./apiService";
 
-const cookies = parseCookies();
-const access_token = cookies.access_token;
-
-axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL;
-axios.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
-axios.defaults.headers.common["Content-Type"] = "application/json";
+const axiosInstance = createAxiosInstance();
 
 type RequestCreateAssignmentService = {
   title: string;
@@ -24,7 +18,7 @@ export async function CreateAssignmentService(
   input: RequestCreateAssignmentService
 ): Promise<ResponseCreateAssignmentService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "POST",
       url: `/v1/assignments`,
       data: { ...input },
@@ -43,7 +37,7 @@ export async function GetAssignmentsBySubjectIdService(input: {
   subjectId: string;
 }): Promise<ResponseGetAssignmentsService[]> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "GET",
       url: `/v1/assignments/subject/${input.subjectId}`,
     });
@@ -63,7 +57,7 @@ export async function GetAssignmentByIdService(
   input: RequestGetAssignmentByIdService
 ): Promise<ResponseGetAssignmentByIdService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "GET",
       url: `/v1/assignments/${input.assignmentId}`,
     });
@@ -95,7 +89,7 @@ export async function UpdateAssignmentService(
   input: RequestUpdateAssignmentService
 ): Promise<ResponseUpdateAssignmentService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "PATCH",
       url: `/v1/assignments`,
       data: {
@@ -123,7 +117,7 @@ export async function DeleteAssignmentService(
   input: RequestDeleteAssignmentService
 ): Promise<ResponseDeleteAssignmentService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "DELETE",
       url: `/v1/assignments/${input.assignmentId}`,
     });

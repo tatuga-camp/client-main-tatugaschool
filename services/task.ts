@@ -1,13 +1,9 @@
-import axios from "axios";
-import { parseCookies } from "nookies";
 import { Task } from "../interfaces";
 
-const cookies = parseCookies();
-const access_token = cookies.access_token;
 
-axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL;
-axios.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
-axios.defaults.headers.common["Content-Type"] = "application/json";
+import createAxiosInstance from "./apiService";
+
+const axiosInstance = createAxiosInstance();
 
 type RequestCreateTaskService = Task;
 
@@ -17,7 +13,7 @@ export async function CreateTaskService(
   input: RequestCreateTaskService
 ): Promise<ResponseCreateTaskService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "POST",
       url: `/v1/tasks`,
       data: { ...input },
@@ -35,7 +31,7 @@ export async function UpdateTaskService(
   input: RequestUpdateTaskService
 ): Promise<ResponseUpdateTaskService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "PATCH",
       url: `/v1/tasks/${input.id}`,
       data: { ...input },
@@ -56,7 +52,7 @@ export async function GetTaskByIdService(
   input: RequestGetTaskByIdService
 ): Promise<ResponseGetTaskByIdService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "GET",
       url: `/v1/tasks/${input.taskId}`,
     });
@@ -76,7 +72,7 @@ export async function GetTasksByColumnService(
   input: RequestGetTasksByColumnService
 ): Promise<ResponseGetTasksByColumnService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "GET",
       url: `/v1/tasks/column/${input.columnId}`,
     });
@@ -98,7 +94,7 @@ export async function DeleteTaskService(
   input: RequestDeleteTaskService
 ): Promise<ResponseDeleteTaskService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "DELETE",
       url: `/v1/tasks/${input.taskId}`,
     });

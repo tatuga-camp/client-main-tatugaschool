@@ -1,13 +1,8 @@
 import { ScoreOnSubject } from "@/interfaces";
-import axios from "axios";
-import { parseCookies } from "nookies";
 
-const cookies = parseCookies();
-const access_token = cookies.access_token;
+import createAxiosInstance from "./apiService";
 
-axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL;
-axios.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
-axios.defaults.headers.common["Content-Type"] = "application/json";
+const axiosInstance = createAxiosInstance();
 
 type RequestCreateScoreOnSubjectService = {
   score: number;
@@ -23,7 +18,7 @@ export async function CreateScoreOnSubjectService(
   input: RequestCreateScoreOnSubjectService
 ): Promise<ResponseScoreOnSubjectService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "POST",
       url: "/v1/score-on-subjects",
       data: { ...input },
@@ -43,7 +38,7 @@ export async function GetScoresOnSubjectBySubjectIdService(
   input: RequestGetScoresOnSubjectBySubjectIdService
 ): Promise<ResponseScoreOnSubjectService[]> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "GET",
       url: `/v1/score-on-subjects/subject/${input.subjectId}`,
     });
@@ -68,7 +63,7 @@ export async function UpdateScoreOnSubjectService(
   input: RequestUpdateScoreOnSubjectService
 ): Promise<ResponseScoreOnSubjectService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "PATCH",
       url: `/v1/score-on-subjects/${scoreId}`,
       data: { ...input },

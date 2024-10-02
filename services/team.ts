@@ -1,14 +1,9 @@
 import { Team } from "@/interfaces";
 import { Pagination } from "@/interfaces/Pagination";
-import axios from "axios";
-import { parseCookies } from "nookies";
 
-const cookies = parseCookies();
-const access_token = cookies.access_token;
+import createAxiosInstance from "./apiService";
 
-axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL;
-axios.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
-axios.defaults.headers.common["Content-Type"] = "application/json";
+const axiosInstance = createAxiosInstance();
 
 type RequestCreateTeamService = Team;
 
@@ -18,7 +13,7 @@ export async function CreateTeamService(
   input: RequestCreateTeamService
 ): Promise<ResponseCreateTeamService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "POST",
       url: `/v1/teams`,
       data: { ...input },
@@ -40,7 +35,7 @@ export async function GetTeamsBySchoolIdService(
   input: RequestGetTeamsService
 ): Promise<ResponseGetTeamsService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "GET",
       url: `/v1/teams`,
       params: { ...input },
@@ -62,7 +57,7 @@ export async function GetTeamByIdService(
   input: RequestGetTeamByIdService
 ): Promise<ResponseGetTeamByIdService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "GET",
       url: `/v1/teams/${input.teamId}`,
     });
@@ -89,7 +84,7 @@ export async function UpdateTeamService(
   input: RequestUpdateTeamService
 ): Promise<ResponseUpdateTeamService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "PATCH",
       url: `/v1/teams/${input.query.teamId}`,
       data: { ...input.body },
@@ -111,7 +106,7 @@ export async function DeleteTeamService(
   input: RequestDeleteTeamService
 ): Promise<ResponseDeleteTeamService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "DELETE",
       url: `/v1/teams/${input.teamId}`,
     });

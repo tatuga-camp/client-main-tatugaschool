@@ -1,13 +1,8 @@
 import { MemberOnSchool } from "@/interfaces";
-import axios from "axios";
-import { parseCookies } from "nookies";
 
-const cookies = parseCookies();
-const access_token = cookies.access_token;
+import createAxiosInstance from "./apiService";
 
-axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL;
-axios.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
-axios.defaults.headers.common["Content-Type"] = "application/json";
+const axiosInstance = createAxiosInstance();
 
 type RequestCreateMemberOnSchoolService = {
   email: string;
@@ -21,7 +16,7 @@ export async function CreateMemberOnSchoolService(
   input: RequestCreateMemberOnSchoolService
 ): Promise<ResponseMemberOnSchoolService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "POST",
       url: "/v1/member-on-schools",
       data: { ...input },
@@ -44,7 +39,7 @@ export async function UpdateMemberOnSchoolService(
   input: RequestUpdateMemberOnSchoolService
 ): Promise<ResponseMemberOnSchoolService> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "PATCH",
       url: `/v1/member-on-schools/${input.query.memberOnSchoolId}`,
       data: input.body,
@@ -63,7 +58,7 @@ export async function DeleteMemberOnSchoolService(
   input: RequestDeleteMemberOnSchoolService
 ): Promise<void> {
   try {
-    await axios({
+    await axiosInstance({
       method: "DELETE",
       url: `/v1/member-on-schools/${input.memberOnSchoolId}`,
     });
@@ -80,7 +75,7 @@ export async function GetMembersBySchoolIdService(
   input: RequestGetMembersBySchoolIdService
 ): Promise<ResponseMemberOnSchoolService[]> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "GET",
       url: `/v1/member-on-schools/school/${input.schoolId}`,
     });
@@ -98,7 +93,7 @@ export async function GetMembersByUserIdService(
   input: RequestGetMembersByUserIdService
 ): Promise<ResponseMemberOnSchoolService[]> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "GET",
       url: `/v1/member-on-schools/user/${input.userId}`,
     });
@@ -119,7 +114,7 @@ export async function UpdateMemberInvitationService(
   input: RequestUpdateMemberInvitationService
 ): Promise<{ message: string }> {
   try {
-    const response = await axios({
+    const response = await axiosInstance({
       method: "PATCH",
       url: `/v1/member-on-schools/invitation`,
       data: input.body,
