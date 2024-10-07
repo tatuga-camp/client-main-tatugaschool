@@ -8,7 +8,7 @@ export interface CommentOnAssignment {
   title: string;
   firstName: string;
   lastName: string;
-  picture?: string;
+  photo?: string;
   number?: string;
   status: Status;
   role: MemberRole;
