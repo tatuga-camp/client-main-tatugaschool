@@ -5,7 +5,7 @@ export interface Student {
   title: string;
   firstName: string;
   lastName: string;
-  picture: string;
+  photo: string;
   number: string;
   schoolId: string;
   classId: string;

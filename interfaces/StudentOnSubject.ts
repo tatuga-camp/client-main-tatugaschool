@@ -5,7 +5,7 @@ export interface StudentOnSubject {
   title: string;
   firstName: string;
   lastName: string;
-  picture: string;
+  photo: string;
   number: string;
   totalSpeicalScore: number;
   studentId: string;
