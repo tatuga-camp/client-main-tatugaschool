@@ -1,30 +1,52 @@
 // pages/verify-email.tsx
 import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
 import { VerifyEmailService } from "@/services"; // Import the service
 import { AuthHeader } from "@/components/auth/AuthHeader";
 import React from "react";
-import { AuthFooter } from "@/components/auth/AuthFooter";
+import { GetServerSideProps } from "next";
+import { FiXCircle } from "react-icons/fi";
+import { ErrorMessages } from "../../interfaces";
+import Swal from "sweetalert2";
+import { useRouter } from "next-nprogress-bar";
+import Link from "next/link";
 
-const VerifyEmailPage = () => {
+const VerifyEmailPage = ({ token }: { token: string | null }) => {
   const router = useRouter();
-  const { token } = router.query; // Get token from URL query
   const [verificationStatus, setVerificationStatus] = useState<
-    "success" | "fail" | null
-  >(null);
+    "success" | "fail" | "pending" | "no-token"
+  >("no-token");
 
   useEffect(() => {
     if (token) {
       verifyEmail(token as string);
+    } else {
+      setVerificationStatus("no-token");
     }
-  }, [token]);
+  }, []);
 
   const verifyEmail = async (token: string) => {
     try {
+      setVerificationStatus("pending");
       await VerifyEmailService({ token });
       setVerificationStatus("success");
+      Swal.fire({
+        title: "Email Verified",
+        text: "Your email has been verified successfully",
+        icon: "success",
+      });
+      router.push("/auth/sign-in");
     } catch (error) {
       setVerificationStatus("fail");
+      console.log(error);
+      let result = error as ErrorMessages;
+      Swal.fire({
+        title: result.error ? result.error : "Something Went Wrong",
+        text: result.message.toString(),
+        footer: result.statusCode
+          ? "Code Error: " + result.statusCode?.toString()
+          : "",
+        icon: "error",
+      });
     }
   };
 
@@ -34,20 +56,41 @@ const VerifyEmailPage = () => {
       <div className="flex flex-col items-center text-center">
         {verificationStatus === "success" && (
           <>
-            <h2 className="text-5xl font-bold text-[#4CAF50] mb-4">
+            <h2 className="text-5xl font-bold text-green-600 mb-4">
               Your Email Has Been Verified
             </h2>
             <p className="text-[#6E6E6E] mb-8 text-lg">
               Please click the button below to sign in again.
             </p>
-            <button
+            <Link
+              href={"/auth/sign-in"}
               className="p-4 bg-[#5F3DC4] text-white rounded-lg font-semibold hover:bg-[#482ab4] transition duration-300"
-              onClick={() => router.push("/auth/login")}
             >
               Sign In
-            </button>
+            </Link>
           </>
         )}
+        {verificationStatus === "pending" && (
+          <>
+            <h2 className="text-5xl animate-pulse font-bold text-blue-600 mb-4">
+              Verifying Your Email..
+            </h2>
+            <p className="text-[#6E6E6E] mb-8 text-lg">
+              Please wait while we verify your email.
+            </p>
+          </>
+        )}
+        {verificationStatus === "no-token" && (
+          <>
+            <h2 className="text-5xl font-bold flex items-center justify-center gap-1 text-red-600 mb-4">
+              No Token Found <FiXCircle />
+            </h2>
+            <p className="text-[#6E6E6E] mb-8 text-lg">
+              Please resend the email again or contact admin.
+            </p>
+          </>
+        )}
+
         {verificationStatus === "fail" && (
           <>
             <h2 className="text-5xl font-bold text-red-500 mb-4">
@@ -64,3 +107,13 @@ const VerifyEmailPage = () => {
 };
 
 export default VerifyEmailPage;
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  // read params from ctx.query
+  const { token } = ctx.query;
+  return {
+    props: {
+      token: token,
+    },
+  };
+};

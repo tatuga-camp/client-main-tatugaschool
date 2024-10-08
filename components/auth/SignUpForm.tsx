@@ -77,7 +77,7 @@ export const SignUpForm = () => {
 
   return (
     <form
-      className="bg-white p-10  w-11/12 flex flex-col gap-4 md:w-8/12 lg:w-8/12 xl:w-5/12 drop-shadow rounded-md text-center"
+      className="bg-white p-10  w-11/12 flex flex-col gap-4 md:w-8/12 lg:w-8/12 xl:w-5/12  rounded-[40px] shadow-[0_12px_24px_rgba(145,158,171,0.12)] text-center"
       onSubmit={handleSignUp}
     >
       <h2 className="text-[24px] font-bold mb-[40px]">Create Account</h2>

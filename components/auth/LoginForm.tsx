@@ -55,7 +55,7 @@ export const LoginForm = () => {
 
   return (
     <form
-      className="bg-white p-10 w-11/12 md:w-96 lg:w-4/12 drop-shadow rounded-md text-center"
+      className="bg-white p-10 w-11/12 md:w-96 lg:w-4/12  rounded-[40px] shadow-[0_12px_24px_rgba(145,158,171,0.12)] text-center"
       onSubmit={handleLogin}
     >
       <h2 className="text-[24px] font-bold mb-[40px]">Log in</h2>
