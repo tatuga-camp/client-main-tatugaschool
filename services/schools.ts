@@ -4,7 +4,7 @@ import createAxiosInstance from "./apiService";
 
 const axiosInstance = createAxiosInstance();
 
-type RequestCreateSchoolService = {
+export type RequestCreateSchoolService = {
   title: string;
   description: string;
 };
@@ -76,13 +76,25 @@ type RequestGetSchoolService = {
   schoolId: string;
 };
 
-export async function GetSchoolService(
+export async function GetSchoolByIdService(
   input: RequestGetSchoolService
 ): Promise<ResponseSchoolService> {
   try {
     const response = await axiosInstance({
       method: "GET",
       url: `/v1/schools/${input.schoolId}`,
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data;
+  }
+}
+
+export async function GetSchoolService(): Promise<ResponseSchoolService[]> {
+  try {
+    const response = await axiosInstance({
+      method: "GET",
+      url: `/v1/schools`,
     });
     return response.data;
   } catch (error: any) {

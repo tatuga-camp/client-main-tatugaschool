@@ -20,6 +20,8 @@ export async function SignInService(
       url: "/v1/auth/sign-in",
       data: { ...input },
     });
+    console.log(response);
+    
     return response.data;
   } catch (error: any) {
     console.error("Sign-In request failed:", error.response.data);
