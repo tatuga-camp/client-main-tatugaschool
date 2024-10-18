@@ -1,8 +1,9 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { getSignedURLTeacherService } from "@/services";
+import { getSignedURLTeacherService, UploadSignURLService } from "@/services";
 import useUserStore from "@/store/userStore";
 import useAccountStore from "@/store/accountStore";
 
@@ -10,7 +11,7 @@ import Swal from "sweetalert2";
 
 export default function UploadPhoto() {
   const { user } = useUserStore();
-  const { setPhoto } = useAccountStore();
+  const { setSignURL, setOriginalURL } = useAccountStore();
 
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -28,14 +29,18 @@ export default function UploadPhoto() {
   const handleUpload = async () => {
     if (!file) return;
     try {
-      const { signURL } = await getSignedURLTeacherService({
+      const { signURL, originalURL } = await getSignedURLTeacherService({
         fileName: file.name,
         fileType: file.type,
       });
 
       console.log(signURL);
+
+      await UploadSignURLService({contentType: file.type, file, signURL});
       
-      setPhoto(signURL);
+      setSignURL(signURL);
+      setOriginalURL(originalURL);
+      setPreviewUrl(originalURL);
 
       Swal.fire("success", "Photo uploaded successfully!");
     } catch (error) {
@@ -45,13 +50,19 @@ export default function UploadPhoto() {
   };
 
   useEffect(() => {
+    if (!user?.id) return;
     setPreviewUrl(user?.photo);
-  }, [user?.id]);
+  }, [user]);
+
+  useEffect(() => {
+    handleUpload();
+  }, [file]);
 
   return (
     <div className="flex flex-col items-center space-y-4">
       <div className="relative w-32 h-32 rounded-full overflow-hidden">
         {previewUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={previewUrl}
             alt="Preview"
@@ -72,12 +83,12 @@ export default function UploadPhoto() {
         </label>
       </div>
 
-      {file ? <button
+      {/* {file ? <button
         onClick={handleUpload}
         className="text-purple-600 hover:underline"
       >
         Update photo
-      </button> : ''}
+      </button> : ''} */}
 
       <div className="text-center text-sm text-gray-600">
         <p>Allowed *.jpeg, *.jpg, *.png, *.gif</p>

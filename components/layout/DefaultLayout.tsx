@@ -1,23 +1,18 @@
-import { useEffect } from "react";
 import SchoolListHeader from "@/components/Header";
-import useUserStore from "@/store/userStore";
-import { SignInService, UserService } from "@/services";
+import { UserService } from "@/services";
+import { QueryClient, useQuery } from "@tanstack/react-query";
 
 const DefaultLayout = ({ children }: { children: React.ReactNode }) => {
-  const { setUser, clearUser } = useUserStore();
+  useQuery({
+    queryKey: ["user"],
+    queryFn: () => UserService(),
+  });
 
-  useEffect(() => {
-    getUserData();
-  }, []);
-
-  const getUserData = async () => {
-    const responseUser = await UserService()
-    setUser(responseUser);
-  };
+  const clearClient = new QueryClient();
 
   return (
     <div className="min-h-screen bg-[#6f47dd]">
-      <SchoolListHeader clearUser={clearUser} />
+      <SchoolListHeader QueryClient={clearClient} />
       {children}
     </div>
   );

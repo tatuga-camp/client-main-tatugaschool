@@ -6,14 +6,15 @@ import { useRouter } from "next/router";
 
 import { destroyCookie, parseCookies } from "nookies";
 import { usePathname } from "next/navigation";
+import { QueryClient } from "@tanstack/react-query";
 
-const Header = ({ clearUser }: any) => {
+const Header = ({ QueryClient }: { QueryClient: QueryClient }) => {
   const router = useRouter();
   const pathname = usePathname();
   const cookies = parseCookies();
 
   const handleLogout = () => {
-    clearUser();
+    QueryClient.clear();
     destroyCookie(null, "access_token", { path: "/" });
     destroyCookie(null, "refresh_token", { path: "/" });
 

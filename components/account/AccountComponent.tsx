@@ -14,18 +14,18 @@ import { UpdateUserService, UserService } from "@/services";
 
 const AccountComponent = () => {
   const { user, setUser } = useUserStore();
-  const { photo } = useAccountStore();
+  const { originalURL } = useAccountStore();
 
   const [form, setForm] = useState({
     firstname: user?.firstName || "",
     lastname: user?.lastName || "",
     email: user?.email || "",
     phone: user?.phone || "",
-    photo: photo || user?.photo || "",
+    photo: originalURL || user?.photo || "",
   });
 
   const userMemo = useMemo(() => user, [user]);
-  const photoMemo = useMemo(() => photo, [photo]);
+  const photoMemo = useMemo(() => originalURL, [originalURL]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -67,8 +67,8 @@ const AccountComponent = () => {
   }, [userMemo]);
 
   useEffect(() => {
-    if (photo) setForm((prev) => ({ ...prev, photo: photo }));
-  }, [photo]);
+    if (originalURL) setForm((prev) => ({ ...prev, photo: originalURL }));
+  }, [originalURL]);
 
   return (
     <div className="min-h-[90vh] flex items-center justify-center">
