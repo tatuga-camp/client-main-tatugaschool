@@ -26,19 +26,24 @@ export const LoginForm = () => {
       const response = await SignInService({ email, password });
       console.log("Login successful:", response);
 
-      setCookie(null, "access_token", response.accessToken, {
-        path: "/",
-      });
-      setCookie(null, "refresh_token", response.refreshToken, {
-        path: "/",
-      });
+      await Promise.all([
+        setCookie(null, "access_token", response.accessToken, {
+          path: "/",
+        }),
+        setCookie(null, "refresh_token", response.refreshToken, {
+          path: "/",
+        }),
+      ]);
 
-      router.push("/");
-      Swal.fire({
+      await Swal.fire({
         title: "Login Success!",
         text: "You are now logged in",
         icon: "success",
+        showConfirmButton: false,
+        timer: 1500,
       });
+
+      router.refresh();
     } catch (error) {
       console.log(error);
       let result = error as ErrorMessages;
