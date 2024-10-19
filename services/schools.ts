@@ -1,12 +1,20 @@
 import { School } from "@/interfaces";
 
 import createAxiosInstance from "./apiService";
+import { useAccesstoken } from "../hooks";
+import axios from "axios";
 
 const axiosInstance = createAxiosInstance();
 
 export type RequestCreateSchoolService = {
   title: string;
   description: string;
+  country: string;
+  city: string;
+  address: string;
+  zipCode: string;
+  logo: string;
+  phoneNumber: string;
 };
 
 export type ResponseSchoolService = School;
@@ -56,7 +64,7 @@ type RequestDeleteSchoolService = {
 
 type ResponseDeleteSchoolService = {
   message: string;
-}
+};
 
 export async function DeleteSchoolService(
   input: RequestDeleteSchoolService
@@ -96,6 +104,7 @@ export async function GetSchoolService(): Promise<ResponseSchoolService[]> {
       method: "GET",
       url: `/v1/schools`,
     });
+
     return response.data;
   } catch (error: any) {
     throw error?.response?.data;

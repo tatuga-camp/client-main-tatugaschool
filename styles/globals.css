@@ -1,5 +1,16 @@
 @import url("https://fonts.googleapis.com/css2?family=Anuphan:wght@100;200;300;400;500;600;700&display=swap");
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@layer tailwind-base, primereact, tailwind-utilities;
+
+@layer tailwind-base {
+  @tailwind base;
+}
+@layer tailwind-utilities {
+  @tailwind components;
+  @tailwind utilities;
+}
+@layer components {
+  .main-button {
+    @apply bg-secondary-color text-white  py-2 px-4 rounded-md active:scale-105 hover:bg-primary-color active:drop-shadow-md transition duration-150;
+  }
+}

@@ -111,9 +111,9 @@ export const SignUpForm = () => {
             value={phone}
             onChange={(e) => setPhone(e.value as string)}
             mask="(+99) 999-999-9999"
-            className="w-full p-[16px]  border border-gray-300 rounded-lg"
+            className="w-full p-[16px] dark:bg-white dark:text-black border border-gray-300 rounded-lg"
             placeholder="(+99) 999-999-9999"
-          ></InputMask>
+          />
         </label>
         <label className="w-full h-max  flex flex-col relative items-start">
           <span className="text-sm">Email Adress</span>

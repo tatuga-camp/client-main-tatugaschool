@@ -3,7 +3,7 @@ import Image from "next/image";
 export const AuthFooter = () => (
   <div className="flex flex-row items-center h-max justify-center mt-[60px]">
     <Image
-      src="/logo-ted-fund.svg"
+      src="/svg/logo/logo-ted-fund.svg"
       alt="TED Fund Logo"
       width={40}
       height={40}

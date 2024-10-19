@@ -1,13 +1,9 @@
-
 import { User } from "../interfaces";
-
-
 import createAxiosInstance from "./apiService";
 
 const axiosInstance = createAxiosInstance();
 
-type ResponseUserService = User;
-export async function UserService(): Promise<ResponseUserService> {
+export async function GetUserService(): Promise<User> {
   try {
     const response = await axiosInstance({
       method: "GET",
@@ -27,10 +23,9 @@ type RequestUpdateUserService = {
   phone?: string;
   photo?: string;
 };
-type ResponseUserService = User;
 export async function UpdateUserService(
   input: RequestUpdateUserService
-): Promise<ResponseUserService> {
+): Promise<User> {
   try {
     const response = await axiosInstance({
       method: "PATCH",

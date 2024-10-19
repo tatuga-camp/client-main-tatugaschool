@@ -1,47 +1,34 @@
 import React, { useEffect, useState, memo } from "react";
 import { GetSchoolService, DeleteSchoolService } from "@/services";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
-import { School } from "@/interfaces";
+import { ErrorMessages, School, User } from "@/interfaces";
 import Swal from "sweetalert2";
-import useUserStore from '@/store/userStore';
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getSchools, getUser } from "../../react-query";
+import { MdDelete } from "react-icons/md";
+import Image from "next/image";
 
 const ListsSchoolComponent = () => {
-  const { user } = useUserStore();
-  
-
-  const [schools, setSchools] = useState<School[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedYear, setSelectedYear] = useState<string>("");
-
-  const tableHeaders = ["Name", "Description", "Action"];
+  const user = getUser().data;
+  const tableHeaders = ["Name", "Create At", "Description", "Action"];
   const inputClasses = "border rounded-md px-4 py-2";
   const buttonClasses =
-    "bg-[#6f47dd] text-white px-6 py-2 rounded-lg w-full md:w-auto";
+    "bg-secondary-color text-white px-6 py-2 rounded-lg w-full md:w-auto";
 
-  useEffect(() => {
-    fetchSchools();
-  }, []);
-
-  const fetchSchools = async () => {
-    try {
-      const response: School[] = await GetSchoolService();
-      setSchools(response);
-    } catch (error) {
-      console.error("Error fetching school data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  const schools = getSchools();
   const handleDeleteSchool = async (id: string, schoolName: string) => {
     const { value: inputValue } = await Swal.fire({
       title: "Are you sure?",
-      text: `To confirm, please type the name of the school: ${schoolName}`,
+      html: `<div>
+        <div>To confirm deleting school please type text below</div>
+        <h1 style="font-weight: 700;">${schoolName}</h1>
+      </div>`,
       input: "text",
       inputPlaceholder: "Type the school name",
+      footer: "<p>This action cannot be undone</p>",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
@@ -58,16 +45,36 @@ const ListsSchoolComponent = () => {
       },
     });
 
-    if (inputValue === schoolName) {
+    try {
+      Swal.fire({
+        title: "Please wait...",
+        text: "We are processing your request",
+        showConfirmButton: false,
+        willOpen: () => {
+          Swal.showLoading();
+        },
+      });
       await DeleteSchoolService({ schoolId: id });
-      fetchSchools();
+      const filterUnDeletedSchools = schools.data?.filter(
+        (school: School) => school.id !== id
+      );
+      queryClient.setQueryData(["schools"], filterUnDeletedSchools);
       Swal.fire("Deleted!", "The school has been deleted.", "success");
-    } else {
-      Swal.fire("Cancelled", "The school was not deleted.", "error");
+    } catch (error) {
+      console.log(error);
+      let result = error as ErrorMessages;
+      Swal.fire({
+        title: result.error ? result.error : "Something Went Wrong",
+        text: result.message.toString(),
+        footer: result.statusCode
+          ? "Code Error: " + result.statusCode?.toString()
+          : "",
+        icon: "error",
+      });
     }
   };
 
-  const filteredSchools = schools.filter((school) => {
+  const filteredSchools = schools.data?.filter((school: School) => {
     const matchesSearchTerm = school.title
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
@@ -110,19 +117,6 @@ const ListsSchoolComponent = () => {
         <p className="text-gray-600 mb-6">Lists of your school</p>
 
         <div className="flex flex-col md:flex-row items-center justify-between mb-4 gap-4">
-          <select
-            className={`${inputClasses} w-full md:w-40`}
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(e.target.value)}
-            aria-label="Year education"
-          >
-            <option value="">All Years</option>
-            {uniqueYears.map((year) => (
-              <option key={year} value={year}>
-                Year {year}
-              </option>
-            ))}
-          </select>
           <input
             type="text"
             placeholder="Search by name..."
@@ -131,13 +125,17 @@ const ListsSchoolComponent = () => {
             className={`${inputClasses} flex-grow w-full md:w-auto`}
             aria-label="Search schools"
           />
-          <Link className={buttonClasses} href="/school/create">
+          <Link
+            className="bg-secondary-color text-white px-6 py-2 rounded-md active:scale-105
+             w-full md:w-auto hover:bg-primary-color transition duration-300"
+            href="/school/create"
+          >
             + create school
           </Link>
         </div>
 
         <div className="overflow-auto">
-          {loading ? (
+          {schools.isLoading ? (
             <p>Loading schools...</p>
           ) : (
             <table className="min-w-full table-auto text-left">
@@ -151,33 +149,52 @@ const ListsSchoolComponent = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredSchools.length > 0 ? (
-                  filteredSchools.map((school, index) => (
+                {filteredSchools && filteredSchools?.length > 0 ? (
+                  filteredSchools?.map((school, index) => (
                     <tr key={index} className="border-b">
                       <td className="p-4">
-                        <div className="flex items-center">
-                          <span className="ml-2 text-gray-500">
+                        <div className="flex items-center justify-start gap-1">
+                          <div className="w-10 h-10 rounded-md overflow-hidden relative">
+                            <Image
+                              src={school.logo || "/favicon.ico"}
+                              fill
+                              alt="logo tatuga school"
+                              className="object-cover"
+                            />
+                          </div>
+                          <Link
+                            href={`/school/${school.id}`}
+                            className="ml-2 text-primary-color underline underline-offset-1"
+                          >
                             {school.title}
-                          </span>
+                          </Link>
                         </div>
                       </td>
                       <td className="p-4">
-                        <span className="ml-2 text-gray-500">
-                          {school.description}
-                        </span>
+                        {new Date(school.createAt).toLocaleDateString(
+                          undefined,
+                          {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          }
+                        )}
                       </td>
                       <td className="p-4">
-                        <button
-                          aria-label="Delete"
-                          onClick={() =>
-                            handleDeleteSchool(school.id, school.title)
-                          }
+                        <Link
+                          href={`/school/${school.id}`}
+                          className="ml-2 text-primary-color underline underline-offset-1"
                         >
-                          <FontAwesomeIcon
-                            icon={faTrash}
-                            className="text-red-500"
-                          />
-                        </button>
+                          {school.description}
+                        </Link>
+                      </td>
+                      <td className="p-4">
+                        <Link
+                          href={`/school/${school.id}`}
+                          className="main-button"
+                        >
+                          Join School
+                        </Link>
                       </td>
                     </tr>
                   ))

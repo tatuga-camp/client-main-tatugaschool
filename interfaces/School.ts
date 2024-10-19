@@ -6,6 +6,12 @@ export interface School {
   updateAt: Date;
   title: string;
   description: string;
+  country: string;
+  city: string;
+  address: string;
+  zipCode: string;
+  logo: string;
+  phoneNumber: string;
   plan: Plan;
   isDeleted: boolean;
   stripe_customer_id: string;

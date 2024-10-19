@@ -5,6 +5,7 @@ import Link from "next/link";
 import Swal from "sweetalert2";
 import { ErrorMessages } from "../../interfaces";
 import { useRouter } from "next-nprogress-bar";
+import { setAccessToken, setRefreshToken } from "../../hooks";
 
 export const LoginForm = () => {
   const router = useRouter();
@@ -24,26 +25,18 @@ export const LoginForm = () => {
         },
       });
       const response = await SignInService({ email, password });
-      console.log("Login successful:", response);
 
-      await Promise.all([
-        setCookie(null, "access_token", response.accessToken, {
-          path: "/",
-        }),
-        setCookie(null, "refresh_token", response.refreshToken, {
-          path: "/",
-        }),
-      ]);
+      setAccessToken({ access_token: response.accessToken });
+      setRefreshToken({ refresh_token: response.refreshToken });
 
-      await Swal.fire({
+      Swal.fire({
         title: "Login Success!",
         text: "You are now logged in",
         icon: "success",
         showConfirmButton: false,
         timer: 1500,
       });
-
-      router.refresh();
+      router.push("/");
     } catch (error) {
       console.log(error);
       let result = error as ErrorMessages;

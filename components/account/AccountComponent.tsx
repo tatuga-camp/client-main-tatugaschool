@@ -6,16 +6,12 @@ import React, {
   ChangeEvent,
 } from "react";
 import UploadPhoto from "./UploadPhoto";
-import useUserStore from "@/store/userStore";
-import useAccountStore from "@/store/accountStore";
+
 import Swal from "sweetalert2";
 
-import { UpdateUserService, UserService } from "@/services";
+import { UpdateUserService, GetUserService } from "@/services";
 
 const AccountComponent = () => {
-  const { user, setUser } = useUserStore();
-  const { originalURL } = useAccountStore();
-
   const [form, setForm] = useState({
     firstname: user?.firstName || "",
     lastname: user?.lastName || "",
@@ -43,7 +39,7 @@ const AccountComponent = () => {
         icon: "success",
       });
 
-      const res = await UserService();
+      const res = await GetUserService();
       setUser(res);
     } catch (error) {
       Swal.fire({

@@ -1,52 +1,57 @@
-import { NextRequest, NextResponse } from "next/server";
-import { RefreshTokenService } from "./services";
-import { setCookie } from "nookies";
+// import { NextRequest, NextResponse } from "next/server";
+// import { RefreshTokenService } from "./services";
+// import { setCookie } from "nookies";
 
-export async function middleware(req: NextRequest) {
-  const refreshToken = req.cookies.get("refresh_token");
+import { NextRequest } from "next/server";
 
-  // Avoid middleware looping by excluding sign-in and sign-up pages from further redirects
-  const isAuthPage =
-    req.nextUrl.pathname === "/auth/sign-in" ||
-    req.nextUrl.pathname === "/auth/sign-up";
+// export async function middleware(req: NextRequest) {
+//   const refreshToken = req.cookies.get("refresh_token");
 
-  // If the user is on the sign-in or sign-up page and has a refresh token, redirect to home
-  if (isAuthPage) {
-    if (refreshToken) {
-      const homeUrl = `${req.nextUrl.origin}/`;
-      return NextResponse.redirect(homeUrl);
-    } else {
-      return NextResponse.next();
-    }
-  }
+//   // Avoid middleware looping by excluding sign-in, sign-up, and forget-password pages from further redirects
+//   const isAuthPage =
+//     req.nextUrl.pathname === "/auth/sign-in" ||
+//     req.nextUrl.pathname === "/auth/sign-up" ||
+//     req.nextUrl.pathname === "/auth/forget-password";
 
-  // If no refresh token is present, redirect to sign-in page, but skip redirect if already on sign-in or sign-up
-  if (!refreshToken) {
-    const loginUrl = `${req.nextUrl.origin}/auth/sign-in`;
-    return NextResponse.redirect(loginUrl);
-  }
+//   // If the user is on the sign-in, sign-up, or forget-password page and has a refresh token, redirect to home
+//   if (isAuthPage) {
+//     if (refreshToken) {
+//       const homeUrl = `${req.nextUrl.origin}/`;
+//       return NextResponse.redirect(homeUrl);
+//     } else {
+//       return NextResponse.next();
+//     }
+//   }
 
-  // Try refreshing tokens if a refresh token is present
-  try {
-    const newTokens = await RefreshTokenService({
-      refreshToken: refreshToken.value,
-    });
+//   // If no refresh token is present, redirect to sign-in page, but skip redirect if already on auth pages
+//   if (!refreshToken) {
+//     const loginUrl = `${req.nextUrl.origin}/auth/sign-in`;
+//     return NextResponse.redirect(loginUrl);
+//   }
 
-    const response = NextResponse.next();
-    setCookie({ res: response }, "access_token", newTokens.accessToken, {
-      path: "/", // Ensure cookie is set at the root
-    });
-    setCookie({ res: response }, "refresh_token", newTokens.refreshToken, {
-      path: "/", // Ensure cookie is set at the root
-    });
-    return response;
-  } catch (error) {
-    // In case of an error, redirect to the sign-in page
-    const loginUrl = `${req.nextUrl.origin}/auth/sign-in`;
-    return NextResponse.redirect(loginUrl);
-  }
-}
+//   // Try refreshing tokens if a refresh token is present
+//   try {
+//     const newTokens = await RefreshTokenService({
+//       refreshToken: refreshToken.value,
+//     });
 
-export const config = {
-  matcher: ["/", "/auth/:path*", "/school/:path*", ],
-};
+//     const response = NextResponse.next();
+//     setCookie({ res: response }, "access_token", newTokens.accessToken, {
+//       path: "/", // Ensure cookie is set at the root
+//     });
+//     setCookie({ res: response }, "refresh_token", newTokens.refreshToken, {
+//       path: "/", // Ensure cookie is set at the root
+//     });
+//     return response;
+//   } catch (error) {
+//     // In case of an error, redirect to the sign-in page
+//     const loginUrl = `${req.nextUrl.origin}/auth/sign-in`;
+//     return NextResponse.redirect(loginUrl);
+//   }
+// }
+
+// export const config = {
+//   matcher: ["/", "/auth/:path*", "/school/:path*"],
+// };
+
+export async function middleware(req: NextRequest) {}
