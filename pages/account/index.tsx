@@ -5,14 +5,22 @@ import AccountComponent from "@/components/account/AccountComponent";
 import { GetUserService, RefreshTokenService } from "../../services";
 import { GetServerSideProps } from "next";
 import { User } from "../../interfaces";
-import { setAccessToken, useRefetchtoken } from "../../hooks";
+import { setAccessToken, getRefetchtoken } from "../../utils";
+import Head from "next/head";
 
 const AccountPage = () => {
   return (
-    <DefaultLayout>
-      <div></div>
-      {/* <AccountComponent /> */}
-    </DefaultLayout>
+    <>
+      <Head>
+        <title>Account</title>
+        <meta name="description" content="Account" />
+      </Head>
+      <DefaultLayout>
+        <div className="mt-20">
+          <AccountComponent />
+        </div>
+      </DefaultLayout>
+    </>
   );
 };
 
@@ -20,7 +28,7 @@ export default AccountPage;
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   try {
-    const { refresh_token } = useRefetchtoken(ctx);
+    const { refresh_token } = getRefetchtoken(ctx);
     if (!refresh_token) {
       throw new Error("Token not found");
     }

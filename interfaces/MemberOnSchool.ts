@@ -1,4 +1,4 @@
-export interface MemberOnSchool {
+export type MemberOnSchool = {
   id: string;
   createAt: Date;
   updateAt: Date;
@@ -11,15 +11,8 @@ export interface MemberOnSchool {
   phone: string;
   userId: string;
   schoolId: string;
-}
+};
 
-export enum Status {
-  PENDDING,
-  ACCEPT,
-  REJECT,
-}
+export type Status = "PENDDING" | "ACCEPT" | "REJECT";
 
-export enum MemberRole {
-  ADMIN,
-  TEACHER,
-}
+export type MemberRole = "TEACHER" | "ADMIN";

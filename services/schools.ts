@@ -1,7 +1,7 @@
 import { School } from "@/interfaces";
 
 import createAxiosInstance from "./apiService";
-import { useAccesstoken } from "../hooks";
+import { getAccesstoken } from "../utils";
 import axios from "axios";
 
 const axiosInstance = createAxiosInstance();

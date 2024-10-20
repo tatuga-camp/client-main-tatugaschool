@@ -1,6 +1,6 @@
 import axios from "axios";
 import { RefreshTokenService } from "./auth";
-import { setAccessToken, useAccesstoken, useRefetchtoken } from "../hooks";
+import { setAccessToken, getAccesstoken, getRefetchtoken } from "../utils";
 
 const createAxiosInstance = () => {
   const instance = axios.create({
@@ -9,7 +9,7 @@ const createAxiosInstance = () => {
   });
   instance.interceptors.request.use(
     (config) => {
-      const { access_token } = useAccesstoken();
+      const { access_token } = getAccesstoken();
       if (access_token) {
         config.headers["Authorization"] = `Bearer ${access_token}`;
       }
@@ -24,7 +24,7 @@ const createAxiosInstance = () => {
       const originalRequest = error.config;
       if (error.response.status === 401 && !originalRequest._retry) {
         originalRequest._retry = true;
-        const { refresh_token } = useRefetchtoken();
+        const { refresh_token } = getRefetchtoken();
         if (!refresh_token) {
           // redirect to login
           throw new Error("Token not found");

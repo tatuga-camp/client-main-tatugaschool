@@ -1,7 +1,7 @@
 import { GetServerSidePropsContext } from "next";
 import { parseCookies, setCookie } from "nookies";
 
-export function useRefetchtoken(ctx?: GetServerSidePropsContext): {
+export function getRefetchtoken(ctx?: GetServerSidePropsContext): {
   refresh_token: string | null;
 } {
   const cookies = parseCookies(ctx);
@@ -9,7 +9,7 @@ export function useRefetchtoken(ctx?: GetServerSidePropsContext): {
   return { refresh_token };
 }
 
-export function useAccesstoken(): { access_token: string | null } {
+export function getAccesstoken(): { access_token: string | null } {
   const cookies = parseCookies();
   const access_token = cookies.access_token;
   return { access_token };

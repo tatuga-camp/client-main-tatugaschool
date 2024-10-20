@@ -1,21 +1,24 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-"use client";
-
-import { useState, useEffect } from "react";
-import axios from "axios";
-import { getSignedURLTeacherService, UploadSignURLService } from "@/services";
-import useUserStore from "@/store/userStore";
-import useAccountStore from "@/store/accountStore";
+import { useState, useEffect, memo } from "react";
+import {
+  getSignedURLTeacherService,
+  RequestUpdateUserService,
+  UploadSignURLService,
+} from "@/services";
 
 import Swal from "sweetalert2";
+import { ErrorMessages, User } from "../../interfaces";
+import Image from "next/image";
+import { ProgressBar } from "primereact/progressbar";
+import { UseMutationResult } from "@tanstack/react-query";
 
-export default function UploadPhoto() {
-  const { user } = useUserStore();
-  const { setSignURL, setOriginalURL } = useAccountStore();
-
+type Prosp = {
+  updateUser: UseMutationResult<User, Error, RequestUpdateUserService, unknown>;
+  user: User;
+};
+function UploadPhoto({ user, updateUser }: Prosp) {
   const [file, setFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-
+  const [previewUrl, setPreviewUrl] = useState<string | null>(user.photo);
+  const [loading, setLoading] = useState(false);
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0] || null;
     setFile(selectedFile);
@@ -29,30 +32,34 @@ export default function UploadPhoto() {
   const handleUpload = async () => {
     if (!file) return;
     try {
+      setLoading(true);
       const { signURL, originalURL } = await getSignedURLTeacherService({
         fileName: file.name,
         fileType: file.type,
       });
 
-      console.log(signURL);
+      await UploadSignURLService({ contentType: file.type, file, signURL });
 
-      await UploadSignURLService({contentType: file.type, file, signURL});
-      
-      setSignURL(signURL);
-      setOriginalURL(originalURL);
       setPreviewUrl(originalURL);
-
+      await updateUser.mutateAsync({
+        photo: originalURL,
+      });
       Swal.fire("success", "Photo uploaded successfully!");
+      setLoading(false);
     } catch (error) {
-      console.error("Error uploading photo:", error);
-      Swal.fire("error", "Failed to upload photo.");
+      setLoading(false);
+      console.log(error);
+      let result = error as ErrorMessages;
+      Swal.fire({
+        title: result.error ? result.error : "Something Went Wrong",
+        text: result.message.toString(),
+        footer: result.statusCode
+          ? "Code Error: " + result.statusCode?.toString()
+          : "",
+        icon: "error",
+      });
     }
   };
-
-  useEffect(() => {
-    if (!user?.id) return;
-    setPreviewUrl(user?.photo);
-  }, [user]);
 
   useEffect(() => {
     handleUpload();
@@ -60,13 +67,13 @@ export default function UploadPhoto() {
 
   return (
     <div className="flex flex-col items-center space-y-4">
-      <div className="relative w-32 h-32 rounded-full overflow-hidden">
+      <div className=" w-32 h-32 relative rounded-full overflow-hidden">
         {previewUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={previewUrl}
             alt="Preview"
-            className="object-cover w-full h-full"
+            fill
+            className="object-cover "
           />
         ) : (
           <div className="w-full h-full bg-gray-200 flex items-center justify-center">
@@ -82,14 +89,12 @@ export default function UploadPhoto() {
           />
         </label>
       </div>
-
-      {/* {file ? <button
-        onClick={handleUpload}
-        className="text-purple-600 hover:underline"
-      >
-        Update photo
-      </button> : ''} */}
-
+      {loading && (
+        <ProgressBar
+          mode="indeterminate"
+          style={{ height: "6px", width: "100%" }}
+        />
+      )}
       <div className="text-center text-sm text-gray-600">
         <p>Allowed *.jpeg, *.jpg, *.png, *.gif</p>
         <p>Max size of 3.1 MB</p>
@@ -97,3 +102,4 @@ export default function UploadPhoto() {
     </div>
   );
 }
+export default memo(UploadPhoto);

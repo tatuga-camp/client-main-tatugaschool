@@ -9,9 +9,9 @@ function UserAgreement() {
       <p className="mb-4">
         Welcome to TatugaSchool.com. By accessing or using our website and
         services, you agree to comply with and be bound by the following terms
-        and conditions (the "User Agreement"). Please review the agreement
-        carefully. If you do not agree to these terms, you should not proceed
-        with the use of our platform.
+        and conditions (the &quot;User Agreement&quot;). Please review the
+        agreement carefully. If you do not agree to these terms, you should not
+        proceed with the use of our platform.
       </p>
 
       <h2 className="text-xl font-semibold mb-4">1. Acceptance of Terms</h2>

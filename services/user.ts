@@ -16,7 +16,26 @@ export async function GetUserService(): Promise<User> {
   }
 }
 
-type RequestUpdateUserService = {
+export type RequestGetUserByEmailService = {
+  email: string;
+};
+export async function GetUserByEmailService(
+  input: RequestGetUserByEmailService
+): Promise<User[]> {
+  try {
+    const response = await axiosInstance({
+      method: "GET",
+      url: "/v1/users",
+      params: input,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("User request failed:", error?.response?.data);
+    throw error?.response?.data;
+  }
+}
+
+export type RequestUpdateUserService = {
   firstName?: string;
   lastName?: string;
   email?: string;
@@ -32,6 +51,28 @@ export async function UpdateUserService(
       url: "/v1/users",
       data: { ...input },
     });
+    console.info("User updated successfully:", response?.data);
+    return response.data;
+  } catch (error: any) {
+    console.error("User request failed:", error?.response?.data);
+    throw error?.response?.data;
+  }
+}
+
+export type RequestUpdatePasswordService = {
+  currentPassword: string;
+  newPassword: string;
+};
+export async function UpdatePasswordService(
+  input: RequestUpdatePasswordService
+): Promise<User> {
+  try {
+    const response = await axiosInstance({
+      method: "PATCH",
+      url: "/v1/users/password",
+      data: { ...input },
+    });
+
     console.info("User updated successfully:", response?.data);
     return response.data;
   } catch (error: any) {

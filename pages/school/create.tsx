@@ -2,7 +2,7 @@ import CreateSchoolComponent from "@/components/school/CreateSchoolComponent";
 import { GetUserService, RefreshTokenService } from "../../services";
 import { GetServerSideProps } from "next";
 import DefaultLayout from "../../components/layout/DefaultLayout";
-import { setAccessToken, useRefetchtoken } from "../../hooks";
+import { setAccessToken, getRefetchtoken } from "../../utils";
 
 const CreateSchoolPage = () => {
   return (
@@ -17,7 +17,7 @@ const CreateSchoolPage = () => {
 export default CreateSchoolPage;
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   try {
-    const { refresh_token } = useRefetchtoken(ctx);
+    const { refresh_token } = getRefetchtoken(ctx);
     if (!refresh_token) {
       throw new Error("Token not found");
     }

@@ -5,7 +5,7 @@ import Link from "next/link";
 import Swal from "sweetalert2";
 import { ErrorMessages } from "../../interfaces";
 import { useRouter } from "next-nprogress-bar";
-import { setAccessToken, setRefreshToken } from "../../hooks";
+import { setAccessToken, setRefreshToken } from "../../utils";
 
 export const LoginForm = () => {
   const router = useRouter();

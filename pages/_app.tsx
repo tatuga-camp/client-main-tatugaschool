@@ -49,11 +49,6 @@ function MyApp({ Component, pageProps }: AppProps) {
         value={{
           unstyled: true,
           pt: Tailwind,
-          ptOptions: {
-            mergeSections: true,
-            mergeProps: true,
-            classNameMergeFunction: twMerge,
-          },
         }}
       >
         <PagesProgressBar

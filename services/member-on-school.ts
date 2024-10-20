@@ -1,12 +1,12 @@
-import { MemberOnSchool } from "@/interfaces";
+import { MemberOnSchool, MemberRole } from "@/interfaces";
 
 import createAxiosInstance from "./apiService";
 
 const axiosInstance = createAxiosInstance();
 
-type RequestCreateMemberOnSchoolService = {
+export type RequestCreateMemberOnSchoolService = {
   email: string;
-  role: string;
+  role: MemberRole;
   schoolId: string;
 };
 

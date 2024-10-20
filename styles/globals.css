@@ -13,4 +13,17 @@
   .main-button {
     @apply bg-secondary-color text-white  py-2 px-4 rounded-md active:scale-105 hover:bg-primary-color active:drop-shadow-md transition duration-150;
   }
+  .success-button {
+    @apply bg-success-color text-white  py-2 px-4 rounded-md active:scale-105 hover:bg-success-color active:drop-shadow-md transition duration-150;
+  }
+  .reject-button {
+    @apply bg-red-500 text-white  py-2 px-4 rounded-md active:scale-105 hover:bg-red-700 active:drop-shadow-md transition duration-150;
+  }
+  .main-input {
+    @apply border rounded-md outline-none hover:border-blue-500  focus:shadow-[0_0_0_0.2rem_rgba(191,219,254,1)] px-4 py-2;
+  }
+}
+
+.p-password-input {
+  width: 100%;
 }

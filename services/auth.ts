@@ -128,7 +128,6 @@ type RequestRefreshTokenService = {
 
 type ResponseRefreshTokenService = {
   accessToken: string;
-  refreshToken: string;
 };
 
 export async function RefreshTokenService(
@@ -153,7 +152,6 @@ type RequestStudentRefetchTokenService = {
 
 type ResponseStudentRefetchTokenService = {
   accessToken: string;
-  refreshToken: string;
 };
 
 export async function StudentRefetchTokenService(

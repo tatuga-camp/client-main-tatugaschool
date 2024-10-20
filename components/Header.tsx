@@ -37,7 +37,10 @@ const Header = ({ queryClient }: props) => {
   const isActiveClass = (path: boolean) =>
     path ? classLinkActive : classLinkInactive;
   return (
-    <header className="flex flex-col h-20 sticky top-0 md:flex-row justify-between items-center p-4 bg-[#6f47dd84] backdrop-blur text-white gap-4">
+    <header
+      className="flex flex-col h-20 sticky z-50
+     top-0 md:flex-row justify-between items-center p-4 bg-[#6f47dd84] backdrop-blur text-white gap-4"
+    >
       <Link
         href="/"
         className="flex items-center justify-center gap-1 md:gap-3"
@@ -74,16 +77,17 @@ const Header = ({ queryClient }: props) => {
             <FaBell />
           </button>
           <div className="flex gap-2">
-            <Image
-              src={user.data?.photo || "/favicon.ico"}
-              alt="User Avatar"
-              width={32}
-              height={32}
-              className="rounded-full cursor-pointer"
-              onClick={() => {
-                router.push("/account");
-              }}
-            />
+            <div className="w-10 h-10 relative rounded-full overflow-hidden ">
+              <Image
+                src={user.data?.photo || "/favicon.ico"}
+                alt="User Avatar"
+                fill
+                className=" object-cover cursor-pointer"
+                onClick={() => {
+                  router.push("/account");
+                }}
+              />
+            </div>
             <div className=" items-start w-0 h-0 overflow-hidden group-hover:w-max group-hover:h-max duration-300 transition-width flex flex-col justify-center gap-0">
               <h2 className="font-semibold text-sm text-gray-800">
                 {user.data?.email}

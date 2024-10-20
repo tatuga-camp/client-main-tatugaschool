@@ -7,10 +7,11 @@ import {
 } from "@tanstack/react-query";
 import {
   CreateSchoolService,
+  GetMembersBySchoolIdService,
   GetSchoolService,
   RequestCreateSchoolService,
 } from "../services";
-import { School } from "../interfaces";
+import { MemberOnSchool, School } from "../interfaces";
 
 export function getSchools(): UseQueryResult<School[], Error> {
   const schools = useQuery({
@@ -18,4 +19,17 @@ export function getSchools(): UseQueryResult<School[], Error> {
     queryFn: () => GetSchoolService(),
   });
   return schools;
+}
+
+export function getMemberBySchool(request: {
+  id: string;
+}): UseQueryResult<MemberOnSchool[], Error> {
+  const memberOnSchools = useQuery({
+    queryKey: ["member-on-school", { schoolId: request.id }],
+    queryFn: () =>
+      GetMembersBySchoolIdService({
+        schoolId: request.id,
+      }),
+  });
+  return memberOnSchools;
 }

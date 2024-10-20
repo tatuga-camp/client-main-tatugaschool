@@ -1,6 +1,6 @@
 import { GetServerSideProps } from "next";
 import React from "react";
-import { setAccessToken, useRefetchtoken } from "../../hooks";
+import { setAccessToken, getRefetchtoken } from "../../utils";
 import { RefreshTokenService } from "../../services";
 
 function Index() {
@@ -11,7 +11,7 @@ export default Index;
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   try {
-    const { refresh_token } = useRefetchtoken(ctx);
+    const { refresh_token } = getRefetchtoken(ctx);
     if (!refresh_token) {
       throw new Error("Token not found");
     }

@@ -4,7 +4,7 @@ import { GetServerSideProps } from "next";
 import { GetUserService, RefreshTokenService } from "../services";
 import { User } from "../interfaces";
 import Head from "next/head";
-import { setAccessToken, useRefetchtoken } from "../hooks";
+import { setAccessToken, getRefetchtoken } from "../utils";
 
 export default function Home() {
   return (
@@ -23,7 +23,7 @@ export default function Home() {
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   try {
-    const { refresh_token } = useRefetchtoken(ctx);
+    const { refresh_token } = getRefetchtoken(ctx);
     if (!refresh_token) {
       throw new Error("Token not found");
     }

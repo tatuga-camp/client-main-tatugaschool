@@ -18,6 +18,8 @@ import { countries } from "../../data";
 import Image from "next/image";
 import { InputMask } from "primereact/inputmask";
 import { ProgressBar } from "primereact/progressbar";
+import { InputText } from "primereact/inputtext";
+import InviteJoinSchool from "./InviteJoinSchool";
 const menuItems: { title: string; icon: ReactNode }[] = [
   {
     title: "Profile",
@@ -65,7 +67,6 @@ const CreateSchoolComponent = () => {
         return [...(old || []), data];
       });
       show();
-      handleChangeActiveIndex(2);
     },
   });
 
@@ -76,7 +77,6 @@ const CreateSchoolComponent = () => {
       detail: "School has been created",
     });
   };
-
   const handleUploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
       const file = e.target.files?.[0];
@@ -84,7 +84,6 @@ const CreateSchoolComponent = () => {
         throw new Error("File not found");
       }
       setLoading(true);
-      console.log(file);
       const signURL = await getSignedURLTeacherService({
         fileName: file?.name,
         fileType: file?.type,
@@ -115,7 +114,7 @@ const CreateSchoolComponent = () => {
     }
   };
 
-  const handleSubmit = (e: { preventDefault: () => void }) => {
+  const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     if (
       !profile?.school ||
@@ -134,21 +133,26 @@ const CreateSchoolComponent = () => {
       });
       return;
     }
-    createSchool.mutate({
-      title: profile?.school,
-      description: profile?.description,
-      logo: profile?.logo,
-      country: address?.country?.name,
-      city: address?.city,
-      address: address?.address,
-      zipCode: address?.zipCode,
-      phoneNumber: address?.phoneNumber,
-    });
-
-    if (createSchool.error) {
+    try {
+      await createSchool.mutateAsync({
+        title: profile?.school,
+        description: profile?.description,
+        logo: profile?.logo,
+        country: address?.country?.name,
+        city: address?.city,
+        address: address?.address,
+        zipCode: address?.zipCode,
+        phoneNumber: address?.phoneNumber,
+      });
+    } catch (error) {
+      console.log(error);
+      let result = error as ErrorMessages;
       Swal.fire({
-        title: "Error",
-        text: createSchool.error.message,
+        title: result.error ? result.error : "Something Went Wrong",
+        text: result.message.toString(),
+        footer: result.statusCode
+          ? "Code Error: " + result.statusCode?.toString()
+          : "",
         icon: "error",
       });
     }
@@ -191,9 +195,17 @@ const CreateSchoolComponent = () => {
     );
   };
 
+  useEffect(() => {
+    if (createSchool.status === "success") {
+      handleChangeActiveIndex(2);
+    }
+  }, [createSchool.status]);
+
   const handleChangeActiveIndex = (index: number) => {
-    if (createSchool.data) {
+    if (createSchool.isSuccess) {
       setActiveIndex(2);
+    } else if (!createSchool.data && index === 2) {
+      return null;
     } else {
       setActiveIndex(index);
     }
@@ -421,6 +433,10 @@ justify-center text-white py-2 h-10 rounded-lg font-semibold`}
           </section>
         )}
       </form>
+
+      {activeIndex === 2 && createSchool.data && (
+        <InviteJoinSchool schoolId={createSchool.data.id} />
+      )}
     </div>
   );
 };
