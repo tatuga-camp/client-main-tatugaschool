@@ -22,6 +22,9 @@
   .main-input {
     @apply border rounded-md outline-none hover:border-blue-500  focus:shadow-[0_0_0_0.2rem_rgba(191,219,254,1)] px-4 py-2;
   }
+  .gradient-bg {
+    @apply bg-gradient-to-r to-secondary-color from-primary-color;
+  }
 }
 
 .p-password-input {

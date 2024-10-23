@@ -8,6 +8,7 @@ import {
 import {
   CreateSchoolService,
   GetMembersBySchoolIdService,
+  GetSchoolByIdService,
   GetSchoolService,
   RequestCreateSchoolService,
 } from "../services";
@@ -19,6 +20,18 @@ export function getSchools(): UseQueryResult<School[], Error> {
     queryFn: () => GetSchoolService(),
   });
   return schools;
+}
+
+export function getSchool({
+  schoolId,
+}: {
+  schoolId: string;
+}): UseQueryResult<School, Error> {
+  const school = useQuery({
+    queryKey: ["school", { id: schoolId }],
+    queryFn: () => GetSchoolByIdService({ schoolId }),
+  });
+  return school;
 }
 
 export function getMemberBySchool(request: {

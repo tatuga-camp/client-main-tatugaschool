@@ -1,4 +1,4 @@
-import { StudentOnSubject } from "@/interfaces";
+import { ScoreOnStudent, StudentOnSubject } from "@/interfaces";
 
 import createAxiosInstance from "./apiService";
 
@@ -22,7 +22,10 @@ export async function CreateStudentOnSubjectService(
     });
     return response.data;
   } catch (error: any) {
-    console.error("Create StudentOnSubject request failed:", error.response.data);
+    console.error(
+      "Create StudentOnSubject request failed:",
+      error.response.data
+    );
     throw error?.response?.data;
   }
 }
@@ -31,7 +34,10 @@ type RequestGetStudentOnSubjectBySubjectService = {
   subjectId: string;
 };
 
-type ResponseGetStudentOnSubjectBySubjectService = StudentOnSubject[];
+type ResponseGetStudentOnSubjectBySubjectService = (StudentOnSubject & {
+  scores: ScoreOnStudent[];
+  totalScore: number;
+})[];
 
 export async function GetStudentOnSubjectBySubjectService(
   input: RequestGetStudentOnSubjectBySubjectService
@@ -43,7 +49,10 @@ export async function GetStudentOnSubjectBySubjectService(
     });
     return response.data;
   } catch (error: any) {
-    console.error("Get StudentOnSubject by Subject request failed:", error.response.data);
+    console.error(
+      "Get StudentOnSubject by Subject request failed:",
+      error.response.data
+    );
     throw error?.response?.data;
   }
 }
@@ -64,7 +73,10 @@ export async function GetStudentOnSubjectByStudentService(
     });
     return response.data;
   } catch (error: any) {
-    console.error("Get StudentOnSubject by Student request failed:", error.response.data);
+    console.error(
+      "Get StudentOnSubject by Student request failed:",
+      error.response.data
+    );
     throw error?.response?.data;
   }
 }
@@ -85,7 +97,10 @@ export async function GetStudentOnSubjectByIdService(
     });
     return response.data;
   } catch (error: any) {
-    console.error("Get StudentOnSubject by ID request failed:", error.response.data);
+    console.error(
+      "Get StudentOnSubject by ID request failed:",
+      error.response.data
+    );
     throw error?.response?.data;
   }
 }
@@ -108,7 +123,10 @@ export async function DeleteStudentOnSubjectService(
     });
     return response.data;
   } catch (error: any) {
-    console.error("Delete StudentOnSubject request failed:", error.response.data);
+    console.error(
+      "Delete StudentOnSubject request failed:",
+      error.response.data
+    );
     throw error?.response?.data;
   }
 }

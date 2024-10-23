@@ -23,7 +23,10 @@ export async function CreateTeacherOnSubjectService(
     });
     return response.data;
   } catch (error: any) {
-    console.error("Create Teacher on Subject request failed:", error.response.data);
+    console.error(
+      "Create Teacher on Subject request failed:",
+      error.response.data
+    );
     throw error?.response?.data;
   }
 }
@@ -32,7 +35,7 @@ type RequestGetTeacherOnSubjectBySubjectService = {
   subjectId: string;
 };
 
-type ResponseGetTeacherOnSubjectBySubjectService = TeacherOnSubject;
+type ResponseGetTeacherOnSubjectBySubjectService = TeacherOnSubject[];
 
 export async function GetTeacherOnSubjectBySubjectService(
   input: RequestGetTeacherOnSubjectBySubjectService
@@ -44,7 +47,10 @@ export async function GetTeacherOnSubjectBySubjectService(
     });
     return response.data;
   } catch (error: any) {
-    console.error("Get Teacher on Subject by Subject request failed:", error.response.data);
+    console.error(
+      "Get Teacher on Subject by Subject request failed:",
+      error.response.data
+    );
     throw error?.response?.data;
   }
 }
@@ -65,18 +71,21 @@ export async function GetTeacherOnSubjectByIdService(
     });
     return response.data;
   } catch (error: any) {
-    console.error("Get Teacher on Subject by ID request failed:", error.response.data);
+    console.error(
+      "Get Teacher on Subject by ID request failed:",
+      error.response.data
+    );
     throw error?.response?.data;
   }
 }
 
 type RequestUpdateTeacherOnSubjectService = {
-    query: { teacherOnSubjectId: string };
-    body: {
-        status: string;
-        role: string;
-    };
+  query: { teacherOnSubjectId: string };
+  body: {
+    status: string;
+    role: string;
   };
+};
 
 type ResponseUpdateTeacherOnSubjectService = TeacherOnSubject;
 
@@ -91,7 +100,10 @@ export async function UpdateTeacherOnSubjectService(
     });
     return response.data;
   } catch (error: any) {
-    console.error("Update Teacher on Subject request failed:", error.response.data);
+    console.error(
+      "Update Teacher on Subject request failed:",
+      error.response.data
+    );
     throw error?.response?.data;
   }
 }
@@ -114,7 +126,10 @@ export async function DeleteTeacherOnSubjectService(
     });
     return response.data;
   } catch (error: any) {
-    console.error("Delete Teacher on Subject request failed:", error.response.data);
+    console.error(
+      "Delete Teacher on Subject request failed:",
+      error.response.data
+    );
     throw error?.response?.data;
   }
 }
