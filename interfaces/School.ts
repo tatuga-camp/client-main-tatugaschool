@@ -22,7 +22,4 @@ export interface School {
   billingManager?: User;
 }
 
-export enum Plan {
-  FREE,
-  PREMIUM,
-}
+export type Plan = "FREE" | "PREMIUM";

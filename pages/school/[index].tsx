@@ -4,7 +4,12 @@ import { setAccessToken, getRefetchtoken } from "../../utils";
 import { RefreshTokenService } from "../../services";
 
 function Index() {
-  return <div>Index</div>;
+  return (
+    <div className="">
+      <button className="main-button w-40">Click me</button>
+      <input type="text" className="w-40 main-input" />
+    </div>
+  );
 }
 
 export default Index;
