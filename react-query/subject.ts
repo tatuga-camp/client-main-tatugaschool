@@ -46,15 +46,9 @@ export function getStudentOnSubject({
   subjectId,
 }: {
   subjectId: string;
-}): UseQueryResult<
-  (StudentOnSubject & {
-    scores: ScoreOnStudent[];
-    totalScore: number;
-  })[],
-  Error
-> {
+}): UseQueryResult<StudentOnSubject[], Error> {
   const students = useQuery({
-    queryKey: ["studentOnSubject", { subjectId: subjectId }],
+    queryKey: ["studentOnSubjects", { subjectId: subjectId }],
     queryFn: () =>
       GetStudentOnSubjectBySubjectService({
         subjectId: subjectId,

@@ -30,14 +30,36 @@ export async function CreateStudentOnSubjectService(
   }
 }
 
+type RequestSortStudentOnSubjectService = {
+  studentOnSubjectIds: string[];
+};
+
+type ResponseSortStudentOnSubjectService = StudentOnSubject;
+
+export async function SortStudentOnSubjectService(
+  input: RequestSortStudentOnSubjectService
+): Promise<ResponseSortStudentOnSubjectService> {
+  try {
+    const response = await axiosInstance({
+      method: "PATCH",
+      url: `/v1/student-on-subjects/sort`,
+      data: input,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error(
+      "Create StudentOnSubject request failed:",
+      error.response.data
+    );
+    throw error?.response?.data;
+  }
+}
+
 type RequestGetStudentOnSubjectBySubjectService = {
   subjectId: string;
 };
 
-type ResponseGetStudentOnSubjectBySubjectService = (StudentOnSubject & {
-  scores: ScoreOnStudent[];
-  totalScore: number;
-})[];
+type ResponseGetStudentOnSubjectBySubjectService = StudentOnSubject[];
 
 export async function GetStudentOnSubjectBySubjectService(
   input: RequestGetStudentOnSubjectBySubjectService

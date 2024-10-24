@@ -16,6 +16,9 @@ import Setting from "../../../components/subject/Setting";
 import { useRouter } from "next/router";
 import Swal from "sweetalert2";
 import { notFound } from "next/navigation";
+import PopUpStudent from "../../../components/subject/PopUpStudent";
+import { ScoreOnStudent, StudentOnSubject } from "../../../interfaces";
+import useClickOutside from "../../../hook/useClickOutside";
 
 type Props = {
   subjectId: string;
@@ -25,12 +28,18 @@ function Index({ subjectId }: Props) {
   const subject = getSubject({
     subjectId: subjectId,
   });
+  const divRef = React.useRef<HTMLDivElement>(null);
   const teacherOnSubjects = getTeacherOnSubject({
     subjectId: subjectId,
   });
   const [selectMenu, setSelectMenu] = React.useState<MenuSubject>("Subject");
   const [selectFooter, setSelectFooter] =
     React.useState<ListMenuFooter>("EMTY");
+  const [selectStudent, setSelectStudent] = React.useState<StudentOnSubject>();
+
+  useClickOutside(divRef, () => {
+    setSelectStudent(() => undefined);
+  });
 
   if (subject.isError) {
     Swal.fire({
@@ -53,6 +62,20 @@ function Index({ subjectId }: Props) {
         setSelectMenu={setSelectMenu}
         selectMenu={selectMenu}
       >
+        {selectStudent && (
+          <div
+            className="fixed top-0 z-40 right-0 left-0 bottom-0 m-auto
+         w-screen h-screen flex items-center justify-center"
+          >
+            <div className="" ref={divRef}>
+              <PopUpStudent student={selectStudent} />
+            </div>
+            <div
+              className="w-screen h-screen fixed top-0 bg-white/20 backdrop-blur
+           -z-10 right-0 left-0 bottom-0 m-auto "
+            ></div>
+          </div>
+        )}
         <header className="w-full p-10 flex items-center justify-center">
           <section className="w-8/12 h-60 flex justify-between p-5 shadow-inner gradient-bg  rounded-md">
             <div className="flex h-full justify-end flex-col gap-1">
@@ -94,14 +117,22 @@ function Index({ subjectId }: Props) {
             </div>
           </section>
         </header>
-        <main className="w-full h-full flex justify-center">
-          {selectMenu === "Subject" && <Subject subjectId={subjectId} />}{" "}
+        <main className="">
+          {selectMenu === "Subject" && (
+            <Subject
+              setSelectStudent={setSelectStudent}
+              subjectId={subjectId}
+            />
+          )}{" "}
           {selectMenu === "Assignment" && <Assignment />}
           {selectMenu === "Grade" && <Grade />}
           {selectMenu === "Attendance" && <Attendance />}
           {selectMenu === "Setting Subject" && <Setting />}
         </main>
-        <footer className="h-96"></footer>
+        <footer
+          className="h-96
+        "
+        ></footer>
       </Layout>
     </>
   );

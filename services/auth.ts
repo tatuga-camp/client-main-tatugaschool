@@ -20,7 +20,6 @@ export async function SignInService(
       url: "/v1/auth/sign-in",
       data: { ...input },
     });
-    console.log(response);
 
     return response.data;
   } catch (error: any) {

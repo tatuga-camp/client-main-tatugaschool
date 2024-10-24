@@ -3,7 +3,7 @@ import type { AppProps } from "next/app";
 import { Prompt } from "@next/font/google";
 import { PrimeReactProvider, PrimeReactContext } from "primereact/api";
 import { PagesProgressBar } from "next-nprogress-bar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   QueryCache,
   QueryClient,
@@ -42,6 +42,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         },
       })
   );
+
   return (
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools initialIsOpen={false} />

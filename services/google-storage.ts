@@ -23,8 +23,7 @@ export async function getSignedURLTeacherService(
       url: "/v1/google-storage/get-signURL/teacher",
       params: { ...input },
     });
-    console.log(response);
-    
+
     return response.data;
   } catch (error: any) {
     console.error("Get Signed URL request failed:", error.response.data);
