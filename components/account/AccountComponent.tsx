@@ -137,6 +137,7 @@ const AccountComponent = () => {
                   placeholder="Phone"
                   value={form?.phone}
                   name="phone"
+                  className="main-input"
                   onChange={(e) => {
                     setForm((prev) => ({ ...prev, phone: e.value as string }));
                   }}

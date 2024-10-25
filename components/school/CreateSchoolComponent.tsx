@@ -13,13 +13,13 @@ import Swal from "sweetalert2";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { LuSchool } from "react-icons/lu";
 import { FaRegAddressCard, FaUserPlus } from "react-icons/fa";
-import { Dropdown } from "primereact/dropdown";
 import { countries } from "../../data";
 import Image from "next/image";
 import { InputMask } from "primereact/inputmask";
 import { ProgressBar } from "primereact/progressbar";
 import { InputText } from "primereact/inputtext";
 import InviteJoinSchool from "./InviteJoinSchool";
+import Dropdown from "../common/Dropdown";
 const menuItems: { title: string; icon: ReactNode }[] = [
   {
     title: "Profile",
@@ -47,14 +47,15 @@ const CreateSchoolComponent = () => {
     logo?: string;
   }>();
   const [address, setAdress] = useState<{
-    country?: {
-      name: string;
-      code: string;
-    };
     city?: string;
     address?: string;
     zipCode?: string;
     phoneNumber?: string;
+  }>();
+
+  const [country, setCountry] = useState<{
+    name: string;
+    code: string;
   }>();
   const queryClient = useQueryClient();
 
@@ -120,7 +121,7 @@ const CreateSchoolComponent = () => {
       !profile?.school ||
       !profile?.description ||
       !profile?.logo ||
-      !address?.country ||
+      !country ||
       !address?.city ||
       !address?.address ||
       !address?.zipCode ||
@@ -138,7 +139,7 @@ const CreateSchoolComponent = () => {
         title: profile?.school,
         description: profile?.description,
         logo: profile?.logo,
-        country: address?.country?.name,
+        country: country?.name,
         city: address?.city,
         address: address?.address,
         zipCode: address?.zipCode,
@@ -246,10 +247,7 @@ const CreateSchoolComponent = () => {
               <label
                 className={`flex flex-col items-center justify-center w-full h-64 border-2
                border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50
-                 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600
-                  dark:hover:border-gray-500 dark:hover:bg-gray-600 ${
-                    loading && "animate-pulse"
-                  }`}
+                ${loading && "animate-pulse"}`}
               >
                 {profile?.logo ? (
                   <div className="w-full h-full p-5 relative">
@@ -263,7 +261,7 @@ const CreateSchoolComponent = () => {
                 ) : (
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
                     <svg
-                      className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400"
+                      className="w-8 h-8 mb-4 text-gray-500 "
                       aria-hidden="true"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
@@ -277,11 +275,11 @@ const CreateSchoolComponent = () => {
                         d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
                       />
                     </svg>
-                    <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                    <p className="mb-2 text-sm text-gray-500 ">
                       <span className="font-semibold">Click to upload</span> or
                       drag and drop
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-xs text-gray-500 ">
                       SVG, PNG, JPG or GIF (MAX. 800x400px)
                     </p>
                   </div>
@@ -344,12 +342,9 @@ const CreateSchoolComponent = () => {
         {activeIndex === 1 && (
           <section className="flex flex-col  w-full gap-2">
             <Dropdown
-              value={address?.country}
-              onChange={(e) =>
-                setAdress((prev) => ({ ...prev, country: e.value }))
-              }
+              value={country}
+              onChange={(e) => setCountry(e.value)}
               options={countries}
-              style={{ width: "100%" }}
               optionLabel="name"
               placeholder="Select a Country"
               valueTemplate={selectedCountryTemplate}
@@ -406,7 +401,7 @@ const CreateSchoolComponent = () => {
                 })
               }
               mask="(+99) 999-999-9999"
-              className="w-full p-[16px] dark:bg-white dark:text-black border border-gray-300 rounded-lg"
+              className="w-full p-[16px]  border border-gray-300 rounded-lg"
               placeholder="(+99) 999-999-9999"
             />
             <button

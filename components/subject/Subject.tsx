@@ -167,7 +167,7 @@ function Subject({ subjectId, setSelectStudent }: Props) {
   return (
     <div className="flex flex-col items-center w-full gap-5">
       <header className="w-9/12 h-16 flex justify-end items-end gap-1 border-b pb-5">
-        <div className="w-72 h-16">
+        <div className="w-60 h-16">
           <Calendar onValue={(value) => setDates(value)} value={dates} />
         </div>
         <Filter onValue={(event) => setSelectFilter(event)} />

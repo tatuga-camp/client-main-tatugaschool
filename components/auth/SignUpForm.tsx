@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { SignUpService } from "@/services";
 import Swal from "sweetalert2";
-import { IoEye, IoEyeOff } from "react-icons/io5";
 import UserAgreement from "../agreements/UserAgreement";
 import { InputMask } from "primereact/inputmask";
 import { ErrorMessages } from "../../interfaces";
 import { useRouter } from "next-nprogress-bar";
+import Password from "../common/Password";
 
 export const SignUpForm = () => {
   const router = useRouter();
@@ -81,8 +81,8 @@ export const SignUpForm = () => {
       onSubmit={handleSignUp}
     >
       <h2 className="text-[24px] font-bold mb-[40px]">Create Account</h2>
-      <div className="flex flex-col gap-4">
-        <label className="w-full h-max  flex flex-col relative items-start">
+      <div className="flex flex-col items-center gap-4">
+        <label className="h-max  flex flex-col relative items-start">
           <span className="text-sm">First Name</span>
           <input
             type="text"
@@ -90,10 +90,10 @@ export const SignUpForm = () => {
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
             required
-            className="w-full p-[16px]  border border-gray-300 rounded-lg"
+            className="  main-input w-80"
           />
         </label>
-        <label className="w-full h-max  flex flex-col relative items-start">
+        <label className="h-max  flex flex-col relative items-start">
           <span className="text-sm">Last Name</span>
           <input
             type="text"
@@ -101,21 +101,21 @@ export const SignUpForm = () => {
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
             required
-            className="w-full p-[16px]  border border-gray-300 rounded-lg"
+            className="  main-input w-80"
           />
         </label>
-        <label className="w-full h-max  flex flex-col relative items-start">
+        <label className="h-max  flex flex-col relative items-start">
           <span className="text-sm">Phone Number</span>
           <InputMask
             required
             value={phone}
             onChange={(e) => setPhone(e.value as string)}
             mask="(+99) 999-999-9999"
-            className="w-full p-[16px] dark:bg-white dark:text-black border border-gray-300 rounded-lg"
+            className=" main-input w-80"
             placeholder="(+99) 999-999-9999"
           />
         </label>
-        <label className="w-full h-max  flex flex-col relative items-start">
+        <label className="h-max  flex flex-col relative items-start">
           <span className="text-sm">Email Adress</span>
           <input
             type="email"
@@ -123,47 +123,28 @@ export const SignUpForm = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full p-[16px]  border border-gray-300 rounded-lg"
+            className="  main-input w-80"
           />
         </label>
-        <label className="w-full h-max  flex flex-col relative items-start">
+        <label className="h-max  flex flex-col relative items-start">
           <span className="text-sm">Password</span>
-          <input
-            type={isShowPassword ? "text" : "password"}
+          <Password
             placeholder="Enter Your Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full p-[16px]  border border-gray-300 rounded-lg"
+            toggleMask
           />
         </label>
-        <label className="w-full h-max   flex flex-col relative items-start">
+        <label className="h-max  flex flex-col relative items-start">
           <span className="text-sm">Confirm Password</span>
-          <input
-            type={isShowPassword ? "text" : "password"}
+          <Password
             placeholder="Enter your Confirm Password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
-            className="w-full p-[16px] border border-gray-300 rounded-lg"
+            toggleMask
           />
-          <div className="absolute h-max z-20  top-6 bottom-0 right-5 m-auto">
-            {isShowPassword ? (
-              <button
-                onClick={() => setIsShowPassword(() => false)}
-                type="button"
-              >
-                <IoEyeOff size={20} />
-              </button>
-            ) : (
-              <button
-                onClick={() => setIsShowPassword(() => true)}
-                type="button"
-              >
-                <IoEye size={20} />
-              </button>
-            )}
-          </div>
         </label>
       </div>
       <div className="text-left mt-10 h-40 overflow-auto">
@@ -185,7 +166,7 @@ export const SignUpForm = () => {
       <button
         type="submit"
         disabled={!isAgree}
-        className={`w-full p-5 ${
+        className={`p-5 ${
           isAgree ? "bg-secondary-color hover:bg-primary-color" : "bg-gray-400"
         }  text-white rounded h-5 flex items-center justify-center
             font-semibold  transition duration-300`}

@@ -1,6 +1,3 @@
-import { Divider } from "primereact/divider";
-import { InputMask } from "primereact/inputmask";
-import { Password } from "primereact/password";
 import React from "react";
 import { ErrorMessages } from "../../interfaces";
 import Swal from "sweetalert2";
@@ -10,6 +7,7 @@ import {
 } from "../../services";
 import { useMutation } from "@tanstack/react-query";
 import { ProgressSpinner } from "primereact/progressspinner";
+import Password from "../common/Password";
 
 function ChangePassword() {
   const [formData, setFormData] = React.useState<{
@@ -77,13 +75,7 @@ function ChangePassword() {
           value={formData?.currentPassword}
           onChange={handleChange}
           name="currentPassword"
-          feedback={false}
           required
-          pt={{
-            input: { className: "w-80" },
-            hideIcon: { className: "absolute right-2 top-2" },
-            showIcon: { className: "absolute right-2 top-2" },
-          }}
           toggleMask
         />
       </label>
@@ -94,13 +86,7 @@ function ChangePassword() {
           value={formData?.newPassword}
           onChange={handleChange}
           name="newPassword"
-          feedback={false}
           required
-          pt={{
-            input: { className: "w-80" },
-            hideIcon: { className: "absolute right-2 top-2" },
-            showIcon: { className: "absolute right-2 top-2" },
-          }}
           toggleMask
         />
       </label>
@@ -111,12 +97,6 @@ function ChangePassword() {
           onChange={handleChange}
           name="confirmNewPassword"
           required
-          feedback={false}
-          pt={{
-            input: { className: "w-80" },
-            hideIcon: { className: "absolute right-2 top-2" },
-            showIcon: { className: "absolute right-2 top-2" },
-          }}
           toggleMask
         />
       </label>
