@@ -29,6 +29,7 @@ const config: Config = {
       },
       transitionProperty: {
         width: "width",
+        height: "height",
       },
     },
   },

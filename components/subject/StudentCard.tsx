@@ -11,8 +11,9 @@ type Props = {
   setSelectStudent: React.Dispatch<
     React.SetStateAction<StudentOnSubject | undefined>
   >;
+  isDragable?: boolean;
 };
-function StudentCard({ student, setSelectStudent }: Props) {
+function StudentCard({ student, setSelectStudent, isDragable = false }: Props) {
   const {
     isDragging,
     attributes,
@@ -43,13 +44,15 @@ function StudentCard({ student, setSelectStudent }: Props) {
       className="w-48 p-3 group flex flex-col items-center justify-center
      gap-2 h-52 rounded-xl relative hover:drop-shadow-md active:scale-105  overflow-hidden hover:bg-primary-color  bg-white"
     >
-      <div
-        {...listeners}
-        style={{ cursor: isDragging ? "grabbing" : "grab" }}
-        className="w-6 h-10 rounded-md hover:bg-gray-300/50 flex items-center justify-center absolute top-2 right-2 "
-      >
-        <MdDragIndicator />
-      </div>
+      {!isDragable && (
+        <div
+          {...listeners}
+          style={{ cursor: isDragging ? "grabbing" : "grab" }}
+          className="w-6 h-10 rounded-md hover:bg-gray-300/50 flex items-center justify-center absolute top-2 right-2 "
+        >
+          <MdDragIndicator />
+        </div>
+      )}
       <div
         className="min-w-10 w-max  max-w-20 h-12  absolute left-0 right-0 -top-3 
       m-auto bg-primary-color group-hover:bg-white  rounded-2xl flex items-center justify-center text-white"

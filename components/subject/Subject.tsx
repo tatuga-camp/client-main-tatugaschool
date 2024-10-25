@@ -1,8 +1,14 @@
-import React, { memo, useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  memo,
+  use,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { getScoreOnStudent, getStudentOnSubject } from "../../react-query";
 import StudentCard from "./StudentCard";
 import { ScoreOnStudent, StudentOnSubject } from "../../interfaces";
-import { Calendar } from "primereact/calendar";
 import { Nullable } from "primereact/ts-helpers";
 import { CgClose } from "react-icons/cg";
 import {
@@ -21,6 +27,8 @@ import {
 } from "@dnd-kit/sortable";
 import { SortStudentOnSubjectService } from "../../services";
 import { useQueryClient } from "@tanstack/react-query";
+import Filter, { FilterTitle } from "../common/Filter";
+import Calendar from "../common/Calendar";
 
 type Props = {
   subjectId: string;
@@ -33,6 +41,12 @@ function Subject({ subjectId, setSelectStudent }: Props) {
   const studentOnSubjects = getStudentOnSubject({
     subjectId: subjectId,
   });
+  const [selectFilter, setSelectFilter] = useState<{
+    title: FilterTitle;
+    orderBy: "asc" | "desc";
+  }>();
+
+  const [activeFilter, setActiveFilter] = useState(false);
   const [students, setStudents] = useState<StudentOnSubject[]>([]);
   const [dates, setDates] = useState<Nullable<(Date | null)[]>>(null);
   const scoreOnStudents = getScoreOnStudent({
@@ -66,40 +80,63 @@ function Subject({ subjectId, setSelectStudent }: Props) {
     }
   }, [studentOnSubjects.data]);
 
+  //reRender when filter change
+  useEffect(() => {
+    if (selectFilter?.title === "Sort by Score") {
+      setStudents((prev) => {
+        return prev.sort((a, b) => {
+          if (selectFilter.orderBy === "desc") {
+            return a.totalSpeicalScore - b.totalSpeicalScore;
+          } else {
+            return b.totalSpeicalScore - a.totalSpeicalScore;
+          }
+        });
+      });
+    } else if (selectFilter?.title === "Sort by Name") {
+      setStudents((prev) => {
+        return prev.sort((a, b) => {
+          if (selectFilter.orderBy === "desc") {
+            return a.firstName.localeCompare(b.firstName);
+          } else {
+            return b.firstName.localeCompare(a.firstName);
+          }
+        });
+      });
+    } else if (selectFilter?.title === "Sort By Number") {
+      setStudents((prev) => {
+        return prev.sort((a, b) => {
+          if (selectFilter.orderBy === "desc") {
+            return a.number.localeCompare(b.number);
+          } else {
+            return b.number.localeCompare(a.number);
+          }
+        });
+      });
+    } else {
+      setStudents((prev) => {
+        return prev.sort((a, b) => {
+          return a.order - b.order;
+        });
+      });
+    }
+  }, [selectFilter]);
+
   useEffect(() => {
     if (dates?.[0] && dates?.[1] && scoreOnStudents.data) {
+      const startDate = dates?.[0];
+      const endDate = dates?.[1];
+      endDate.setHours(24, 0, 0, 0);
+
       setStudents((prev) => {
         return prev.map((student) => {
-          const startDate = new Date(dates[0] ?? "");
-          const endDate = new Date(dates[1] ?? "");
-
-          // Normalize to UTC to avoid timezone discrepancies
-          const startDateUTC = Date.UTC(
-            startDate.getUTCFullYear(),
-            startDate.getUTCMonth(),
-            startDate.getUTCDate()
-          );
-          const endDateUTC = Date.UTC(
-            endDate.getUTCFullYear(),
-            endDate.getUTCMonth(),
-            endDate.getUTCDate()
-          );
-
           const scores = scoreOnStudents.data.filter((score) => {
             const createdAt = new Date(score.createAt);
-            const createdAtUTC = Date.UTC(
-              createdAt.getUTCFullYear(),
-              createdAt.getUTCMonth(),
-              createdAt.getUTCDate()
-            );
-
             return (
               score.studentOnSubjectId === student.id &&
-              createdAtUTC >= startDateUTC &&
-              createdAtUTC <= endDateUTC
+              createdAt.getTime() >= startDate.getTime() &&
+              createdAt.getTime() <= endDate.getTime()
             );
           });
-
           const totalScore = scores.reduce((acc, score) => {
             return acc + score.score;
           }, 0);
@@ -127,35 +164,13 @@ function Subject({ subjectId, setSelectStudent }: Props) {
       });
     }
   }, [dates, scoreOnStudents.data]);
-
   return (
     <div className="flex flex-col items-center w-full gap-5">
-      <header className="w-9/12 border-b pb-5">
-        <div className="flex flex-col">
-          <label className="text-xs text-gray-500">Select Date</label>
-          <div className="relative w-max">
-            <Calendar
-              value={dates}
-              onChange={(e) => setDates(e.value)}
-              selectionMode="range"
-              readOnlyInput
-              pt={{
-                input: {
-                  root: { className: "w-80" },
-                },
-              }}
-              hideOnRangeSelection
-              showIcon
-            />
-            <button
-              onClick={() => setDates(null)}
-              className="absolute right-16 z-20 top-0 bottom-0  flex 
-            items-center justify-center  text-gray-600"
-            >
-              <CgClose />
-            </button>
-          </div>
+      <header className="w-9/12 h-16 flex justify-end items-end gap-1 border-b pb-5">
+        <div className="w-72 h-16">
+          <Calendar onValue={(value) => setDates(value)} value={dates} />
         </div>
+        <Filter onValue={(event) => setSelectFilter(event)} />
       </header>
       <DndContext
         sensors={sensors}
@@ -175,6 +190,7 @@ function Subject({ subjectId, setSelectStudent }: Props) {
                 })
               : students.map((student, index) => (
                   <StudentCard
+                    isDragable={!!selectFilter}
                     setSelectStudent={setSelectStudent}
                     key={student.id}
                     student={student}

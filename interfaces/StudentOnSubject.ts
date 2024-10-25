@@ -12,4 +12,5 @@ export interface StudentOnSubject {
   classId: string;
   subjectId: string;
   schoolId: string;
+  order: number;
 }
