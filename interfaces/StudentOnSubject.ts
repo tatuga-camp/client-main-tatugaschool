@@ -6,6 +6,7 @@ export interface StudentOnSubject {
   firstName: string;
   lastName: string;
   photo: string;
+  blurHash: string;
   number: string;
   totalSpeicalScore: number;
   studentId: string;

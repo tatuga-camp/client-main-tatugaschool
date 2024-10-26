@@ -7,6 +7,7 @@ import SubjectSidebar, { MenuSubject } from "./SubjectSidebar";
 import { Subject } from "../../interfaces";
 import Link from "next/link";
 import Image from "next/image";
+import { defaultCanvas } from "../../data";
 
 type Props = {
   subject: UseQueryResult<Subject, Error>;
@@ -44,7 +45,13 @@ function SubjectNavbar({
           className="w-10 h-10 rounded-md overflow-hidden ring-1 ring-white
          relative hover:scale-105 active:scale-110 transition duration-150"
         >
-          <Image src="/favicon.ico" fill alt="logo tatuga school" />
+          <Image
+            src="/favicon.ico"
+            placeholder="blur"
+            blurDataURL={defaultCanvas}
+            fill
+            alt="logo tatuga school"
+          />
         </div>
         <div className="font-bold uppercase hidden md:block text-xs md:text-base text-icon-color">
           Tatuga School

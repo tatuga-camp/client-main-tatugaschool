@@ -1,10 +1,8 @@
 import React from "react";
-import Image from "next/image";
 import DefaultLayout from "@/components/layout/DefaultLayout";
 import AccountComponent from "@/components/account/AccountComponent";
 import { GetUserService, RefreshTokenService } from "../../services";
 import { GetServerSideProps } from "next";
-import { User } from "../../interfaces";
 import { setAccessToken, getRefetchtoken } from "../../utils";
 import Head from "next/head";
 

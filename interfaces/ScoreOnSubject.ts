@@ -7,6 +7,6 @@ export interface ScoreOnSubject {
   icon: string;
   isDeleted: boolean;
   schoolId: string;
-
+  blurHash: string;
   subjectId: string;
 }

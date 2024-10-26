@@ -41,6 +41,7 @@ export type RequestUpdateUserService = {
   email?: string;
   phone?: string;
   photo?: string;
+  blurHash?: string;
 };
 export async function UpdateUserService(
   input: RequestUpdateUserService

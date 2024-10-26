@@ -13,13 +13,14 @@ import Swal from "sweetalert2";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { LuSchool } from "react-icons/lu";
 import { FaRegAddressCard, FaUserPlus } from "react-icons/fa";
-import { countries } from "../../data";
+import { countries, defaultBlurHash } from "../../data";
 import Image from "next/image";
 import { InputMask } from "primereact/inputmask";
 import { ProgressBar } from "primereact/progressbar";
 import { InputText } from "primereact/inputtext";
 import InviteJoinSchool from "./InviteJoinSchool";
 import Dropdown from "../common/Dropdown";
+import { decodeBlurhashToCanvas, generateBlurHash } from "../../utils";
 const menuItems: { title: string; icon: ReactNode }[] = [
   {
     title: "Profile",
@@ -45,6 +46,7 @@ const CreateSchoolComponent = () => {
     school?: string;
     description?: string;
     logo?: string;
+    blurHash?: string;
   }>();
   const [address, setAdress] = useState<{
     city?: string;
@@ -90,14 +92,16 @@ const CreateSchoolComponent = () => {
         fileType: file?.type,
       });
 
-      const uploadFile = await UploadSignURLService({
+      const blurHash = await generateBlurHash(file);
+      console.log(blurHash);
+      await UploadSignURLService({
         file: file,
         signURL: signURL.signURL,
         contentType: file.type,
       });
 
       setProfile((prev) => {
-        return { ...prev, logo: signURL.originalURL };
+        return { ...prev, logo: signURL.originalURL, blurHash: blurHash };
       });
       setLoading(false);
     } catch (error) {
@@ -134,6 +138,15 @@ const CreateSchoolComponent = () => {
       });
       return;
     }
+
+    if (!profile?.blurHash) {
+      Swal.fire({
+        title: "Error",
+        text: "Please upload a logo",
+        icon: "error",
+      });
+      return;
+    }
     try {
       await createSchool.mutateAsync({
         title: profile?.school,
@@ -144,6 +157,7 @@ const CreateSchoolComponent = () => {
         address: address?.address,
         zipCode: address?.zipCode,
         phoneNumber: address?.phoneNumber,
+        blurHash: profile?.blurHash,
       });
     } catch (error) {
       console.log(error);
@@ -254,6 +268,10 @@ const CreateSchoolComponent = () => {
                     <Image
                       src={profile?.logo}
                       layout="fill"
+                      blurDataURL={decodeBlurhashToCanvas(
+                        profile?.blurHash || defaultBlurHash
+                      )}
+                      placeholder="blur"
                       objectFit="contain"
                       alt="School Icon"
                     />

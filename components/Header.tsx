@@ -8,6 +8,7 @@ import { QueryClient } from "@tanstack/react-query";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { getUser } from "../react-query";
 import ButtonProfile from "./button/ButtonProfile";
+import { defaultBlurHash, defaultCanvas } from "../data";
 
 const Header = () => {
   const queryCliclient = new QueryClient();
@@ -34,7 +35,13 @@ const Header = () => {
           className="w-10 h-10 rounded-md overflow-hidden ring-1 ring-white
          relative hover:scale-105 active:scale-110 transition duration-150"
         >
-          <Image src="/favicon.ico" fill alt="logo tatuga school" />
+          <Image
+            src="/favicon.ico"
+            blurDataURL={defaultCanvas}
+            placeholder="blur"
+            fill
+            alt="logo tatuga school"
+          />
         </div>
         <div className="font-bold uppercase hidden md:block text-xs md:text-base text-white">
           Tatuga School
