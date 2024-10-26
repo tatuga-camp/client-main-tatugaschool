@@ -1,57 +1,49 @@
-// import { NextRequest, NextResponse } from "next/server";
-// import { RefreshTokenService } from "./services";
-// import { setCookie } from "nookies";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { RefreshTokenService } from "./services";
 
-import { NextRequest } from "next/server";
+export async function middleware(request: NextRequest) {
+  // Skip token refresh for sign-in and sign-up pages
+  if (
+    request.nextUrl.pathname.startsWith("/auth/sign-in") ||
+    request.nextUrl.pathname.startsWith("/auth/sign-up")
+  ) {
+    return NextResponse.next();
+  }
 
-// export async function middleware(req: NextRequest) {
-//   const refreshToken = req.cookies.get("refresh_token");
+  try {
+    const refresh_token = request.cookies.get("refresh_token")?.value;
+    if (!refresh_token) {
+      throw new Error("Token not found");
+    }
 
-//   // Avoid middleware looping by excluding sign-in, sign-up, and forget-password pages from further redirects
-//   const isAuthPage =
-//     req.nextUrl.pathname === "/auth/sign-in" ||
-//     req.nextUrl.pathname === "/auth/sign-up" ||
-//     req.nextUrl.pathname === "/auth/forget-password";
+    const accessToken = await RefreshTokenService({
+      refreshToken: refresh_token,
+    });
 
-//   // If the user is on the sign-in, sign-up, or forget-password page and has a refresh token, redirect to home
-//   if (isAuthPage) {
-//     if (refreshToken) {
-//       const homeUrl = `${req.nextUrl.origin}/`;
-//       return NextResponse.redirect(homeUrl);
-//     } else {
-//       return NextResponse.next();
-//     }
-//   }
+    // Set the new access token in a cookie
+    const response = NextResponse.next();
+    response.cookies.set("access_token", accessToken.accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV !== "development",
+      sameSite: "strict",
+      maxAge: 3600, // 1 hour
+      path: "/",
+    });
 
-//   // If no refresh token is present, redirect to sign-in page, but skip redirect if already on auth pages
-//   if (!refreshToken) {
-//     const loginUrl = `${req.nextUrl.origin}/auth/sign-in`;
-//     return NextResponse.redirect(loginUrl);
-//   }
+    return response;
+  } catch (error) {
+    // Redirect to sign-in page if there's an error
+    return NextResponse.redirect(new URL("/auth/sign-in", request.url));
+  }
+}
 
-//   // Try refreshing tokens if a refresh token is present
-//   try {
-//     const newTokens = await RefreshTokenService({
-//       refreshToken: refreshToken.value,
-//     });
-
-//     const response = NextResponse.next();
-//     setCookie({ res: response }, "access_token", newTokens.accessToken, {
-//       path: "/", // Ensure cookie is set at the root
-//     });
-//     setCookie({ res: response }, "refresh_token", newTokens.refreshToken, {
-//       path: "/", // Ensure cookie is set at the root
-//     });
-//     return response;
-//   } catch (error) {
-//     // In case of an error, redirect to the sign-in page
-//     const loginUrl = `${req.nextUrl.origin}/auth/sign-in`;
-//     return NextResponse.redirect(loginUrl);
-//   }
-// }
-
-// export const config = {
-//   matcher: ["/", "/auth/:path*", "/school/:path*"],
-// };
-
-export async function middleware(req: NextRequest) {}
+export const config = {
+  matcher: [
+    "/",
+    "/auth/:path*",
+    "/subject/:path*",
+    "/school/:path*",
+    "/account/:path*",
+  ],
+};

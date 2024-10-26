@@ -3,7 +3,7 @@ import { SiGoogleclassroom } from "react-icons/si";
 import { MdAssignmentAdd } from "react-icons/md";
 import { FaStarHalfStroke, FaUserGroup } from "react-icons/fa6";
 import React, { memo, ReactNode } from "react";
-import { getSchool, getSchools } from "../../react-query";
+import { useGetSchool, useGetSchools } from "../../react-query";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import Link from "next/link";
@@ -58,7 +58,7 @@ function SubjectSidebar({
   selectMenu,
 }: Props) {
   const router = useRouter();
-  const school = getSchool({
+  const school = useGetSchool({
     schoolId: schoolId,
   });
 

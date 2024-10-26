@@ -6,13 +6,13 @@ import { useRouter } from "next/router";
 import { usePathname } from "next/navigation";
 import { QueryClient } from "@tanstack/react-query";
 import { OverlayPanel } from "primereact/overlaypanel";
-import { getUser } from "../react-query";
+import { useGetUser } from "../react-query";
 import ButtonProfile from "./button/ButtonProfile";
 import { defaultBlurHash, defaultCanvas } from "../data";
 
 const Header = () => {
   const queryCliclient = new QueryClient();
-  const user = getUser();
+  const user = useGetUser();
   const pathname = usePathname();
 
   const classLinkActive =

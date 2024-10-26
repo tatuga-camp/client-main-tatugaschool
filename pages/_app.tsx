@@ -1,11 +1,10 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { Prompt } from "@next/font/google";
-import { PrimeReactProvider, PrimeReactContext } from "primereact/api";
+import { PrimeReactProvider } from "primereact/api";
 import { PagesProgressBar } from "next-nprogress-bar";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
-  QueryCache,
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
