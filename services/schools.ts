@@ -9,6 +9,7 @@ const axiosInstance = createAxiosInstance();
 export type RequestCreateSchoolService = {
   title: string;
   description: string;
+  blurHash: string;
   country: string;
   city: string;
   address: string;

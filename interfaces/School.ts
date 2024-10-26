@@ -11,6 +11,7 @@ export interface School {
   address: string;
   zipCode: string;
   logo: string;
+  blurHash?: string;
   phoneNumber: string;
   plan: Plan;
   isDeleted: boolean;

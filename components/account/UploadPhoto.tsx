@@ -10,6 +10,8 @@ import { ErrorMessages, User } from "../../interfaces";
 import Image from "next/image";
 import { ProgressBar } from "primereact/progressbar";
 import { UseMutationResult } from "@tanstack/react-query";
+import { decodeBlurhashToCanvas, generateBlurHash } from "../../utils";
+import { defaultBlurHash } from "../../data";
 
 type Prosp = {
   updateUser: UseMutationResult<User, Error, RequestUpdateUserService, unknown>;
@@ -37,12 +39,13 @@ function UploadPhoto({ user, updateUser }: Prosp) {
         fileName: file.name,
         fileType: file.type,
       });
-
+      const blurHash = await generateBlurHash(file);
       await UploadSignURLService({ contentType: file.type, file, signURL });
 
       setPreviewUrl(originalURL);
       await updateUser.mutateAsync({
         photo: originalURL,
+        blurHash: blurHash,
       });
       Swal.fire("success", "Photo uploaded successfully!");
       setLoading(false);
@@ -73,6 +76,8 @@ function UploadPhoto({ user, updateUser }: Prosp) {
             src={previewUrl}
             alt="Preview"
             fill
+            placeholder="blur"
+            blurDataURL={decodeBlurhashToCanvas(defaultBlurHash)}
             className="object-cover "
           />
         ) : (

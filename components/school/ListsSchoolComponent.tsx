@@ -7,6 +7,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getSchools, getUser } from "../../react-query";
 import { MdDelete } from "react-icons/md";
 import Image from "next/image";
+import { decodeBlurhashToCanvas } from "../../utils";
+import { defaultBlurHash } from "../../data";
 
 const ListsSchoolComponent = () => {
   const queryClient = useQueryClient();
@@ -156,8 +158,12 @@ const ListsSchoolComponent = () => {
                         <div className="flex items-center justify-start gap-1">
                           <div className="w-10 h-10 rounded-md overflow-hidden relative">
                             <Image
-                              src={school.logo || "/favicon.ico"}
+                              src={school.logo}
                               fill
+                              placeholder="blur"
+                              blurDataURL={decodeBlurhashToCanvas(
+                                school.blurHash || defaultBlurHash
+                              )}
                               alt="logo tatuga school"
                               className="object-cover"
                             />

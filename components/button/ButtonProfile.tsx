@@ -6,6 +6,8 @@ import React, { useState } from "react";
 import { FaBell } from "react-icons/fa";
 import { User } from "../../interfaces";
 import { AiOutlineLogout } from "react-icons/ai";
+import { decodeBlurhashToCanvas } from "../../utils";
+import { defaultBlurHash, defaultCanvas } from "../../data";
 
 type Props = {
   user: UseQueryResult<User, Error>;
@@ -36,9 +38,13 @@ function ButtonProfile({ user, queryClient }: Props) {
         <div className="flex gap-2">
           <div className="w-10 h-10 relative rounded-full overflow-hidden ">
             <Image
-              src={user.data?.photo || "/favicon.ico"}
+              src={user.data?.photo || defaultCanvas}
               alt="User Avatar"
               fill
+              placeholder="blur"
+              blurDataURL={decodeBlurhashToCanvas(
+                user.data?.blurHash ?? defaultBlurHash
+              )}
               className=" object-cover cursor-pointer"
               onClick={() => {
                 router.push("/account");

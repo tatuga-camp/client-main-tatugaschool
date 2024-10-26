@@ -18,6 +18,7 @@ import Swal from "sweetalert2";
 import { Toast } from "primereact/toast";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { useSound } from "../../hook";
+import { decodeBlurhashToCanvas } from "../../utils";
 
 type Props = {
   student: StudentOnSubject;
@@ -189,6 +190,8 @@ function PopUpStudent({ student }: Props) {
                       <Image
                         src={score.icon}
                         alt={score.title}
+                        placeholder="blur"
+                        blurDataURL={decodeBlurhashToCanvas(score.blurHash)}
                         fill
                         className="object-contain"
                       />

@@ -6,6 +6,7 @@ export type User = {
   lastName: string;
   email: string;
   phone: string;
+  blurHash?: string;
   photo: string;
   password?: string;
   role: UserRole;

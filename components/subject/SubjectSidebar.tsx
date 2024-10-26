@@ -8,6 +8,8 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { CiSettings } from "react-icons/ci";
+import { decodeBlurhashToCanvas } from "../../utils";
+import { defaultBlurHash } from "../../data";
 
 const menuList: { title: MenuSubject; icon: ReactNode }[] = [
   {
@@ -59,6 +61,8 @@ function SubjectSidebar({
   const school = getSchool({
     schoolId: schoolId,
   });
+
+  console.log(decodeBlurhashToCanvas(defaultBlurHash));
   return (
     <div
       className={`text-black overflow-hidden flex flex-col items-center justify-start gap-3
@@ -76,6 +80,10 @@ function SubjectSidebar({
             src={school.data?.logo ?? "/favicon.ico"}
             className="object-cover"
             alt={`logo ${school.data?.title}`}
+            placeholder="blur"
+            blurDataURL={decodeBlurhashToCanvas(
+              school.data?.blurHash ?? defaultBlurHash
+            )}
           />
         </div>
         <h2 className="text-xs bg-primary-color px-2 rounded-md text-white">
