@@ -14,7 +14,7 @@ import {
   GetUserService,
   RequestUpdateUserService,
 } from "@/services";
-import { getUser } from "../../react-query";
+import { useGetUser } from "../../react-query";
 import { InputMask } from "primereact/inputmask";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ErrorMessages } from "../../interfaces";
@@ -25,7 +25,7 @@ const menuItems = ["General", "Change Password"];
 const AccountComponent = () => {
   const queryClient = useQueryClient();
   const [activeMenu, setActiveMenu] = useState(0);
-  const user = getUser();
+  const user = useGetUser();
   const [form, setForm] = useState<{
     firstName?: string;
     lastName?: string;

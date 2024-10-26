@@ -1,80 +1,19 @@
-import React, { useEffect, useState, memo } from "react";
-import { GetSchoolService, DeleteSchoolService } from "@/services";
+import React, { useState, memo } from "react";
 import Link from "next/link";
-import { ErrorMessages, School, User } from "@/interfaces";
-import Swal from "sweetalert2";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getSchools, getUser } from "../../react-query";
-import { MdDelete } from "react-icons/md";
+import { School } from "@/interfaces";
+import { useGetSchools, useGetUser } from "../../react-query";
 import Image from "next/image";
 import { decodeBlurhashToCanvas } from "../../utils";
 import { defaultBlurHash } from "../../data";
 
 const ListsSchoolComponent = () => {
-  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [selectedYear, setSelectedYear] = useState<string>("");
-  const user = getUser().data;
+  const [selectedYear] = useState<string>("");
+  const user = useGetUser().data;
   const tableHeaders = ["Name", "Create At", "Description", "Action"];
   const inputClasses = "border rounded-md px-4 py-2";
-  const buttonClasses =
-    "bg-secondary-color text-white px-6 py-2 rounded-lg w-full md:w-auto";
 
-  const schools = getSchools();
-  const handleDeleteSchool = async (id: string, schoolName: string) => {
-    const { value: inputValue } = await Swal.fire({
-      title: "Are you sure?",
-      html: `<div>
-        <div>To confirm deleting school please type text below</div>
-        <h1 style="font-weight: 700;">${schoolName}</h1>
-      </div>`,
-      input: "text",
-      inputPlaceholder: "Type the school name",
-      footer: "<p>This action cannot be undone</p>",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
-      inputValidator: (value) => {
-        if (!value) {
-          return "You need to type the school name!";
-        }
-        if (value !== schoolName) {
-          return "The name doesn't match!";
-        }
-        return null;
-      },
-    });
-
-    try {
-      Swal.fire({
-        title: "Please wait...",
-        text: "We are processing your request",
-        showConfirmButton: false,
-        willOpen: () => {
-          Swal.showLoading();
-        },
-      });
-      await DeleteSchoolService({ schoolId: id });
-      const filterUnDeletedSchools = schools.data?.filter(
-        (school: School) => school.id !== id
-      );
-      queryClient.setQueryData(["schools"], filterUnDeletedSchools);
-      Swal.fire("Deleted!", "The school has been deleted.", "success");
-    } catch (error) {
-      console.log(error);
-      let result = error as ErrorMessages;
-      Swal.fire({
-        title: result.error ? result.error : "Something Went Wrong",
-        text: result.message.toString(),
-        footer: result.statusCode
-          ? "Code Error: " + result.statusCode?.toString()
-          : "",
-        icon: "error",
-      });
-    }
-  };
+  const schools = useGetSchools();
 
   const filteredSchools = schools.data?.filter((school: School) => {
     const matchesSearchTerm = school.title
@@ -90,17 +29,7 @@ const ListsSchoolComponent = () => {
     const date = new Date(dateInput);
     return date.getFullYear().toString();
   }
-  function createYearArray(startYear: number, endYear: number) {
-    let years = [];
-    for (let year = startYear; year <= endYear; year++) {
-      years.push(year.toString());
-    }
-    return years.reverse();
-  }
 
-  const startYear = 1990;
-  const endYear = new Date().getFullYear();
-  const uniqueYears = createYearArray(startYear, endYear);
 
   return (
     <main className="max-w-6xl mx-auto py-8 px-4">
@@ -152,7 +81,7 @@ const ListsSchoolComponent = () => {
               </thead>
               <tbody>
                 {filteredSchools && filteredSchools?.length > 0 ? (
-                  filteredSchools?.map((school, index) => (
+                  filteredSchools?.map((school: School, index: number) => (
                     <tr key={index} className="border-b">
                       <td className="p-4">
                         <div className="flex items-center justify-start gap-1">
@@ -197,7 +126,7 @@ const ListsSchoolComponent = () => {
                       <td className="p-4">
                         <Link
                           href={`/school/${school.id}`}
-                          className="main-button"
+                          className="main-button text-nowrap"
                         >
                           Join School
                         </Link>
