@@ -1,9 +1,8 @@
 import React from "react";
 import Layout from "../../../components/layout/SubjectLayout";
 import Head from "next/head";
-import { getSubject, getTeacherOnSubject } from "../../../react-query";
+import { useGetSubject, useGetTeacherOnSubject } from "../../../react-query";
 import { GetServerSideProps } from "next";
-import { MenuSubject } from "../../../components/subject/SubjectSidebar";
 import Subject from "../../../components/subject/Subject";
 import Assignment from "../../../components/subject/Assignment";
 import Grade from "../../../components/subject/Grade";
@@ -20,18 +19,20 @@ import PopUpStudent from "../../../components/subject/PopUpStudent";
 import { ScoreOnStudent, StudentOnSubject } from "../../../interfaces";
 import useClickOutside from "../../../hook/useClickOutside";
 import InviteTeacher from "../../../components/subject/InviteTeacher";
+import { MenuSubject } from "../../../data";
 
 type Props = {
   subjectId: string;
 };
+
 function Index({ subjectId }: Props) {
   const router = useRouter();
-  const subject = getSubject({
+  const subject = useGetSubject({
     subjectId: subjectId,
   });
   const divRef = React.useRef<HTMLDivElement>(null);
   const inviteTeacherRef = React.useRef<HTMLDivElement>(null);
-  const teacherOnSubjects = getTeacherOnSubject({
+  const teacherOnSubjects = useGetTeacherOnSubject({
     subjectId: subjectId,
   });
   const [selectMenu, setSelectMenu] = React.useState<MenuSubject>("Subject");
@@ -66,7 +67,9 @@ function Index({ subjectId }: Props) {
         setSelectFooter={setSelectFooter}
         selectFooter={selectFooter}
         subject={subject}
-        setSelectMenu={setSelectMenu}
+        setSelectMenu={
+          setSelectMenu as React.Dispatch<React.SetStateAction<string>>
+        }
         selectMenu={selectMenu}
       >
         {triggerInviteTeacher && (
@@ -133,7 +136,7 @@ function Index({ subjectId }: Props) {
               {teacherOnSubjects.data ? (
                 <ListMemberCircle
                   setTrigger={setTriggerInviteTeacher}
-                  teacherOnSubjects={teacherOnSubjects.data}
+                  members={teacherOnSubjects.data}
                 />
               ) : (
                 "Loading..."

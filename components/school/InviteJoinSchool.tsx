@@ -1,5 +1,9 @@
 import React, { memo, useEffect, useState } from "react";
-import { useGetMemberBySchool, useGetUser, useGetUserByEmail } from "../../react-query";
+import {
+  useGetMemberBySchool,
+  useGetUser,
+  useGetUserByEmail,
+} from "../../react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   CreateMemberOnSchoolService,
@@ -10,6 +14,7 @@ import {
 import {
   ErrorMessages,
   MemberOnSchool,
+  MemberRole,
   User,
 } from "../../interfaces";
 import Image from "next/image";
@@ -189,9 +194,11 @@ function InviteJoinSchool({ schoolId, hideFinishButton }: Props) {
         )}
       </section>
       <div className="w-full mt-5 flex justify-center">
-        {!hideFinishButton && <Link href="/" className="main-button text-center w-40">
-          Finish
-        </Link>}
+        {!hideFinishButton && (
+          <Link href="/" className="main-button text-center w-40">
+            Finish
+          </Link>
+        )}
       </div>
     </div>
   );

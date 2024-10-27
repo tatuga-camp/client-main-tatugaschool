@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { IoMdClose } from "react-icons/io";
-import { getTeacherOnSubject, getUser } from "../../react-query";
+import { useGetTeacherOnSubject, useGetUser } from "../../react-query";
 import ListMemberCircle from "../member/ListMemberCircle";
 import ListMembers from "../member/ListMembers";
 import { GoChevronDown } from "react-icons/go";
@@ -24,8 +24,8 @@ type Props = {
 };
 
 function InviteTeacher({ subjectId, setTrigger }: Props) {
-  const user = getUser();
-  const teacherOnSubjects = getTeacherOnSubject({
+  const user = useGetUser();
+  const teacherOnSubjects = useGetTeacherOnSubject({
     subjectId,
   });
   const queryClient = useQueryClient();
@@ -143,7 +143,7 @@ function InviteTeacher({ subjectId, setTrigger }: Props) {
           ) : (
             teacherOnSubjects.data && (
               <div>
-                <ListMemberCircle teacherOnSubjects={teacherOnSubjects.data} />
+                <ListMemberCircle members={teacherOnSubjects.data} />
               </div>
             )
           )}

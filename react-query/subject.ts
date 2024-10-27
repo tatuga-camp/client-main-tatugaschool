@@ -12,7 +12,7 @@ import {
   GetTeacherOnSubjectBySubjectService,
 } from "../services";
 
-export function getSubject({
+export function useGetSubject({
   subjectId,
 }: {
   subjectId: string;
@@ -27,7 +27,7 @@ export function getSubject({
   return schools;
 }
 
-export function getTeacherOnSubject({
+export function useGetTeacherOnSubject({
   subjectId,
 }: {
   subjectId: string;

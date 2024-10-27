@@ -1,59 +1,22 @@
-import { LuSchool } from "react-icons/lu";
-import { SiGoogleclassroom } from "react-icons/si";
-import { MdAssignmentAdd } from "react-icons/md";
-import { FaStarHalfStroke, FaUserGroup } from "react-icons/fa6";
 import React, { memo, ReactNode } from "react";
-import { useGetSchool, useGetSchools } from "../../react-query";
+import { useGetSchool, useGetSchools } from "../react-query";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import Link from "next/link";
-import { CiSettings } from "react-icons/ci";
-import { decodeBlurhashToCanvas } from "../../utils";
-import { defaultBlurHash } from "../../data";
+import { decodeBlurhashToCanvas } from "../utils";
+import { defaultBlurHash } from "../data";
 
-const menuList: { title: MenuSubject; icon: ReactNode }[] = [
-  {
-    title: "School",
-    icon: <LuSchool />,
-  },
-  {
-    title: "Subject",
-    icon: <SiGoogleclassroom />,
-  },
-  {
-    title: "Assignment",
-    icon: <MdAssignmentAdd />,
-  },
-  {
-    title: "Attendance",
-    icon: <FaUserGroup />,
-  },
-  {
-    title: "Grade",
-    icon: <FaStarHalfStroke />,
-  },
-  {
-    title: "Setting Subject",
-    icon: <CiSettings />,
-  },
-];
 type Props = {
   active: boolean;
   schoolId: string;
-  setSelectMenu: React.Dispatch<React.SetStateAction<MenuSubject>>;
-  selectMenu: MenuSubject;
+  setSelectMenu: React.Dispatch<React.SetStateAction<string>>;
+  selectMenu: string;
+  menuList: { title: string; icon: ReactNode; url?: string }[];
 };
-export type MenuSubject =
-  | "School"
-  | "Subject"
-  | "Assignment"
-  | "Attendance"
-  | "Grade"
-  | "Setting Subject";
 
-function SubjectSidebar({
+function Sidebar({
   active,
   schoolId,
+  menuList,
   setSelectMenu,
   selectMenu,
 }: Props) {
@@ -62,7 +25,6 @@ function SubjectSidebar({
     schoolId: schoolId,
   });
 
-  console.log(decodeBlurhashToCanvas(defaultBlurHash));
   return (
     <div
       className={`text-black overflow-hidden flex flex-col items-center justify-start gap-3
@@ -98,8 +60,8 @@ function SubjectSidebar({
           return (
             <button
               onClick={() => {
-                if (menu.title === "School") {
-                  router.push(`/school/${schoolId}`);
+                if (menu.url) {
+                  router.push(menu.url);
                 } else {
                   setSelectMenu(menu.title);
                 }
@@ -120,4 +82,4 @@ function SubjectSidebar({
   );
 }
 
-export default memo(SubjectSidebar);
+export default memo(Sidebar);

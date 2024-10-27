@@ -1,18 +1,32 @@
 import React from "react";
-import { TeacherOnSubject } from "../../interfaces";
+import { MemberRole, Status, TeacherOnSubject } from "../../interfaces";
 import Image from "next/image";
 import { IoIosSend } from "react-icons/io";
 import { decodeBlurhashToCanvas } from "../../utils";
 import { defaultBlurHash } from "../../data";
 
 type Props = {
-  teacherOnSubjects: TeacherOnSubject[];
+  members: {
+    id: string;
+    createAt: Date;
+    updateAt: Date;
+    status: Status;
+    role: MemberRole;
+    firstName: string;
+    lastName: string;
+    email: string;
+    blurHash: string;
+    photo: string;
+    phone: string;
+    userId: string;
+    schoolId: string;
+  }[];
   setTrigger?: React.Dispatch<React.SetStateAction<boolean>>;
 };
-function ListMemberCircle({ teacherOnSubjects, setTrigger }: Props) {
+function ListMemberCircle({ members, setTrigger }: Props) {
   return (
     <div className="w-full flex items-end justify-center">
-      {teacherOnSubjects.map((teacher, index) => {
+      {members.map((teacher, index) => {
         const odd = index % 2 === 0;
         ``;
 

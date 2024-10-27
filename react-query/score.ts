@@ -6,7 +6,7 @@ import {
 } from "../services";
 import { ScoreOnStudent, ScoreOnSubject } from "../interfaces";
 
-export function getScoreOnSubject({
+export function useGetScoreOnSubject({
   subjectId,
 }: {
   subjectId: string;
@@ -21,7 +21,7 @@ export function getScoreOnSubject({
   return scores;
 }
 
-export function getScoreOnStudent(
+export function useGetScoreOnStudent(
   request: RequestGetScoresOnStudentBySubjectIdService
 ): UseQueryResult<ScoreOnStudent[], Error> {
   const scores = useQuery({

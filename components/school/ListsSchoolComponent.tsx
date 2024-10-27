@@ -30,7 +30,6 @@ const ListsSchoolComponent = () => {
     return date.getFullYear().toString();
   }
 
-
   return (
     <main className="max-w-6xl mx-auto py-8 px-4">
       <h2 className="text-4xl font-semibold text-white mb-4">

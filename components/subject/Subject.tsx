@@ -6,7 +6,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { getScoreOnStudent, getStudentOnSubject } from "../../react-query";
+import { useGetScoreOnStudent, getStudentOnSubject } from "../../react-query";
 import StudentCard from "./StudentCard";
 import { ScoreOnStudent, StudentOnSubject } from "../../interfaces";
 import { Nullable } from "primereact/ts-helpers";
@@ -49,7 +49,7 @@ function Subject({ subjectId, setSelectStudent }: Props) {
   const [activeFilter, setActiveFilter] = useState(false);
   const [students, setStudents] = useState<StudentOnSubject[]>([]);
   const [dates, setDates] = useState<Nullable<(Date | null)[]>>(null);
-  const scoreOnStudents = getScoreOnStudent({
+  const scoreOnStudents = useGetScoreOnStudent({
     subjectId: subjectId,
   });
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));

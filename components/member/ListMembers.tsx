@@ -3,10 +3,8 @@ import React, { useEffect } from "react";
 import { MemberRole, Status, User } from "../../interfaces";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { decodeBlurhashToCanvas } from "../../utils";
-import { defaultBlurHash } from "../../data";
+import { defaultBlurHash, ListRoles } from "../../data";
 import DropdownRole from "../common/DropdownRole";
-import { ListRoles } from "../../data/list";
-import { on } from "events";
 
 type Props = {
   members: {

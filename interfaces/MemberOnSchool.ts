@@ -7,6 +7,7 @@ export type MemberOnSchool = {
   firstName: string;
   lastName: string;
   email: string;
+  blurHash: string;
   photo: string;
   phone: string;
   userId: string;

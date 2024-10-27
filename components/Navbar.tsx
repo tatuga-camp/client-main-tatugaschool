@@ -1,27 +1,30 @@
-import React, { ReactNode } from "react";
-import ButtonProfile from "../button/ButtonProfile";
-import { useGetUser } from "../../react-query";
+import React, { ReactNode, useRef } from "react";
+import ButtonProfile from "./button/ButtonProfile";
+import { useGetUser } from "../react-query";
 import { QueryClient, UseQueryResult } from "@tanstack/react-query";
 import { IoMenu } from "react-icons/io5";
-import SubjectSidebar, { MenuSubject } from "./SubjectSidebar";
-import { Subject } from "../../interfaces";
+import { Subject } from "../interfaces";
 import Link from "next/link";
 import Image from "next/image";
-import { defaultCanvas } from "../../data";
+import { defaultCanvas, menuSubjectList } from "../data";
+import useClickOutside from "../hook/useClickOutside";
+import Sidebar from "./Sidebar";
 
 type Props = {
-  subject: UseQueryResult<Subject, Error>;
-  setSelectMenu: React.Dispatch<React.SetStateAction<MenuSubject>>;
-  selectMenu: MenuSubject;
-  active: boolean;
-  setActive: React.Dispatch<React.SetStateAction<boolean>>;
+  schoolId: string;
+  setSelectMenu: React.Dispatch<React.SetStateAction<string>>;
+  selectMenu: string;
+  setTrigger: React.Dispatch<React.SetStateAction<boolean>>;
+  trigger: boolean;
+  menuLists: { title: string; icon: ReactNode; url?: string }[];
 };
-function SubjectNavbar({
-  subject,
+function Navbar({
+  schoolId,
   setSelectMenu,
   selectMenu,
-  active,
-  setActive,
+  setTrigger,
+  trigger,
+  menuLists,
 }: Props) {
   const user = useGetUser();
 
@@ -29,9 +32,9 @@ function SubjectNavbar({
   return (
     <div className="flex flex-col h-20  md:flex-row justify-between items-center p-4 bg-white backdrop-blur text-white gap-4">
       <button
-        onClick={() => setActive(!active)}
+        onClick={() => setTrigger(!trigger)}
         className={`text-black flex ${
-          active ? "rotate-90" : "rotate-0"
+          trigger ? "rotate-90" : "rotate-0"
         }  hover:bg-primary-color bg-white transition duration-150 hover:text-white 
       items-center justify-center rounded-full text-xl border-2 border-gray-200 p-2`}
       >
@@ -59,17 +62,16 @@ function SubjectNavbar({
       </Link>
       <ButtonProfile user={user} queryClient={queryClient} />
       <div className="fixed top-0 -z-10 left-0">
-        {subject.data && (
-          <SubjectSidebar
-            setSelectMenu={setSelectMenu}
-            active={active}
-            selectMenu={selectMenu}
-            schoolId={subject.data?.schoolId}
-          />
-        )}
+        <Sidebar
+          menuList={menuLists}
+          setSelectMenu={setSelectMenu}
+          active={trigger}
+          selectMenu={selectMenu}
+          schoolId={schoolId}
+        />
       </div>
     </div>
   );
 }
 
-export default SubjectNavbar;
+export default Navbar;

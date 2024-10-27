@@ -6,7 +6,7 @@ import {
   StudentOnSubject,
 } from "../../interfaces";
 import Image from "next/image";
-import { getScoreOnSubject } from "../../react-query";
+import { useGetScoreOnSubject } from "../../react-query";
 import { IoStar } from "react-icons/io5";
 import { InputNumber } from "primereact/inputnumber";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -27,7 +27,7 @@ function PopUpStudent({ student }: Props) {
   const successSound = useSound("/sounds/ding.mp3");
   const failSound = useSound("/sounds/fail.mp3");
   const queryClient = useQueryClient();
-  const scoreOnSubjects = getScoreOnSubject({
+  const scoreOnSubjects = useGetScoreOnSubject({
     subjectId: student.subjectId,
   });
   const [totalScore, setTotalScore] = React.useState<number>(
