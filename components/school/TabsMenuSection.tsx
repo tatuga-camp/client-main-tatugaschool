@@ -2,14 +2,17 @@ import { useState } from 'react';
 import { FC } from 'react';
 import MemberHeader from './MemberHeader';
 import MemberTable from './MemberTable';
-import { MemberOnSchool } from '@/interfaces';
+import { MemberOnSchool, School } from '@/interfaces';
+import BasicInformationSection from './BasicInformationSection';
+import MemberSection from './MemberSection';
 
-export interface MembersSectionProps {
+export interface TabsMenuSectionProps {
+    school: School;
     members: MemberOnSchool[];
     onInvite: () => void;
 }
 
-const MembersSection: React.FC<MembersSectionProps> = ({ members, onInvite }) => {
+const TabsMenuSection: FC<TabsMenuSectionProps> = ({ school, members, onInvite }) => {
     const [activeTab, setActiveTab] = useState('Member');
 
     const tabs = [
@@ -35,13 +38,11 @@ const MembersSection: React.FC<MembersSectionProps> = ({ members, onInvite }) =>
                     </button>
                 ))}
             </div>
-            
-            {activeTab === 'Member' && <div className="bg-white rounded-lg">
-                <MemberHeader members={members} onInvite={onInvite} />
-                <MemberTable members={members} />
-            </div>}
+
+            {activeTab === 'Member' && <MemberSection members={members} onInvite={onInvite} />}
+            {activeTab === 'Basic information' && <BasicInformationSection school={school} />}
         </>
     );
 };
 
-export default MembersSection;
+export default TabsMenuSection;

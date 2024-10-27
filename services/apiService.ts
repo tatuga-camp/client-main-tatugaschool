@@ -1,17 +1,36 @@
-import axios from "axios";
+import axios, { AxiosInstance, InternalAxiosRequestConfig } from "axios";
 import { RefreshTokenService } from "./auth";
-import { setAccessToken, getAccesstoken, getRefetchtoken } from "../utils";
+import { setAccessToken, getRefetchtoken, getAccessToken } from "../utils";
 
-const createAxiosInstance = () => {
+const createAxiosInstance = (): AxiosInstance => {
   const instance = axios.create({
     baseURL: process.env.NEXT_PUBLIC_SERVER_URL,
     timeout: 10000,
   });
+
   instance.interceptors.request.use(
-    (config) => {
-      const { access_token } = getAccesstoken();
-      if (access_token) {
-        config.headers["Authorization"] = `Bearer ${access_token}`;
+    async (config: InternalAxiosRequestConfig): Promise<InternalAxiosRequestConfig> => {
+      const { access_token } = getAccessToken();
+      if (access_token && !isTokenExpired(access_token)) {
+        config.headers.set("Authorization", `Bearer ${access_token}`);
+        return config;
+      }
+
+      const { refresh_token } = getRefetchtoken();
+      if (refresh_token) {
+        try {
+          const { accessToken } = await RefreshTokenService({ refreshToken: refresh_token });
+          setAccessToken({ access_token: accessToken });
+          config.headers.set("Authorization", `Bearer ${accessToken}`);
+        } catch (error) {
+          console.error("Failed to refresh token:", error);
+          // Consider redirecting to login here
+          // Redirect to login page
+          if (typeof window !== 'undefined') {
+            window.location.href = '/auth/sign-in';
+          }
+          return Promise.reject(error);
+        }
       }
       return config;
     },
@@ -22,24 +41,25 @@ const createAxiosInstance = () => {
     (response) => response,
     async (error) => {
       const originalRequest = error.config;
-      if (error.response.status === 401 && !originalRequest._retry) {
+      if (error.response?.status === 401 && !originalRequest._retry) {
         originalRequest._retry = true;
         const { refresh_token } = getRefetchtoken();
         if (!refresh_token) {
-          // redirect to login
-          throw new Error("Token not found");
+          throw new Error("Refresh token not found");
         }
         try {
-          const { accessToken } = await RefreshTokenService({
-            refreshToken: refresh_token,
-          });
+          const { accessToken } = await RefreshTokenService({ refreshToken: refresh_token });
           setAccessToken({ access_token: accessToken });
-          instance.defaults.headers.common[
-            "Authorization"
-          ] = `Bearer ${accessToken}`;
+          instance.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
           return instance(originalRequest);
         } catch (refreshError) {
-          // Handle token refresh error (e.g., redirect to login)
+          console.error("Failed to refresh token:", refreshError);
+          // Consider redirecting to login here
+          // Redirect to login page
+          if (typeof window !== 'undefined') {
+            window.location.href = '/auth/sign-in';
+          }
+          return Promise.reject(error);
         }
       }
       return Promise.reject(error);
@@ -49,14 +69,19 @@ const createAxiosInstance = () => {
   return instance;
 };
 
-const isTokenExpired = (token: string) => {
+const isTokenExpired = (token: string): boolean => {
   if (!token) return true;
 
-  const [, payload] = token.split(".");
-  const decodedPayload = JSON.parse(atob(payload));
-  const exp = decodedPayload.exp * 1000;
+  try {
+    const [, payload] = token.split(".");
+    const decodedPayload = JSON.parse(atob(payload));
+    const exp = decodedPayload.exp * 1000;
 
-  return Date.now() >= exp;
+    return Date.now() >= exp;
+  } catch (error) {
+    console.error("Error decoding token:", error);
+    return true;
+  }
 };
 
 export default createAxiosInstance;

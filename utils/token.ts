@@ -9,7 +9,7 @@ export function getRefetchtoken(ctx?: GetServerSidePropsContext): {
   return { refresh_token };
 }
 
-export function getAccesstoken(): { access_token: string | null } {
+export function getAccessToken(): { access_token: string | null } {
   const cookies = parseCookies();
   const access_token = cookies.access_token;
   return { access_token };

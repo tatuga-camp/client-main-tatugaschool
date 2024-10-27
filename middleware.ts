@@ -24,13 +24,10 @@ export async function middleware(request: NextRequest) {
     // Set the new access token in a cookie
     const response = NextResponse.next();
     response.cookies.set("access_token", accessToken.accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV !== "development",
-      sameSite: "strict",
       maxAge: 3600, // 1 hour
       path: "/",
     });
-
+    
     return response;
   } catch (error) {
     // Redirect to sign-in page if there's an error

@@ -3,7 +3,7 @@ import Sidebar from './Sidebar';
 import Stats from './Stats';
 import { MemberOnSchool, School, User } from '@/interfaces';
 import HeaderSection from './HeaderSection';
-import MembersSection from './MembersSection';
+import TabsMenuSection from './TabsMenuSection';
 import InviteJoinSchoolModal from './InviteJoinSchoolModal';
 
 interface DashboardProps {
@@ -25,7 +25,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, school, members }) => {
                 <HeaderSection school={school} members={members} onInvite={handleInvite} />
                 <Stats />
                 <div className="px-12 mt-4 pb-10">
-                    <MembersSection members={members} onInvite={handleInvite} />
+                    <TabsMenuSection school={school} members={members} onInvite={handleInvite} />
                 </div>
             </main>
             <InviteJoinSchoolModal
