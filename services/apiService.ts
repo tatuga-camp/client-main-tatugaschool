@@ -10,9 +10,32 @@ const createAxiosInstance = () => {
   instance.interceptors.request.use(
     (config) => {
       const { access_token } = getAccessToken();
+      const request = config.url;
+
+      // Redirect to login if access token is not found and the request is not sign-in
+      if (
+        !access_token &&
+        typeof window !== "undefined" &&
+        request !== "/v1/auth/sign-in"
+      ) {
+        window.location.href = "/auth/sign-in";
+      }
+
+      // Redirect to login if access token is expired and the request is not sign-in
+      if (
+        access_token &&
+        isTokenExpired(access_token) &&
+        typeof window !== "undefined" &&
+        request !== "/v1/auth/sign-in"
+      ) {
+        window.location.href = "/auth/sign-in";
+      }
+
+      // Add access token to the header if it is found and not expired
       if (access_token && !isTokenExpired(access_token)) {
         config.headers["Authorization"] = `Bearer ${access_token}`;
       }
+
       return config;
     },
     (error) => Promise.reject(error)
