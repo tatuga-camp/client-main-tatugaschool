@@ -19,6 +19,7 @@ import { notFound } from "next/navigation";
 import PopUpStudent from "../../../components/subject/PopUpStudent";
 import { ScoreOnStudent, StudentOnSubject } from "../../../interfaces";
 import useClickOutside from "../../../hook/useClickOutside";
+import InviteTeacher from "../../../components/subject/InviteTeacher";
 
 type Props = {
   subjectId: string;
@@ -29,6 +30,7 @@ function Index({ subjectId }: Props) {
     subjectId: subjectId,
   });
   const divRef = React.useRef<HTMLDivElement>(null);
+  const inviteTeacherRef = React.useRef<HTMLDivElement>(null);
   const teacherOnSubjects = getTeacherOnSubject({
     subjectId: subjectId,
   });
@@ -36,9 +38,14 @@ function Index({ subjectId }: Props) {
   const [selectFooter, setSelectFooter] =
     React.useState<ListMenuFooter>("EMTY");
   const [selectStudent, setSelectStudent] = React.useState<StudentOnSubject>();
+  const [triggerInviteTeacher, setTriggerInviteTeacher] = React.useState(false);
 
   useClickOutside(divRef, () => {
     setSelectStudent(() => undefined);
+  });
+
+  useClickOutside(inviteTeacherRef, () => {
+    setTriggerInviteTeacher(() => false);
   });
 
   if (subject.isError) {
@@ -62,6 +69,20 @@ function Index({ subjectId }: Props) {
         setSelectMenu={setSelectMenu}
         selectMenu={selectMenu}
       >
+        {triggerInviteTeacher && (
+          <div
+            className="w-screen z-40 h-screen flex items-center 
+        justify-center fixed top-0 right-0 left-0 bottom-0 m-auto"
+          >
+            <div className="  border rounded-md" ref={inviteTeacherRef}>
+              <InviteTeacher
+                setTrigger={setTriggerInviteTeacher}
+                subjectId={subjectId}
+              />
+            </div>
+            <div className="w-screen -z-10 h-screen bg-white/50 backdrop-blur  fixed top-0 right-0 left-0 bottom-0 m-auto"></div>
+          </div>
+        )}
         {selectStudent && (
           <div
             className="fixed top-0 z-40 right-0 left-0 bottom-0 m-auto
@@ -110,7 +131,10 @@ function Index({ subjectId }: Props) {
                 More Info & Edit
               </button>
               {teacherOnSubjects.data ? (
-                <ListMemberCircle teacherOnSubjects={teacherOnSubjects.data} />
+                <ListMemberCircle
+                  setTrigger={setTriggerInviteTeacher}
+                  teacherOnSubjects={teacherOnSubjects.data}
+                />
               ) : (
                 "Loading..."
               )}

@@ -27,7 +27,7 @@ export async function CreateMemberOnSchoolService(
   }
 }
 
-type RequestUpdateMemberOnSchoolService = {
+export type RequestUpdateMemberOnSchoolService = {
   query: { memberOnSchoolId: string };
   body: {
     role?: string;
@@ -41,8 +41,8 @@ export async function UpdateMemberOnSchoolService(
   try {
     const response = await axiosInstance({
       method: "PATCH",
-      url: `/v1/member-on-schools/${input.query.memberOnSchoolId}`,
-      data: input.body,
+      url: `/v1/member-on-schools`,
+      data: input,
     });
     return response.data;
   } catch (error: any) {

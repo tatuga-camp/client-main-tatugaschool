@@ -4,9 +4,9 @@ import createAxiosInstance from "./apiService";
 
 const axiosInstance = createAxiosInstance();
 
-type RequestCreateTeacherOnSubjectService = {
+export type RequestCreateTeacherOnSubjectService = {
   role: string;
-  userId: string;
+  email: string;
   subjectId: string;
 };
 
@@ -79,11 +79,11 @@ export async function GetTeacherOnSubjectByIdService(
   }
 }
 
-type RequestUpdateTeacherOnSubjectService = {
+export type RequestUpdateTeacherOnSubjectService = {
   query: { teacherOnSubjectId: string };
   body: {
-    status: string;
-    role: string;
+    status?: string;
+    role?: string;
   };
 };
 
@@ -95,8 +95,8 @@ export async function UpdateTeacherOnSubjectService(
   try {
     const response = await axiosInstance({
       method: "PATCH",
-      url: `/v1/teacher-on-subjects/${input.query.teacherOnSubjectId}`,
-      data: { ...input.body },
+      url: `/v1/teacher-on-subjects`,
+      data: { ...input },
     });
     return response.data;
   } catch (error: any) {

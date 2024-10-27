@@ -227,7 +227,7 @@ const CreateSchoolComponent = () => {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto flex flex-col gap-2 mb-10 bg-white rounded-3xl shadow-md p-12">
+    <div className="w-full max-w-xl mx-auto flex flex-col gap-2 mb-10 bg-white rounded-3xl shadow-md p-12">
       <Toast ref={toast}></Toast>
       <h2 className="text-xl font-semibold text-center text-black">
         Create your School here!

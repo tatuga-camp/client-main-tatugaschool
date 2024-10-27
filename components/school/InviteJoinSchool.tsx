@@ -6,6 +6,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   CreateMemberOnSchoolService,
   RequestCreateMemberOnSchoolService,
+  RequestUpdateMemberOnSchoolService,
+  UpdateMemberOnSchoolService,
 } from "../../services";
 import {
   ErrorMessages,
@@ -22,6 +24,7 @@ import Image from "next/image";
 import { ProgressSpinner } from "primereact/progressspinner";
 import Swal from "sweetalert2";
 import Link from "next/link";
+import ListMembers from "../member/ListMembers";
 
 type Props = {
   schoolId: string;
@@ -35,7 +38,18 @@ function InviteJoinSchool({ schoolId }: Props) {
   const getUsers = getUserByEmail({ email: query.length > 5 ? query : "" });
 
   const [users, setUsers] = useState<
-    (User & { isInvite: boolean; isLoading: boolean })[]
+    {
+      id: string | null;
+      email: string;
+      firstName: string;
+      lastName: string;
+      photo: string;
+      isInvite: boolean;
+      isLoading: boolean;
+      role: MemberRole;
+      userId: string;
+      blurHash?: string;
+    }[]
   >([]);
 
   const createMemberOnSchool = useMutation({
@@ -52,16 +66,46 @@ function InviteJoinSchool({ schoolId }: Props) {
     },
   });
 
+  const updateMemberOnSchool = useMutation({
+    mutationKey: ["update-member-on-school"],
+    mutationFn: (input: RequestUpdateMemberOnSchoolService) =>
+      UpdateMemberOnSchoolService(input),
+    onSuccess(data, variables, context) {
+      queryClient.setQueryData(
+        ["member-on-school", { schoolId }],
+        (oldData: MemberOnSchool[]) => {
+          return oldData.map((member) => {
+            if (member.id === data.id) {
+              return data;
+            }
+            return member;
+          });
+        }
+      );
+    },
+  });
+
   useEffect(() => {
     if (getUsers.data && memberOnSchools.data) {
-      setUsers(
+      setUsers(() =>
         getUsers.data.map((user) => {
           return {
-            ...user,
+            id:
+              memberOnSchools.data.find((member) => member.userId === user.id)
+                ?.id ?? null,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            photo: user.photo,
             isInvite: memberOnSchools.data.some(
               (member) => member.userId === user.id
             ),
+            userId: user.id,
             isLoading: false,
+            role:
+              memberOnSchools.data.find((member) => member.userId === user.id)
+                ?.role ?? "ADMIN",
+            trigger: false,
           };
         })
       );
@@ -112,7 +156,6 @@ function InviteJoinSchool({ schoolId }: Props) {
       });
     }
   };
-
   return (
     <div>
       <section className="flex flex-col  w-full gap-2">
@@ -138,65 +181,20 @@ function InviteJoinSchool({ schoolId }: Props) {
             />
           )}
         </div>
-        <ul className="w-full flex mt-5 flex-col gap-2">
-          {users.map((member) => (
-            <li
-              key={member.id}
-              className="flex justify-between py-2 border-b items-center gap-2"
-            >
-              <div className="flex gap-2">
-                <div className="w-10 h-10 relative rounded-md ring-1  overflow-hidden">
-                  <Image
-                    src={member.photo || "/favicon.ico"}
-                    fill
-                    alt="logo tatuga school"
-                    className="object-cover"
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <h1 className="font-semibold text-sm">{member.email}</h1>
-                  <span className="text-xs">
-                    {member.firstName} {member.lastName} (
-                    {
-                      memberOnSchools.data?.find((m) => m.userId === member.id)
-                        ?.role
-                    }
-                    )
-                  </span>
-                </div>
-              </div>
-              {member.isInvite ? (
-                <div className="success-button w-20 text-center text-xs">
-                  {user.data?.id === member.id
-                    ? "You"
-                    : memberOnSchools.data?.find((m) => m.userId === member.id)
-                        ?.status === "ACCEPT"
-                    ? "Accepted"
-                    : "Pending"}
-                </div>
-              ) : (
-                <div className="w-20  flex items-center">
-                  {member.isLoading ? (
-                    <ProgressSpinner
-                      animationDuration="0.5s"
-                      style={{ width: "20px" }}
-                      className="w-5 h-5  "
-                      strokeWidth="8"
-                    />
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => handleSummit({ email: member.email })}
-                      className="main-button w-20 text-xs"
-                    >
-                      Invite
-                    </button>
-                  )}
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
+        {memberOnSchools.data && user.data && (
+          <ListMembers
+            members={users}
+            listMembers={memberOnSchools.data}
+            user={user.data}
+            handleSummit={handleSummit}
+            onRoleChange={async (data) =>
+              await updateMemberOnSchool.mutateAsync({
+                query: { memberOnSchoolId: data.memberId },
+                body: { role: data.role },
+              })
+            }
+          />
+        )}
       </section>
       <div className="w-full mt-5 flex justify-center">
         <Link href="/" className="main-button text-center w-40">
