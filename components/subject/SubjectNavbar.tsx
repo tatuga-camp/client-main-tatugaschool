@@ -1,6 +1,6 @@
 import React, { ReactNode } from "react";
 import ButtonProfile from "../button/ButtonProfile";
-import { getUser } from "../../react-query";
+import { useGetUser } from "../../react-query";
 import { QueryClient, UseQueryResult } from "@tanstack/react-query";
 import { IoMenu } from "react-icons/io5";
 import SubjectSidebar, { MenuSubject } from "./SubjectSidebar";
@@ -23,7 +23,7 @@ function SubjectNavbar({
   active,
   setActive,
 }: Props) {
-  const user = getUser();
+  const user = useGetUser();
 
   const queryClient = new QueryClient();
   return (

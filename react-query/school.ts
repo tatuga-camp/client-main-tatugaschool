@@ -14,35 +14,29 @@ import {
 } from "../services";
 import { MemberOnSchool, School } from "../interfaces";
 
-export function getSchools(): UseQueryResult<School[], Error> {
-  const schools = useQuery({
+export function useGetSchools(): UseQueryResult<School[], Error> {
+  return useQuery({
     queryKey: ["schools"],
     queryFn: () => GetSchoolService(),
   });
-  return schools;
 }
 
-export function getSchool({
+export function useGetSchool({
   schoolId,
 }: {
   schoolId: string;
 }): UseQueryResult<School, Error> {
-  const school = useQuery({
+  return useQuery({
     queryKey: ["school", { id: schoolId }],
     queryFn: () => GetSchoolByIdService({ schoolId }),
   });
-  return school;
 }
 
-export function getMemberBySchool(request: {
-  id: string;
+export function useGetMemberBySchool(request: {
+  schoolId: string;
 }): UseQueryResult<MemberOnSchool[], Error> {
-  const memberOnSchools = useQuery({
-    queryKey: ["member-on-school", { schoolId: request.id }],
-    queryFn: () =>
-      GetMembersBySchoolIdService({
-        schoolId: request.id,
-      }),
+  return useQuery({
+    queryKey: ["member-on-school", { schoolId: request.schoolId }],
+    queryFn: () => GetMembersBySchoolIdService({ schoolId: request.schoolId }),
   });
-  return memberOnSchools;
 }

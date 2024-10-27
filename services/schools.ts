@@ -1,7 +1,7 @@
 import { School } from "@/interfaces";
 
 import createAxiosInstance from "./apiService";
-import { getAccesstoken } from "../utils";
+import { getAccessToken } from "../utils";
 import axios from "axios";
 
 const axiosInstance = createAxiosInstance();
@@ -35,12 +35,13 @@ export async function CreateSchoolService(
   }
 }
 
-type RequestUpdateSchoolService = {
+export type RequestUpdateSchoolService = {
   query: { schoolId: string };
   body: {
     title?: string;
     description?: string;
     billingManagerId?: string;
+    logo?: string;
   };
 };
 
@@ -50,8 +51,8 @@ export async function UpdateSchoolService(
   try {
     const response = await axiosInstance({
       method: "PATCH",
-      url: `/v1/schools/${input.query.schoolId}`,
-      data: input.body,
+      url: `/v1/schools/`,
+      data: input,
     });
     return response.data;
   } catch (error: any) {

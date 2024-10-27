@@ -65,9 +65,9 @@ export const SignUpForm = () => {
       console.log(error);
       let result = error as ErrorMessages;
       Swal.fire({
-        title: result.error ? result.error : "Something Went Wrong",
-        text: result.message.toString(),
-        footer: result.statusCode
+        title: result?.error ? result?.error : "Something Went Wrong",
+        text: result?.message?.toString(),
+        footer: result?.statusCode
           ? "Code Error: " + result.statusCode?.toString()
           : "",
         icon: "error",

@@ -8,7 +8,7 @@ import {
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { Toast } from "primereact/toast";
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState, useCallback } from "react";
 import Swal from "sweetalert2";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { LuSchool } from "react-icons/lu";
@@ -17,7 +17,6 @@ import { countries, defaultBlurHash } from "../../data";
 import Image from "next/image";
 import { InputMask } from "primereact/inputmask";
 import { ProgressBar } from "primereact/progressbar";
-import { InputText } from "primereact/inputtext";
 import InviteJoinSchool from "./InviteJoinSchool";
 import Dropdown from "../common/Dropdown";
 import { decodeBlurhashToCanvas, generateBlurHash } from "../../utils";
@@ -48,7 +47,7 @@ const CreateSchoolComponent = () => {
     logo?: string;
     blurHash?: string;
   }>();
-  const [address, setAdress] = useState<{
+  const [address, setAddress] = useState<{
     city?: string;
     address?: string;
     zipCode?: string;
@@ -65,7 +64,7 @@ const CreateSchoolComponent = () => {
     mutationKey: ["school"],
     mutationFn: (input: RequestCreateSchoolService) =>
       CreateSchoolService(input),
-    onSuccess(data, variables, context) {
+    onSuccess(data, _variables, _context) {
       queryClient.setQueryData(["schools"], (old: School[] | undefined) => {
         return [...(old || []), data];
       });
@@ -210,13 +209,7 @@ const CreateSchoolComponent = () => {
     );
   };
 
-  useEffect(() => {
-    if (createSchool.status === "success") {
-      handleChangeActiveIndex(2);
-    }
-  }, [createSchool.status]);
-
-  const handleChangeActiveIndex = (index: number) => {
+  const handleChangeActiveIndex = useCallback((index: number) => {
     if (createSchool.isSuccess) {
       setActiveIndex(2);
     } else if (!createSchool.data && index === 2) {
@@ -224,7 +217,13 @@ const CreateSchoolComponent = () => {
     } else {
       setActiveIndex(index);
     }
-  };
+  }, [createSchool.isSuccess, createSchool.data]);
+
+  useEffect(() => {
+    if (createSchool.status === "success") {
+      handleChangeActiveIndex(2);
+    }
+  }, [createSchool.status, handleChangeActiveIndex]);
 
   return (
     <div className="w-full max-w-xl mx-auto flex flex-col gap-2 mb-10 bg-white rounded-3xl shadow-md p-12">
@@ -376,7 +375,7 @@ const CreateSchoolComponent = () => {
                 placeholder="City"
                 value={address?.city}
                 onChange={(e) =>
-                  setAdress((prev) => {
+                  setAddress((prev) => {
                     return { ...prev, city: e.target.value };
                   })
                 }
@@ -390,7 +389,7 @@ const CreateSchoolComponent = () => {
                 placeholder="Address"
                 value={address?.address}
                 onChange={(e) =>
-                  setAdress((prev) => {
+                  setAddress((prev) => {
                     return { ...prev, address: e.target.value };
                   })
                 }
@@ -404,7 +403,7 @@ const CreateSchoolComponent = () => {
                 placeholder="Zip Code"
                 value={address?.zipCode}
                 onChange={(e) =>
-                  setAdress((prev) => {
+                  setAddress((prev) => {
                     return { ...prev, zipCode: e.target.value };
                   })
                 }
@@ -414,7 +413,7 @@ const CreateSchoolComponent = () => {
               required
               value={address?.phoneNumber}
               onChange={(e) =>
-                setAdress((prev) => {
+                setAddress((prev) => {
                   return { ...prev, phoneNumber: e.value as string };
                 })
               }
