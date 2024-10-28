@@ -1,9 +1,12 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Layout from "../../../components/layout/SubjectLayout";
 import Head from "next/head";
-import { useGetSubject, useGetTeacherOnSubject } from "../../../react-query";
+import {
+  useGetSubject,
+  useGetTeacherOnSubject,
+  useGetUser,
+} from "../../../react-query";
 import { GetServerSideProps } from "next";
-import Subject from "../../../components/subject/Subject";
 import Assignment from "../../../components/subject/Assignment";
 import Grade from "../../../components/subject/Grade";
 import Attendance from "../../../components/subject/Attendance";
@@ -16,20 +19,38 @@ import { useRouter } from "next/router";
 import Swal from "sweetalert2";
 import { notFound } from "next/navigation";
 import PopUpStudent from "../../../components/subject/PopUpStudent";
-import { ScoreOnStudent, StudentOnSubject } from "../../../interfaces";
+import {
+  ErrorMessages,
+  ScoreOnStudent,
+  StudentOnSubject,
+  Subject as SubjectType,
+} from "../../../interfaces";
 import useClickOutside from "../../../hook/useClickOutside";
 import InviteTeacher from "../../../components/subject/InviteTeacher";
-import { MenuSubject } from "../../../data";
+import { defaultBlurHash, MenuSubject } from "../../../data";
+import { SlPicture } from "react-icons/sl";
+import {
+  getSignedURLTeacherService,
+  RequestUpdateSubjectService,
+  UpdateSubjectService,
+  UploadSignURLService,
+} from "../../../services";
+import { decodeBlurhashToCanvas, generateBlurHash } from "../../../utils";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import Subject from "../../../components/subject/Subject";
+import Image from "next/image";
 
 type Props = {
   subjectId: string;
 };
 
 function Index({ subjectId }: Props) {
+  const queryClient = useQueryClient();
   const router = useRouter();
   const subject = useGetSubject({
     subjectId: subjectId,
   });
+
   const divRef = React.useRef<HTMLDivElement>(null);
   const inviteTeacherRef = React.useRef<HTMLDivElement>(null);
   const teacherOnSubjects = useGetTeacherOnSubject({
@@ -40,6 +61,7 @@ function Index({ subjectId }: Props) {
     React.useState<ListMenuFooter>("EMTY");
   const [selectStudent, setSelectStudent] = React.useState<StudentOnSubject>();
   const [triggerInviteTeacher, setTriggerInviteTeacher] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
 
   useClickOutside(divRef, () => {
     setSelectStudent(() => undefined);
@@ -57,6 +79,60 @@ function Index({ subjectId }: Props) {
     });
     router.push("/404");
   }
+
+  const updateSubject = useMutation({
+    mutationKey: ["update-subject"],
+    mutationFn: (input: RequestUpdateSubjectService) =>
+      UpdateSubjectService(input),
+    onSuccess(data, variables, context) {
+      queryClient.setQueryData(["subject", { id: subjectId }], () => {
+        return data;
+      });
+    },
+  });
+
+  const handleUploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      const file = e.target.files?.[0];
+      if (!file) {
+        throw new Error("File not found");
+      }
+      setLoading(true);
+      const signURL = await getSignedURLTeacherService({
+        fileName: file?.name,
+        fileType: file?.type,
+      });
+
+      const blurHash = await generateBlurHash(file);
+      console.log(blurHash);
+      await UploadSignURLService({
+        file: file,
+        signURL: signURL.signURL,
+        contentType: file.type,
+      });
+      await updateSubject.mutateAsync({
+        query: { subjectId: subjectId },
+        body: {
+          backgroundImage: signURL.originalURL,
+          blurHash: blurHash,
+        },
+      });
+
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.log(error);
+      let result = error as ErrorMessages;
+      Swal.fire({
+        title: result.error ? result.error : "Something Went Wrong",
+        text: result.message.toString(),
+        footer: result.statusCode
+          ? "Code Error: " + result.statusCode?.toString()
+          : "",
+        icon: "error",
+      });
+    }
+  };
 
   return (
     <>
@@ -101,7 +177,30 @@ function Index({ subjectId }: Props) {
           </div>
         )}
         <header className="w-full p-10 flex items-center justify-center">
-          <section className="w-8/12 h-60 flex justify-between p-5 shadow-inner gradient-bg  rounded-md">
+          <section
+            className={`w-8/12 z-30 h-60 relative flex justify-between  p-5 shadow-inner ${
+              loading
+                ? "animate-pulse bg-gray-500/50"
+                : subject.data?.backgroundImage
+                ? ""
+                : "gradient-bg"
+            }  rounded-md`}
+          >
+            {subject.data?.backgroundImage && (
+              <div className="gradient-shadow  -z-10  absolute w-full h-full top-0 bottom-0 right-0 left-0 m-auto"></div>
+            )}{" "}
+            {subject.data?.backgroundImage && (
+              <Image
+                src={subject.data?.backgroundImage}
+                fill
+                placeholder="blur"
+                blurDataURL={decodeBlurhashToCanvas(
+                  subject.data?.blurHash ?? defaultBlurHash
+                )}
+                alt="backgroud"
+                className="object-cover -z-20 "
+              />
+            )}
             <div className="flex h-full justify-end flex-col gap-1">
               <h1 className="text-lg font-semibold w-8/12 min-w-96 line-clamp-2 text-white">
                 {subject.data ? subject.data?.title : "Loading..."}
@@ -124,23 +223,44 @@ function Index({ subjectId }: Props) {
                 </h2>
               </div>
             </div>
-            <div className="h-full flex flex-col justify-between">
-              <button
-                onClick={() => setSelectMenu("Setting Subject")}
-                className="flex items-center active:scale-110 justify-center gap-1 hover:bg-primary-color hover:text-white
+            <div className="h-full flex flex-col items-end justify-between">
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setSelectMenu("Setting Subject")}
+                  className="flex items-center active:scale-110 justify-center gap-1 hover:bg-primary-color hover:text-white
                text-primary-color bg-white w-max px-2 py-1 rounded-md"
-              >
-                <CiCircleInfo />
-                More Info & Edit
-              </button>
-              {teacherOnSubjects.data ? (
-                <ListMemberCircle
-                  setTrigger={setTriggerInviteTeacher}
-                  members={teacherOnSubjects.data}
-                />
-              ) : (
-                "Loading..."
-              )}
+                >
+                  <CiCircleInfo />
+                  More Info & Edit
+                </button>
+                <label
+                  title="Change Background Image"
+                  className="flex items-center cursor-pointer active:scale-110 justify-center gap-1
+                   hover:bg-primary-color hover:text-white
+               text-primary-color bg-white w-max px-2 py-1 rounded-md"
+                >
+                  <SlPicture />
+
+                  <input
+                    disabled={loading}
+                    accept="image/*"
+                    id="dropzone-file"
+                    onChange={handleUploadImage}
+                    type="file"
+                    className="hidden"
+                  />
+                </label>
+              </div>
+              <div>
+                {teacherOnSubjects.data ? (
+                  <ListMemberCircle
+                    setTrigger={setTriggerInviteTeacher}
+                    members={teacherOnSubjects.data}
+                  />
+                ) : (
+                  "Loading..."
+                )}
+              </div>
             </div>
           </section>
         </header>

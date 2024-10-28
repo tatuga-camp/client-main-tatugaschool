@@ -10,24 +10,26 @@ const createAxiosInstance = () => {
   instance.interceptors.request.use(
     (config) => {
       const { access_token } = getAccessToken();
+      const { refresh_token } = getRefetchtoken();
       const request = config.url;
-
       // Redirect to login if access token is not found and the request is not sign-in
       if (
-        !access_token &&
+        (!access_token || !refresh_token) &&
         typeof window !== "undefined" &&
-        request !== "/v1/auth/sign-in"
+        !request?.startsWith("/v1/auth/")
       ) {
+        console.log("redirect to login 1");
         window.location.href = "/auth/sign-in";
       }
 
       // Redirect to login if access token is expired and the request is not sign-in
       if (
-        access_token &&
-        isTokenExpired(access_token) &&
+        refresh_token &&
+        isTokenExpired(refresh_token) &&
         typeof window !== "undefined" &&
-        request !== "/v1/auth/sign-in"
+        !request?.startsWith("/v1/auth/")
       ) {
+        console.log("redirect to login 1");
         window.location.href = "/auth/sign-in";
       }
 
@@ -62,6 +64,7 @@ const createAxiosInstance = () => {
           ] = `Bearer ${accessToken}`;
           return instance(originalRequest);
         } catch (refreshError) {
+          console.log("refreshError", refreshError);
           if (typeof window !== "undefined") {
             window.location.href = "/auth/sign-in";
           }
@@ -79,9 +82,8 @@ const isTokenExpired = (token: string) => {
 
   const [, payload] = token.split(".");
   const decodedPayload = JSON.parse(atob(payload));
-  const exp = decodedPayload.exp * 1000;
-
-  return Date.now() >= exp;
+  const exp = decodedPayload.exp;
+  return Math.floor(Date.now() / 1000) >= exp;
 };
 
 export default createAxiosInstance;

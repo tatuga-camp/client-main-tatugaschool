@@ -46,7 +46,6 @@ function Subject({ subjectId, setSelectStudent }: Props) {
     orderBy: "asc" | "desc";
   }>();
 
-  const [activeFilter, setActiveFilter] = useState(false);
   const [students, setStudents] = useState<StudentOnSubject[]>([]);
   const [dates, setDates] = useState<Nullable<(Date | null)[]>>(null);
   const scoreOnStudents = useGetScoreOnStudent({
@@ -74,52 +73,12 @@ function Subject({ subjectId, setSelectStudent }: Props) {
       );
     }
   }, []);
+
   useEffect(() => {
     if (studentOnSubjects.data) {
       setStudents(studentOnSubjects.data);
     }
   }, [studentOnSubjects.data]);
-
-  //reRender when filter change
-  useEffect(() => {
-    if (selectFilter?.title === "Sort by Score") {
-      setStudents((prev) => {
-        return prev.sort((a, b) => {
-          if (selectFilter.orderBy === "desc") {
-            return a.totalSpeicalScore - b.totalSpeicalScore;
-          } else {
-            return b.totalSpeicalScore - a.totalSpeicalScore;
-          }
-        });
-      });
-    } else if (selectFilter?.title === "Sort by Name") {
-      setStudents((prev) => {
-        return prev.sort((a, b) => {
-          if (selectFilter.orderBy === "desc") {
-            return a.firstName.localeCompare(b.firstName);
-          } else {
-            return b.firstName.localeCompare(a.firstName);
-          }
-        });
-      });
-    } else if (selectFilter?.title === "Sort By Number") {
-      setStudents((prev) => {
-        return prev.sort((a, b) => {
-          if (selectFilter.orderBy === "desc") {
-            return a.number.localeCompare(b.number);
-          } else {
-            return b.number.localeCompare(a.number);
-          }
-        });
-      });
-    } else {
-      setStudents((prev) => {
-        return prev.sort((a, b) => {
-          return a.order - b.order;
-        });
-      });
-    }
-  }, [selectFilter]);
 
   useEffect(() => {
     if (dates?.[0] && dates?.[1] && scoreOnStudents.data) {
@@ -164,13 +123,55 @@ function Subject({ subjectId, setSelectStudent }: Props) {
       });
     }
   }, [dates, scoreOnStudents.data]);
+
   return (
     <div className="flex flex-col items-center w-full gap-5">
       <header className="w-9/12 h-16 flex justify-end items-end gap-1 border-b pb-5">
         <div className="w-60 h-16">
           <Calendar onValue={(value) => setDates(value)} value={dates} />
         </div>
-        <Filter onValue={(event) => setSelectFilter(event)} />
+        <Filter
+          onValue={(event) => {
+            if (event?.title === "Sort by Score") {
+              setStudents((prev) => {
+                return prev.sort((a, b) => {
+                  if (event.orderBy === "desc") {
+                    return b.totalSpeicalScore - a.totalSpeicalScore;
+                  } else {
+                    return a.totalSpeicalScore - b.totalSpeicalScore;
+                  }
+                });
+              });
+            } else if (event?.title === "Sort by Name") {
+              setStudents((prev) => {
+                return prev.sort((a, b) => {
+                  if (event.orderBy === "desc") {
+                    return b.firstName.localeCompare(a.firstName);
+                  } else {
+                    return a.firstName.localeCompare(b.firstName);
+                  }
+                });
+              });
+            } else if (event?.title === "Sort By Number") {
+              setStudents((prev) => {
+                return prev.sort((a, b) => {
+                  if (event.orderBy === "desc") {
+                    return b.number.localeCompare(a.number);
+                  } else {
+                    return a.number.localeCompare(b.number);
+                  }
+                });
+              });
+            } else if (!event) {
+              setStudents((prev) => {
+                return prev.sort((a, b) => {
+                  return a.order - b.order;
+                });
+              });
+            }
+            setSelectFilter(event);
+          }}
+        />
       </header>
       <DndContext
         sensors={sensors}

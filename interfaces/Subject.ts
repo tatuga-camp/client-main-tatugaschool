@@ -7,6 +7,7 @@ export interface Subject {
   description: string;
   order: number;
   backgroundImage?: string;
+  blurHash?: string;
   classId: string;
   userId: string;
   schoolId: string;

@@ -78,13 +78,14 @@ export async function GetSubjectByIdService(
   }
 }
 
-type RequestUpdateSubjectService = {
+export type RequestUpdateSubjectService = {
   query: { subjectId: string };
   body: {
-    title: string;
-    educationYear: string;
-    description: string;
+    title?: string;
+    educationYear?: string;
+    description?: string;
     backgroundImage?: string;
+    blurHash?: string;
   };
 };
 
@@ -96,8 +97,8 @@ export async function UpdateSubjectService(
   try {
     const response = await axiosInstance({
       method: "PATCH",
-      url: `/v1/subjects/${input.query.subjectId}`,
-      data: { ...input.body },
+      url: `/v1/subjects/`,
+      data: { ...input },
     });
     return response.data;
   } catch (error: any) {
@@ -130,7 +131,7 @@ export async function DeleteSubjectService(
 }
 
 type RequestReorderSubjectsService = {
-    subjectIds: string[]
+  subjectIds: string[];
 };
 
 type ResponseReorderSubjectsService = Subject;
