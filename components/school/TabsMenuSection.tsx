@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { FC } from "react";
-import MemberHeader from "./MemberHeader";
-import MemberTable from "./MemberTable";
 import { MemberOnSchool, School } from "@/interfaces";
 import BasicInformationSection from "./BasicInformationSection";
 import MemberSection from "./MemberSection";
+import BillingPlanSection from "./BillingPlanSection";
 
 export interface TabsMenuSectionProps {
   school: School;
@@ -49,6 +48,7 @@ const TabsMenuSection: FC<TabsMenuSectionProps> = ({
       {activeTab === "Basic information" && (
         <BasicInformationSection school={school} />
       )}
+      {activeTab === "Billing & Plan" && <BillingPlanSection />}
     </>
   );
 };
