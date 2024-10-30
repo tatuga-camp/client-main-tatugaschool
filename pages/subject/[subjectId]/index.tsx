@@ -134,10 +134,11 @@ function Index({ subjectId }: Props) {
     }
   };
 
+  const title = `Subject ${subject.data?.title ?? "Loading..."}`;
   return (
     <>
       <Head>
-        <title>Subject: {subject.data?.title}</title>
+        <title>{title}</title>
       </Head>
       <Layout
         setSelectFooter={setSelectFooter}

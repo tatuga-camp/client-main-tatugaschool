@@ -1,6 +1,6 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
-import { Prompt } from "@next/font/google";
+import { Prompt } from "next/font/google";
 import { PrimeReactProvider } from "primereact/api";
 import { PagesProgressBar } from "next-nprogress-bar";
 import { useState } from "react";

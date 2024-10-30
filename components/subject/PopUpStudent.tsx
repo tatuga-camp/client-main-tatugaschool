@@ -6,7 +6,10 @@ import {
   StudentOnSubject,
 } from "../../interfaces";
 import Image from "next/image";
-import { useGetScoreOnSubject } from "../../react-query";
+import {
+  useCreateScoreOnStudent,
+  useGetScoreOnSubject,
+} from "../../react-query";
 import { IoStar } from "react-icons/io5";
 import { InputNumber } from "primereact/inputnumber";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -19,6 +22,7 @@ import { Toast } from "primereact/toast";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { useSound } from "../../hook";
 import { decodeBlurhashToCanvas } from "../../utils";
+import ScorePanel from "./ScorePanel";
 
 type Props = {
   student: StudentOnSubject;
@@ -27,13 +31,14 @@ function PopUpStudent({ student }: Props) {
   const successSound = useSound("/sounds/ding.mp3");
   const failSound = useSound("/sounds/fail.mp3");
   const queryClient = useQueryClient();
+
+  const createScoreOnStudent = useCreateScoreOnStudent();
   const scoreOnSubjects = useGetScoreOnSubject({
     subjectId: student.subjectId,
   });
   const [totalScore, setTotalScore] = React.useState<number>(
     student.totalSpeicalScore
   );
-  const scoreRef = React.useRef<HTMLButtonElement>(null);
   const toast = useRef<Toast>(null);
 
   const [selectScore, setSelectScore] = React.useState<
@@ -42,65 +47,33 @@ function PopUpStudent({ student }: Props) {
     inputScore: 0,
   });
 
-  const createScoreOnStudent = useMutation({
-    mutationKey: ["createScoreOnStudent"],
-    mutationFn: (request: RequestCreateScoreOnStudentService) =>
-      CreateScoreOnStudentService(request),
-    onSuccess(data, variables, context) {
-      const newScore: StudentOnSubject = {
-        ...student,
-        totalSpeicalScore: totalScore + data.score,
-      };
-
-      queryClient.setQueryData(
-        ["scoreOnStudents", { subjectId: student.subjectId }],
-        (prev: ScoreOnStudent[]) => {
-          return [...prev, data];
-        }
-      );
-
-      queryClient.setQueryData(
-        ["studentOnSubjects", { subjectId: student.subjectId }],
-        (
-          prev: (StudentOnSubject & {
-            scores: ScoreOnStudent[];
-            totalScore: number;
-          })[]
-        ) => {
-          const newData = prev?.map((student) => {
-            if (student.id === newScore.id) {
-              return newScore;
-            }
-            return student;
-          });
-          return newData;
-        }
-      );
-    },
-  });
-
   const handleCreateScore = async () => {
     try {
       if (!selectScore?.score) {
-        scoreRef.current?.style.setProperty("border", "1px solid red");
-        scoreRef.current?.classList.add("scale-110");
-        setTimeout(() => {
-          scoreRef.current?.classList.remove("scale-110");
-          scoreRef.current?.style.removeProperty("border");
-        }, 100);
+        Swal.fire({
+          title: "Score Not Found",
+          text: "Please select score first",
+          icon: "error",
+        });
         return;
       }
 
       const data = await createScoreOnStudent.mutateAsync({
-        studentOnSubjectId: student.id,
-        scoreOnSubjectId: selectScore?.score.id,
-        score: selectScore?.inputScore,
+        request: {
+          studentOnSubjectId: student.id,
+          scoreOnSubjectId: selectScore?.score.id,
+          score: selectScore?.inputScore,
+        },
+        studentOnSubject: student,
+        totalScore: totalScore,
+        queryClient,
       });
+
       setTotalScore((prev) => prev + data.score);
       if (data.score >= 0) {
-        successSound.play();
+        successSound?.play();
       } else {
-        failSound.play();
+        failSound?.play();
       }
       showSuccess();
     } catch (error) {
@@ -153,104 +126,18 @@ function PopUpStudent({ student }: Props) {
           <span className="text-gray-500 text-xs">Number {student.number}</span>
         </div>
       </div>
-      <div className="flex flex-col gap-3">
-        <div className="text-lg font-semibold border-b ">
-          Give You Student A Score!
-        </div>
-        <ul className="grid max-h-48 p-2 overflow-auto grid-cols-4 gap-3">
-          {scoreOnSubjects.isLoading
-            ? [...Array(12)].map((_, index) => {
-                return (
-                  <div
-                    key={index}
-                    className="w-20 h-20 bg-gray-200 rounded-2xl animate-pulse"
-                  ></div>
-                );
-              })
-            : scoreOnSubjects.data?.map((score, index) => {
-                return (
-                  <button
-                    ref={index === 0 ? scoreRef : null}
-                    onClick={() =>
-                      setSelectScore(() => {
-                        return {
-                          score: score,
-                          inputScore: score.score,
-                        };
-                      })
-                    }
-                    key={score.id}
-                    className={` ${
-                      selectScore?.score?.id === score.id &&
-                      "gradient-bg ring-1 ring-black"
-                    } p-2 bg-white active:gradient-bg transition rounded-md group hover:bg-secondary-color 
-                         flex flex-col items-center justify-center gap-2`}
-                  >
-                    <div className="w-10 h-10 rounded-lg relative">
-                      <Image
-                        src={score.icon}
-                        alt={score.title}
-                        placeholder="blur"
-                        blurDataURL={decodeBlurhashToCanvas(score.blurHash)}
-                        fill
-                        className="object-contain"
-                      />
-                      <div
-                        className={`min-w-5 max-w-10 truncate -top-2 -right-2 flex items-center justify-center z-20 absolute text-white h-5 rounded-full ${
-                          score.score >= 0 ? "bg-green-400" : "bg-red-500"
-                        } `}
-                      >
-                        {score.score}
-                      </div>
-                    </div>
-                    <span
-                      className={`text-xs w-20 break-words line-clamp-2
-                     group-hover:text-white text-gray-500 ${
-                       selectScore?.score?.id === score.id && "text-white"
-                     }`}
-                    >
-                      {score.title}
-                    </span>
-                  </button>
-                );
-              })}
-        </ul>
-        <div className="flex gap-2">
-          <InputNumber
-            pt={{
-              input: {
-                root: { className: "w-60 h-10" },
-              },
-            }}
-            style={{ width: "15rem" }}
-            value={selectScore?.inputScore}
-            onValueChange={(e) =>
-              setSelectScore((prev) => {
-                return { score: prev?.score, inputScore: e.value ?? 0 };
-              })
-            }
-          />
-
-          <button
-            disabled={createScoreOnStudent.isPending}
-            onClick={handleCreateScore}
-            className="main-button w-56 flex items-center justify-center"
-          >
-            {createScoreOnStudent.isPending ? (
-              <ProgressSpinner
-                animationDuration="1s"
-                style={{ width: "20px" }}
-                className="w-5 h-5"
-                strokeWidth="8"
-              />
-            ) : (
-              <div className=" flex items-center justify-center gap-1">
-                Give Score <IoStar />
-              </div>
-            )}
-          </button>
-        </div>
-      </div>
+      <ScorePanel
+        scoreOnSubjects={scoreOnSubjects}
+        onSelectScore={({ inputScore, score }) => {
+          setSelectScore({ inputScore, score });
+        }}
+        selectScore={{
+          score: selectScore?.score,
+          inputScore: selectScore?.inputScore,
+        }}
+        isLoading={createScoreOnStudent.isPending}
+        onCreateScore={handleCreateScore}
+      />
     </section>
   );
 }

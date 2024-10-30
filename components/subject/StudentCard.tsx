@@ -7,13 +7,17 @@ import { CSSProperties } from "styled-components";
 import { MdDragIndicator } from "react-icons/md";
 
 type Props = {
-  student: StudentOnSubject;
-  setSelectStudent: React.Dispatch<
-    React.SetStateAction<StudentOnSubject | undefined>
-  >;
+  student: StudentOnSubject & { select?: boolean };
+  showSelect: boolean;
+  setSelectStudent: (data: StudentOnSubject & { select?: boolean }) => void;
   isDragable?: boolean;
 };
-function StudentCard({ student, setSelectStudent, isDragable = false }: Props) {
+function StudentCard({
+  student,
+  setSelectStudent,
+  isDragable = false,
+  showSelect = false,
+}: Props) {
   const {
     isDragging,
     attributes,
@@ -40,9 +44,14 @@ function StudentCard({ student, setSelectStudent, isDragable = false }: Props) {
       ref={setNodeRef}
       style={inlineStyles}
       {...attributes}
-      onClick={() => setSelectStudent(student)}
-      className="w-48 p-3 group flex flex-col items-center justify-center
-     gap-2 h-52 rounded-xl relative hover:drop-shadow-md active:scale-105  overflow-hidden hover:bg-primary-color  bg-white"
+      onClick={() => {
+        setSelectStudent(student);
+      }}
+      className={`w-48 p-3 group flex flex-col items-center justify-center
+     gap-2 h-52 rounded-xl relative hover:drop-shadow-md active:scale-105 ${
+       student.select && showSelect ? "gradient-bg " : "bg-white"
+     }
+      overflow-hidden hover:bg-primary-color  bg-white`}
     >
       {!isDragable && (
         <div
@@ -53,11 +62,27 @@ function StudentCard({ student, setSelectStudent, isDragable = false }: Props) {
           <MdDragIndicator />
         </div>
       )}
+      {showSelect && (
+        <input
+          checked={student.select}
+          type="checkbox"
+          className="w-5 h-5 rounded-full bg-primary-color absolute top-2 right-2"
+        />
+      )}
+
       <div
-        className="min-w-10 w-max  max-w-20 h-12  absolute left-0 right-0 -top-3 
-      m-auto bg-primary-color group-hover:bg-white  rounded-2xl flex items-center justify-center text-white"
+        className={`min-w-10 w-max  max-w-20 h-12  absolute left-0 right-0 -top-3 ${
+          student.select && showSelect ? "bg-white" : "bg-primary-color"
+        }
+      m-auto bg-primary-color group-hover:bg-white  rounded-2xl flex items-center justify-center text-white`}
       >
-        <span className="max-w-14 truncate w-max group-hover:text-primary-color ">
+        <span
+          className={`max-w-14 truncate
+            ${
+              student.select && showSelect ? "text-primary-color" : "text-white"
+            }
+            w-max group-hover:text-primary-color `}
+        >
           {student.totalSpeicalScore}
         </span>
       </div>
@@ -69,10 +94,18 @@ function StudentCard({ student, setSelectStudent, isDragable = false }: Props) {
           className="object-cover w-full h-full"
         />
       </div>
-      <h2 className="text-sm group-hover:text-white w-11/12 truncate text-center font-semibold text-gray-800">
+      <h2
+        className={`text-sm group-hover:text-white 
+          ${student.select && showSelect ? "text-white" : "text-gray-800"}
+          w-11/12 truncate text-center font-semibold text-gray-800`}
+      >
         {student.firstName} {student.lastName}
       </h2>
-      <span className="text-xs group-hover:text-white text-gray-500">
+      <span
+        className={`text-xs
+        ${student.select && showSelect ? "text-white" : "text-gray-500"}
+        group-hover:text-white text-gray-500`}
+      >
         Number {student.number}
       </span>
     </button>

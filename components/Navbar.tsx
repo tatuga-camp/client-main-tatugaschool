@@ -30,7 +30,10 @@ function Navbar({
 
   const queryClient = new QueryClient();
   return (
-    <div className="flex flex-col h-20  md:flex-row justify-between items-center p-4 bg-white backdrop-blur text-white gap-4">
+    <div
+      className="flex flex-col h-20  md:flex-row justify-between items-center p-4 
+    bg-white text-white gap-4"
+    >
       <button
         onClick={() => setTrigger(!trigger)}
         className={`text-black flex ${

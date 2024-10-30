@@ -1,5 +1,7 @@
-export function useSound(url: string): HTMLAudioElement {
-  const audio = new Audio(url);
+export function useSound(url: string): HTMLAudioElement | void {
+  if (typeof window !== "undefined") {
+    const audio = new Audio(url);
 
-  return audio;
+    return audio;
+  }
 }
