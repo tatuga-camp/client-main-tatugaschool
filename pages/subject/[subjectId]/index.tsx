@@ -179,7 +179,7 @@ function Index({ subjectId }: Props) {
         )}
         <header className="w-full p-10 flex items-center justify-center">
           <section
-            className={`w-8/12 z-30 h-60 relative flex justify-between  p-5 shadow-inner ${
+            className={`w-8/12 z-30 overflow-hidden h-60 relative flex justify-between  p-5 shadow-inner ${
               loading
                 ? "animate-pulse bg-gray-500/50"
                 : subject.data?.backgroundImage
@@ -275,7 +275,9 @@ function Index({ subjectId }: Props) {
           {selectMenu === "Assignment" && <Assignment />}
           {selectMenu === "Grade" && <Grade />}
           {selectMenu === "Attendance" && <Attendance />}
-          {selectMenu === "Setting Subject" && <Setting />}
+          {selectMenu === "Setting Subject" && (
+            <Setting subjectId={subjectId} />
+          )}
         </main>
         <footer
           className="h-96

@@ -27,6 +27,7 @@ type Props = {
   user: User;
   onRoleChange: (data: { memberId: string; role: MemberRole }) => void;
   handleSummit: (data: { email: string }) => void;
+  allowRemove?: boolean;
 };
 function ListMembers({
   members,
@@ -34,6 +35,7 @@ function ListMembers({
   listMembers,
   handleSummit,
   onRoleChange,
+  allowRemove,
 }: Props) {
   const [memberData, setMemberData] = React.useState<
     {
@@ -109,6 +111,7 @@ function ListMembers({
               </div>
               {user.id !== member.userId && member.id && (
                 <DropdownRole
+                  allowRemove={allowRemove}
                   listRoles={ListRoles}
                   selectRole={member.role}
                   setSelectRole={(role: MemberRole) => {

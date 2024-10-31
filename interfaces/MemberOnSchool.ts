@@ -16,4 +16,4 @@ export type MemberOnSchool = {
 
 export type Status = "PENDDING" | "ACCEPT" | "REJECT";
 
-export type MemberRole = "TEACHER" | "ADMIN";
+export type MemberRole = "TEACHER" | "ADMIN" | "REMOVE";
