@@ -108,7 +108,7 @@ export async function UpdateTeacherOnSubjectService(
   }
 }
 
-type RequestDeleteTeacherOnSubjectService = {
+export type RequestDeleteTeacherOnSubjectService = {
   teacherOnSubjectId: string;
 };
 

@@ -206,21 +206,13 @@ function Index({ subjectId }: Props) {
               <h1 className="text-lg font-semibold w-8/12 min-w-96 line-clamp-2 text-white">
                 {subject.data ? subject.data?.title : "Loading..."}
               </h1>
-              <p className="text-lg text-white">
+              <p className="text-lg w-11/12 min-w-96 line-clamp-2 text-white">
                 {subject.data ? subject.data?.description : "Loading..."}
               </p>
               <div className="bg-white w-max px-2 py-1 rounded-md">
                 <h2 className="text-xs text-primary-color">
                   Academic year:{" "}
-                  {subject.data
-                    ? new Date(subject.data?.educationYear).toLocaleDateString(
-                        "en-US",
-                        {
-                          year: "numeric",
-                          month: "long",
-                        }
-                      )
-                    : "Loading..."}
+                  {subject.data ? subject.data?.educationYear : "Loading..."}
                 </h2>
               </div>
             </div>

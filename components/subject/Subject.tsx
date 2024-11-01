@@ -8,7 +8,7 @@ import React, {
 } from "react";
 import {
   useGetScoreOnStudent,
-  getStudentOnSubject,
+  useGetStudentOnSubject,
   useGetScoreOnSubject,
   useCreateScoreOnStudent,
 } from "../../react-query";
@@ -59,7 +59,7 @@ function Subject({ subjectId, setSelectStudent }: Props) {
   const failSound = useSound("/sounds/fail.mp3");
   const toast = useRef<Toast>(null);
 
-  const studentOnSubjects = getStudentOnSubject({
+  const studentOnSubjects = useGetStudentOnSubject({
     subjectId: subjectId,
   });
   const createStudentScore = useCreateScoreOnStudent();
@@ -114,16 +114,16 @@ function Subject({ subjectId, setSelectStudent }: Props) {
 
   useEffect(() => {
     if (studentOnSubjects.data) {
-      setStudents(studentOnSubjects.data);
+      setStudents(studentOnSubjects.data.filter((item) => item.isActive));
     }
   }, [studentOnSubjects.data]);
 
+  // sort by date
   useEffect(() => {
     if (dates?.[0] && dates?.[1] && scoreOnStudents.data) {
       const startDate = dates?.[0];
       const endDate = dates?.[1];
       endDate.setHours(24, 0, 0, 0);
-
       setStudents((prev) => {
         return prev.map((student) => {
           const scores = scoreOnStudents.data.filter((score) => {

@@ -10,7 +10,6 @@ type Pops = {
   setTrigger: React.Dispatch<React.SetStateAction<boolean>> | (() => void);
   trigger: boolean;
   listRoles: { title: string; describe: string }[];
-  allowRemove?: boolean;
 };
 function DropdownRole({
   setSelectRole,
@@ -18,7 +17,6 @@ function DropdownRole({
   setTrigger,
   trigger,
   listRoles,
-  allowRemove,
 }: Pops) {
   const devRef = React.useRef<HTMLDivElement>(null);
   useClickOutside(devRef, () => {
@@ -56,18 +54,6 @@ top-12 z-10 -right-20 bg-white drop-shadow"
               <p className="text-xs text-gray-500">{role.describe}</p>
             </div>
           ))}
-          {allowRemove && (
-            <div
-              onClick={() => {
-                setSelectRole("REMOVE" as MemberRole);
-                setTrigger(false);
-              }}
-              className="w-full p-2 hover:bg-red-700 bg-red-300 text-white cursor-pointer border-b text-sm"
-            >
-              <h1 className="font-semibold">REMOVE</h1>
-              <p className="text-xs text-white">Remove this member</p>
-            </div>
-          )}
         </div>
       )}
     </>

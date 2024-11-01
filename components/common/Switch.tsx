@@ -3,13 +3,15 @@ import { classNames } from "primereact/utils";
 import React from "react";
 
 type Props = {
-  checked: boolean;
+  checked: boolean | undefined;
   setChecked: (data: boolean) => void;
+  disabled?: boolean;
 };
-function Switch({ checked, setChecked }: Props) {
+function Switch({ checked, setChecked, disabled = false }: Props) {
   return (
     <InputSwitch
-      checked={checked}
+      disabled={disabled}
+      checked={checked ?? false}
       onChange={(e) => setChecked(e.value)}
       pt={{
         root: (option) => ({
