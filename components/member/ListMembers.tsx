@@ -5,6 +5,8 @@ import { ProgressSpinner } from "primereact/progressspinner";
 import { decodeBlurhashToCanvas } from "../../utils";
 import { defaultBlurHash, ListRoles } from "../../data";
 import DropdownRole from "../common/DropdownRole";
+import { MdDelete } from "react-icons/md";
+import { useQueryClient } from "@tanstack/react-query";
 
 type Props = {
   members: {
@@ -20,6 +22,7 @@ type Props = {
     blurHash?: string;
   }[];
   listMembers: {
+    id: string;
     userId: string;
     role: MemberRole;
     status: Status;
@@ -27,6 +30,7 @@ type Props = {
   user: User;
   onRoleChange: (data: { memberId: string; role: MemberRole }) => void;
   handleSummit: (data: { email: string }) => void;
+  onDelete?: (data: { memberId: string }) => void;
 };
 function ListMembers({
   members,
@@ -34,7 +38,9 @@ function ListMembers({
   listMembers,
   handleSummit,
   onRoleChange,
+  onDelete,
 }: Props) {
+  const queryClient = useQueryClient();
   const [memberData, setMemberData] = React.useState<
     {
       id: string | null;
@@ -68,7 +74,6 @@ function ListMembers({
       );
     }
   }, [members]);
-
   return (
     <ul className="w-full  p-2 flex mt-5 flex-col gap-2">
       {memberData.map((member, index) => (
@@ -102,7 +107,7 @@ function ListMembers({
               <div className="success-button w-20 text-center text-xs">
                 {user?.id === member.userId
                   ? "You"
-                  : listMembers?.find((m) => m.userId === member.id)?.status ===
+                  : listMembers?.find((m) => m.id === member.id)?.status ===
                     "ACCEPT"
                   ? "Accepted"
                   : "Pending"}
@@ -126,6 +131,14 @@ function ListMembers({
                   }}
                   trigger={member.trigger}
                 />
+              )}
+              {onDelete && member.id && (
+                <button
+                  onClick={() => member.id && onDelete({ memberId: member.id })}
+                  className="reject-button text-lg px-2"
+                >
+                  <MdDelete />
+                </button>
               )}
             </div>
           ) : (

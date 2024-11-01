@@ -3,7 +3,7 @@ export interface Subject {
   createAt: Date;
   updateAt: Date;
   title: string;
-  educationYear: Date;
+  educationYear: string;
   description: string;
   order: number;
   backgroundImage?: string;
@@ -11,4 +11,9 @@ export interface Subject {
   classId: string;
   userId: string;
   schoolId: string;
+  code: string;
+  allowStudentDeleteWork: boolean;
+  allowStudentViewOverallScore: boolean;
+  allowStudentViewGrade: boolean;
+  allowStudentViewAttendance: boolean;
 }

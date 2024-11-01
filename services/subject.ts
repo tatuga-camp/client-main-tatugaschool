@@ -82,10 +82,14 @@ export type RequestUpdateSubjectService = {
   query: { subjectId: string };
   body: {
     title?: string;
-    educationYear?: string;
+    eduYear?: string;
     description?: string;
     backgroundImage?: string;
     blurHash?: string;
+    allowStudentDeleteWork?: boolean;
+    allowStudentViewOverallScore?: boolean;
+    allowStudentViewGrade?: boolean;
+    allowStudentViewAttendance?: boolean;
   };
 };
 
@@ -107,7 +111,7 @@ export async function UpdateSubjectService(
   }
 }
 
-type RequestDeleteSubjectService = {
+export type RequestDeleteSubjectService = {
   subjectId: string;
 };
 

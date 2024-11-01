@@ -134,7 +134,7 @@ function InviteTeacher({ subjectId, setTrigger }: Props) {
     }
   };
   return (
-    <div className="w-[34rem]  h-[30rem] flex flex-col items-center rounded-md justify-start bg-white">
+    <div className="w-max h-[30rem] flex flex-col items-center rounded-md justify-start bg-white">
       <header className="w-full p-5 flex justify-between border-b pb-3">
         <div className="flex  items-center gap-1">
           <h1 className="text-lg  font-semibold">Invite Co-Teacher</h1>
@@ -201,9 +201,11 @@ function InviteTeacher({ subjectId, setTrigger }: Props) {
               </button>
             </div>
           </label>
-          <div className="w-full text-xs break-words max-w-full max-h-10 overflow-auto text-red-600">
-            {createTeacherOnSubject.error &&
-              createTeacherOnSubject.error.message}
+          <div className="w-full flex">
+            <div className=" text-xs break-words max-w-96 max-h-10  text-red-600">
+              {createTeacherOnSubject.error &&
+                createTeacherOnSubject.error.message}
+            </div>
           </div>
         </form>
 

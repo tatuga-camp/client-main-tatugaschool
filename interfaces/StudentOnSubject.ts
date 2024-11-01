@@ -14,4 +14,5 @@ export interface StudentOnSubject {
   subjectId: string;
   schoolId: string;
   order: number;
+  isActive: boolean;
 }

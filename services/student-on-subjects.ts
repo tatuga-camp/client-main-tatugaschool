@@ -152,3 +152,31 @@ export async function DeleteStudentOnSubjectService(
     throw error?.response?.data;
   }
 }
+
+type ResponseUpdateStudentOnSubjectService = StudentOnSubject;
+export type RequestUpdateStudentOnSubjectService = {
+  query: {
+    id: string;
+  };
+  data: {
+    isActive?: boolean;
+  };
+};
+export async function UpdateStudentOnSubjectService(
+  input: RequestUpdateStudentOnSubjectService
+): Promise<ResponseUpdateStudentOnSubjectService> {
+  try {
+    const response = await axiosInstance({
+      method: "PATCH",
+      url: `/v1/student-on-subjects`,
+      data: input,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error(
+      "Delete StudentOnSubject request failed:",
+      error.response.data
+    );
+    throw error?.response?.data;
+  }
+}
