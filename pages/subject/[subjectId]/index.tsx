@@ -39,6 +39,8 @@ import { decodeBlurhashToCanvas, generateBlurHash } from "../../../utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Subject from "../../../components/subject/Subject";
 import Image from "next/image";
+import { IoQrCode } from "react-icons/io5";
+import QRCode from "../../../components/subject/QRCode";
 
 type Props = {
   subjectId: string;
@@ -62,9 +64,13 @@ function Index({ subjectId }: Props) {
   const [selectStudent, setSelectStudent] = React.useState<StudentOnSubject>();
   const [triggerInviteTeacher, setTriggerInviteTeacher] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
-
+  const qrcodeRef = React.useRef<HTMLDivElement>(null);
+  const [triggerQRCode, setTriggerQRCode] = React.useState(false);
   useClickOutside(divRef, () => {
     setSelectStudent(() => undefined);
+  });
+  useClickOutside(qrcodeRef, () => {
+    setTriggerQRCode(() => false);
   });
 
   useClickOutside(inviteTeacherRef, () => {
@@ -149,6 +155,23 @@ function Index({ subjectId }: Props) {
         }
         selectMenu={selectMenu}
       >
+        {subject.data && triggerQRCode && (
+          <div
+            className="w-screen z-40 h-screen flex items-center 
+        justify-center fixed top-0 right-0 left-0 bottom-0 m-auto"
+          >
+            <div
+              ref={qrcodeRef}
+              className="w-[30rem] bg-white drop-shadow-md p-5 h-[30rem] rounded-md overflow-hidden"
+            >
+              <QRCode
+                url={`${process.env.NEXT_PUBLIC_STUDENT_CLIENT_URL}/school/${subject.data?.schoolId}?subjectId=${subject.data?.id}`}
+                code={subject.data?.code}
+              />
+            </div>
+            <div className="w-screen -z-10 h-screen bg-white/50 backdrop-blur  fixed top-0 right-0 left-0 bottom-0 m-auto"></div>
+          </div>
+        )}
         {triggerInviteTeacher && (
           <div
             className="w-screen z-40 h-screen flex items-center 
@@ -209,11 +232,19 @@ function Index({ subjectId }: Props) {
               <p className="text-lg w-11/12 min-w-96 line-clamp-2 text-white">
                 {subject.data ? subject.data?.description : "Loading..."}
               </p>
-              <div className="bg-white w-max px-2 py-1 rounded-md">
-                <h2 className="text-xs text-primary-color">
-                  Academic year:{" "}
-                  {subject.data ? subject.data?.educationYear : "Loading..."}
-                </h2>
+              <div className="flex gap-2">
+                <div className="bg-white w-max px-2 py-1 rounded-md">
+                  <h2 className="text-xs text-primary-color">
+                    Academic year:{" "}
+                    {subject.data ? subject.data?.educationYear : "Loading..."}
+                  </h2>
+                </div>
+                <div className="bg-white w-max px-2 py-1 rounded-md">
+                  <h2 className="text-xs text-primary-color">
+                    Subject Code:{" "}
+                    {subject.data ? subject.data?.code : "Loading..."}
+                  </h2>
+                </div>
               </div>
             </div>
             <div className="h-full flex flex-col items-end justify-between">
@@ -244,7 +275,7 @@ function Index({ subjectId }: Props) {
                   />
                 </label>
               </div>
-              <div>
+              <div className="flex gap-3">
                 {teacherOnSubjects.data ? (
                   <ListMemberCircle
                     setTrigger={setTriggerInviteTeacher}
@@ -253,6 +284,16 @@ function Index({ subjectId }: Props) {
                 ) : (
                   "Loading..."
                 )}
+                <button
+                  onClick={() => setTriggerQRCode((prev) => !prev)}
+                  aria-label="QR Code Subject"
+                  className="flex w-40 items-center text-xs active:scale-110 
+                  justify-center gap-1 hover:bg-primary-color hover:text-white
+               text-primary-color bg-white  px-2 py-1 rounded-md"
+                >
+                  QR Code Subject
+                  <IoQrCode />
+                </button>
               </div>
             </div>
           </section>
