@@ -25,7 +25,7 @@ type Props = {
 };
 function ListMemberCircle({ members, setTrigger }: Props) {
   return (
-    <div className="w-full flex items-end justify-center">
+    <div className="w-max flex items-end justify-center">
       {members.map((teacher, index) => {
         const odd = index % 2 === 0;
         ``;
