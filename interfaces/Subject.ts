@@ -12,6 +12,7 @@ export interface Subject {
   userId: string;
   schoolId: string;
   code: string;
+  wheelOfNamePath?: string | null;
   allowStudentDeleteWork: boolean;
   allowStudentViewOverallScore: boolean;
   allowStudentViewGrade: boolean;
