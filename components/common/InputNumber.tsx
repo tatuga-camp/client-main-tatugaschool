@@ -9,6 +9,8 @@ type Props = {
   max: number;
   useGrouping?: boolean;
   required?: boolean;
+  suffix?: string;
+  prefix?: string;
 };
 function InputNumber({
   value,
@@ -17,9 +19,13 @@ function InputNumber({
   max,
   useGrouping,
   required,
+  suffix,
+  prefix,
 }: Props) {
   return (
     <InputNumberPrimereact
+      suffix={suffix}
+      prefix={prefix}
       required={required}
       value={value}
       min={min}
@@ -28,11 +34,11 @@ function InputNumber({
       onValueChange={(e) => onValueChange(e.value as number)}
       pt={{
         root: {
-          className: " inline-flex",
+          className: " inline-flex w-full",
         },
         input: {
           root(options) {
-            return { className: "main-input" };
+            return { className: "main-input  w-full" };
           },
         },
         buttonGroup(options) {
