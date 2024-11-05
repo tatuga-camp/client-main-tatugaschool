@@ -1,5 +1,5 @@
 import React, { memo, ReactNode } from "react";
-import { FaStopwatch20, FaWpforms } from "react-icons/fa";
+import { FaRandom, FaStopwatch20, FaWpforms } from "react-icons/fa";
 import { GiPerspectiveDiceSixFacesRandom } from "react-icons/gi";
 import { PiStudentBold } from "react-icons/pi";
 
@@ -17,8 +17,8 @@ const menuFooters: { title: ListMenuFooter; icon: ReactNode }[] = [
     icon: <FaWpforms />,
   },
   {
-    title: "Random Picker",
-    icon: <GiPerspectiveDiceSixFacesRandom />,
+    title: "Wheel Of Name",
+    icon: <FaRandom />,
   },
   {
     title: "QR Code",
@@ -29,6 +29,7 @@ const menuFooters: { title: ListMenuFooter; icon: ReactNode }[] = [
 export type ListMenuFooter =
   | "Manage Student"
   | "Stop Watch"
+  | "Wheel Of Name"
   | "Attendance"
   | "Random Picker"
   | "QR Code"

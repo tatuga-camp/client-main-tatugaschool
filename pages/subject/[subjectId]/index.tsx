@@ -77,6 +77,16 @@ function Index({ subjectId }: Props) {
     setTriggerInviteTeacher(() => false);
   });
 
+  useEffect(() => {
+    if (selectFooter === "Wheel Of Name" && subject.data) {
+      window.open(
+        `https://wheelofnames.com/${subject?.data.wheelOfNamePath}`,
+        "_blank"
+      );
+      setSelectFooter("EMTY");
+    }
+  }, [selectFooter]);
+
   if (subject.isError) {
     Swal.fire({
       title: "Error",
