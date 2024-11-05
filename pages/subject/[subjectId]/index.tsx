@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import Layout from "../../../components/layout/SubjectLayout";
 import Head from "next/head";
 import {
@@ -41,6 +41,7 @@ import Subject from "../../../components/subject/Subject";
 import Image from "next/image";
 import { IoQrCode } from "react-icons/io5";
 import QRCode from "../../../components/subject/QRCode";
+import StopWatch from "../../../components/subject/StopWatch";
 
 type Props = {
   subjectId: string;
@@ -66,6 +67,8 @@ function Index({ subjectId }: Props) {
   const [loading, setLoading] = React.useState(false);
   const qrcodeRef = React.useRef<HTMLDivElement>(null);
   const [triggerQRCode, setTriggerQRCode] = React.useState(false);
+  const [triggerStopWatch, setTriggerStopWatch] = React.useState(false);
+
   useClickOutside(divRef, () => {
     setSelectStudent(() => undefined);
   });
@@ -78,12 +81,32 @@ function Index({ subjectId }: Props) {
   });
 
   useEffect(() => {
-    if (selectFooter === "Wheel Of Name" && subject.data) {
+    if (
+      selectFooter === "Wheel Of Name" &&
+      subject.data &&
+      subject.data.wheelOfNamePath
+    ) {
       window.open(
         `https://wheelofnames.com/${subject?.data.wheelOfNamePath}`,
         "_blank"
       );
       setSelectFooter("EMTY");
+    } else if (
+      selectFooter === "Wheel Of Name" &&
+      subject.data &&
+      !subject.data.wheelOfNamePath
+    ) {
+      Swal.fire({
+        title: "Not Ready",
+        text: "Wheel of name not ready yet, please try again later in a few minutes",
+        footer: "We will notify you when it's ready on your email",
+        icon: "info",
+      });
+      setSelectFooter("EMTY");
+    } else if (selectFooter === "Stop Watch") {
+      setTriggerStopWatch(true);
+    } else {
+      setTriggerStopWatch(false);
     }
   }, [selectFooter]);
 
@@ -151,6 +174,10 @@ function Index({ subjectId }: Props) {
   };
 
   const title = `Subject ${subject.data?.title ?? "Loading..."}`;
+
+  const handleCloseStopWatch = useCallback(() => {
+    setTriggerStopWatch(false);
+  }, []);
   return (
     <>
       <Head>
@@ -165,6 +192,7 @@ function Index({ subjectId }: Props) {
         }
         selectMenu={selectMenu}
       >
+        {triggerStopWatch && <StopWatch onClose={handleCloseStopWatch} />}
         {subject.data && triggerQRCode && (
           <div
             className="w-screen z-40 h-screen flex items-center 
