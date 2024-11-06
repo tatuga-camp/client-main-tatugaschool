@@ -14,8 +14,7 @@ export async function GetAttendanceTablesService(
   try {
     const response = await axiosInstance({
       method: "GET",
-      url: `/v1/attendance-tables`,
-      params: { subjectId: input.subjectId },
+      url: `/v1/attendance-tables/subject/${input.subjectId}`,
     });
 
     return response.data;

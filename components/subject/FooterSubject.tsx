@@ -5,10 +5,6 @@ import { PiStudentBold } from "react-icons/pi";
 
 const menuFooters: { title: ListMenuFooter; icon: ReactNode }[] = [
   {
-    title: "Manage Student",
-    icon: <PiStudentBold />,
-  },
-  {
     title: "Stop Watch",
     icon: <FaStopwatch20 />,
   },
@@ -19,10 +15,6 @@ const menuFooters: { title: ListMenuFooter; icon: ReactNode }[] = [
   {
     title: "Wheel Of Name",
     icon: <FaRandom />,
-  },
-  {
-    title: "QR Code",
-    icon: <FaStopwatch20 />,
   },
 ];
 

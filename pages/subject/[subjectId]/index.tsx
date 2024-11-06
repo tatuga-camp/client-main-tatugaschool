@@ -17,7 +17,6 @@ import { ListMenuFooter } from "../../../components/subject/FooterSubject";
 import Setting from "../../../components/subject/Setting";
 import { useRouter } from "next/router";
 import Swal from "sweetalert2";
-import { notFound } from "next/navigation";
 import PopUpStudent from "../../../components/subject/PopUpStudent";
 import {
   ErrorMessages,
@@ -42,6 +41,7 @@ import Image from "next/image";
 import { IoQrCode } from "react-icons/io5";
 import QRCode from "../../../components/subject/QRCode";
 import StopWatch from "../../../components/subject/StopWatch";
+import AttendanceChecker from "../../../components/subject/AttendanceChecker";
 
 type Props = {
   subjectId: string;
@@ -67,8 +67,7 @@ function Index({ subjectId }: Props) {
   const [loading, setLoading] = React.useState(false);
   const qrcodeRef = React.useRef<HTMLDivElement>(null);
   const [triggerQRCode, setTriggerQRCode] = React.useState(false);
-  const [triggerStopWatch, setTriggerStopWatch] = React.useState(false);
-
+  const attendanceRef = React.useRef<HTMLDivElement>(null);
   useClickOutside(divRef, () => {
     setSelectStudent(() => undefined);
   });
@@ -78,6 +77,10 @@ function Index({ subjectId }: Props) {
 
   useClickOutside(inviteTeacherRef, () => {
     setTriggerInviteTeacher(() => false);
+  });
+
+  useClickOutside(attendanceRef, () => {
+    setSelectFooter("EMTY");
   });
 
   useEffect(() => {
@@ -103,10 +106,6 @@ function Index({ subjectId }: Props) {
         icon: "info",
       });
       setSelectFooter("EMTY");
-    } else if (selectFooter === "Stop Watch") {
-      setTriggerStopWatch(true);
-    } else {
-      setTriggerStopWatch(false);
     }
   }, [selectFooter]);
 
@@ -176,7 +175,7 @@ function Index({ subjectId }: Props) {
   const title = `Subject ${subject.data?.title ?? "Loading..."}`;
 
   const handleCloseStopWatch = useCallback(() => {
-    setTriggerStopWatch(false);
+    setSelectFooter("EMTY");
   }, []);
   return (
     <>
@@ -192,7 +191,23 @@ function Index({ subjectId }: Props) {
         }
         selectMenu={selectMenu}
       >
-        {triggerStopWatch && <StopWatch onClose={handleCloseStopWatch} />}
+        {selectFooter === "Stop Watch" && (
+          <StopWatch onClose={handleCloseStopWatch} />
+        )}
+
+        {selectFooter === "Attendance" && (
+          <div
+            className="w-screen z-40 h-screen flex items-center 
+        justify-center fixed top-0 right-0 left-0 bottom-0 m-auto"
+          >
+            <div
+              ref={attendanceRef}
+              className="w-8/12 border bg-white p-5 h-max rounded-md overflow-hidden"
+            >
+              <AttendanceChecker subjectId={subjectId} />
+            </div>
+          </div>
+        )}
         {subject.data && triggerQRCode && (
           <div
             className="w-screen z-40 h-screen flex items-center 
