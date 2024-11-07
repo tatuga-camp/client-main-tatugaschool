@@ -27,6 +27,11 @@
   }
 }
 
+/* * {
+  box-sizing: border-box;
+  background: rgba(0, 100, 0, 0.1) !important;
+} */
+
 .p-password-input {
   width: 100%;
 }
@@ -52,4 +57,12 @@
     rgba(0, 212, 255, 0) 100%
   );
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#6149cd",endColorstr="#00d4ff",GradientType=1);
+}
+
+.hideScrollBar {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+}
+.hideScrollBar::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
 }

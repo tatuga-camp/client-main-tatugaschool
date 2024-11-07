@@ -3,19 +3,18 @@ import createAxiosInstance from "./apiService";
 
 const axiosInstance = createAxiosInstance();
 
-type RequestGetAttendanceRowService = {
-  attendanceRowId: string;
+type RequestGetAttendanceRowByTabelIdService = {
+  attendanceTableId: string;
 };
 
-export async function GetAttendanceRowService(
-  input: RequestGetAttendanceRowService
-): Promise<AttendanceRow[]> {
+export async function GetAttendanceRowByTabelIdService(
+  input: RequestGetAttendanceRowByTabelIdService
+): Promise<(AttendanceRow & { attendances: Attendance[] })[]> {
   try {
     const response = await axiosInstance({
       method: "GET",
-      url: `/v1/attendance-rows?attendanceRowId=${input.attendanceRowId}`,
+      url: `/v1/attendance-rows/attendance-table/${input.attendanceTableId}`,
     });
-
     return response.data;
   } catch (error: any) {
     console.error("Failed to fetch Attendance Row:", error.response.data);
@@ -47,20 +46,16 @@ export async function GetAttendanceRowByIdService(
   }
 }
 
-type RequestCreateAttendanceRowService = {
+export type RequestCreateAttendanceRowService = {
   startDate: string;
   endDate: string;
   note?: string;
   attendanceTableId: string;
-  subjectId: string;
-  teamId: string;
-  schoolId: string;
 };
 
 export type ResponseCreateAttendanceRowService = AttendanceRow & {
   attendances: Attendance[];
 };
-
 export async function CreateAttendanceRowService(
   input: RequestCreateAttendanceRowService
 ): Promise<ResponseCreateAttendanceRowService> {

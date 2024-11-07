@@ -1,4 +1,3 @@
-
 import { Attendance } from "../interfaces";
 import createAxiosInstance from "./apiService";
 
@@ -22,7 +21,7 @@ export async function GetAttendanceByIdService(
   }
 }
 
-type RequestUpdateAttendanceService = {
+export type RequestUpdateAttendanceService = {
   query: {
     attendanceId: string;
   };
@@ -44,8 +43,8 @@ export async function UpdateAttendanceService(
   try {
     const response = await axiosInstance({
       method: "PATCH",
-      url: `/v1/attendances/${input.query.attendanceId}`,
-      data: input.body,
+      url: `/v1/attendances`,
+      data: input,
     });
     return response.data;
   } catch (error: any) {
