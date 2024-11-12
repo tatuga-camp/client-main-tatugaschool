@@ -2,6 +2,7 @@ import React, { useCallback, useEffect } from "react";
 import Layout from "../../../components/layout/SubjectLayout";
 import Head from "next/head";
 import {
+  useGetStudentOnSubject,
   useGetSubject,
   useGetTeacherOnSubject,
   useGetUser,
@@ -42,6 +43,8 @@ import Image from "next/image";
 import { IoQrCode } from "react-icons/io5";
 import QRCode from "../../../components/subject/QRCode";
 import StopWatch from "../../../components/subject/StopWatch";
+import AnimationPanoramaCarousel from "../../../components/animation/AnimationPanoramaCarousel";
+import { useSound } from "../../../hook";
 
 type Props = {
   subjectId: string;
@@ -49,11 +52,14 @@ type Props = {
 
 function Index({ subjectId }: Props) {
   const queryClient = useQueryClient();
+  const ding = useSound("/sounds/ding.mp3");
   const router = useRouter();
   const subject = useGetSubject({
     subjectId: subjectId,
   });
-
+  const studentOnSubjects = useGetStudentOnSubject({
+    subjectId: subjectId,
+  });
   const divRef = React.useRef<HTMLDivElement>(null);
   const inviteTeacherRef = React.useRef<HTMLDivElement>(null);
   const teacherOnSubjects = useGetTeacherOnSubject({
@@ -193,6 +199,32 @@ function Index({ subjectId }: Props) {
         selectMenu={selectMenu}
       >
         {triggerStopWatch && <StopWatch onClose={handleCloseStopWatch} />}
+
+        {selectFooter === "Slide Picker" && studentOnSubjects.data && (
+          <div
+            className="w-screen z-40 h-screen flex items-center 
+        justify-center fixed top-0 right-0 left-0 bottom-0 m-auto"
+          >
+            <div className="">
+              <AnimationPanoramaCarousel<StudentOnSubject>
+                images={studentOnSubjects.data.map((student, index) => {
+                  return {
+                    ...student,
+                    photo: `/cat/${index + 1}.jpg`,
+                  };
+                })}
+                onSelected={(s) => console.log("Selected", s)}
+                onPassPointer={() => {
+                  ding?.play();
+                }}
+              />
+            </div>
+            <div
+              onClick={() => setSelectFooter("EMTY")}
+              className="w-screen -z-10 h-screen bg-white/50 backdrop-blur  fixed top-0 right-0 left-0 bottom-0 m-auto"
+            ></div>
+          </div>
+        )}
         {subject.data && triggerQRCode && (
           <div
             className="w-screen z-40 h-screen flex items-center 

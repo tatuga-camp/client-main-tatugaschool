@@ -1,59 +1,96 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
-import AnimationModal from "./AnimationModal";
-import ConditionalFireworkEffect from "./AnimationFireworkEffectConditional";
-import { AnimationPanoramaCarouselProps } from "./types/AnimationPanoramaCarouselProps";
 import { AnimationImageItemProps } from "./types/AnimationImageItemProps";
+import AnimationCard from "./AnimationCard";
+interface AnimationPanoramaCarouselProps<T> {
+  images: T[];
+  onPassPointer: () => void;
+  onSelected: (onSelected: T | null) => void;
+}
 
-const AnimationPanoramaCarousel = <T extends AnimationImageItemProps,>({ images, isStarted, passPointer: passPointer, onPassPointer: setPointer, onSelected, setIsStarted }: AnimationPanoramaCarouselProps<T>) => {
-    const [clonedImages, setClonedImages] = useState<T[]>([]);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+const AnimationPanoramaCarousel = <T extends AnimationImageItemProps>({
+  images,
+  onPassPointer: onPassPointer,
+  onSelected,
+}: AnimationPanoramaCarouselProps<T>) => {
+  const [clonedImages, setClonedImages] = useState<T[]>([]);
+  const [isStarted, setIsStarted] = useState(false);
+  const [passPointer, setPassPointer] = useState<T | null>(null);
 
-    const RANDOM_IMAGE = images.length >= 6
-        ? images.slice(0, 6).sort(() => Math.random() - 0.5)
-        : [...images, ...images, ...images, ...images, ...images, ...images].slice(0, 6).sort(() => Math.random() - 0.5);
+  const RANDOM_IMAGE =
+    images.length >= 30
+      ? images.slice(0, 30).sort(() => Math.random() - 0.5)
+      : [
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+        ]
+          .slice(0, 30)
+          .sort(() => Math.random() - 0.5);
 
-    useEffect(() => {
-        setIsStarted(true);
-        setPointer(null);
-        setClonedImages(RANDOM_IMAGE);
-    }, []);
+  useEffect(() => {
+    setIsStarted(true);
+    setClonedImages(RANDOM_IMAGE);
+    onSelected(RANDOM_IMAGE[1]);
+  }, []);
 
-    const handleCloseModal = () => {
-        setIsModalOpen(false);
-        setIsStarted(false);
+  const handleCloseModal = () => {
+    setIsStarted(false);
+  };
+
+  const handleOpenModal = () => {
+    setIsStarted(true);
+    setClonedImages(RANDOM_IMAGE);
+  };
+
+  useEffect(() => {
+    if (!isStarted && passPointer) {
+      onSelected(passPointer);
     }
+  }, [passPointer, isStarted]);
 
-    const handleOpenModal = () => {
-        setIsModalOpen(true);
-        setIsStarted(true);
-        setPointer(null);
-        setClonedImages(RANDOM_IMAGE);
-    }
-
-    useEffect(() => {
-        if (!isStarted && passPointer) {
-            onSelected(passPointer);
-        }
-    }, [passPointer, isStarted]);
-
-    return (
-        <>
-            <button onClick={handleOpenModal} className="mt-4">Open Modal</button>
-
-            <AnimationModal<T>
-                isModalOpen={isModalOpen}
-                handleCloseModal={handleCloseModal}
-                clonedImages={clonedImages}
-                isStarted={isStarted}
-                passPointer={passPointer}
-                setPointer={setPointer}
-                setIsStarted={setIsStarted}
-                onSelected={onSelected}
-            />
-            <ConditionalFireworkEffect isStarted={isStarted} passPointer={passPointer} isModalOpen={isModalOpen} />
-        </>
-    );
+  return (
+    <div className="">
+      <button onClick={handleOpenModal} className="mt-4">
+        Open Modal
+      </button>
+      {clonedImages.length > 0 && (
+        <AnimationCard<T>
+          randomImages={clonedImages}
+          onPassPointer={onPassPointer}
+          setIsStarted={setIsStarted}
+          isStarted={isStarted}
+        />
+      )}
+    </div>
+  );
 };
 
 export default AnimationPanoramaCarousel;

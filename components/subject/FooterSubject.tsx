@@ -2,6 +2,7 @@ import React, { memo, ReactNode } from "react";
 import { FaRandom, FaStopwatch20, FaWpforms } from "react-icons/fa";
 import { GiPerspectiveDiceSixFacesRandom } from "react-icons/gi";
 import { PiStudentBold } from "react-icons/pi";
+import { TbArrowsRandom } from "react-icons/tb";
 
 const menuFooters: { title: ListMenuFooter; icon: ReactNode }[] = [
   {
@@ -18,11 +19,15 @@ const menuFooters: { title: ListMenuFooter; icon: ReactNode }[] = [
   },
   {
     title: "Wheel Of Name",
-    icon: <FaRandom />,
+    icon: <TbArrowsRandom />,
   },
   {
     title: "QR Code",
     icon: <FaStopwatch20 />,
+  },
+  {
+    title: "Slide Picker",
+    icon: <FaRandom />,
   },
 ];
 
@@ -33,7 +38,8 @@ export type ListMenuFooter =
   | "Attendance"
   | "Random Picker"
   | "QR Code"
-  | "EMTY";
+  | "EMTY"
+  | "Slide Picker";
 
 type Props = {
   setSelectFooter: React.Dispatch<React.SetStateAction<ListMenuFooter>>;
