@@ -213,7 +213,7 @@ function Index({ subjectId }: Props) {
         )}
         {subject.data && triggerQRCode && (
           <div
-            className="w-screen z-40 h-screen flex items-center 
+            className="w-screen z-50 h-screen flex items-center 
         justify-center fixed top-0 right-0 left-0 bottom-0 m-auto"
           >
             <div
@@ -230,7 +230,7 @@ function Index({ subjectId }: Props) {
         )}
         {triggerInviteTeacher && (
           <div
-            className="w-screen z-40 h-screen flex items-center 
+            className="w-screen z-50 h-screen flex items-center 
         justify-center fixed top-0 right-0 left-0 bottom-0 m-auto"
           >
             <div className="  border rounded-md" ref={inviteTeacherRef}>
@@ -363,7 +363,9 @@ function Index({ subjectId }: Props) {
           )}{" "}
           {selectMenu === "Assignment" && <Assignment />}
           {selectMenu === "Grade" && <Grade />}
-          {selectMenu === "Attendance" && <Attendance />}
+          {selectMenu === "Attendance" && (
+            <Attendance toast={toast} subjectId={subjectId} />
+          )}
           {selectMenu === "Setting Subject" && (
             <Setting subjectId={subjectId} />
           )}

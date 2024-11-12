@@ -1,4 +1,7 @@
-import { AttendanceTable } from "@/interfaces/AttendanceTable";
+import {
+  AttendanceStatusList,
+  AttendanceTable,
+} from "@/interfaces/AttendanceTable";
 import createAxiosInstance from "./apiService";
 
 const axiosInstance = createAxiosInstance();
@@ -6,7 +9,9 @@ type RequestGetAttendanceTablesService = {
   subjectId: string;
 };
 
-type ResponseGetAttendanceTablesService = AttendanceTable[];
+type ResponseGetAttendanceTablesService = (AttendanceTable & {
+  statusList: AttendanceStatusList[];
+})[];
 
 export async function GetAttendanceTablesService(
   input: RequestGetAttendanceTablesService

@@ -26,11 +26,7 @@ export type RequestUpdateAttendanceService = {
     attendanceId: string;
   };
   body: {
-    absent: boolean;
-    present: boolean;
-    holiday: boolean;
-    sick: boolean;
-    late: boolean;
+    status?: string;
     note?: string;
   };
 };
@@ -45,6 +41,34 @@ export async function UpdateAttendanceService(
       method: "PATCH",
       url: `/v1/attendances`,
       data: input,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Update Attendance request failed:", error.response.data);
+    throw error?.response?.data;
+  }
+}
+
+export type RequestUpdateManyAttendanceService = {
+  query: {
+    attendanceId: string;
+  };
+  body: {
+    status?: string;
+    note?: string;
+  };
+}[];
+
+type ResponseUpdateManyAttendanceService = Attendance[];
+
+export async function UpdateManyAttendanceService(
+  input: RequestUpdateManyAttendanceService
+): Promise<ResponseUpdateManyAttendanceService> {
+  try {
+    const response = await axiosInstance({
+      method: "PATCH",
+      url: `/v1/attendances/many`,
+      data: { data: input },
     });
     return response.data;
   } catch (error: any) {

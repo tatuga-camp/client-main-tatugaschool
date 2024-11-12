@@ -4,8 +4,10 @@ import {
   useGetAttendancesTable,
   useGetStudentOnSubject,
   useUpdateAttendance,
+  useUpdateManyAttendance,
 } from "../../react-query";
 import {
+  AttendanceStatusList,
   AttendanceTable,
   ErrorMessages,
   StudentOnSubject,
@@ -30,14 +32,17 @@ type Props = {
 };
 function AttendanceChecker({ subjectId, onClose, toast }: Props) {
   const queryClient = useQueryClient();
-  const [selectTable, setSelectTable] = React.useState<AttendanceTable | null>(
-    null
-  );
+  const [selectTable, setSelectTable] = React.useState<
+    | (AttendanceTable & {
+        statusList: AttendanceStatusList[];
+      })
+    | null
+  >(null);
   const successSong = useSound("/sounds/ding.mp3");
 
   const [loading, setLoading] = React.useState(false);
   const createAttendanceRow = useCreateAttendanceRow();
-  const updateAttendance = useUpdateAttendance();
+  const updateAttendance = useUpdateManyAttendance();
   const [triggerNote, setTriggerNote] = React.useState(false);
   const [attendanceData, setAttendanceData] = React.useState<{
     startDate?: string;
@@ -48,13 +53,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
   });
   const [studentAttendances, setStudentAttendances] = React.useState<
     | (StudentOnSubject & {
-        status: {
-          absent: boolean;
-          present: boolean;
-          holiday: boolean;
-          sick: boolean;
-          late: boolean;
-        };
+        status: string | "UNKNOW";
         note: string;
       })[]
     | null
@@ -77,13 +76,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
       setStudentAttendances(
         studentOnSubjects.data.map((student) => ({
           ...student,
-          status: {
-            absent: false,
-            present: false,
-            holiday: false,
-            sick: false,
-            late: false,
-          },
+          status: "UNKNOW",
           note: "",
         }))
       );
@@ -103,17 +96,9 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
       if (!prev) return null;
       return prev.map((student) => {
         if (student.id === studentId) {
-          const updatedStatus = Object.keys(student.status).reduce((acc, k) => {
-            acc[k as keyof typeof student.status] = false;
-            return acc;
-          }, {} as typeof student.status);
-
-          // Set the selected key to `check` (true or false)
-          updatedStatus[key as keyof typeof student.status] = check;
-
           return {
             ...student,
-            status: updatedStatus,
+            status: key,
           };
         }
         return student;
@@ -125,16 +110,9 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
     setStudentAttendances((prev) => {
       if (!prev) return null;
       return prev.map((student) => {
-        const updatedStatus = Object.keys(student.status).reduce((acc, k) => {
-          acc[k as keyof typeof student.status] = false;
-          return acc;
-        }, {} as typeof student.status);
-
-        // Set the selected key to `check` (true or false)
-        updatedStatus[key as keyof typeof student.status] = check;
         return {
           ...student,
-          status: updatedStatus,
+          status: key,
         };
       });
     });
@@ -163,24 +141,26 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
         queryClient,
       });
 
-      for (const attendance of create.attendances) {
-        const student = studentAttendances.find(
-          (s) => s.id === attendance.studentOnSubjectId
-        );
-        if (!student) continue;
-        await updateAttendance.mutateAsync({
-          request: {
-            query: {
-              attendanceId: attendance.id,
-            },
-            body: {
-              ...student.status,
-              note: student.note,
-            },
+      const data = studentAttendances.map((student) => {
+        const attendanceId = create.attendances.find(
+          (a) => a.studentOnSubjectId === student.id
+        )?.id;
+        if (!attendanceId) return null;
+        return {
+          query: {
+            attendanceId: attendanceId,
           },
-          queryClient,
-        });
-      }
+          body: {
+            status: student.status,
+            note: student.note,
+          },
+        };
+      });
+      const filterData = data.filter((d) => d !== null);
+      await updateAttendance.mutateAsync({
+        request: filterData,
+        queryClient,
+      });
       show();
       successSong?.play();
       setLoading(false);
@@ -261,9 +241,22 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
                 value={attendanceData.startDate}
                 onChange={(e) =>
                   setAttendanceData((prev) => {
+                    if (e.target.value === "") {
+                      return {
+                        ...prev,
+                        startDate: e.target.value,
+                        endDate: e.target.value,
+                      };
+                    }
+
+                    const [datePart, timePart] = e.target.value.split("T");
+
+                    const [hours, minutes] = timePart.split(":").map(Number);
+                    const plusOneHour = `${datePart}T${hours + 1}:${minutes}`;
                     return {
                       ...prev,
                       startDate: e.target.value,
+                      endDate: plusOneHour,
                     };
                   })
                 }
@@ -300,61 +293,23 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
         </h2>
         <li className="p-2  gap-2 grid bg-gray-200/50 grid-cols-9">
           <div className="col-span-2 flex items-center">Name</div>
-          <button
-            onClick={(e) =>
-              handleCheckAll({ key: e.currentTarget.name, check: true })
-            }
-            name="present"
-            className="text-center select-none rounded-md hover:drop-shadow-md cursor-pointer active:scale-105
-             hover:bg-white transition hover:text-black
-           flex items-center justify-center gap-1"
-          >
-            Present <TbSelectAll />
-          </button>
-          <button
-            name="absent"
-            onClick={(e) =>
-              handleCheckAll({ key: e.currentTarget.name, check: true })
-            }
-            className="text-center select-none rounded-md hover:drop-shadow-md cursor-pointer active:scale-105
-             hover:bg-white transition hover:text-black
-           flex items-center justify-center gap-1"
-          >
-            Absent <TbSelectAll />
-          </button>
-          <button
-            onClick={(e) =>
-              handleCheckAll({ key: e.currentTarget.name, check: true })
-            }
-            name="holiday"
-            className="text-center select-none rounded-md hover:drop-shadow-md cursor-pointer active:scale-105
-             hover:bg-white transition hover:text-black
-           flex items-center justify-center gap-1"
-          >
-            Holiday <TbSelectAll />
-          </button>
-          <button
-            onClick={(e) =>
-              handleCheckAll({ key: e.currentTarget.name, check: true })
-            }
-            name="sick"
-            className="text-center select-none rounded-md hover:drop-shadow-md cursor-pointer active:scale-105
-             hover:bg-white transition hover:text-black
-           flex items-center justify-center gap-1"
-          >
-            Sick <TbSelectAll />
-          </button>
-          <button
-            onClick={(e) =>
-              handleCheckAll({ key: e.currentTarget.name, check: true })
-            }
-            name="late"
-            className="text-center select-none rounded-md hover:drop-shadow-md cursor-pointer active:scale-105
-             hover:bg-white transition hover:text-black
-           flex items-center justify-center gap-1"
-          >
-            Late <TbSelectAll />
-          </button>
+          {selectTable?.statusList.map((status, index) => {
+            return (
+              <button
+                key={status.id}
+                onClick={(e) =>
+                  handleCheckAll({ key: e.currentTarget.name, check: true })
+                }
+                style={{ backgroundColor: status.color }}
+                name={status.title}
+                className={`text-center select-none rounded-md hover:drop-shadow-md cursor-pointer active:scale-105
+            transition hover:text-black
+           flex items-center justify-center gap-1`}
+              >
+                {status.title} <TbSelectAll />
+              </button>
+            );
+          })}
 
           <button
             onClick={() => setTriggerNote((prev) => !prev)}
@@ -383,11 +338,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
           <ul className="grid  grid-cols-1 max-h-72 hideScrollBar overflow-auto">
             {studentAttendances
               ?.filter((s) => s.isActive)
-              .sort(
-                (a, b) =>
-                  a.number.localeCompare(a.number) -
-                  b.number.localeCompare(b.number)
-              )
+              .sort((a, b) => Number(a.number) - Number(b.number))
               .map((student, index) => {
                 const odd = index % 2 === 0;
                 return (
@@ -421,81 +372,30 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
                         </p>
                       </div>
                     </div>
-                    <div className="w-full flex justify-center items-center ">
-                      <input
-                        name="present"
-                        checked={student.status.present}
-                        onChange={(e) =>
-                          handleCheck({
-                            studentId: student.id,
-                            key: e.target.name,
-                            check: e.target.checked,
-                          })
-                        }
-                        type="checkbox"
-                        className="w-6 h-6"
-                      />
-                    </div>
-                    <div className="w-full flex justify-center items-center ">
-                      <input
-                        checked={student.status.absent}
-                        onChange={(e) =>
-                          handleCheck({
-                            studentId: student.id,
-                            key: e.target.name,
-                            check: e.target.checked,
-                          })
-                        }
-                        name="absent"
-                        type="checkbox"
-                        className="w-6 h-6"
-                      />
-                    </div>
-                    <div className="w-full flex justify-center items-center ">
-                      <input
-                        checked={student.status.holiday}
-                        onChange={(e) =>
-                          handleCheck({
-                            studentId: student.id,
-                            key: e.target.name,
-                            check: e.target.checked,
-                          })
-                        }
-                        name="holiday"
-                        type="checkbox"
-                        className="w-6 h-6"
-                      />
-                    </div>
-                    <div className="w-full flex justify-center items-center ">
-                      <input
-                        checked={student.status.sick}
-                        onChange={(e) =>
-                          handleCheck({
-                            studentId: student.id,
-                            key: e.target.name,
-                            check: e.target.checked,
-                          })
-                        }
-                        name="sick"
-                        type="checkbox"
-                        className="w-6 h-6"
-                      />
-                    </div>
-                    <div className="w-full flex justify-center items-center ">
-                      <input
-                        checked={student.status.late}
-                        onChange={(e) =>
-                          handleCheck({
-                            studentId: student.id,
-                            key: e.target.name,
-                            check: e.target.checked,
-                          })
-                        }
-                        name="late"
-                        type="checkbox"
-                        className="w-6 h-6"
-                      />
-                    </div>
+                    {selectTable?.statusList.map((status, index) => {
+                      return (
+                        <div
+                          key={student.id + status.id}
+                          className="w-full flex justify-center items-center "
+                        >
+                          <input
+                            name={status.title}
+                            checked={student.status === status.title}
+                            onChange={(e) =>
+                              handleCheck({
+                                studentId: student.id,
+                                key: e.target.name,
+                                check: e.target.checked,
+                              })
+                            }
+                            style={{ accentColor: status.color }}
+                            type="checkbox"
+                            className="w-6 h-6 "
+                          />
+                        </div>
+                      );
+                    })}
+
                     <textarea
                       value={student.note}
                       onChange={(e) =>

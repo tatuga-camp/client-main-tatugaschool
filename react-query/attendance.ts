@@ -10,7 +10,9 @@ import {
   GetAttendanceTablesService,
   RequestCreateAttendanceRowService,
   RequestUpdateAttendanceService,
+  RequestUpdateManyAttendanceService,
   UpdateAttendanceService,
+  UpdateManyAttendanceService,
 } from "../services";
 import { Attendance, AttendanceRow } from "../interfaces";
 
@@ -83,6 +85,44 @@ export function useUpdateAttendance() {
               };
             }
             return attendanceRow;
+          });
+        }
+      );
+    },
+  });
+}
+
+export function useUpdateManyAttendance() {
+  return useMutation({
+    mutationKey: ["update-many-attendance"],
+    mutationFn: (request: {
+      request: RequestUpdateManyAttendanceService;
+      queryClient: QueryClient;
+    }) => UpdateManyAttendanceService(request.request),
+    onSuccess(data, variables, context) {
+      variables.queryClient.setQueryData(
+        ["attendance-rows", { attendanceTableId: data[0].attendanceTableId }],
+        (oldData: (AttendanceRow & { attendances: Attendance[] })[]) => {
+          return oldData?.map((attendanceRow) => {
+            const attendanceWIthRowIds = data.filter(
+              (a) => a.attendanceRowId === attendanceRow.id
+            );
+            if (attendanceWIthRowIds.length > 0) {
+              return {
+                ...attendanceRow,
+                attendances: attendanceRow.attendances.map((attendance) => {
+                  const updatedAttendance = attendanceWIthRowIds.find(
+                    (a) => a.id === attendance.id
+                  );
+                  if (updatedAttendance) {
+                    return updatedAttendance;
+                  }
+                  return attendance;
+                }),
+              };
+            } else {
+              return attendanceRow;
+            }
           });
         }
       );

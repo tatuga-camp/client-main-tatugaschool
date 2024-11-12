@@ -16,8 +16,8 @@ const Header = () => {
   const pathname = usePathname();
 
   const classLinkActive =
-    "bg-[#E3E0EF38] text-white px-4 py-2 rounded-md font-semibold";
-  const classLinkInactive = "bg-transparent text-white";
+    "bg-blue-500/50 text-black px-4 py-2 rounded-md font-semibold";
+  const classLinkInactive = "bg-transparent text-black";
   const isSchoolPage = pathname === "/";
   const isAccountPage = pathname.startsWith("/account");
   const isActiveClass = (path: boolean) =>
@@ -25,7 +25,7 @@ const Header = () => {
   return (
     <header
       className="flex flex-col h-20 sticky z-50
-     top-0 md:flex-row justify-between items-center p-4 bg-[#6f47dd84] backdrop-blur text-white gap-4"
+     top-0 md:flex-row justify-between items-center p-4 bg-white/50 backdrop-blur text-white gap-4"
     >
       <Link
         href="/"
@@ -43,7 +43,7 @@ const Header = () => {
             alt="logo tatuga school"
           />
         </div>
-        <div className="font-bold uppercase hidden md:block text-xs md:text-base text-white">
+        <div className="font-bold uppercase hidden md:block text-xs md:text-base text-black">
           Tatuga School
         </div>
       </Link>
