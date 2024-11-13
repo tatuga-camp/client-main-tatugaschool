@@ -14,11 +14,12 @@ interface AnimationCardProps<T> {
 
 const IMAGE_WIDTH = 200;
 const GAP = 0.9 * 16; // Gap in pixels (0.9rem)
+const GAP_BETWEEN_IMAGE = 10;
 const INITIAL_SPEED = 0.5;
 const TIME_INITIAL = (INITIAL_SPEED * 2) * 1000;
 const SLOWDOWN_SPEED = 1;
 const TIME_SLOWDOWN = (SLOWDOWN_SPEED * 1000) + TIME_INITIAL;
-const SLOWDOWN_STOP = 2;;
+const SLOWDOWN_STOP = 2;
 
 const AnimationCard = <T extends AnimationImageItemProps>({
   randomImages,
@@ -29,6 +30,8 @@ const AnimationCard = <T extends AnimationImageItemProps>({
   const x = useMotionValue(0);
   const TOTAL_WIDTH = (IMAGE_WIDTH + GAP) * randomImages.length;
   const [currentIndex, setCurrentIndex] = React.useState(0);
+
+  
   useEffect(() => {
     startAnimation();
     return () => controls.stop();
@@ -90,8 +93,11 @@ const AnimationCard = <T extends AnimationImageItemProps>({
     const centerPosition = window.innerWidth / 2;
     const currentPosition = -latest;
     const index = Math.floor(
-      (currentPosition + centerPosition) / (IMAGE_WIDTH + GAP)
+      (currentPosition + centerPosition) / (IMAGE_WIDTH + GAP + GAP_BETWEEN_IMAGE)
     );
+
+    console.log(index);
+    
 
     setCurrentIndex((prev) => {
       if (index !== prev) {
