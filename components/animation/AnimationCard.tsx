@@ -8,7 +8,8 @@ import React from "react";
 interface AnimationCardProps<T> {
   randomImages: T[];
   onPassPointer: () => void;
-  setIsStarted: (start: boolean) => void;
+  onStart: (start: boolean) => void;
+  onFinished: () => void;
   isStarted: boolean;
 }
 
@@ -16,41 +17,42 @@ const IMAGE_WIDTH = 200;
 const GAP = 0.9 * 16; // Gap in pixels (0.9rem)
 const GAP_BETWEEN_IMAGE = 10;
 const INITIAL_SPEED = 1;
-const TIME_INITIAL = (INITIAL_SPEED * 2) * 1000;
+const TIME_INITIAL = INITIAL_SPEED * 2 * 1000;
 const SLOWDOWN_SPEED = 3;
-const TIME_SLOWDOWN = (SLOWDOWN_SPEED * 1000) + TIME_INITIAL;
-const SLOWDOWN_STOP = 5;
+const TIME_SLOWDOWN = SLOWDOWN_SPEED * 1000 + TIME_INITIAL;
+const SLOWDOWN_STOP = 7;
 
 const AnimationCard = <T extends AnimationImageItemProps>({
   randomImages,
   onPassPointer,
-  setIsStarted,
+  onStart,
+  onFinished,
+  isStarted,
 }: AnimationCardProps<T>) => {
   const controls = useAnimationControls();
+  const [onProgress, setOnProgress] = React.useState(false);
   const x = useMotionValue(0);
   const TOTAL_WIDTH = (IMAGE_WIDTH + GAP) * randomImages.length;
   const [currentIndex, setCurrentIndex] = React.useState(0);
 
-  
   useEffect(() => {
-    startAnimation();
-    return () => controls.stop();
-  }, []);
-
-  useEffect(() => {
-    const timer = setTimeout(handleSlowdown, TIME_INITIAL);
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    const timer = setTimeout(handleSlowdownAndStop, TIME_SLOWDOWN);
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    const unsubscribe = x.onChange(handleImageSelection);
-    return () => unsubscribe();
-  }, []);
+    if (isStarted && !onProgress) {
+      startAnimation();
+      const timerStart = setTimeout(handleSlowdown, TIME_INITIAL);
+      const timerSlow = setTimeout(handleSlowdownAndStop, TIME_SLOWDOWN);
+      const unsubscribe = x.onChange(handleImageSelection);
+      setOnProgress(true);
+      return () => {
+        controls.stop();
+        clearTimeout(timerStart);
+        clearTimeout(timerSlow);
+        unsubscribe();
+      };
+    } else {
+      setOnProgress(false);
+      controls.stop();
+    }
+  }, [isStarted]);
 
   const startAnimation = () => {
     controls.start({
@@ -62,7 +64,7 @@ const AnimationCard = <T extends AnimationImageItemProps>({
         repeatType: "loop",
       },
     });
-    setIsStarted(true);
+    onStart(true);
   };
 
   const handleSlowdown = async () => {
@@ -87,17 +89,19 @@ const AnimationCard = <T extends AnimationImageItemProps>({
       },
     });
     controls.stop();
-    setTimeout(() => setIsStarted(false), 500);
+    setTimeout(() => {
+      setOnProgress(false);
+      onStart(false);
+      onFinished();
+    }, 100);
   };
   const handleImageSelection = (latest: number) => {
     const centerPosition = window.innerWidth / 2;
     const currentPosition = -latest;
     const index = Math.floor(
-      (currentPosition + centerPosition) / (IMAGE_WIDTH + GAP + GAP_BETWEEN_IMAGE)
+      (currentPosition + centerPosition) /
+        (IMAGE_WIDTH + GAP + GAP_BETWEEN_IMAGE)
     );
-
-    console.log(index);
-    
 
     setCurrentIndex((prev) => {
       if (index !== prev) {
@@ -109,7 +113,8 @@ const AnimationCard = <T extends AnimationImageItemProps>({
 
   return (
     <div className="w-full flex justify-center items-center relative">
-      <div className="absolute h-full w-[1px] bg-gray-100 p-0 z-10 rounded-full" />
+      <div className="absolute h-60 w-[3px] bg-black p-0 z-10  rounded-full" />
+
       <div className=" max-w-2xl min-w-[42rem] overflow-hidden ">
         <motion.div
           style={{

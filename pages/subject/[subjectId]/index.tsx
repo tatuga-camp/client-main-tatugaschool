@@ -43,8 +43,8 @@ import Image from "next/image";
 import { IoQrCode } from "react-icons/io5";
 import QRCode from "../../../components/subject/QRCode";
 import StopWatch from "../../../components/subject/StopWatch";
-import AnimationPanoramaCarousel from "../../../components/animation/AnimationPanoramaCarousel";
 import { useSound } from "../../../hook";
+import SilderPicker from "../../../components/subject/SilderPicker";
 
 type Props = {
   subjectId: string;
@@ -205,18 +205,14 @@ function Index({ subjectId }: Props) {
             className="w-screen z-40 h-screen flex items-center 
         justify-center fixed top-0 right-0 left-0 bottom-0 m-auto"
           >
-            <div className="">
-              <AnimationPanoramaCarousel<StudentOnSubject>
+            <div className="bg-white p-10">
+              <SilderPicker<StudentOnSubject>
                 images={studentOnSubjects.data.map((student, index) => {
                   return {
                     ...student,
                     photo: `/cat/${index + 1}.jpg`,
                   };
                 })}
-                onSelected={(s) => console.log("Selected", s)}
-                onPassPointer={() => {
-                  ding?.play();
-                }}
               />
             </div>
             <div
