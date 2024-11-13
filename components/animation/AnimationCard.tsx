@@ -15,11 +15,11 @@ interface AnimationCardProps<T> {
 const IMAGE_WIDTH = 200;
 const GAP = 0.9 * 16; // Gap in pixels (0.9rem)
 const GAP_BETWEEN_IMAGE = 10;
-const INITIAL_SPEED = 0.5;
+const INITIAL_SPEED = 1;
 const TIME_INITIAL = (INITIAL_SPEED * 2) * 1000;
-const SLOWDOWN_SPEED = 1;
+const SLOWDOWN_SPEED = 3;
 const TIME_SLOWDOWN = (SLOWDOWN_SPEED * 1000) + TIME_INITIAL;
-const SLOWDOWN_STOP = 2;
+const SLOWDOWN_STOP = 5;
 
 const AnimationCard = <T extends AnimationImageItemProps>({
   randomImages,
