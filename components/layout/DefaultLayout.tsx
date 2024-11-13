@@ -6,7 +6,7 @@ import { useRouter } from "next/router";
 
 const DefaultLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="min-h-screen font-Anuphan bg-[#6f47dd]">
+    <div className="min-h-screen font-Anuphan w-full bg-background-color">
       <SchoolListHeader />
       {children}
     </div>

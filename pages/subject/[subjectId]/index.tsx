@@ -205,7 +205,7 @@ function Index({ subjectId }: Props) {
             className="w-screen z-40 h-screen flex items-center 
         justify-center fixed top-0 right-0 left-0 bottom-0 m-auto"
           >
-            <div className="bg-white p-10">
+            <div className="">
               <SilderPicker<StudentOnSubject>
                 images={studentOnSubjects.data.map((student, index) => {
                   return {
@@ -373,7 +373,7 @@ function Index({ subjectId }: Props) {
           )}{" "}
           {selectMenu === "Assignment" && <Assignment />}
           {selectMenu === "Grade" && <Grade />}
-          {selectMenu === "Attendance" && <Attendance />}
+          {selectMenu === "Attendance" && <Attendance subjectId={subjectId} />}
           {selectMenu === "Setting Subject" && (
             <Setting subjectId={subjectId} />
           )}

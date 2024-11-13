@@ -1,4 +1,7 @@
-import { AttendanceTable } from "@/interfaces/AttendanceTable";
+import {
+  AttendanceStatusList,
+  AttendanceTable,
+} from "@/interfaces/AttendanceTable";
 import createAxiosInstance from "./apiService";
 
 const axiosInstance = createAxiosInstance();
@@ -6,7 +9,9 @@ type RequestGetAttendanceTablesService = {
   subjectId: string;
 };
 
-type ResponseGetAttendanceTablesService = AttendanceTable[];
+type ResponseGetAttendanceTablesService = (AttendanceTable & {
+  statusLists: AttendanceStatusList[];
+})[];
 
 export async function GetAttendanceTablesService(
   input: RequestGetAttendanceTablesService
@@ -14,8 +19,7 @@ export async function GetAttendanceTablesService(
   try {
     const response = await axiosInstance({
       method: "GET",
-      url: `/v1/attendance-tables`,
-      params: { subjectId: input.subjectId },
+      url: `/v1/attendance-tables/subject/${input.subjectId}`,
     });
 
     return response.data;
@@ -47,12 +51,10 @@ export async function GetAttendanceTableByIdService(
   }
 }
 
-type RequestCreateAttendanceTableService = {
+export type RequestCreateAttendanceTableService = {
   title: string;
   description?: string;
   subjectId: string;
-  teamId: string;
-  schoolId: string;
 };
 
 type ResponseCreateAttendanceTableService = AttendanceTable;

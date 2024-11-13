@@ -4,11 +4,7 @@ export interface Attendance {
   updateAt: Date;
   startDate: Date;
   endDate: Date;
-  absent: boolean;
-  present: boolean;
-  holiday: boolean;
-  sick: boolean;
-  late: boolean;
+  status: string;
   note?: string;
   attendanceTableId: string;
   studentId: string;
