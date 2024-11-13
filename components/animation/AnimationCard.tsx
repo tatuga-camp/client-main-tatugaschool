@@ -14,9 +14,11 @@ interface AnimationCardProps<T> {
 
 const IMAGE_WIDTH = 200;
 const GAP = 0.9 * 16; // Gap in pixels (0.9rem)
-const INITIAL_SPEED = 5;
-const SLOWDOWN_SPEED = 10;
-const SLOWDOWN_STOP = 15;
+const INITIAL_SPEED = 0.5;
+const TIME_INITIAL = (INITIAL_SPEED * 2) * 1000;
+const SLOWDOWN_SPEED = 1;
+const TIME_SLOWDOWN = (SLOWDOWN_SPEED * 1000) + TIME_INITIAL;
+const SLOWDOWN_STOP = 2;;
 
 const AnimationCard = <T extends AnimationImageItemProps>({
   randomImages,
@@ -33,12 +35,12 @@ const AnimationCard = <T extends AnimationImageItemProps>({
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(handleSlowdown, 3000);
+    const timer = setTimeout(handleSlowdown, TIME_INITIAL);
     return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(handleSlowdownAndStop, 5000);
+    const timer = setTimeout(handleSlowdownAndStop, TIME_SLOWDOWN);
     return () => clearTimeout(timer);
   }, []);
 
@@ -125,6 +127,31 @@ const AnimationCard = <T extends AnimationImageItemProps>({
         >
           {randomImages.map((image, index) => (
             <div
+              key={`${image.id}-${index}`}
+              className="bg-white flex flex-col items-center justify-start
+               rounded-md h-60 ring-1 ring-black overflow-hidden"
+              style={{ width: `${IMAGE_WIDTH}px` }}
+            >
+              <div className="w-full h-40 bg-gray-100 relative rounded overflow-hidden">
+                <Image
+                  key={`${image.id}-${index}`}
+                  src={image.photo}
+                  alt={`Scroll item ${index}`}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <h1 className="text-lg font-semibold text-balance break-words w-full text-center">
+                {image.firstName} {image.lastName}
+              </h1>
+              <h1 className="text-md font-normal text-gray-500 break-words w-full text-center">
+                Number {image.number}
+              </h1>
+            </div>
+          ))}
+          {randomImages.map((image, index) => (
+            <div
+              key={`${image.id}-${index}`}
               className="bg-white flex flex-col items-center justify-start
                rounded-md h-60 ring-1 ring-black overflow-hidden"
               style={{ width: `${IMAGE_WIDTH}px` }}
