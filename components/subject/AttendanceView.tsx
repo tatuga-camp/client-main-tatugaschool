@@ -23,7 +23,7 @@ type props = {
   onClose: () => void;
   toast: React.RefObject<Toast>;
 
-  attendanceTable: AttendanceTable & { statusList: AttendanceStatusList[] };
+  attendanceTable: AttendanceTable & { statusLists: AttendanceStatusList[] };
 };
 function AttendanceView({
   selectAttendance,
@@ -147,7 +147,7 @@ function AttendanceView({
               </span>
             </div>
             <div className="flex flex-col">
-              {attendanceTable.statusList.map((status, index) => {
+              {attendanceTable.statusLists.map((status, index) => {
                 const odd = index % 2 === 0;
                 return (
                   <div

@@ -83,7 +83,7 @@ type UpdateAttendanceRowBody = {
   note?: string;
 };
 
-type RequestUpdateAttendanceRowService = {
+export type RequestUpdateAttendanceRowService = {
   query: UpdateAttendanceRowQuery;
   body: UpdateAttendanceRowBody;
 };
@@ -94,8 +94,8 @@ export async function UpdateAttendanceRowService(
   try {
     const response = await axiosInstance({
       method: "PATCH",
-      url: `/v1/attendance-rows/${input.query.attendanceRowId}`,
-      data: input.body,
+      url: `/v1/attendance-rows`,
+      data: input,
     });
 
     return response.data;

@@ -10,7 +10,7 @@ type RequestGetAttendanceTablesService = {
 };
 
 type ResponseGetAttendanceTablesService = (AttendanceTable & {
-  statusList: AttendanceStatusList[];
+  statusLists: AttendanceStatusList[];
 })[];
 
 export async function GetAttendanceTablesService(
@@ -51,12 +51,10 @@ export async function GetAttendanceTableByIdService(
   }
 }
 
-type RequestCreateAttendanceTableService = {
+export type RequestCreateAttendanceTableService = {
   title: string;
   description?: string;
   subjectId: string;
-  teamId: string;
-  schoolId: string;
 };
 
 type ResponseCreateAttendanceTableService = AttendanceTable;

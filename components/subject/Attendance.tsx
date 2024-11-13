@@ -21,6 +21,9 @@ import { MdOutlineSpeakerNotes } from "react-icons/md";
 import useClickOutside from "../../hook/useClickOutside";
 import AttendanceView from "./AttendanceView";
 import { Toast } from "primereact/toast";
+import AttendanceRowView from "./AttendanceRowView";
+import { CiViewTable } from "react-icons/ci";
+import AttendanceTableCreate from "./AttendanceTableCreate";
 
 function Attendance({
   subjectId,
@@ -29,6 +32,8 @@ function Attendance({
   subjectId: string;
   toast: React.RefObject<Toast>;
 }) {
+  const [triggerCreateAttendanceTable, setTriggerCreateAttendanceTable] =
+    React.useState(false);
   const studentOnSubjects = useGetStudentOnSubject({
     subjectId,
   });
@@ -41,10 +46,11 @@ function Attendance({
   >(null);
   const [selectTable, setSelectTable] = React.useState<
     | (AttendanceTable & {
-        statusList: AttendanceStatusList[];
+        statusLists: AttendanceStatusList[];
       })
     | null
   >(null);
+  const [selectRow, setSelectRow] = React.useState<AttendanceRow | null>(null);
   const rows = useGetAttendanceRowByTableId({
     attendanceTableId: selectTable?.id ?? "",
   });
@@ -84,6 +90,49 @@ function Attendance({
           bg-white/50 backdrop-blur fixed  m-auto -z-10"
         ></footer>
       </div>
+
+      <div
+        className={`fixed ${
+          selectRow ? "flex" : "hidden"
+        } top-0 bottom-0 right-0 left-0 flex items-center justify-center m-auto z-50`}
+      >
+        <div className="bg-white w-7/12 p-2 rounded-md border">
+          {selectRow && (
+            <AttendanceRowView
+              toast={toast}
+              selectRow={selectRow}
+              onClose={() => setSelectRow(null)}
+            />
+          )}
+        </div>
+        <footer
+          onClick={() => setSelectRow(null)}
+          className="top-0 bottom-0 w-screen h-screen right-0 left-0 
+          bg-white/50 backdrop-blur fixed  m-auto -z-10"
+        ></footer>
+      </div>
+
+      <div
+        className={`fixed ${
+          triggerCreateAttendanceTable ? "flex" : "hidden"
+        } top-0 bottom-0 right-0 left-0 flex items-center justify-center m-auto z-50`}
+      >
+        <div className=" w-96 h-max bg-background-color p-2 rounded-md border">
+          {triggerCreateAttendanceTable && (
+            <AttendanceTableCreate
+              toast={toast}
+              subjectId={subjectId}
+              onClose={() => setTriggerCreateAttendanceTable(false)}
+            />
+          )}
+        </div>
+        <footer
+          onClick={() => setTriggerCreateAttendanceTable(false)}
+          className="top-0 bottom-0 w-screen h-screen right-0 left-0 
+          bg-white/50 backdrop-blur fixed  m-auto -z-10"
+        ></footer>
+      </div>
+
       <header className="w-full flex justify-between px-40">
         <section className="">
           <h1 className="text-3xl font-semibold">Attendance Data</h1>
@@ -92,13 +141,21 @@ function Attendance({
           </span>
         </section>
         <section className="flex items-center gap-1">
+          <button
+            onClick={() => setTriggerCreateAttendanceTable(true)}
+            className="main-button flex items-center justify-center gap-1 py-1 ring-1 ring-blue-600 "
+          >
+            <CiViewTable />
+            Create Table
+          </button>
           <button className="main-button flex items-center justify-center gap-1 py-1 ring-1 ring-blue-600 ">
             <SiMicrosoftexcel />
             Export
           </button>
+
           <button className="second-button flex items-center justify-center gap-1 py-1 border ">
             <BiCustomize />
-            Customize
+            Customize / Edit
           </button>
         </section>
       </header>
@@ -141,8 +198,8 @@ function Attendance({
         >
           <table className="table-fixed bg-white">
             <thead className="">
-              <tr className="border-b h-14 bg-white sticky top-0 z-40">
-                <th className="text-sm sticky left-0 bg-white font-semibold">
+              <tr className="border-b  bg-white sticky top-0 z-40">
+                <th className="text-sm z-40 sticky left-0 bg-white font-semibold">
                   <div className="w-96 flex justify-start items-center gap-2">
                     <FaUser />
                     Name
@@ -171,10 +228,23 @@ function Attendance({
                     );
                     return (
                       <th key={row.id} className="text-sm  font-semibold">
-                        <div className="w-40 flex items-start flex-col">
+                        <button
+                          onClick={() => setSelectRow(row)}
+                          className="w-40 p-2 relative active:bg-gray-200
+                         hover:bg-gray-100  hover:ring-1 flex items-start flex-col"
+                        >
+                          {row?.note && (
+                            <div
+                              className="w-5 h-5 bg-white absolute flex items-center justify-center
+                               top-1 m-auto right-1
+                              rounded-full border-2 border-black"
+                            >
+                              <MdOutlineSpeakerNotes />
+                            </div>
+                          )}
                           <span>{dateFormat}</span>
                           <span className="text-xs text-gray-500">{time}</span>
-                        </div>
+                        </button>
                       </th>
                     );
                   })}
@@ -241,7 +311,7 @@ function Attendance({
                               }}
                               style={{
                                 backgroundColor:
-                                  selectTable?.statusList.find(
+                                  selectTable?.statusLists.find(
                                     (s) => s.title === attendance?.status
                                   )?.color ?? "#94a3b8",
                               }}

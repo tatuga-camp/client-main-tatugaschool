@@ -34,7 +34,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
   const queryClient = useQueryClient();
   const [selectTable, setSelectTable] = React.useState<
     | (AttendanceTable & {
-        statusList: AttendanceStatusList[];
+        statusLists: AttendanceStatusList[];
       })
     | null
   >(null);
@@ -293,23 +293,25 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
         </h2>
         <li className="p-2  gap-2 grid bg-gray-200/50 grid-cols-9">
           <div className="col-span-2 flex items-center">Name</div>
-          {selectTable?.statusList.map((status, index) => {
-            return (
-              <button
-                key={status.id}
-                onClick={(e) =>
-                  handleCheckAll({ key: e.currentTarget.name, check: true })
-                }
-                style={{ backgroundColor: status.color }}
-                name={status.title}
-                className={`text-center select-none rounded-md hover:drop-shadow-md cursor-pointer active:scale-105
+          {selectTable?.statusLists
+            .sort((a, b) => b.title.localeCompare(a.title))
+            .map((status, index) => {
+              return (
+                <button
+                  key={status.id}
+                  onClick={(e) =>
+                    handleCheckAll({ key: e.currentTarget.name, check: true })
+                  }
+                  style={{ backgroundColor: status.color }}
+                  name={status.title}
+                  className={`text-center select-none rounded-md hover:drop-shadow-md cursor-pointer active:scale-105
             transition hover:text-black
            flex items-center justify-center gap-1`}
-              >
-                {status.title} <TbSelectAll />
-              </button>
-            );
-          })}
+                >
+                  {status.title} <TbSelectAll />
+                </button>
+              );
+            })}
 
           <button
             onClick={() => setTriggerNote((prev) => !prev)}
@@ -372,7 +374,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
                         </p>
                       </div>
                     </div>
-                    {selectTable?.statusList.map((status, index) => {
+                    {selectTable?.statusLists.map((status, index) => {
                       return (
                         <div
                           key={student.id + status.id}

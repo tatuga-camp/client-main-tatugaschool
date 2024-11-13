@@ -6,15 +6,19 @@ import {
 } from "@tanstack/react-query";
 import {
   CreateAttendanceRowService,
+  CreateAttendanceTableService,
   GetAttendanceRowByTabelIdService,
   GetAttendanceTablesService,
   RequestCreateAttendanceRowService,
+  RequestCreateAttendanceTableService,
+  RequestUpdateAttendanceRowService,
   RequestUpdateAttendanceService,
   RequestUpdateManyAttendanceService,
+  UpdateAttendanceRowService,
   UpdateAttendanceService,
   UpdateManyAttendanceService,
 } from "../services";
-import { Attendance, AttendanceRow } from "../interfaces";
+import { Attendance, AttendanceRow, AttendanceTable } from "../interfaces";
 
 export function useGetAttendancesTable({ subjectId }: { subjectId: string }) {
   return useQuery({
@@ -124,6 +128,49 @@ export function useUpdateManyAttendance() {
               return attendanceRow;
             }
           });
+        }
+      );
+    },
+  });
+}
+export function useUpdateRowAttendance() {
+  return useMutation({
+    mutationKey: ["update-row-attendance"],
+    mutationFn: (request: {
+      request: RequestUpdateAttendanceRowService;
+      queryClient: QueryClient;
+    }) => UpdateAttendanceRowService(request.request),
+    onSuccess(data, variables, context) {
+      variables.queryClient.setQueryData(
+        ["attendance-rows", { attendanceTableId: data.attendanceTableId }],
+        (oldData: (AttendanceRow & { attendances: Attendance[] })[]) => {
+          return oldData?.map((attendanceRow) => {
+            if (attendanceRow.id === data.id) {
+              return {
+                ...data,
+                attendances: attendanceRow.attendances,
+              };
+            }
+            return attendanceRow;
+          });
+        }
+      );
+    },
+  });
+}
+
+export function useCreateAttendanceTable() {
+  return useMutation({
+    mutationKey: ["create-attendance-table"],
+    mutationFn: (request: {
+      request: RequestCreateAttendanceTableService;
+      queryClient: QueryClient;
+    }) => CreateAttendanceTableService(request.request),
+    onSuccess(data, variables, context) {
+      variables.queryClient.setQueryData(
+        ["attendance-tables", { subjectId: data.subjectId }],
+        (oldData: AttendanceTable[]) => {
+          return [...(oldData ?? []), data];
         }
       );
     },
