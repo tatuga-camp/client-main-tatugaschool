@@ -20,19 +20,26 @@ import { defaultBlurHash } from "../../data";
 import { MdOutlineSpeakerNotes } from "react-icons/md";
 import useClickOutside from "../../hook/useClickOutside";
 import AttendanceView from "./AttendanceView";
-import { Toast } from "primereact/toast";
 import AttendanceRowView from "./AttendanceRowView";
 import { CiViewTable } from "react-icons/ci";
 import AttendanceTableCreate from "./AttendanceTableCreate";
+import { Toast } from "primereact/toast";
+import { ProgressBar } from "primereact/progressbar";
+import AttendanceTableSetting from "./AttendanceTableSetting";
 
-function Attendance({ subjectId }: { subjectId: string }) {
-  const toast = React.useRef<Toast>(null);
+function Attendance({
+  subjectId,
+  toast,
+}: {
+  subjectId: string;
+  toast: React.RefObject<Toast>;
+}) {
   const [triggerCreateAttendanceTable, setTriggerCreateAttendanceTable] =
     React.useState(false);
   const studentOnSubjects = useGetStudentOnSubject({
     subjectId,
   });
-  const scrollRef = React.useRef<HTMLDivElement | null>(null);
+  const [triggerSetting, setTriggerSetting] = React.useState(false);
   const tables = useGetAttendancesTable({
     subjectId,
   });
@@ -46,21 +53,12 @@ function Attendance({ subjectId }: { subjectId: string }) {
     | null
   >(null);
   const [selectRow, setSelectRow] = React.useState<AttendanceRow | null>(null);
-  const rows = useGetAttendanceRowByTableId({
-    attendanceTableId: selectTable?.id ?? "",
-  });
 
   useEffect(() => {
     if (tables.data) {
       setSelectTable(tables.data[0]);
     }
   }, [tables.data]);
-
-  useEffect(() => {
-    if (rows.data && scrollRef.current) {
-      scrollRef.current.scrollLeft = scrollRef.current.scrollWidth;
-    }
-  }, [rows.data]);
 
   return (
     <>
@@ -148,13 +146,28 @@ function Attendance({ subjectId }: { subjectId: string }) {
             Export
           </button>
 
-          <button className="second-button flex items-center justify-center gap-1 py-1 border ">
-            <BiCustomize />
-            Customize / Edit
+          <button
+            onClick={() => setTriggerSetting((prev) => !prev)}
+            className="second-button flex items-center w-52 justify-center gap-1 py-1 border "
+          >
+            {triggerSetting ? (
+              <div className="flex items-center justify-center gap-1">
+                <CiViewTable />
+                View Table
+              </div>
+            ) : (
+              <div className="flex items-center justify-center gap-1">
+                <BiCustomize />
+                Customize / Edit
+              </div>
+            )}
           </button>
         </section>
       </header>
       <div className="w-full px-40">
+        {tables.isLoading && (
+          <ProgressBar mode="indeterminate" style={{ height: "6px" }} />
+        )}
         <ul className="mt-5 flex items-center justify-start w-full overflow-x-auto gap-2">
           {tables.isLoading ? (
             <div>Loading..</div>
@@ -186,157 +199,206 @@ function Attendance({ subjectId }: { subjectId: string }) {
           )}
         </ul>
       </div>
-      <main className="w-full px-40 ">
-        <div
-          ref={scrollRef}
-          className="w-full h-[30rem] overflow-auto relative  bg-white rounded-md mt-5"
-        >
-          <table className="table-fixed bg-white">
-            <thead className="">
-              <tr className="border-b  bg-white sticky top-0 z-40">
-                <th className="text-sm z-40 sticky left-0 bg-white font-semibold">
-                  <div className="w-96 flex justify-start items-center gap-2">
-                    <FaUser />
-                    Name
-                  </div>
-                </th>
-                {rows.data
-                  ?.sort(
-                    (a, b) =>
-                      new Date(a.startDate).getTime() -
-                      new Date(b.startDate).getTime()
-                  )
-                  .map((row) => {
-                    const dateFormat = new Date(
-                      row.startDate
-                    ).toLocaleDateString(undefined, {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    });
-                    const time = new Date(row.startDate).toLocaleTimeString(
-                      undefined,
-                      {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      }
-                    );
-                    return (
-                      <th key={row.id} className="text-sm  font-semibold">
-                        <button
-                          onClick={() => setSelectRow(row)}
-                          className="w-40 p-2 relative active:bg-gray-200
-                         hover:bg-gray-100  hover:ring-1 flex items-start flex-col"
-                        >
-                          {row?.note && (
-                            <div
-                              className="w-5 h-5 bg-white absolute flex items-center justify-center
-                               top-1 m-auto right-1
-                              rounded-full border-2 border-black"
-                            >
-                              <MdOutlineSpeakerNotes />
-                            </div>
-                          )}
-                          <span>{dateFormat}</span>
-                          <span className="text-xs text-gray-500">{time}</span>
-                        </button>
-                      </th>
-                    );
-                  })}
-              </tr>
-            </thead>
-            <tbody>
-              {studentOnSubjects.data
-                ?.filter((s) => s.isActive)
-                ?.sort((a, b) => Number(a.number) - Number(b.number))
-                ?.map((student, index) => {
-                  const odd = index % 2 === 0;
-                  return (
-                    <tr
-                      className={` ${
-                        odd ? "bg-gray-200/20" : "bg-white"
-                      } hover:bg-gray-200/40 group`}
-                      key={student.id}
-                    >
-                      <td
-                        className={`text-sm sticky left-0 z-40 font-semibold
-                      ${
-                        odd ? "bg-gray-100" : "bg-white"
-                      } group-hover:bg-gray-200
-                      `}
-                      >
-                        <div className="flex items-center h-14 gap-2 col-span-2">
-                          <div className="w-10 h-10 relative rounded-md ring-1  overflow-hidden">
-                            <Image
-                              src="/favicon.ico"
-                              alt={student.firstName}
-                              fill
-                              placeholder="blur"
-                              blurDataURL={decodeBlurhashToCanvas(
-                                student.blurHash ?? defaultBlurHash
-                              )}
-                              className="object-cover"
-                            />
-                          </div>
-                          <div>
-                            <h1 className="text-sm font-semibold">
-                              {student.firstName} {student.lastName}{" "}
-                            </h1>
-                            <p className="text-xs text-gray-500">
-                              Number {student.number}{" "}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                      {rows.data?.map((row) => {
-                        const attendance = row.attendances.find(
-                          (a) => a.studentOnSubjectId === student.id
-                        );
-                        return (
-                          <td key={row.id} className="text-sm  font-semibold">
-                            <button
-                              onClick={() => {
-                                if (!attendance) return;
-                                setSelectAttendance(() => {
-                                  return {
-                                    ...attendance,
-                                    student,
-                                  };
-                                });
-                              }}
-                              style={{
-                                backgroundColor:
-                                  selectTable?.statusLists.find(
-                                    (s) => s.title === attendance?.status
-                                  )?.color ?? "#94a3b8",
-                              }}
-                              className="flex w-full h-14
-                             relative hover:ring-1  ring-black hover:drop-shadow-md cursor-pointer   
-                             items-center transition
-                             justify-center flex-col"
-                            >
-                              {attendance?.note && (
-                                <div
-                                  className="w-5 h-5 bg-white absolute flex items-center justify-center top-2 m-auto right-2
-                              rounded-full border-2 border-black"
-                                >
-                                  <MdOutlineSpeakerNotes />
-                                </div>
-                              )}
-                              <span>{attendance?.status}</span>
-                            </button>
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  );
-                })}
-            </tbody>
-          </table>
-        </div>
+
+      <main className="w-full px-40">
+        {triggerSetting && selectTable ? (
+          <div className="mt-5">
+            <AttendanceTableSetting table={selectTable} toast={toast} />
+          </div>
+        ) : (
+          selectTable && (
+            <DisplayAttendanceTable
+              selectTable={selectTable}
+              setSelectRow={setSelectRow}
+              setSelectAttendance={setSelectAttendance}
+            />
+          )
+        )}
       </main>
     </>
   );
 }
 
 export default Attendance;
+
+type Props = {
+  selectTable: AttendanceTable & {
+    statusLists: AttendanceStatusList[];
+  };
+  setSelectRow: React.Dispatch<React.SetStateAction<AttendanceRow | null>>;
+  setSelectAttendance: React.Dispatch<
+    React.SetStateAction<
+      | (AttendanceType & {
+          student: StudentOnSubject;
+        })
+      | null
+    >
+  >;
+};
+function DisplayAttendanceTable({
+  selectTable,
+  setSelectRow,
+  setSelectAttendance,
+}: Props) {
+  const scrollRef = React.useRef<HTMLDivElement | null>(null);
+  const rows = useGetAttendanceRowByTableId({
+    attendanceTableId: selectTable.id,
+  });
+  const studentOnSubjects = useGetStudentOnSubject({
+    subjectId: selectTable.subjectId,
+  });
+
+  useEffect(() => {
+    if (rows.data && scrollRef.current) {
+      scrollRef.current.scrollLeft = scrollRef.current.scrollWidth;
+    }
+  }, [rows.data]);
+  return (
+    <div
+      ref={scrollRef}
+      className="w-full h-[30rem] overflow-auto relative  bg-white rounded-md mt-5"
+    >
+      <table className="table-fixed bg-white">
+        <thead className="">
+          <tr className="border-b  bg-white sticky top-0 z-40">
+            <th className="text-sm z-40 sticky left-0 bg-white font-semibold">
+              <div className="w-96 flex justify-start items-center gap-2">
+                <FaUser />
+                Name
+              </div>
+            </th>
+            {rows?.data
+              ?.sort(
+                (a, b) =>
+                  new Date(a.startDate).getTime() -
+                  new Date(b.startDate).getTime()
+              )
+              .map((row) => {
+                const dateFormat = new Date(row.startDate).toLocaleDateString(
+                  undefined,
+                  {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  }
+                );
+                const time = new Date(row.startDate).toLocaleTimeString(
+                  undefined,
+                  {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }
+                );
+                return (
+                  <th key={row.id} className="text-sm  font-semibold">
+                    <button
+                      onClick={() => setSelectRow(row)}
+                      className="w-40 p-2 relative active:bg-gray-200
+               hover:bg-gray-100  hover:ring-1 flex items-start flex-col"
+                    >
+                      {row?.note && (
+                        <div
+                          className="w-5 h-5 bg-white absolute flex items-center justify-center
+                     top-1 m-auto right-1
+                    rounded-full border-2 border-black"
+                        >
+                          <MdOutlineSpeakerNotes />
+                        </div>
+                      )}
+                      <span>{dateFormat}</span>
+                      <span className="text-xs text-gray-500">{time}</span>
+                    </button>
+                  </th>
+                );
+              })}
+          </tr>
+        </thead>
+        <tbody>
+          {studentOnSubjects.data
+            ?.filter((s) => s.isActive)
+            ?.sort((a, b) => Number(a.number) - Number(b.number))
+            ?.map((student, index) => {
+              const odd = index % 2 === 0;
+              return (
+                <tr
+                  className={` ${
+                    odd ? "bg-gray-200/20" : "bg-white"
+                  } hover:bg-gray-200/40 group`}
+                  key={student.id}
+                >
+                  <td
+                    className={`text-sm sticky left-0 z-30 font-semibold
+            ${odd ? "bg-gray-100" : "bg-white"} group-hover:bg-gray-200
+            `}
+                  >
+                    <div className="flex items-center h-14 gap-2 col-span-2">
+                      <div className="w-10 h-10 relative rounded-md ring-1  overflow-hidden">
+                        <Image
+                          src="/favicon.ico"
+                          alt={student.firstName}
+                          fill
+                          placeholder="blur"
+                          blurDataURL={decodeBlurhashToCanvas(
+                            student.blurHash ?? defaultBlurHash
+                          )}
+                          className="object-cover"
+                        />
+                      </div>
+                      <div>
+                        <h1 className="text-sm font-semibold">
+                          {student.firstName} {student.lastName}{" "}
+                        </h1>
+                        <p className="text-xs text-gray-500">
+                          Number {student.number}{" "}
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+                  {rows?.data?.map((row) => {
+                    const attendance = row.attendances.find(
+                      (a) => a.studentOnSubjectId === student.id
+                    );
+                    return (
+                      <td key={row.id} className="text-sm  font-semibold">
+                        <button
+                          onClick={() => {
+                            if (!attendance) return;
+                            setSelectAttendance(() => {
+                              return {
+                                ...attendance,
+                                student,
+                              };
+                            });
+                          }}
+                          style={{
+                            backgroundColor:
+                              selectTable?.statusLists.find(
+                                (s) => s.title === attendance?.status
+                              )?.color ?? "#94a3b8",
+                          }}
+                          className="flex w-full h-14
+                   relative hover:ring-1  ring-black hover:drop-shadow-md cursor-pointer   
+                   items-center transition
+                   justify-center flex-col"
+                        >
+                          {attendance?.note && (
+                            <div
+                              className="w-5 h-5 bg-white absolute flex items-center justify-center top-2 m-auto right-2
+                    rounded-full border-2 border-black"
+                            >
+                              <MdOutlineSpeakerNotes />
+                            </div>
+                          )}
+                          <span>{attendance?.status}</span>
+                        </button>
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
+        </tbody>
+      </table>
+    </div>
+  );
+}

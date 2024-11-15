@@ -14,6 +14,7 @@ export type AttendanceStatusList = {
   title: string;
   value: number;
   color: string;
+  isHidden: boolean;
   attendanceTableId: string;
   schoolId: string;
   subjectId: string;

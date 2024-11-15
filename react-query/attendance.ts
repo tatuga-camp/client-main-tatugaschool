@@ -6,19 +6,28 @@ import {
 } from "@tanstack/react-query";
 import {
   CreateAttendanceRowService,
+  CreateAttendanceStatusListService,
   CreateAttendanceTableService,
   GetAttendanceRowByTabelIdService,
   GetAttendanceTablesService,
   RequestCreateAttendanceRowService,
+  RequestCreateAttendanceStatusListService,
   RequestCreateAttendanceTableService,
   RequestUpdateAttendanceRowService,
   RequestUpdateAttendanceService,
+  RequestUpdateAttendanceStatusListService,
   RequestUpdateManyAttendanceService,
   UpdateAttendanceRowService,
   UpdateAttendanceService,
+  UpdateAttendanceStatusListService,
+  UpdateAttendanceTableService,
   UpdateManyAttendanceService,
 } from "../services";
 import { Attendance, AttendanceRow, AttendanceTable } from "../interfaces";
+import {
+  RequestUpdateAttendanceTableService,
+  ResponseGetAttendanceTablesService,
+} from "../services/attendance-table";
 
 export function useGetAttendancesTable({ subjectId }: { subjectId: string }) {
   return useQuery({
@@ -45,7 +54,24 @@ export function useCreateAttendanceRow() {
       request: RequestCreateAttendanceRowService;
       queryClient: QueryClient;
     }) => CreateAttendanceRowService(request.request),
-    onSuccess(data, variables, context) {
+    async onSuccess(data, variables, context) {
+      const oldData = variables.queryClient.getQueryData([
+        "attendance-rows",
+        { attendanceTableId: data.attendanceTableId },
+      ]);
+      console.log("oldData", oldData);
+      if (!oldData) {
+        await variables.queryClient.prefetchQuery({
+          queryKey: [
+            "attendance-rows",
+            { attendanceTableId: data.attendanceTableId },
+          ],
+          queryFn: () =>
+            GetAttendanceRowByTabelIdService({
+              attendanceTableId: data.attendanceTableId,
+            }),
+        });
+      }
       variables.queryClient.setQueryData<
         (AttendanceRow & { attendances: Attendance[] })[]
       >(
@@ -72,7 +98,7 @@ export function useUpdateAttendance() {
       request: RequestUpdateAttendanceService;
       queryClient: QueryClient;
     }) => UpdateAttendanceService(request.request),
-    onSuccess(data, variables, context) {
+    async onSuccess(data, variables, context) {
       variables.queryClient.setQueryData(
         ["attendance-rows", { attendanceTableId: data.attendanceTableId }],
         (oldData: (AttendanceRow & { attendances: Attendance[] })[]) => {
@@ -169,8 +195,91 @@ export function useCreateAttendanceTable() {
     onSuccess(data, variables, context) {
       variables.queryClient.setQueryData(
         ["attendance-tables", { subjectId: data.subjectId }],
-        (oldData: AttendanceTable[]) => {
+        (oldData: ResponseGetAttendanceTablesService) => {
           return [...(oldData ?? []), data];
+        }
+      );
+    },
+  });
+}
+
+export function useUpdateAttendanceTable() {
+  return useMutation({
+    mutationKey: ["update-attendance-table"],
+    mutationFn: (request: {
+      request: RequestUpdateAttendanceTableService;
+      queryClient: QueryClient;
+    }) => UpdateAttendanceTableService(request.request),
+    onSuccess(data, variables, context) {
+      variables.queryClient.setQueryData(
+        ["attendance-tables", { subjectId: data.subjectId }],
+        (oldData: ResponseGetAttendanceTablesService) => {
+          return oldData?.map((table) => {
+            if (table.id === data.id) {
+              return {
+                ...data,
+                statusLists: table.statusLists,
+              };
+            }
+            return table;
+          });
+        }
+      );
+    },
+  });
+}
+
+export function useUpdateAttendanceStatus() {
+  return useMutation({
+    mutationKey: ["update-attendance-status"],
+    mutationFn: (request: {
+      request: RequestUpdateAttendanceStatusListService;
+      queryClient: QueryClient;
+    }) => UpdateAttendanceStatusListService(request.request),
+    onSuccess(status, variables, context) {
+      variables.queryClient.setQueryData(
+        ["attendance-tables", { subjectId: status.subjectId }],
+        (oldData: ResponseGetAttendanceTablesService) => {
+          return oldData?.map((table) => {
+            if (table.id === status.attendanceTableId) {
+              return {
+                ...table,
+                statusLists: table.statusLists.map((oldStatus) => {
+                  if (oldStatus.id === status.id) {
+                    return status;
+                  }
+                  return oldStatus;
+                }),
+              };
+            }
+            return table;
+          });
+        }
+      );
+    },
+  });
+}
+
+export function useCreateAttendanceStatus() {
+  return useMutation({
+    mutationKey: ["create-attendance-status"],
+    mutationFn: (request: {
+      request: RequestCreateAttendanceStatusListService;
+      queryClient: QueryClient;
+    }) => CreateAttendanceStatusListService(request.request),
+    async onSuccess(status, variables, context) {
+      variables.queryClient.setQueryData(
+        ["attendance-tables", { subjectId: status.subjectId }],
+        (oldData: ResponseGetAttendanceTablesService) => {
+          return oldData?.map((table) => {
+            if (table.id === status.attendanceTableId) {
+              return {
+                ...table,
+                statusLists: [...table.statusLists, status],
+              };
+            }
+            return table;
+          });
         }
       );
     },

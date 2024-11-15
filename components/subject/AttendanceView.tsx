@@ -147,33 +147,35 @@ function AttendanceView({
               </span>
             </div>
             <div className="flex flex-col">
-              {attendanceTable.statusLists.map((status, index) => {
-                const odd = index % 2 === 0;
-                return (
-                  <div
-                    onClick={(e) => handleCheck({ key: status.title })}
-                    key={status.id}
-                    className={`w-full hover:bg-gray-100 h-8  flex items-center justify-between px-2 ${
-                      odd ? "bg-white" : "bg-gray-50"
-                    }`}
-                  >
-                    <span
-                      style={{ color: status.color }}
-                      className="font-semibold"
+              {attendanceTable.statusLists
+                .filter((s) => !s.isHidden)
+                .map((status, index) => {
+                  const odd = index % 2 === 0;
+                  return (
+                    <div
+                      onClick={(e) => handleCheck({ key: status.title })}
+                      key={status.id}
+                      className={`w-full hover:bg-gray-100 h-8  flex items-center justify-between px-2 ${
+                        odd ? "bg-white" : "bg-gray-50"
+                      }`}
                     >
-                      {status.title}
-                    </span>
-                    <input
-                      onChange={(e) => handleCheck({ key: status.title })}
-                      type="checkbox"
-                      style={{ accentColor: status.color }}
-                      className="w-5 h-5"
-                      name={status.title}
-                      checked={attendanceData?.status === status.title}
-                    />
-                  </div>
-                );
-              })}
+                      <span
+                        style={{ color: status.color }}
+                        className="font-semibold"
+                      >
+                        {status.title}
+                      </span>
+                      <input
+                        onChange={(e) => handleCheck({ key: status.title })}
+                        type="checkbox"
+                        style={{ accentColor: status.color }}
+                        className="w-5 h-5"
+                        name={status.title}
+                        checked={attendanceData?.status === status.title}
+                      />
+                    </div>
+                  );
+                })}
             </div>
             <div className="flex flex-col gap-0 border-b">
               <div className="font-medium leading-4">Attendance Note</div>

@@ -9,7 +9,7 @@ type RequestGetAttendanceTablesService = {
   subjectId: string;
 };
 
-type ResponseGetAttendanceTablesService = (AttendanceTable & {
+export type ResponseGetAttendanceTablesService = (AttendanceTable & {
   statusLists: AttendanceStatusList[];
 })[];
 
@@ -75,7 +75,7 @@ export async function CreateAttendanceTableService(
     throw error?.response?.data;
   }
 }
-type RequestUpdateAttendanceTableService = {
+export type RequestUpdateAttendanceTableService = {
   query: {
     attendanceTableId: string;
   };
@@ -93,9 +93,9 @@ export async function UpdateAttendanceTableService(
   try {
     const response = await axiosInstance({
       method: "PATCH",
-      url: `/v1/attendance-tables/${input.query.attendanceTableId}`,
+      url: `/v1/attendance-tables`,
       data: {
-        ...input.body,
+        ...input,
       },
     });
     return response.data;

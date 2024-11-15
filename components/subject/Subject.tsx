@@ -52,12 +52,12 @@ type Props = {
   setSelectStudent: React.Dispatch<
     React.SetStateAction<StudentOnSubject | undefined>
   >;
+  toast: React.RefObject<Toast>;
 };
-function Subject({ subjectId, setSelectStudent }: Props) {
+function Subject({ subjectId, setSelectStudent, toast }: Props) {
   const queryClient = useQueryClient();
   const successSound = useSound("/sounds/ding.mp3");
   const failSound = useSound("/sounds/fail.mp3");
-  const toast = useRef<Toast>(null);
 
   const studentOnSubjects = useGetStudentOnSubject({
     subjectId: subjectId,
@@ -235,7 +235,6 @@ function Subject({ subjectId, setSelectStudent }: Props) {
 
   return (
     <div className="flex flex-col items-center w-full gap-5">
-      <Toast position="bottom-right" ref={toast} />
       <div
         className={`fixed ${
           triggerChooseScore ? "flex" : "hidden"

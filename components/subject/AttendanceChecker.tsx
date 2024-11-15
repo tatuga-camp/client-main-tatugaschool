@@ -18,13 +18,15 @@ import { defaultBlurHash } from "../../data";
 import { TbSelectAll } from "react-icons/tb";
 
 import TextEditor from "../common/TextEditor";
-import { IoIosCreate } from "react-icons/io";
+import { IoIosArrowBack, IoIosCreate } from "react-icons/io";
 import Swal from "sweetalert2";
 import { useQueryClient } from "@tanstack/react-query";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { ProgressBar } from "primereact/progressbar";
 import { Toast } from "primereact/toast";
 import { useSound } from "../../hook";
+import { SiMicrosoftexcel } from "react-icons/si";
+import { BiSolidNote } from "react-icons/bi";
 type Props = {
   subjectId: string;
   onClose: () => void;
@@ -83,28 +85,17 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
     }
   }, [studentOnSubjects.data]);
 
-  const handleCheck = ({
-    studentId,
-    key,
-    check,
-  }: {
-    studentId: string;
-    key: string;
-    check: boolean;
-  }) => {
-    setStudentAttendances((prev) => {
-      if (!prev) return null;
-      return prev.map((student) => {
-        if (student.id === studentId) {
-          return {
-            ...student,
-            status: key,
-          };
-        }
-        return student;
+  const handleCheck = React.useCallback(
+    ({ studentId, key }: { studentId: string; key: string }) => {
+      setStudentAttendances((prev) => {
+        if (!prev) return null;
+        return prev?.map((student) =>
+          student.id === studentId ? { ...student, status: key } : student
+        );
       });
-    });
-  };
+    },
+    []
+  );
 
   const handleCheckAll = ({ key, check }: { key: string; check: boolean }) => {
     setStudentAttendances((prev) => {
@@ -117,6 +108,18 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
       });
     });
   };
+
+  const handleNoteChange = React.useCallback(
+    ({ studentId, note }: { studentId: string; note: string }) => {
+      setStudentAttendances((prev) => {
+        if (!prev) return null;
+        return prev?.map((student) =>
+          student.id === studentId ? { ...student, note } : student
+        );
+      });
+    },
+    []
+  );
 
   const handleCreateAttendance = async () => {
     try {
@@ -218,7 +221,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
           </div>
         </section>
 
-        <section className="w-full flex h-14 justify-between mt-5 border-b  gap-2">
+        <section className="w-full flex h-14 justify-between items-end mt-5 border-b  gap-2">
           <div className="max-w-8/12 flex flex-nowrap overflow-auto  ">
             {attendanceTables.data?.map((table, index) => (
               <button
@@ -234,7 +237,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
               </button>
             ))}
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-end">
             <label className=" flex flex-col">
               <span className="text-gray-400 text-xs">Start Date</span>
               <input
@@ -252,7 +255,10 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
                     const [datePart, timePart] = e.target.value.split("T");
 
                     const [hours, minutes] = timePart.split(":").map(Number);
-                    const plusOneHour = `${datePart}T${hours + 1}:${minutes}`;
+                    const plusOneHour = `${datePart}T${
+                      hours + 1 < 10 ? `0${hours + 1}` : hours + 1
+                    }:${minutes}`;
+
                     return {
                       ...prev,
                       startDate: e.target.value,
@@ -280,150 +286,220 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
                 className="main-input h-8 "
               />
             </label>
+            <button
+              onClick={() => setTriggerNote((prev) => !prev)}
+              className="main-button flex items-center justify-center w-36 h-8  ring-1 ring-blue-600 "
+            >
+              {triggerNote ? (
+                <div
+                  className="flex items-center 
+          justify-center gap-1"
+                >
+                  <IoIosArrowBack />
+                  Back
+                </div>
+              ) : (
+                <div
+                  className="flex items-center 
+          justify-center gap-1"
+                >
+                  <BiSolidNote />
+                  Add Note
+                </div>
+              )}
+            </button>
           </div>
         </section>
       </header>
       {loading && (
         <ProgressBar mode="indeterminate" style={{ height: "6px" }} />
       )}
-
-      <main className="flex flex-col gap-2">
-        <h2 className="w-full line-clamp-2 text-sm text-gray-400">
-          {selectTable?.description}
-        </h2>
-        <li className="p-2  gap-2 grid bg-gray-200/50 grid-cols-9">
-          <div className="col-span-2 flex items-center">Name</div>
-          {selectTable?.statusLists
-            .sort((a, b) => b.title.localeCompare(a.title))
-            .map((status, index) => {
-              return (
-                <button
-                  key={status.id}
-                  onClick={(e) =>
-                    handleCheckAll({ key: e.currentTarget.name, check: true })
-                  }
-                  style={{ backgroundColor: status.color }}
-                  name={status.title}
-                  className={`text-center select-none rounded-md hover:drop-shadow-md cursor-pointer active:scale-105
-            transition hover:text-black
+      <h2 className="w-full line-clamp-2 text-sm text-gray-400">
+        {selectTable?.description}
+      </h2>
+      {triggerNote ? (
+        <div className="h-72">
+          <TextEditor
+            value={attendanceData?.note}
+            onChange={(content) =>
+              setAttendanceData((prev) => {
+                return {
+                  ...prev,
+                  note: content,
+                };
+              })
+            }
+          />
+        </div>
+      ) : (
+        <div className="w-full max-h-80 overflow-auto">
+          <table className="table-fixed w-max">
+            <thead>
+              <tr className="bg-gray-100 z-30 sticky top-0 ">
+                <th className="sticky left-0 z-40 bg-gray-100">Name</th>
+                {selectTable?.statusLists
+                  .filter((s) => !s.isHidden)
+                  .sort((a, b) => b.title.localeCompare(a.title))
+                  .map((status, index) => {
+                    return (
+                      <th key={status.id + selectTable.id}>
+                        <button
+                          onClick={(e) =>
+                            handleCheckAll({
+                              key: e.currentTarget.name,
+                              check: true,
+                            })
+                          }
+                          style={{ backgroundColor: status.color }}
+                          name={status.title}
+                          className={`text-center w-24 p-2 select-none rounded-md hover:drop-shadow-md 
+                          cursor-pointer active:scale-105
+            transition hover:text-black text-sm font-medium 
            flex items-center justify-center gap-1`}
-                >
-                  {status.title} <TbSelectAll />
-                </button>
-              );
-            })}
-
-          <button
-            onClick={() => setTriggerNote((prev) => !prev)}
-            name="note"
-            className="col-span-2 border-2 ring-2 font-medium rounded-md h-full p-2 bg-white
-           flex items-center justify-center gap-1"
-          >
-            {triggerNote ? "Close Note" : "Add Note"}
-          </button>
-        </li>
-        {triggerNote ? (
-          <div className="h-72">
-            <TextEditor
-              value={attendanceData?.note}
-              onChange={(content) =>
-                setAttendanceData((prev) => {
-                  return {
-                    ...prev,
-                    note: content,
-                  };
-                })
-              }
-            />
-          </div>
-        ) : (
-          <ul className="grid  grid-cols-1 max-h-72 hideScrollBar overflow-auto">
-            {studentAttendances
-              ?.filter((s) => s.isActive)
-              .sort((a, b) => Number(a.number) - Number(b.number))
-              .map((student, index) => {
-                const odd = index % 2 === 0;
-                return (
-                  <li
-                    key={student.id}
-                    className={`${
-                      index === 0 && "pt-0"
-                    } p-2 py-4 gap-2 grid grid-cols-9 ${
-                      odd && "bg-gray-200/20"
-                    }`}
-                  >
-                    <div className="flex gap-2 col-span-2">
-                      <div className="w-10 h-10 relative rounded-md ring-1  overflow-hidden">
-                        <Image
-                          src="/favicon.ico"
-                          alt={student.firstName}
-                          fill
-                          placeholder="blur"
-                          blurDataURL={decodeBlurhashToCanvas(
-                            student.blurHash ?? defaultBlurHash
-                          )}
-                          className="object-cover"
-                        />
-                      </div>
-                      <div>
-                        <h1 className="text-sm font-semibold">
-                          {student.firstName} {student.lastName}{" "}
-                        </h1>
-                        <p className="text-xs text-gray-500">
-                          Number {student.number}{" "}
-                        </p>
-                      </div>
-                    </div>
-                    {selectTable?.statusLists.map((status, index) => {
-                      return (
-                        <div
-                          key={student.id + status.id}
-                          className="w-full flex justify-center items-center "
                         >
-                          <input
-                            name={status.title}
-                            checked={student.status === status.title}
-                            onChange={(e) =>
-                              handleCheck({
-                                studentId: student.id,
-                                key: e.target.name,
-                                check: e.target.checked,
-                              })
-                            }
-                            style={{ accentColor: status.color }}
-                            type="checkbox"
-                            className="w-6 h-6 "
-                          />
-                        </div>
-                      );
-                    })}
-
-                    <textarea
-                      value={student.note}
-                      onChange={(e) =>
-                        setStudentAttendances((prev) => {
-                          if (!prev) return null;
-                          return prev.map((s) => {
-                            if (s.id === student.id) {
-                              return {
-                                ...s,
-                                note: e.target.value,
-                              };
-                            }
-                            return s;
-                          });
-                        })
-                      }
-                      className="main-input col-span-2 h-10 resize-none"
-                    />
-                  </li>
-                );
-              })}
-          </ul>
-        )}
-      </main>
+                          <span className="max-w-20 truncate">
+                            {status.title}
+                          </span>
+                          <TbSelectAll />
+                        </button>
+                      </th>
+                    );
+                  })}
+                <th className="z-10 bg-gray-100 text-sm  sticky right-0">
+                  <div className="flex items-center justify-center gap-1">
+                    <BiSolidNote /> Note
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {selectTable?.statusLists &&
+                studentAttendances
+                  ?.filter((s) => s.isActive)
+                  .sort((a, b) => Number(a.number) - Number(b.number))
+                  .map((student, index) => {
+                    return (
+                      <StudentAttendanceItem
+                        key={student.id + selectTable.id}
+                        index={index}
+                        student={student}
+                        statusLists={selectTable?.statusLists}
+                        handleCheck={handleCheck}
+                        handleNoteChange={handleNoteChange}
+                      />
+                    );
+                  })}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
 
 export default AttendanceChecker;
+
+const StudentAttendanceItem = React.memo(
+  ({
+    student,
+    statusLists,
+    handleCheck,
+    handleNoteChange,
+    index,
+  }: {
+    student: StudentOnSubject & { status: string; note: string };
+    statusLists: AttendanceStatusList[];
+    handleCheck: ({
+      studentId,
+      key,
+    }: {
+      studentId: string;
+      key: string;
+    }) => void;
+    handleNoteChange: ({
+      studentId,
+      note,
+    }: {
+      studentId: string;
+      note: string;
+    }) => void;
+    index: number;
+  }) => {
+    const odd = index % 2 === 0;
+    return (
+      <tr
+        key={student.id}
+        className={` ${
+          odd && "bg-gray-50"
+        } border-spacing-2 border-4 border-transparent`}
+      >
+        <td
+          className={`sticky left-0 z-10    ${
+            odd ? "bg-gray-50" : "bg-white"
+          } `}
+        >
+          <div className="flex w-80 gap-2">
+            <div className="w-10 h-10 relative rounded-md ring-1  overflow-hidden">
+              <Image
+                src="/favicon.ico"
+                alt={student.firstName}
+                fill
+                placeholder="blur"
+                blurDataURL={decodeBlurhashToCanvas(
+                  student.blurHash ?? defaultBlurHash
+                )}
+                className="object-cover"
+              />
+            </div>
+            <div>
+              <h1 className="text-sm font-semibold">
+                {student.firstName} {student.lastName}{" "}
+              </h1>
+              <p className="text-xs text-gray-500">Number {student.number} </p>
+            </div>
+          </div>
+        </td>
+
+        {statusLists
+          .filter((s) => !s.isHidden)
+          .sort((a, b) => b.title.localeCompare(a.title))
+          .map((status, index) => {
+            return (
+              <td key={student.id + status.id}>
+                <div className="w-full flex justify-center items-center ">
+                  <input
+                    name={status.title}
+                    checked={student.status === status.title}
+                    onChange={(e) =>
+                      handleCheck({
+                        studentId: student.id,
+                        key: e.target.name,
+                      })
+                    }
+                    style={{ accentColor: status.color }}
+                    type="checkbox"
+                    className="w-6 h-6 "
+                  />
+                </div>
+              </td>
+            );
+          })}
+        <td
+          className={`z-10  ${odd ? "bg-gray-50" : "bg-white"}  sticky right-0`}
+        >
+          <textarea
+            value={student.note}
+            onChange={(e) =>
+              handleNoteChange({
+                studentId: student.id,
+                note: e.target.value,
+              })
+            }
+            className="main-input w-full h-10 resize-none"
+          />
+        </td>
+      </tr>
+    );
+  }
+);
+StudentAttendanceItem.displayName = "StudentAttendanceItem";

@@ -95,7 +95,7 @@ function AttendanceTableCreate({ onClose, toast, subjectId }: Props) {
           <span className="text-xs ">Description</span>
           <textarea
             required
-            maxLength={999}
+            maxLength={99}
             value={createData?.description}
             onChange={(e) =>
               setCreateData((prev) => {
