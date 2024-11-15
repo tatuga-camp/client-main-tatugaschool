@@ -6,10 +6,6 @@ import { TbArrowsRandom } from "react-icons/tb";
 
 const menuFooters: { title: ListMenuFooter; icon: ReactNode }[] = [
   {
-    title: "Manage Student",
-    icon: <PiStudentBold />,
-  },
-  {
     title: "Stop Watch",
     icon: <FaStopwatch20 />,
   },
@@ -20,10 +16,6 @@ const menuFooters: { title: ListMenuFooter; icon: ReactNode }[] = [
   {
     title: "Wheel Of Name",
     icon: <TbArrowsRandom />,
-  },
-  {
-    title: "QR Code",
-    icon: <FaStopwatch20 />,
   },
   {
     title: "Slide Picker",

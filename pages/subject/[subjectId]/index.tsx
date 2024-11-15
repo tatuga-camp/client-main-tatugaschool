@@ -45,12 +45,14 @@ import QRCode from "../../../components/subject/QRCode";
 import StopWatch from "../../../components/subject/StopWatch";
 import { useSound } from "../../../hook";
 import SilderPicker from "../../../components/subject/SilderPicker";
-
+import AttendanceChecker from "../../../components/subject/AttendanceChecker";
+import { Toast } from "primereact/toast";
 type Props = {
   subjectId: string;
 };
 
 function Index({ subjectId }: Props) {
+  const toast = React.useRef<Toast>(null);
   const queryClient = useQueryClient();
   const ding = useSound("/sounds/ding.mp3");
   const router = useRouter();
@@ -198,11 +200,12 @@ function Index({ subjectId }: Props) {
         }
         selectMenu={selectMenu}
       >
+        <Toast ref={toast} />
         {triggerStopWatch && <StopWatch onClose={handleCloseStopWatch} />}
 
         {selectFooter === "Slide Picker" && studentOnSubjects.data && (
           <div
-            className="w-screen z-40 h-screen flex items-center 
+            className="w-screen z-50 h-screen flex items-center 
         justify-center fixed top-0 right-0 left-0 bottom-0 m-auto"
           >
             <div className="bg-white p-10">
@@ -210,7 +213,7 @@ function Index({ subjectId }: Props) {
                 images={studentOnSubjects.data.map((student, index) => {
                   return {
                     ...student,
-                    photo: `/cat/${index + 1}.jpg`,
+                    photo: `/favicon.ico`,
                   };
                 })}
               />
@@ -218,6 +221,24 @@ function Index({ subjectId }: Props) {
             <div
               onClick={() => setSelectFooter("EMTY")}
               className="w-screen -z-10 h-screen bg-white/50 backdrop-blur  fixed top-0 right-0 left-0 bottom-0 m-auto"
+            ></div>
+          </div>
+        )}
+        {selectFooter === "Attendance" && (
+          <div
+            className="w-screen z-50 h-screen flex items-center 
+        justify-center fixed top-0 right-0 left-0 bottom-0 m-auto"
+          >
+            <div className="w-9/12 border bg-white p-5 h-max rounded-md overflow-hidden">
+              <AttendanceChecker
+                toast={toast}
+                subjectId={subjectId}
+                onClose={() => setSelectFooter("EMTY")}
+              />
+            </div>
+            <div
+              onClick={() => setSelectFooter("EMTY")}
+              className="w-screen -z-10 h-screen bg-black/50  fixed top-0 right-0 left-0 bottom-0 m-auto"
             ></div>
           </div>
         )}
@@ -258,7 +279,7 @@ function Index({ subjectId }: Props) {
          w-screen h-screen flex items-center justify-center"
           >
             <div className="" ref={divRef}>
-              <PopUpStudent student={selectStudent} />
+              <PopUpStudent student={selectStudent} toast={toast} />
             </div>
             <div
               className="w-screen h-screen fixed top-0 bg-white/20 backdrop-blur
@@ -367,13 +388,16 @@ function Index({ subjectId }: Props) {
         <main className="">
           {selectMenu === "Subject" && (
             <Subject
+              toast={toast}
               setSelectStudent={setSelectStudent}
               subjectId={subjectId}
             />
           )}{" "}
           {selectMenu === "Assignment" && <Assignment />}
           {selectMenu === "Grade" && <Grade />}
-          {selectMenu === "Attendance" && <Attendance />}
+          {selectMenu === "Attendance" && (
+            <Attendance toast={toast} subjectId={subjectId} />
+          )}
           {selectMenu === "Setting Subject" && (
             <Setting subjectId={subjectId} />
           )}

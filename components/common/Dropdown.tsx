@@ -1,23 +1,20 @@
 import { DropdownChangeEvent, DropdownProps } from "primereact/dropdown";
 import React, { memo } from "react";
 import { Dropdown as DropdownPrimereact } from "primereact/dropdown";
-import { SelectItemOptionsType } from "primereact/selectitem";
 import { classNames } from "primereact/utils";
 
-type Props = {
-  value: any;
+type Props<T> = {
+  value: T;
   onChange: (e: DropdownChangeEvent) => void;
-  options: SelectItemOptionsType;
+  options: T[];
   placeholder: string;
   optionLabel?: string;
   valueTemplate?:
     | React.ReactNode
-    | ((option: any, props: DropdownProps) => React.ReactNode)
+    | ((option: T, props: DropdownProps) => React.ReactNode)
     | undefined;
-  itemTemplate?:
-    | React.ReactNode
-    | ((option: any) => React.ReactNode)
-    | undefined;
+  itemTemplate?: React.ReactNode | ((option: T) => React.ReactNode) | undefined;
+  loading?: boolean;
 };
 const TRANSITIONS = {
   overlay: {
@@ -28,7 +25,7 @@ const TRANSITIONS = {
     leaveToClass: "opacity-0",
   },
 };
-function Dropdown({
+function Dropdown<T>({
   value,
   onChange,
   options,
@@ -36,11 +33,12 @@ function Dropdown({
   optionLabel,
   valueTemplate,
   itemTemplate,
-}: Props) {
-  console.log("Dropdown");
+  loading,
+}: Props<T>) {
   return (
     <>
       <DropdownPrimereact
+        loading={loading}
         value={value}
         onChange={onChange}
         options={options}
@@ -148,4 +146,4 @@ function Dropdown({
   );
 }
 
-export default memo(Dropdown);
+export default memo(Dropdown) as <T>(props: Props<T>) => JSX.Element;

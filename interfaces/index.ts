@@ -26,5 +26,5 @@ export * from "./Subject";
 export * from "./Task";
 export * from "./TeacherOnSubject";
 export * from "./Team";
-export * from "./User";
 export * from "./Error";
+export * from "./User";

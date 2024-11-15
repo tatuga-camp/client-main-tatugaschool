@@ -13,7 +13,7 @@ const HeaderSection: React.FC<{
 }> = ({ school, members, onInvite }) => {
   const { data: user } = useGetUser();
   return (
-    <div className="bg-primary-color p-12 pb-24 text-white">
+    <div className=" p-12 pb-24 text-white gradient-bg">
       {/* Top Section */}
       <div className="flex justify-between items-center">
         <div>

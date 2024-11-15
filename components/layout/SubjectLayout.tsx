@@ -46,7 +46,7 @@ function Layout({
         )}
       </div>
       {children}
-      <div className="fixed bottom-0 border-t-2  border-t-gray-200 w-full">
+      <div className="fixed bottom-0 border-t-2 z-50 border-t-gray-200 w-full">
         <FooterSubject
           selectFooter={selectFooter}
           setSelectFooter={setSelectFooter}

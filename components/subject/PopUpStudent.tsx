@@ -26,8 +26,9 @@ import ScorePanel from "./ScorePanel";
 
 type Props = {
   student: StudentOnSubject;
+  toast: React.RefObject<Toast>;
 };
-function PopUpStudent({ student }: Props) {
+function PopUpStudent({ student, toast }: Props) {
   const successSound = useSound("/sounds/ding.mp3");
   const failSound = useSound("/sounds/fail.mp3");
   const queryClient = useQueryClient();
@@ -39,7 +40,6 @@ function PopUpStudent({ student }: Props) {
   const [totalScore, setTotalScore] = React.useState<number>(
     student.totalSpeicalScore
   );
-  const toast = useRef<Toast>(null);
 
   const [selectScore, setSelectScore] = React.useState<
     { score?: ScoreOnSubject } & { inputScore: number }
@@ -105,8 +105,6 @@ function PopUpStudent({ student }: Props) {
 
   return (
     <section className="w-full border  p-5 items-center  flex gap-5  bg-background-color rounded-md">
-      <Toast position="bottom-right" ref={toast} />
-
       <div className="w-40 h-max border bg-white rounded-md flex flex-col gap-1 items-center justify-center">
         <div className="w-40 h-10 gradient-bg rounded-t-md flex items-center justify-center">
           <span className="text-white font-semibold text-lg">{totalScore}</span>

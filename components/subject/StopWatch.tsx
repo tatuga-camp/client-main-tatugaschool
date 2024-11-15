@@ -10,12 +10,12 @@ type Props = {
   onClose: () => void;
 };
 
-function StopWatch({ onClose }: Props) {
-  const alert = useSound("/sounds/ringing.mp3");
-  const [triggerFull, setTriggerFull] = React.useState(false);
+const MemoizedCountdown = memo(() => {
   const [time, setTime] = React.useState(10000);
   const [minutes, setMinutes] = React.useState(0);
   const [seconds, setSeconds] = React.useState(10);
+  const alert = useSound("/sounds/ringing.mp3");
+
   return (
     <Countdown
       autoStart={false}
@@ -28,73 +28,17 @@ function StopWatch({ onClose }: Props) {
         }
         return (
           <div
-            className={`${
-              triggerFull
-                ? "w-10/12 h-5/6 top-0 right-0 left-0 bottom-0 m-auto"
-                : "w-96 h-60  bottom-5 right-5 m-auto"
-            }  transition-height ${
-              props.seconds < 6
-                ? "bg-gradient-to-r from-pink-500 to-rose-500 "
-                : "gradient-bg "
-            } fixed rounded-xl overflow-hidden  z-50 " pt-8  p-2 gap-2`}
+            className={`
+  ${
+    props.total < 6
+      ? "bg-gradient-to-r from-pink-500 to-rose-500 "
+      : "gradient-bg "
+  }  pt-8 w-full h-full  p-2 gap-2`}
           >
-            <div className="flex gap-2 top-2 right-2 m-auto absolute">
-              <button
-                title="full screen"
-                className="flex items-center  
-               justify-center w-5 h-5 text-white rounded-md border border-white"
-                onClick={() => {
-                  setTriggerFull((prev) => !prev);
-                }}
-              >
-                {triggerFull ? <MdFullscreenExit /> : <MdFullscreen />}
-              </button>
-              <button
-                className="flex items-center  
-               justify-center w-5 h-5 text-white rounded-md border border-white"
-                onClick={onClose}
-              >
-                <IoMdClose />
-              </button>
-            </div>
             <main className="w-full mt-2 place  h-full grid">
               <section className="flex   justify-center items-center gap-2">
-                <div className="w-full h-full flex items-center justify-center rounded-md bg-white">
-                  <h1
-                    className={`text-center ${
-                      triggerFull ? "text-9xl" : "text-6xl"
-                    } `}
-                  >
-                    {props.hours}
-                  </h1>
-                  <h1
-                    className={`text-center ${
-                      triggerFull ? "text-9xl" : "text-6xl"
-                    } `}
-                  >
-                    :
-                  </h1>
-                  <h1
-                    className={`text-center ${
-                      triggerFull ? "text-9xl" : "text-6xl"
-                    } `}
-                  >
-                    {props.minutes}
-                  </h1>
-                  <h1
-                    className={`text-center ${
-                      triggerFull ? "text-9xl" : "text-6xl"
-                    } `}
-                  >
-                    :
-                  </h1>
-                  <h1
-                    className={`text-center ${
-                      triggerFull ? "text-9xl" : "text-6xl"
-                    } `}
-                  >
-                    {props.seconds}
-                  </h1>
+                <div className="w-full h-full text-7xl flex items-center justify-center rounded-md bg-white">
+                  {props.hours}:{props.minutes}:{props.seconds}
                 </div>
               </section>
               <section className="flex gap-2 justify-center items-center flex-col">
@@ -164,6 +108,40 @@ function StopWatch({ onClose }: Props) {
         );
       }}
     />
+  );
+});
+MemoizedCountdown.displayName = "MemoizedCountdown";
+function StopWatch({ onClose }: Props) {
+  const [triggerFull, setTriggerFull] = React.useState(false);
+  return (
+    <div
+      className={`${
+        triggerFull
+          ? "w-10/12 h-5/6 top-0 right-0 left-0 bottom-0 m-auto"
+          : "w-96 h-60  bottom-5 right-5 m-auto"
+      } transition-height fixed rounded-xl overflow-hidden  z-50`}
+    >
+      <div className="flex gap-2 top-2 right-2 m-auto absolute">
+        <button
+          title="full screen"
+          className="flex items-center  
+         justify-center w-5 h-5 text-white rounded-md border border-white"
+          onClick={() => {
+            setTriggerFull((prev) => !prev);
+          }}
+        >
+          {triggerFull ? <MdFullscreenExit /> : <MdFullscreen />}
+        </button>
+        <button
+          className="flex items-center  
+         justify-center w-5 h-5 text-white rounded-md border border-white"
+          onClick={onClose}
+        >
+          <IoMdClose />
+        </button>
+      </div>
+      <MemoizedCountdown />
+    </div>
   );
 }
 

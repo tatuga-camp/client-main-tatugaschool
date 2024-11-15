@@ -173,7 +173,7 @@ const CreateSchoolComponent = () => {
   };
 
   const selectedCountryTemplate = (
-    option: { name: string; code: string },
+    option: { name: string; code: string } | undefined,
     props: any
   ) => {
     if (option) {
@@ -194,7 +194,12 @@ const CreateSchoolComponent = () => {
     return <span>{props.placeholder}</span>;
   };
 
-  const countryOptionTemplate = (option: { name: string; code: string }) => {
+  const countryOptionTemplate = (
+    option: { name: string; code: string } | undefined
+  ) => {
+    if (!option) {
+      return;
+    }
     return (
       <div className="flex gap-5 align-items-center">
         <Image
@@ -209,15 +214,18 @@ const CreateSchoolComponent = () => {
     );
   };
 
-  const handleChangeActiveIndex = useCallback((index: number) => {
-    if (createSchool.isSuccess) {
-      setActiveIndex(2);
-    } else if (!createSchool.data && index === 2) {
-      return null;
-    } else {
-      setActiveIndex(index);
-    }
-  }, [createSchool.isSuccess, createSchool.data]);
+  const handleChangeActiveIndex = useCallback(
+    (index: number) => {
+      if (createSchool.isSuccess) {
+        setActiveIndex(2);
+      } else if (!createSchool.data && index === 2) {
+        return null;
+      } else {
+        setActiveIndex(index);
+      }
+    },
+    [createSchool.isSuccess, createSchool.data]
+  );
 
   useEffect(() => {
     if (createSchool.status === "success") {
@@ -358,7 +366,7 @@ const CreateSchoolComponent = () => {
 
         {activeIndex === 1 && (
           <section className="flex flex-col  w-full gap-2">
-            <Dropdown
+            <Dropdown<{ name: string; code: string } | undefined>
               value={country}
               onChange={(e) => setCountry(e.value)}
               options={countries}

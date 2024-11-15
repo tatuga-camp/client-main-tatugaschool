@@ -11,6 +11,7 @@ type Props = {
   required?: boolean;
   suffix?: string;
   prefix?: string;
+  disabled?: boolean;
 };
 function InputNumber({
   value,
@@ -21,12 +22,14 @@ function InputNumber({
   required,
   suffix,
   prefix,
+  disabled,
 }: Props) {
   return (
     <InputNumberPrimereact
       suffix={suffix}
       prefix={prefix}
       required={required}
+      disabled={disabled}
       value={value}
       min={min}
       useGrouping={useGrouping}

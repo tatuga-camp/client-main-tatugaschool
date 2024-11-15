@@ -68,7 +68,12 @@ export const menuSubjectList = ({
   ];
 };
 
-export type MenuSchool = "School" | "Class" | "Team" | "Homepage";
+export type MenuSchool =
+  | "School"
+  | "Classes"
+  | "Teams"
+  | "Homepage"
+  | "Subjects";
 export const menuSchoolList = ({
   schoolId,
   subjectId,
@@ -76,7 +81,7 @@ export const menuSchoolList = ({
   schoolId?: string;
   subjectId?: string;
 }): {
-  title: string;
+  title: MenuSchool;
   icon: ReactNode;
   url?: string | undefined;
 }[] => {
@@ -87,12 +92,12 @@ export const menuSchoolList = ({
       url: `/school/${schoolId}`,
     },
     {
-      title: "Class",
+      title: "Classes",
       icon: <BsPeopleFill />,
     },
     {
-      title: "Team",
-      icon: <PiWechatLogoBold />,
+      title: "Subjects",
+      icon: <SiGoogleclassroom />,
     },
     {
       title: "Homepage",
