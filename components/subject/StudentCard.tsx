@@ -89,7 +89,7 @@ function StudentCard({
       <div className="w-20 h-20 relative rounded-full overflow-hidden">
         <Image
           fill
-          src="/favicon.ico"
+          src={student.photo}
           alt="Student"
           className="object-cover w-full h-full"
         />

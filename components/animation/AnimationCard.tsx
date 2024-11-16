@@ -4,6 +4,8 @@ import { useEffect } from "react";
 import Image from "next/image";
 import { AnimationImageItemProps } from "./types/AnimationImageItemProps";
 import React from "react";
+import { decodeBlurhashToCanvas } from "../../utils";
+import { defaultBlurHash } from "../../data";
 
 interface AnimationCardProps<T> {
   randomImages: T[];
@@ -113,7 +115,7 @@ const AnimationCard = <T extends AnimationImageItemProps>({
 
   return (
     <div className="w-full flex justify-center items-center relative">
-      <div className="absolute h-60 w-[3px] bg-black p-0 z-10  rounded-full" />
+      <div className="absolute h-full w-[3px] bg-black p-0 z-10  rounded-full" />
 
       <div className=" max-w-2xl min-w-[42rem] overflow-hidden ">
         <motion.div
@@ -140,7 +142,7 @@ const AnimationCard = <T extends AnimationImageItemProps>({
             <div
               key={`${image.id}-${index}`}
               className="bg-white flex flex-col items-center justify-start
-               rounded-md h-60 ring-1 ring-black overflow-hidden"
+               rounded-md h-full ring-1 ring-black overflow-hidden"
               style={{ width: `${IMAGE_WIDTH}px` }}
             >
               <div className="w-full h-40 bg-gray-100 relative rounded overflow-hidden">
@@ -173,6 +175,8 @@ const AnimationCard = <T extends AnimationImageItemProps>({
                   src={image.photo}
                   alt={`Scroll item ${index}`}
                   fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  quality={10}
                   className="object-cover"
                 />
               </div>

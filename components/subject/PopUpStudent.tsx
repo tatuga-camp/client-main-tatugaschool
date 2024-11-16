@@ -111,7 +111,7 @@ function PopUpStudent({ student, toast }: Props) {
         </div>
         <div className="w-20 h-20 relative">
           <Image
-            src="/favicon.ico"
+            src={student.photo}
             alt="Student"
             fill
             className=" rounded-full"

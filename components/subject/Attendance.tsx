@@ -15,7 +15,11 @@ import {
 } from "../../interfaces";
 import { FaUser } from "react-icons/fa6";
 import Image from "next/image";
-import { decodeBlurhashToCanvas } from "../../utils";
+import {
+  decodeBlurhashToCanvas,
+  getRandomSlateShade,
+  getSlateColorStyle,
+} from "../../utils";
 import { defaultBlurHash } from "../../data";
 import { MdOutlineSpeakerNotes } from "react-icons/md";
 import useClickOutside from "../../hook/useClickOutside";
@@ -148,10 +152,10 @@ function Attendance({
 
           <button
             onClick={() => setTriggerSetting((prev) => !prev)}
-            className="second-button flex items-center w-52 justify-center gap-1 py-1 border "
+            className="second-button  flex items-center w-52 justify-center gap-1 py-1 border "
           >
             {triggerSetting ? (
-              <div className="flex items-center justify-center gap-1">
+              <div className="flex  items-center justify-center gap-1">
                 <CiViewTable />
                 View Table
               </div>
@@ -267,50 +271,62 @@ function DisplayAttendanceTable({
                 Name
               </div>
             </th>
-            {rows?.data
-              ?.sort(
-                (a, b) =>
-                  new Date(a.startDate).getTime() -
-                  new Date(b.startDate).getTime()
-              )
-              .map((row) => {
-                const dateFormat = new Date(row.startDate).toLocaleDateString(
-                  undefined,
-                  {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  }
-                );
-                const time = new Date(row.startDate).toLocaleTimeString(
-                  undefined,
-                  {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  }
-                );
-                return (
-                  <th key={row.id} className="text-sm  font-semibold">
-                    <button
-                      onClick={() => setSelectRow(row)}
-                      className="w-40 p-2 relative active:bg-gray-200
+            {rows.isLoading
+              ? [...Array(20)].map((_, index) => {
+                  const number = getRandomSlateShade();
+                  const color = getSlateColorStyle(number);
+                  return (
+                    <th key={index} className="text-sm  font-semibold">
+                      <div
+                        style={color}
+                        className="w-40 h-14  animate-pulse"
+                      ></div>
+                    </th>
+                  );
+                })
+              : rows?.data
+                  ?.sort(
+                    (a, b) =>
+                      new Date(a.startDate).getTime() -
+                      new Date(b.startDate).getTime()
+                  )
+                  .map((row) => {
+                    const dateFormat = new Date(
+                      row.startDate
+                    ).toLocaleDateString(undefined, {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    });
+                    const time = new Date(row.startDate).toLocaleTimeString(
+                      undefined,
+                      {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }
+                    );
+                    return (
+                      <th key={row.id} className="text-sm  font-semibold">
+                        <button
+                          onClick={() => setSelectRow(row)}
+                          className="w-40 p-2 relative active:bg-gray-200
                hover:bg-gray-100  hover:ring-1 flex items-start flex-col"
-                    >
-                      {row?.note && (
-                        <div
-                          className="w-5 h-5 bg-white absolute flex items-center justify-center
+                        >
+                          {row?.note && (
+                            <div
+                              className="w-5 h-5 bg-white absolute flex items-center justify-center
                      top-1 m-auto right-1
                     rounded-full border-2 border-black"
-                        >
-                          <MdOutlineSpeakerNotes />
-                        </div>
-                      )}
-                      <span>{dateFormat}</span>
-                      <span className="text-xs text-gray-500">{time}</span>
-                    </button>
-                  </th>
-                );
-              })}
+                            >
+                              <MdOutlineSpeakerNotes />
+                            </div>
+                          )}
+                          <span>{dateFormat}</span>
+                          <span className="text-xs text-gray-500">{time}</span>
+                        </button>
+                      </th>
+                    );
+                  })}
           </tr>
         </thead>
         <tbody>
@@ -334,7 +350,7 @@ function DisplayAttendanceTable({
                     <div className="flex items-center h-14 gap-2 col-span-2">
                       <div className="w-10 h-10 relative rounded-md ring-1  overflow-hidden">
                         <Image
-                          src="/favicon.ico"
+                          src={student.photo}
                           alt={student.firstName}
                           fill
                           placeholder="blur"
@@ -354,46 +370,59 @@ function DisplayAttendanceTable({
                       </div>
                     </div>
                   </td>
-                  {rows?.data?.map((row) => {
-                    const attendance = row.attendances.find(
-                      (a) => a.studentOnSubjectId === student.id
-                    );
-                    return (
-                      <td key={row.id} className="text-sm  font-semibold">
-                        <button
-                          onClick={() => {
-                            if (!attendance) return;
-                            setSelectAttendance(() => {
-                              return {
-                                ...attendance,
-                                student,
-                              };
-                            });
-                          }}
-                          style={{
-                            backgroundColor:
-                              selectTable?.statusLists.find(
-                                (s) => s.title === attendance?.status
-                              )?.color ?? "#94a3b8",
-                          }}
-                          className="flex w-full h-14
+                  {rows.isLoading
+                    ? [...Array(20)].map((_, index) => {
+                        const number = getRandomSlateShade();
+                        const color = getSlateColorStyle(number);
+                        return (
+                          <td key={index}>
+                            <div
+                              style={color}
+                              className="flex w-full h-14 animate-pulse"
+                            ></div>
+                          </td>
+                        );
+                      })
+                    : rows?.data?.map((row) => {
+                        const attendance = row.attendances.find(
+                          (a) => a.studentOnSubjectId === student.id
+                        );
+                        return (
+                          <td key={row.id} className="text-sm  font-semibold">
+                            <button
+                              onClick={() => {
+                                if (!attendance) return;
+                                setSelectAttendance(() => {
+                                  return {
+                                    ...attendance,
+                                    student,
+                                  };
+                                });
+                              }}
+                              style={{
+                                backgroundColor:
+                                  selectTable?.statusLists.find(
+                                    (s) => s.title === attendance?.status
+                                  )?.color ?? "#94a3b8",
+                              }}
+                              className="flex w-full h-14
                    relative hover:ring-1  ring-black hover:drop-shadow-md cursor-pointer   
                    items-center transition
                    justify-center flex-col"
-                        >
-                          {attendance?.note && (
-                            <div
-                              className="w-5 h-5 bg-white absolute flex items-center justify-center top-2 m-auto right-2
-                    rounded-full border-2 border-black"
                             >
-                              <MdOutlineSpeakerNotes />
-                            </div>
-                          )}
-                          <span>{attendance?.status}</span>
-                        </button>
-                      </td>
-                    );
-                  })}
+                              {attendance?.note && (
+                                <div
+                                  className="w-5 h-5 bg-white absolute flex items-center justify-center top-2 m-auto right-2
+                    rounded-full border-2 border-black"
+                                >
+                                  <MdOutlineSpeakerNotes />
+                                </div>
+                              )}
+                              <span>{attendance?.status}</span>
+                            </button>
+                          </td>
+                        );
+                      })}
                 </tr>
               );
             })}

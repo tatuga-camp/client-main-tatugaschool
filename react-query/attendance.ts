@@ -71,22 +71,25 @@ export function useCreateAttendanceRow() {
               attendanceTableId: data.attendanceTableId,
             }),
         });
+      } else {
+        variables.queryClient.setQueryData<
+          (AttendanceRow & { attendances: Attendance[] })[]
+        >(
+          ["attendance-rows", { attendanceTableId: data.attendanceTableId }],
+          (
+            oldData:
+              | (AttendanceRow & { attendances: Attendance[] })[]
+              | undefined
+          ) => {
+            return [
+              ...(oldData ?? []),
+              {
+                ...data,
+              },
+            ];
+          }
+        );
       }
-      variables.queryClient.setQueryData<
-        (AttendanceRow & { attendances: Attendance[] })[]
-      >(
-        ["attendance-rows", { attendanceTableId: data.attendanceTableId }],
-        (
-          oldData: (AttendanceRow & { attendances: Attendance[] })[] | undefined
-        ) => {
-          return [
-            ...(oldData ?? []),
-            {
-              ...data,
-            },
-          ];
-        }
-      );
     },
   });
 }

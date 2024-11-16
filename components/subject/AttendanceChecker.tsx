@@ -310,15 +310,16 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
             </button>
           </div>
         </section>
+        <h2 className="w-full  line-clamp-2 text-sm text-gray-400">
+          {selectTable?.description}
+        </h2>
+        {loading && (
+          <ProgressBar mode="indeterminate" style={{ height: "6px" }} />
+        )}
       </header>
-      {loading && (
-        <ProgressBar mode="indeterminate" style={{ height: "6px" }} />
-      )}
-      <h2 className="w-full line-clamp-2 text-sm text-gray-400">
-        {selectTable?.description}
-      </h2>
+
       {triggerNote ? (
-        <div className="h-72">
+        <div className="h-full">
           <TextEditor
             value={attendanceData?.note}
             onChange={(content) =>
@@ -332,8 +333,8 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
           />
         </div>
       ) : (
-        <div className="w-full max-h-80 overflow-auto">
-          <table className="table-fixed w-max">
+        <div className="w-full max-h-full overflow-auto">
+          <table className="table-fixed  w-max min-w-full">
             <thead>
               <tr className="bg-gray-100 z-30 sticky top-0 ">
                 <th className="sticky left-0 z-40 bg-gray-100">Name</th>
@@ -441,7 +442,7 @@ const StudentAttendanceItem = React.memo(
           <div className="flex w-80 gap-2">
             <div className="w-10 h-10 relative rounded-md ring-1  overflow-hidden">
               <Image
-                src="/favicon.ico"
+                src={student.photo}
                 alt={student.firstName}
                 fill
                 placeholder="blur"

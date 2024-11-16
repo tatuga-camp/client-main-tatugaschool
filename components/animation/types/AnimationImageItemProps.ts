@@ -5,4 +5,5 @@ export interface AnimationImageItemProps {
   lastName: string;
   title: string;
   number: string;
+  blurHash?: string;
 }

@@ -122,7 +122,7 @@ function AttendanceView({
         >
           <div className="w-20 h-20 relative">
             <Image
-              src="/favicon.ico"
+              src={selectAttendance.student.photo}
               alt="Student"
               fill
               className=" rounded-full"

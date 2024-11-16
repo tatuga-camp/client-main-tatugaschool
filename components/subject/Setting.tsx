@@ -272,7 +272,7 @@ function Setting({ subjectId }: Props) {
                     <div className="flex gap-2">
                       <div className="w-10 h-10 relative rounded-md ring-1  overflow-hidden">
                         <Image
-                          src="/favicon.ico"
+                          src={student.photo}
                           alt={student.firstName}
                           fill
                           placeholder="blur"

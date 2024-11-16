@@ -36,7 +36,12 @@ import {
   UpdateSubjectService,
   UploadSignURLService,
 } from "../../../services";
-import { decodeBlurhashToCanvas, generateBlurHash } from "../../../utils";
+import {
+  decodeBlurhashToCanvas,
+  generateBlurHash,
+  localStorageGetRemoveRandomStudents,
+  localStorageSetRemoveRandomStudents,
+} from "../../../utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Subject from "../../../components/subject/Subject";
 import Image from "next/image";
@@ -47,6 +52,7 @@ import { useSound } from "../../../hook";
 import SilderPicker from "../../../components/subject/SilderPicker";
 import AttendanceChecker from "../../../components/subject/AttendanceChecker";
 import { Toast } from "primereact/toast";
+import { MdFullscreen, MdFullscreenExit } from "react-icons/md";
 type Props = {
   subjectId: string;
 };
@@ -67,6 +73,9 @@ function Index({ subjectId }: Props) {
   const teacherOnSubjects = useGetTeacherOnSubject({
     subjectId: subjectId,
   });
+  const [randomStudents, setRandomStudents] = React.useState<
+    StudentOnSubject[]
+  >([]);
   const [selectMenu, setSelectMenu] = React.useState<MenuSubject>("Subject");
   const [selectFooter, setSelectFooter] =
     React.useState<ListMenuFooter>("EMTY");
@@ -76,7 +85,7 @@ function Index({ subjectId }: Props) {
   const qrcodeRef = React.useRef<HTMLDivElement>(null);
   const [triggerQRCode, setTriggerQRCode] = React.useState(false);
   const [triggerStopWatch, setTriggerStopWatch] = React.useState(false);
-
+  const [triggerFullScreen, setTriggerFullScreen] = React.useState(false);
   useClickOutside(divRef, () => {
     setSelectStudent(() => undefined);
   });
@@ -186,6 +195,30 @@ function Index({ subjectId }: Props) {
   const handleCloseStopWatch = useCallback(() => {
     setTriggerStopWatch(false);
   }, []);
+
+  useEffect(() => {
+    if (studentOnSubjects.data) {
+      const localStorageStudents = localStorageGetRemoveRandomStudents({
+        subjectId: subjectId,
+      });
+
+      if (localStorageStudents?.length === 0 || !localStorageStudents) {
+        const ids = studentOnSubjects.data.map((student) => {
+          return { id: student.id };
+        });
+
+        setRandomStudents(studentOnSubjects.data);
+      } else {
+        const randomStudents = studentOnSubjects.data.filter((student) => {
+          return !localStorageStudents.some((localStudent) => {
+            return localStudent.id === student.id;
+          });
+        });
+        setRandomStudents(randomStudents);
+      }
+    }
+  }, [studentOnSubjects.data, selectFooter]);
+
   return (
     <>
       <Head>
@@ -203,24 +236,26 @@ function Index({ subjectId }: Props) {
         <Toast ref={toast} />
         {triggerStopWatch && <StopWatch onClose={handleCloseStopWatch} />}
 
-        {selectFooter === "Slide Picker" && studentOnSubjects.data && (
+        {selectFooter === "Slide Picker" && randomStudents && (
           <div
             className="w-screen z-50 h-screen flex items-center 
         justify-center fixed top-0 right-0 left-0 bottom-0 m-auto"
           >
-            <div className="bg-white p-10">
+            <div className="bg-white p-5 rounded-md border">
               <SilderPicker<StudentOnSubject>
-                images={studentOnSubjects.data.map((student, index) => {
-                  return {
-                    ...student,
-                    photo: `/favicon.ico`,
-                  };
-                })}
+                images={randomStudents
+                  .filter((s) => s.isActive)
+                  .map((student, index) => {
+                    return {
+                      ...student,
+                    };
+                  })}
+                subjectId={subjectId}
               />
             </div>
             <div
               onClick={() => setSelectFooter("EMTY")}
-              className="w-screen -z-10 h-screen bg-white/50 backdrop-blur  fixed top-0 right-0 left-0 bottom-0 m-auto"
+              className="w-screen -z-10 h-screen bg-black/50 backdrop-blur  fixed top-0 right-0 left-0 bottom-0 m-auto"
             ></div>
           </div>
         )}
@@ -229,7 +264,32 @@ function Index({ subjectId }: Props) {
             className="w-screen z-50 h-screen flex items-center 
         justify-center fixed top-0 right-0 left-0 bottom-0 m-auto"
           >
-            <div className="w-9/12 border bg-white p-5 h-max rounded-md overflow-hidden">
+            <div
+              className={`${
+                triggerFullScreen
+                  ? "h-screen w-screen p-10"
+                  : "w-9/12 h-5/6 p-5 "
+              } flex flex-col gap-1 border bg-white 
+             rounded-md overflow-hidden`}
+            >
+              <div className="w-full flex justify-end">
+                <button
+                  onClick={() => setTriggerFullScreen((prev) => !prev)}
+                  className="second-button text-xs flex items-center w-40 justify-center gap-1 py-1 border "
+                >
+                  {triggerFullScreen ? (
+                    <div className="flex items-center justify-center gap-1">
+                      <MdFullscreenExit />
+                      Small Screen
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center gap-1">
+                      <MdFullscreen />
+                      Full Screen
+                    </div>
+                  )}
+                </button>
+              </div>
               <AttendanceChecker
                 toast={toast}
                 subjectId={subjectId}
@@ -270,7 +330,7 @@ function Index({ subjectId }: Props) {
                 subjectId={subjectId}
               />
             </div>
-            <div className="w-screen -z-10 h-screen bg-white/50 backdrop-blur  fixed top-0 right-0 left-0 bottom-0 m-auto"></div>
+            <div className="w-screen -z-10 h-screen bg-black/50 backdrop-blur  fixed top-0 right-0 left-0 bottom-0 m-auto"></div>
           </div>
         )}
         {selectStudent && (
@@ -282,7 +342,7 @@ function Index({ subjectId }: Props) {
               <PopUpStudent student={selectStudent} toast={toast} />
             </div>
             <div
-              className="w-screen h-screen fixed top-0 bg-white/20 backdrop-blur
+              className="w-screen h-screen fixed top-0 bg-black/20 backdrop-blur
            -z-10 right-0 left-0 bottom-0 m-auto "
             ></div>
           </div>

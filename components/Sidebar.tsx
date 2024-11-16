@@ -60,6 +60,7 @@ function Sidebar({
           return (
             <button
               onClick={() => {
+                window.scrollTo(0, 0);
                 if (menu.url) {
                   router.push(menu.url);
                 } else {
