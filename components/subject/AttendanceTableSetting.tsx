@@ -6,6 +6,8 @@ import {
 } from "../../interfaces";
 import {
   useCreateAttendanceStatus,
+  useDeleteAttendanceStatus,
+  useDeleteAttendanceTable,
   useUpdateAttendanceStatus,
   useUpdateAttendanceTable,
 } from "../../react-query";
@@ -29,14 +31,16 @@ import { RequestUpdateAttendanceStatusListService } from "../../services";
 type Props = {
   table: AttendanceTable & { statusLists: AttendanceStatusList[] };
   toast: React.RefObject<Toast>;
+  onDelete: () => void;
 };
-function AttendanceTableSetting({ table, toast }: Props) {
+function AttendanceTableSetting({ table, toast, onDelete }: Props) {
   const queryClient = useQueryClient();
   const [tableData, setTableData] = React.useState<
-    AttendanceTable & { statusLists: AttendanceStatusList[] }
-  >(table);
+    (AttendanceTable & { statusLists: AttendanceStatusList[] }) | undefined
+  >();
   const updateTable = useUpdateAttendanceTable();
   const updateStatus = useUpdateAttendanceStatus();
+  const deleteAttendanceTable = useDeleteAttendanceTable();
 
   useEffect(() => {
     setTableData(table);
@@ -51,13 +55,17 @@ function AttendanceTableSetting({ table, toast }: Props) {
             attendanceTableId: table.id,
           },
           body: {
-            title: tableData.title,
-            description: tableData.description,
+            title: tableData?.title,
+            description: tableData?.description,
           },
         },
         queryClient,
       });
-      show();
+      toast.current?.show({
+        severity: "success",
+        summary: "Updated",
+        detail: "Attendance Table Updated",
+      });
     } catch (error) {
       console.log(error);
       let result = error as ErrorMessages;
@@ -71,12 +79,69 @@ function AttendanceTableSetting({ table, toast }: Props) {
       });
     }
   };
-  const show = () => {
-    toast.current?.show({
-      severity: "success",
-      summary: "Updated",
-      detail: "Attendance Table Updated",
+
+  const handleDeleteAttendanceTable = async ({
+    attendanceTableId,
+  }: {
+    attendanceTableId: string;
+  }) => {
+    const replacedText = "DELETE";
+    let content = document.createElement("div");
+    content.innerHTML =
+      "<div>To confirm, type <strong>" +
+      replacedText +
+      "</strong> in the box below </div>";
+    const { value } = await Swal.fire({
+      title: "Are you sure?",
+      input: "text",
+      icon: "warning",
+      footer: "This action is irreversible and destructive. Please be careful.",
+      html: content,
+      showCancelButton: true,
+      inputValidator: (value) => {
+        if (value !== replacedText) {
+          return "Please Type Correctly";
+        }
+      },
     });
+    if (value) {
+      try {
+        Swal.fire({
+          title: "Deleting...",
+          html: "Loading....",
+          allowEscapeKey: false,
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          },
+        });
+
+        await deleteAttendanceTable.mutateAsync({
+          request: {
+            attendanceTableId,
+          },
+          queryClient,
+        });
+        onDelete();
+        Swal.close();
+        toast.current?.show({
+          severity: "success",
+          summary: "Deleted",
+          detail: "Attendance Table Deleted",
+        });
+      } catch (error) {
+        console.log(error);
+        let result = error as ErrorMessages;
+        Swal.fire({
+          title: result.error ? result.error : "Something Went Wrong",
+          text: result.message.toString(),
+          footer: result.statusCode
+            ? "Code Error: " + result.statusCode?.toString()
+            : "",
+          icon: "error",
+        });
+      }
+    }
   };
 
   return (
@@ -101,6 +166,7 @@ function AttendanceTableSetting({ table, toast }: Props) {
                 value={tableData?.title}
                 onChange={(e) => {
                   setTableData((prev) => {
+                    if (!prev) return prev;
                     return {
                       ...prev,
                       title: e.target.value,
@@ -122,6 +188,7 @@ function AttendanceTableSetting({ table, toast }: Props) {
                 value={tableData?.description}
                 onChange={(e) => {
                   setTableData((prev) => {
+                    if (!prev) return prev;
                     return {
                       ...prev,
                       description: e.target.value,
@@ -203,30 +270,50 @@ function AttendanceTableSetting({ table, toast }: Props) {
               </tr>
             </thead>
             <tbody>
-              {tableData.statusLists.map((status, index) => {
+              {tableData?.statusLists.map((status, index) => {
                 const odd = index % 2 === 0;
                 return (
                   <>
                     <AttendanceStatusRow
+                      toast={toast}
                       updateStatus={updateStatus}
                       key={index}
                       odd={odd}
                       status={status}
                     />
-                    {tableData.statusLists.length - 1 === index && (
-                      <CreateAttendanceStatus
-                        odd={!odd}
-                        attendanceTableId={table.id}
-                        key={index + 1}
-                        toast={toast}
-                      />
-                    )}
                   </>
                 );
               })}
+              <CreateAttendanceStatus
+                odd={(tableData?.statusLists?.length ?? 0) % 2 === 0}
+                attendanceTableId={table.id}
+                toast={toast}
+              />
             </tbody>
           </table>
         </div>
+      </div>
+
+      <h1 className="text-xl font-medium mt-10">Danger zone</h1>
+      <h4 className="text-sm text-gray-500">
+        Irreversible and destructive actions
+      </h4>
+      <div className="flex flex-col items-start p-4  bg-white rounded-md border gap-5 mt-5">
+        <h2 className="border-b text-lg font-medium py-3">
+          Delete This Attendance Table
+        </h2>
+        <h4 className="text-sm text-red-700">
+          This action is irreversible and will delete all attendance data
+          associated with this table. Cannot be undone.
+        </h4>
+        <button
+          onClick={() =>
+            handleDeleteAttendanceTable({ attendanceTableId: table.id })
+          }
+          className="reject-button mt-5"
+        >
+          Delete This Table
+        </button>
       </div>
     </div>
   );
@@ -239,9 +326,11 @@ const AttendanceStatusRow = memo(
     status,
     odd,
     updateStatus,
+    toast,
   }: {
     status: AttendanceStatusList;
     odd: boolean;
+    toast: React.RefObject<Toast>;
     updateStatus: UseMutationResult<
       AttendanceStatusList,
       Error,
@@ -255,7 +344,7 @@ const AttendanceStatusRow = memo(
     const [data, setData] = React.useState<AttendanceStatusList>(status);
     const queryClient = useQueryClient();
     const debounceTimeout = React.useRef<NodeJS.Timeout | null>(null);
-
+    const deleteStatus = useDeleteAttendanceStatus();
     useEffect(() => {
       setData(status);
     }, [status]);
@@ -292,6 +381,34 @@ const AttendanceStatusRow = memo(
         debounceTimeout.current = null; // Reset timeout reference
       }, 1000);
     };
+
+    const handleDelete = async () => {
+      try {
+        await deleteStatus.mutateAsync({
+          request: {
+            id: status.id,
+          },
+          queryClient,
+        });
+        toast.current?.show({
+          severity: "success",
+          summary: "Deleted",
+          detail: "Attendance Status Deleted",
+        });
+      } catch (error) {
+        console.log(error);
+        let result = error as ErrorMessages;
+        Swal.fire({
+          title: result.error ? result.error : "Something Went Wrong",
+          text: result.message.toString(),
+          footer: result.statusCode
+            ? "Code Error: " + result.statusCode?.toString()
+            : "",
+          icon: "error",
+        });
+      }
+    };
+
     return (
       <tr
         className={`${
@@ -346,21 +463,10 @@ const AttendanceStatusRow = memo(
         <td>
           <div className="w-full flex items-center justify-center">
             <button
-              onClick={() => {
-                handleChange({ name: "isHidden", value: !data.isHidden });
-              }}
-              className={`${data.isHidden ? "reject-button" : "main-button"}`}
+              onClick={handleDelete}
+              className={`reject-button flex items-center justify-center`}
             >
-              {data.isHidden ? (
-                <div className="flex items-center justify-center gap-1">
-                  <FaRegEyeSlash />
-                  Invisible
-                </div>
-              ) : (
-                <div className="flex items-center justify-center gap-1">
-                  <FaRegEye /> Visible
-                </div>
-              )}
+              DELETE
             </button>
           </div>
         </td>

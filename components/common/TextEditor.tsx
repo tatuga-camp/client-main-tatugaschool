@@ -21,6 +21,7 @@ function TextEditor({ value, onChange }: Props) {
         onChange(content);
       }}
       init={{
+        object_resizing: true,
         link_context_toolbar: true,
         height: "100%",
         width: "100%",

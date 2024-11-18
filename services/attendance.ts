@@ -76,3 +76,28 @@ export async function UpdateManyAttendanceService(
     throw error?.response?.data;
   }
 }
+
+export type RequestCreateAttendanceService = {
+  attendanceRowId: string;
+  studentOnSubjectId: string;
+  status: string;
+  note?: string;
+};
+
+type ResponseCreateAttendanceService = Attendance;
+
+export async function CreateAttendanceService(
+  input: RequestCreateAttendanceService
+): Promise<ResponseCreateAttendanceService> {
+  try {
+    const response = await axiosInstance({
+      method: "POST",
+      url: `/v1/attendances`,
+      data: input,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Create Attendance request failed:", error.response.data);
+    throw error?.response?.data;
+  }
+}

@@ -257,7 +257,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
                     const [hours, minutes] = timePart.split(":").map(Number);
                     const plusOneHour = `${datePart}T${
                       hours + 1 < 10 ? `0${hours + 1}` : hours + 1
-                    }:${minutes}`;
+                    }:${minutes < 10 ? `0${minutes}` : minutes}`;
 
                     return {
                       ...prev,

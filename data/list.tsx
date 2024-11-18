@@ -23,7 +23,7 @@ export const ListRoles: { title: MemberRole; describe: string }[] = [
 export type MenuSubject =
   | "School"
   | "Subject"
-  | "Assignment"
+  | "Class work"
   | "Attendance"
   | "Grade"
   | "Setting Subject";
@@ -50,7 +50,7 @@ export const menuSubjectList = ({
       icon: <SiGoogleclassroom />,
     },
     {
-      title: "Assignment",
+      title: "Class work",
       icon: <MdAssignmentAdd />,
     },
     {

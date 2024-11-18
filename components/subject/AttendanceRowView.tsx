@@ -12,7 +12,11 @@ import Image from "next/image";
 import TextEditor from "../common/TextEditor";
 import { BiCustomize } from "react-icons/bi";
 import { CiSaveUp2 } from "react-icons/ci";
-import { useUpdateAttendance, useUpdateRowAttendance } from "../../react-query";
+import {
+  useDeleteRowAttendance,
+  useUpdateAttendance,
+  useUpdateRowAttendance,
+} from "../../react-query";
 import Swal from "sweetalert2";
 import { useQueryClient } from "@tanstack/react-query";
 import { Toast } from "primereact/toast";
@@ -29,6 +33,7 @@ function AttendanceRowView({ selectRow, onClose, toast }: props) {
   const [rowData, setRowData] = React.useState<AttendanceRow>(selectRow);
   const queryClient = useQueryClient();
   const update = useUpdateRowAttendance();
+  const remove = useDeleteRowAttendance();
 
   const handleUpdate = async () => {
     try {
@@ -44,7 +49,10 @@ function AttendanceRowView({ selectRow, onClose, toast }: props) {
         queryClient,
       });
       sucessSoud?.play();
-      show();
+      show({
+        title: "Update Success",
+        description: "Attendance Note has been updated",
+      });
     } catch (error) {
       console.log(error);
       let result = error as ErrorMessages;
@@ -59,13 +67,48 @@ function AttendanceRowView({ selectRow, onClose, toast }: props) {
     }
   };
 
-  const show = () => {
+  const handleDelete = async () => {
+    try {
+      await remove.mutateAsync({
+        request: {
+          attendanceRowId: selectRow.id,
+        },
+        queryClient,
+      });
+      sucessSoud?.play();
+      show({
+        title: "Delete Success",
+        description: "Attendance Row has been deleted",
+      });
+      onClose();
+    } catch (error) {
+      console.log(error);
+      let result = error as ErrorMessages;
+      Swal.fire({
+        title: result.error ? result.error : "Something Went Wrong",
+        text: result.message.toString(),
+        footer: result.statusCode
+          ? "Code Error: " + result.statusCode?.toString()
+          : "",
+        icon: "error",
+      });
+    }
+  };
+
+  const show = ({
+    title,
+    description,
+  }: {
+    title: string;
+    description: string;
+  }) => {
     toast.current?.show({
       severity: "success",
-      summary: "Updated",
-      detail: "Attendance has been updated",
+      summary: title,
+      detail: description,
     });
   };
+
   return (
     <main className="h-96 flex flex-col gap-2">
       {update.isPending && (
@@ -80,6 +123,13 @@ function AttendanceRowView({ selectRow, onClose, toast }: props) {
           </span>
         </div>
         <div className="flex gap-2 items-center">
+          <button
+            disabled={remove.isPending}
+            onClick={handleDelete}
+            className="reject-button flex items-center justify-center gap-1 py-1 border "
+          >
+            Delete
+          </button>
           <button
             disabled={update.isPending}
             onClick={handleUpdate}

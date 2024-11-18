@@ -105,18 +105,19 @@ export async function UpdateAttendanceRowService(
   }
 }
 
-type RequestDeleteAttendanceRowService = {
+export type RequestDeleteAttendanceRowService = {
   attendanceRowId: string;
 };
 
 export async function DeleteAttendanceRowService(
   input: RequestDeleteAttendanceRowService
-) {
+): Promise<AttendanceRow> {
   try {
-    await axiosInstance({
+    const remove = await axiosInstance<AttendanceRow>({
       method: "DELETE",
       url: `/v1/attendance-rows/${input.attendanceRowId}`,
     });
+    return remove.data;
   } catch (error: any) {
     console.error("Failed to delete Attendance Row:", error.response?.data);
     throw error?.response?.data;

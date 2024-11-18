@@ -11,15 +11,16 @@ import Image from "next/image";
 import TextEditor from "../common/TextEditor";
 import { BiCustomize } from "react-icons/bi";
 import { CiSaveUp2 } from "react-icons/ci";
-import { useUpdateAttendance } from "../../react-query";
+import { useCreateAttendance, useUpdateAttendance } from "../../react-query";
 import Swal from "sweetalert2";
 import { useQueryClient } from "@tanstack/react-query";
 import { Toast } from "primereact/toast";
 import { useSound } from "../../hook";
 import { ProgressBar } from "primereact/progressbar";
+import { SelectAttendance } from "./Attendance";
 
 type props = {
-  selectAttendance: Attendance & { student: StudentOnSubject };
+  selectAttendance: SelectAttendance;
   onClose: () => void;
   toast: React.RefObject<Toast>;
 
@@ -33,8 +34,10 @@ function AttendanceView({
 }: props) {
   const sucessSoud = useSound("/sounds/ding.mp3");
   const queryClient = useQueryClient();
-  const [attendanceData, setAttendanceData] = React.useState<Attendance>();
+  const [attendanceData, setAttendanceData] =
+    React.useState<SelectAttendance | null>();
   const updateAttendance = useUpdateAttendance();
+  const createAttendance = useCreateAttendance();
   React.useEffect(() => {
     setAttendanceData(selectAttendance);
   }, [selectAttendance]);
@@ -48,6 +51,9 @@ function AttendanceView({
 
   const handleUpdate = async () => {
     try {
+      if (!selectAttendance?.id) {
+        throw new Error("Attendance not found");
+      }
       await updateAttendance.mutateAsync({
         request: {
           query: {
@@ -61,7 +67,11 @@ function AttendanceView({
         queryClient,
       });
       sucessSoud?.play();
-      show();
+      toast.current?.show({
+        severity: "success",
+        summary: "Updated",
+        detail: "Attendance has been updated",
+      });
     } catch (error) {
       console.log(error);
       let result = error as ErrorMessages;
@@ -76,13 +86,41 @@ function AttendanceView({
     }
   };
 
-  const show = () => {
-    toast.current?.show({
-      severity: "success",
-      summary: "Updated",
-      detail: "Attendance has been updated",
-    });
+  const handleCreate = async () => {
+    try {
+      if (!attendanceData?.status) {
+        throw new Error("Status is required");
+      }
+      await createAttendance.mutateAsync({
+        request: {
+          status: attendanceData?.status,
+          note: attendanceData?.note,
+          attendanceRowId: selectAttendance.attendanceRowId,
+          studentOnSubjectId: selectAttendance.student.id,
+        },
+        queryClient,
+      });
+      sucessSoud?.play();
+      toast.current?.show({
+        severity: "success",
+        summary: "created",
+        detail: "Attendance has been created",
+      });
+      onClose();
+    } catch (error) {
+      console.log(error);
+      let result = error as ErrorMessages;
+      Swal.fire({
+        title: result.error ? result.error : "Something Went Wrong",
+        text: result.message.toString(),
+        footer: result.statusCode
+          ? "Code Error: " + result.statusCode?.toString()
+          : "",
+        icon: "error",
+      });
+    }
   };
+
   return (
     <main className="h-96 flex flex-col gap-2">
       {updateAttendance.isPending && (
@@ -97,14 +135,25 @@ function AttendanceView({
           </span>
         </div>
         <div className="flex gap-2 items-center">
-          <button
-            disabled={updateAttendance.isPending}
-            onClick={handleUpdate}
-            className="second-button flex items-center justify-center gap-1 py-1 border "
-          >
-            <CiSaveUp2 />
-            Save Change
-          </button>
+          {selectAttendance?.id ? (
+            <button
+              disabled={updateAttendance.isPending}
+              onClick={handleUpdate}
+              className="second-button flex items-center justify-center gap-1 py-1 border "
+            >
+              <CiSaveUp2 />
+              Save Change
+            </button>
+          ) : (
+            <button
+              disabled={createAttendance.isPending}
+              onClick={handleCreate}
+              className="second-button flex items-center justify-center gap-1 py-1 border "
+            >
+              <CiSaveUp2 />
+              Create
+            </button>
+          )}
           <button
             onClick={() => onClose()}
             className="text-lg hover:bg-gray-300/50 w-6  h-6  rounded

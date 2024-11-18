@@ -148,12 +148,12 @@ function Setting({ subjectId }: Props) {
     subjectId: string;
     schoolId: string;
   }) => {
-    const replacedText = "DELETE THIS SUBJECT";
+    const replacedText = "DELETE";
     let content = document.createElement("div");
     content.innerHTML =
-      "<div>Please Type This Sentence Below</div> <strong>" +
+      "<div>To confirm, type <strong>" +
       replacedText +
-      "</strong> <div>To Confirm Deleting</div>";
+      "</strong> in the box below </div>";
     const { value } = await Swal.fire({
       title: "Are you sure?",
       input: "text",
@@ -221,7 +221,7 @@ function Setting({ subjectId }: Props) {
         <SubjectPermission
           subjectId={subjectId}
           onSummit={handleSaveChanges}
-          isPending={false}
+          isPending={updateSubject.isPending}
         />
 
         <div className="flex flex-col p-4 min-h-80 bg-white rounded-md border gap-5 mt-5">

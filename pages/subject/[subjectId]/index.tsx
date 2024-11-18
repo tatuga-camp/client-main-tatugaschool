@@ -8,7 +8,6 @@ import {
   useGetUser,
 } from "../../../react-query";
 import { GetServerSideProps } from "next";
-import Assignment from "../../../components/subject/Assignment";
 import Grade from "../../../components/subject/Grade";
 import Attendance from "../../../components/subject/Attendance";
 import { Skeleton } from "primereact/skeleton";
@@ -53,6 +52,7 @@ import SilderPicker from "../../../components/subject/SilderPicker";
 import AttendanceChecker from "../../../components/subject/AttendanceChecker";
 import { Toast } from "primereact/toast";
 import { MdFullscreen, MdFullscreenExit } from "react-icons/md";
+import Classwork from "../../../components/subject/Classwork";
 type Props = {
   subjectId: string;
 };
@@ -453,7 +453,7 @@ function Index({ subjectId }: Props) {
               subjectId={subjectId}
             />
           )}{" "}
-          {selectMenu === "Assignment" && <Assignment />}
+          {selectMenu === "Class work" && <Classwork toast={toast} />}
           {selectMenu === "Grade" && <Grade />}
           {selectMenu === "Attendance" && (
             <Attendance toast={toast} subjectId={subjectId} />

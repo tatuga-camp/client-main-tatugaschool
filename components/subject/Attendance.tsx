@@ -12,6 +12,7 @@ import {
   AttendanceStatusList,
   AttendanceTable,
   StudentOnSubject,
+  PartialExcept,
 } from "../../interfaces";
 import { FaUser } from "react-icons/fa6";
 import Image from "next/image";
@@ -31,6 +32,12 @@ import { Toast } from "primereact/toast";
 import { ProgressBar } from "primereact/progressbar";
 import AttendanceTableSetting from "./AttendanceTableSetting";
 
+export type SelectAttendance = PartialExcept<
+  AttendanceType,
+  "attendanceRowId"
+> & {
+  student: StudentOnSubject;
+};
 function Attendance({
   subjectId,
   toast,
@@ -47,9 +54,8 @@ function Attendance({
   const tables = useGetAttendancesTable({
     subjectId,
   });
-  const [selectAttendance, setSelectAttendance] = React.useState<
-    (AttendanceType & { student: StudentOnSubject }) | null
-  >(null);
+  const [selectAttendance, setSelectAttendance] =
+    React.useState<SelectAttendance | null>(null);
   const [selectTable, setSelectTable] = React.useState<
     | (AttendanceTable & {
         statusLists: AttendanceStatusList[];
@@ -59,11 +65,14 @@ function Attendance({
   const [selectRow, setSelectRow] = React.useState<AttendanceRow | null>(null);
 
   useEffect(() => {
-    if (tables.data) {
-      setSelectTable(tables.data[0]);
+    if (!selectTable && tables.data) {
+      setSelectTable(tables.data?.[0]);
+    } else if (selectTable && tables.data) {
+      const findTable = tables.data.find((t) => t.id === selectTable.id);
+      if (!findTable) return;
+      setSelectTable(findTable);
     }
   }, [tables.data]);
-
   return (
     <>
       <div
@@ -84,7 +93,7 @@ function Attendance({
         <footer
           onClick={() => setSelectAttendance(null)}
           className="top-0 bottom-0 w-screen h-screen right-0 left-0 
-          bg-white/50 backdrop-blur fixed  m-auto -z-10"
+          bg-black/50 backdrop-blur fixed  m-auto -z-10"
         ></footer>
       </div>
 
@@ -105,7 +114,7 @@ function Attendance({
         <footer
           onClick={() => setSelectRow(null)}
           className="top-0 bottom-0 w-screen h-screen right-0 left-0 
-          bg-white/50 backdrop-blur fixed  m-auto -z-10"
+          bg-black/50 backdrop-blur fixed  m-auto -z-10"
         ></footer>
       </div>
 
@@ -207,7 +216,11 @@ function Attendance({
       <main className="w-full px-40">
         {triggerSetting && selectTable ? (
           <div className="mt-5">
-            <AttendanceTableSetting table={selectTable} toast={toast} />
+            <AttendanceTableSetting
+              table={selectTable}
+              toast={toast}
+              onDelete={() => setSelectTable(null)}
+            />
           </div>
         ) : (
           selectTable && (
@@ -231,12 +244,7 @@ type Props = {
   };
   setSelectRow: React.Dispatch<React.SetStateAction<AttendanceRow | null>>;
   setSelectAttendance: React.Dispatch<
-    React.SetStateAction<
-      | (AttendanceType & {
-          student: StudentOnSubject;
-        })
-      | null
-    >
+    React.SetStateAction<SelectAttendance | null>
   >;
 };
 function DisplayAttendanceTable({
@@ -383,15 +391,39 @@ function DisplayAttendanceTable({
                           </td>
                         );
                       })
-                    : rows?.data?.map((row) => {
+                    : rows?.data?.map((row, index) => {
                         const attendance = row.attendances.find(
                           (a) => a.studentOnSubjectId === student.id
                         );
+                        if (!attendance)
+                          return (
+                            <td key={row.id}>
+                              <button
+                                onClick={() => {
+                                  setSelectAttendance(() => {
+                                    return {
+                                      attendanceRowId: row.id,
+                                      student,
+                                    };
+                                  });
+                                }}
+                                className="flex w-full h-14
+                   relative hover:ring-1  bg-black select-none
+                    text-white ring-black hover:drop-shadow-md cursor-pointer   
+                   items-center transition
+                   justify-center flex-col"
+                              >
+                                NO DATA
+                              </button>
+                            </td>
+                          );
                         return (
-                          <td key={row.id} className="text-sm  font-semibold">
+                          <td
+                            key={row.id + attendance.id}
+                            className="text-sm  font-semibold"
+                          >
                             <button
                               onClick={() => {
-                                if (!attendance) return;
                                 setSelectAttendance(() => {
                                   return {
                                     ...attendance,
