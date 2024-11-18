@@ -65,3 +65,27 @@ export async function UpdateAttendanceStatusListService(
     throw error?.response?.data;
   }
 }
+
+export type RequestDeleteAttendanceStatusListService = {
+  id: string;
+};
+
+type ResponseDeleteAttendanceStatusListService = AttendanceStatusList;
+
+export async function DeleteAttendanceStatusListService(
+  input: RequestDeleteAttendanceStatusListService
+): Promise<ResponseDeleteAttendanceStatusListService> {
+  try {
+    const response = await axiosInstance({
+      method: "DELETE",
+      url: `/v1/attendance-status-lists/${input.id}`,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error(
+      "Update Attendance Status request failed:",
+      error.response?.data
+    );
+    throw error?.response?.data;
+  }
+}

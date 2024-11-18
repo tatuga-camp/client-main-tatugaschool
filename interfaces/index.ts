@@ -28,3 +28,4 @@ export * from "./TeacherOnSubject";
 export * from "./Team";
 export * from "./Error";
 export * from "./User";
+export * from "./Exception";

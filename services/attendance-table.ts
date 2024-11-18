@@ -107,15 +107,13 @@ export async function UpdateAttendanceTableService(
     throw error?.response?.data;
   }
 }
-type RequestDeleteAttendanceTableService = {
+export type RequestDeleteAttendanceTableService = {
   attendanceTableId: string;
 };
 
-type ResponseDeleteAttendanceTableService = {
-  message: string;
-};
+type ResponseDeleteAttendanceTableService = AttendanceTable;
 
-export async function DeleteAttendanceService(
+export async function DeleteAttendanceTableService(
   input: RequestDeleteAttendanceTableService
 ): Promise<ResponseDeleteAttendanceTableService> {
   try {

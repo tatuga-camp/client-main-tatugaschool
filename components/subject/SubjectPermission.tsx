@@ -15,7 +15,7 @@ type Props = {
       allowStudentViewAttendance?: boolean;
     }
   ) => void;
-  isPending?: boolean;
+  isPending: boolean;
 };
 function SubjectPermission({ subjectId, onSummit, isPending }: Props) {
   const subject = useGetSubject({ subjectId });

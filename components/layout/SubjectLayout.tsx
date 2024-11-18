@@ -31,6 +31,9 @@ function Layout({
   useClickOutside(navbarRef, () => {
     setActive(() => false); // Close the SubjectNavbar when clicking outside
   });
+  React.useEffect(() => {
+    document.body.style.overflow = "auto";
+  }, []);
   return (
     <section className="min-h-screen font-Anuphan bg-background-color ">
       <div ref={navbarRef} className="sticky z-50 top-0">

@@ -6,13 +6,19 @@ import {
 } from "@tanstack/react-query";
 import {
   CreateAttendanceRowService,
+  CreateAttendanceService,
   CreateAttendanceStatusListService,
   CreateAttendanceTableService,
+  DeleteAttendanceRowService,
+  DeleteAttendanceStatusListService,
   GetAttendanceRowByTabelIdService,
   GetAttendanceTablesService,
   RequestCreateAttendanceRowService,
+  RequestCreateAttendanceService,
   RequestCreateAttendanceStatusListService,
   RequestCreateAttendanceTableService,
+  RequestDeleteAttendanceRowService,
+  RequestDeleteAttendanceStatusListService,
   RequestUpdateAttendanceRowService,
   RequestUpdateAttendanceService,
   RequestUpdateAttendanceStatusListService,
@@ -25,6 +31,8 @@ import {
 } from "../services";
 import { Attendance, AttendanceRow, AttendanceTable } from "../interfaces";
 import {
+  DeleteAttendanceTableService,
+  RequestDeleteAttendanceTableService,
   RequestUpdateAttendanceTableService,
   ResponseGetAttendanceTablesService,
 } from "../services/attendance-table";
@@ -59,7 +67,6 @@ export function useCreateAttendanceRow() {
         "attendance-rows",
         { attendanceTableId: data.attendanceTableId },
       ]);
-      console.log("oldData", oldData);
       if (!oldData) {
         await variables.queryClient.prefetchQuery({
           queryKey: [
@@ -115,6 +122,32 @@ export function useUpdateAttendance() {
                   }
                   return attendance;
                 }),
+              };
+            }
+            return attendanceRow;
+          });
+        }
+      );
+    },
+  });
+}
+
+export function useCreateAttendance() {
+  return useMutation({
+    mutationKey: ["create-attendance"],
+    mutationFn: (request: {
+      request: RequestCreateAttendanceService;
+      queryClient: QueryClient;
+    }) => CreateAttendanceService(request.request),
+    async onSuccess(data, variables, context) {
+      variables.queryClient.setQueryData(
+        ["attendance-rows", { attendanceTableId: data.attendanceTableId }],
+        (oldData: (AttendanceRow & { attendances: Attendance[] })[]) => {
+          return oldData?.map((attendanceRow) => {
+            if (attendanceRow.id === data.attendanceRowId) {
+              return {
+                ...attendanceRow,
+                attendances: [...attendanceRow.attendances, data],
               };
             }
             return attendanceRow;
@@ -188,6 +221,24 @@ export function useUpdateRowAttendance() {
   });
 }
 
+export function useDeleteRowAttendance() {
+  return useMutation({
+    mutationKey: ["delete-row-attendance"],
+    mutationFn: (request: {
+      request: RequestDeleteAttendanceRowService;
+      queryClient: QueryClient;
+    }) => DeleteAttendanceRowService(request.request),
+    onSuccess(data, variables, context) {
+      variables.queryClient.setQueryData(
+        ["attendance-rows", { attendanceTableId: data.attendanceTableId }],
+        (oldData: (AttendanceRow & { attendances: Attendance[] })[]) => {
+          return oldData.filter((row) => row.id !== data.id);
+        }
+      );
+    },
+  });
+}
+
 export function useCreateAttendanceTable() {
   return useMutation({
     mutationKey: ["create-attendance-table"],
@@ -200,6 +251,24 @@ export function useCreateAttendanceTable() {
         ["attendance-tables", { subjectId: data.subjectId }],
         (oldData: ResponseGetAttendanceTablesService) => {
           return [...(oldData ?? []), data];
+        }
+      );
+    },
+  });
+}
+
+export function useDeleteAttendanceTable() {
+  return useMutation({
+    mutationKey: ["delete-attendance-table"],
+    mutationFn: (request: {
+      request: RequestDeleteAttendanceTableService;
+      queryClient: QueryClient;
+    }) => DeleteAttendanceTableService(request.request),
+    onSuccess(data, variables, context) {
+      variables.queryClient.setQueryData(
+        ["attendance-tables", { subjectId: data.subjectId }],
+        (oldData: ResponseGetAttendanceTablesService) => {
+          return oldData?.filter((table) => table.id !== data.id);
         }
       );
     },
@@ -279,6 +348,34 @@ export function useCreateAttendanceStatus() {
               return {
                 ...table,
                 statusLists: [...table.statusLists, status],
+              };
+            }
+            return table;
+          });
+        }
+      );
+    },
+  });
+}
+
+export function useDeleteAttendanceStatus() {
+  return useMutation({
+    mutationKey: ["delete-attendance-status"],
+    mutationFn: (request: {
+      request: RequestDeleteAttendanceStatusListService;
+      queryClient: QueryClient;
+    }) => DeleteAttendanceStatusListService(request.request),
+    async onSuccess(status, variables, context) {
+      variables.queryClient.setQueryData(
+        ["attendance-tables", { subjectId: status.subjectId }],
+        (oldData: ResponseGetAttendanceTablesService) => {
+          return oldData?.map((table) => {
+            if (table.id === status.attendanceTableId) {
+              return {
+                ...table,
+                statusLists: table.statusLists.filter(
+                  (s) => s.id !== status.id
+                ),
               };
             }
             return table;
