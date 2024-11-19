@@ -10,4 +10,9 @@ export interface Assignment {
   dueDate: Date;
   subjectId: string;
   schoolId: string;
+  status: AssignmentStatus;
+  type: AssignmentType;
 }
+
+export type AssignmentStatus = " Published" | "Draft";
+export type AssignmentType = "Assignment" | "Material";

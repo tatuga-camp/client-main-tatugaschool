@@ -12,6 +12,7 @@ type Props = {
   suffix?: string;
   prefix?: string;
   disabled?: boolean;
+  placeholder?: string;
 };
 function InputNumber({
   value,
@@ -21,6 +22,7 @@ function InputNumber({
   useGrouping,
   required,
   suffix,
+  placeholder,
   prefix,
   disabled,
 }: Props) {
@@ -32,6 +34,7 @@ function InputNumber({
       disabled={disabled}
       value={value}
       min={min}
+      placeholder={placeholder}
       useGrouping={useGrouping}
       max={max}
       onValueChange={(e) => onValueChange(e.value as number)}
