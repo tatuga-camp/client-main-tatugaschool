@@ -104,14 +104,15 @@ export default function KanbanBoard({ data }: KanbanBoardProps) {
     if (draggedColumn) {
       setActiveColumn(draggedColumn);
     } else {
-      setActiveTask(active);
+      const activeTask = columns.flatMap(col => col.tasks).find(task => task.id === activeId);
+      setActiveTask(activeTask || null);
     }
   }
 
   function handleDragEnd(event: any) {
     const { active, over } = event;
 
-    if (!over) return;
+    if (!over || active.id === over.id) return;
 
     // จัดการ drag & drop columns
     if (columns.find(col => col.id === active.id)) {
