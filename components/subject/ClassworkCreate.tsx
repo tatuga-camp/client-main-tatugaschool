@@ -1,6 +1,7 @@
 import React, { ReactNode, useEffect } from "react";
 import { IoChevronDownSharp, IoClose, IoDuplicate } from "react-icons/io5";
 import {
+  MdAssignment,
   MdAssignmentAdd,
   MdDelete,
   MdOutlineDataSaverOn,
@@ -11,14 +12,31 @@ import {
 import useAdjustPosition from "../../hook/useWindow";
 import useClickOutside from "../../hook/useClickOutside";
 import TextEditor from "../common/TextEditor";
-import { AssignmentType, FileOnAssignment } from "../../interfaces";
+import {
+  AssignmentStatus,
+  AssignmentType,
+  ErrorMessages,
+  FileOnAssignment,
+} from "../../interfaces";
 import { FaBook, FaRegFile, FaRegFileImage } from "react-icons/fa6";
 import Dropdown from "../common/Dropdown";
 import InputNumber from "../common/InputNumber";
 import Switch from "../common/Switch";
+import { useCreateAssignment } from "../../react-query";
+import Swal from "sweetalert2";
+import { Toast } from "primereact/toast";
+import { ProgressBar } from "primereact/progressbar";
+import { convertToDateTimeLocalString, generateBlurHash } from "../../utils";
+import {
+  CreateFileAssignmentService,
+  getSignedURLTeacherService,
+  UploadSignURLService,
+} from "../../services";
 
 type Props = {
   onClose: () => void;
+  toast: React.RefObject<Toast>;
+  subjectId: string;
 };
 
 type TitleList =
@@ -58,24 +76,26 @@ type FileClasswork = {
   url: string;
 };
 
-const classworkLists: { title: AssignmentType; icon: ReactNode }[] = [
+export const classworkLists: { title: AssignmentType; icon: ReactNode }[] = [
   {
     title: "Assignment",
-    icon: <MdAssignmentAdd />,
+    icon: <MdAssignment />,
   },
   {
     title: "Material",
     icon: <FaRegFile />,
   },
 ];
-function ClassworkCreate({ onClose }: Props) {
+function ClassworkCreate({ onClose, toast, subjectId }: Props) {
   useEffect(() => {
     document.body.style.overflow = "hidden";
   }, []);
   const [triggerOption, setTriggerOption] = React.useState(false);
-  const [files, setFiles] = React.useState<FileClasswork[]>();
+  const [files, setFiles] = React.useState<FileClasswork[]>([]);
   const divRef = React.useRef<HTMLDivElement | null>(null);
+  const [loading, setLoading] = React.useState(false);
   const adjustedStyle = useAdjustPosition(divRef, 20); // 20px padding
+  const create = useCreateAssignment();
   const [classwork, setClasswork] = React.useState<{
     title?: string;
     description?: string;
@@ -83,8 +103,11 @@ function ClassworkCreate({ onClose }: Props) {
     maxScore?: number;
     weight?: number;
     allowWeight?: boolean;
+    assignAt?: string;
+    deadline?: string;
   }>({
     type: "Assignment",
+    assignAt: convertToDateTimeLocalString(new Date()),
   });
 
   useClickOutside(divRef, () => {
@@ -106,7 +129,6 @@ function ClassworkCreate({ onClose }: Props) {
       return [...(prev ?? []), ...filesArray];
     });
   };
-
   const handleDeleteFile = async (file: FileClasswork) => {
     if (!file.data) {
       setFiles((prev) => {
@@ -115,11 +137,94 @@ function ClassworkCreate({ onClose }: Props) {
     }
   };
 
+  const handleCreateClasswork = async (e: React.FormEvent) => {
+    try {
+      e.preventDefault();
+      const submitter = (e.nativeEvent as SubmitEvent)
+        .submitter as HTMLButtonElement;
+      console.log(submitter.value);
+      if (
+        !classwork?.title ||
+        !classwork?.description ||
+        !classwork?.type ||
+        !classwork?.assignAt
+      ) {
+        throw new Error("Description is required");
+      }
+      setLoading(true);
+      const assignment = await create.mutateAsync({
+        title: classwork?.title,
+        description: classwork?.description,
+        type: classwork?.type,
+        maxScore: classwork?.maxScore,
+        weight: classwork?.weight,
+        dueDate:
+          classwork?.deadline && new Date(classwork.deadline).toISOString(),
+        beginDate: new Date(classwork.assignAt).toISOString(),
+        subjectId: subjectId,
+        status: submitter.value as AssignmentStatus,
+      });
+
+      if (files?.length > 0) {
+        const uploadTasks = files.map(async (file) => {
+          const isImage = file.type.includes("image");
+          let blurHashData: string | undefined = undefined;
+
+          if (isImage) {
+            blurHashData = await generateBlurHash(file.file);
+          }
+
+          const signURL = await getSignedURLTeacherService({
+            fileName: file.file.name,
+            fileType: file.file.type,
+          });
+
+          await UploadSignURLService({
+            contentType: file.file.type,
+            file: file.file,
+            signURL: signURL.signURL,
+          });
+
+          return CreateFileAssignmentService({
+            assignmentId: assignment.id,
+            url: signURL.originalURL,
+            type: file.file.type,
+            size: file.file.size,
+            blurHash: blurHashData,
+          });
+        });
+
+        await Promise.allSettled(uploadTasks);
+      }
+      setLoading(false);
+      toast.current?.show({
+        severity: "success",
+        summary: "Success",
+        detail: "Classwork has been created",
+      });
+      onClose();
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+
+      let result = error as ErrorMessages;
+      Swal.fire({
+        title: result.error ? result.error : "Something Went Wrong",
+        text: result.message.toString(),
+        footer: result.statusCode
+          ? "Code Error: " + result.statusCode?.toString()
+          : "",
+        icon: "error",
+      });
+    }
+  };
+
   return (
-    <div className="flex flex-col">
+    <form onSubmit={handleCreateClasswork} className="flex flex-col">
       <nav className="w-full px-5  bg-white border-b h-20 flex items-center justify-between">
         <section className="flex items-center gap-4">
           <button
+            type="button"
             onClick={onClose}
             className="w-10 h-10 text-3xl border rounded-full flex items-center justify-center
            hover:bg-gray-300/50 transition active:scale-105"
@@ -133,16 +238,20 @@ function ClassworkCreate({ onClose }: Props) {
           >
             <MdAssignmentAdd />
           </div>
-          <h1 className="text-lg font-medium">Class Classwork</h1>
+          <h1 className="text-lg font-medium">Create Classwork</h1>
         </section>
         <section className="flex items-center gap-[2px]">
           <button
+            type="submit"
+            value="Published"
+            disabled={loading}
             className="w-40 p-2 h-10 opacity-85 hover:opacity-100 font-medium rounded-r-none rounded-md text-base text-white
          gradient-bg"
           >
-            Save Draft
+            Publish
           </button>
           <button
+            type="button"
             onClick={() => setTriggerOption((prev) => !prev)}
             className="w-max p-2 h-10  font-medium rounded-l-none rounded-md text-base text-white
          gradient-bg"
@@ -159,10 +268,23 @@ function ClassworkCreate({ onClose }: Props) {
               ref={divRef}
             >
               <div className="w-52 h-max z-40 p-1 absolute top-8 rounded-md bg-white drop-shadow border">
-                {menuClassworkList.map((menu, index) => (
-                  <button
-                    key={index}
-                    className={`w-full p-2 flex gap-10 items-center justify-start text-base
+                {menuClassworkList
+                  .filter(
+                    (i) =>
+                      i.title !== "Unpublish" &&
+                      i.title !== "Duplicate" &&
+                      i.title !== "Delete"
+                  )
+                  .map((menu, index) => (
+                    <button
+                      type={
+                        menu.title === "Publish" || menu.title === "Save Draft"
+                          ? "submit"
+                          : "button"
+                      }
+                      value={menu.title === "Publish" ? "Published" : "Draft"}
+                      key={index}
+                      className={`w-full p-2 flex gap-10 items-center justify-start text-base
                  font-medium 
                  ${
                    menu.title === "Delete"
@@ -170,24 +292,39 @@ function ClassworkCreate({ onClose }: Props) {
                      : "text-gray-500 hover:bg-primary-color hover:text-white"
                  }
                  `}
-                  >
-                    {menu.icon}
-                    {menu.title}
-                  </button>
-                ))}
+                    >
+                      {menu.icon}
+                      {menu.title}
+                    </button>
+                  ))}
               </div>
             </div>
           )}
         </section>
       </nav>
+      {loading && (
+        <ProgressBar mode="indeterminate" style={{ height: "6px" }} />
+      )}
       <main className="w-full  h-screen pb-40 overflow-auto flex">
         <section className="w-full flex-col h-max flex items-center justify-start gap-5">
           <div className="w-11/12  h-max max-h-max mt-10 p-5 bg-white flex flex-col gap-2 rounded-md border">
             <label className="flex flex-col ">
               <span className="text-base font-medium">Title</span>
-              <input className="main-input" placeholder="Title" />
+              <input
+                value={classwork?.title}
+                onChange={(e) =>
+                  setClasswork((prev) => {
+                    return { ...prev, title: e.target.value };
+                  })
+                }
+                required
+                maxLength={999}
+                className="main-input"
+                placeholder="Title"
+              />
             </label>
             <div className="w-full h-screen ">
+              <span className="text-base font-medium">Description</span>
               <TextEditor
                 value={classwork?.description || ""}
                 onChange={(v) =>
@@ -218,6 +355,7 @@ function ClassworkCreate({ onClose }: Props) {
                       </div>
                     </div>
                     <button
+                      type="button"
                       onClick={() => handleDeleteFile(file)}
                       className="text-xl mr-5 hover:bg-red-300/50 p-2 rounded-full active:scale-105 text-red-500"
                     >
@@ -295,12 +433,37 @@ function ClassworkCreate({ onClose }: Props) {
             </label>
             <label className="flex flex-col bg-gray-50  w-full">
               <span className="text-base font-medium">Assign At</span>
-              <input type="datetime-local" className="main-input" />
+              <input
+                required
+                value={classwork.assignAt}
+                onChange={(e) =>
+                  setClasswork((prev) => {
+                    return {
+                      ...prev,
+                      assignAt: e.target.value,
+                    };
+                  })
+                }
+                type="datetime-local"
+                className="main-input"
+              />
             </label>
             {classwork?.type === "Assignment" && (
               <label className="flex flex-col  w-full  border-b pb-2">
                 <span className="text-base font-medium">Deadline</span>
-                <input type="datetime-local" className="main-input" />
+                <input
+                  value={classwork.deadline}
+                  onChange={(e) =>
+                    setClasswork((prev) => {
+                      return {
+                        ...prev,
+                        deadline: e.target.value,
+                      };
+                    })
+                  }
+                  type="datetime-local"
+                  className="main-input"
+                />
               </label>
             )}
 
@@ -308,6 +471,7 @@ function ClassworkCreate({ onClose }: Props) {
               <label className="flex flex-col  w-full border-b pb-2">
                 <span className="text-base font-medium">Max Score</span>
                 <InputNumber
+                  required={classwork?.type === "Assignment"}
                   value={classwork?.maxScore}
                   max={1000}
                   min={0}
@@ -366,7 +530,7 @@ function ClassworkCreate({ onClose }: Props) {
           </section>
         </section>
       </main>
-    </div>
+    </form>
   );
 }
 

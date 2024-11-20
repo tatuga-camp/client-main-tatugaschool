@@ -2,12 +2,6 @@ import { encode } from "blurhash";
 
 type ImageFile = File;
 
-interface ImageData {
-  file: ImageFile;
-  url: string;
-  blurHash: string | null;
-}
-
 // Function to load the image from a file
 const loadImageFromFile = (file: ImageFile): Promise<HTMLImageElement> => {
   return new Promise((resolve, reject) => {

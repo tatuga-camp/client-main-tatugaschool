@@ -1,15 +1,23 @@
-import { Assignment } from "../interfaces";
+import {
+  Assignment,
+  AssignmentStatus,
+  AssignmentType,
+  FileOnAssignment,
+} from "../interfaces";
 import createAxiosInstance from "./apiService";
 
 const axiosInstance = createAxiosInstance();
 
-type RequestCreateAssignmentService = {
+export type RequestCreateAssignmentService = {
   title: string;
   description: string;
-  maxScore: number;
-  weight: number;
+  maxScore?: number;
+  weight?: number;
   beginDate: string;
+  dueDate?: string;
   subjectId: string;
+  type: AssignmentType;
+  status: AssignmentStatus;
 };
 
 type ResponseCreateAssignmentService = Assignment;
@@ -31,11 +39,11 @@ export async function CreateAssignmentService(
   }
 }
 
-type ResponseGetAssignmentsService = Assignment[];
+export type ResponseGetAssignmentsService = Assignment[];
 
 export async function GetAssignmentsBySubjectIdService(input: {
   subjectId: string;
-}): Promise<ResponseGetAssignmentsService[]> {
+}): Promise<ResponseGetAssignmentsService> {
   try {
     const response = await axiosInstance({
       method: "GET",
@@ -51,7 +59,9 @@ type RequestGetAssignmentByIdService = {
   assignmentId: string;
 };
 
-type ResponseGetAssignmentByIdService = Assignment;
+type ResponseGetAssignmentByIdService = Assignment & {
+  files: FileOnAssignment[];
+};
 
 export async function GetAssignmentByIdService(
   input: RequestGetAssignmentByIdService

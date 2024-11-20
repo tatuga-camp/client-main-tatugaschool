@@ -8,9 +8,8 @@ type RequestCreateFileAssignmentService = {
   type: string;
   url: string;
   size: number;
-  subjectId: string;
   assignmentId: string;
-  schoolId: string;
+  blurHash?: string;
 };
 
 type ResponseCreateFileAssignmentService = FileOnAssignment;

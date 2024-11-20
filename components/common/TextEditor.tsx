@@ -28,6 +28,8 @@ function TextEditor({ value, onChange }: Props) {
         menubar: true,
         image_title: true,
         automatic_uploads: true,
+        paste_data_images: false,
+        smart_paste: false,
         file_picker_types: "image",
         file_picker_callback: async (callback, value, meta) => {
           const input = document.createElement("input");

@@ -53,6 +53,7 @@ import AttendanceChecker from "../../../components/subject/AttendanceChecker";
 import { Toast } from "primereact/toast";
 import { MdFullscreen, MdFullscreenExit } from "react-icons/md";
 import Classwork from "../../../components/subject/Classwork";
+import { IoMdClose } from "react-icons/io";
 type Props = {
   subjectId: string;
 };
@@ -272,20 +273,25 @@ function Index({ subjectId }: Props) {
               } flex flex-col gap-1 border bg-white 
              rounded-md overflow-hidden`}
             >
-              <div className="w-full flex justify-end">
+              <div className="w-full flex gap-2 justify-end">
+                <button
+                  onClick={() => setSelectFooter("EMTY")}
+                  className="text-lg hover:bg-gray-300/50 w-6  h-6  rounded
+         flex items-center justify-center font-semibold"
+                >
+                  <IoMdClose />
+                </button>
                 <button
                   onClick={() => setTriggerFullScreen((prev) => !prev)}
-                  className="second-button text-xs flex items-center w-40 justify-center gap-1 py-1 border "
+                  className="second-button text-lg flex items-center w-6  h-6  justify-center gap-1 "
                 >
                   {triggerFullScreen ? (
                     <div className="flex items-center justify-center gap-1">
                       <MdFullscreenExit />
-                      Small Screen
                     </div>
                   ) : (
                     <div className="flex items-center justify-center gap-1">
                       <MdFullscreen />
-                      Full Screen
                     </div>
                   )}
                 </button>
@@ -453,7 +459,9 @@ function Index({ subjectId }: Props) {
               subjectId={subjectId}
             />
           )}{" "}
-          {selectMenu === "Class work" && <Classwork toast={toast} />}
+          {selectMenu === "Class work" && (
+            <Classwork subjetId={subjectId} toast={toast} />
+          )}
           {selectMenu === "Grade" && <Grade />}
           {selectMenu === "Attendance" && (
             <Attendance toast={toast} subjectId={subjectId} />
