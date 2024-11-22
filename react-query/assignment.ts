@@ -1,10 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   CreateAssignmentService,
+  CreateFileAssignmentService,
+  DeleteAssignmentService,
+  DeleteFileAssignmentService,
   GetAssignmentByIdService,
   GetAssignmentsBySubjectIdService,
+  ReorderAssignmentService,
   RequestCreateAssignmentService,
+  RequestCreateFileAssignmentService,
+  RequestDeleteAssignmentService,
+  RequestDeleteFileAssignmentService,
+  RequestReorderAssignmentService,
+  RequestUpdateAssignmentService,
+  ResponseGetAssignmentByIdService,
   ResponseGetAssignmentsService,
+  UpdateAssignmentService,
 } from "../services";
 
 export function useGetAssignments({ subjectId }: { subjectId: string }) {
@@ -24,6 +35,37 @@ export function useGetAssignment({ id }: { id: string }) {
   });
 }
 
+export function useUpdateAssignment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["update-assignment"],
+    mutationFn: (request: RequestUpdateAssignmentService) =>
+      UpdateAssignmentService(request),
+    onSuccess(data, variables, context) {
+      queryClient.setQueryData(
+        ["assignments", { subjectId: data.subjectId }],
+        (oldData: ResponseGetAssignmentsService) => {
+          return oldData?.map((prevAssignment) => {
+            if (prevAssignment.id === data.id) {
+              return { ...data, files: prevAssignment.files };
+            } else {
+              return prevAssignment;
+            }
+          });
+        }
+      );
+      queryClient.setQueryData(
+        ["assignment", { id: data.id }],
+        (
+          prev: ResponseGetAssignmentByIdService
+        ): ResponseGetAssignmentByIdService => {
+          return { ...data, files: prev.files };
+        }
+      );
+    },
+  });
+}
+
 export function useCreateAssignment() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -35,6 +77,132 @@ export function useCreateAssignment() {
         ["assignments", { subjectId: data.subjectId }],
         (oldData: ResponseGetAssignmentsService) => {
           return [...(oldData ?? []), data];
+        }
+      );
+    },
+  });
+}
+
+export function useDeleteAssignment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["delete-assignment"],
+    mutationFn: (request: RequestDeleteAssignmentService) =>
+      DeleteAssignmentService(request),
+    onSuccess(data, variables, context) {
+      queryClient.setQueryData(
+        ["assignments", { subjectId: data.subjectId }],
+        (oldData: ResponseGetAssignmentsService) => {
+          return oldData?.filter((assignment) => assignment.id !== data.id);
+        }
+      );
+      queryClient.invalidateQueries({
+        queryKey: ["assignment", { id: data.id }],
+      });
+    },
+  });
+}
+
+export function useReoderAssignment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["reorder-assignment"],
+    mutationFn: (request: {
+      request: RequestReorderAssignmentService;
+      subjectId: string;
+    }) => ReorderAssignmentService(request.request),
+    onSuccess(newDatas, variables, context) {
+      queryClient.setQueryData(
+        ["assignments", { subjectId: variables.subjectId }],
+        (oldData: ResponseGetAssignmentsService) => {
+          return oldData?.map((prevAssignment) => {
+            const newAssignment = newDatas.find(
+              (newData) => newData.id === prevAssignment.id
+            );
+            if (newAssignment) {
+              return {
+                ...newAssignment,
+                files: prevAssignment.files,
+              };
+            } else {
+              return prevAssignment;
+            }
+          });
+        }
+      );
+    },
+  });
+}
+
+export function useCreateFileOnAssignment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["create-file-assignment"],
+    mutationFn: (request: RequestCreateFileAssignmentService) =>
+      CreateFileAssignmentService(request),
+    onSuccess(data, variables, context) {
+      queryClient.setQueryData(
+        ["assignment", { id: data.assignmentId }],
+        (oldData: ResponseGetAssignmentByIdService) => {
+          return {
+            ...oldData,
+            files: [...oldData.files, data],
+          };
+        }
+      );
+      queryClient.setQueryData(
+        ["assignments", { subjectId: data.subjectId }],
+        (oldData: ResponseGetAssignmentsService) => {
+          return oldData?.map((prevAssignment) => {
+            if (prevAssignment.id === data.assignmentId) {
+              return {
+                ...prevAssignment,
+                files: [...prevAssignment.files, data],
+              };
+            } else {
+              return prevAssignment;
+            }
+          });
+        }
+      );
+    },
+  });
+}
+
+export function useDeleteFileOnAssignment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["delete-file-assignment"],
+    mutationFn: (request: RequestDeleteFileAssignmentService) =>
+      DeleteFileAssignmentService(request),
+    onSuccess(data, variables, context) {
+      queryClient.setQueryData(
+        ["assignment", { id: data.assignmentId }],
+        (oldData: ResponseGetAssignmentByIdService) => {
+          return {
+            ...oldData,
+            files: oldData.files.filter((file) => file.id !== data.id),
+          };
+        }
+      );
+
+      queryClient.setQueryData(
+        ["assignments", { subjectId: data.subjectId }],
+        (oldData: ResponseGetAssignmentsService) => {
+          return oldData?.map((prevAssignment) => {
+            if (prevAssignment.id === data.assignmentId) {
+              return {
+                ...prevAssignment,
+                files: prevAssignment.files.filter(
+                  (file) => file.id !== data.id
+                ),
+              };
+            } else {
+              return prevAssignment;
+            }
+          });
         }
       );
     },

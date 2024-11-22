@@ -15,6 +15,7 @@ type Props<T> = {
     | undefined;
   itemTemplate?: React.ReactNode | ((option: T) => React.ReactNode) | undefined;
   loading?: boolean;
+  disabled?: boolean;
 };
 const TRANSITIONS = {
   overlay: {
@@ -34,10 +35,12 @@ function Dropdown<T>({
   valueTemplate,
   itemTemplate,
   loading,
+  disabled,
 }: Props<T>) {
   return (
     <>
       <DropdownPrimereact
+        disabled={disabled}
         loading={loading}
         value={value}
         onChange={onChange}

@@ -31,6 +31,7 @@ import { defaultBlurHash, MenuSubject } from "../../../data";
 import { SlPicture } from "react-icons/sl";
 import {
   getSignedURLTeacherService,
+  RefreshTokenService,
   RequestUpdateSubjectService,
   UpdateSubjectService,
   UploadSignURLService,
@@ -38,8 +39,10 @@ import {
 import {
   decodeBlurhashToCanvas,
   generateBlurHash,
+  getRefetchtoken,
   localStorageGetRemoveRandomStudents,
   localStorageSetRemoveRandomStudents,
+  setAccessToken,
 } from "../../../utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Subject from "../../../components/subject/Subject";
@@ -220,6 +223,14 @@ function Index({ subjectId }: Props) {
     }
   }, [studentOnSubjects.data, selectFooter]);
 
+  useEffect(() => {
+    if (router.isReady) {
+      const menu = router.query.menu as MenuSubject;
+      if (menu) {
+        setSelectMenu(menu);
+      }
+    }
+  }, [router.isReady]);
   return (
     <>
       <Head>
@@ -403,7 +414,7 @@ function Index({ subjectId }: Props) {
             <div className="h-full flex flex-col items-end justify-between">
               <div className="flex gap-2">
                 <button
-                  onClick={() => setSelectMenu("Setting Subject")}
+                  onClick={() => setSelectMenu("Setting-Subject")}
                   className="flex items-center active:scale-110 justify-center gap-1 hover:bg-primary-color hover:text-white
                text-primary-color bg-white w-max px-2 py-1 rounded-md"
                 >
@@ -459,14 +470,14 @@ function Index({ subjectId }: Props) {
               subjectId={subjectId}
             />
           )}{" "}
-          {selectMenu === "Class work" && (
-            <Classwork subjetId={subjectId} toast={toast} />
+          {selectMenu === "Classwork" && (
+            <Classwork subjectId={subjectId} toast={toast} />
           )}
           {selectMenu === "Grade" && <Grade />}
           {selectMenu === "Attendance" && (
             <Attendance toast={toast} subjectId={subjectId} />
           )}
-          {selectMenu === "Setting Subject" && (
+          {selectMenu === "Setting-Subject" && (
             <Setting subjectId={subjectId} />
           )}
         </main>
@@ -482,17 +493,34 @@ function Index({ subjectId }: Props) {
 export default Index;
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const params = ctx.params;
+  try {
+    const params = ctx.params;
 
-  if (!params?.subjectId) {
+    if (!params?.subjectId) {
+      return {
+        notFound: true,
+      };
+    }
+    const { refresh_token } = getRefetchtoken(ctx);
+    if (!refresh_token) {
+      throw new Error("Token not found");
+    }
+    const accessToken = await RefreshTokenService({
+      refreshToken: refresh_token,
+    });
+    setAccessToken({ access_token: accessToken.accessToken });
+
     return {
-      notFound: true,
+      props: {
+        subjectId: params.subjectId,
+      },
+    };
+  } catch (error) {
+    return {
+      redirect: {
+        destination: "/auth/sign-in",
+        permanent: false,
+      },
     };
   }
-
-  return {
-    props: {
-      subjectId: params.subjectId,
-    },
-  };
 };

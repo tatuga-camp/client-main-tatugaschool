@@ -6,11 +6,13 @@ export interface StudentOnAssignment {
   firstName: string;
   lastName: string;
   photo: string;
+  blurHash?: string | undefined;
   number: string;
   score: number;
   body: string;
   isCompleted: boolean;
   isReviewed: boolean;
+  isAssigned: boolean;
   studentId: string;
   assignmentId: string;
   studentOnSubjectId: string;

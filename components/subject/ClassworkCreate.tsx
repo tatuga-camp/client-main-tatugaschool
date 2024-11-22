@@ -13,6 +13,7 @@ import useAdjustPosition from "../../hook/useWindow";
 import useClickOutside from "../../hook/useClickOutside";
 import TextEditor from "../common/TextEditor";
 import {
+  Assignment,
   AssignmentStatus,
   AssignmentType,
   ErrorMessages,
@@ -32,6 +33,8 @@ import {
   getSignedURLTeacherService,
   UploadSignURLService,
 } from "../../services";
+import ClasswordView, { FileClasswork } from "./ClasswordView";
+import { useRouter } from "next/router";
 
 type Props = {
   onClose: () => void;
@@ -41,22 +44,22 @@ type Props = {
 
 type TitleList =
   | "Publish"
-  | "Unpublish"
-  | "Save Draft"
+  | "Mark as Draft"
+  | "Save Change"
   | "Duplicate"
   | "Delete";
 
-const menuClassworkList: { title: TitleList; icon: ReactNode }[] = [
+export const menuClassworkList: { title: TitleList; icon: ReactNode }[] = [
   {
     title: "Publish",
     icon: <MdPublish />,
   },
   {
-    title: "Unpublish",
+    title: "Mark as Draft",
     icon: <MdUnpublished />,
   },
   {
-    title: "Save Draft",
+    title: "Save Change",
     icon: <MdOutlineDataSaverOn />,
   },
   {
@@ -69,13 +72,6 @@ const menuClassworkList: { title: TitleList; icon: ReactNode }[] = [
   },
 ];
 
-type FileClasswork = {
-  file: File;
-  data: FileOnAssignment | null;
-  type: string;
-  url: string;
-};
-
 export const classworkLists: { title: AssignmentType; icon: ReactNode }[] = [
   {
     title: "Assignment",
@@ -86,10 +82,12 @@ export const classworkLists: { title: AssignmentType; icon: ReactNode }[] = [
     icon: <FaRegFile />,
   },
 ];
+
 function ClassworkCreate({ onClose, toast, subjectId }: Props) {
   useEffect(() => {
     document.body.style.overflow = "hidden";
   }, []);
+  const router = useRouter();
   const [triggerOption, setTriggerOption] = React.useState(false);
   const [files, setFiles] = React.useState<FileClasswork[]>([]);
   const divRef = React.useRef<HTMLDivElement | null>(null);
@@ -101,32 +99,22 @@ function ClassworkCreate({ onClose, toast, subjectId }: Props) {
     description?: string;
     type?: AssignmentType;
     maxScore?: number;
-    weight?: number;
+    weight?: number | null;
     allowWeight?: boolean;
-    assignAt?: string;
+    beginDate?: string;
     deadline?: string;
   }>({
     type: "Assignment",
-    assignAt: convertToDateTimeLocalString(new Date()),
+    beginDate: convertToDateTimeLocalString(new Date()),
   });
 
   useClickOutside(divRef, () => {
     setTriggerOption(false);
   });
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-    const filesArray = Array.from(files).map((file) => {
-      return {
-        file,
-        data: null,
-        type: file.type,
-        url: URL.createObjectURL(file),
-      };
-    });
+  const handleFileChange = (files: FileClasswork[]) => {
     setFiles((prev) => {
-      return [...(prev ?? []), ...filesArray];
+      return [...(prev ?? []), ...files];
     });
   };
   const handleDeleteFile = async (file: FileClasswork) => {
@@ -142,12 +130,11 @@ function ClassworkCreate({ onClose, toast, subjectId }: Props) {
       e.preventDefault();
       const submitter = (e.nativeEvent as SubmitEvent)
         .submitter as HTMLButtonElement;
-      console.log(submitter.value);
       if (
         !classwork?.title ||
         !classwork?.description ||
         !classwork?.type ||
-        !classwork?.assignAt
+        !classwork?.beginDate
       ) {
         throw new Error("Description is required");
       }
@@ -160,13 +147,14 @@ function ClassworkCreate({ onClose, toast, subjectId }: Props) {
         weight: classwork?.weight,
         dueDate:
           classwork?.deadline && new Date(classwork.deadline).toISOString(),
-        beginDate: new Date(classwork.assignAt).toISOString(),
+        beginDate: new Date(classwork.beginDate).toISOString(),
         subjectId: subjectId,
         status: submitter.value as AssignmentStatus,
       });
 
       if (files?.length > 0) {
         const uploadTasks = files.map(async (file) => {
+          if (!file.file) return;
           const isImage = file.type.includes("image");
           let blurHashData: string | undefined = undefined;
 
@@ -202,7 +190,7 @@ function ClassworkCreate({ onClose, toast, subjectId }: Props) {
         summary: "Success",
         detail: "Classwork has been created",
       });
-      onClose();
+      router.push(`/subject/${subjectId}/assignment/${assignment.id}`);
     } catch (error) {
       console.log(error);
       setLoading(false);
@@ -271,14 +259,15 @@ function ClassworkCreate({ onClose, toast, subjectId }: Props) {
                 {menuClassworkList
                   .filter(
                     (i) =>
-                      i.title !== "Unpublish" &&
                       i.title !== "Duplicate" &&
-                      i.title !== "Delete"
+                      i.title !== "Delete" &&
+                      i.title !== "Save Change"
                   )
                   .map((menu, index) => (
                     <button
                       type={
-                        menu.title === "Publish" || menu.title === "Save Draft"
+                        menu.title === "Publish" ||
+                        menu.title === "Mark as Draft"
                           ? "submit"
                           : "button"
                       }
@@ -305,230 +294,14 @@ function ClassworkCreate({ onClose, toast, subjectId }: Props) {
       {loading && (
         <ProgressBar mode="indeterminate" style={{ height: "6px" }} />
       )}
-      <main className="w-full  h-screen pb-40 overflow-auto flex">
-        <section className="w-full flex-col h-max flex items-center justify-start gap-5">
-          <div className="w-11/12  h-max max-h-max mt-10 p-5 bg-white flex flex-col gap-2 rounded-md border">
-            <label className="flex flex-col ">
-              <span className="text-base font-medium">Title</span>
-              <input
-                value={classwork?.title}
-                onChange={(e) =>
-                  setClasswork((prev) => {
-                    return { ...prev, title: e.target.value };
-                  })
-                }
-                required
-                maxLength={999}
-                className="main-input"
-                placeholder="Title"
-              />
-            </label>
-            <div className="w-full h-screen ">
-              <span className="text-base font-medium">Description</span>
-              <TextEditor
-                value={classwork?.description || ""}
-                onChange={(v) =>
-                  setClasswork((prev) => {
-                    return { ...prev, description: v };
-                  })
-                }
-              />
-            </div>
-
-            <ul className="w-full h-max flex flex-col gap-2">
-              {files?.map((file, index) => {
-                const isImage = file.type.includes("image");
-                return (
-                  <li
-                    key={index}
-                    className="w-full h-20 flex overflow-hidden rounded-md items-center justify-between  bg-white border"
-                  >
-                    <div className="w-full h-full flex items-center justify-start gap-2">
-                      <div
-                        className="w-16 gradient-bg text-white text-lg flex items-center justify-center
-                     border-r h-full"
-                      >
-                        {isImage ? <FaRegFileImage /> : <FaRegFile />}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span>{file.file.name}</span>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteFile(file)}
-                      className="text-xl mr-5 hover:bg-red-300/50 p-2 rounded-full active:scale-105 text-red-500"
-                    >
-                      <MdDelete />
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-
-          <div className="w-11/12 h-max p-5 rounded-md bg-white border">
-            <h1>Attach File</h1>
-            <span className="text-xs text-gray-400">
-              Attach file to your classwork, you can attach multiple files.
-            </span>
-            <div className="w-full  flex items-center justify-center h-20">
-              <label
-                htmlFor="upload"
-                className="text-white flex active:scale-105 transition
-                 items-center justify-center gap-1
-               gradient-bg px-3 py-1 text-lg rounded-md"
-              >
-                <MdOutlineFileUpload />
-                Upload
-                <input
-                  onChange={handleFileChange}
-                  id="upload"
-                  type="file"
-                  multiple
-                  className="hidden"
-                />
-              </label>
-            </div>
-          </div>
-        </section>
-        <section className="w-4/12 min-h-screen max-h-max flex flex-col gap-2  bg-white  h-full">
-          <div className="w-full py-5 flex items-start flex-col px-5  border-b">
-            <h1 className="text-lg font-medium">Classwork setting</h1>
-            <span className="text-xs text-gray-400">
-              Manage the setting of your classwork here
-            </span>
-          </div>
-
-          <section className="flex flex-col gap-3 mt-5 px-5 w-10/12">
-            <label className="flex border-b pb-2 flex-col  w-full">
-              <span className="text-base font-medium">
-                Choose Type of Classword
-              </span>
-              <Dropdown<{ title: string; icon: ReactNode }>
-                value={
-                  classworkLists.find((c) => c.title === classwork?.type) ||
-                  classworkLists[0]
-                }
-                itemTemplate={(item) => {
-                  return (
-                    <div className="flex items-center gap-2">
-                      {item.icon}
-                      <span>{item.title}</span>
-                    </div>
-                  );
-                }}
-                placeholder="Choose Type of Classwork"
-                onChange={(e) =>
-                  setClasswork((prev) => {
-                    return {
-                      ...prev,
-                      type: e.target.value.title,
-                    };
-                  })
-                }
-                options={classworkLists}
-                optionLabel="title"
-              />
-            </label>
-            <label className="flex flex-col bg-gray-50  w-full">
-              <span className="text-base font-medium">Assign At</span>
-              <input
-                required
-                value={classwork.assignAt}
-                onChange={(e) =>
-                  setClasswork((prev) => {
-                    return {
-                      ...prev,
-                      assignAt: e.target.value,
-                    };
-                  })
-                }
-                type="datetime-local"
-                className="main-input"
-              />
-            </label>
-            {classwork?.type === "Assignment" && (
-              <label className="flex flex-col  w-full  border-b pb-2">
-                <span className="text-base font-medium">Deadline</span>
-                <input
-                  value={classwork.deadline}
-                  onChange={(e) =>
-                    setClasswork((prev) => {
-                      return {
-                        ...prev,
-                        deadline: e.target.value,
-                      };
-                    })
-                  }
-                  type="datetime-local"
-                  className="main-input"
-                />
-              </label>
-            )}
-
-            {classwork?.type === "Assignment" && (
-              <label className="flex flex-col  w-full border-b pb-2">
-                <span className="text-base font-medium">Max Score</span>
-                <InputNumber
-                  required={classwork?.type === "Assignment"}
-                  value={classwork?.maxScore}
-                  max={1000}
-                  min={0}
-                  onValueChange={(e) =>
-                    setClasswork((prev) => {
-                      return {
-                        ...prev,
-                        maxScore: e,
-                      };
-                    })
-                  }
-                />
-              </label>
-            )}
-            {classwork?.type === "Assignment" && (
-              <label className="flex gap-2 items-center justify-between   w-full">
-                <span className="text-base font-medium">
-                  Allow Weight of Classwork
-                </span>
-                <Switch
-                  checked={classwork?.allowWeight}
-                  setChecked={(e) =>
-                    setClasswork((prev) => {
-                      return {
-                        ...prev,
-                        weight: e ? prev?.weight : undefined,
-                        allowWeight: e,
-                      };
-                    })
-                  }
-                />
-              </label>
-            )}
-            {classwork?.allowWeight && classwork.type === "Assignment" && (
-              <label className="flex flex-col  w-full">
-                <span className="text-base font-medium">
-                  Weight of Classwork (Optional)
-                </span>
-                <InputNumber
-                  value={classwork?.weight}
-                  max={100}
-                  suffix="%"
-                  min={0}
-                  placeholder="percentage of classwork"
-                  onValueChange={(e) =>
-                    setClasswork((prev) => {
-                      return {
-                        ...prev,
-                        weight: e,
-                      };
-                    })
-                  }
-                />
-              </label>
-            )}
-          </section>
-        </section>
+      <main className="w-full h-max max-h-screen overflow-auto flex">
+        <ClasswordView
+          classwork={classwork as Assignment}
+          onChange={(d) => setClasswork((prev) => ({ ...prev, ...d }))}
+          files={files}
+          onDeleteFile={handleDeleteFile}
+          onUploadFile={(file) => handleFileChange(file)}
+        />
       </main>
     </form>
   );

@@ -33,11 +33,9 @@ export async function CreateStudentOnAssignmentService(
 
 type RequestGetStudentOnAssignmentsService = {
   assignmentId: string;
-  page?: number;
-  limit?: number;
 };
 
-type ResponseGetStudentOnAssignmentsService = Pagination<StudentOnAssignment>;
+export type ResponseGetStudentOnAssignmentsService = StudentOnAssignment[];
 
 export async function GetStudentOnAssignmentsByAssignmentIdService(
   input: RequestGetStudentOnAssignmentsService
@@ -46,7 +44,6 @@ export async function GetStudentOnAssignmentsByAssignmentIdService(
     const response = await axiosInstance({
       method: "GET",
       url: `/v1/student-on-assignments/assignment/${input.assignmentId}`,
-      params: { ...input },
     });
     return response.data;
   } catch (error: any) {
@@ -82,17 +79,18 @@ export async function GetStudentOnAssignmentByStudentIdService(
   }
 }
 
-type RequestUpdateStudentOnAssignmentService = {
+export type RequestUpdateStudentOnAssignmentService = {
   query: { studentOnAssignmentId: string };
   body: {
     score?: number;
     body?: string;
     isCompleted?: boolean;
     isReviewed?: boolean;
+    isAssigned?: boolean;
   };
 };
 
-type ResponseUpdateStudentOnAssignmentService = StudentOnAssignment;
+export type ResponseUpdateStudentOnAssignmentService = StudentOnAssignment;
 
 export async function UpdateStudentOnAssignmentService(
   input: RequestUpdateStudentOnAssignmentService
@@ -100,8 +98,8 @@ export async function UpdateStudentOnAssignmentService(
   try {
     const response = await axiosInstance({
       method: "PATCH",
-      url: `/v1/student-on-assignments/${input.query.studentOnAssignmentId}`,
-      data: { ...input.body },
+      url: `/v1/student-on-assignments`,
+      data: { ...input },
     });
     return response.data;
   } catch (error: any) {

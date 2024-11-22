@@ -64,6 +64,9 @@ function Sidebar({
                 if (menu.url) {
                   router.push(menu.url);
                 } else {
+                  router.replace({
+                    query: { ...router.query, menu: menu.title },
+                  });
                   setSelectMenu(menu.title);
                 }
               }}

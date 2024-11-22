@@ -12,7 +12,7 @@ export type RequestCreateAssignmentService = {
   title: string;
   description: string;
   maxScore?: number;
-  weight?: number;
+  weight?: number | null;
   beginDate: string;
   dueDate?: string;
   subjectId: string;
@@ -39,7 +39,9 @@ export async function CreateAssignmentService(
   }
 }
 
-export type ResponseGetAssignmentsService = Assignment[];
+export type ResponseGetAssignmentsService = (Assignment & {
+  files: FileOnAssignment[];
+})[];
 
 export async function GetAssignmentsBySubjectIdService(input: {
   subjectId: string;
@@ -59,7 +61,7 @@ type RequestGetAssignmentByIdService = {
   assignmentId: string;
 };
 
-type ResponseGetAssignmentByIdService = Assignment & {
+export type ResponseGetAssignmentByIdService = Assignment & {
   files: FileOnAssignment[];
 };
 
@@ -78,18 +80,18 @@ export async function GetAssignmentByIdService(
   }
 }
 
-type RequestUpdateAssignmentService = {
+export type RequestUpdateAssignmentService = {
   query: {
     assignmentId: string;
   };
   data: {
-    title: string;
-    description: string;
-    maxScore: number;
-    weight: number;
-    beginDate: string;
-    isAllowDeleteWork: boolean;
-    dueDate?: string;
+    title?: string;
+    description?: string;
+    maxScore?: number;
+    weight?: number | null;
+    beginDate?: string;
+    dueDate?: string | null;
+    status?: AssignmentStatus;
   };
 };
 
@@ -115,14 +117,34 @@ export async function UpdateAssignmentService(
     throw error?.response?.data;
   }
 }
-type RequestDeleteAssignmentService = {
+
+export type RequestReorderAssignmentService = {
+  assignmentIds: string[];
+};
+
+type ResponseReorderAssignmentService = Assignment[];
+
+export async function ReorderAssignmentService(
+  input: RequestReorderAssignmentService
+): Promise<ResponseReorderAssignmentService> {
+  try {
+    const response = await axiosInstance({
+      method: "PATCH",
+      url: `/v1/assignments/reorder`,
+      data: input,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Reorder Assignment request failed:", error.response.data);
+    throw error?.response?.data;
+  }
+}
+
+export type RequestDeleteAssignmentService = {
   assignmentId: string;
 };
 
-type ResponseDeleteAssignmentService = {
-  message: string;
-};
-
+type ResponseDeleteAssignmentService = Assignment;
 export async function DeleteAssignmentService(
   input: RequestDeleteAssignmentService
 ): Promise<ResponseDeleteAssignmentService> {

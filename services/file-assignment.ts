@@ -4,7 +4,7 @@ import createAxiosInstance from "./apiService";
 
 const axiosInstance = createAxiosInstance();
 
-type RequestCreateFileAssignmentService = {
+export type RequestCreateFileAssignmentService = {
   type: string;
   url: string;
   size: number;
@@ -20,13 +20,11 @@ type RequestGetFileAssignmentService = {
 
 type ResponseGetFileAssignmentService = ResponseCreateFileAssignmentService[];
 
-type RequestDeleteFileAssignmentService = {
+export type RequestDeleteFileAssignmentService = {
   fileOnAssignmentId: string;
 };
 
-type ResponseDeleteFileAssignmentService = {
-  message: string;
-};
+type ResponseDeleteFileAssignmentService = FileOnAssignment;
 
 export async function CreateFileAssignmentService(
   input: RequestCreateFileAssignmentService
