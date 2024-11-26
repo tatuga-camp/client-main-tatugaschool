@@ -190,9 +190,9 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
     });
   };
   return (
-    <div className="w-full h-full flex flex-col gap-1">
+    <div className="w-full h-full flex flex-col gap-1 p-2 md:p-4">
       <header className="">
-        <section className="w-full flex justify-between items-center gap-2">
+        <section className="w-full flex flex-col md:flex-row justify-between items-center gap-2">
           <div>
             <h1 className="text-xl font-medium">Attendance Checker</h1>
             <span className="text-sm text-gray-500">
@@ -203,7 +203,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
             <button
               onClick={handleCreateAttendance}
               disabled={loading}
-              className="main-button w-40 flex items-center justify-center gap-2"
+              className="main-button w-full md:w-40 flex items-center justify-center gap-2"
             >
               {loading ? (
                 <ProgressSpinner
@@ -221,8 +221,8 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
           </div>
         </section>
 
-        <section className="w-full flex h-14 justify-between items-end mt-5 border-b  gap-2">
-          <div className="max-w-8/12 flex flex-nowrap overflow-auto  ">
+        <section className="w-full flex flex-col md:flex-row h-14 justify-between items-end mt-5 border-b gap-2">
+          <div className="max-w-full md:max-w-8/12 flex flex-nowrap overflow-auto">
             {attendanceTables.data?.map((table, index) => (
               <button
                 key={index}
@@ -238,7 +238,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
             ))}
           </div>
           <div className="flex gap-2 items-end">
-            <label className=" flex flex-col">
+            <label className="flex flex-col">
               <span className="text-gray-400 text-xs">Start Date</span>
               <input
                 value={attendanceData.startDate}
@@ -267,10 +267,10 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
                   })
                 }
                 type="datetime-local"
-                className="main-input h-8 "
+                className="main-input h-8"
               />
             </label>
-            <label className=" flex flex-col">
+            <label className="flex flex-col">
               <span className="text-gray-400 text-xs">End Date</span>
               <input
                 value={attendanceData.endDate}
@@ -283,26 +283,20 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
                   })
                 }
                 type="datetime-local"
-                className="main-input h-8 "
+                className="main-input h-8"
               />
             </label>
             <button
               onClick={() => setTriggerNote((prev) => !prev)}
-              className="main-button flex items-center justify-center w-36 h-8  ring-1 ring-blue-600 "
+              className="main-button flex items-center justify-center w-full md:w-36 h-8 ring-1 ring-blue-600"
             >
               {triggerNote ? (
-                <div
-                  className="flex items-center 
-          justify-center gap-1"
-                >
+                <div className="flex items-center justify-center gap-1">
                   <IoIosArrowBack />
                   Back
                 </div>
               ) : (
-                <div
-                  className="flex items-center 
-          justify-center gap-1"
-                >
+                <div className="flex items-center justify-center gap-1">
                   <BiSolidNote />
                   Add Note
                 </div>
@@ -310,7 +304,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
             </button>
           </div>
         </section>
-        <h2 className="w-full  line-clamp-2 text-sm text-gray-400">
+        <h2 className="w-full line-clamp-2 text-sm text-gray-400">
           {selectTable?.description}
         </h2>
         {loading && (
@@ -334,9 +328,9 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
         </div>
       ) : (
         <div className="w-full max-h-full overflow-auto">
-          <table className="table-fixed  w-max min-w-full">
+          <table className="table-fixed w-max min-w-full">
             <thead>
-              <tr className="bg-gray-100 z-30 sticky top-0 ">
+              <tr className="bg-gray-100 z-30 sticky top-0">
                 <th className="sticky left-0 z-40 bg-gray-100">Name</th>
                 {selectTable?.statusLists
                   .filter((s) => !s.isHidden)
@@ -353,10 +347,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
                           }
                           style={{ backgroundColor: status.color }}
                           name={status.title}
-                          className={`text-center w-24 p-2 select-none rounded-md hover:drop-shadow-md 
-                          cursor-pointer active:scale-105
-            transition hover:text-black text-sm font-medium 
-           flex items-center justify-center gap-1`}
+                          className={`text-center w-24 p-2 select-none rounded-md hover:drop-shadow-md cursor-pointer active:scale-105 transition hover:text-black text-sm font-medium flex items-center justify-center gap-1`}
                         >
                           <span className="max-w-20 truncate">
                             {status.title}
@@ -366,7 +357,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
                       </th>
                     );
                   })}
-                <th className="z-10 bg-gray-100 text-sm  sticky right-0">
+                <th className="z-10 bg-gray-100 text-sm sticky right-0">
                   <div className="flex items-center justify-center gap-1">
                     <BiSolidNote /> Note
                   </div>
@@ -430,17 +421,13 @@ const StudentAttendanceItem = React.memo(
     return (
       <tr
         key={student.id}
-        className={` ${
-          odd && "bg-gray-50"
-        } border-spacing-2 border-4 border-transparent`}
+        className={` ${odd && "bg-gray-50"} border-spacing-2 border-4 border-transparent`}
       >
         <td
-          className={`sticky left-0 z-10    ${
-            odd ? "bg-gray-50" : "bg-white"
-          } `}
+          className={`sticky left-0 z-10 ${odd ? "bg-gray-50" : "bg-white"}`}
         >
           <div className="flex w-80 gap-2">
-            <div className="w-10 h-10 relative rounded-md ring-1  overflow-hidden">
+            <div className="w-10 h-10 relative rounded-md ring-1 overflow-hidden">
               <Image
                 src={student.photo}
                 alt={student.firstName}
@@ -467,7 +454,7 @@ const StudentAttendanceItem = React.memo(
           .map((status, index) => {
             return (
               <td key={student.id + status.id}>
-                <div className="w-full flex justify-center items-center ">
+                <div className="w-full flex justify-center items-center">
                   <input
                     name={status.title}
                     checked={student.status === status.title}
@@ -479,15 +466,13 @@ const StudentAttendanceItem = React.memo(
                     }
                     style={{ accentColor: status.color }}
                     type="checkbox"
-                    className="w-6 h-6 "
+                    className="w-6 h-6"
                   />
                 </div>
               </td>
             );
           })}
-        <td
-          className={`z-10  ${odd ? "bg-gray-50" : "bg-white"}  sticky right-0`}
-        >
+        <td className={`z-10 ${odd ? "bg-gray-50" : "bg-white"} sticky right-0`}>
           <textarea
             value={student.note}
             onChange={(e) =>

@@ -239,14 +239,11 @@ const SilderPicker = <T extends AnimationImageItemProps>({
     setFinsh(false);
   };
   return (
-    <div className="flex">
-      <div className="flex flex-col gap-2">
+    <div className="flex flex-col md:flex-row">
+      <div className="flex flex-col gap-2 w-full md:w-3/4">
         {finsih && !isStarted && <AnimationFireworkEffect />}
         {finsih && selectItem ? (
-          <div
-            className="max-w-2xl min-w-[42rem] flex flex-col items-center justify-center gap-2
-          h-80 bg-white"
-          >
+          <div className="max-w-full md:max-w-2xl min-w-full md:min-w-[42rem] flex flex-col items-center justify-center gap-2 h-80 bg-white">
             <h1 className="text-2xl font-bold">Congratulations!</h1>
             <div className="w-40 h-40 bg-gray-100 relative rounded overflow-hidden">
               <Image
@@ -288,7 +285,7 @@ const SilderPicker = <T extends AnimationImageItemProps>({
         ) : (
           <div className="h-80 flex flex-col gap-2">
             {randomImages.length === 0 && (
-              <div className="min-w-[42rem] h-full bg-gray-100 relative flex items-center justify-center rounded overflow-hidden">
+              <div className="min-w-full md:min-w-[42rem] h-full bg-gray-100 relative flex items-center justify-center rounded overflow-hidden">
                 No student found
               </div>
             )}
@@ -351,7 +348,7 @@ const SilderPicker = <T extends AnimationImageItemProps>({
           </div>
         )}
       </div>
-      <div className="w-60 h-80 border-l pl-5 ">
+      <div className="w-full md:w-1/4 h-80 border-l pl-5 mt-5 md:mt-0">
         <div className="w-full h-7 flex border-b border-collapse items-center justify-center gap-1">
           <button
             onClick={() => setSelectMenu("available")}

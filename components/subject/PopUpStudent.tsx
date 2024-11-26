@@ -104,9 +104,9 @@ function PopUpStudent({ student, toast }: Props) {
   };
 
   return (
-    <section className="w-full border  p-5 items-center  flex gap-5  bg-background-color rounded-md">
-      <div className="w-40 h-max border bg-white rounded-md flex flex-col gap-1 items-center justify-center">
-        <div className="w-40 h-10 gradient-bg rounded-t-md flex items-center justify-center">
+    <section className="w-full border p-5 items-center flex flex-col md:flex-row gap-5 bg-background-color rounded-md">
+      <div className="w-full md:w-40 h-max border bg-white rounded-md flex flex-col gap-1 items-center justify-center">
+        <div className="w-full md:w-40 h-10 gradient-bg rounded-t-md flex items-center justify-center">
           <span className="text-white font-semibold text-lg">{totalScore}</span>
         </div>
         <div className="w-20 h-20 relative">
@@ -114,10 +114,10 @@ function PopUpStudent({ student, toast }: Props) {
             src={student.photo}
             alt="Student"
             fill
-            className=" rounded-full"
+            className="rounded-full"
           />
         </div>
-        <div className="w-40 h-16 flex flex-col items-center justify-center">
+        <div className="w-full md:w-40 h-16 flex flex-col items-center justify-center">
           <span className="text-gray-800 font-semibold text-sm">
             {student.firstName} {student.lastName}
           </span>
