@@ -6,6 +6,7 @@ type Props = {
   url: string;
   code: string;
 };
+
 function QRCode({ url, code }: Props) {
   const [isLoading, setIsLoading] = React.useState(false);
   const [qrCode, setQRCode] = React.useState<string>();
@@ -32,8 +33,8 @@ function QRCode({ url, code }: Props) {
   }, []);
 
   return (
-    <div className="w-full h-full flex flex-col gap-2">
-      <div className="w-full h-96 relative">
+    <div className="w-full h-full flex flex-col gap-2 p-4 sm:p-6 md:p-8">
+      <div className="w-full h-64 sm:h-80 md:h-96 relative">
         {qrCode ? (
           <Image src={qrCode} alt="QR Code" layout="fill" objectFit="contain" />
         ) : (
@@ -41,8 +42,8 @@ function QRCode({ url, code }: Props) {
         )}
       </div>
       <div className="flex flex-col items-center justify-center gap-1">
-        <h1 className="text-center text-3xl font-semibold">{code}</h1>
-        <p className="text-center text-sm text-gray-500">
+        <h1 className="text-center text-xl sm:text-2xl md:text-3xl font-semibold">{code}</h1>
+        <p className="text-center text-xs sm:text-sm md:text-base text-gray-500">
           Subject code for student to join
         </p>
       </div>

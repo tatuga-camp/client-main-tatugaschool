@@ -259,8 +259,8 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
           bg-white/50 backdrop-blur fixed  m-auto -z-10"
         ></footer>
       </div>
-      <header className="w-9/12 h-16 flex justify-end items-end gap-1 border-b pb-5">
-        <div className="w-60 h-16">
+      <header className="w-full md:w-9/12 h-16 flex justify-end items-end gap-1 border-b pb-5">
+        <div className="w-40 md:w-60 h-16">
           <Calendar onValue={(value) => setDates(value)} value={dates} />
         </div>
         <Filter
@@ -306,11 +306,11 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
           }}
         />
       </header>
-      <section className="w-9/12 place-items-center  grid grid-cols-5 gap-5">
+      <section className="w-full md:w-9/12 place-items-center grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-5">
         <div
           onClick={() => setTriggerSelectMultipleStudent((prev) => !prev)}
           onDragStart={(e) => e.preventDefault()}
-          className="w-40 h-40 ring-4 ring-white gradient-bg select-none  drop-shadow-md 
+          className="w-32 h-32 md:w-40 md:h-40 ring-4 ring-white gradient-bg select-none drop-shadow-md 
          hover:scale-105 flex items-center justify-center p-3
            rounded-full transition cursor-pointer active:scale-110 "
         >
@@ -327,7 +327,7 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
                   return (
                     <div
                       key={index}
-                      className="w-48 h-52 bg-gray-200 rounded-2xl animate-pulse"
+                      className="w-32 h-40 md:w-48 md:h-52 bg-gray-200 rounded-2xl animate-pulse"
                     ></div>
                   );
                 })
@@ -377,12 +377,12 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
               }
             });
           }}
-          className={`  border-2 ${
+          className={`border-2 ${
             students.every((item) => item.select)
               ? "border-primary-color bg-primary-color text-white"
               : "border-gray-200 bg-white text-primary-color "
           }
-         border-primary-color rounded-md px-2 w-36 drop-shadow-md h-8 gap-2 flex items-center justify-between`}
+         border-primary-color rounded-md px-2 w-28 md:w-36 drop-shadow-md h-8 gap-2 flex items-center justify-between`}
         >
           {students.every((item) => item.select) ? (
             <>
@@ -400,7 +400,7 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
           onClick={() => {
             setTriggerChooseScore((prev) => !prev);
           }}
-          className="main-button w-36 px-2 h-8 flex items-center justify-center "
+          className="main-button w-28 md:w-36 px-2 h-8 flex items-center justify-center "
         >
           Choose Score
         </button>
