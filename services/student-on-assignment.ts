@@ -1,4 +1,4 @@
-import { StudentOnAssignment } from "@/interfaces";
+import { FileOnStudentOnAssignment, StudentOnAssignment } from "@/interfaces";
 import { Pagination } from "@/interfaces/Pagination";
 
 import createAxiosInstance from "./apiService";
@@ -35,7 +35,9 @@ type RequestGetStudentOnAssignmentsService = {
   assignmentId: string;
 };
 
-export type ResponseGetStudentOnAssignmentsService = StudentOnAssignment[];
+export type ResponseGetStudentOnAssignmentsService = (StudentOnAssignment & {
+  files: FileOnStudentOnAssignment[];
+})[];
 
 export async function GetStudentOnAssignmentsByAssignmentIdService(
   input: RequestGetStudentOnAssignmentsService

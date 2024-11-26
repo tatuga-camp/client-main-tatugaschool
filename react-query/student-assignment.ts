@@ -29,10 +29,12 @@ export function useUpdateStudentOnAssignments() {
     onSuccess(data, variables, context) {
       queryClient.setQueryData(
         ["student-assignments", { assignmentId: data.assignmentId }],
-        (oldData: ResponseGetStudentOnAssignmentsService) => {
+        (
+          oldData: ResponseGetStudentOnAssignmentsService
+        ): ResponseGetStudentOnAssignmentsService => {
           return oldData?.map((prevStudentAssignment) => {
             if (prevStudentAssignment.id === data.id) {
-              return data;
+              return { ...data, files: prevStudentAssignment.files };
             } else {
               return prevStudentAssignment;
             }

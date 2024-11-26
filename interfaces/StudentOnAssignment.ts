@@ -13,6 +13,8 @@ export interface StudentOnAssignment {
   isCompleted: boolean;
   isReviewed: boolean;
   isAssigned: boolean;
+  completedAt?: string;
+  reviewdAt?: string;
   studentId: string;
   assignmentId: string;
   studentOnSubjectId: string;

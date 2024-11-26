@@ -78,7 +78,7 @@ function Index({
     Assignment & { allowWeight: boolean }
   >();
   const [selectMenu, setSelectMenu] = React.useState<MenuQuery>("classwork");
-
+  const bodyRef = React.useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     if (router.isReady) {
       const menu = router.query.menu as MenuQuery;
@@ -266,7 +266,7 @@ function Index({
 
   return (
     <form
-      onSubmit={handleUpdateClasswork}
+      onSubmit={selectMenu === "classwork" ? handleUpdateClasswork : undefined}
       className="flex flex-col bg-background-color"
     >
       <nav
@@ -426,7 +426,10 @@ function Index({
           );
         })}
       </div>
-      <main className="w-full h-max max-h-screen overflow-auto flex">
+      <main
+        ref={bodyRef}
+        className={`w-full h-max max-h-screen overflow-auto flex`}
+      >
         {selectMenu === "classwork" ? (
           <ClasswordView
             classwork={classwork as Assignment}
@@ -441,7 +444,14 @@ function Index({
             onUploadFile={(file) => handleUploadFile(file)}
           />
         ) : (
-          <ClassStudentWork assignmentId={assignmentId} />
+          <ClassStudentWork
+            assignmentId={assignmentId}
+            onScroll={() =>
+              bodyRef.current?.scrollTo({
+                top: 0,
+              })
+            }
+          />
         )}
       </main>
     </form>

@@ -13,6 +13,8 @@ type Props = {
   prefix?: string;
   disabled?: boolean;
   placeholder?: string;
+  minFractionDigits?: number;
+  maxFractionDigits?: number;
 };
 function InputNumber({
   value,
@@ -25,6 +27,8 @@ function InputNumber({
   placeholder,
   prefix,
   disabled,
+  minFractionDigits,
+  maxFractionDigits,
 }: Props) {
   return (
     <InputNumberPrimereact
@@ -32,6 +36,8 @@ function InputNumber({
       prefix={prefix}
       required={required}
       disabled={disabled}
+      minFractionDigits={minFractionDigits}
+      maxFractionDigits={maxFractionDigits}
       value={value}
       min={min}
       placeholder={placeholder}

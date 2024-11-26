@@ -35,7 +35,7 @@ function SubjectPermission({ subjectId, onSummit, isPending }: Props) {
         allowStudentViewAttendance: subject.data.allowStudentViewAttendance,
       });
     }
-  }, [subject.data]);
+  }, [subject.status]);
   return (
     <form
       onSubmit={(e) => {
