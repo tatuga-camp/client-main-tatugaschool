@@ -39,6 +39,7 @@ import useClickOutside from "../../../../hook/useClickOutside";
 import Swal from "sweetalert2";
 import { useRouter } from "next/router";
 import ClassStudentWork from "../../../../components/subject/ClassStudentWork";
+import ClassStudentAssignWork from "../../../../components/subject/ClassStudentAssignWork";
 
 type SummitValue = "Published" | "Save Change" | "Mark as Draft";
 
@@ -53,8 +54,13 @@ const menuLists = [
     query: "student-work",
     description: "View and Assign student work here",
   },
+  {
+    title: "Manage Assigning",
+    query: "manage-assigning",
+    description: "Manage the assigning of student work here",
+  },
 ] as const;
-type MenuQuery = (typeof menuLists)[number]["query"];
+export type MenuAssignmentQuery = (typeof menuLists)[number]["query"];
 
 function Index({
   subjectId,
@@ -77,11 +83,12 @@ function Index({
   const [classwork, setClasswork] = React.useState<
     Assignment & { allowWeight: boolean }
   >();
-  const [selectMenu, setSelectMenu] = React.useState<MenuQuery>("classwork");
+  const [selectMenu, setSelectMenu] =
+    React.useState<MenuAssignmentQuery>("classwork");
   const bodyRef = React.useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     if (router.isReady) {
-      const menu = router.query.menu as MenuQuery;
+      const menu = router.query.menu as MenuAssignmentQuery;
 
       if (menu) {
         setSelectMenu(menu);
@@ -267,7 +274,7 @@ function Index({
   return (
     <form
       onSubmit={selectMenu === "classwork" ? handleUpdateClasswork : undefined}
-      className="flex flex-col bg-background-color"
+      className="flex h-full flex-col bg-background-color"
     >
       <nav
         className={`w-full px-5 ${
@@ -399,38 +406,41 @@ function Index({
       )}
 
       <div className="w-full h-14  bg-white flex border-b justify-start items-center px-10 ">
-        {menuLists.map((menu, index) => {
-          return (
-            <Link
-              href={{
-                pathname: `/subject/${subjectId}/assignment/${assignmentId}`,
-                query: { menu: menu.query },
-              }}
-              onClick={() => setSelectMenu(menu.query)}
-              key={index}
-              className={`flex flex-col px-10  justify-center p-2 h-full gap-0 ${
-                selectMenu === menu.query
-                  ? "bg-primary-color text-white hover:bg-primary-color"
-                  : "bg-white text-black hover:bg-gray-100"
-              } `}
-            >
-              <h1>{menu.title}</h1>
-              <span
-                className={`text-xs ${
-                  selectMenu === menu.query ? " text-white" : "text-gray-400"
+        {menuLists
+          .filter((menu) =>
+            assignment.data?.type === "Material"
+              ? menu.query !== "student-work"
+              : true
+          )
+          .map((menu, index) => {
+            return (
+              <Link
+                href={{
+                  pathname: `/subject/${subjectId}/assignment/${assignmentId}`,
+                  query: { menu: menu.query },
+                }}
+                onClick={() => setSelectMenu(menu.query)}
+                key={index}
+                className={`flex flex-col px-10  justify-center p-2 h-full gap-0 ${
+                  selectMenu === menu.query
+                    ? "bg-primary-color text-white hover:bg-primary-color"
+                    : "bg-white text-black hover:bg-gray-100"
                 } `}
               >
-                {menu.description}
-              </span>
-            </Link>
-          );
-        })}
+                <h1>{menu.title}</h1>
+                <span
+                  className={`text-xs ${
+                    selectMenu === menu.query ? " text-white" : "text-gray-400"
+                  } `}
+                >
+                  {menu.description}
+                </span>
+              </Link>
+            );
+          })}
       </div>
-      <main
-        ref={bodyRef}
-        className={`w-full h-max max-h-screen overflow-auto flex`}
-      >
-        {selectMenu === "classwork" ? (
+      <main ref={bodyRef} className={`w-full h-max max-h-screen overflow-auto`}>
+        {selectMenu === "classwork" && (
           <ClasswordView
             classwork={classwork as Assignment}
             onChange={(d) =>
@@ -443,7 +453,8 @@ function Index({
             onDeleteFile={(file) => handleDeleteFile(file)}
             onUploadFile={(file) => handleUploadFile(file)}
           />
-        ) : (
+        )}
+        {selectMenu === "student-work" && (
           <ClassStudentWork
             assignmentId={assignmentId}
             onScroll={() =>
@@ -451,6 +462,12 @@ function Index({
                 top: 0,
               })
             }
+          />
+        )}
+        {selectMenu === "manage-assigning" && (
+          <ClassStudentAssignWork
+            assignmentId={assignmentId}
+            subjectId={subjectId}
           />
         )}
       </main>

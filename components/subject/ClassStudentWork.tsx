@@ -34,17 +34,12 @@ type Props = {
   onScroll?: () => void;
 };
 function ClassStudentWork({ assignmentId, onScroll }: Props) {
-  const studentOnAssignment = useGetStudentOnAssignments({
+  const studentOnAssignments = useGetStudentOnAssignments({
     assignmentId,
   });
   const [triggerHideStudentList, setTriggerHideStudentList] =
     React.useState(false);
-  const [assignAll, setAssignAll] = React.useState(false);
-  const update = useUpdateStudentOnAssignments();
-  const [loading, setLoading] = React.useState(false);
-  const [studentData, setStudentData] = React.useState<
-    (StudentOnAssignment & { files: FileOnStudentOnAssignment[] })[]
-  >([]);
+
   const assignment = useGetAssignment({
     id: assignmentId,
   });
@@ -52,50 +47,6 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
   const [selectStudentWork, setSelectStudentWork] = React.useState<
     (StudentOnAssignment & { files: FileOnStudentOnAssignment[] }) | null
   >(null);
-
-  React.useEffect(() => {
-    if (studentOnAssignment.data) {
-      setStudentData(() => {
-        const data = studentOnAssignment.data.map((student) => {
-          return {
-            ...student,
-          };
-        });
-
-        const isAllAssigned = data.every((student) => student.isAssigned);
-        setAssignAll(isAllAssigned);
-
-        return data;
-      });
-    }
-  }, [studentOnAssignment.status]);
-
-  const handleAssignAll = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLoading(true);
-    setStudentData((prev) => {
-      return prev.map((student) => {
-        return {
-          ...student,
-          isAssigned: e.target.checked,
-        };
-      });
-    });
-    setAssignAll(e.target.checked);
-
-    await Promise.allSettled(
-      studentData.map((student) => {
-        return update.mutateAsync({
-          query: {
-            studentOnAssignmentId: student.id,
-          },
-          body: {
-            isAssigned: e.target.checked,
-          },
-        });
-      })
-    );
-    setLoading(false);
-  };
 
   const handleSelectStudentWork = useCallback(
     (student: StudentOnAssignment & { files: FileOnStudentOnAssignment[] }) => {
@@ -110,12 +61,12 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
     []
   );
   return (
-    <main className="w-full h-max flex ">
+    <main className="w-full h-max  flex ">
       <section
         className={`${
           triggerHideStudentList ? "w-20  " : " w-8/12  "
-        } overflow-auto transition-width p-5 min-h-screen max-h-screen  
-       flex flex-col gap-2 bg-white  h-full border-r sticky top-0`}
+        } overflow-auto transition-width p-5 min-h-screen max-h-screen pb-40  
+       flex flex-col gap-2 bg-white  h-max border-r sticky top-0`}
       >
         <div className="text-xl w-full justify-between flex gap-2 items-center ">
           {!triggerHideStudentList && "Student"}
@@ -146,22 +97,10 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
                 <div className="text-start font-normal ">Name</div>
               </th>
               <th>
-                <div className="text-center font-normal ">Score</div>
+                <div className="text-center font-normal ">Status</div>
               </th>
               <th>
-                <div className="text-base font-normal flex gap-2 items-center justify-center ">
-                  <div className="w-8 h-8 flex items-center justify-center active:bg-primary-color/60 hover:bg-primary-color/50  focus-within:bg-primary-color/50 rounded-full">
-                    <input
-                      disabled={loading}
-                      type="checkbox"
-                      checked={assignAll}
-                      onChange={handleAssignAll}
-                      className="w-5 h-5 accent-primary-color  "
-                    />
-                  </div>
-                  <HiUsers />
-                  Assign All
-                </div>
+                <div className="text-center font-normal ">Score</div>
               </th>
               <th>
                 <div className="text-base font-normal flex gap-2 items-center justify-center ">
@@ -172,7 +111,7 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
             </tr>
           </thead>
           <tbody>
-            {studentOnAssignment.isLoading || loading
+            {studentOnAssignments.isLoading
               ? [...Array(20)].map((_, index) => {
                   const odd = index % 2 === 0;
                   return (
@@ -209,19 +148,20 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
                     </tr>
                   );
                 })
-              : studentOnAssignment.data?.map((student, index) => {
-                  const odd = index % 2 === 0;
-                  return (
-                    <StudentList
-                      onClick={handleSelectStudentWork}
-                      key={student.id}
-                      student={student}
-                      selectStudentWork={selectStudentWork}
-                      odd={odd}
-                      setStudentData={setStudentData}
-                    />
-                  );
-                })}
+              : studentOnAssignments.data
+                  ?.filter((d) => d.isAssigned === true)
+                  .sort((a, b) => Number(a.number) - Number(b.number))
+                  .map((student, index) => {
+                    const odd = index % 2 === 0;
+                    return (
+                      <StudentList
+                        onClick={handleSelectStudentWork}
+                        key={student.id}
+                        student={student}
+                        odd={odd}
+                      />
+                    );
+                  })}
           </tbody>
         </table>
       </section>
@@ -241,15 +181,7 @@ export default ClassStudentWork;
 
 type StudentListProps = {
   student: StudentOnAssignment & { files: FileOnStudentOnAssignment[] };
-  setStudentData: (
-    value: React.SetStateAction<
-      (StudentOnAssignment & { files: FileOnStudentOnAssignment[] })[]
-    >
-  ) => void;
   odd: boolean;
-  selectStudentWork:
-    | (StudentOnAssignment & { files: FileOnStudentOnAssignment[] })
-    | null;
   onClick: (
     student: StudentOnAssignment & { files: FileOnStudentOnAssignment[] }
   ) => void;
@@ -258,37 +190,8 @@ type StudentListProps = {
 const StudentList = React.memo(function StudentList({
   student,
   odd,
-  setStudentData,
   onClick,
-  selectStudentWork,
 }: StudentListProps) {
-  const update = useUpdateStudentOnAssignments();
-
-  const handleChangeCheck = React.useCallback(
-    async ({ studentId, checked }: { studentId: string; checked: boolean }) => {
-      setStudentData((prev) => {
-        return prev.map((student) => {
-          if (student.id === studentId) {
-            return {
-              ...student,
-              isAssigned: checked,
-            };
-          }
-          return student;
-        });
-      });
-      await update.mutateAsync({
-        query: {
-          studentOnAssignmentId: studentId,
-        },
-        body: {
-          isAssigned: checked,
-        },
-      });
-    },
-    []
-  );
-
   return (
     <tr className={` ${odd && "bg-gray-200/20"} hover:bg-sky-100  gap-2`}>
       <th className="">
@@ -318,6 +221,32 @@ const StudentList = React.memo(function StudentList({
       </th>
       <th className="">
         <div
+          className={`flex w-full items-center h-full 
+            text-white py-2 rounded-md px-2 
+
+            ${
+              student.status === "SUBMITTED" &&
+              "bg-gradient-to-r from-amber-200 to-yellow-400"
+            }
+
+            ${
+              student.status === "REVIEWD" &&
+              "bg-gradient-to-r from-emerald-400 to-cyan-400"
+            }
+
+            ${
+              student.status === "PENDDING" &&
+              "bg-gradient-to-r from-stone-500 to-stone-700"
+            }
+            justify-center text-sm font-normal `}
+        >
+          {student.status === "SUBMITTED" && "Waiting for Review"}
+          {student.status === "REVIEWD" && "Reviewed"}
+          {student.status === "PENDDING" && "No work"}
+        </div>
+      </th>
+      <th className="">
+        <div
           className={`flex justify-center text-sm font-normal ${
             student.score !== null
               ? "text-primary-color font-medium"
@@ -330,27 +259,11 @@ const StudentList = React.memo(function StudentList({
         </div>
       </th>
       <th className="">
-        <div className="flex justify-center">
-          <input
-            disabled={update.isPending}
-            checked={student.isAssigned}
-            onChange={(e) =>
-              handleChangeCheck({
-                studentId: student.id,
-                checked: e.target.checked,
-              })
-            }
-            type="checkbox"
-            className="w-5 h-5 accent-primary-color"
-          />
-        </div>
-      </th>
-      <th className="">
-        <div className="flex justify-center">
+        <div className="flex w-full h-full p-2 justify-center">
           <button
             type="button"
             onClick={() => onClick(student)}
-            className={`flex items-center font-normal text-xs
+            className={`flex items-center font-normal 
            justify-center gap-1 transition
            ${student.id === student.id ? "main-button" : "second-button border"}
            `}
@@ -393,7 +306,7 @@ function StudentWork({ student, assignment }: PropsStudentWork) {
         },
         body: {
           score: studentWork?.score,
-          isReviewed: true,
+          status: "REVIEWD",
           body: studentWork?.body,
         },
       });
@@ -416,13 +329,14 @@ function StudentWork({ student, assignment }: PropsStudentWork) {
       });
     }
   };
+
   return (
     <>
       <Toast ref={toast} />
 
       <form
         onSubmit={handleSaveChange}
-        className="w-full bg-white border-b h-16 flex items-center justify-between p-2 px-4"
+        className="w-full bg-white  h-16 flex items-center justify-between p-2 px-4"
       >
         <div className="flex gap-2 pl-2 h-14 items-center">
           <div className="w-10 h-10 relative rounded-md ring-1  overflow-hidden">

@@ -1,4 +1,8 @@
-import { FileOnStudentOnAssignment, StudentOnAssignment } from "@/interfaces";
+import {
+  FileOnStudentOnAssignment,
+  StudentAssignmentStatus,
+  StudentOnAssignment,
+} from "@/interfaces";
 import { Pagination } from "@/interfaces/Pagination";
 
 import createAxiosInstance from "./apiService";
@@ -86,9 +90,8 @@ export type RequestUpdateStudentOnAssignmentService = {
   body: {
     score?: number;
     body?: string;
-    isCompleted?: boolean;
-    isReviewed?: boolean;
     isAssigned?: boolean;
+    status?: StudentAssignmentStatus;
   };
 };
 

@@ -255,11 +255,7 @@ function Setting({ subjectId }: Props) {
           </h4>
           <ul className="grid grid-cols-1">
             {studentOnSubjects.data
-              ?.sort(
-                (a, b) =>
-                  a.number.localeCompare(a.number) -
-                  b.number.localeCompare(b.number)
-              )
+              ?.sort((a, b) => Number(a.number) - Number(b.number))
               .map((student, index) => {
                 const odd = index % 2 === 0;
                 return (

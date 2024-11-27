@@ -10,9 +10,8 @@ export interface StudentOnAssignment {
   number: string;
   score: number;
   body: string;
-  isCompleted: boolean;
-  isReviewed: boolean;
   isAssigned: boolean;
+  status: StudentAssignmentStatus;
   completedAt?: string;
   reviewdAt?: string;
   studentId: string;
@@ -21,3 +20,5 @@ export interface StudentOnAssignment {
   schoolId: string;
   subjectId: string;
 }
+
+export type StudentAssignmentStatus = "PENDDING" | "SUBMITTED" | "REVIEWD";

@@ -35,6 +35,7 @@ import {
 } from "../../services";
 import ClasswordView, { FileClasswork } from "./ClasswordView";
 import { useRouter } from "next/router";
+import { MenuAssignmentQuery } from "../../pages/subject/[subjectId]/assignment/[assignmentId]";
 
 type Props = {
   onClose: () => void;
@@ -190,7 +191,10 @@ function ClassworkCreate({ onClose, toast, subjectId }: Props) {
         summary: "Success",
         detail: "Classwork has been created",
       });
-      router.push(`/subject/${subjectId}/assignment/${assignment.id}`);
+      router.push({
+        pathname: `/subject/${subjectId}/assignment/${assignment.id}`,
+        query: { menu: "manage-assigning" as MenuAssignmentQuery },
+      });
     } catch (error) {
       console.log(error);
       setLoading(false);

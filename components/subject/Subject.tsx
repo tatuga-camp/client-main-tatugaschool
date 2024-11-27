@@ -289,9 +289,9 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
               setStudents((prev) => {
                 return prev.sort((a, b) => {
                   if (event.orderBy === "desc") {
-                    return b.number.localeCompare(a.number);
+                    return Number(b.number) - Number(a.number);
                   } else {
-                    return a.number.localeCompare(b.number);
+                    return Number(a.number) - Number(b.number);
                   }
                 });
               });
