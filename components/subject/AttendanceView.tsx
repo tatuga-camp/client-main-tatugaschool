@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Attendance,
   AttendanceStatusList,
@@ -41,7 +41,7 @@ function AttendanceView({
   React.useEffect(() => {
     setAttendanceData(selectAttendance);
   }, [selectAttendance]);
-
+  const saveRef = React.useRef<HTMLButtonElement>(null);
   const handleCheck = ({ key }: { key: string }) => {
     setAttendanceData((prev) => {
       if (!prev) return prev;
@@ -121,6 +121,19 @@ function AttendanceView({
     }
   };
 
+  const handleClickEnter = (event: KeyboardEvent) => {
+    if (event.key === "Enter") {
+      saveRef.current?.click();
+    }
+  };
+  useEffect(() => {
+    document.addEventListener("keydown", handleClickEnter);
+
+    return () => {
+      document.removeEventListener("keydown", handleClickEnter);
+    };
+  }, [attendanceData]);
+
   return (
     <main className="h-96 flex flex-col gap-2">
       {updateAttendance.isPending && (
@@ -137,6 +150,7 @@ function AttendanceView({
         <div className="flex gap-2 items-center">
           {selectAttendance?.id ? (
             <button
+              ref={saveRef}
               disabled={updateAttendance.isPending}
               onClick={handleUpdate}
               className="second-button flex items-center justify-center gap-1 py-1 border "
@@ -146,6 +160,7 @@ function AttendanceView({
             </button>
           ) : (
             <button
+              ref={saveRef}
               disabled={createAttendance.isPending}
               onClick={handleCreate}
               className="second-button flex items-center justify-center gap-1 py-1 border "
