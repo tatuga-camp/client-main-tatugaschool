@@ -28,8 +28,8 @@ function Sidebar({
   return (
     <div
       className={`text-black overflow-hidden flex flex-col items-center justify-start gap-3
-          bg-white  transition-width   h-screen ${
-            active ? "w-60  p-5" : "w-0 p-0 "
+          bg-white  transition-width h-screen ${
+            active ? "w-screen md:w-60  p-5" : "w-0 p-0 "
           } `}
     >
       <header

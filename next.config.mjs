@@ -23,7 +23,10 @@ const nextConfig = {
     return config;
   },
   images: {
-    remotePatterns: [{ protocol: "https", hostname: "storage.googleapis.com" }],
+    remotePatterns: [
+      { protocol: "http", hostname: "*" },
+      { protocol: "https", hostname: "*" },
+    ],
   },
 };
 

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Layout from "../../../components/layout/SubjectLayout";
 import Head from "next/head";
 import {
@@ -54,7 +54,7 @@ import { useSound } from "../../../hook";
 import SilderPicker from "../../../components/subject/SilderPicker";
 import AttendanceChecker from "../../../components/subject/AttendanceChecker";
 import { Toast } from "primereact/toast";
-import { MdFullscreen, MdFullscreenExit } from "react-icons/md";
+import { MdFullscreen, MdFullscreenExit, MdMenu } from "react-icons/md";
 import Classwork from "../../../components/subject/Classwork";
 import { IoMdClose } from "react-icons/io";
 type Props = {
@@ -83,15 +83,16 @@ function Index({ subjectId }: Props) {
   const [selectMenu, setSelectMenu] = React.useState<MenuSubject>("Subject");
   const [selectFooter, setSelectFooter] =
     React.useState<ListMenuFooter>("EMTY");
-  const [selectStudent, setSelectStudent] = React.useState<StudentOnSubject>();
+  const [selectStudent, setSelectStudent] = React.useState<StudentOnSubject | null>(null);
   const [triggerInviteTeacher, setTriggerInviteTeacher] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const qrcodeRef = React.useRef<HTMLDivElement>(null);
   const [triggerQRCode, setTriggerQRCode] = React.useState(false);
   const [triggerStopWatch, setTriggerStopWatch] = React.useState(false);
   const [triggerFullScreen, setTriggerFullScreen] = React.useState(false);
+  const [isMenuVisible, setIsMenuVisible] = useState(false);
   useClickOutside(divRef, () => {
-    setSelectStudent(() => undefined);
+    setSelectStudent(null);
   });
   useClickOutside(qrcodeRef, () => {
     setTriggerQRCode(() => false);
@@ -263,6 +264,7 @@ function Index({ subjectId }: Props) {
                     };
                   })}
                 subjectId={subjectId}
+                setSelectFooter={setSelectFooter}
               />
             </div>
             <div
@@ -277,11 +279,10 @@ function Index({ subjectId }: Props) {
         justify-center fixed top-0 right-0 left-0 bottom-0 m-auto"
           >
             <div
-              className={`${
-                triggerFullScreen
-                  ? "h-screen w-screen p-10"
-                  : "w-9/12 h-5/6 p-5 "
-              } flex flex-col gap-1 border bg-white 
+              className={`${triggerFullScreen
+                ? "h-screen w-screen p-10"
+                : "w-9/12 h-5/6 p-5 "
+                } flex flex-col gap-1 border bg-white 
              rounded-md overflow-hidden`}
             >
               <div className="w-full flex gap-2 justify-end">
@@ -331,6 +332,7 @@ function Index({ subjectId }: Props) {
               <QRCode
                 url={`${process.env.NEXT_PUBLIC_STUDENT_CLIENT_URL}/school/${subject.data?.schoolId}?subjectId=${subject.data?.id}`}
                 code={subject.data?.code}
+                setTriggerQRCode={setTriggerQRCode}
               />
             </div>
             <div className="w-screen -z-10 h-screen bg-white/50 backdrop-blur  fixed top-0 right-0 left-0 bottom-0 m-auto"></div>
@@ -352,11 +354,15 @@ function Index({ subjectId }: Props) {
         )}
         {selectStudent && (
           <div
-            className="fixed top-0 z-40 right-0 left-0 bottom-0 m-auto
-         w-screen h-screen flex items-center justify-center"
+            className="fixed top-28 md:top-20 z-40 right-0 left-0 md:bottom-0 m-auto
+         w-screen overflow-scroll md:h-screen flex items-center justify-center"
           >
-            <div className="" ref={divRef}>
-              <PopUpStudent student={selectStudent} toast={toast} />
+            <div className="max-h-[calc(100vh-12rem)] md:max-h-screen" ref={divRef}>
+              <PopUpStudent
+                student={selectStudent}
+                setSelectStudent={setSelectStudent}
+                toast={toast}
+              />
             </div>
             <div
               className="w-screen h-screen fixed top-0 bg-black/20 backdrop-blur
@@ -364,19 +370,18 @@ function Index({ subjectId }: Props) {
             ></div>
           </div>
         )}
-        <header className="w-full p-10 flex items-center justify-center">
+        <header className="w-full p-5 lg:p-10 pb-10 flex items-center justify-center">
           <section
-            className={`w-8/12 z-30 overflow-hidden h-60 relative flex justify-between  p-5 shadow-inner ${
-              loading
-                ? "animate-pulse bg-gray-500/50"
-                : subject.data?.backgroundImage
+            className={`w-full lg:w-10/12 z-30 overflow-hidden h-60 relative flex flex-col-reverse md:flex-row justify-between p-5 shadow-inner ${loading
+              ? "animate-pulse bg-gray-500/50"
+              : subject.data?.backgroundImage
                 ? ""
                 : "gradient-bg"
-            }  rounded-md`}
+              } lg:rounded-md`}
           >
             {subject.data?.backgroundImage && (
-              <div className="gradient-shadow  -z-10  absolute w-full h-full top-0 bottom-0 right-0 left-0 m-auto"></div>
-            )}{" "}
+              <div className="gradient-shadow -z-10 absolute w-full h-full top-0 bottom-0 right-0 left-0 m-auto"></div>
+            )}
             {subject.data?.backgroundImage && (
               <Image
                 src={subject.data?.backgroundImage}
@@ -385,18 +390,18 @@ function Index({ subjectId }: Props) {
                 blurDataURL={decodeBlurhashToCanvas(
                   subject.data?.blurHash ?? defaultBlurHash
                 )}
-                alt="backgroud"
-                className="object-cover -z-20 "
+                alt="background"
+                className="object-cover -z-20"
               />
             )}
-            <div className="flex h-full justify-end flex-col gap-1">
-              <h1 className="text-lg font-semibold w-8/12 min-w-96 line-clamp-2 text-white">
+            <div className="flex flex-col justify-end gap-1">
+              <h1 className="text-lg font-semibold w-full lg:w-8/12 line-clamp-2 text-white">
                 {subject.data ? subject.data?.title : "Loading..."}
               </h1>
-              <p className="text-lg w-11/12 min-w-96 line-clamp-2 text-white">
+              <p className="text-lg w-full lg:w-11/12 line-clamp-2 text-white">
                 {subject.data ? subject.data?.description : "Loading..."}
               </p>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <div className="bg-white w-max px-2 py-1 rounded-md">
                   <h2 className="text-xs text-primary-color">
                     Academic year:{" "}
@@ -411,53 +416,61 @@ function Index({ subjectId }: Props) {
                 </div>
               </div>
             </div>
-            <div className="h-full flex flex-col items-end justify-between">
+            <div className="flex flex-col items-end justify-between mt-4 lg:mt-0" onMouseOut={() => setIsMenuVisible(false)}>
+              <button
+                onClick={() => setIsMenuVisible((prev) => !prev)}
+                className="flex items-center active:scale-110 justify-center gap-1 hover:bg-primary-color hover:text-white
+                text-primary-color bg-white w-max px-2 py-1 rounded-md md:hidden"
+              >
+                <MdMenu />
+              </button>
+              <div className={`h-full flex-col items-end justify-between ${isMenuVisible ? "flex flex-col bg-white/50 rounded-md p-5 animate-in fade-in-0" : "hidden"} md:flex`}>
               <div className="flex gap-2">
-                <button
-                  onClick={() => setSelectMenu("Setting-Subject")}
-                  className="flex items-center active:scale-110 justify-center gap-1 hover:bg-primary-color hover:text-white
-               text-primary-color bg-white w-max px-2 py-1 rounded-md"
-                >
-                  <CiCircleInfo />
-                  More Info & Edit
-                </button>
-                <label
-                  title="Change Background Image"
-                  className="flex items-center cursor-pointer active:scale-110 justify-center gap-1
-                   hover:bg-primary-color hover:text-white
-               text-primary-color bg-white w-max px-2 py-1 rounded-md"
-                >
-                  <SlPicture />
-
-                  <input
-                    disabled={loading}
-                    accept="image/*"
-                    id="dropzone-file"
-                    onChange={handleUploadImage}
-                    type="file"
-                    className="hidden"
-                  />
-                </label>
-              </div>
-              <div className="flex gap-3">
-                {teacherOnSubjects.data ? (
-                  <ListMemberCircle
-                    setTrigger={setTriggerInviteTeacher}
-                    members={teacherOnSubjects.data}
-                  />
-                ) : (
-                  "Loading..."
-                )}
-                <button
-                  onClick={() => setTriggerQRCode((prev) => !prev)}
-                  aria-label="QR Code Subject"
-                  className="flex w-40 items-center text-xs active:scale-110 
-                  justify-center gap-1 hover:bg-primary-color hover:text-white
-               text-primary-color bg-white  px-2 py-1 rounded-md"
-                >
-                  QR Code Subject
-                  <IoQrCode />
-                </button>
+                  <button
+                    onClick={() => setSelectMenu("Setting-Subject")}
+                    className="flex items-center active:scale-110 justify-center gap-1 hover:bg-primary-color hover:text-white
+                      text-primary-color bg-white w-max px-2 py-1 rounded-md"
+                  >
+                    <CiCircleInfo />
+                    More Info & Edit
+                  </button>
+                  <label
+                    title="Change Background Image"
+                    className="flex items-center cursor-pointer active:scale-110 justify-center gap-1
+                      hover:bg-primary-color hover:text-white
+                      text-primary-color bg-white w-max px-2 py-1 rounded-md"
+                  >
+                    <SlPicture />
+                    <input
+                      disabled={loading}
+                      accept="image/*"
+                      id="dropzone-file"
+                      onChange={handleUploadImage}
+                      type="file"
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+                <div className="flex gap-3 mt-2">
+                  {teacherOnSubjects.data ? (
+                    <ListMemberCircle
+                      setTrigger={setTriggerInviteTeacher}
+                      members={teacherOnSubjects.data}
+                    />
+                  ) : (
+                    "Loading..."
+                  )}
+                  <button
+                    onClick={() => setTriggerQRCode((prev) => !prev)}
+                    aria-label="QR Code Subject"
+                    className="flex w-40 items-center text-xs active:scale-110 
+                      justify-center gap-1 hover:bg-primary-color hover:text-white
+                      text-primary-color bg-white px-2 py-1 rounded-md"
+                  >
+                    QR Code Subject
+                    <IoQrCode />
+                  </button>
+                </div>
               </div>
             </div>
           </section>
@@ -478,7 +491,7 @@ function Index({ subjectId }: Props) {
             <Attendance toast={toast} subjectId={subjectId} />
           )}
           {selectMenu === "Setting-Subject" && (
-            <Setting subjectId={subjectId} />
+            <Setting subjectId={subjectId} setSelectMenu={(menu: string) => setSelectMenu(menu as MenuSubject)}/>
           )}
         </main>
         <footer

@@ -31,7 +31,7 @@ function Navbar({
   const queryClient = new QueryClient();
   return (
     <div
-      className="flex flex-col h-20  md:flex-row justify-between items-center p-4 
+      className="flex flex-row h-20  justify-between items-center p-4 
     bg-white text-white gap-4"
     >
       <button

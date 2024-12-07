@@ -50,7 +50,7 @@ import { Toast } from "primereact/toast";
 type Props = {
   subjectId: string;
   setSelectStudent: React.Dispatch<
-    React.SetStateAction<StudentOnSubject | undefined>
+    React.SetStateAction<StudentOnSubject | null>
   >;
   toast: React.RefObject<Toast>;
 };
@@ -259,8 +259,8 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
           bg-white/50 backdrop-blur fixed  m-auto -z-10"
         ></footer>
       </div>
-      <header className="w-full md:w-9/12 h-16 flex justify-end items-end gap-1 border-b pb-5">
-        <div className="w-40 md:w-60 h-16">
+      <header className="w-full md:w-10/12 lg:w-9/12 h-16 flex justify-end items-end gap-1 border-b pb-5">
+        <div className="h-16">
           <Calendar onValue={(value) => setDates(value)} value={dates} />
         </div>
         <Filter
@@ -306,13 +306,13 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
           }}
         />
       </header>
-      <section className="w-full md:w-9/12 place-items-center grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-5">
+      <section className="w-full md:w-10/12 lg:w-9/12 place-items-center grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
         <div
           onClick={() => setTriggerSelectMultipleStudent((prev) => !prev)}
           onDragStart={(e) => e.preventDefault()}
-          className="w-32 h-32 md:w-40 md:h-40 ring-4 ring-white gradient-bg select-none drop-shadow-md 
+          className="w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 ring-4 ring-white gradient-bg select-none drop-shadow-md 
          hover:scale-105 flex items-center justify-center p-3
-           rounded-full transition cursor-pointer active:scale-110 "
+           rounded-full transition cursor-pointer active:scale-110"
         >
           <Image src="/svg/trophy.svg" height={100} width={100} alt="trophy" />
         </div>
@@ -327,7 +327,7 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
                   return (
                     <div
                       key={index}
-                      className="w-32 h-40 md:w-48 md:h-52 bg-gray-200 rounded-2xl animate-pulse"
+                      className="w-24 h-32 sm:w-32 sm:h-40 md:w-36 md:h-48 lg:w-48 lg:h-52 bg-gray-200 rounded-2xl animate-pulse"
                     ></div>
                   );
                 })

@@ -59,7 +59,7 @@ function SubjectInfomation({ onSummit, subjectId, isPending = false }: Props) {
       <h2 className="border-b text-lg font-medium py-3">Subject Infomation</h2>
       <div className="grid grid-cols-1 w-full">
         <div className="grid grid-cols-1  bg-gray-200/20 gap-5  p-2 py-4">
-          <label className="w-full grid grid-cols-2 gap-10">
+          <label className="w-full grid md:grid-cols-2 md:gap-10">
             <span className="text-base text-black">Subject ID:</span>
             <Link
               target="_blank"
@@ -71,7 +71,7 @@ function SubjectInfomation({ onSummit, subjectId, isPending = false }: Props) {
           </label>
         </div>
         <div className="grid grid-cols-1  gap-5  p-2 py-4">
-          <label className="w-full grid grid-cols-2 gap-10">
+          <label className="w-full grid md:grid-cols-2 md:gap-10">
             <span className="text-base text-black">
               The Subject Connect To Class ID:
             </span>
@@ -85,7 +85,7 @@ function SubjectInfomation({ onSummit, subjectId, isPending = false }: Props) {
           </label>
         </div>
         <div className="grid grid-cols-1  gap-5 bg-gray-200/20  p-2 py-4">
-          <label className="w-full grid grid-cols-2 gap-10">
+          <label className="w-full grid md:grid-cols-2 md:gap-10">
             <span className="text-base text-black">Subject Code:</span>
             <span className="text-base font-semibold  text-black">
               {subject.data?.code}
@@ -93,7 +93,7 @@ function SubjectInfomation({ onSummit, subjectId, isPending = false }: Props) {
           </label>
         </div>
         <div className="grid grid-cols-1   gap-5  p-2 py-4">
-          <label className="w-full items-center grid grid-cols-2 gap-10">
+          <label className="w-full items-center grid md:grid-cols-2 md:gap-10">
             <span className="text-base text-black">Subject Name:</span>
             <input
               required
@@ -111,7 +111,7 @@ function SubjectInfomation({ onSummit, subjectId, isPending = false }: Props) {
           </label>
         </div>
         <div className="grid grid-cols-1 bg-gray-200/20   gap-5  p-2 py-4">
-          <label className="w-full items-center grid grid-cols-2 gap-10">
+          <label className="w-full items-center grid md:grid-cols-2 md:gap-10">
             <span className="text-base text-black">Description:</span>
             <input
               required
@@ -129,7 +129,7 @@ function SubjectInfomation({ onSummit, subjectId, isPending = false }: Props) {
           </label>
         </div>
         <div className="grid grid-cols-1  gap-5  p-2 py-4">
-          <label className="w-full items-center grid grid-cols-2 gap-10">
+          <label className="w-1/2 md:w-full items-center grid md:grid-cols-2 md:gap-10">
             <span className="text-base text-black">Education Year:</span>
             <div className="flex items-center gap-2">
               <InputNumber

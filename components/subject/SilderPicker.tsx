@@ -13,14 +13,18 @@ import {
 } from "../../utils";
 import { useGetStudentOnSubject } from "../../react-query";
 import { defaultBlurHash } from "../../data";
+import { ListMenuFooter } from "./FooterSubject";
+import { IoCloseOutline } from "react-icons/io5";
 interface SilderPickerProps<T> {
   images: T[];
   subjectId: string;
+  setSelectFooter: React.Dispatch<React.SetStateAction<ListMenuFooter>>;
 }
 
 const SilderPicker = <T extends AnimationImageItemProps>({
   images,
   subjectId,
+  setSelectFooter,
 }: SilderPickerProps<T>) => {
   const [selectItem, setSelectItem] = useState<T | null>(null);
   const cheering = useSound("/sounds/cheering.mp3");
@@ -63,40 +67,40 @@ const SilderPicker = <T extends AnimationImageItemProps>({
     images.length >= 30
       ? shuffleWithNoAdjacentDuplicates(images, 30)
       : shuffleWithNoAdjacentDuplicates(
-          [
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-          ],
-          30
-        )
+        [
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+          ...images,
+        ],
+        30
+      )
   );
 
   useEffect(() => {
@@ -109,40 +113,40 @@ const SilderPicker = <T extends AnimationImageItemProps>({
         prev.length >= 30
           ? shuffleWithNoAdjacentDuplicates(prev, 30)
           : shuffleWithNoAdjacentDuplicates(
-              [
-                ...prev,
-                ...prev,
-                ...prev,
-                ...prev,
-                ...prev,
-                ...prev,
-                ...prev,
-                ...prev,
-                ...prev,
-                ...prev,
-                ...prev,
-                ...prev,
-                ...prev,
-                ...prev,
-                ...prev,
-                ...prev,
-                ...prev,
-                ...prev,
-                ...prev,
-                ...prev,
-                ...prev,
-                ...prev,
-                ...prev,
-                ...prev,
-                ...prev,
-                ...prev,
-                ...prev,
-                ...prev,
-                ...prev,
-                ...prev,
-              ],
-              30
-            );
+            [
+              ...prev,
+              ...prev,
+              ...prev,
+              ...prev,
+              ...prev,
+              ...prev,
+              ...prev,
+              ...prev,
+              ...prev,
+              ...prev,
+              ...prev,
+              ...prev,
+              ...prev,
+              ...prev,
+              ...prev,
+              ...prev,
+              ...prev,
+              ...prev,
+              ...prev,
+              ...prev,
+              ...prev,
+              ...prev,
+              ...prev,
+              ...prev,
+              ...prev,
+              ...prev,
+              ...prev,
+              ...prev,
+              ...prev,
+              ...prev,
+            ],
+            30
+          );
       setSelectItem(newRandoms[1]);
       return newRandoms;
     });
@@ -193,40 +197,39 @@ const SilderPicker = <T extends AnimationImageItemProps>({
         students.length >= 30
           ? shuffleWithNoAdjacentDuplicates(students as T[], 30)
           : shuffleWithNoAdjacentDuplicates(
-              [
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-              ],
-              30
-            );
+            [
+              ...(students as T[]),
+              ...(students as T[]),
+              ...(students as T[]),
+              ...(students as T[]),
+              ...(students as T[]),
+              ...(students as T[]),
+              ...(students as T[]),
+              ...(students as T[]),
+              ...(students as T[]),
+              ...(students as T[]),
+              ...(students as T[]),
+              ...(students as T[]),
+              ...(students as T[]),
+              ...(students as T[]),
+              ...(students as T[]),
+              ...(students as T[]),
+              ...(students as T[]),
+              ...(students as T[]),
+              ...(students as T[]),
+              ...(students as T[]),
+              ...(students as T[]),
+              ...(students as T[]),
+              ...(students as T[]),
+              ...(students as T[]),
+              ...(students as T[]),
+              ...(students as T[]),
+              ...(students as T[]),
+              ...(students as T[]),
+              ...(students as T[]),
+            ],
+            30
+          );
       setSelectItem(newRandoms[1]);
       return newRandoms;
     });
@@ -238,12 +241,23 @@ const SilderPicker = <T extends AnimationImageItemProps>({
     setIsStarted((prev) => !prev);
     setFinsh(false);
   };
+
+  const handleCloseModal = () => {
+    setSelectFooter("EMTY");
+  };
+
   return (
-    <div className="flex flex-col md:flex-row">
-      <div className="flex flex-col gap-2 w-full md:w-3/4">
+    <div className="relative flex flex-col lg:flex-row max-w-xs sm:max-w-full lg:max-w-none lg:w-full overflow-hidden">
+      <button
+        onClick={handleCloseModal}
+        className="absolute top-0 right-0 p-1 hover:bg-gray-100 rounded-full z-10"
+      >
+        <IoCloseOutline size={24} />
+      </button>
+      <div className="flex flex-col gap-2 w-full lg:w-3/4 pt-10">
         {finsih && !isStarted && <AnimationFireworkEffect />}
         {finsih && selectItem ? (
-          <div className="max-w-full md:max-w-2xl min-w-full md:min-w-[42rem] flex flex-col items-center justify-center gap-2 h-80 bg-white">
+          <div className="max-w-full lg:max-w-2xl min-w-full lg:min-w-[42rem] flex flex-col items-center justify-center gap-2 h-80 bg-white relative">
             <h1 className="text-2xl font-bold">Congratulations!</h1>
             <div className="w-40 h-40 bg-gray-100 relative rounded overflow-hidden">
               <Image
@@ -261,7 +275,7 @@ const SilderPicker = <T extends AnimationImageItemProps>({
             <h1 className="text-lg font-semibold">
               {selectItem?.firstName} {selectItem?.lastName}
             </h1>
-            <h1 className="text-md font-normal text-gray-500">
+            <h1 className="text-lg font-normal text-gray-500">
               Number {selectItem?.number}
             </h1>
             <div className="w-full flex justify-center gap-2">
@@ -285,7 +299,7 @@ const SilderPicker = <T extends AnimationImageItemProps>({
         ) : (
           <div className="h-80 flex flex-col gap-2">
             {randomImages.length === 0 && (
-              <div className="min-w-full md:min-w-[42rem] h-full bg-gray-100 relative flex items-center justify-center rounded overflow-hidden">
+              <div className="min-w-full lg:min-w-[42rem] h-full bg-gray-100 relative flex items-center justify-center rounded overflow-hidden">
                 No student found
               </div>
             )}
@@ -299,7 +313,7 @@ const SilderPicker = <T extends AnimationImageItemProps>({
                     ding.play();
                   }
                 }}
-                onStart={(start) => {}}
+                onStart={(start) => { }}
                 onFinished={() => {
                   setIsStarted(false);
 
@@ -348,52 +362,52 @@ const SilderPicker = <T extends AnimationImageItemProps>({
           </div>
         )}
       </div>
-      <div className="w-full md:w-1/4 h-80 border-l pl-5 mt-5 md:mt-0">
-        <div className="w-full h-7 flex border-b border-collapse items-center justify-center gap-1">
-          <button
-            onClick={() => setSelectMenu("available")}
-            className={`text-base ${
-              selectMenu === "available" && "border-b-2 border-black"
-            } `}
-          >
-            Available List
-          </button>
-          <div className="h-7 w-[1px] bg-gray-400" />
-          <button
-            onClick={() => setSelectMenu("remove")}
-            className={`text-base ${
-              selectMenu === "remove" && "border-b-2 border-black"
-            } `}
-          >
-            Remove List
-          </button>
-        </div>
-        <ul className="h-72 overflow-y-auto">
-          {selectMenu === "remove" &&
-            studentRemoveList.map((student, index) => {
-              const image = studentOnSubjects.data?.find(
-                (img) => img.id === student.id
-              );
-              if (!image) {
-                return <></>;
-              }
-              const odd = index % 2 === 0;
-              return (
-                <StudentCard key={index} odd index={index} image={image} />
-              );
-            })}
-          {selectMenu === "available" &&
-            studentOnSubjects.data
-              ?.filter((s) => s.isActive)
-              .filter((s) => !studentRemoveList.some((r) => r.id === s.id))
-              .map((student, index) => {
+      <div className="flex items-center justify-center lg:justify-start">
+        <div className="w-full h-80 lg:border-l pl-5 mt-5 lg:mt-0 max-w-xs sm:max-w-full lg:max-w-none lg:w-full">
+          <div className="w-full h-7 flex border-b border-collapse items-center justify-center gap-1">
+            <button
+              onClick={() => setSelectMenu("available")}
+              className={`text-base ${selectMenu === "available" && "border-b-2 border-black"
+                } `}
+            >
+              Available List
+            </button>
+            <div className="h-7 w-[1px] bg-gray-400" />
+            <button
+              onClick={() => setSelectMenu("remove")}
+              className={`text-base ${selectMenu === "remove" && "border-b-2 border-black"
+                } `}
+            >
+              Remove List
+            </button>
+          </div>
+          <ul className="h-72 overflow-y-auto">
+            {selectMenu === "remove" &&
+              studentRemoveList.map((student, index) => {
+                const image = studentOnSubjects.data?.find(
+                  (img) => img.id === student.id
+                );
+                if (!image) {
+                  return <></>;
+                }
                 const odd = index % 2 === 0;
-
                 return (
-                  <StudentCard key={index} odd index={index} image={student} />
+                  <StudentCard key={index} odd index={index} image={image} />
                 );
               })}
-        </ul>
+            {selectMenu === "available" &&
+              studentOnSubjects.data
+                ?.filter((s) => s.isActive)
+                .filter((s) => !studentRemoveList.some((r) => r.id === s.id))
+                .map((student, index) => {
+                  const odd = index % 2 === 0;
+
+                  return (
+                    <StudentCard key={index} odd index={index} image={student} />
+                  );
+                })}
+          </ul>
+        </div>
       </div>
     </div>
   );
@@ -413,9 +427,8 @@ const StudentCard = <T extends AnimationImageItemProps>({
   return (
     <li
       key={`${image.id}-${index}`}
-      className={`flex items-center gap-2 p-2 ${
-        odd ? "bg-white" : "bg-gray-50"
-      } `}
+      className={`flex items-center gap-2 p-2 ${odd ? "bg-white" : "bg-gray-50"
+        } `}
     >
       {index + 1}
       <div className="w-12 h-12 relative">
@@ -427,7 +440,7 @@ const StudentCard = <T extends AnimationImageItemProps>({
         />
       </div>
       <div className="flex flex-col">
-        <h1 className="text-md font-semibold">
+        <h1 className="text-lg font-semibold">
           {image.firstName} {image.lastName}
         </h1>
         <h1 className="text-sm font-normal text-gray-500">

@@ -134,12 +134,12 @@ function InviteTeacher({ subjectId, setTrigger }: Props) {
     }
   };
   return (
-    <div className="w-max h-[30rem] flex flex-col items-center rounded-md justify-start bg-white">
-      <header className="w-full p-5 flex justify-between border-b pb-3">
-        <div className="flex  items-center gap-1">
-          <h1 className="text-lg  font-semibold">Invite Co-Teacher</h1>
+    <div className="w-full sm:w-max h-[30rem] flex flex-col items-center rounded-md justify-start bg-white">
+      <header className="w-full p-3 sm:p-5 flex justify-between border-b pb-2 sm:pb-3">
+        <div className="flex items-center gap-1">
+          <h1 className="text-base sm:text-lg font-semibold">Invite Co-Teacher</h1>
           {teacherOnSubjects.isLoading ? (
-            <div className="w-10 h-3 rounded-md bg-gray-300/50 animate-pulse"></div>
+            <div className="w-8 sm:w-10 h-2 sm:h-3 rounded-md bg-gray-300/50 animate-pulse"></div>
           ) : (
             teacherOnSubjects.data && (
               <div>
@@ -151,14 +151,13 @@ function InviteTeacher({ subjectId, setTrigger }: Props) {
         {setTrigger && (
           <button
             onClick={() => setTrigger(false)}
-            className="text-lg hover:bg-gray-300/50 w-6  h-6  rounded
-         flex items-center justify-center font-semibold"
+            className="text-base sm:text-lg hover:bg-gray-300/50 w-5 sm:w-6 h-5 sm:h-6 rounded flex items-center justify-center font-semibold"
           >
             <IoMdClose />
           </button>
         )}
       </header>
-      <main className="w-full  flex flex-col items-center justify-center gap-5 p-5">
+      <main className="w-full flex flex-col items-center justify-center gap-3 sm:gap-5 p-3 sm:p-5">
         <form
           onSubmit={handleSummit}
           className="w-full flex flex-col items-center justify-center gap-1"
@@ -166,13 +165,13 @@ function InviteTeacher({ subjectId, setTrigger }: Props) {
           <label className="w-full flex flex-col items-start justify-start gap-1">
             <span className="text-sm font-semibold">Invite With Email</span>
             <div className="w-full flex gap-2">
-              <div className="relative w-96">
+              <div className="relative w-full sm:w-96">
                 <input
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   type="email"
-                  className="main-input w-96 pr-28"
+                  className="main-input w-full sm:w-96 pr-28"
                 />
                 <div className="absolute top-2 right-1 m-auto">
                   <DropdownRole
@@ -186,7 +185,7 @@ function InviteTeacher({ subjectId, setTrigger }: Props) {
               </div>
               <button
                 disabled={createTeacherOnSubject.isPending}
-                className="main-button items-center flex justify-center  w-20 text-sm"
+                className="main-button items-center flex justify-center w-16 sm:w-20 text-sm"
               >
                 {createTeacherOnSubject.isPending ? (
                   <ProgressSpinner
@@ -202,14 +201,13 @@ function InviteTeacher({ subjectId, setTrigger }: Props) {
             </div>
           </label>
           <div className="w-full flex">
-            <div className=" text-xs break-words max-w-96 max-h-10  text-red-600">
-              {createTeacherOnSubject.error &&
-                createTeacherOnSubject.error.message}
+            <div className="text-xs break-words max-w-full sm:max-w-96 max-h-10 text-red-600">
+              {createTeacherOnSubject.error && createTeacherOnSubject.error.message}
             </div>
           </div>
         </form>
 
-        <div className="w-full mt-5">
+        <div className="w-full mt-3 sm:mt-5">
           <h2 className="font-semibold text-sm">Current Co-Teachers</h2>
           {user.data && teacherOnSubjects.data && members && (
             <ListMembers

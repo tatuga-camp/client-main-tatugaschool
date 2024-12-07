@@ -1,13 +1,15 @@
 import React from "react";
 import * as qrcode from "qrcode";
 import Image from "next/image";
+import { IoMdClose } from "react-icons/io";
 
 type Props = {
   url: string;
   code: string;
+  setTriggerQRCode: (visible: boolean) => void;
 };
 
-function QRCode({ url, code }: Props) {
+function QRCode({ url, code, setTriggerQRCode }: Props) {
   const [isLoading, setIsLoading] = React.useState(false);
   const [qrCode, setQRCode] = React.useState<string>();
   const generateQRCode = async () => {
@@ -34,6 +36,12 @@ function QRCode({ url, code }: Props) {
 
   return (
     <div className="w-full h-full flex flex-col gap-2 p-4 sm:p-6 md:p-8">
+      <button
+        className="self-end text-red-500"
+        onClick={() => setTriggerQRCode(false)}
+      >
+        <IoMdClose />
+      </button>
       <div className="w-full h-64 sm:h-80 md:h-96 relative">
         {qrCode ? (
           <Image src={qrCode} alt="QR Code" layout="fill" objectFit="contain" />
