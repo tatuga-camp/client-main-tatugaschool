@@ -1,4 +1,4 @@
-import React, { memo, useRef } from "react";
+import React, { memo, useRef, useState } from "react";
 import {
   ErrorMessages,
   ScoreOnStudent,
@@ -23,12 +23,21 @@ import { ProgressSpinner } from "primereact/progressspinner";
 import { useSound } from "../../hook";
 import { decodeBlurhashToCanvas } from "../../utils";
 import ScorePanel from "./ScorePanel";
+import { CgClose } from "react-icons/cg";
 
 type Props = {
+  setSelectStudent: React.Dispatch<
+    React.SetStateAction<StudentOnSubject | null>
+  >;
   student: StudentOnSubject;
   toast: React.RefObject<Toast>;
 };
-function PopUpStudent({ student, toast }: Props) {
+function PopUpStudent({
+  student,
+  setSelectStudent,
+  toast,
+}: Props) {
+  const [isModalOpen, setIsModalOpen] = useState(true);
   const successSound = useSound("/sounds/ding.mp3");
   const failSound = useSound("/sounds/fail.mp3");
   const queryClient = useQueryClient();
@@ -103,10 +112,20 @@ function PopUpStudent({ student, toast }: Props) {
     });
   };
 
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectStudent(null);
+  };
+
+  if (!isModalOpen) return null;
+
   return (
-    <section className="w-full border  p-5 items-center  flex gap-5  bg-background-color rounded-md">
-      <div className="w-40 h-max border bg-white rounded-md flex flex-col gap-1 items-center justify-center">
-        <div className="w-40 h-10 gradient-bg rounded-t-md flex items-center justify-center">
+    <section className="w-full border p-5 items-center flex flex-col md:flex-row gap-5 bg-background-color rounded-md">
+      <button onClick={handleCloseModal} className="self-end md:hidden">
+        <CgClose className="text-2xl" />
+      </button>
+      <div className="w-full md:w-40 h-max border bg-white rounded-md flex flex-col gap-1 items-center justify-center">
+        <div className="w-full md:w-40 h-10 gradient-bg rounded-t-md flex items-center justify-center">
           <span className="text-white font-semibold text-lg">{totalScore}</span>
         </div>
         <div className="w-20 h-20 relative">
@@ -114,10 +133,10 @@ function PopUpStudent({ student, toast }: Props) {
             src={student.photo}
             alt="Student"
             fill
-            className=" rounded-full"
+            className="rounded-full"
           />
         </div>
-        <div className="w-40 h-16 flex flex-col items-center justify-center">
+        <div className="w-full md:w-40 h-16 flex flex-col items-center justify-center">
           <span className="text-gray-800 font-semibold text-sm">
             {student.firstName} {student.lastName}
           </span>

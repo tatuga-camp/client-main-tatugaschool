@@ -46,10 +46,10 @@ function SubjectPermission({ subjectId, onSummit, isPending }: Props) {
       className="flex flex-col p-4 min-h-80 bg-white rounded-md border gap-5 mt-5"
     >
       <h2 className="border-b text-lg font-medium py-3">Subject Permission</h2>
-      <div className="grid grid-cols-1 ">
-        <div className="grid grid-cols-1 p-2 py-4">
-          <label className="w-full grid grid-cols-2 gap-10">
-            <span className="text-base text-black">
+      <div className="flex flex-col sm:grid-cols-2 gap-4">
+        <div className="flex p-2 py-4">
+          <label className="w-full flex items-center">
+            <span className="text-base text-black flex-1">
               Allow Student To Delete Their Work:
             </span>
             <Switch
@@ -63,9 +63,9 @@ function SubjectPermission({ subjectId, onSummit, isPending }: Props) {
             />
           </label>
         </div>
-        <div className="grid grid-cols-1 bg-gray-200/20 gap-5  p-2 py-4">
-          <label className="w-full grid grid-cols-2 gap-10">
-            <span className="text-base text-black">
+        <div className="flex bg-gray-200/20 gap-5 p-2 py-4">
+          <label className="w-full flex items-center">
+            <span className="text-base text-black flex-1">
               Allow Student To View Overall Score:
             </span>
             <Switch
@@ -79,9 +79,9 @@ function SubjectPermission({ subjectId, onSummit, isPending }: Props) {
             />
           </label>
         </div>
-        <div className="grid grid-cols-1  gap-5  p-2 py-4">
-          <label className="w-full grid grid-cols-2 gap-10">
-            <span className="text-base text-black">
+        <div className="flex gap-5 p-2 py-4">
+          <label className="w-full flex items-center">
+            <span className="text-base text-black flex-1">
               Allow Student To View Grade:
             </span>
             <Switch
@@ -95,9 +95,9 @@ function SubjectPermission({ subjectId, onSummit, isPending }: Props) {
             />
           </label>
         </div>
-        <div className="grid grid-cols-1 bg-gray-200/20 gap-5  p-2 py-4">
-          <label className="w-full grid grid-cols-2 gap-10">
-            <span className="text-base text-black">
+        <div className="flex bg-gray-200/20 gap-5 p-2 py-4">
+          <label className="w-full flex items-center">
+            <span className="text-base text-black flex-1">
               Allow Student To View Attendance Record:
             </span>
             <Switch
@@ -114,7 +114,7 @@ function SubjectPermission({ subjectId, onSummit, isPending }: Props) {
       </div>
       <button
         disabled={isPending}
-        className="main-button flex justify-center items-center  w-40 mt-5"
+        className="main-button flex justify-center items-center w-full sm:w-40 mt-5"
       >
         {isPending ? (
           <ProgressSpinner

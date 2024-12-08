@@ -51,7 +51,7 @@ function ButtonProfile({ user, queryClient }: Props) {
               }}
             />
           </div>
-          <div className=" items-start w-0 h-0 overflow-hidden group-hover:w-max group-hover:h-max duration-300 transition-width flex flex-col justify-center gap-0">
+          <div className=" items-start w-0 h-0 overflow-hidden group-hover:w-max group-hover:h-max duration-300 transition-width flex-col justify-center gap-0 hidden md:flex">
             <h2 className="font-semibold text-sm text-gray-800">
               {user.data?.email}
             </h2>
@@ -68,7 +68,7 @@ function ButtonProfile({ user, queryClient }: Props) {
      py-1 bg-red-500 text-white font-semibold rounded-md"
         >
           <AiOutlineLogout />
-          Logout
+          <span className="hidden md:block">Logout</span>
         </button>
       </div>
     </div>

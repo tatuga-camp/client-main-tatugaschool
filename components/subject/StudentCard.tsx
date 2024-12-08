@@ -47,11 +47,12 @@ function StudentCard({
       onClick={() => {
         setSelectStudent(student);
       }}
-      className={`w-48 p-3 group flex flex-col items-center justify-center
-     gap-2 h-52 rounded-xl relative hover:drop-shadow-md active:scale-105 ${
+      className={`w-full p-3 group flex flex-col items-center justify-center
+     gap-2  rounded-xl relative hover:drop-shadow-md active:scale-105 ${
        student.select && showSelect ? "gradient-bg " : "bg-white"
      }
-      overflow-hidden hover:bg-primary-color  bg-white`}
+      overflow-hidden hover:bg-primary-color bg-white
+     h-60 sm:h-60 md:h-60 lg:h-60 xl:h-60`}
     >
       {!isDragable && (
         <div
@@ -71,10 +72,10 @@ function StudentCard({
       )}
 
       <div
-        className={`min-w-10 w-max  max-w-20 h-12  absolute left-0 right-0 -top-3 ${
+        className={`min-w-10 w-max max-w-20 h-12 absolute left-0 right-0 -top-3 ${
           student.select && showSelect ? "bg-white" : "bg-primary-color"
         }
-      m-auto bg-primary-color group-hover:bg-white  rounded-2xl flex items-center justify-center text-white`}
+      m-auto bg-primary-color group-hover:bg-white rounded-2xl flex items-center justify-center text-white`}
       >
         <span
           className={`max-w-14 truncate
@@ -97,14 +98,16 @@ function StudentCard({
       <h2
         className={`text-sm group-hover:text-white 
           ${student.select && showSelect ? "text-white" : "text-gray-800"}
-          w-11/12 truncate text-center font-semibold text-gray-800`}
+          w-11/12 truncate text-center font-semibold text-gray-800
+          sm:text-base md:text-lg lg:text-xl`}
       >
         {student.firstName} {student.lastName}
       </h2>
       <span
         className={`text-xs
         ${student.select && showSelect ? "text-white" : "text-gray-500"}
-        group-hover:text-white text-gray-500`}
+        group-hover:text-white text-gray-500
+        sm:text-sm md:text-base`}
       >
         Number {student.number}
       </span>

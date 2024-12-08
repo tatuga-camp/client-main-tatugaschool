@@ -20,6 +20,7 @@ type Props = {
   isLoading: boolean;
   onCreateScore: () => void;
 };
+
 function ScorePanel({
   scoreOnSubjects,
   onSelectScore,
@@ -30,11 +31,11 @@ function ScorePanel({
   const scoreRef = React.useRef<HTMLButtonElement>(null);
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="text-lg font-semibold border-b ">
-        Give You Student A Score!
+    <div className="flex flex-col gap-3 p-4 sm:p-6 md:p-8 lg:p-10">
+      <div className="text-lg font-semibold border-b">
+        Give Your Student A Score!
       </div>
-      <ul className="grid max-h-48 p-2 overflow-auto grid-cols-4 gap-3">
+      <ul className="grid max-h-48 p-2 overflow-auto grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
         {scoreOnSubjects.isLoading
           ? [...Array(12)].map((_, index) => {
               return (
@@ -87,11 +88,11 @@ function ScorePanel({
               );
             })}
       </ul>
-      <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row gap-2">
         <InputNumber
           pt={{
             input: {
-              root: { className: "w-60 main-input h-10" },
+              root: { className: "w-full sm:w-60 main-input h-10" },
             },
           }}
           style={{ width: "15rem" }}
@@ -118,7 +119,7 @@ function ScorePanel({
             }
             onCreateScore();
           }}
-          className="main-button w-56 flex items-center justify-center"
+          className="main-button w-full sm:w-56 flex items-center justify-center"
         >
           {isLoading ? (
             <ProgressSpinner
@@ -128,7 +129,7 @@ function ScorePanel({
               strokeWidth="8"
             />
           ) : (
-            <div className=" flex items-center justify-center gap-1">
+            <div className="flex items-center justify-center gap-1">
               Give Score <IoStar />
             </div>
           )}

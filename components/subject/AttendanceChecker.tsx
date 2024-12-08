@@ -190,20 +190,20 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
     });
   };
   return (
-    <div className="w-full h-full flex flex-col gap-1">
+    <div className="w-full h-full flex flex-col gap-1 p-2 md:p-4">
       <header className="">
-        <section className="w-full flex justify-between items-center gap-2">
-          <div>
-            <h1 className="text-xl font-medium">Attendance Checker</h1>
-            <span className="text-sm text-gray-500">
+        <section className="w-full flex flex-col gap-4 sm:gap-2 sm:flex-row sm:justify-between sm:items-center">
+          <div className="text-center sm:text-left">
+            <h1 className="text-2xl sm:text-xl font-medium">Attendance Checker</h1>
+            <span className="text-sm text-gray-500 block mt-1">
               You can check the attendance of the students here
             </span>
           </div>
-          <div className="flex gap-2">
+          <div className="flex justify-center sm:justify-end">
             <button
               onClick={handleCreateAttendance}
               disabled={loading}
-              className="main-button w-40 flex items-center justify-center gap-2"
+              className="main-button w-48 sm:w-40 h-11 sm:h-10 flex items-center justify-center gap-2 text-base sm:text-sm"
             >
               {loading ? (
                 <ProgressSpinner
@@ -214,95 +214,94 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
                 />
               ) : (
                 <div className="flex items-center justify-center gap-2">
-                  Create <IoIosCreate />
+                  Create <IoIosCreate className="text-lg sm:text-base" />
                 </div>
               )}
             </button>
           </div>
         </section>
 
-        <section className="w-full flex h-14 justify-between items-end mt-5 border-b  gap-2">
-          <div className="max-w-8/12 flex flex-nowrap overflow-auto  ">
-            {attendanceTables.data?.map((table, index) => (
-              <button
-                key={index}
-                onClick={() => setSelectTable(table)}
-                className={`px-3 w-max py-1 ${
-                  selectTable?.id === table.id
-                    ? "font-semibold border-b-2 border-b-black"
-                    : ""
-                }`}
-              >
-                <span className="w-max text-nowrap">{table.title}</span>
-              </button>
-            ))}
+        <section className="w-full flex flex-col gap-4 mt-5 border-b pb-2">
+          {/* Table Selection */}
+          <div className="w-full overflow-x-auto">
+            <div className="flex flex-nowrap min-w-0">
+              {attendanceTables.data?.map((table, index) => (
+                <button
+                  key={index}
+                  onClick={() => setSelectTable(table)}
+                  className={`px-3 py-1 whitespace-nowrap ${
+                    selectTable?.id === table.id
+                      ? "font-semibold border-b-2 border-b-black"
+                      : ""
+                  }`}
+                >
+                  {table.title}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="flex gap-2 items-end">
-            <label className=" flex flex-col">
-              <span className="text-gray-400 text-xs">Start Date</span>
-              <input
-                value={attendanceData.startDate}
-                onChange={(e) =>
-                  setAttendanceData((prev) => {
-                    if (e.target.value === "") {
+
+          {/* Date & Note Controls */}
+          <div className="flex flex-col sm:flex-row gap-3 w-full">
+            <div className="flex-1 flex flex-col sm:flex-row gap-2">
+              <label className="flex-1">
+                <span className="text-gray-400 text-xs">Start Date</span>
+                <input
+                  value={attendanceData.startDate}
+                  onChange={(e) =>
+                    setAttendanceData((prev) => {
+                      if (e.target.value === "") {
+                        return {
+                          ...prev,
+                          startDate: e.target.value,
+                          endDate: e.target.value,
+                        };
+                      }
+
+                      const [datePart, timePart] = e.target.value.split("T");
+
+                      const [hours, minutes] = timePart.split(":").map(Number);
+                      const plusOneHour = `${datePart}T${
+                        hours + 1 < 10 ? `0${hours + 1}` : hours + 1
+                      }:${minutes < 10 ? `0${minutes}` : minutes}`;
+
                       return {
                         ...prev,
                         startDate: e.target.value,
-                        endDate: e.target.value,
+                        endDate: plusOneHour,
                       };
-                    }
-
-                    const [datePart, timePart] = e.target.value.split("T");
-
-                    const [hours, minutes] = timePart.split(":").map(Number);
-                    const plusOneHour = `${datePart}T${
-                      hours + 1 < 10 ? `0${hours + 1}` : hours + 1
-                    }:${minutes < 10 ? `0${minutes}` : minutes}`;
-
-                    return {
-                      ...prev,
-                      startDate: e.target.value,
-                      endDate: plusOneHour,
-                    };
-                  })
-                }
-                type="datetime-local"
-                className="main-input h-8 "
-              />
-            </label>
-            <label className=" flex flex-col">
-              <span className="text-gray-400 text-xs">End Date</span>
-              <input
-                value={attendanceData.endDate}
-                onChange={(e) =>
-                  setAttendanceData((prev) => {
-                    return {
+                    })
+                  }
+                  type="datetime-local"
+                  className="main-input h-8 w-full"
+                />
+              </label>
+              <label className="flex-1">
+                <span className="text-gray-400 text-xs">End Date</span>
+                <input
+                  value={attendanceData.endDate}
+                  onChange={(e) =>
+                    setAttendanceData((prev) => ({
                       ...prev,
                       endDate: e.target.value,
-                    };
-                  })
-                }
-                type="datetime-local"
-                className="main-input h-8 "
-              />
-            </label>
+                    }))
+                  }
+                  type="datetime-local" 
+                  className="main-input h-8 w-full"
+                />
+              </label>
+            </div>
             <button
               onClick={() => setTriggerNote((prev) => !prev)}
-              className="main-button flex items-center justify-center w-36 h-8  ring-1 ring-blue-600 "
+              className="main-button h-8 px-4 ring-1 ring-blue-600 whitespace-nowrap sm:self-end"
             >
               {triggerNote ? (
-                <div
-                  className="flex items-center 
-          justify-center gap-1"
-                >
+                <div className="flex items-center justify-center gap-1">
                   <IoIosArrowBack />
                   Back
                 </div>
               ) : (
-                <div
-                  className="flex items-center 
-          justify-center gap-1"
-                >
+                <div className="flex items-center justify-center gap-1">
                   <BiSolidNote />
                   Add Note
                 </div>
@@ -310,7 +309,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
             </button>
           </div>
         </section>
-        <h2 className="w-full  line-clamp-2 text-sm text-gray-400">
+        <h2 className="w-full line-clamp-2 text-sm text-gray-400">
           {selectTable?.description}
         </h2>
         {loading && (
@@ -323,76 +322,140 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
           <TextEditor
             value={attendanceData?.note}
             onChange={(content) =>
-              setAttendanceData((prev) => {
-                return {
-                  ...prev,
-                  note: content,
-                };
-              })
+              setAttendanceData((prev) => ({
+                ...prev,
+                note: content,
+              }))
             }
           />
         </div>
       ) : (
-        <div className="w-full max-h-full overflow-auto">
-          <table className="table-fixed  w-max min-w-full">
-            <thead>
-              <tr className="bg-gray-100 z-30 sticky top-0 ">
-                <th className="sticky left-0 z-40 bg-gray-100">Name</th>
-                {selectTable?.statusLists
-                  .filter((s) => !s.isHidden)
-                  .sort((a, b) => b.title.localeCompare(a.title))
-                  .map((status, index) => {
-                    return (
-                      <th key={status.id + selectTable.id}>
-                        <button
-                          onClick={(e) =>
-                            handleCheckAll({
-                              key: e.currentTarget.name,
-                              check: true,
-                            })
-                          }
-                          style={{ backgroundColor: status.color }}
-                          name={status.title}
-                          className={`text-center w-24 p-2 select-none rounded-md hover:drop-shadow-md 
-                          cursor-pointer active:scale-105
-            transition hover:text-black text-sm font-medium 
-           flex items-center justify-center gap-1`}
-                        >
-                          <span className="max-w-20 truncate">
-                            {status.title}
-                          </span>
-                          <TbSelectAll />
-                        </button>
-                      </th>
-                    );
-                  })}
-                <th className="z-10 bg-gray-100 text-sm  sticky right-0">
-                  <div className="flex items-center justify-center gap-1">
-                    <BiSolidNote /> Note
+        <>
+          {/* Mobile View */}
+          <div className="lg:hidden w-full h-full overflow-y-auto space-y-4 pb-16">
+            {selectTable?.statusLists && 
+              studentAttendances
+                ?.filter((s) => s.isActive)
+                .sort((a, b) => Number(a.number) - Number(b.number))
+                .map((student) => (
+                  <div key={student.id} className="bg-white rounded-xl shadow-md p-4">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="w-20 h-20 relative rounded-lg ring-1 ring-gray-200 overflow-hidden shrink-0">
+                        <Image
+                          src={student.photo}
+                          alt={student.firstName}
+                          fill
+                          placeholder="blur"
+                          blurDataURL={decodeBlurhashToCanvas(student.blurHash ?? defaultBlurHash)}
+                          className="object-cover"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-lg truncate">
+                          {student.firstName} {student.lastName}
+                        </h3>
+                        <p className="text-sm text-gray-500">Student No. {student.number}</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                      {selectTable.statusLists
+                        .filter((s) => !s.isHidden)
+                        .sort((a, b) => b.title.localeCompare(a.title))
+                        .map((status) => (
+                          <label 
+                            key={status.id}
+                            className="flex items-center gap-3 p-3 rounded-lg transition-all active:scale-95"
+                            style={{ backgroundColor: `${status.color}15` }}
+                          >
+                            <input
+                              type="checkbox"
+                              name={status.title}
+                              checked={student.status === status.title}
+                              onChange={(e) => handleCheck({
+                                studentId: student.id,
+                                key: e.target.name,
+                              })}
+                              style={{ accentColor: status.color }}
+                              className="w-5 h-5 rounded-md"
+                            />
+                            <span className="text-sm font-medium">{status.title}</span>
+                          </label>
+                        ))}
+                    </div>
+
+                    <textarea
+                      value={student.note}
+                      onChange={(e) => handleNoteChange({
+                        studentId: student.id,
+                        note: e.target.value,
+                      })}
+                      placeholder="Add note for this student..."
+                      className="main-input w-full h-24 resize-none rounded-xl text-sm"
+                    />
                   </div>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {selectTable?.statusLists &&
-                studentAttendances
-                  ?.filter((s) => s.isActive)
-                  .sort((a, b) => Number(a.number) - Number(b.number))
-                  .map((student, index) => {
-                    return (
-                      <StudentAttendanceItem
-                        key={student.id + selectTable.id}
-                        index={index}
-                        student={student}
-                        statusLists={selectTable?.statusLists}
-                        handleCheck={handleCheck}
-                        handleNoteChange={handleNoteChange}
-                      />
-                    );
-                  })}
-            </tbody>
-          </table>
-        </div>
+                ))}
+          </div>
+
+          {/* Desktop View */}
+          <div className="hidden lg:block w-full max-h-full overflow-auto">
+            <table className="table-fixed w-max min-w-full">
+              <thead>
+                <tr className="bg-gray-100 z-30 sticky top-0">
+                  <th className="sticky left-0 z-40 bg-gray-100">Name</th>
+                  {selectTable?.statusLists
+                    .filter((s) => !s.isHidden)
+                    .sort((a, b) => b.title.localeCompare(a.title))
+                    .map((status, index) => {
+                      return (
+                        <th key={status.id + selectTable.id}>
+                          <button
+                            onClick={(e) =>
+                              handleCheckAll({
+                                key: e.currentTarget.name,
+                                check: true,
+                              })
+                            }
+                            style={{ backgroundColor: status.color }}
+                            name={status.title}
+                            className={`text-center w-24 p-2 select-none rounded-md hover:drop-shadow-md cursor-pointer active:scale-105 transition hover:text-black text-sm font-medium flex items-center justify-center gap-1`}
+                          >
+                            <span className="max-w-20 truncate">
+                              {status.title}
+                            </span>
+                            <TbSelectAll />
+                          </button>
+                        </th>
+                      );
+                    })}
+                  <th className="z-10 bg-gray-100 text-sm sticky right-0">
+                    <div className="flex items-center justify-center gap-1">
+                      <BiSolidNote /> Note
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectTable?.statusLists &&
+                  studentAttendances
+                    ?.filter((s) => s.isActive)
+                    .sort((a, b) => Number(a.number) - Number(b.number))
+                    .map((student, index) => {
+                      return (
+                        <StudentAttendanceItem
+                          key={student.id + selectTable.id}
+                          index={index}
+                          student={student}
+                          statusLists={selectTable?.statusLists}
+                          handleCheck={handleCheck}
+                          handleNoteChange={handleNoteChange}
+                        />
+                      );
+                    })}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </div>
   );
@@ -430,17 +493,13 @@ const StudentAttendanceItem = React.memo(
     return (
       <tr
         key={student.id}
-        className={` ${
-          odd && "bg-gray-50"
-        } border-spacing-2 border-4 border-transparent`}
+        className={` ${odd && "bg-gray-50"} border-spacing-2 border-4 border-transparent`}
       >
         <td
-          className={`sticky left-0 z-10    ${
-            odd ? "bg-gray-50" : "bg-white"
-          } `}
+          className={`sticky left-0 z-10 ${odd ? "bg-gray-50" : "bg-white"}`}
         >
           <div className="flex w-80 gap-2">
-            <div className="w-10 h-10 relative rounded-md ring-1  overflow-hidden">
+            <div className="w-10 h-10 relative rounded-md ring-1 overflow-hidden">
               <Image
                 src={student.photo}
                 alt={student.firstName}
@@ -467,7 +526,7 @@ const StudentAttendanceItem = React.memo(
           .map((status, index) => {
             return (
               <td key={student.id + status.id}>
-                <div className="w-full flex justify-center items-center ">
+                <div className="w-full flex justify-center items-center">
                   <input
                     name={status.title}
                     checked={student.status === status.title}
@@ -479,15 +538,13 @@ const StudentAttendanceItem = React.memo(
                     }
                     style={{ accentColor: status.color }}
                     type="checkbox"
-                    className="w-6 h-6 "
+                    className="w-6 h-6"
                   />
                 </div>
               </td>
             );
           })}
-        <td
-          className={`z-10  ${odd ? "bg-gray-50" : "bg-white"}  sticky right-0`}
-        >
+        <td className={`z-10 ${odd ? "bg-gray-50" : "bg-white"} sticky right-0`}>
           <textarea
             value={student.note}
             onChange={(e) =>
