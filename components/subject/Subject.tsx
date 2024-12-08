@@ -306,7 +306,10 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
           }}
         />
       </header>
-      <section className="w-full md:w-10/12 lg:w-9/12 place-items-center grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
+      <section
+        className="w-80 md:w-10/12 lg:w-9/12 place-items-center 
+      grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5"
+      >
         <div
           onClick={() => setTriggerSelectMultipleStudent((prev) => !prev)}
           onDragStart={(e) => e.preventDefault()}
@@ -358,10 +361,10 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
       </section>
 
       <footer
-        className={`flex justify-center items-center ease-in-out gap-3 fixed bottom-20 
+        className={`flex justify-center  items-center ease-in-out gap-3 fixed bottom-20 
        right-0 left-0 m-auto z-30 w-max transition-transform ${
          triggerSelectMultipleStudent ? "translate-y-0" : "translate-y-40"
-       }   h-10`}
+       } h-10`}
       >
         <button
           onClick={() => {

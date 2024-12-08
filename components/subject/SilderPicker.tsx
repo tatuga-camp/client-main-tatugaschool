@@ -67,40 +67,40 @@ const SilderPicker = <T extends AnimationImageItemProps>({
     images.length >= 30
       ? shuffleWithNoAdjacentDuplicates(images, 30)
       : shuffleWithNoAdjacentDuplicates(
-        [
-          ...images,
-          ...images,
-          ...images,
-          ...images,
-          ...images,
-          ...images,
-          ...images,
-          ...images,
-          ...images,
-          ...images,
-          ...images,
-          ...images,
-          ...images,
-          ...images,
-          ...images,
-          ...images,
-          ...images,
-          ...images,
-          ...images,
-          ...images,
-          ...images,
-          ...images,
-          ...images,
-          ...images,
-          ...images,
-          ...images,
-          ...images,
-          ...images,
-          ...images,
-          ...images,
-        ],
-        30
-      )
+          [
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+          ],
+          30
+        )
   );
 
   useEffect(() => {
@@ -113,40 +113,40 @@ const SilderPicker = <T extends AnimationImageItemProps>({
         prev.length >= 30
           ? shuffleWithNoAdjacentDuplicates(prev, 30)
           : shuffleWithNoAdjacentDuplicates(
-            [
-              ...prev,
-              ...prev,
-              ...prev,
-              ...prev,
-              ...prev,
-              ...prev,
-              ...prev,
-              ...prev,
-              ...prev,
-              ...prev,
-              ...prev,
-              ...prev,
-              ...prev,
-              ...prev,
-              ...prev,
-              ...prev,
-              ...prev,
-              ...prev,
-              ...prev,
-              ...prev,
-              ...prev,
-              ...prev,
-              ...prev,
-              ...prev,
-              ...prev,
-              ...prev,
-              ...prev,
-              ...prev,
-              ...prev,
-              ...prev,
-            ],
-            30
-          );
+              [
+                ...prev,
+                ...prev,
+                ...prev,
+                ...prev,
+                ...prev,
+                ...prev,
+                ...prev,
+                ...prev,
+                ...prev,
+                ...prev,
+                ...prev,
+                ...prev,
+                ...prev,
+                ...prev,
+                ...prev,
+                ...prev,
+                ...prev,
+                ...prev,
+                ...prev,
+                ...prev,
+                ...prev,
+                ...prev,
+                ...prev,
+                ...prev,
+                ...prev,
+                ...prev,
+                ...prev,
+                ...prev,
+                ...prev,
+                ...prev,
+              ],
+              30
+            );
       setSelectItem(newRandoms[1]);
       return newRandoms;
     });
@@ -197,39 +197,39 @@ const SilderPicker = <T extends AnimationImageItemProps>({
         students.length >= 30
           ? shuffleWithNoAdjacentDuplicates(students as T[], 30)
           : shuffleWithNoAdjacentDuplicates(
-            [
-              ...(students as T[]),
-              ...(students as T[]),
-              ...(students as T[]),
-              ...(students as T[]),
-              ...(students as T[]),
-              ...(students as T[]),
-              ...(students as T[]),
-              ...(students as T[]),
-              ...(students as T[]),
-              ...(students as T[]),
-              ...(students as T[]),
-              ...(students as T[]),
-              ...(students as T[]),
-              ...(students as T[]),
-              ...(students as T[]),
-              ...(students as T[]),
-              ...(students as T[]),
-              ...(students as T[]),
-              ...(students as T[]),
-              ...(students as T[]),
-              ...(students as T[]),
-              ...(students as T[]),
-              ...(students as T[]),
-              ...(students as T[]),
-              ...(students as T[]),
-              ...(students as T[]),
-              ...(students as T[]),
-              ...(students as T[]),
-              ...(students as T[]),
-            ],
-            30
-          );
+              [
+                ...(students as T[]),
+                ...(students as T[]),
+                ...(students as T[]),
+                ...(students as T[]),
+                ...(students as T[]),
+                ...(students as T[]),
+                ...(students as T[]),
+                ...(students as T[]),
+                ...(students as T[]),
+                ...(students as T[]),
+                ...(students as T[]),
+                ...(students as T[]),
+                ...(students as T[]),
+                ...(students as T[]),
+                ...(students as T[]),
+                ...(students as T[]),
+                ...(students as T[]),
+                ...(students as T[]),
+                ...(students as T[]),
+                ...(students as T[]),
+                ...(students as T[]),
+                ...(students as T[]),
+                ...(students as T[]),
+                ...(students as T[]),
+                ...(students as T[]),
+                ...(students as T[]),
+                ...(students as T[]),
+                ...(students as T[]),
+                ...(students as T[]),
+              ],
+              30
+            );
       setSelectItem(newRandoms[1]);
       return newRandoms;
     });
@@ -247,7 +247,10 @@ const SilderPicker = <T extends AnimationImageItemProps>({
   };
 
   return (
-    <div className="relative flex flex-col lg:flex-row max-w-xs sm:max-w-full lg:max-w-none lg:w-full overflow-hidden">
+    <div
+      className="relative w-full h-full flex flex-col lg:flex-row 
+    lg:max-w-none lg:w-full "
+    >
       <button
         onClick={handleCloseModal}
         className="absolute top-0 right-0 p-1 hover:bg-gray-100 rounded-full z-10"
@@ -313,7 +316,7 @@ const SilderPicker = <T extends AnimationImageItemProps>({
                     ding.play();
                   }
                 }}
-                onStart={(start) => { }}
+                onStart={(start) => {}}
                 onFinished={() => {
                   setIsStarted(false);
 
@@ -367,16 +370,18 @@ const SilderPicker = <T extends AnimationImageItemProps>({
           <div className="w-full h-7 flex border-b border-collapse items-center justify-center gap-1">
             <button
               onClick={() => setSelectMenu("available")}
-              className={`text-base ${selectMenu === "available" && "border-b-2 border-black"
-                } `}
+              className={`text-base ${
+                selectMenu === "available" && "border-b-2 border-black"
+              } `}
             >
               Available List
             </button>
             <div className="h-7 w-[1px] bg-gray-400" />
             <button
               onClick={() => setSelectMenu("remove")}
-              className={`text-base ${selectMenu === "remove" && "border-b-2 border-black"
-                } `}
+              className={`text-base ${
+                selectMenu === "remove" && "border-b-2 border-black"
+              } `}
             >
               Remove List
             </button>
@@ -403,7 +408,12 @@ const SilderPicker = <T extends AnimationImageItemProps>({
                   const odd = index % 2 === 0;
 
                   return (
-                    <StudentCard key={index} odd index={index} image={student} />
+                    <StudentCard
+                      key={index}
+                      odd
+                      index={index}
+                      image={student}
+                    />
                   );
                 })}
           </ul>
@@ -427,8 +437,9 @@ const StudentCard = <T extends AnimationImageItemProps>({
   return (
     <li
       key={`${image.id}-${index}`}
-      className={`flex items-center gap-2 p-2 ${odd ? "bg-white" : "bg-gray-50"
-        } `}
+      className={`flex items-center gap-2 p-2 ${
+        odd ? "bg-white" : "bg-gray-50"
+      } `}
     >
       {index + 1}
       <div className="w-12 h-12 relative">

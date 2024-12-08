@@ -48,11 +48,11 @@ function StudentCard({
         setSelectStudent(student);
       }}
       className={`w-full p-3 group flex flex-col items-center justify-center
-     gap-2 h-52 rounded-xl relative hover:drop-shadow-md active:scale-105 ${
+     gap-2  rounded-xl relative hover:drop-shadow-md active:scale-105 ${
        student.select && showSelect ? "gradient-bg " : "bg-white"
      }
       overflow-hidden hover:bg-primary-color bg-white
-      sm:h-60 md:h-64 lg:h-72 xl:h-80`}
+     h-60 sm:h-60 md:h-60 lg:h-60 xl:h-60`}
     >
       {!isDragable && (
         <div

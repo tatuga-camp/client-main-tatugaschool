@@ -83,7 +83,8 @@ function Index({ subjectId }: Props) {
   const [selectMenu, setSelectMenu] = React.useState<MenuSubject>("Subject");
   const [selectFooter, setSelectFooter] =
     React.useState<ListMenuFooter>("EMTY");
-  const [selectStudent, setSelectStudent] = React.useState<StudentOnSubject | null>(null);
+  const [selectStudent, setSelectStudent] =
+    React.useState<StudentOnSubject | null>(null);
   const [triggerInviteTeacher, setTriggerInviteTeacher] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const qrcodeRef = React.useRef<HTMLDivElement>(null);
@@ -254,7 +255,7 @@ function Index({ subjectId }: Props) {
             className="w-screen z-50 h-screen flex items-center 
         justify-center fixed top-0 right-0 left-0 bottom-0 m-auto"
           >
-            <div className="bg-white p-5 rounded-md border">
+            <div className="bg-white w-full h-full md:w-max md:h-max  p-5 md:rounded-md md:border">
               <SilderPicker<StudentOnSubject>
                 images={randomStudents
                   .filter((s) => s.isActive)
@@ -279,10 +280,11 @@ function Index({ subjectId }: Props) {
         justify-center fixed top-0 right-0 left-0 bottom-0 m-auto"
           >
             <div
-              className={`${triggerFullScreen
-                ? "h-screen w-screen p-10"
-                : "w-9/12 h-5/6 p-5 "
-                } flex flex-col gap-1 border bg-white 
+              className={`${
+                triggerFullScreen
+                  ? "h-screen w-screen p-10"
+                  : "h-screen w-screen p-10 md:w-9/12 md:h-5/6 md:p-5 "
+              } flex flex-col gap-1 border bg-white 
              rounded-md overflow-hidden`}
             >
               <div className="w-full flex gap-2 justify-end">
@@ -357,7 +359,10 @@ function Index({ subjectId }: Props) {
             className="fixed top-28 md:top-20 z-40 right-0 left-0 md:bottom-0 m-auto
          w-screen overflow-scroll md:h-screen flex items-center justify-center"
           >
-            <div className="max-h-[calc(100vh-12rem)] md:max-h-screen" ref={divRef}>
+            <div
+              className="max-h-[calc(100vh-12rem)] md:max-h-screen"
+              ref={divRef}
+            >
               <PopUpStudent
                 student={selectStudent}
                 setSelectStudent={setSelectStudent}
@@ -372,12 +377,13 @@ function Index({ subjectId }: Props) {
         )}
         <header className="w-full p-5 lg:p-10 pb-10 flex items-center justify-center">
           <section
-            className={`w-full lg:w-10/12 z-30 overflow-hidden h-60 relative flex flex-col-reverse md:flex-row justify-between p-5 shadow-inner ${loading
-              ? "animate-pulse bg-gray-500/50"
-              : subject.data?.backgroundImage
+            className={`w-full lg:w-10/12 z-30 overflow-hidden h-60 relative flex flex-col-reverse md:flex-row justify-between p-5 shadow-inner ${
+              loading
+                ? "animate-pulse bg-gray-500/50"
+                : subject.data?.backgroundImage
                 ? ""
                 : "gradient-bg"
-              } lg:rounded-md`}
+            } lg:rounded-md`}
           >
             {subject.data?.backgroundImage && (
               <div className="gradient-shadow -z-10 absolute w-full h-full top-0 bottom-0 right-0 left-0 m-auto"></div>
@@ -416,7 +422,10 @@ function Index({ subjectId }: Props) {
                 </div>
               </div>
             </div>
-            <div className="flex flex-col items-end justify-between mt-4 lg:mt-0" onMouseOut={() => setIsMenuVisible(false)}>
+            <div
+              className="flex flex-col items-end justify-between mt-4 lg:mt-0"
+              onMouseOut={() => setIsMenuVisible(false)}
+            >
               <button
                 onClick={() => setIsMenuVisible((prev) => !prev)}
                 className="flex items-center active:scale-110 justify-center gap-1 hover:bg-primary-color hover:text-white
@@ -424,8 +433,14 @@ function Index({ subjectId }: Props) {
               >
                 <MdMenu />
               </button>
-              <div className={`h-full flex-col items-end justify-between ${isMenuVisible ? "flex flex-col bg-white/50 rounded-md p-5 animate-in fade-in-0" : "hidden"} md:flex`}>
-              <div className="flex gap-2">
+              <div
+                className={`h-full flex-col items-end justify-between ${
+                  isMenuVisible
+                    ? "flex flex-col bg-white/50 rounded-md p-5 animate-in fade-in-0"
+                    : "hidden"
+                } md:flex`}
+              >
+                <div className="flex gap-2">
                   <button
                     onClick={() => setSelectMenu("Setting-Subject")}
                     className="flex items-center active:scale-110 justify-center gap-1 hover:bg-primary-color hover:text-white
@@ -491,7 +506,12 @@ function Index({ subjectId }: Props) {
             <Attendance toast={toast} subjectId={subjectId} />
           )}
           {selectMenu === "Setting-Subject" && (
-            <Setting subjectId={subjectId} setSelectMenu={(menu: string) => setSelectMenu(menu as MenuSubject)}/>
+            <Setting
+              subjectId={subjectId}
+              setSelectMenu={(menu: string) =>
+                setSelectMenu(menu as MenuSubject)
+              }
+            />
           )}
         </main>
         <footer
