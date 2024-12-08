@@ -135,19 +135,19 @@ function AttendanceView({
   }, [attendanceData]);
 
   return (
-    <main className="h-96 flex flex-col gap-2">
+    <main className="flex flex-col gap-2 max-h-screen overflow-y-auto">
       {updateAttendance.isPending && (
         <ProgressBar mode="indeterminate" style={{ height: "6px" }} />
       )}
 
-      <section className="w-full border-b flex py-2 justify-between ">
+      <section className="w-full border-b flex flex-col md:flex-row py-2 justify-between">
         <div className="text-lg font-semibold">
           View Attendance Detail{" "}
           <span className="text-xs text-gray-400 font-normal">
             ( View / Edit )
           </span>
         </div>
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-2 items-center md:order-2">
           {selectAttendance?.id ? (
             <button
               ref={saveRef}
@@ -171,28 +171,24 @@ function AttendanceView({
           )}
           <button
             onClick={() => onClose()}
-            className="text-lg hover:bg-gray-300/50 w-6  h-6  rounded
-         flex items-center justify-center font-semibold"
+            className="text-lg hover:bg-gray-300/50 w-6 h-6 rounded flex items-center justify-center font-semibold"
           >
             <IoMdClose />
           </button>
         </div>
       </section>
 
-      <section className="w-full flex h-72 items-center justify-start">
-        <div
-          className="w-40 border-r h-full  bg-white 
-        flex flex-col gap-1 items-center justify-center"
-        >
+      <div className="flex flex-col md:flex-row w-full h-full overflow-hidden">
+        <div className="w-full md:w-1/4 bg-white flex flex-col gap-1 items-center justify-center overflow-y-auto">
           <div className="w-20 h-20 relative">
             <Image
               src={selectAttendance.student.photo}
               alt="Student"
               fill
-              className=" rounded-full"
+              className="rounded-full"
             />
           </div>
-          <div className="w-40 h-16 flex flex-col items-center justify-center">
+          <div className="w-full h-16 flex flex-col items-center justify-center">
             <span className="text-gray-800 font-semibold text-sm">
               {selectAttendance.student.firstName}{" "}
               {selectAttendance.student.lastName}
@@ -202,15 +198,15 @@ function AttendanceView({
             </span>
           </div>
         </div>
-        <div className="w-full h-full overflow-y-auto">
-          <div className="flex w-full  h-max p-2 flex-col gap-2">
+        <div className="w-full md:w-3/4 h-full overflow-y-auto">
+          <div className="flex w-full h-full p-2 flex-col gap-2">
             <div className="flex flex-col gap-0 border-b">
               <div className="font-medium leading-4">Attendance Status</div>
               <span className="text-gray-400 text-xs">
                 modify attendance status here
               </span>
             </div>
-            <div className="flex flex-col">
+            <div className="flex-1 overflow-y-auto">
               {attendanceTable.statusLists
                 .filter((s) => !s.isHidden)
                 .map((status, index) => {
@@ -219,7 +215,7 @@ function AttendanceView({
                     <div
                       onClick={(e) => handleCheck({ key: status.title })}
                       key={status.id}
-                      className={`w-full hover:bg-gray-100 h-8  flex items-center justify-between px-2 ${
+                      className={`w-full hover:bg-gray-100 h-8 flex items-center justify-between px-2 ${
                         odd ? "bg-white" : "bg-gray-50"
                       }`}
                     >
@@ -244,23 +240,23 @@ function AttendanceView({
             <div className="flex flex-col gap-0 border-b">
               <div className="font-medium leading-4">Attendance Note</div>
               <span className="text-gray-400 text-xs">
-                Add note or edit note here
+              Add note or edit note here
               </span>
             </div>
             <div className="h-96 bg-slate-200">
               <TextEditor
-                value={attendanceData?.note || ""}
-                onChange={(value) =>
-                  setAttendanceData((prev) => {
-                    if (!prev) return prev;
-                    return { ...prev, note: value };
-                  })
-                }
+              value={attendanceData?.note || ""}
+              onChange={(value) =>
+                setAttendanceData((prev) => {
+                if (!prev) return prev;
+                return { ...prev, note: value };
+                })
+              }
               />
             </div>
           </div>
         </div>
-      </section>
+      </div>
     </main>
   );
 }

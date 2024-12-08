@@ -145,20 +145,18 @@ function AttendanceTableSetting({ table, toast, onDelete }: Props) {
   };
 
   return (
-    <div>
-      <h1 className="text-xl font-medium">General Settings</h1>
-      <h4 className="text-sm text-gray-500">Manage your general settings</h4>
-      <form
-        onSubmit={handleUpdate}
-        className="flex flex-col p-4 min-h-80 bg-white rounded-md border gap-5 mt-5"
-      >
-        <div className="border-b w-full justify-between text-lg font-medium py-3">
-          Subject Infomation
+    <div className="">
+      <h1 className="text-lg sm:text-xl font-medium">General Settings</h1>
+      <h4 className="text-xs sm:text-sm text-gray-500">Manage your general settings</h4>
+      
+      <form onSubmit={handleUpdate} className="flex flex-col p-2 sm:p-4 min-h-80 bg-white rounded-md border gap-3 sm:gap-5 mt-3 sm:mt-5">
+        <div className="border-b w-full justify-between text-base sm:text-lg font-medium py-2 sm:py-3">
+          Subject Information
         </div>
         <div className="grid grid-cols-1 w-full">
-          <div className="grid grid-cols-1   gap-5  p-2 py-4">
-            <label className="w-full items-center grid grid-cols-2 gap-10">
-              <span className="text-base text-black">Table Name:</span>
+          <div className="grid grid-cols-1 gap-3 sm:gap-5 p-2 py-3 sm:py-4">
+            <label className="w-full items-start sm:items-center grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-10">
+              <span className="text-sm sm:text-base text-black">Table Name:</span>
               <input
                 required
                 type="text"
@@ -174,13 +172,13 @@ function AttendanceTableSetting({ table, toast, onDelete }: Props) {
                   });
                 }}
                 placeholder="Table Name"
-                className="main-input"
+                className="main-input text-sm sm:text-base"
               />
             </label>
           </div>
-          <div className="grid grid-cols-1 bg-gray-200/20   gap-5  p-2 py-4">
-            <label className="w-full items-center grid grid-cols-2 gap-10">
-              <span className="text-base text-black">Description:</span>
+          <div className="grid grid-cols-1 bg-gray-200/20 gap-3 sm:gap-5 p-2 py-3 sm:py-4">
+            <label className="w-full items-start sm:items-center grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-10">
+              <span className="text-sm sm:text-base text-black">Description:</span>
               <input
                 required
                 type="text"
@@ -196,7 +194,7 @@ function AttendanceTableSetting({ table, toast, onDelete }: Props) {
                   });
                 }}
                 placeholder="Description"
-                className="main-input"
+                className="main-input text-sm sm:text-base"
               />
             </label>
           </div>
@@ -415,20 +413,20 @@ const AttendanceStatusRow = memo(
           odd ? "bg-white" : "bg-gray-50"
         } relative border-spacing-2 border-4 border-transparent`}
       >
-        <td>
-          <div className="w-full p-2 rounded-md text-center">{data.title}</div>
+        <td className="p-2 sm:p-3">
+          <div className="w-full rounded-md text-center text-sm sm:text-base">{data.title}</div>
           {data.isHidden && (
             <div className="w-full absolute top-0 bottom-0 m-auto h-[1px] bg-black"></div>
           )}
         </td>
-        <td>
+        <td className="p-2 sm:p-3">
           <div className="w-full flex items-center justify-center">
             <label
               htmlFor={`hs-color-input-${data.id}`}
               style={{
                 backgroundColor: `${data.color}`,
               }}
-              className="w-max p-2 rounded-md text-center cursor-pointer active:scale-105 transition"
+              className="w-max p-1.5 sm:p-2 rounded-md text-center text-xs sm:text-sm cursor-pointer active:scale-105 transition"
             >
               {data.color}
             </label>
@@ -445,9 +443,9 @@ const AttendanceStatusRow = memo(
             />
           </div>
         </td>
-        <td>
+        <td className="p-2 sm:p-3">
           <div className="w-full flex items-center justify-center">
-            <div className="w-20 flex items-center justify-center">
+            <div className="w-16 sm:w-20 flex items-center justify-center">
               <InputNumber
                 value={data.value}
                 max={10}
@@ -456,15 +454,16 @@ const AttendanceStatusRow = memo(
                   handleChange({ name: "value", value: data })
                 }
                 disabled={data.isHidden}
+                className="text-sm sm:text-base"
               />
             </div>
           </div>
         </td>
-        <td>
+        <td className="p-2 sm:p-3">
           <div className="w-full flex items-center justify-center">
             <button
               onClick={handleDelete}
-              className={`reject-button flex items-center justify-center`}
+              className="reject-button flex items-center justify-center text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-1.5"
             >
               DELETE
             </button>
@@ -533,38 +532,30 @@ const CreateAttendanceStatus = memo(
       });
     };
     return (
-      <tr
-        className={`${
-          odd ? "bg-white" : "bg-gray-50"
-        }   gap-5  p-2 py-4 relative border-spacing-2 border-4 border-transparent`}
-      >
+      <tr className={`${odd ? "bg-white" : "bg-gray-50"} gap-3 sm:gap-5 p-1 sm:p-2 py-2 sm:py-4 relative border-spacing-2 border-4 border-transparent`}>
         <td>
-          <div className="w-full p-2 rounded-md text-center">
+          <div className="w-full p-1 sm:p-2 rounded-md text-center">
             <input
               type="text"
-              className="main-input"
+              className="main-input text-sm sm:text-base w-full"
               maxLength={20}
               required
               value={createData.title}
               onChange={(e) => {
-                setCreateData((prev) => {
-                  return {
-                    ...prev,
-                    title: e.target.value,
-                  };
-                });
+                setCreateData((prev) => ({
+                  ...prev,
+                  title: e.target.value,
+                }));
               }}
             />
           </div>
         </td>
         <td>
-          <div className="w-full  flex items-center justify-center">
+          <div className="w-full flex items-center justify-center">
             <label
               htmlFor="hs-color-input"
-              style={{
-                backgroundColor: `${createData.color}`,
-              }}
-              className="w-max p-2 rounded-md text-center cursor-pointer active:scale-105 transition"
+              style={{ backgroundColor: createData.color }}
+              className="w-max p-1 sm:p-2 rounded-md text-center cursor-pointer active:scale-105 transition text-xs sm:text-sm"
             >
               {createData.color}
             </label>
@@ -575,29 +566,26 @@ const CreateAttendanceStatus = memo(
               required
               value={createData.color}
               onChange={(e) => {
-                setCreateData((prev) => {
-                  return {
-                    ...prev,
-                    color: e.target.value,
-                  };
-                });
+                setCreateData((prev) => ({
+                  ...prev,
+                  color: e.target.value,
+                }));
               }}
             />
           </div>
         </td>
         <td>
           <div className="w-full flex items-center justify-center">
-            <div className="w-20 flex items-center justify-center">
+            <div className="w-16 sm:w-20 flex items-center justify-center">
               <InputNumber
                 required
                 value={createData.value}
                 max={10}
                 min={-1}
                 onValueChange={(data) => {
-                  setCreateData((prev) => {
-                    return { ...prev, value: data };
-                  });
+                  setCreateData((prev) => ({ ...prev, value: data }));
                 }}
+                className="text-sm sm:text-base"
               />
             </div>
           </div>
@@ -607,19 +595,19 @@ const CreateAttendanceStatus = memo(
             <button
               disabled={create.isPending}
               onClick={handleCreate}
-              className="main-button flex justify-center items-center"
+              className="main-button flex justify-center items-center text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-1.5"
             >
               {create.isPending ? (
                 <ProgressSpinner
                   animationDuration="1s"
-                  style={{ width: "20px" }}
-                  className="w-5 h-5"
+                  style={{ width: "16px" }}
+                  className="w-4 sm:w-5 h-4 sm:h-5"
                   strokeWidth="8"
                 />
               ) : (
                 <div className="flex items-center justify-center gap-1">
-                  <CiSaveDown2 />
-                  Create
+                  <CiSaveDown2 className="text-sm sm:text-base" />
+                  <span>Create</span>
                 </div>
               )}
             </button>

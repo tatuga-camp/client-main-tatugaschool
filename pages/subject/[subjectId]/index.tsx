@@ -375,12 +375,11 @@ function Index({ subjectId }: Props) {
             ></div>
           </div>
         )}
-        <header className="w-full p-5 lg:p-10 pb-10 flex items-center justify-center">
+        <header className="md:max-w-screen-md xl:max-w-screen-lg mx-auto w-full p-5 lg:py-10 pb-10 flex items-center justify-center">
           <section
-            className={`w-full lg:w-10/12 z-30 overflow-hidden h-60 relative flex flex-col-reverse md:flex-row justify-between p-5 shadow-inner ${
-              loading
-                ? "animate-pulse bg-gray-500/50"
-                : subject.data?.backgroundImage
+            className={`w-full z-30 overflow-hidden h-60 relative flex flex-col-reverse md:flex-row justify-between p-5 shadow-inner ${loading
+              ? "animate-pulse bg-gray-500/50"
+              : subject.data?.backgroundImage
                 ? ""
                 : "gradient-bg"
             } lg:rounded-md`}
