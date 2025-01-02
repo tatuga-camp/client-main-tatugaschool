@@ -439,7 +439,10 @@ function Index({
             );
           })}
       </div>
-      <main ref={bodyRef} className={`w-full h-max max-h-screen overflow-auto`}>
+      <main
+        ref={bodyRef}
+        className={`w-full h-full max-h-screen overflow-auto`}
+      >
         {selectMenu === "classwork" && (
           <ClasswordView
             classwork={classwork as Assignment}

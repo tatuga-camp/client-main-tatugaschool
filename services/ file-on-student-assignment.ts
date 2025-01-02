@@ -27,7 +27,6 @@ export async function CreateFileOnStudentAssignmentsService(
   }
 }
 
-
 type RequestGetFileOnStudentAssignmentsByStudentOnAssignmentIdService = {
   studentOnAssignmentId: string;
 };
@@ -62,41 +61,43 @@ export async function GetFileOnStudentAssignmentsByTeacherOnAssignmentIdService(
   }
 }
 
-
-type RequestDeleteFileOnStudentAssignmentsService = {
-  fileOnStudentAssignmentId: string;
+export type RequestUpdateFileOnStudentAssignmentService = {
+  query: {
+    id: string;
+  };
+  body: {
+    body: string;
+    name?: string;
+  };
 };
 
-type ResponseDeleteFileOnStudentAssignmentsService = {
-  message: string;
-};
-
-
-export async function DeleteFileOnStudentAssignmentsService(
-  input: RequestDeleteFileOnStudentAssignmentsService
-): Promise<ResponseDeleteFileOnStudentAssignmentsService> {
+type ResponseUpdateFileOnStudentAssignmentService = FileOnStudentOnAssignment;
+export async function UpdateFileOnStudentAssignmentService(
+  input: RequestUpdateFileOnStudentAssignmentService
+): Promise<ResponseUpdateFileOnStudentAssignmentService> {
   try {
     const response = await axiosInstance({
-      method: "DELETE",
-      url: `/v1/file-on-student-assignments/${input.fileOnStudentAssignmentId}/student`,
+      method: "PATCH",
+      url: `v1/file-on-student-assignments/teacher`,
+      data: { ...input },
     });
     return response.data;
   } catch (error: any) {
+    console.error(
+      "Update FileOnStudentAssignment request failed:",
+      error.response.data
+    );
     throw error?.response?.data;
   }
 }
-
-
-type RequestDeleteFileOnTeacherAssignmentsService = {
+export type RequestDeleteFileOnStudentAssignmentService = {
   fileOnStudentAssignmentId: string;
 };
 
-type ResponseDeleteFileOnTeacherAssignmentsService = {
-  message: string;
-};
-export async function DeleteFileOnTeacherAssignmentsService(
-  input: RequestDeleteFileOnTeacherAssignmentsService
-): Promise<ResponseDeleteFileOnTeacherAssignmentsService> {
+type ResponseDeleteFileOnStudentAssignmentService = FileOnStudentOnAssignment;
+export async function DeleteFileOnStudentAssignmentService(
+  input: RequestDeleteFileOnStudentAssignmentService
+): Promise<ResponseDeleteFileOnStudentAssignmentService> {
   try {
     const response = await axiosInstance({
       method: "DELETE",

@@ -54,7 +54,7 @@ function ClasswordView({
               placeholder="Title"
             />
           </label>
-          <div className="w-full h-screen pb-5 ">
+          <div className="w-full h-96 pb-5 ">
             <span className="text-base font-medium">Description</span>
             <TextEditor
               value={classwork?.description || ""}
