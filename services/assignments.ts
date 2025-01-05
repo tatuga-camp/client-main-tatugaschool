@@ -3,6 +3,7 @@ import {
   AssignmentStatus,
   AssignmentType,
   FileOnAssignment,
+  StudentOnAssignment,
 } from "../interfaces";
 import createAxiosInstance from "./apiService";
 
@@ -50,6 +51,29 @@ export async function GetAssignmentsBySubjectIdService(input: {
     const response = await axiosInstance({
       method: "GET",
       url: `/v1/assignments/subject/${input.subjectId}`,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Get Assignments request failed:", error.response.data);
+    throw error?.response?.data;
+  }
+}
+
+export type RequestGetOverviewAssignmentService = {
+  subjectId: string;
+};
+export type ResponseGetOverviewAssignmentService = {
+  assignment: Assignment;
+  students: StudentOnAssignment[];
+}[];
+
+export async function GetOverviewAssignmentService(
+  input: RequestGetOverviewAssignmentService
+): Promise<ResponseGetOverviewAssignmentService> {
+  try {
+    const response = await axiosInstance({
+      method: "GET",
+      url: `/v1/assignments/subject/${input.subjectId}/overview`,
     });
     return response.data;
   } catch (error: any) {
