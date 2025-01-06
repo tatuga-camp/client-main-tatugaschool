@@ -13,10 +13,8 @@ import {
 import Image from "next/image";
 import { defaultBlurHash } from "../../data";
 import { Assignment, StudentOnAssignment } from "../../interfaces";
-import UpdateStudentOnAssignment from "./UpdateStudentOnAssignment";
+import GradePopup from "./GradePopup";
 import { Toast } from "primereact/toast";
-import { IoMdClose } from "react-icons/io";
-import { CiSaveUp2 } from "react-icons/ci";
 
 function Grade({
   subjectId,
@@ -34,7 +32,7 @@ function Grade({
   const [selectStudentOnAssignment, setSelectStudentOnAssignment] =
     React.useState<{
       assignment: Assignment;
-      studentOnAssignment: StudentOnAssignment;
+      studentOnAssignment?: StudentOnAssignment;
     } | null>(null);
 
   return (
@@ -46,7 +44,7 @@ function Grade({
       >
         <div className=" w-max h-max bg-background-color p-2 rounded-md border">
           {selectStudentOnAssignment && (
-            <UpdateStudentOnAssignment
+            <GradePopup
               studentOnAssignment={
                 selectStudentOnAssignment.studentOnAssignment
               }
@@ -107,6 +105,11 @@ function Grade({
                           className="text-sm group  font-semibold"
                         >
                           <button
+                            onClick={() =>
+                              setSelectStudentOnAssignment({
+                                assignment: data.assignment,
+                              })
+                            }
                             className="w-40 min-w-40 group-hover:w-max  p-2 relative active:bg-gray-200
                            hover:bg-gray-100  hover:ring-1 flex items-start flex-col"
                           >
@@ -115,6 +118,8 @@ function Grade({
                             </span>
                             <span className="text-xs text-gray-500">
                               {data.assignment.maxScore} points
+                              {data.assignment.weight !== null &&
+                                ` / ${data.assignment.weight}% weight`}
                             </span>
                           </button>
                         </th>
@@ -128,6 +133,7 @@ function Grade({
                 ?.sort((a, b) => Number(a.number) - Number(b.number))
                 ?.map((student, index) => {
                   const odd = index % 2 === 0;
+
                   return (
                     <tr
                       className={` ${
@@ -214,6 +220,18 @@ function Grade({
                                 score = "Not Graded";
                               }
 
+                              const originalScore =
+                                studentOnAssignment.score /
+                                data.assignment.maxScore;
+
+                              if (
+                                data.assignment.weight !== null &&
+                                studentOnAssignment.status === "REVIEWD"
+                              ) {
+                                score = (
+                                  originalScore * data.assignment.weight
+                                ).toFixed(2);
+                              }
                               return (
                                 <td
                                   key={
