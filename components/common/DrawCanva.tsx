@@ -1,37 +1,77 @@
 import React, { useRef, useState } from "react";
 import CanvasDraw from "react-canvas-draw";
-import { Rnd } from "react-rnd";
+
+import {
+  DndContext,
+  useDraggable,
+  MouseSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import { CSS } from "@dnd-kit/utilities";
+
+interface ITextObject {
+  id: number;
+  text: string;
+  x: number;
+  y: number;
+  color: string;
+  fontSize: number;
+}
+
+function DraggableText({
+  obj,
+  mode,
+  currentTextId,
+  handleTextClick,
+}: {
+  obj: ITextObject;
+  mode: "draw" | "text-edit";
+  currentTextId: number | null;
+  handleTextClick: (id: number) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+    id: String(obj.id), 
+  });
+
+  const style: React.CSSProperties = {
+    position: "absolute",
+    left: obj.x,
+    top: obj.y,
+    transform: CSS.Translate.toString(transform),
+    border: mode === "draw" ? "1px dashed #ccc" : "none",
+    color: obj.color,
+    fontSize: `${obj.fontSize}px`,
+    cursor: mode === "draw" ? "move" : "default",
+    pointerEvents: currentTextId === obj.id ? "none" : "auto",
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      onDoubleClick={() => handleTextClick(obj.id)}
+      {...attributes}
+      {...listeners}
+    >
+      {obj.text}
+    </div>
+  );
+}
 
 const DrawCanva = () => {
   const [image, setImage] = useState<string | null>(null);
   const canvasRef = useRef<CanvasDraw>(null);
   const imageRef = useRef<HTMLImageElement>(null);
 
-  // โหมด: 'draw' หรือ 'text-edit'
-  const [mode, setMode] = useState<'draw' | 'text-edit'>('draw');
+  const [mode, setMode] = useState<"draw" | "text-edit">("draw");
 
   const [brushColor, setBrushColor] = useState<string>("#000000");
   const [brushRadius, setBrushRadius] = useState<number>(5);
 
-  // เก็บข้อความทั้งหมด
-  const [textObjects, setTextObjects] = useState<Array<{
-    id: number;
-    text: string;
-    x: number;
-    y: number;
-    color: string;
-    fontSize: number;
-  }>>([]);
-
-  // สแต็กสำหรับเก็บสถานะของข้อความ
-  const [textObjectsHistory, setTextObjectsHistory] = useState<Array<Array<{
-    id: number;
-    text: string;
-    x: number;
-    y: number;
-    color: string;
-    fontSize: number;
-  }>>>([]);
+  const [textObjects, setTextObjects] = useState<ITextObject[]>([]);
+  const [textObjectsHistory, setTextObjectsHistory] = useState<ITextObject[][]>([]);
 
   const [currentText, setCurrentText] = useState<string>("");
   const [currentTextId, setCurrentTextId] = useState<number | null>(null);
@@ -53,62 +93,44 @@ const DrawCanva = () => {
     }
   };
 
-  // เพิ่มข้อความใหม่
   const handleAddText = () => {
-    setMode('text-edit');
+    setMode("text-edit");
     const newTextId = Date.now();
     setCurrentTextId(newTextId);
     setCurrentText("");
     saveTextObjectsToHistory();
-    setTextObjects([...textObjects, {
-      id: newTextId,
-      text: "",
-      x: canvasWidth / 2,
-      y: canvasHeight / 2,
-      color: textColor,
-      fontSize: textSize,
-    }]);
+    setTextObjects([
+      ...textObjects,
+      {
+        id: newTextId,
+        text: "",
+        x: canvasWidth / 2,
+        y: canvasHeight / 2,
+        color: textColor,
+        fontSize: textSize,
+      },
+    ]);
   };
 
-  // ยืนยันการแก้ไขข้อความ
   const handleFinishEditing = () => {
     saveTextObjectsToHistory();
-    setTextObjects(textObjects.map(obj => {
-      if (obj.id === currentTextId) {
-        return {
-          ...obj,
-          text: currentText,
-          color: textColor,
-          fontSize: textSize,
-        };
-      }
-      return obj;
-    }));
-    setMode('draw');
+    setTextObjects((prev) =>
+      prev.map((obj) =>
+        obj.id === currentTextId
+          ? { ...obj, text: currentText, color: textColor, fontSize: textSize }
+          : obj
+      )
+    );
+    setMode("draw");
     setCurrentTextId(null);
     setCurrentText("");
   };
 
-  // จัดการการลากข้อความ
-  const handleTextDrag = (e: any, data: any, id: number) => {
-    setTextObjects(textObjects.map(obj => {
-      if (obj.id === id) {
-        return {
-          ...obj,
-          x: data.x,
-          y: data.y,
-        };
-      }
-      return obj;
-    }));
-  };
-
-  // เมื่อคลิกที่ข้อความในโหมดวาด
   const handleTextClick = (id: number) => {
-    if (mode === 'draw') {
-      setMode('text-edit');
+    if (mode === "draw") {
+      setMode("text-edit");
       setCurrentTextId(id);
-      const textObj = textObjects.find(obj => obj.id === id);
+      const textObj = textObjects.find((obj) => obj.id === id);
       if (textObj) {
         setCurrentText(textObj.text);
         setTextColor(textObj.color);
@@ -117,12 +139,10 @@ const DrawCanva = () => {
     }
   };
 
-  // บันทึกสถานะของข้อความลงในสแต็ก
   const saveTextObjectsToHistory = () => {
     setTextObjectsHistory([...textObjectsHistory, [...textObjects]]);
   };
 
-  // ย้อนกลับสถานะของข้อความ
   const handleUndo = () => {
     if (textObjectsHistory.length > 0) {
       const lastState = textObjectsHistory[textObjectsHistory.length - 1];
@@ -141,27 +161,24 @@ const DrawCanva = () => {
       const context = canvas.getContext("2d");
 
       if (context) {
-        // วาดภาพต้นฉบับ
         if (image) {
+          // มีภาพพื้นหลัง
           const img = new Image();
           img.src = image;
           img.onload = () => {
             context.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-            // วาดการวาดของผู้ใช้
             const drawing = new Image();
             drawing.src = canvasRef.current?.getDataURL() || "";
             drawing.onload = () => {
               context.drawImage(drawing, 0, 0);
 
-              // วาดข้อความ
-              textObjects.forEach(obj => {
+              textObjects.forEach((obj) => {
                 context.fillStyle = obj.color;
                 context.font = `${obj.fontSize}px Arial`;
                 context.fillText(obj.text, obj.x, obj.y);
               });
 
-              // บันทึกภาพ
               const newImage = canvas.toDataURL("image/png");
               const link = document.createElement("a");
               link.href = newImage;
@@ -176,7 +193,7 @@ const DrawCanva = () => {
           drawing.onload = () => {
             context.drawImage(drawing, 0, 0);
 
-            textObjects.forEach(obj => {
+            textObjects.forEach((obj) => {
               context.fillStyle = obj.color;
               context.font = `${obj.fontSize}px Arial`;
               context.fillText(obj.text, obj.x, obj.y);
@@ -191,6 +208,25 @@ const DrawCanva = () => {
         }
       }
     }
+  };
+
+  const mouseSensor = useSensor(MouseSensor, {
+    activationConstraint: { distance: 5 },
+  });
+  const sensors = useSensors(mouseSensor);
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, delta } = event;
+    const activeId = Number(active.id);
+
+    setTextObjects((prev) =>
+      prev.map((obj) => {
+        if (obj.id === activeId) {
+          return { ...obj, x: obj.x + delta.x, y: obj.y + delta.y };
+        }
+        return obj;
+      })
+    );
   };
 
   return (
@@ -223,7 +259,7 @@ const DrawCanva = () => {
         </button>
       </div>
 
-      {mode === 'text-edit' && (
+      {mode === "text-edit" && (
         <div className="flex space-x-2 mt-4">
           <label>
             Text:
@@ -261,53 +297,43 @@ const DrawCanva = () => {
         </div>
       )}
 
-      <div
-        className="relative mt-4"
-        style={{ width: canvasWidth, height: canvasHeight }}
-      >
-        {image && (
-          <img
-            ref={imageRef}
-            src={image}
-            alt="Selected"
-            className="absolute top-0 left-0 w-full h-full"
+      {/* ครอบทุกส่วนด้วย DndContext */}
+      <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+        <div
+          className="relative mt-4"
+          style={{ width: canvasWidth, height: canvasHeight }}
+        >
+          {image && (
+            <img
+              ref={imageRef}
+              src={image}
+              alt="Selected"
+              className="absolute top-0 left-0 w-full h-full"
+            />
+          )}
+
+          <CanvasDraw
+            ref={canvasRef}
+            canvasWidth={canvasWidth}
+            canvasHeight={canvasHeight}
+            brushColor={brushColor}
+            brushRadius={brushRadius}
+            className="border"
+            hideGrid={true}
+            lazyRadius={0}
           />
-        )}
-        <CanvasDraw
-          ref={canvasRef}
-          canvasWidth={canvasWidth}
-          canvasHeight={canvasHeight}
-          brushColor={brushColor}
-          brushRadius={brushRadius}
-          className="border"
-          hideGrid={true}
-          lazyRadius={0}
-        />
-        {textObjects.map((obj) => (
-          <Rnd
-            key={obj.id}
-            position={{ x: obj.x, y: obj.y }}
-            onDragStop={(e, d) => handleTextDrag(e, d, obj.id)}
-            enableResizing={false}
-            disableDragging={mode !== 'draw'}
-            style={{
-              border: mode === 'draw' ? '1px dashed #ccc' : 'none',
-            }}
-          >
-            <div
-              onDoubleClick={() => handleTextClick(obj.id)}
-              style={{
-                color: obj.color,
-                fontSize: `${obj.fontSize}px`,
-                cursor: mode === 'draw' ? 'move' : 'default',
-                pointerEvents: currentTextId === obj.id ? 'none' : 'auto',
-              }}
-            >
-              {obj.text}
-            </div>
-          </Rnd>
-        ))}
-      </div>
+
+          {textObjects.map((obj) => (
+            <DraggableText
+              key={obj.id}
+              obj={obj}
+              mode={mode}
+              currentTextId={currentTextId}
+              handleTextClick={handleTextClick}
+            />
+          ))}
+        </div>
+      </DndContext>
 
       <button onClick={handleSave} className="mt-4 p-2 bg-blue-500 text-white">
         Save Changes
