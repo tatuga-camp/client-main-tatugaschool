@@ -62,7 +62,8 @@ function DraggableText({
 
 const DrawCanva = () => {
   const [image, setImage] = useState<string | null>(null);
-  const canvasRef = useRef<CanvasDraw>(null);
+  const canvasRef = useRef<CanvasDraw & { getDataURL(): string }>(null);
+
   const imageRef = useRef<HTMLImageElement>(null);
 
   const [mode, setMode] = useState<"draw" | "text-edit">("draw");
@@ -71,6 +72,7 @@ const DrawCanva = () => {
   const [brushRadius, setBrushRadius] = useState<number>(5);
 
   const [textObjects, setTextObjects] = useState<ITextObject[]>([]);
+
   const [textObjectsHistory, setTextObjectsHistory] = useState<ITextObject[][]>([]);
 
   const [currentText, setCurrentText] = useState<string>("");
@@ -79,15 +81,22 @@ const DrawCanva = () => {
   const [textColor, setTextColor] = useState<string>("#000000");
   const [textSize, setTextSize] = useState<number>(20);
 
-  const canvasWidth = 1000;
-  const canvasHeight = 1000;
+  const [canvasWidth, setCanvasWidth] = useState<number>(1000);
+  const [canvasHeight, setCanvasHeight] = useState<number>(1000);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        setImage(e.target?.result as string);
+        const imageUrl = e.target?.result as string;
+        const img = new Image();
+        img.onload = () => {
+          setCanvasWidth(img.width);
+          setCanvasHeight(img.height);
+          setImage(imageUrl);
+        };
+        img.src = imageUrl;
       };
       reader.readAsDataURL(file);
     }
@@ -99,8 +108,8 @@ const DrawCanva = () => {
     setCurrentTextId(newTextId);
     setCurrentText("");
     saveTextObjectsToHistory();
-    setTextObjects([
-      ...textObjects,
+    setTextObjects((prev) => [
+      ...prev,
       {
         id: newTextId,
         text: "",
@@ -140,7 +149,7 @@ const DrawCanva = () => {
   };
 
   const saveTextObjectsToHistory = () => {
-    setTextObjectsHistory([...textObjectsHistory, [...textObjects]]);
+    setTextObjectsHistory((prev) => [...prev, [...textObjects]]);
   };
 
   const handleUndo = () => {
@@ -162,7 +171,6 @@ const DrawCanva = () => {
 
       if (context) {
         if (image) {
-          // มีภาพพื้นหลัง
           const img = new Image();
           img.src = image;
           img.onload = () => {
@@ -187,7 +195,6 @@ const DrawCanva = () => {
             };
           };
         } else {
-          // ไม่มีภาพพื้นหลัง
           const drawing = new Image();
           drawing.src = canvasRef.current?.getDataURL() || "";
           drawing.onload = () => {
@@ -291,13 +298,15 @@ const DrawCanva = () => {
               className="ml-2 border w-16"
             />
           </label>
-          <button onClick={handleFinishEditing} className="p-2 bg-blue-500 text-white">
+          <button
+            onClick={handleFinishEditing}
+            className="p-2 bg-blue-500 text-white"
+          >
             Done Editing
           </button>
         </div>
       )}
 
-      {/* ครอบทุกส่วนด้วย DndContext */}
       <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
         <div
           className="relative mt-4"
@@ -344,7 +353,10 @@ const DrawCanva = () => {
       >
         Clear Drawing
       </button>
-      <button onClick={() => setImage(null)} className="mt-4 p-2 bg-yellow-500 text-white">
+      <button
+        onClick={() => setImage(null)}
+        className="mt-4 p-2 bg-yellow-500 text-white"
+      >
         Clear Image
       </button>
       <button onClick={handleUndo} className="mt-4 p-2 bg-gray-500 text-white">
