@@ -1,12 +1,26 @@
 import ListsSchoolComponent from "@/components/school/ListsSchoolComponent";
 import DefaultLayout from "@/components/layout/DefaultLayout";
 import { GetServerSideProps } from "next";
-import { GetUserService, RefreshTokenService } from "../services";
-import { User } from "../interfaces";
+import { RefreshTokenService } from "../services";
 import Head from "next/head";
 import { setAccessToken, getRefetchtoken } from "../utils";
-
+import { subscribeUserToPush } from "@/utils/notifications";
+import { SubscribeToPushService } from "@/services/push";
 export default function Home() {
+  const VAPID_PUBLIC_KEY = 'BDgFAJKY6huXLvQOXLLL2UvVol1mw8lYDmfKDh_6r4MZr4SVBJl1AlcSAxDnN7dS-xVps7E_JQ0z5AbNIumysao';
+
+  const handleSubscribe = async () => {
+    const subscription = await subscribeUserToPush(VAPID_PUBLIC_KEY);
+    if (subscription) {
+      try {
+        await SubscribeToPushService(subscription.toJSON());
+        alert("Subscribed successfully!");
+      } catch (error) {
+        alert("Subscription failed!");
+      }
+    }
+  };
+
   return (
     <>
       <Head>
@@ -14,6 +28,12 @@ export default function Home() {
         <meta name="description" content="Tatuga School" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+
+      <h1>Push Notifications Example</h1>
+      <button onClick={handleSubscribe} className="main-button">
+        Enable Push Notifications
+      </button>
+
       <DefaultLayout>
         <ListsSchoolComponent />
       </DefaultLayout>
