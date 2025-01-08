@@ -4,13 +4,21 @@ import { GetServerSideProps } from "next";
 import { RefreshTokenService } from "../services";
 import Head from "next/head";
 import { setAccessToken, getRefetchtoken } from "../utils";
-import { subscribeUserToPush } from "@/utils/notifications";
+import {
+  registerServiceWorker,
+  subscribeUserToPush,
+} from "@/utils/notifications";
 import { SubscribeToPushService } from "@/services/push";
+import { useEffect } from "react";
 export default function Home() {
-  const VAPID_PUBLIC_KEY = 'BDgFAJKY6huXLvQOXLLL2UvVol1mw8lYDmfKDh_6r4MZr4SVBJl1AlcSAxDnN7dS-xVps7E_JQ0z5AbNIumysao';
+  const VAPID_PUBLIC_KEY =
+    "BGLXG3cbb9SjjKjOIwai-k51C1MlXFx8OPXGLtiS38EFWq921XTLWhkLLaQ269cK7ZJhACI9IXsDandcOKVWtB0";
 
   const handleSubscribe = async () => {
+    console.log("Clicked");
     const subscription = await subscribeUserToPush(VAPID_PUBLIC_KEY);
+    console.log(subscription);
+
     if (subscription) {
       try {
         await SubscribeToPushService(subscription.toJSON());
@@ -20,6 +28,10 @@ export default function Home() {
       }
     }
   };
+
+  useEffect(() => {
+    registerServiceWorker();
+  }, []);
 
   return (
     <>
