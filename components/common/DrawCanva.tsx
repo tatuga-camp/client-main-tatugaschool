@@ -27,12 +27,12 @@ function DraggableText({
   handleTextClick,
 }: {
   obj: ITextObject;
-  mode: "draw" | "text-edit";
+  mode: ModeCanva;
   currentTextId: number | null;
   handleTextClick: (id: number) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id: String(obj.id), 
+    id: String(obj.id),
   });
 
   const style: React.CSSProperties = {
@@ -60,20 +60,23 @@ function DraggableText({
   );
 }
 
+type ModeCanva = "default" | "draw" | "text-edit";
 const DrawCanva = () => {
   const [image, setImage] = useState<string | null>(null);
   const canvasRef = useRef<CanvasDraw & { getDataURL(): string }>(null);
 
   const imageRef = useRef<HTMLImageElement>(null);
 
-  const [mode, setMode] = useState<"draw" | "text-edit">("draw");
+  const [mode, setMode] = useState<ModeCanva>("default");
 
   const [brushColor, setBrushColor] = useState<string>("#000000");
   const [brushRadius, setBrushRadius] = useState<number>(5);
 
   const [textObjects, setTextObjects] = useState<ITextObject[]>([]);
 
-  const [textObjectsHistory, setTextObjectsHistory] = useState<ITextObject[][]>([]);
+  const [textObjectsHistory, setTextObjectsHistory] = useState<ITextObject[][]>(
+    []
+  );
 
   const [currentText, setCurrentText] = useState<string>("");
   const [currentTextId, setCurrentTextId] = useState<number | null>(null);
