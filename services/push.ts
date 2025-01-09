@@ -1,10 +1,13 @@
-
 import createAxiosInstance from "./apiService";
 
 const axiosInstance = createAxiosInstance();
 
+export type RequestSubscribeToPushService = {
+  payload: PushSubscription;
+  userAgent: string;
+};
 export async function SubscribeToPushService(
-  input: any
+  input: RequestSubscribeToPushService
 ): Promise<any> {
   try {
     const response = await axiosInstance({

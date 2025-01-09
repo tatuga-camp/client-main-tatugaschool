@@ -8,9 +8,7 @@ export async function registerServiceWorker() {
 
 export async function subscribeUserToPush(vapidPublicKey: any) {
   try {
-    console.log(vapidPublicKey);
     const registration = await navigator.serviceWorker.ready;
-    console.log(registration);
 
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,

@@ -11,17 +11,17 @@ import {
 import { SubscribeToPushService } from "@/services/push";
 import { useEffect } from "react";
 export default function Home() {
-  const VAPID_PUBLIC_KEY =
-    "BGLXG3cbb9SjjKjOIwai-k51C1MlXFx8OPXGLtiS38EFWq921XTLWhkLLaQ269cK7ZJhACI9IXsDandcOKVWtB0";
-
   const handleSubscribe = async () => {
-    console.log("Clicked");
-    const subscription = await subscribeUserToPush(VAPID_PUBLIC_KEY);
-    console.log(subscription);
+    const subscription = await subscribeUserToPush(
+      process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+    );
 
     if (subscription) {
       try {
-        await SubscribeToPushService(subscription.toJSON());
+        await SubscribeToPushService({
+          payload: subscription,
+          userAgent: navigator.userAgent,
+        });
         alert("Subscribed successfully!");
       } catch (error) {
         alert("Subscription failed!");
