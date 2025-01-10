@@ -5,7 +5,8 @@ export interface Class {
   title: string;
   level: string;
   description?: string;
-  educationYear: Date;
+  educationYear: string;
+  isAchieved: boolean;
   order: number;
   schoolId: string;
 }

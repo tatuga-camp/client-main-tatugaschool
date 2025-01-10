@@ -33,7 +33,7 @@ function ListMemberCircle({ members, setTrigger }: Props) {
         return (
           <div
             style={{ left: `-${index * 5}px` }}
-            className={`w-6 h-6 ring-1  ring-white bg-slate-700 relative rounded-full overflow-hidden`}
+            className={`w-6 h-6 ring-1  ring-white bg-white relative rounded-full overflow-hidden`}
             key={teacher.id}
           >
             <Image

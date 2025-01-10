@@ -25,7 +25,7 @@ function SchoolLayout({
   });
   return (
     <section className="min-h-screen font-Anuphan bg-background-color ">
-      <div className="sticky z-50 top-0">
+      <div ref={navbarRef} className="sticky z-50 top-0">
         <Navbar
           menuLists={menuSchoolList({ schoolId: schoolId })}
           schoolId={schoolId}

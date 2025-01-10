@@ -6,3 +6,4 @@ export * from "./attendance";
 export * from "./assignment";
 export * from "./student-assignment";
 export * from "./grade";
+export * from "./classroom";

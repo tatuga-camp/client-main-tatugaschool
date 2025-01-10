@@ -89,7 +89,6 @@ export const menuSchoolList = ({
     {
       title: "School",
       icon: <LuSchool />,
-      url: `/school/${schoolId}`,
     },
     {
       title: "Classes",

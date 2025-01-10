@@ -6,17 +6,24 @@ import { ProgressSpinner } from "primereact/progressspinner";
 import SchoolLayout from "../../components/layout/SchoolLayout";
 import React from "react";
 import { MenuSchool } from "../../data";
+import Classes from "../../components/school/Classes";
 
 const SchoolPage = ({ schoolId }: { schoolId: string }) => {
   const { data: school, isLoading: isSchoolLoading } = useGetSchool({
     schoolId: schoolId,
   });
-  const { data: members, isLoading: isMembersLoading } = useGetMemberBySchool({
-    schoolId: schoolId,
-  });
-  const [selectMenu, setSelectMenu] = React.useState<MenuSchool>("School");
-  const { data: user, isLoading: isUserLoading } = useGetUser();
 
+  const [selectMenu, setSelectMenu] = React.useState<MenuSchool>("School");
+
+  if (isSchoolLoading || !school) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ProgressSpinner />
+      </div>
+    );
+  }
+
+  console.log("selectMenu", selectMenu);
   return (
     <>
       <SchoolLayout
@@ -26,22 +33,8 @@ const SchoolPage = ({ schoolId }: { schoolId: string }) => {
         selectMenu={selectMenu}
         schoolId={schoolId}
       >
-        {user &&
-        school &&
-        members &&
-        !isSchoolLoading &&
-        !isMembersLoading &&
-        !isUserLoading ? (
-          <Dashboard user={user} school={school} members={members ?? []} />
-        ) : (
-          <div className="flex justify-center items-center h-screen">
-            <ProgressSpinner
-              animationDuration="0.5s"
-              style={{ width: "50px" }}
-              strokeWidth="8"
-            />
-          </div>
-        )}
+        {selectMenu === "School" && <Dashboard school={school} />}
+        {selectMenu === "Classes" && <Classes schoolId={schoolId} />}
       </SchoolLayout>
     </>
   );

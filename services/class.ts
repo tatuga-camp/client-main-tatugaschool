@@ -1,4 +1,4 @@
-import { Class } from "@/interfaces";
+import { Class, Student } from "@/interfaces";
 import { Pagination } from "@/interfaces/Pagination";
 
 import createAxiosInstance from "./apiService";
@@ -25,20 +25,25 @@ export async function CreateClassService(
   }
 }
 
-type RequestGetClassService = {
+export type RequestetClassesBySchoolIdService = {
   schoolId: string;
+  isAchieved: boolean;
 };
 
-type ResponseGetClassService = Pagination<Class>;
+export type ResponseGetClassesBySchoolIdService = (Class & {
+  studentNumbers: number;
+})[];
 
 export async function GetClassesBySchoolIdService(
-  input: RequestGetClassService
-): Promise<ResponseGetClassService> {
+  input: RequestetClassesBySchoolIdService
+): Promise<ResponseGetClassesBySchoolIdService> {
   try {
     const response = await axiosInstance({
       method: "GET",
-      url: `/v1/classes`,
-      params: { ...input },
+      url: `/v1/classes/school/${input.schoolId}`,
+      params: {
+        isAchieved: input.isAchieved,
+      },
     });
     return response.data;
   } catch (error: any) {
@@ -51,7 +56,7 @@ type RequestGetClassByIdService = {
   classId: string;
 };
 
-type ResponseGetClassByIdService = Class;
+type ResponseGetClassByIdService = Class & { students: Student[] };
 
 export async function GetClassByIdService(
   input: RequestGetClassByIdService
@@ -118,18 +123,18 @@ export async function DeleteClassService(
   }
 }
 
-type RequestReorderClassesService = {
+export type RequestReorderClassesService = {
   classIds: string[];
 };
 
-type ResponseReorderClassesService = Class;
+type ResponseReorderClassesService = Class[];
 
 export async function ReorderClassesService(
   input: RequestReorderClassesService
 ): Promise<ResponseReorderClassesService> {
   try {
     const response = await axiosInstance({
-      method: "POST",
+      method: "PATCH",
       url: `/v1/classes/reorder`,
       data: { ...input },
     });
