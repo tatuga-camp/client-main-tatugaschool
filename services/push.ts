@@ -1,19 +1,19 @@
+import { subscribeUserToPush } from "../utils/notifications";
 import createAxiosInstance from "./apiService";
 
 const axiosInstance = createAxiosInstance();
 
-export type RequestSubscribeToPushService = {
-  payload: PushSubscription;
-  userAgent: string;
-};
-export async function SubscribeToPushService(
-  input: RequestSubscribeToPushService
-): Promise<any> {
+export async function SubscribeToPushService(): Promise<any> {
   try {
+    const subscription = await subscribeUserToPush();
+    const userAgent = navigator.userAgent;
+    if (!subscription) {
+      throw new Error("Subscription failed");
+    }
     const response = await axiosInstance({
       method: "POST",
       url: `/v1/push/subscribe`,
-      data: { ...input },
+      data: { payload: subscription, userAgent },
     });
     return response.data;
   } catch (error: any) {

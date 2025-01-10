@@ -33,6 +33,7 @@ import { ProgressBar } from "primereact/progressbar";
 import AttendanceTableSetting from "./AttendanceTableSetting";
 import { RiTable3 } from "react-icons/ri";
 import { Bs123 } from "react-icons/bs";
+import PopupLayout from "../layout/PopupLayout";
 
 const menuAttendances = [
   {
@@ -90,69 +91,42 @@ function Attendance({
   }, [tables.data]);
   return (
     <>
-      <div
-        className={`fixed ${
-          selectAttendance ? "flex" : "hidden"
-        } top-0 bottom-0 right-0 left-0 flex items-center justify-center m-auto z-50`}
-      >
-        <div className="bg-white w-full md:w-7/12 p-2 rounded-md border">
-          {selectAttendance && selectTable && (
+      {selectAttendance && selectTable && (
+        <PopupLayout onClose={() => setSelectAttendance(null)}>
+          <div className="bg-white border rounded-md p-2">
             <AttendanceView
               toast={toast}
               selectAttendance={selectAttendance}
               attendanceTable={selectTable}
               onClose={() => setSelectAttendance(null)}
             />
-          )}
-        </div>
-        <footer
-          onClick={() => setSelectAttendance(null)}
-          className="top-0 bottom-0 w-screen h-screen right-0 left-0 
-          bg-black/50 backdrop-blur fixed  m-auto -z-10"
-        ></footer>
-      </div>
+          </div>
+        </PopupLayout>
+      )}
 
-      <div
-        className={`fixed ${
-          selectRow ? "flex" : "hidden"
-        } top-0 bottom-0 right-0 left-0 flex items-center justify-center m-auto z-50`}
-      >
-        <div className="bg-white w-7/12 p-2 rounded-md border">
-          {selectRow && (
+      {selectRow && (
+        <PopupLayout onClose={() => setSelectRow(null)}>
+          <div className="bg-white w-7/12 p-2 rounded-md border">
             <AttendanceRowView
               toast={toast}
               selectRow={selectRow}
               onClose={() => setSelectRow(null)}
             />
-          )}
-        </div>
-        <footer
-          onClick={() => setSelectRow(null)}
-          className="top-0 bottom-0 w-screen h-screen right-0 left-0 
-          bg-black/50 backdrop-blur fixed  m-auto -z-10"
-        ></footer>
-      </div>
+          </div>
+        </PopupLayout>
+      )}
 
-      <div
-        className={`fixed ${
-          triggerCreateAttendanceTable ? "flex" : "hidden"
-        } top-0 bottom-0 right-0 left-0 flex items-center justify-center m-auto z-50`}
-      >
-        <div className=" w-96 h-max bg-background-color p-2 rounded-md border">
-          {triggerCreateAttendanceTable && (
+      {triggerCreateAttendanceTable && (
+        <PopupLayout onClose={() => setTriggerCreateAttendanceTable(false)}>
+          <div className="bg-white w-96 p-2 rounded-md border">
             <AttendanceTableCreate
               toast={toast}
               subjectId={subjectId}
               onClose={() => setTriggerCreateAttendanceTable(false)}
             />
-          )}
-        </div>
-        <footer
-          onClick={() => setTriggerCreateAttendanceTable(false)}
-          className="top-0 bottom-0 w-screen h-screen right-0 left-0 
-          bg-white/50 backdrop-blur fixed  m-auto -z-10"
-        ></footer>
-      </div>
+          </div>
+        </PopupLayout>
+      )}
 
       <header className="w-full flex flex-col md:flex-row justify-between p-3 md:px-5 md:max-w-screen-md xl:max-w-screen-lg gap-4 md:gap-0 mx-auto">
         <section className="text-center md:text-left">

@@ -3,7 +3,7 @@ self.addEventListener("push", async function (event) {
     const data = event.data.json();
     console.log("Push event data has been received.", data);
     try {
-      await event.waitUntil(
+      event.waitUntil(
         self.registration.showNotification(data.title, {
           body: data.body,
           icon: data.icon,

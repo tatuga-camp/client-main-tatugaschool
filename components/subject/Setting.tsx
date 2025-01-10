@@ -212,7 +212,9 @@ function Setting({ subjectId, setSelectMenu }: Props) {
       <Toast ref={toast} />
       <section className="w-full sm:w-10/12 lg:w-8/12">
         <h1 className="text-lg sm:text-xl font-medium">General Settings</h1>
-        <h4 className="text-xs sm:text-sm text-gray-500">Manage your general settings</h4>
+        <h4 className="text-xs sm:text-sm text-gray-500">
+          Manage your general settings
+        </h4>
         <SubjectInfomation
           subjectId={subjectId}
           onSummit={handleSaveChanges}
@@ -240,7 +242,9 @@ function Setting({ subjectId, setSelectMenu }: Props) {
             />
           )}
         </div>
-        <h1 className="text-lg sm:text-xl font-medium mt-10">Students Setting</h1>
+        <h1 className="text-lg sm:text-xl font-medium mt-10">
+          Students Setting
+        </h1>
         <h4 className="text-xs sm:text-sm text-gray-500">
           Manage Students / Import Student Here
         </h4>
@@ -254,7 +258,7 @@ function Setting({ subjectId, setSelectMenu }: Props) {
             automatically added to this subject. You can only disable a student
             from this subject not delete them.
           </h4>
-          <ul className="grid grid-cols-1">
+          <ul className="grid max-h-96 overflow-auto grid-cols-1">
             {studentOnSubjects.data
               ?.sort((a, b) => Number(a.number) - Number(b.number))
               .map((student, index) => {
@@ -339,7 +343,10 @@ function Setting({ subjectId, setSelectMenu }: Props) {
             Delete This Subject
           </button>
         </div>
-        <button onClick={() => setSelectMenu("Subject")} className="main-button mt-5">
+        <button
+          onClick={() => setSelectMenu("Subject")}
+          className="main-button mt-5"
+        >
           Back To Subject
         </button>
       </section>
