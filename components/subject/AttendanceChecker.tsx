@@ -194,7 +194,9 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
       <header className="">
         <section className="w-full flex flex-col gap-4 sm:gap-2 sm:flex-row sm:justify-between sm:items-center">
           <div className="text-center sm:text-left">
-            <h1 className="text-2xl sm:text-xl font-medium">Attendance Checker</h1>
+            <h1 className="text-2xl sm:text-xl font-medium">
+              Attendance Checker
+            </h1>
             <span className="text-sm text-gray-500 block mt-1">
               You can check the attendance of the students here
             </span>
@@ -286,7 +288,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
                       endDate: e.target.value,
                     }))
                   }
-                  type="datetime-local" 
+                  type="datetime-local"
                   className="main-input h-8 w-full"
                 />
               </label>
@@ -333,20 +335,26 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
         <>
           {/* Mobile View */}
           <div className="lg:hidden w-full h-full overflow-y-auto space-y-4 pb-16">
-            {selectTable?.statusLists && 
+            {selectTable?.statusLists &&
               studentAttendances
                 ?.filter((s) => s.isActive)
                 .sort((a, b) => Number(a.number) - Number(b.number))
                 .map((student) => (
-                  <div key={student.id} className="bg-white rounded-xl shadow-md p-4">
+                  <div
+                    key={student.id}
+                    className="bg-white rounded-xl shadow-md p-4"
+                  >
                     <div className="flex items-center gap-4 mb-4">
                       <div className="w-20 h-20 relative rounded-lg ring-1 ring-gray-200 overflow-hidden shrink-0">
                         <Image
                           src={student.photo}
                           alt={student.firstName}
                           fill
+                          sizes="(max-width: 768px) 100vw, 33vw"
                           placeholder="blur"
-                          blurDataURL={decodeBlurhashToCanvas(student.blurHash ?? defaultBlurHash)}
+                          blurDataURL={decodeBlurhashToCanvas(
+                            student.blurHash ?? defaultBlurHash
+                          )}
                           className="object-cover"
                         />
                       </div>
@@ -354,7 +362,9 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
                         <h3 className="font-semibold text-lg truncate">
                           {student.firstName} {student.lastName}
                         </h3>
-                        <p className="text-sm text-gray-500">Student No. {student.number}</p>
+                        <p className="text-sm text-gray-500">
+                          Student No. {student.number}
+                        </p>
                       </div>
                     </div>
 
@@ -363,7 +373,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
                         .filter((s) => !s.isHidden)
                         .sort((a, b) => b.title.localeCompare(a.title))
                         .map((status) => (
-                          <label 
+                          <label
                             key={status.id}
                             className="flex items-center gap-3 p-3 rounded-lg transition-all active:scale-95"
                             style={{ backgroundColor: `${status.color}15` }}
@@ -372,24 +382,30 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
                               type="checkbox"
                               name={status.title}
                               checked={student.status === status.title}
-                              onChange={(e) => handleCheck({
-                                studentId: student.id,
-                                key: e.target.name,
-                              })}
+                              onChange={(e) =>
+                                handleCheck({
+                                  studentId: student.id,
+                                  key: e.target.name,
+                                })
+                              }
                               style={{ accentColor: status.color }}
                               className="w-5 h-5 rounded-md"
                             />
-                            <span className="text-sm font-medium">{status.title}</span>
+                            <span className="text-sm font-medium">
+                              {status.title}
+                            </span>
                           </label>
                         ))}
                     </div>
 
                     <textarea
                       value={student.note}
-                      onChange={(e) => handleNoteChange({
-                        studentId: student.id,
-                        note: e.target.value,
-                      })}
+                      onChange={(e) =>
+                        handleNoteChange({
+                          studentId: student.id,
+                          note: e.target.value,
+                        })
+                      }
                       placeholder="Add note for this student..."
                       className="main-input w-full h-24 resize-none rounded-xl text-sm"
                     />
@@ -493,17 +509,18 @@ const StudentAttendanceItem = React.memo(
     return (
       <tr
         key={student.id}
-        className={` ${odd && "bg-gray-50"} border-spacing-2 border-4 border-transparent`}
+        className={` ${
+          odd && "bg-gray-50"
+        } border-spacing-2 border-4 border-transparent`}
       >
-        <td
-          className={`sticky left-0 z-10 ${odd ? "bg-gray-50" : "bg-white"}`}
-        >
+        <td className={`sticky left-0 z-10 ${odd ? "bg-gray-50" : "bg-white"}`}>
           <div className="flex w-80 gap-2">
             <div className="w-10 h-10 relative rounded-md ring-1 overflow-hidden">
               <Image
                 src={student.photo}
                 alt={student.firstName}
                 fill
+                sizes="(max-width: 768px) 100vw, 33vw"
                 placeholder="blur"
                 blurDataURL={decodeBlurhashToCanvas(
                   student.blurHash ?? defaultBlurHash
@@ -544,7 +561,9 @@ const StudentAttendanceItem = React.memo(
               </td>
             );
           })}
-        <td className={`z-10 ${odd ? "bg-gray-50" : "bg-white"} sticky right-0`}>
+        <td
+          className={`z-10 ${odd ? "bg-gray-50" : "bg-white"} sticky right-0`}
+        >
           <textarea
             value={student.note}
             onChange={(e) =>

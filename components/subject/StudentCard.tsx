@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { ScoreOnStudent, StudentOnSubject } from "../../interfaces";
+import { ScoreOnStudent, Student, StudentOnSubject } from "../../interfaces";
 import Image from "next/image";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -7,9 +7,11 @@ import { CSSProperties } from "styled-components";
 import { MdDragIndicator } from "react-icons/md";
 
 type Props = {
-  student: StudentOnSubject & { select?: boolean };
+  student: (StudentOnSubject | Student) & { select?: boolean };
   showSelect: boolean;
-  setSelectStudent: (data: StudentOnSubject & { select?: boolean }) => void;
+  setSelectStudent: (
+    data: (StudentOnSubject | Student) & { select?: boolean }
+  ) => void;
   isDragable?: boolean;
 };
 function StudentCard({
@@ -54,7 +56,7 @@ function StudentCard({
       overflow-hidden hover:bg-primary-color bg-white
      h-60 sm:h-60 md:h-60 lg:h-60 xl:h-60`}
     >
-      {!isDragable && (
+      {isDragable && (
         <div
           {...listeners}
           style={{ cursor: isDragging ? "grabbing" : "grab" }}
@@ -71,25 +73,28 @@ function StudentCard({
         />
       )}
 
-      <div
-        className={`min-w-10 w-max max-w-20 h-12 absolute left-0 right-0 -top-3 ${
-          student.select && showSelect ? "bg-white" : "bg-primary-color"
-        }
+      {"totalSpeicalScore" in student && (
+        <div
+          className={`min-w-10 w-max max-w-20 h-12 absolute left-0 right-0 -top-3 ${
+            student.select && showSelect ? "bg-white" : "bg-primary-color"
+          }
       m-auto bg-primary-color group-hover:bg-white rounded-2xl flex items-center justify-center text-white`}
-      >
-        <span
-          className={`max-w-14 truncate
+        >
+          <span
+            className={`max-w-14 truncate
             ${
               student.select && showSelect ? "text-primary-color" : "text-white"
             }
             w-max group-hover:text-primary-color `}
-        >
-          {student.totalSpeicalScore}
-        </span>
-      </div>
+          >
+            {student.totalSpeicalScore}
+          </span>
+        </div>
+      )}
       <div className="w-20 h-20 relative rounded-full overflow-hidden">
         <Image
           fill
+          sizes="(max-width: 768px) 100vw, 33vw"
           src={student.photo}
           alt="Student"
           className="object-cover w-full h-full"

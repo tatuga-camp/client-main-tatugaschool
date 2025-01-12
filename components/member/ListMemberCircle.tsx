@@ -40,6 +40,7 @@ function ListMemberCircle({ members, setTrigger }: Props) {
               src={teacher.photo}
               alt="User Avatar"
               fill
+              sizes="(max-width: 768px) 100vw, 33vw"
               placeholder="blur"
               blurDataURL={decodeBlurhashToCanvas(
                 teacher.blurHash ?? defaultBlurHash

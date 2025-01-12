@@ -1,12 +1,11 @@
-export interface Class {
+export interface Classroom {
   id: string;
   createAt: Date;
   updateAt: Date;
   title: string;
   level: string;
   description?: string;
-  educationYear: string;
   isAchieved: boolean;
-  order: number;
+  order: number | undefined;
   schoolId: string;
 }

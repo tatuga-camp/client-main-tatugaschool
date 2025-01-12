@@ -105,3 +105,49 @@ export const menuSchoolList = ({
     },
   ];
 };
+
+export type MenuClassroom = "Classroom" | "Setting-Classroom" | "School";
+export const menuClassroomList = ({
+  schoolId,
+}: {
+  schoolId: string;
+}): {
+  title: MenuClassroom;
+  icon: ReactNode;
+  url?: string | undefined;
+}[] => {
+  return [
+    {
+      title: "Classroom",
+      icon: <SiGoogleclassroom />,
+    },
+    {
+      title: "Setting-Classroom",
+      icon: <CiSettings />,
+    },
+    {
+      title: "School",
+      icon: <LuSchool />,
+      url: `/school/${schoolId}?menu=Classes`,
+    },
+  ];
+};
+
+export const sortByOptions = [
+  {
+    title: "Default",
+  },
+  {
+    title: "Newest",
+  },
+  {
+    title: "Oldest",
+  },
+  {
+    title: "A-Z",
+  },
+  {
+    title: "Z-A",
+  },
+] as const;
+export type SortByOption = (typeof sortByOptions)[number]["title"];

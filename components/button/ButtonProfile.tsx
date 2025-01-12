@@ -41,6 +41,7 @@ function ButtonProfile({ user, queryClient }: Props) {
               src={user.data?.photo || defaultCanvas}
               alt="User Avatar"
               fill
+              sizes="(max-width: 768px) 100vw, 33vw"
               placeholder="blur"
               blurDataURL={decodeBlurhashToCanvas(
                 user.data?.blurHash ?? defaultBlurHash

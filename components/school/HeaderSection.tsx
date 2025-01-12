@@ -15,12 +15,23 @@ const HeaderSection: React.FC<{
   return (
     <div className=" p-12 pb-24 text-white gradient-bg">
       {/* Top Section */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-4xl font-bold">ชั้นเรียน - {school.title}</h1>
-          <p className="text-gray-300">{school.description}</p>
-          <p className="text-gray-300">{school.phoneNumber}</p>
-        </div>
+      <div
+        className="flex w-max text-xs  
+             items-center mb-5  text-white  border-white gap-1 border rounded-full px-2 py-1 justify-center"
+      >
+        SCHOOL
+      </div>
+      <div className="w-max border-b border-b-white pb-2">
+        <h1 className="text-4xl font-bold max-w-[60rem] break-words">
+          ชั้นเรียน - {school.title}{" "}
+        </h1>
+        <p className="text-xl">{school.description}</p>
+        <p className="text-gray-300  max-w-[60rem] break-words ">
+          {school.address} {school.city} {school.country} {school.zipCode}
+        </p>
+        <p className="text-gray-300  max-w-[60rem] break-words ">
+          {school.phoneNumber}
+        </p>
       </div>
       <div className="flex justify-end items-center space-x-2">
         <div>

@@ -39,6 +39,7 @@ function Sidebar({
         <div className="w-12 h-12 bg-white rounded-full relative overflow-hidden">
           <Image
             fill
+            sizes="(max-width: 768px) 100vw, 33vw"
             src={school.data?.logo ?? "/favicon.ico"}
             className="object-cover"
             alt={`logo ${school.data?.title}`}

@@ -272,6 +272,7 @@ const SilderPicker = <T extends AnimationImageItemProps>({
                 )}
                 alt={`Scroll item`}
                 fill
+                sizes="(max-width: 768px) 100vw, 33vw"
                 className="object-contain"
               />
             </div>
@@ -447,6 +448,7 @@ const StudentCard = <T extends AnimationImageItemProps>({
           src={image.photo}
           alt={`Scroll item ${index}`}
           fill
+          sizes="(max-width: 768px) 100vw, 33vw"
           className="object-cover rounded-full"
         />
       </div>

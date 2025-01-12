@@ -392,6 +392,7 @@ function Index({ subjectId }: Props) {
               <Image
                 src={subject.data?.backgroundImage}
                 fill
+                sizes="(max-width: 768px) 100vw, 33vw"
                 placeholder="blur"
                 blurDataURL={decodeBlurhashToCanvas(
                   subject.data?.blurHash ?? defaultBlurHash

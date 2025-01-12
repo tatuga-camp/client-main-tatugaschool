@@ -151,6 +151,7 @@ const AnimationCard = <T extends AnimationImageItemProps>({
                   src={image.photo}
                   alt={`Scroll item ${index}`}
                   fill
+                  sizes="(max-width: 768px) 100vw, 33vw"
                   className="object-cover"
                 />
               </div>
@@ -175,7 +176,7 @@ const AnimationCard = <T extends AnimationImageItemProps>({
                   src={image.photo}
                   alt={`Scroll item ${index}`}
                   fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  sizes="(max-width: 768px) 100vw, 33vw"
                   quality={10}
                   className="object-cover"
                 />

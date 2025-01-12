@@ -42,10 +42,15 @@ function AskNotification() {
         <PopupLayout onClose={() => {}}>
           <div className="w-96 h-96 font-Anuphan bg-white border rounded-md p-3 flex flex-col gap-2 items-center justify-center">
             <div className="w-10 h-10 relative">
-              <Image fill src="/favicon.ico" alt="logo" />
+              <Image
+                fill
+                sizes="(max-width: 768px) 100vw, 33vw"
+                src="/favicon.ico"
+                alt="logo"
+              />
             </div>
             <h1 className="text-xl mt-5 font-semibold text-center">
-              You don't want to miss any updates from us.
+              You don&apos;t want to miss any updates from us.
             </h1>
             <span className="text-sm text-gray-500">
               Please allow notification

@@ -32,11 +32,7 @@ type Props = {
   student: StudentOnSubject;
   toast: React.RefObject<Toast>;
 };
-function PopUpStudent({
-  student,
-  setSelectStudent,
-  toast,
-}: Props) {
+function PopUpStudent({ student, setSelectStudent, toast }: Props) {
   const [isModalOpen, setIsModalOpen] = useState(true);
   const successSound = useSound("/sounds/ding.mp3");
   const failSound = useSound("/sounds/fail.mp3");
@@ -133,6 +129,7 @@ function PopUpStudent({
             src={student.photo}
             alt="Student"
             fill
+            sizes="(max-width: 768px) 100vw, 33vw"
             className="rounded-full"
           />
         </div>

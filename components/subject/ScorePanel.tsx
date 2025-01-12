@@ -66,6 +66,7 @@ function ScorePanel({
                       placeholder="blur"
                       blurDataURL={decodeBlurhashToCanvas(score.blurHash)}
                       fill
+                      sizes="(max-width: 768px) 100vw, 33vw"
                       className="object-contain"
                     />
                     <div

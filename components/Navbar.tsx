@@ -56,6 +56,7 @@ function Navbar({
             placeholder="blur"
             blurDataURL={defaultCanvas}
             fill
+            sizes="(max-width: 768px) 100vw, 33vw"
             alt="logo tatuga school"
           />
         </div>

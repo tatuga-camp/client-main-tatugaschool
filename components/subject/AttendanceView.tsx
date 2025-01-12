@@ -185,6 +185,7 @@ function AttendanceView({
               src={selectAttendance.student.photo}
               alt="Student"
               fill
+              sizes="(max-width: 768px) 100vw, 33vw"
               className="rounded-full object-contain"
             />
           </div>

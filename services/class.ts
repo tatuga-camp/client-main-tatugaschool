@@ -1,13 +1,18 @@
-import { Class, Student } from "@/interfaces";
+import { Classroom, Student } from "@/interfaces";
 import { Pagination } from "@/interfaces/Pagination";
 
 import createAxiosInstance from "./apiService";
 
 const axiosInstance = createAxiosInstance();
 
-type RequestCreateClassService = Class;
+export type RequestCreateClassService = {
+  schoolId: string;
+  title: string;
+  level: string;
+  description: string;
+};
 
-type ResponseCreateClassService = Class;
+type ResponseCreateClassService = Classroom;
 
 export async function CreateClassService(
   input: RequestCreateClassService
@@ -20,7 +25,7 @@ export async function CreateClassService(
     });
     return response.data;
   } catch (error: any) {
-    console.error("Create Class request failed:", error.response.data);
+    console.error("Create Classroom request failed:", error.response.data);
     throw error?.response?.data;
   }
 }
@@ -30,7 +35,7 @@ export type RequestetClassesBySchoolIdService = {
   isAchieved: boolean;
 };
 
-export type ResponseGetClassesBySchoolIdService = (Class & {
+export type ResponseGetClassesBySchoolIdService = (Classroom & {
   studentNumbers: number;
 })[];
 
@@ -52,11 +57,11 @@ export async function GetClassesBySchoolIdService(
   }
 }
 
-type RequestGetClassByIdService = {
+export type RequestGetClassByIdService = {
   classId: string;
 };
 
-type ResponseGetClassByIdService = Class & { students: Student[] };
+export type ResponseGetClassByIdService = Classroom & { students: Student[] };
 
 export async function GetClassByIdService(
   input: RequestGetClassByIdService
@@ -68,7 +73,7 @@ export async function GetClassByIdService(
     });
     return response.data;
   } catch (error: any) {
-    console.error("Get Class by ID request failed:", error.response.data);
+    console.error("Get Classroom by ID request failed:", error.response.data);
     throw error?.response?.data;
   }
 }
@@ -82,7 +87,7 @@ type RequestUpdateClassService = {
   educationYear: string;
 };
 
-type ResponseUpdateClassService = Class;
+type ResponseUpdateClassService = Classroom;
 
 export async function UpdateClassService(
   input: RequestUpdateClassService
@@ -95,7 +100,7 @@ export async function UpdateClassService(
     });
     return response.data;
   } catch (error: any) {
-    console.error("Update Class request failed:", error.response.data);
+    console.error("Update Classroom request failed:", error.response.data);
     throw error?.response?.data;
   }
 }
@@ -118,7 +123,7 @@ export async function DeleteClassService(
     });
     return response.data;
   } catch (error: any) {
-    console.error("Delete Class request failed:", error.response.data);
+    console.error("Delete Classroom request failed:", error.response.data);
     throw error?.response?.data;
   }
 }
@@ -127,7 +132,7 @@ export type RequestReorderClassesService = {
   classIds: string[];
 };
 
-type ResponseReorderClassesService = Class[];
+type ResponseReorderClassesService = Classroom[];
 
 export async function ReorderClassesService(
   input: RequestReorderClassesService

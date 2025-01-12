@@ -232,7 +232,6 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
       life: 3000,
     });
   };
-
   return (
     <div className="flex flex-col items-center w-full gap-5">
       <div
@@ -337,7 +336,13 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
               : students.map((student, index) => (
                   <StudentCard
                     showSelect={triggerSelectMultipleStudent}
-                    isDragable={!!selectFilter || triggerSelectMultipleStudent}
+                    isDragable={
+                      selectFilter
+                        ? false
+                        : triggerSelectMultipleStudent
+                        ? false
+                        : true
+                    }
                     setSelectStudent={(data) => {
                       if (triggerSelectMultipleStudent) {
                         setStudents((prev) => {
@@ -349,7 +354,7 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
                           });
                         });
                       } else {
-                        setSelectStudent(data);
+                        setSelectStudent(data as StudentOnSubject);
                       }
                     }}
                     key={student.id}

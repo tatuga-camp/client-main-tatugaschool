@@ -239,6 +239,7 @@ function StudentUpdateGrade({
               src={studentOnAssignment.photo}
               alt="Student"
               fill
+              sizes="(max-width: 768px) 100vw, 33vw"
               className="rounded-full"
             />
           </div>
