@@ -2,7 +2,7 @@ import React from "react";
 import { SiGoogleclassroom } from "react-icons/si";
 import InputWithIcon from "../common/InputWithIcon";
 import { TbFileDescription } from "react-icons/tb";
-import ClassLevel from "../common/ClassLevel";
+import ClassLevel from "../common/InputClassLevel";
 import { useCreateClassroom } from "../../react-query";
 import LoadingSpinner from "../common/LoadingSpinner";
 import { ErrorMessages } from "../../interfaces";

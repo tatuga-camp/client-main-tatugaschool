@@ -7,7 +7,7 @@ type Props = {
   maxLength?: number;
   minLength?: number;
   type?: HTMLInputTypeAttribute;
-  title: string;
+  title?: string;
   value: string;
   onChange: (value: string) => void;
   required?: boolean;
@@ -25,10 +25,10 @@ function InputWithIcon({
 }: Props) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="text-sm font-normal">{title}</span>
+      {title && <span className="text-sm font-normal">{title}</span>}{" "}
       <div className="flex w-full group h-10 items-center justify-center">
         <div
-          className="h-full grow rounded-l-md
+          className="h-full w-10 rounded-l-md
         group-hover:border-blue-500  
         flex items-center justify-center border border-r-0"
         >
@@ -39,7 +39,7 @@ function InputWithIcon({
           type={type}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="outline-none group-hover:border-blue-500 rounded-md  border w-80 h-10 rounded-l-none border-l-0"
+          className="outline-none group-hover:border-blue-500 rounded-md  border grow h-10 rounded-l-none border-l-0"
           placeholder={placeholder}
           maxLength={maxLength}
           minLength={minLength}

@@ -23,7 +23,7 @@ const HeaderSection: React.FC<{
       </div>
       <div className="w-max border-b border-b-white pb-2">
         <h1 className="text-4xl font-bold max-w-[60rem] break-words">
-          ชั้นเรียน - {school.title}{" "}
+          โรงเรียน - {school.title}{" "}
         </h1>
         <p className="text-xl">{school.description}</p>
         <p className="text-gray-300  max-w-[60rem] break-words ">

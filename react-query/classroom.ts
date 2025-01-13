@@ -1,15 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   CreateClassService,
+  DeleteClassService,
   GetClassByIdService,
   GetClassesBySchoolIdService,
   ReorderClassesService,
   RequestCreateClassService,
+  RequestDeleteClassService,
   RequestetClassesBySchoolIdService,
   RequestGetClassByIdService,
   RequestReorderClassesService,
+  RequestUpdateClassService,
   ResponseGetClassByIdService,
   ResponseGetClassesBySchoolIdService,
+  UpdateClassService,
 } from "../services";
 
 export function useGetClassrooms(input: RequestetClassesBySchoolIdService) {
@@ -31,6 +35,25 @@ export function useGetClassroom(
     queryKey: ["classroom", { id: input.classId }],
     queryFn: () => GetClassByIdService(input),
     initialData: input.initialData,
+  });
+}
+
+export function useUpdateClassroom() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["updateClassroom"],
+    mutationFn: (input: RequestUpdateClassService) => UpdateClassService(input),
+    onSuccess(data, variables, context) {
+      queryClient.setQueryData(
+        ["classroom", { id: variables.query.classId }],
+        (oldData: ResponseGetClassByIdService): ResponseGetClassByIdService => {
+          return { ...data, students: oldData.students };
+        }
+      );
+      queryClient.refetchQueries({
+        queryKey: ["classrooms", { schoolId: data.schoolId }],
+      });
+    },
   });
 }
 
@@ -76,6 +99,31 @@ export function useReorderClassrooms() {
           });
         }
       );
+    },
+  });
+}
+
+export function useDeleteClassroom() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["deleteClassroom"],
+    mutationFn: (input: RequestDeleteClassService) => DeleteClassService(input),
+    onSuccess(data, variables, context) {
+      const classrooms = queryClient.getQueryData([
+        "classrooms",
+        { schoolId: data.schoolId, isAchieved: false },
+      ]) as ResponseGetClassesBySchoolIdService;
+
+      if (classrooms) {
+        queryClient.setQueryData(
+          ["classrooms", { schoolId: data.schoolId, isAchieved: false }],
+          classrooms.filter((classroom) => classroom.id !== data.id)
+        );
+      }
+
+      queryClient.invalidateQueries({
+        queryKey: ["classroom", { id: data.id }],
+      });
     },
   });
 }

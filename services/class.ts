@@ -78,13 +78,16 @@ export async function GetClassByIdService(
   }
 }
 
-type RequestUpdateClassService = {
-  classId: string;
-  schoolId: string;
-  title: string;
-  level: string;
-  description: string;
-  educationYear: string;
+export type RequestUpdateClassService = {
+  query: {
+    classId: string;
+  };
+  body: {
+    title?: string;
+    description?: string;
+    level?: string;
+    isAchieved?: boolean;
+  };
 };
 
 type ResponseUpdateClassService = Classroom;
@@ -95,7 +98,7 @@ export async function UpdateClassService(
   try {
     const response = await axiosInstance({
       method: "PATCH",
-      url: `/v1/classes/${input.classId}`,
+      url: `/v1/classes`,
       data: { ...input },
     });
     return response.data;
@@ -105,13 +108,11 @@ export async function UpdateClassService(
   }
 }
 
-type RequestDeleteClassService = {
+export type RequestDeleteClassService = {
   classId: string;
 };
 
-type ResponseDeleteClassService = {
-  message: string;
-};
+type ResponseDeleteClassService = Classroom;
 
 export async function DeleteClassService(
   input: RequestDeleteClassService
@@ -123,7 +124,7 @@ export async function DeleteClassService(
     });
     return response.data;
   } catch (error: any) {
-    console.error("Delete Classroom request failed:", error.response.data);
+    console.error("Delete Classroom request failed:", error);
     throw error?.response?.data;
   }
 }

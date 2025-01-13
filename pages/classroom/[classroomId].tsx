@@ -20,8 +20,11 @@ import { useRouter } from "next/router";
 import { FaUsers } from "react-icons/fa6";
 import { CiCircleInfo } from "react-icons/ci";
 import StudentSection from "../../components/classroom/StudentSection";
+import ClassroomSetting from "../../components/classroom/ClassroomSetting";
+import { Toast } from "primereact/toast";
 
 function Index({ classroomId }: { classroomId: string }) {
+  const toast = React.useRef<Toast>(null);
   const router = useRouter();
   const [selectMenu, setSelectMenu] =
     React.useState<MenuClassroom>("Classroom");
@@ -56,6 +59,7 @@ function Index({ classroomId }: { classroomId: string }) {
       <Head>
         <title>Classroom</title>
       </Head>
+      <Toast ref={toast} />
 
       <ClassroomLayout
         selectMenu={selectMenu}
@@ -65,14 +69,29 @@ function Index({ classroomId }: { classroomId: string }) {
         classroomId={classroomId}
         schoolId={classroom.data?.schoolId}
       >
-        <header className=" p-12 pb-20 flex flex-col text-white gradient-bg">
+        <header
+          className={`p-12 pb-20 flex flex-col text-white ${
+            classroom.data.isAchieved ? "gradient-bg-success" : "gradient-bg"
+          } `}
+        >
           {/* Top Section */}
-          <div
-            className="flex w-max text-xs  
+          <div className="flex gap-2">
+            <div
+              className="flex w-max text-xs  
              items-center mb-5  text-white  border-white gap-1 border rounded-full px-2 py-1 justify-center"
-          >
-            CLASSROOM
+            >
+              CLASSROOM
+            </div>
+            {classroom.data.isAchieved && (
+              <div
+                className="flex w-max text-xs  
+             items-center mb-5  text-white  border-white gap-1 border rounded-full px-2 py-1 justify-center"
+              >
+                ACHIEVED
+              </div>
+            )}
           </div>
+
           <div className="flex justify-between items-start w-full">
             <div className="w-max border-b border-b-white pb-2">
               <h1 className="text-4xl font-bold max-w-[60rem] break-words">
@@ -85,6 +104,15 @@ function Index({ classroomId }: { classroomId: string }) {
             </div>
             <div className="flex gap-2">
               <button
+                onClick={() => {
+                  router.replace({
+                    query: {
+                      ...router.query,
+                      menu: "Setting-Classroom",
+                    },
+                  });
+                  setSelectMenu("Setting-Classroom");
+                }}
                 className="flex items-center active:scale-110 justify-center gap-1
                  hover:bg-primary-color hover:text-white
                   text-primary-color bg-white w-max px-2 py-1 rounded-md"
@@ -123,6 +151,9 @@ function Index({ classroomId }: { classroomId: string }) {
         <main className="w-full flex flex-col pb-20 pt-20 items-center">
           {selectMenu === "Classroom" && (
             <StudentSection students={classroom.data.students} />
+          )}
+          {selectMenu === "Setting-Classroom" && (
+            <ClassroomSetting classroom={classroom.data} toast={toast} />
           )}
         </main>
       </ClassroomLayout>

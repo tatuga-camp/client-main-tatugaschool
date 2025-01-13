@@ -6,18 +6,22 @@ type Props = {
   onChange: (value: string) => void;
   required: boolean;
 };
-function ClassLevel({ value, onChange, required }: Props) {
+function InputClassLevel({ value, onChange, required }: Props) {
+  const valueSplit = value.split("/");
   const [data, setData] = React.useState<{
     grade: ClassLevelType;
     level: string;
   }>({
-    grade: "ประถมศึกษาปีที่ 1",
-    level: "1",
+    grade: ClassLevelList.some((level) => level.title === valueSplit[0])
+      ? (valueSplit[0] as ClassLevelType)
+      : ClassLevelList[0].title,
+    level: valueSplit[1] || "1",
   });
 
   React.useEffect(() => {
     onChange(`${data.grade}/${data.level}`);
   }, [data]);
+
   return (
     <div>
       <label className="text-sm font-medium text-gray-700">Level</label>
@@ -58,4 +62,4 @@ function ClassLevel({ value, onChange, required }: Props) {
   );
 }
 
-export default ClassLevel;
+export default InputClassLevel;

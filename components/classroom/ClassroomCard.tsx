@@ -49,10 +49,22 @@ function ClassroomCard({ classroom }: Props) {
         {...attributes}
         className="w-full h-64 cursor-pointer active:scale-105 flex flex-col rounded-lg overflow-hidden border"
       >
-        <div className="w-full h-24 relative gradient-bg flex items-end p-5">
+        <div
+          className={`w-full h-24 relative ${
+            classroom.isAchieved ? "gradient-bg-success" : "gradient-bg"
+          }  flex items-end p-5`}
+        >
           <h1 className="text-white line-clamp-2 w-10/12 text-lg font-semibold">
             {classroom.title}
           </h1>
+          {classroom.isAchieved && (
+            <div
+              className="flex w-max text-xs  
+             items-center   text-white  border-white gap-1 border rounded-full px-2 py-1 justify-center"
+            >
+              ACHIEVED
+            </div>
+          )}
           <div
             {...listeners}
             style={{ cursor: isDragging ? "grabbing" : "grab" }}

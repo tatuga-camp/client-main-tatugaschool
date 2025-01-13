@@ -31,6 +31,9 @@
   .gradient-bg {
     @apply bg-gradient-to-r to-secondary-color from-primary-color;
   }
+  .gradient-bg-success {
+    @apply bg-gradient-to-r from-emerald-400 to-cyan-400;
+  }
 }
 
 /* * {

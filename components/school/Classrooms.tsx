@@ -18,9 +18,9 @@ import {
   rectSortingStrategy,
   SortableContext,
 } from "@dnd-kit/sortable";
-import ClassesCard from "./ClassroomCard";
+import ClassesCard from "../classroom/ClassroomCard";
 import PopupLayout from "../layout/PopupLayout";
-import ClassesCreate from "./ClassroomCreate";
+import ClassesCreate from "../classroom/ClassroomCreate";
 import { IoMdClose } from "react-icons/io";
 import { Toast } from "primereact/toast";
 import { SortByOption, sortByOptions } from "../../data";
