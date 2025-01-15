@@ -5,8 +5,8 @@ import Swal from "sweetalert2";
 import { Toast } from "primereact/toast";
 
 import { ProgressSpinner } from "primereact/progressspinner";
-import useEscKey from "../../hook/useKeyboard";
 import { useUpdateFileStudentOnAssignment } from "../../react-query";
+import { useEscKey } from "../../hook";
 
 type Props = {
   toast: React.RefObject<Toast>;

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useEscKey } from "../../hook";
 
 type LayoutProps = {
   children: ReactNode;
@@ -6,13 +7,21 @@ type LayoutProps = {
 };
 
 function PopupLayout({ children, onClose }: LayoutProps) {
+  useEscKey(() => {
+    onClose();
+  });
+
   return (
     <div
       className={`fixed flex top-0 bottom-0 right-0 left-0 items-center justify-center m-auto z-50`}
     >
       {children}
       <footer
-        onClick={() => onClose()}
+        onClick={() => {
+          if (confirm("Are you sure you want to close?")) {
+            onClose();
+          }
+        }}
         className="top-0 bottom-0 w-screen h-screen right-0 left-0 
     bg-black/50 fixed  m-auto -z-10"
       ></footer>

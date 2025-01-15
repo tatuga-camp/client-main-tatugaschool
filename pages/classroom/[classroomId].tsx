@@ -19,7 +19,7 @@ import { MenuClassroom } from "../../data";
 import { useRouter } from "next/router";
 import { FaUsers } from "react-icons/fa6";
 import { CiCircleInfo } from "react-icons/ci";
-import StudentSection from "../../components/classroom/StudentSection";
+import StudentSection from "../../components/classroom/StudentLists";
 import ClassroomSetting from "../../components/classroom/ClassroomSetting";
 import { Toast } from "primereact/toast";
 
@@ -150,7 +150,10 @@ function Index({ classroomId }: { classroomId: string }) {
 
         <main className="w-full flex flex-col pb-20 pt-20 items-center">
           {selectMenu === "Classroom" && (
-            <StudentSection students={classroom.data.students} />
+            <StudentSection
+              students={classroom.data.students}
+              classroom={classroom.data}
+            />
           )}
           {selectMenu === "Setting-Classroom" && (
             <ClassroomSetting classroom={classroom.data} toast={toast} />

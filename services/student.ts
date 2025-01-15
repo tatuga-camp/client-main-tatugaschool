@@ -4,7 +4,12 @@ import createAxiosInstance from "./apiService";
 
 const axiosInstance = createAxiosInstance();
 
-type RequestCreateStudentService = {
+export type RequestCreateStudentService = {
+  title: string;
+  firstName: string;
+  lastName: string;
+  blurHash?: string | undefined;
+  photo?: string | undefined;
   number: string;
   classId: string;
 };
@@ -72,15 +77,16 @@ export async function GetStudentsByClassIdService(
   }
 }
 
-type RequestUpdateStudentService = {
+export type RequestUpdateStudentService = {
   query: { studentId: string };
   body: {
-    title: string;
-    firstName: string;
-    lastName: string;
-    photo: string;
-    number: string;
+    title?: string;
+    firstName?: string;
+    lastName?: string;
+    photo?: string;
+    number?: string;
     password?: string;
+    blurHash?: string;
   };
 };
 
@@ -92,8 +98,8 @@ export async function UpdateStudentService(
   try {
     const response = await axiosInstance({
       method: "PATCH",
-      url: `/v1/students/${input.query.studentId}`,
-      data: { ...input.body },
+      url: `/v1/students`,
+      data: { ...input },
     });
     return response.data;
   } catch (error: any) {
@@ -106,9 +112,7 @@ type RequestDeleteStudentService = {
   studentId: string;
 };
 
-type ResponseDeleteStudentService = {
-  message: string;
-};
+type ResponseDeleteStudentService = Student;
 
 export async function DeleteStudentService(
   input: RequestDeleteStudentService

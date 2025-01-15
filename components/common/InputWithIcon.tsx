@@ -24,12 +24,12 @@ function InputWithIcon({
   required,
 }: Props) {
   return (
-    <label className="flex flex-col gap-1">
+    <label className="flex w-full flex-col gap-1">
       {title && <span className="text-sm font-normal">{title}</span>}{" "}
-      <div className="flex w-full group h-10 items-center justify-center">
+      <div className="flex w-full focus:ring-2 group h-10 items-center justify-center">
         <div
           className="h-full w-10 rounded-l-md
-        group-hover:border-blue-500  
+        group-hover:border-blue-500 
         flex items-center justify-center border border-r-0"
         >
           {icon}
@@ -39,7 +39,7 @@ function InputWithIcon({
           type={type}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="outline-none group-hover:border-blue-500 rounded-md  border grow h-10 rounded-l-none border-l-0"
+          className="outline-none  group-hover:border-blue-500 rounded-md  border grow h-10 rounded-l-none border-l-0"
           placeholder={placeholder}
           maxLength={maxLength}
           minLength={minLength}

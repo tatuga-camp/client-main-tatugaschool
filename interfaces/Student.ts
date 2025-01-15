@@ -6,6 +6,7 @@ export interface Student {
   firstName: string;
   lastName: string;
   photo: string;
+  blurHash?: string | undefined;
   number: string;
   schoolId: string;
   classId: string;

@@ -133,9 +133,7 @@ function Classrooms({ schoolId }: Props) {
       {triggerCreateClass && (
         <PopupLayout
           onClose={() => {
-            if (confirm("Are you sure you want to close?")) {
-              setTriggerCreateClass(false);
-            }
+            setTriggerCreateClass(false);
           }}
         >
           <Toast ref={toast} />
@@ -175,7 +173,7 @@ function Classrooms({ schoolId }: Props) {
           </section>
         </header>
         <main
-          className="w-full flex flex-col  p-3 md:px-5 
+          className="w-full min-h-screen flex flex-col  p-3 md:px-5 
       md:max-w-screen-md xl:max-w-screen-lg gap-4 md:gap-0 mx-auto"
         >
           <div className="flex items-center justify-start gap-2">

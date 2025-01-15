@@ -1,117 +1,135 @@
-import React from "react";
-import { Student } from "../../interfaces";
-import StudentCard from "../subject/StudentCard";
-import { SortByOption, sortByOptions } from "../../data";
+import React, { memo } from "react";
+import InputWithIcon from "../common/InputWithIcon";
+import { MdFamilyRestroom, MdOutlineSubtitles } from "react-icons/md";
+import { IoPerson } from "react-icons/io5";
+import { TbNumber123 } from "react-icons/tb";
+import Image from "next/image";
 
 type Props = {
-  students: Student[];
+  data: {
+    title: string;
+    firstName: string;
+    lastName: string;
+    number: string;
+    photo?: string;
+    hash?: string;
+  };
+  setData: (data: {
+    title?: string;
+    firstName?: string;
+    lastName?: string;
+    number?: string;
+    photo?: string;
+    hash?: string;
+  }) => void;
+  handleUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
-function StudentSection({ students }: Props) {
-  const [studentData, setStudentData] = React.useState<Student[]>(students);
-  const [sortBy, setSortBy] = React.useState<SortByOption>("Default");
-  const [search, setSearch] = React.useState("");
-  const handleSortBy = (sortBy: SortByOption) => {
-    switch (sortBy) {
-      case "Default":
-        setStudentData((prev) =>
-          prev.sort((a, b) => Number(a.number) - Number(b.number))
-        );
-        break;
-      case "Newest":
-        setStudentData((prev) =>
-          prev.sort(
-            (a, b) =>
-              new Date(b.createAt).getTime() - new Date(a.createAt).getTime()
-          )
-        );
-        break;
-      case "Oldest":
-        setStudentData((prev) =>
-          prev.sort(
-            (a, b) =>
-              new Date(a.createAt).getTime() - new Date(b.createAt).getTime()
-          )
-        );
-        break;
-      case "A-Z":
-        setStudentData((prev) =>
-          prev.sort((a, b) => a.firstName.localeCompare(b.firstName))
-        );
-        break;
-      case "Z-A":
-        setStudentData((prev) =>
-          prev.sort((a, b) => b.firstName.localeCompare(a.firstName))
-        );
-        break;
-      default:
-        break;
-    }
-  };
-
-  const handleSearch = (search: string) => {
-    setSearch(search);
-    if (search === "") return setStudentData(students);
-    setStudentData(() =>
-      students?.filter(
-        (student) =>
-          student.firstName.toLowerCase().includes(search.toLowerCase()) ||
-          student.lastName?.toLowerCase().includes(search.toLowerCase()) ||
-          student.number.toLowerCase().includes(search.toLowerCase())
-      )
-    );
-  };
-
+function StudentSection({ data, setData, handleUpload }: Props) {
   return (
-    <div className="w-full flex flex-col items-center gap-5">
-      <div className="flex items-center justify-start gap-2">
-        <label className="flex flex-col">
-          <span className="text-gray-400 text-sm">Search</span>
-          <input
-            value={search}
-            onChange={(e) => handleSearch(e.target.value)}
-            type="text"
-            className="w-96 border border-gray-300 rounded-lg p-2"
-            placeholder="Search for student"
-          />
-        </label>
-
-        <label className="flex flex-col">
-          <span className="text-gray-400 text-sm">Sort By</span>
-          <select
-            value={sortBy}
-            onChange={(e) => {
-              handleSortBy(e.target.value as SortByOption);
-              setSortBy(e.target.value as SortByOption);
+    <>
+      <h1 className="text-lg py-5 font-medium">Student Information</h1>
+      <div className="flex flex-col gap-5">
+        <InputWithIcon
+          required
+          value={data?.title}
+          title="Title"
+          minLength={1}
+          placeholder="Title"
+          onChange={(value) => {
+            setData({ title: value });
+          }}
+          icon={<MdOutlineSubtitles />}
+        />
+        <div className="flex gap-1 w-full">
+          <InputWithIcon
+            value={data?.firstName}
+            required
+            title="First Name"
+            minLength={1}
+            placeholder="First Name"
+            onChange={(value) => {
+              setData({ firstName: value });
             }}
-            className="main-selection w-40 border"
-          >
-            {sortByOptions.map((option) => (
-              <option key={option.title} value={option.title}>
-                {option.title}
-              </option>
-            ))}
-          </select>
-        </label>
+            icon={<IoPerson />}
+          />
+          <InputWithIcon
+            value={data?.lastName}
+            required
+            title="Last Name"
+            minLength={1}
+            placeholder="Last Name"
+            onChange={(value) => {
+              setData({ lastName: value });
+            }}
+            icon={<MdFamilyRestroom />}
+          />
+        </div>
+        <InputWithIcon
+          value={data?.number}
+          required
+          title="Number"
+          placeholder="Number"
+          minLength={1}
+          onChange={(value) => {
+            setData({ number: value });
+          }}
+          icon={<TbNumber123 />}
+        />
       </div>
-
-      <section
-        className="w-80 md:w-10/12 lg:w-9/12 place-items-center 
-grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5"
+      <div className="text-sm mt-10 mb-2">Upload Student Image (Optional)</div>
+      <label
+        htmlFor="dropzone-file"
+        className={`flex flex-col relative items-center justify-center w-full h-64 border-2
+                 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50
+                `}
       >
-        {studentData.map((student) => {
-          return (
-            <StudentCard
-              key={student.id}
-              student={student as Student}
-              isDragable={false}
-              showSelect={false}
-              setSelectStudent={() => {}}
+        {data.photo ? (
+          <div className="w-full h-full relative">
+            <Image
+              src={data.photo}
+              alt="student"
+              fill
+              className="object-contain"
+              sizes="(max-width: 768px) 100vw, 33vw"
             />
-          );
-        })}
-      </section>
-    </div>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center pt-5 pb-6">
+            <svg
+              className="w-8 h-8 mb-4 text-gray-500 "
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 20 16"
+            >
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+              />
+            </svg>
+            <p className="mb-2 text-sm text-gray-500 ">
+              <span className="font-semibold">Click to upload</span> or drag and
+              drop
+            </p>
+            <p className="text-xs text-gray-500 ">
+              PNG, JPG or GIF (MAX. 800x400px)
+            </p>
+          </div>
+        )}
+
+        <input
+          onChange={handleUpload}
+          accept="image/*"
+          id="dropzone-file"
+          type="file"
+          className="hidden"
+        />
+      </label>
+    </>
   );
 }
 
-export default StudentSection;
+export default memo(StudentSection);
