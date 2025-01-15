@@ -41,11 +41,6 @@ export const menuSubjectList = ({
 }[] => {
   return [
     {
-      title: "School",
-      icon: <LuSchool />,
-      url: `/school/${schoolId}`,
-    },
-    {
       title: "Subject",
       icon: <SiGoogleclassroom />,
     },
@@ -64,6 +59,11 @@ export const menuSubjectList = ({
     {
       title: "Setting-Subject",
       icon: <CiSettings />,
+    },
+    {
+      title: "School",
+      icon: <LuSchool />,
+      url: `/school/${schoolId}`,
     },
   ];
 };
