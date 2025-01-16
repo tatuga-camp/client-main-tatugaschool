@@ -180,7 +180,7 @@ function Attendance({
               <li
                 onClick={() => setSelectTable(table)}
                 key={table.id}
-                className={`w-max rounded-md shrink-0 p-3 cursor-pointer ${
+                className={`w-max min-w-40 rounded-md shrink-0 p-3 cursor-pointer ${
                   table.id === selectTable?.id
                     ? "border-primary-color gradient-bg text-white"
                     : "border bg-white  text-black"

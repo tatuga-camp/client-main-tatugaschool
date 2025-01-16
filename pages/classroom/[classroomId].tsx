@@ -22,6 +22,7 @@ import { CiCircleInfo } from "react-icons/ci";
 import StudentSection from "../../components/classroom/StudentLists";
 import ClassroomSetting from "../../components/classroom/ClassroomSetting";
 import { Toast } from "primereact/toast";
+import GradeSummaryReport from "../../components/classroom/GradeSummaryReport";
 
 function Index({ classroomId }: { classroomId: string }) {
   const toast = React.useRef<Toast>(null);
@@ -157,6 +158,12 @@ function Index({ classroomId }: { classroomId: string }) {
           )}
           {selectMenu === "Setting-Classroom" && (
             <ClassroomSetting classroom={classroom.data} toast={toast} />
+          )}
+          {selectMenu === "Grades-Summary" && (
+            <GradeSummaryReport
+              students={classroom.data.students}
+              classroom={classroom.data}
+            />
           )}
         </main>
       </ClassroomLayout>

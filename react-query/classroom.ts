@@ -4,11 +4,13 @@ import {
   DeleteClassService,
   GetClassByIdService,
   GetClassesBySchoolIdService,
+  GetGradeSummaryOnClassroomService,
   ReorderClassesService,
   RequestCreateClassService,
   RequestDeleteClassService,
   RequestetClassesBySchoolIdService,
   RequestGetClassByIdService,
+  RequestGetGradeSummaryOnClassroomService,
   RequestReorderClassesService,
   RequestUpdateClassService,
   ResponseGetClassByIdService,
@@ -23,6 +25,15 @@ export function useGetClassrooms(input: RequestetClassesBySchoolIdService) {
       { schoolId: input.schoolId, isAchieved: input.isAchieved },
     ],
     queryFn: () => GetClassesBySchoolIdService(input),
+  });
+}
+
+export function useGetGradeSummaryReportOnClassroom(
+  input: RequestGetGradeSummaryOnClassroomService
+) {
+  return useQuery({
+    queryKey: ["grade-summary", { classId: input.classId }],
+    queryFn: () => GetGradeSummaryOnClassroomService(input),
   });
 }
 

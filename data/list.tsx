@@ -8,6 +8,7 @@ import { CiSettings } from "react-icons/ci";
 import { BsPeopleFill } from "react-icons/bs";
 import { PiWechatLogoBold } from "react-icons/pi";
 import { IoHome } from "react-icons/io5";
+import { TbReportAnalytics } from "react-icons/tb";
 
 export const ListRoles: { title: MemberRole; describe: string }[] = [
   {
@@ -106,7 +107,11 @@ export const menuSchoolList = ({
   ];
 };
 
-export type MenuClassroom = "Classroom" | "Setting-Classroom" | "School";
+export type MenuClassroom =
+  | "Classroom"
+  | "Setting-Classroom"
+  | "Grades-Summary"
+  | "School";
 export const menuClassroomList = ({
   schoolId,
 }: {
@@ -120,6 +125,10 @@ export const menuClassroomList = ({
     {
       title: "Classroom",
       icon: <SiGoogleclassroom />,
+    },
+    {
+      title: "Grades-Summary",
+      icon: <TbReportAnalytics />,
     },
     {
       title: "Setting-Classroom",
