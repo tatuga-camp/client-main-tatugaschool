@@ -55,7 +55,7 @@ function GradeSummaryReport({
                 </th>
                 {grades.data?.map((grade) => {
                   return (
-                    <th>
+                    <th key={grade.id}>
                       <div className="flex items-start hover:w-max min-w-40 w-40 flex-col gap-1">
                         <h1 className="text-xs md:text-sm truncate font-semibold text-start">
                           {grade.title}
@@ -116,7 +116,7 @@ function GradeSummaryReport({
                         );
                         return (
                           <td
-                            key={grades.id}
+                            key={grades.id + student.id}
                             className={`text-sm font-normal text-center group-hover:bg-gray-200
                             ${odd ? "bg-gray-100" : "bg-white"}
                             `}
