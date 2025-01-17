@@ -78,12 +78,15 @@ const createAxiosInstance = () => {
 };
 
 const isTokenExpired = (token: string) => {
-  if (!token) return true;
-
-  const [, payload] = token.split(".");
-  const decodedPayload = JSON.parse(atob(payload));
-  const exp = decodedPayload.exp;
-  return Math.floor(Date.now() / 1000) >= exp;
+  try {
+    if (!token) return true;
+    const [, payload] = token.split(".");
+    const decodedPayload = JSON.parse(window.atob(payload));
+    const exp = decodedPayload.exp;
+    return Math.floor(Date.now() / 1000) >= exp;
+  } catch (error) {
+    console.log("error", error);
+  }
 };
 
 export default createAxiosInstance;

@@ -8,7 +8,11 @@ import StudentCreate from "./StudentCreate";
 import { Toast } from "primereact/toast";
 import SlideLayout from "../layout/SlideLayout";
 import StudentSection from "./StudentSection";
-import { useDeleteStudent, useUpdateStudent } from "../../react-query";
+import {
+  useDeleteStudent,
+  useResetStudentPassword,
+  useUpdateStudent,
+} from "../../react-query";
 import {
   getSignedURLTeacherService,
   UploadSignURLService,
@@ -17,12 +21,14 @@ import { generateBlurHash } from "../../utils";
 import Swal from "sweetalert2";
 import LoadingBar from "../common/LoadingBar";
 import { useSound } from "../../hook";
+import { MdOutlinePassword } from "react-icons/md";
 
 type Props = {
   students: Student[];
   classroom: Classroom;
 };
 function StudentLists({ students, classroom }: Props) {
+  const resetPasword = useResetStudentPassword();
   const deleteStudent = useDeleteStudent();
   const [triggerCreateStudent, setTriggerCreateStudent] = React.useState(false);
   const updateStudent = useUpdateStudent();
@@ -239,6 +245,36 @@ function StudentLists({ students, classroom }: Props) {
     }
   };
 
+  const handleResetPassword = async () => {
+    try {
+      if (!selectStudent) return;
+      setLoadingStudent(true);
+      await resetPasword.mutateAsync({
+        studentId: selectStudent.id,
+      });
+      sound.play();
+      toast.current?.show({
+        severity: "success",
+        summary: "Success",
+        detail: "Password Reset",
+        life: 3000,
+      });
+      setLoadingStudent(false);
+    } catch (error) {
+      setLoadingStudent(false);
+      console.log(error);
+      let result = error as ErrorMessages;
+      Swal.fire({
+        title: result.error ? result.error : "Something Went Wrong",
+        text: result.message.toString(),
+        footer: result.statusCode
+          ? "Code Error: " + result.statusCode?.toString()
+          : "",
+        icon: "error",
+      });
+    }
+  };
+
   return (
     <>
       {selectStudent && (
@@ -264,6 +300,23 @@ function StudentLists({ students, classroom }: Props) {
               }}
               handleUpload={handleUpload}
             />
+
+            <div className="flex flex-col mt-5 gap-1">
+              <span className=" text-sm">student's password</span>
+              <button
+                type="button"
+                disabled={loadingStudent}
+                onClick={handleResetPassword}
+                className="second-button border w-max flex items-center justify-center gap-1"
+              >
+                <MdOutlinePassword />
+                Reset Password
+              </button>
+              <span className="text-sm text-red-500">
+                ** Password is hashed that mean you can't see the password only
+                reset them. Even the admin doesn't know the password. **
+              </span>
+            </div>
           </div>
         </SlideLayout>
       )}
