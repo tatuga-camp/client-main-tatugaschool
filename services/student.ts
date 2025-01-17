@@ -128,3 +128,24 @@ export async function DeleteStudentService(
     throw error?.response?.data;
   }
 }
+
+type RequestResetPasswordStudentService = {
+  studentId: string;
+};
+
+type ResponseResetPasswordStudentService = Student;
+
+export async function ResetPasswordStudentService(
+  input: RequestResetPasswordStudentService
+): Promise<ResponseResetPasswordStudentService> {
+  try {
+    const response = await axiosInstance({
+      method: "PATCH",
+      url: `/v1/students/${input.studentId}/reset-password`,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Delete Student request failed:", error.response.data);
+    throw error?.response?.data;
+  }
+}

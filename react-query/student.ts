@@ -4,6 +4,7 @@ import {
   DeleteStudentService,
   RequestCreateStudentService,
   RequestUpdateStudentService,
+  ResetPasswordStudentService,
   ResponseGetClassByIdService,
   UpdateStudentService,
 } from "../services";
@@ -25,6 +26,14 @@ export function useCreateStudent() {
         }
       );
     },
+  });
+}
+
+export function useResetStudentPassword() {
+  return useMutation({
+    mutationKey: ["reset-student-password"],
+    mutationFn: (input: { studentId: string }) =>
+      ResetPasswordStudentService(input),
   });
 }
 
