@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Classroom, ErrorMessages, Student } from "../../interfaces";
-import StudentCard from "../subject/StudentCard";
+import StudentCard from "../student/StudentCard";
 import { SortByOption, sortByOptions } from "../../data";
 import { FiPlus } from "react-icons/fi";
 import PopupLayout from "../layout/PopupLayout";

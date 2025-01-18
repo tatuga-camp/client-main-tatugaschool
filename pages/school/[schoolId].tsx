@@ -8,6 +8,7 @@ import React, { useEffect } from "react";
 import { MenuSchool } from "../../data";
 import Classes from "../../components/school/Classrooms";
 import { validateMongodbId } from "../../utils";
+import Subjects from "../../components/school/Subjects";
 
 const SchoolPage = ({ schoolId }: { schoolId: string }) => {
   const router = useRouter();
@@ -41,6 +42,7 @@ const SchoolPage = ({ schoolId }: { schoolId: string }) => {
       >
         {selectMenu === "School" && <Dashboard school={school} />}
         {selectMenu === "Classes" && <Classes schoolId={schoolId} />}
+        {selectMenu === "Subjects" && <Subjects schoolId={schoolId} />}
       </SchoolLayout>
     </>
   );

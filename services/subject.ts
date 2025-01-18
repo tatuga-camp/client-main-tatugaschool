@@ -1,4 +1,9 @@
-import { Subject } from "@/interfaces";
+import {
+  Classroom,
+  EducationYear,
+  Subject,
+  TeacherOnSubject,
+} from "@/interfaces";
 import { Pagination } from "@/interfaces/Pagination";
 
 import createAxiosInstance from "./apiService";
@@ -31,24 +36,24 @@ export async function CreateSubjectService(
   }
 }
 
-type RequestGetSubjectsService = {
+export type RequestGetSubjectBySchoolsService = {
   schoolId: string;
-  page: number;
-  limit: number;
-  search?: string;
-  educationYear?: string;
+  educationYear: EducationYear;
 };
 
-type ResponseGetSubjectsService = Pagination<Subject>;
+export type ResponseGetSubjectBySchoolsService = (Subject & {
+  teachers: TeacherOnSubject[];
+  class: Classroom;
+})[];
 
-export async function GetSubjectsBySchoolIdService(
-  input: RequestGetSubjectsService
-): Promise<ResponseGetSubjectsService> {
+export async function GetSubjectBySchoolsBySchoolIdService(
+  input: RequestGetSubjectBySchoolsService
+): Promise<ResponseGetSubjectBySchoolsService> {
   try {
     const response = await axiosInstance({
       method: "GET",
-      url: `/v1/subjects`,
-      params: { ...input },
+      url: `/v1/subjects/school/${input.schoolId}`,
+      params: { educationYear: input.educationYear },
     });
     return response.data;
   } catch (error: any) {
@@ -115,9 +120,7 @@ export type RequestDeleteSubjectService = {
   subjectId: string;
 };
 
-type ResponseDeleteSubjectService = {
-  message: string;
-};
+type ResponseDeleteSubjectService = Subject;
 
 export async function DeleteSubjectService(
   input: RequestDeleteSubjectService
@@ -134,11 +137,11 @@ export async function DeleteSubjectService(
   }
 }
 
-type RequestReorderSubjectsService = {
+export type RequestReorderSubjectsService = {
   subjectIds: string[];
 };
 
-type ResponseReorderSubjectsService = Subject;
+type ResponseReorderSubjectsService = Subject[];
 
 export async function ReorderSubjectsService(
   input: RequestReorderSubjectsService
@@ -147,7 +150,7 @@ export async function ReorderSubjectsService(
     const response = await axiosInstance({
       method: "PATCH",
       url: `/v1/subjects/reorder`,
-      data: { ...input.subjectIds },
+      data: { subjectIds: input.subjectIds },
     });
     return response.data;
   } catch (error: any) {

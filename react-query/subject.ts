@@ -2,9 +2,11 @@ import {
   QueryClient,
   useMutation,
   useQuery,
+  useQueryClient,
   UseQueryResult,
 } from "@tanstack/react-query";
 import {
+  EducationYear,
   ScoreOnStudent,
   StudentOnSubject,
   Subject,
@@ -16,11 +18,16 @@ import {
   GetScoresByStudentOnSubjectIdService,
   GetStudentOnSubjectBySubjectService,
   GetSubjectByIdService,
+  GetSubjectBySchoolsBySchoolIdService,
   GetTeacherOnSubjectBySubjectService,
+  ReorderSubjectsService,
   RequestDeleteSubjectService,
   RequestDeleteTeacherOnSubjectService,
+  RequestGetSubjectBySchoolsService,
+  RequestReorderSubjectsService,
   RequestUpdateStudentOnSubjectService,
   RequestUpdateSubjectService,
+  ResponseGetSubjectBySchoolsService,
   UpdateStudentOnSubjectService,
   UpdateSubjectService,
 } from "../services";
@@ -38,6 +45,59 @@ export function useGetSubject({
       }),
   });
   return schools;
+}
+
+export function useGetSubjectFromSchool(
+  input: RequestGetSubjectBySchoolsService
+) {
+  return useQuery({
+    queryKey: [
+      "subjects",
+      { schoolId: input.schoolId, educationYear: input.educationYear },
+    ],
+    queryFn: () => GetSubjectBySchoolsBySchoolIdService(input),
+    enabled: !!input.schoolId && !!input.educationYear,
+  });
+}
+
+export function useReorderSubjects() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["reorder-subjects"],
+    mutationFn: (
+      input: RequestReorderSubjectsService & {
+        schoolId: string;
+        educationYear: EducationYear;
+      }
+    ) => ReorderSubjectsService(input),
+    onSuccess(data, variables, context) {
+      queryClient.setQueryData(
+        [
+          "subjects",
+          {
+            schoolId: variables.schoolId,
+            educationYear: variables.educationYear,
+          },
+        ],
+        (
+          prevs: ResponseGetSubjectBySchoolsService
+        ): ResponseGetSubjectBySchoolsService => {
+          return prevs.map((subject) => {
+            const newOrder = data.find((d) => d.id === subject.id);
+            if (newOrder) {
+              return {
+                ...newOrder,
+                teachers: subject.teachers,
+                class: subject.class,
+              };
+            } else {
+              return subject;
+            }
+          });
+        }
+      );
+    },
+  });
 }
 
 export function useGetTeacherOnSubject({
@@ -84,6 +144,9 @@ export function useUpdateSubject() {
           return data;
         }
       );
+      variables.queryClient.invalidateQueries({
+        queryKey: ["subjects", { schoolId: data.schoolId }],
+      });
     },
   });
   return updateSubject;
@@ -145,6 +208,12 @@ export function useDeleteSubject() {
     onSuccess(data, variables, context) {
       variables.queryClient.invalidateQueries({
         queryKey: ["subject", { id: variables.request.subjectId }],
+      });
+      variables.queryClient.invalidateQueries({
+        queryKey: [
+          "subjects",
+          { schoolId: data.schoolId, educationYear: data.educationYear },
+        ],
       });
     },
   });

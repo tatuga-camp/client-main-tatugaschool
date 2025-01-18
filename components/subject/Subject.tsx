@@ -12,7 +12,7 @@ import {
   useGetScoreOnSubject,
   useCreateScoreOnStudent,
 } from "../../react-query";
-import StudentCard from "./StudentCard";
+import StudentCard from "../student/StudentCard";
 import {
   ErrorMessages,
   ScoreOnStudent,
