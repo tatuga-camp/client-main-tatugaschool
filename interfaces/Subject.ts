@@ -18,3 +18,5 @@ export interface Subject {
   allowStudentViewGrade: boolean;
   allowStudentViewAttendance: boolean;
 }
+
+export type EducationYear = `${string}/${string}`;

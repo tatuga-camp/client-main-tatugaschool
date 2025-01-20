@@ -54,7 +54,13 @@ function ClassroomCard({ classroom }: Props) {
             classroom.isAchieved ? "gradient-bg-success" : "gradient-bg"
           }  flex items-end p-5`}
         >
-          <h1 className="text-white line-clamp-2 w-10/12 text-lg font-semibold">
+          <div
+            className="flex w-max text-xs  
+             items-center absolute top-2 left-2 m-auto bg-white text-black  border-white gap-1 border rounded-full px-2 py-1 justify-center"
+          >
+            CLASSROOM
+          </div>
+          <h1 className="text-white truncate w-48  text-lg font-semibold">
             {classroom.title}
           </h1>
           {classroom.isAchieved && (

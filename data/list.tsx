@@ -64,7 +64,7 @@ export const menuSubjectList = ({
     {
       title: "School",
       icon: <LuSchool />,
-      url: `/school/${schoolId}`,
+      url: `/school/${schoolId}?menu=Subjects`,
     },
   ];
 };

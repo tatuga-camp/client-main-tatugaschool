@@ -191,7 +191,7 @@ function Setting({ subjectId, setSelectMenu }: Props) {
           text: "Subject has been deleted",
           icon: "success",
         });
-        router.push(`/school/${schoolId}`);
+        router.push(`/school/${schoolId}?menu=Subjects`);
       } catch (error) {
         console.log(error);
         let result = error as ErrorMessages;

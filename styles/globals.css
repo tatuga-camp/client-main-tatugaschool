@@ -16,7 +16,7 @@
   .second-button {
     @apply bg-white text-black  py-2 px-4 rounded-md active:scale-105 hover:bg-gray-100/50 active:drop-shadow-md transition duration-150;
   }
-  .main-selection {
+  .main-select {
     @apply bg-white text-black  py-2 px-4 rounded-md;
   }
   .success-button {

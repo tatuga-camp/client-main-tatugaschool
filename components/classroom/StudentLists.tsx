@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Classroom, ErrorMessages, Student } from "../../interfaces";
-import StudentCard from "../subject/StudentCard";
+import StudentCard from "../student/StudentCard";
 import { SortByOption, sortByOptions } from "../../data";
 import { FiPlus } from "react-icons/fi";
 import PopupLayout from "../layout/PopupLayout";
@@ -302,7 +302,7 @@ function StudentLists({ students, classroom }: Props) {
             />
 
             <div className="flex flex-col mt-5 gap-1">
-              <span className=" text-sm">student's password</span>
+              <span className=" text-sm">student&lsquo;s password</span>
               <button
                 type="button"
                 disabled={loadingStudent}
@@ -313,8 +313,9 @@ function StudentLists({ students, classroom }: Props) {
                 Reset Password
               </button>
               <span className="text-sm text-red-500">
-                ** Password is hashed that mean you can't see the password only
-                reset them. Even the admin doesn't know the password. **
+                ** Password is hashed that mean you can&lsquo;t see the password
+                only reset them. Even the admin doesn&lsquo;t know the password.
+                **
               </span>
             </div>
           </div>
@@ -384,7 +385,7 @@ function StudentLists({ students, classroom }: Props) {
                 handleSortBy(e.target.value as SortByOption);
                 setSortBy(e.target.value as SortByOption);
               }}
-              className="main-selection w-40 border"
+              className="main-select w-40 border"
             >
               {sortByOptions.map((option) => (
                 <option key={option.title} value={option.title}>

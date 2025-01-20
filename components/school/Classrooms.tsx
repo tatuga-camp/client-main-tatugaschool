@@ -157,7 +157,7 @@ function Classrooms({ schoolId }: Props) {
       md:max-w-screen-md xl:max-w-screen-lg gap-4 md:gap-0 mx-auto"
         >
           <section className="text-center md:text-left">
-            <h1 className="text-2xl md:text-3xl font-semibold">Classroom</h1>
+            <h1 className="text-2xl md:text-3xl font-semibold">Classrooms</h1>
             <p className="text-gray-400 max-w-96 break-words text-sm md:text-base">
               This section is for managing classes. You can create, edit, and
               delete classes here.

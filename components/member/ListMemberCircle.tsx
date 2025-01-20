@@ -32,6 +32,7 @@ function ListMemberCircle({ members, setTrigger }: Props) {
 
         return (
           <div
+            title={`${teacher.firstName} ${teacher.lastName} : ${teacher.email}`}
             style={{ left: `-${index * 5}px` }}
             className={`w-6 h-6 ring-1  ring-white bg-white relative rounded-full overflow-hidden`}
             key={teacher.id}

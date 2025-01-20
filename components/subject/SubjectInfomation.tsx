@@ -12,7 +12,7 @@ type Props = {
       title?: string;
       description?: string;
       code?: string;
-      eduYear?: string;
+      educationYear?: string;
     }
   ) => void;
   subjectId: string;
@@ -50,7 +50,7 @@ function SubjectInfomation({ onSummit, subjectId, isPending = false }: Props) {
             title: subjectBasicInfo.name,
             description: subjectBasicInfo.description,
             code: subjectBasicInfo.code,
-            eduYear: `${subjectBasicInfo.term}/${subjectBasicInfo.year}`,
+            educationYear: `${subjectBasicInfo.term}/${subjectBasicInfo.year}`,
           });
         }
       }}
