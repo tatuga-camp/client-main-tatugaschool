@@ -26,11 +26,13 @@ import {
 import InputEducationYear from "../common/InputEducationYear";
 import PopupLayout from "../layout/PopupLayout";
 import SubjectCreate from "../subject/SubjectCreate";
+import { Toast } from "primereact/toast";
 
 type Props = {
   schoolId: string;
 };
 function Subjects({ schoolId }: Props) {
+  const toast = React.useRef<Toast>(null);
   const reorder = useReorderSubjects();
   const [educationYear, setEducationYear] = React.useState<
     EducationYear | undefined
@@ -159,17 +161,23 @@ function Subjects({ schoolId }: Props) {
 
   return (
     <>
+      <Toast ref={toast} />
       {triggerCreateSubject && (
         <PopupLayout
           onClose={() => {
             setTriggerCreateSubject(false);
           }}
         >
-          <SubjectCreate
-            onClose={() => {
-              setTriggerCreateSubject(false);
-            }}
-          />
+          {educationYear && (
+            <SubjectCreate
+              toast={toast}
+              educationYear={educationYear}
+              schoolId={schoolId}
+              onClose={() => {
+                setTriggerCreateSubject(false);
+              }}
+            />
+          )}
         </PopupLayout>
       )}
       <div className="w-full bg-white flex  flex-col justify-center">

@@ -13,6 +13,7 @@ import {
   TeacherOnSubject,
 } from "../interfaces";
 import {
+  CreateSubjectService,
   DeleteSubjectService,
   DeleteTeacherOnSubjectService,
   GetScoresByStudentOnSubjectIdService,
@@ -21,6 +22,7 @@ import {
   GetSubjectBySchoolsBySchoolIdService,
   GetTeacherOnSubjectBySubjectService,
   ReorderSubjectsService,
+  RequestCreateSubjectService,
   RequestDeleteSubjectService,
   RequestDeleteTeacherOnSubjectService,
   RequestGetSubjectBySchoolsService,
@@ -128,6 +130,24 @@ export function useGetStudentOnSubject({
       }),
   });
   return students;
+}
+
+export function useCreateSubject() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["create-subject"],
+    mutationFn: (request: RequestCreateSubjectService) =>
+      CreateSubjectService(request),
+
+    onSuccess(data, variables, context) {
+      queryClient.invalidateQueries({
+        queryKey: [
+          "subjects",
+          { schoolId: data.schoolId, educationYear: data.educationYear },
+        ],
+      });
+    },
+  });
 }
 
 export function useUpdateSubject() {

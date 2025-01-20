@@ -6,6 +6,9 @@ import Link from "next/link";
 import { MdDragIndicator } from "react-icons/md";
 import { FaUsers } from "react-icons/fa6";
 import ListMemberCircle from "../member/ListMemberCircle";
+import Image from "next/image";
+import { decodeBlurhashToCanvas } from "../../utils";
+import { defaultBlurHash } from "../../data";
 
 type Props = {
   subject: Subject;
@@ -48,20 +51,40 @@ function SubjectCard({ subject, teachers, classroom }: Props) {
         }}
         href={`/subject/${subject.id}`}
       >
-        <div className="w-full h-24 relative gradient-bg flex items-end p-5">
+        <div
+          className={`w-full h-24 relative shadow-inner ${
+            subject.backgroundImage ? "" : "gradient-bg"
+          }  flex items-end p-5`}
+        >
+          {subject.backgroundImage && (
+            <div className="gradient-shadow z-10 absolute w-full h-full top-0 bottom-0 right-0 left-0 m-auto"></div>
+          )}
+          {subject.backgroundImage && (
+            <Image
+              src={subject.backgroundImage}
+              fill
+              sizes="(max-width: 768px) 100vw, 33vw"
+              placeholder="blur"
+              blurDataURL={decodeBlurhashToCanvas(
+                subject.blurHash ?? defaultBlurHash
+              )}
+              alt="background"
+              className="object-cover "
+            />
+          )}
           <div
-            className="flex w-max text-xs  
+            className="flex w-max text-xs  z-20 
          items-center absolute top-2 left-2 m-auto bg-white text-black  border-white gap-1 border rounded-full px-2 py-1 justify-center"
           >
             SUBJECT
           </div>
-          <h1 className="text-white truncate w-48  text-lg font-semibold">
+          <h1 className="text-white z-20 truncate w-48  text-lg font-semibold">
             {subject.title}
           </h1>
           <div
             {...listeners}
             style={{ cursor: isDragging ? "grabbing" : "grab" }}
-            className="w-6 h-10 rounded-md text-white hover:bg-gray-300/50 flex 
+            className="w-6 h-10 z-20 rounded-md text-white hover:bg-gray-300/50 flex 
 items-center justify-center absolute top-2 right-2 "
           >
             <MdDragIndicator />

@@ -10,9 +10,9 @@ import createAxiosInstance from "./apiService";
 
 const axiosInstance = createAxiosInstance();
 
-type RequestCreateSubjectService = {
+export type RequestCreateSubjectService = {
   title: string;
-  educationYear: string;
+  educationYear: EducationYear;
   description: string;
   classId: string;
   schoolId: string;
@@ -87,7 +87,7 @@ export type RequestUpdateSubjectService = {
   query: { subjectId: string };
   body: {
     title?: string;
-    eduYear?: string;
+    educationYear?: string;
     description?: string;
     backgroundImage?: string;
     blurHash?: string;
