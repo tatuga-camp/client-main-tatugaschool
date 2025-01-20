@@ -138,7 +138,7 @@ function SubjectCreate({ onClose, schoolId, educationYear, toast }: Props) {
               ?.sort((a, b) => Number(a.order) - Number(b.order))
               .map((classroom) => {
                 return (
-                  <option value={classroom.id}>
+                  <option key={classroom.id} value={classroom.id}>
                     <div className="flex">
                       <span>{classroom.title}</span>
                       {" - "}
