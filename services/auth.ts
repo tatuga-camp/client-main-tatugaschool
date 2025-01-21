@@ -20,10 +20,10 @@ export async function SignInService(
       url: "/v1/auth/sign-in",
       data: { ...input },
     });
-
     return response.data;
   } catch (error: any) {
-    console.error("Sign-In request failed:", error.response.data);
+    console.log(error);
+    console.error("Sign-In request failed:", error.response?.data);
     throw error?.response?.data;
   }
 }
@@ -49,7 +49,8 @@ export async function SignUpService(
     });
     return response.data;
   } catch (error: any) {
-    console.error("Sign-Up request failed:", error.response.data);
+    console.log(error);
+    console.error("Sign-Up request failed:", error.response?.data);
     throw error?.response?.data;
   }
 }
@@ -71,7 +72,8 @@ export async function VerifyEmailService(
     });
     return response.data;
   } catch (error: any) {
-    console.error("Email Verification failed:", error.response.data);
+    console.log(error);
+    console.error("Email Verification failed:", error.response?.data);
     throw error?.response?.data;
   }
 }
@@ -93,7 +95,7 @@ export async function ForgotPasswordService(
     });
     return response.data;
   } catch (error: any) {
-    console.error("Forgot Password request failed:", error.response.data);
+    console.error("Forgot Password request failed:", error.response?.data);
     throw error?.response?.data;
   }
 }
@@ -141,56 +143,6 @@ export async function RefreshTokenService(
     return response.data;
   } catch (error: any) {
     console.error("Refresh Token request failed:", error.response.data);
-    throw error?.response?.data;
-  }
-}
-
-type RequestStudentRefetchTokenService = {
-  refreshToken: string;
-};
-
-type ResponseStudentRefetchTokenService = {
-  accessToken: string;
-};
-
-export async function StudentRefetchTokenService(
-  input: RequestStudentRefetchTokenService
-): Promise<ResponseStudentRefetchTokenService> {
-  try {
-    const response = await axiosInstance({
-      method: "POST",
-      url: "/v1/auth/student-refetch-token",
-      data: { ...input },
-    });
-    return response.data;
-  } catch (error: any) {
-    console.error("Student Refetch Token request failed:", error.response.data);
-    throw error?.response?.data;
-  }
-}
-
-type RequestStudentSignInService = {
-  email: string;
-  password: string;
-};
-
-type ResponseStudentSignInService = {
-  accessToken: string;
-  refreshToken: string;
-};
-
-export async function StudentSignInService(
-  input: RequestStudentSignInService
-): Promise<ResponseStudentSignInService> {
-  try {
-    const response = await axiosInstance({
-      method: "POST",
-      url: "/v1/auth/student-sign-in",
-      data: { ...input },
-    });
-    return response.data;
-  } catch (error: any) {
-    console.error("Student Sign-In request failed:", error.response.data);
     throw error?.response?.data;
   }
 }

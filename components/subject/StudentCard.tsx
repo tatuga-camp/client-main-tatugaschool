@@ -99,7 +99,7 @@ function StudentCard({
         className={`text-sm group-hover:text-white 
           ${student.select && showSelect ? "text-white" : "text-gray-800"}
           w-11/12 truncate text-center font-semibold text-gray-800
-          sm:text-base md:text-lg lg:text-xl`}
+          sm:text-base md:text-base lg:text-base`}
       >
         {student.firstName} {student.lastName}
       </h2>
@@ -107,7 +107,7 @@ function StudentCard({
         className={`text-xs
         ${student.select && showSelect ? "text-white" : "text-gray-500"}
         group-hover:text-white text-gray-500
-        sm:text-sm md:text-base`}
+        sm:text-sm md:text-sm`}
       >
         Number {student.number}
       </span>

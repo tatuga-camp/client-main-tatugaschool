@@ -178,14 +178,14 @@ function AttendanceView({
         </div>
       </section>
 
-      <div className="flex flex-col md:flex-row w-full h-full overflow-hidden">
+      <div className="flex flex-col md:flex-row w-full h-full md:h-max  md:max-h-96 overflow-auto ">
         <div className="w-full md:w-1/4 bg-white flex flex-col gap-1 items-center justify-center overflow-y-auto">
           <div className="w-20 h-20 relative">
             <Image
               src={selectAttendance.student.photo}
               alt="Student"
               fill
-              className="rounded-full"
+              className="rounded-full object-contain"
             />
           </div>
           <div className="w-full h-16 flex flex-col items-center justify-center">
@@ -240,18 +240,18 @@ function AttendanceView({
             <div className="flex flex-col gap-0 border-b">
               <div className="font-medium leading-4">Attendance Note</div>
               <span className="text-gray-400 text-xs">
-              Add note or edit note here
+                Add note or edit note here
               </span>
             </div>
             <div className="h-96 bg-slate-200">
               <TextEditor
-              value={attendanceData?.note || ""}
-              onChange={(value) =>
-                setAttendanceData((prev) => {
-                if (!prev) return prev;
-                return { ...prev, note: value };
-                })
-              }
+                value={attendanceData?.note || ""}
+                onChange={(value) =>
+                  setAttendanceData((prev) => {
+                    if (!prev) return prev;
+                    return { ...prev, note: value };
+                  })
+                }
               />
             </div>
           </div>

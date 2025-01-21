@@ -25,7 +25,7 @@ export const LoginForm = () => {
         },
       });
       const response = await SignInService({ email, password });
-
+      console.log(response);
       setAccessToken({ access_token: response?.accessToken });
       setRefreshToken({ refresh_token: response?.refreshToken });
 

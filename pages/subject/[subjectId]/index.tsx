@@ -377,9 +377,10 @@ function Index({ subjectId }: Props) {
         )}
         <header className="md:max-w-screen-md xl:max-w-screen-lg mx-auto w-full p-5 lg:py-10 pb-10 flex items-center justify-center">
           <section
-            className={`w-full z-30 overflow-hidden h-60 relative flex flex-col-reverse md:flex-row justify-between p-5 shadow-inner ${loading
-              ? "animate-pulse bg-gray-500/50"
-              : subject.data?.backgroundImage
+            className={`w-full z-30 overflow-hidden h-60 relative flex flex-col-reverse md:flex-row justify-between p-5 shadow-inner ${
+              loading
+                ? "animate-pulse bg-gray-500/50"
+                : subject.data?.backgroundImage
                 ? ""
                 : "gradient-bg"
             } lg:rounded-md`}
@@ -489,7 +490,7 @@ function Index({ subjectId }: Props) {
             </div>
           </section>
         </header>
-        <main className="">
+        <main>
           {selectMenu === "Subject" && (
             <Subject
               toast={toast}
@@ -500,7 +501,9 @@ function Index({ subjectId }: Props) {
           {selectMenu === "Classwork" && (
             <Classwork subjectId={subjectId} toast={toast} />
           )}
-          {selectMenu === "Grade" && <Grade />}
+          {selectMenu === "Grade" && (
+            <Grade toast={toast} subjectId={subjectId} />
+          )}
           {selectMenu === "Attendance" && (
             <Attendance toast={toast} subjectId={subjectId} />
           )}

@@ -73,8 +73,8 @@ function Attendance({
     React.useState<SelectAttendance | null>(null);
   const [selectTable, setSelectTable] = React.useState<
     | (AttendanceTable & {
-      statusLists: AttendanceStatusList[];
-    })
+        statusLists: AttendanceStatusList[];
+      })
     | null
   >(null);
   const [selectRow, setSelectRow] = React.useState<AttendanceRow | null>(null);
@@ -91,10 +91,11 @@ function Attendance({
   return (
     <>
       <div
-        className={`fixed ${selectAttendance ? "flex" : "hidden"
-          } top-0 bottom-0 right-0 left-0 flex items-center justify-center m-auto z-50`}
+        className={`fixed ${
+          selectAttendance ? "flex" : "hidden"
+        } top-0 bottom-0 right-0 left-0 flex items-center justify-center m-auto z-50`}
       >
-        <div className="bg-white w-7/12 p-2 rounded-md border">
+        <div className="bg-white w-full md:w-7/12 p-2 rounded-md border">
           {selectAttendance && selectTable && (
             <AttendanceView
               toast={toast}
@@ -112,8 +113,9 @@ function Attendance({
       </div>
 
       <div
-        className={`fixed ${selectRow ? "flex" : "hidden"
-          } top-0 bottom-0 right-0 left-0 flex items-center justify-center m-auto z-50`}
+        className={`fixed ${
+          selectRow ? "flex" : "hidden"
+        } top-0 bottom-0 right-0 left-0 flex items-center justify-center m-auto z-50`}
       >
         <div className="bg-white w-7/12 p-2 rounded-md border">
           {selectRow && (
@@ -132,8 +134,9 @@ function Attendance({
       </div>
 
       <div
-        className={`fixed ${triggerCreateAttendanceTable ? "flex" : "hidden"
-          } top-0 bottom-0 right-0 left-0 flex items-center justify-center m-auto z-50`}
+        className={`fixed ${
+          triggerCreateAttendanceTable ? "flex" : "hidden"
+        } top-0 bottom-0 right-0 left-0 flex items-center justify-center m-auto z-50`}
       >
         <div className=" w-96 h-max bg-background-color p-2 rounded-md border">
           {triggerCreateAttendanceTable && (
@@ -153,7 +156,9 @@ function Attendance({
 
       <header className="w-full flex flex-col md:flex-row justify-between p-3 md:px-5 md:max-w-screen-md xl:max-w-screen-lg gap-4 md:gap-0 mx-auto">
         <section className="text-center md:text-left">
-          <h1 className="text-2xl md:text-3xl font-semibold">Attendance Data</h1>
+          <h1 className="text-2xl md:text-3xl font-semibold">
+            Attendance Data
+          </h1>
           <span className="text-gray-400 text-sm md:text-base">
             You can view the attendance data of this subject here.
           </span>
@@ -201,18 +206,20 @@ function Attendance({
               <li
                 onClick={() => setSelectTable(table)}
                 key={table.id}
-                className={`w-max rounded-md shrink-0 p-3 cursor-pointer ${table.id === selectTable?.id
+                className={`w-max rounded-md shrink-0 p-3 cursor-pointer ${
+                  table.id === selectTable?.id
                     ? "border-primary-color gradient-bg text-white"
                     : "border bg-white  text-black"
-                  }`}
+                }`}
               >
                 <h2 className="text-base font-semibold">{table.title}</h2>
                 <p
                   className={`text-xs text-gray-400
-                  ${table.id === selectTable?.id
+                  ${
+                    table.id === selectTable?.id
                       ? " text-white"
                       : " text-gray-400"
-                    }
+                  }
                   `}
                 >
                   {table.description}
@@ -290,9 +297,10 @@ function DisplayAttendanceTable({
             <button
               onClick={() => setSelectMenu(menu.title)}
               className={`border-b w-full md:w-52 p-2 rounded-md transition flex justify-start items-center gap-1
-              ${menu.title === selectMenu
-                ? "border-primary-color text-primary-color bg-white drop-shadow"
-                : "border-gray-400"
+              ${
+                menu.title === selectMenu
+                  ? "border-primary-color text-primary-color bg-white drop-shadow"
+                  : "border-gray-400"
               }`}
             >
               {menu.icon} {menu.title}
@@ -315,19 +323,19 @@ function DisplayAttendanceTable({
               </th>
               {rows.isLoading
                 ? [...Array(20)].map((_, index) => {
-                  const number = getRandomSlateShade();
-                  const color = getSlateColorStyle(number);
-                  return (
-                    <th key={index} className="text-sm  font-semibold">
-                      <div
-                        style={color}
-                        className="w-40 h-14  animate-pulse"
-                      ></div>
-                    </th>
-                  );
-                })
+                    const number = getRandomSlateShade();
+                    const color = getSlateColorStyle(number);
+                    return (
+                      <th key={index} className="text-sm  font-semibold">
+                        <div
+                          style={color}
+                          className="w-40 h-14  animate-pulse"
+                        ></div>
+                      </th>
+                    );
+                  })
                 : selectMenu === "Attendances"
-                  ? rows?.data
+                ? rows?.data
                     ?.sort(
                       (a, b) =>
                         new Date(a.startDate).getTime() -
@@ -372,7 +380,7 @@ function DisplayAttendanceTable({
                         </th>
                       );
                     })
-                  : selectTable.statusLists.map((status) => {
+                : selectTable.statusLists.map((status) => {
                     return (
                       <th key={status.id} className="text-sm  font-semibold">
                         <button
@@ -395,8 +403,9 @@ function DisplayAttendanceTable({
                 const odd = index % 2 === 0;
                 return (
                   <tr
-                    className={` ${odd ? "bg-gray-200/20" : "bg-white"
-                      } hover:bg-gray-200/40 group`}
+                    className={` ${
+                      odd ? "bg-gray-200/20" : "bg-white"
+                    } hover:bg-gray-200/40 group`}
                     key={student.id}
                   >
                     <td
@@ -429,19 +438,19 @@ function DisplayAttendanceTable({
                     </td>
                     {rows.isLoading
                       ? [...Array(20)].map((_, index) => {
-                        const number = getRandomSlateShade();
-                        const color = getSlateColorStyle(number);
-                        return (
-                          <td key={index}>
-                            <div
-                              style={color}
-                              className="flex w-full h-14 animate-pulse"
-                            ></div>
-                          </td>
-                        );
-                      })
+                          const number = getRandomSlateShade();
+                          const color = getSlateColorStyle(number);
+                          return (
+                            <td key={index}>
+                              <div
+                                style={color}
+                                className="flex w-full h-14 animate-pulse"
+                              ></div>
+                            </td>
+                          );
+                        })
                       : selectMenu === "Attendances"
-                        ? rows?.data?.map((row, index) => {
+                      ? rows?.data?.map((row, index) => {
                           const attendance = row.attendances.find(
                             (a) => a.studentOnSubjectId === student.id
                           );
@@ -505,7 +514,7 @@ function DisplayAttendanceTable({
                             </td>
                           );
                         })
-                        : selectTable.statusLists.map((status) => {
+                      : selectTable.statusLists.map((status) => {
                           const attendances = rows.data
                             ?.map((row) => {
                               const attendances = row.attendances.filter(

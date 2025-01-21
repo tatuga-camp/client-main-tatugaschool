@@ -147,16 +147,23 @@ function AttendanceTableSetting({ table, toast, onDelete }: Props) {
   return (
     <div className="">
       <h1 className="text-lg sm:text-xl font-medium">General Settings</h1>
-      <h4 className="text-xs sm:text-sm text-gray-500">Manage your general settings</h4>
-      
-      <form onSubmit={handleUpdate} className="flex flex-col p-2 sm:p-4 min-h-80 bg-white rounded-md border gap-3 sm:gap-5 mt-3 sm:mt-5">
+      <h4 className="text-xs sm:text-sm text-gray-500">
+        Manage your general settings
+      </h4>
+
+      <form
+        onSubmit={handleUpdate}
+        className="flex flex-col p-2 sm:p-4 min-h-80 bg-white rounded-md border gap-3 sm:gap-5 mt-3 sm:mt-5"
+      >
         <div className="border-b w-full justify-between text-base sm:text-lg font-medium py-2 sm:py-3">
           Subject Information
         </div>
         <div className="grid grid-cols-1 w-full">
           <div className="grid grid-cols-1 gap-3 sm:gap-5 p-2 py-3 sm:py-4">
             <label className="w-full items-start sm:items-center grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-10">
-              <span className="text-sm sm:text-base text-black">Table Name:</span>
+              <span className="text-sm sm:text-base text-black">
+                Table Name:
+              </span>
               <input
                 required
                 type="text"
@@ -178,7 +185,9 @@ function AttendanceTableSetting({ table, toast, onDelete }: Props) {
           </div>
           <div className="grid grid-cols-1 bg-gray-200/20 gap-3 sm:gap-5 p-2 py-3 sm:py-4">
             <label className="w-full items-start sm:items-center grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-10">
-              <span className="text-sm sm:text-base text-black">Description:</span>
+              <span className="text-sm sm:text-base text-black">
+                Description:
+              </span>
               <input
                 required
                 type="text"
@@ -414,7 +423,9 @@ const AttendanceStatusRow = memo(
         } relative border-spacing-2 border-4 border-transparent`}
       >
         <td className="p-2 sm:p-3">
-          <div className="w-full rounded-md text-center text-sm sm:text-base">{data.title}</div>
+          <div className="w-full rounded-md text-center text-sm sm:text-base">
+            {data.title}
+          </div>
           {data.isHidden && (
             <div className="w-full absolute top-0 bottom-0 m-auto h-[1px] bg-black"></div>
           )}
@@ -454,7 +465,6 @@ const AttendanceStatusRow = memo(
                   handleChange({ name: "value", value: data })
                 }
                 disabled={data.isHidden}
-                className="text-sm sm:text-base"
               />
             </div>
           </div>
@@ -532,7 +542,11 @@ const CreateAttendanceStatus = memo(
       });
     };
     return (
-      <tr className={`${odd ? "bg-white" : "bg-gray-50"} gap-3 sm:gap-5 p-1 sm:p-2 py-2 sm:py-4 relative border-spacing-2 border-4 border-transparent`}>
+      <tr
+        className={`${
+          odd ? "bg-white" : "bg-gray-50"
+        } gap-3 sm:gap-5 p-1 sm:p-2 py-2 sm:py-4 relative border-spacing-2 border-4 border-transparent`}
+      >
         <td>
           <div className="w-full p-1 sm:p-2 rounded-md text-center">
             <input
@@ -585,7 +599,6 @@ const CreateAttendanceStatus = memo(
                 onValueChange={(data) => {
                   setCreateData((prev) => ({ ...prev, value: data }));
                 }}
-                className="text-sm sm:text-base"
               />
             </div>
           </div>

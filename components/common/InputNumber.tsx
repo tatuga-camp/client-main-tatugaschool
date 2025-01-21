@@ -43,7 +43,7 @@ function InputNumber({
       placeholder={placeholder}
       useGrouping={useGrouping}
       max={max}
-      onValueChange={(e) => onValueChange(e.value as number)}
+      onChange={(e) => onValueChange(e.value as number)}
       pt={{
         root: {
           className: " inline-flex w-full",

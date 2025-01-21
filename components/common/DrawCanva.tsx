@@ -64,6 +64,7 @@ function DraggableText({
   );
 }
 
+type ModeCanva = "default" | "draw" | "text-edit";
 const DrawCanva = () => {
   const canvasRef = useRef<CanvasDraw>(null);
 

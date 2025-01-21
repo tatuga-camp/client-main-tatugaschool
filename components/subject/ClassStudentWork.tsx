@@ -20,14 +20,19 @@ import {
   BsLayoutSidebarInset,
   BsLayoutSidebarInsetReverse,
 } from "react-icons/bs";
-import { BiBookOpen } from "react-icons/bi";
+import { BiBookOpen, BiComment } from "react-icons/bi";
 import TextEditor from "../common/TextEditor";
 import InputNumber from "../common/InputNumber";
 import { FaRegFile, FaRegFileImage } from "react-icons/fa6";
-import { MdDelete } from "react-icons/md";
+import { MdAssignment, MdDelete } from "react-icons/md";
 import Swal from "sweetalert2";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { Toast } from "primereact/toast";
+import FileStudentAssignmentCard from "./FileStudentAssignmentCard";
+import AssignmentText from "./AssignmentText";
+import { IoMdClose } from "react-icons/io";
+import { ProgressBar } from "primereact/progressbar";
+import CommentSection from "./CommentSection";
 
 type Props = {
   assignmentId: string;
@@ -36,6 +41,7 @@ type Props = {
 function ClassStudentWork({ assignmentId, onScroll }: Props) {
   const studentOnAssignments = useGetStudentOnAssignments({
     assignmentId,
+    refetchInterval: 5000,
   });
   const [triggerHideStudentList, setTriggerHideStudentList] =
     React.useState(false);
@@ -47,6 +53,22 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
   const [selectStudentWork, setSelectStudentWork] = React.useState<
     (StudentOnAssignment & { files: FileOnStudentOnAssignment[] }) | null
   >(null);
+
+  // render for update
+  useEffect(() => {
+    if (selectStudentWork && studentOnAssignments.data) {
+      setSelectStudentWork((prevSelectedStudent) => {
+        if (!prevSelectedStudent) return null;
+        const updateStudnet =
+          studentOnAssignments.data.find(
+            (studentOnAssignment) =>
+              studentOnAssignment.id === prevSelectedStudent.id
+          ) ?? null;
+
+        return updateStudnet;
+      });
+    }
+  }, [studentOnAssignments.data]);
 
   const handleSelectStudentWork = useCallback(
     (student: StudentOnAssignment & { files: FileOnStudentOnAssignment[] }) => {
@@ -69,7 +91,11 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
        flex flex-col gap-2 bg-white  h-max border-r sticky top-0`}
       >
         <div className="text-xl w-full justify-between flex gap-2 items-center ">
-          {!triggerHideStudentList && "Student"}
+          {triggerHideStudentList
+            ? ""
+            : studentOnAssignments.isFetching
+            ? "Student Loading.."
+            : "Student"}
           <button
             type="button"
             className={`${
@@ -168,7 +194,7 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
       <section className="w-full  flex-col min-h-screen h-max flex  items-start justify-start">
         {selectStudentWork && assignment.data && (
           <StudentWork
-            student={selectStudentWork}
+            studentOnAssignment={selectStudentWork}
             assignment={assignment.data}
           />
         )}
@@ -276,13 +302,31 @@ const StudentList = React.memo(function StudentList({
   );
 });
 
+const menuViewStudentWorks = [
+  {
+    title: "Works",
+    icon: <MdAssignment />,
+  },
+  {
+    title: "Comments",
+    icon: <BiComment />,
+  },
+] as const;
+
+type MenuViewStudentWorks = (typeof menuViewStudentWorks)[number]["title"];
 type PropsStudentWork = {
-  student: StudentOnAssignment & { files: FileOnStudentOnAssignment[] };
+  studentOnAssignment: StudentOnAssignment & {
+    files: FileOnStudentOnAssignment[];
+  };
   assignment: Assignment;
 };
-function StudentWork({ student, assignment }: PropsStudentWork) {
+function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
   const update = useUpdateStudentOnAssignments();
   const toast = React.useRef<Toast>(null);
+  const [selectMenu, setSelectMenu] =
+    React.useState<MenuViewStudentWorks>("Works");
+  const [selectAssignmentText, setSelectAssignmentText] =
+    React.useState<FileOnStudentOnAssignment | null>(null);
   const [studentWork, setStudentWork] = React.useState<{
     score?: number;
     body?: string;
@@ -291,18 +335,18 @@ function StudentWork({ student, assignment }: PropsStudentWork) {
 
   useEffect(() => {
     setStudentWork({
-      score: student.score,
-      body: student.body,
-      files: student.files,
+      score: studentOnAssignment.score,
+      body: studentOnAssignment.body,
+      files: studentOnAssignment.files,
     });
-  }, [student]);
+  }, [studentOnAssignment]);
 
   const handleSaveChange = async (e: React.FormEvent) => {
     try {
       e.preventDefault();
       await update.mutateAsync({
         query: {
-          studentOnAssignmentId: student.id,
+          studentOnAssignmentId: studentOnAssignment.id,
         },
         body: {
           score: studentWork?.score,
@@ -333,7 +377,34 @@ function StudentWork({ student, assignment }: PropsStudentWork) {
   return (
     <>
       <Toast ref={toast} />
+      {selectAssignmentText && (
+        <div className="w-screen h-screen flex items-center justify-center fixed z-50 top-0 right-0 bottom-0 left-0 m-auto">
+          <div
+            className="w-full md:w-10/12 lg:w-[35rem] relative 
+          h-max p-3 bg-white rounded-md"
+          >
+            <div className="w-full flex justify-end">
+              <button
+                onClick={() => setSelectAssignmentText(null)}
+                className="text-lg  hover:bg-gray-300/50 w-6 h-6 rounded flex items-center justify-center font-semibold"
+              >
+                <IoMdClose />
+              </button>
+            </div>
 
+            <AssignmentText
+              onClose={() => setSelectAssignmentText(null)}
+              text={selectAssignmentText}
+              studentOnAssignmentId={studentOnAssignment.id}
+              toast={toast}
+            />
+          </div>
+          <footer
+            className="w-screen h-screen bg-black/50 fixed
+          -z-10 top-0 right-0 bottom-0 left-0 m-auto"
+          ></footer>
+        </div>
+      )}
       <form
         onSubmit={handleSaveChange}
         className="w-full bg-white  h-16 flex items-center justify-between p-2 px-4"
@@ -341,23 +412,24 @@ function StudentWork({ student, assignment }: PropsStudentWork) {
         <div className="flex gap-2 pl-2 h-14 items-center">
           <div className="w-10 h-10 relative rounded-md ring-1  overflow-hidden">
             <Image
-              src={student.photo}
-              alt={student.firstName}
+              src={studentOnAssignment.photo}
+              alt={studentOnAssignment.firstName}
               fill
               placeholder="blur"
               sizes="(max-width: 768px) 100vw, 33vw"
               blurDataURL={decodeBlurhashToCanvas(
-                student.blurHash ?? defaultBlurHash
+                studentOnAssignment.blurHash ?? defaultBlurHash
               )}
               className="object-cover"
             />
           </div>
           <div className="flex flex-col  items-start">
             <h1 className="text-sm font-semibold">
-              {student.firstName} {student.lastName}{" "}
+              {studentOnAssignment.firstName} {studentOnAssignment.lastName}{" "}
             </h1>
             <p className="text-xs text-gray-500">
-              Number {student.number} {!student.isAssigned && "(NOT Assigned)"}
+              Number {studentOnAssignment.number}{" "}
+              {!studentOnAssignment.isAssigned && "(NOT Assigned)"}
             </p>
           </div>
         </div>
@@ -397,48 +469,45 @@ function StudentWork({ student, assignment }: PropsStudentWork) {
           </button>
         </div>
       </form>
-      <main className="w-full flex  flex-col gap-2">
-        <div className="h-96  w-full">
-          <TextEditor
-            value={studentWork?.body ?? ""}
-            onChange={(c) => {
-              setStudentWork((prev) => ({
-                ...prev,
-                body: c,
-              }));
-            }}
-          />
-        </div>
-        <ul className="w-full h-max flex flex-col gap-2">
-          {studentWork?.files?.map((file, index) => {
-            const isImage = file.type.includes("image");
-            const name = file.url.split("/").pop();
+      <main className="w-full bg-white p-5 flex pb-40  flex-col gap-2">
+        <div className="w-full font-semibold text-lg gap-3 flex border-b pb-2">
+          {menuViewStudentWorks.map((menu, index) => {
             return (
-              <li
+              <button
+                onClick={() => setSelectMenu(menu.title)}
                 key={index}
-                className="w-full h-20 flex overflow-hidden rounded-md items-center justify-between  bg-white border"
+                type="button"
+                className={`${
+                  menu.title === selectMenu ? "text-black" : "text-gray-500"
+                } flex items-center gap-2
+                
+                `}
               >
-                <div className="w-full h-full flex items-center justify-start gap-2">
-                  <div
-                    className="w-16 gradient-bg text-white text-lg flex items-center justify-center
-               border-r h-full"
-                  >
-                    {isImage ? <FaRegFileImage /> : <FaRegFile />}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span>{name}</span>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  className="text-xl mr-5 hover:bg-red-300/50 p-2 rounded-full active:scale-105 text-red-500"
-                >
-                  <MdDelete />
-                </button>
-              </li>
+                {menu.icon}
+                {menu.title}
+              </button>
             );
           })}
-        </ul>
+        </div>
+        {selectMenu === "Works" && (
+          <ul className="w-96 min-h-96 h-max flex flex-col gap-2">
+            {studentWork?.files?.map((file, index) => {
+              return (
+                <FileStudentAssignmentCard
+                  onShowText={() => setSelectAssignmentText(file)}
+                  file={file}
+                  key={index}
+                />
+              );
+            })}
+            {studentOnAssignment.files.length === 0 && (
+              <p>Student has not upload any files</p>
+            )}
+          </ul>
+        )}
+        {selectMenu === "Comments" && (
+          <CommentSection studentOnAssignmentId={studentOnAssignment.id} />
+        )}
       </main>
     </>
   );
