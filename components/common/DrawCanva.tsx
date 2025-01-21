@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import CanvasDraw from "react-canvas-draw";
 
 import {
@@ -20,6 +20,8 @@ interface ITextObject {
   fontSize: number;
 }
 
+type ModeType = "draw" | "mouse" | "text-edit" | "eraser";
+
 function DraggableText({
   obj,
   mode,
@@ -27,12 +29,12 @@ function DraggableText({
   handleTextClick,
 }: {
   obj: ITextObject;
-  mode: "draw" | "text-edit";
+  mode: ModeType;
   currentTextId: number | null;
   handleTextClick: (id: number) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id: String(obj.id), 
+    id: String(obj.id),
   });
 
   const style: React.CSSProperties = {
@@ -40,10 +42,10 @@ function DraggableText({
     left: obj.x,
     top: obj.y,
     transform: CSS.Translate.toString(transform),
-    border: mode === "draw" ? "1px dashed #ccc" : "none",
+    border: mode === "mouse" ? "1px dashed #ccc" : "none",
     color: obj.color,
     fontSize: `${obj.fontSize}px`,
-    cursor: mode === "draw" ? "move" : "default",
+    cursor: mode === "mouse" ? "move" : "default",
     pointerEvents: currentTextId === obj.id ? "none" : "auto",
   };
 
@@ -51,7 +53,9 @@ function DraggableText({
     <div
       ref={setNodeRef}
       style={style}
-      onDoubleClick={() => handleTextClick(obj.id)}
+      onDoubleClick={() => {
+        handleTextClick(obj.id);
+      }}
       {...attributes}
       {...listeners}
     >
@@ -61,19 +65,20 @@ function DraggableText({
 }
 
 const DrawCanva = () => {
-  const [image, setImage] = useState<string | null>(null);
-  const canvasRef = useRef<CanvasDraw & { getDataURL(): string }>(null);
+  const canvasRef = useRef<CanvasDraw>(null);
 
+  const [image, setImage] = useState<string | null>(null);
   const imageRef = useRef<HTMLImageElement>(null);
 
-  const [mode, setMode] = useState<"draw" | "text-edit">("draw");
+  const [mode, setMode] = useState<ModeType>("draw");
 
   const [brushColor, setBrushColor] = useState<string>("#000000");
   const [brushRadius, setBrushRadius] = useState<number>(5);
 
   const [textObjects, setTextObjects] = useState<ITextObject[]>([]);
-
-  const [textObjectsHistory, setTextObjectsHistory] = useState<ITextObject[][]>([]);
+  const [textObjectsHistory, setTextObjectsHistory] = useState<ITextObject[][]>(
+    []
+  );
 
   const [currentText, setCurrentText] = useState<string>("");
   const [currentTextId, setCurrentTextId] = useState<number | null>(null);
@@ -83,6 +88,26 @@ const DrawCanva = () => {
 
   const [canvasWidth, setCanvasWidth] = useState<number>(1000);
   const [canvasHeight, setCanvasHeight] = useState<number>(1000);
+
+  // สำคัญ: ให้ effect นี้รันซ้ำทั้งตอน mode เปลี่ยน และ image เปลี่ยน (เช่นหลังอัปโหลดรูป)
+  useEffect(() => {
+    const canvasDraw = canvasRef.current;
+    if (!canvasDraw) return;
+
+    const drawingCanvas = canvasDraw.canvas.drawing;
+    if (!drawingCanvas) return;
+
+    const ctx = drawingCanvas.getContext("2d");
+    if (!ctx) return;
+
+    if (mode === "eraser") {
+      // ลบเส้นด้วย destination-out
+      ctx.globalCompositeOperation = "destination-out";
+    } else {
+      // วาดปกติ
+      ctx.globalCompositeOperation = "source-over";
+    }
+  }, [mode, image]);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -136,7 +161,8 @@ const DrawCanva = () => {
   };
 
   const handleTextClick = (id: number) => {
-    if (mode === "draw") {
+    // ให้แก้ไขข้อความได้หากเป็น draw/mouse
+    if (mode === "draw" || mode === "mouse") {
       setMode("text-edit");
       setCurrentTextId(id);
       const textObj = textObjects.find((obj) => obj.id === id);
@@ -154,7 +180,8 @@ const DrawCanva = () => {
 
   const handleUndo = () => {
     if (textObjectsHistory.length > 0) {
-      const lastState = textObjectsHistory[textObjectsHistory.length - 1];
+      const lastState =
+        textObjectsHistory[textObjectsHistory.length - 1];
       setTextObjects(lastState);
       setTextObjectsHistory(textObjectsHistory.slice(0, -1));
     } else {
@@ -162,59 +189,71 @@ const DrawCanva = () => {
     }
   };
 
-  const handleSave = () => {
-    if (canvasRef.current) {
-      const canvas = document.createElement("canvas");
-      canvas.width = canvasWidth;
-      canvas.height = canvasHeight;
-      const context = canvas.getContext("2d");
-
-      if (context) {
-        if (image) {
-          const img = new Image();
-          img.src = image;
-          img.onload = () => {
-            context.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-            const drawing = new Image();
-            drawing.src = canvasRef.current?.getDataURL() || "";
-            drawing.onload = () => {
-              context.drawImage(drawing, 0, 0);
-
-              textObjects.forEach((obj) => {
-                context.fillStyle = obj.color;
-                context.font = `${obj.fontSize}px Arial`;
-                context.fillText(obj.text, obj.x, obj.y);
-              });
-
-              const newImage = canvas.toDataURL("image/png");
-              const link = document.createElement("a");
-              link.href = newImage;
-              link.download = "merged-image.png";
-              link.click();
-            };
-          };
-        } else {
-          const drawing = new Image();
-          drawing.src = canvasRef.current?.getDataURL() || "";
-          drawing.onload = () => {
-            context.drawImage(drawing, 0, 0);
-
-            textObjects.forEach((obj) => {
-              context.fillStyle = obj.color;
-              context.font = `${obj.fontSize}px Arial`;
-              context.fillText(obj.text, obj.x, obj.y);
-            });
-
-            const newImage = canvas.toDataURL("image/png");
-            const link = document.createElement("a");
-            link.href = newImage;
-            link.download = "merged-image.png";
-            link.click();
-          };
-        }
-      }
+  const handleDeleteCurrentText = () => {
+    if (currentTextId !== null) {
+      saveTextObjectsToHistory();
+      setTextObjects((prev) => prev.filter((obj) => obj.id !== currentTextId));
+      setMode("draw");
+      setCurrentTextId(null);
+      setCurrentText("");
     }
+  };
+
+  const handleClearAllText = () => {
+    if (textObjects.length > 0) {
+      saveTextObjectsToHistory();
+      setTextObjects([]);
+    }
+  };
+
+  const handleSave = () => {
+    if (!canvasRef.current) return;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+    const context = canvas.getContext("2d");
+    if (!context) return;
+
+    // วาดรูปพื้นหลัง
+    if (image) {
+      const img = new Image();
+      img.src = image;
+      img.onload = () => {
+        context.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        // วาดลายเส้น (canvasRef)
+        const drawing = new Image();
+        drawing.src = canvasRef.current?.getDataURL() || "";
+        drawing.onload = () => {
+          context.drawImage(drawing, 0, 0);
+          // วาด text
+          drawTexts(context);
+        };
+      };
+    } else {
+      // ถ้าไม่มีภาพ ก็วาดแค่ลายเส้นกับข้อความ
+      const drawing = new Image();
+      drawing.src = canvasRef.current?.getDataURL() || "";
+      drawing.onload = () => {
+        context.drawImage(drawing, 0, 0);
+        drawTexts(context);
+      };
+    }
+  };
+
+  const drawTexts = (context: CanvasRenderingContext2D) => {
+    textObjects.forEach((obj) => {
+      context.fillStyle = obj.color;
+      context.font = `${obj.fontSize}px Arial`;
+      context.fillText(obj.text, obj.x, obj.y);
+    });
+    // แปลงเป็นรูปแล้วดาวน์โหลด
+    const newImage = context.canvas.toDataURL("image/png");
+    const link = document.createElement("a");
+    link.href = newImage;
+    link.download = "merged-image.png";
+    link.click();
   };
 
   const mouseSensor = useSensor(MouseSensor, {
@@ -225,16 +264,17 @@ const DrawCanva = () => {
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, delta } = event;
     const activeId = Number(active.id);
-
     setTextObjects((prev) =>
-      prev.map((obj) => {
-        if (obj.id === activeId) {
-          return { ...obj, x: obj.x + delta.x, y: obj.y + delta.y };
-        }
-        return obj;
-      })
+      prev.map((obj) =>
+        obj.id === activeId
+          ? { ...obj, x: obj.x + delta.x, y: obj.y + delta.y }
+          : obj
+      )
     );
   };
+
+  // ถ้าไม่ใช่ draw/eraser => disable canvas
+  const isCanvasDisabled = mode !== "draw" && mode !== "eraser";
 
   return (
     <div className="flex flex-col items-center">
@@ -261,6 +301,16 @@ const DrawCanva = () => {
             className="ml-2"
           />
         </label>
+
+        <button onClick={() => setMode("draw")} className="p-2 bg-blue-500 text-white">
+          Draw Mode
+        </button>
+        <button onClick={() => setMode("mouse")} className="p-2 bg-yellow-500 text-white">
+          Mouse Mode
+        </button>
+        <button onClick={() => setMode("eraser")} className="p-2 bg-red-400 text-white">
+          Eraser Mode
+        </button>
         <button onClick={handleAddText} className="p-2 bg-green-500 text-white">
           Add Text
         </button>
@@ -298,20 +348,22 @@ const DrawCanva = () => {
               className="ml-2 border w-16"
             />
           </label>
-          <button
-            onClick={handleFinishEditing}
-            className="p-2 bg-blue-500 text-white"
-          >
+          <button onClick={handleFinishEditing} className="p-2 bg-blue-500 text-white">
             Done Editing
+          </button>
+          <button onClick={handleDeleteCurrentText} className="p-2 bg-red-500 text-white">
+            Delete This Text
           </button>
         </div>
       )}
 
       <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+        {/* Container สำหรับซ้อนรูปพื้นหลัง + CanvasDraw (โปร่งใส) */}
         <div
           className="relative mt-4"
           style={{ width: canvasWidth, height: canvasHeight }}
         >
+          {/* รูปพื้นหลัง */}
           {image && (
             <img
               ref={imageRef}
@@ -321,6 +373,7 @@ const DrawCanva = () => {
             />
           )}
 
+          {/* CanvasDraw โปร่งใส วางข้างบน */}
           <CanvasDraw
             ref={canvasRef}
             canvasWidth={canvasWidth}
@@ -330,8 +383,11 @@ const DrawCanva = () => {
             className="border"
             hideGrid={true}
             lazyRadius={0}
+            backgroundColor="rgba(0,0,0,0)"
+            disabled={isCanvasDisabled}
           />
 
+          {/* ข้อความที่ลากได้ */}
           {textObjects.map((obj) => (
             <DraggableText
               key={obj.id}
@@ -344,24 +400,29 @@ const DrawCanva = () => {
         </div>
       </DndContext>
 
-      <button onClick={handleSave} className="mt-4 p-2 bg-blue-500 text-white">
-        Save Changes
-      </button>
-      <button
-        onClick={() => canvasRef.current?.clear()}
-        className="mt-4 p-2 bg-red-500 text-white"
-      >
-        Clear Drawing
-      </button>
-      <button
-        onClick={() => setImage(null)}
-        className="mt-4 p-2 bg-yellow-500 text-white"
-      >
-        Clear Image
-      </button>
-      <button onClick={handleUndo} className="mt-4 p-2 bg-gray-500 text-white">
-        Undo
-      </button>
+      <div className="mt-4 flex space-x-2">
+        <button onClick={handleSave} className="p-2 bg-blue-500 text-white">
+          Save Merged
+        </button>
+        <button
+          onClick={() => canvasRef.current?.clear()}
+          className="p-2 bg-red-500 text-white"
+        >
+          Clear Drawing
+        </button>
+        <button
+          onClick={() => setImage(null)}
+          className="p-2 bg-yellow-500 text-white"
+        >
+          Clear Image
+        </button>
+        <button onClick={handleClearAllText} className="p-2 bg-pink-500 text-white">
+          Clear All Text
+        </button>
+        <button onClick={handleUndo} className="p-2 bg-gray-500 text-white">
+          Undo
+        </button>
+      </div>
     </div>
   );
 };
