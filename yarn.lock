@@ -2670,11 +2670,6 @@ randombytes@^2.1.0:
   dependencies:
     safe-buffer "^5.1.0"
 
-re-resizable@6.10.3:
-  version "6.10.3"
-  resolved "https://registry.npmjs.org/re-resizable/-/re-resizable-6.10.3.tgz"
-  integrity sha512-zvWb7X3RJMA4cuSrqoxgs3KR+D+pEXnGrD2FAD6BMYAULnZsSF4b7AOVyG6pC3VVNVOtlagGDCDmZSwWLjjBBw==
-
 react-canvas-draw@^1.2.1:
   version "1.2.1"
   resolved "https://registry.npmjs.org/react-canvas-draw/-/react-canvas-draw-1.2.1.tgz"
@@ -2700,7 +2695,7 @@ react-dom@^18:
     loose-envify "^1.1.0"
     scheduler "^0.23.2"
 
-react-draggable@^4.4.6, react-draggable@4.4.6:
+react-draggable@^4.4.6:
   version "4.4.6"
   resolved "https://registry.npmjs.org/react-draggable/-/react-draggable-4.4.6.tgz"
   integrity sha512-LtY5Xw1zTPqHkVmtM3X8MUOxNDOUhv/khTgBgrUvwaS064bwVvxT+q5El0uUFNx5IEPKXuRejr7UqLwBIg5pdw==
@@ -2722,15 +2717,6 @@ react-property@2.0.2:
   version "2.0.2"
   resolved "https://registry.npmjs.org/react-property/-/react-property-2.0.2.tgz"
   integrity sha512-+PbtI3VuDV0l6CleQMsx2gtK0JZbZKbpdu5ynr+lbsuvtmgbNcS3VM0tuY2QjFNOcWxvXeHjDpy42RO+4U2rug==
-
-react-rnd@^10.4.13:
-  version "10.4.14"
-  resolved "https://registry.npmjs.org/react-rnd/-/react-rnd-10.4.14.tgz"
-  integrity sha512-NLGc3IymymumPfHy3DXiHNIMOiTlj6xBNb2boHqrtwCgYDasNarpg8tdUY36JlJbrs0E4BvjYBkfEGqUPBsukg==
-  dependencies:
-    re-resizable "6.10.3"
-    react-draggable "4.4.6"
-    tslib "2.6.2"
 
 react-transition-group@^4.4.1:
   version "4.4.5"

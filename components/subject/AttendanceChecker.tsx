@@ -295,7 +295,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
             </div>
             <button
               onClick={() => setTriggerNote((prev) => !prev)}
-              className="main-button h-8 px-4 ring-1 ring-blue-600 whitespace-nowrap sm:self-end"
+              className="main-button flex items-center justify-center h-8 px-4 ring-1 ring-blue-600 whitespace-nowrap sm:self-end"
             >
               {triggerNote ? (
                 <div className="flex items-center justify-center gap-1">
