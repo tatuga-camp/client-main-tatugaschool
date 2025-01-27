@@ -31,12 +31,3 @@ export function useGetSchool({
     queryFn: () => GetSchoolByIdService({ schoolId }),
   });
 }
-
-export function useGetMemberBySchool(request: {
-  schoolId: string;
-}): UseQueryResult<MemberOnSchool[], Error> {
-  return useQuery({
-    queryKey: ["member-on-school", { schoolId: request.schoolId }],
-    queryFn: () => GetMembersBySchoolIdService({ schoolId: request.schoolId }),
-  });
-}

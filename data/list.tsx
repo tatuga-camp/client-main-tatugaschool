@@ -10,7 +10,7 @@ import { PiWechatLogoBold } from "react-icons/pi";
 import { IoHome } from "react-icons/io5";
 import { TbReportAnalytics } from "react-icons/tb";
 
-export const ListRoles: { title: MemberRole; describe: string }[] = [
+export const ListSubjectRoles: { title: MemberRole; describe: string }[] = [
   {
     title: "ADMIN",
     describe: "Full access to all features",
@@ -18,6 +18,17 @@ export const ListRoles: { title: MemberRole; describe: string }[] = [
   {
     title: "TEACHER",
     describe: "Can view and manage students, but cannot delete the subject",
+  },
+];
+
+export const ListSchoolRoles: { title: MemberRole; describe: string }[] = [
+  {
+    title: "ADMIN",
+    describe: "Full access to all features",
+  },
+  {
+    title: "TEACHER",
+    describe: "Can view and manage students, but cannot delete the school",
   },
 ];
 

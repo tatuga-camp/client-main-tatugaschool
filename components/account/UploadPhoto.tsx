@@ -51,7 +51,7 @@ function UploadPhoto({ user, updateUser }: Prosp) {
       setLoading(false);
     } catch (error) {
       setLoading(false);
-      console.log(error);
+      console.error(error);
       let result = error as ErrorMessages;
       Swal.fire({
         title: result.error ? result.error : "Something Went Wrong",

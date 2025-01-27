@@ -8,3 +8,4 @@ export * from "./student-assignment";
 export * from "./grade";
 export * from "./classroom";
 export * from "./student";
+export * from "./memberOnSchool";

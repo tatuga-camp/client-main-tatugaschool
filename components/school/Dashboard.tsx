@@ -4,7 +4,7 @@ import { MemberOnSchool, School, User } from "@/interfaces";
 import HeaderSection from "./HeaderSection";
 import TabsMenuSection from "./TabsMenuSection";
 import InviteJoinSchoolModal from "./InviteJoinSchoolModal";
-import { useGetMemberBySchool } from "../../react-query";
+import { useGetMemberOnSchoolBySchool } from "../../react-query/memberOnSchool";
 
 interface DashboardProps {
   school: School;
@@ -15,10 +15,10 @@ const Dashboard: React.FC<DashboardProps> = ({ school }) => {
 
   const handleInvite = () => setIsInviteModalOpen(true);
   const handleClose = () => setIsInviteModalOpen(false);
-  const members = useGetMemberBySchool({ schoolId: school.id });
+  const members = useGetMemberOnSchoolBySchool({ schoolId: school.id });
   return (
     <>
-      <main className="bg-gray-50 overflow-auto">
+      <main className="bg-gray-50  pb-40 ">
         {members.data && (
           <HeaderSection
             school={school}

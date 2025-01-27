@@ -16,7 +16,7 @@ import {
 import Swal from "sweetalert2";
 import { ProgressSpinner } from "primereact/progressspinner";
 import DropdownRole from "../common/DropdownRole";
-import { ListRoles } from "../../data/list";
+import { ListSubjectRoles } from "../../data";
 
 type Props = {
   subjectId: string;
@@ -137,7 +137,9 @@ function InviteTeacher({ subjectId, setTrigger }: Props) {
     <div className="w-full sm:w-max h-[30rem] flex flex-col items-center rounded-md justify-start bg-white">
       <header className="w-full p-3 sm:p-5 flex justify-between border-b pb-2 sm:pb-3">
         <div className="flex items-center gap-1">
-          <h1 className="text-base sm:text-lg font-semibold">Invite Co-Teacher</h1>
+          <h1 className="text-base sm:text-lg font-semibold">
+            Invite Co-Teacher
+          </h1>
           {teacherOnSubjects.isLoading ? (
             <div className="w-8 sm:w-10 h-2 sm:h-3 rounded-md bg-gray-300/50 animate-pulse"></div>
           ) : (
@@ -179,7 +181,7 @@ function InviteTeacher({ subjectId, setTrigger }: Props) {
                     selectRole={selectRole}
                     setTrigger={setTriggerChangeRole}
                     trigger={triggerChangeRole}
-                    listRoles={ListRoles}
+                    listRoles={ListSubjectRoles}
                   />
                 </div>
               </div>
@@ -202,7 +204,8 @@ function InviteTeacher({ subjectId, setTrigger }: Props) {
           </label>
           <div className="w-full flex">
             <div className="text-xs break-words max-w-full sm:max-w-96 max-h-10 text-red-600">
-              {createTeacherOnSubject.error && createTeacherOnSubject.error.message}
+              {createTeacherOnSubject.error &&
+                createTeacherOnSubject.error.message}
             </div>
           </div>
         </form>
@@ -211,6 +214,7 @@ function InviteTeacher({ subjectId, setTrigger }: Props) {
           <h2 className="font-semibold text-sm">Current Co-Teachers</h2>
           {user.data && teacherOnSubjects.data && members && (
             <ListMembers
+              listRoles={ListSubjectRoles}
               onRoleChange={(data) =>
                 handleUpdateRole({
                   id: data.memberId,
@@ -219,7 +223,7 @@ function InviteTeacher({ subjectId, setTrigger }: Props) {
               }
               user={user.data}
               members={members}
-              listMembers={teacherOnSubjects.data}
+              currentListMembers={teacherOnSubjects.data}
               handleSummit={() => {}}
             />
           )}

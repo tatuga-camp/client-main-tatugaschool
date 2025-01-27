@@ -1,5 +1,5 @@
 import Dashboard from "@/components/school/Dashboard";
-import { useGetMemberBySchool, useGetSchool, useGetUser } from "@/react-query";
+import { useGetSchool, useGetUser } from "@/react-query";
 import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import { ProgressSpinner } from "primereact/progressspinner";
@@ -9,10 +9,11 @@ import { MenuSchool } from "../../data";
 import Classes from "../../components/school/Classrooms";
 import { validateMongodbId } from "../../utils";
 import Subjects from "../../components/school/Subjects";
+import DefaultLayout from "../../components/layout/DefaultLayout";
 
 const SchoolPage = ({ schoolId }: { schoolId: string }) => {
   const router = useRouter();
-  const { data: school, isLoading: isSchoolLoading } = useGetSchool({
+  const school = useGetSchool({
     schoolId: schoolId,
   });
   const [selectMenu, setSelectMenu] = React.useState<MenuSchool>("School");
@@ -23,7 +24,7 @@ const SchoolPage = ({ schoolId }: { schoolId: string }) => {
     }
   }, [router.isReady]);
 
-  if (isSchoolLoading || !school) {
+  if (school.isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
         <ProgressSpinner />
@@ -31,6 +32,39 @@ const SchoolPage = ({ schoolId }: { schoolId: string }) => {
     );
   }
 
+  if (school.error) {
+    return (
+      <DefaultLayout>
+        <div className="flex justify-center gap-3 flex-col items-center h-screen">
+          <h1 className="text-4xl text-red-500">
+            {school.error.message || "Something went wrong"}
+          </h1>
+          <button
+            onClick={() => router.back()}
+            className="bg-primary-color w-40 text-white px-4 py-2 rounded-md"
+          >
+            Back
+          </button>
+        </div>
+      </DefaultLayout>
+    );
+  }
+
+  if (!school.data) {
+    return (
+      <DefaultLayout>
+        <div className="flex justify-center gap-3 flex-col items-center h-screen">
+          <h1 className="text-4xl text-red-500">No School Found</h1>
+          <button
+            onClick={() => router.back()}
+            className="bg-primary-color w-40 text-white px-4 py-2 rounded-md"
+          >
+            Back
+          </button>
+        </div>
+      </DefaultLayout>
+    );
+  }
   return (
     <>
       <SchoolLayout
@@ -40,7 +74,7 @@ const SchoolPage = ({ schoolId }: { schoolId: string }) => {
         selectMenu={selectMenu}
         schoolId={schoolId}
       >
-        {selectMenu === "School" && <Dashboard school={school} />}
+        {selectMenu === "School" && <Dashboard school={school.data} />}
         {selectMenu === "Classes" && <Classes schoolId={schoolId} />}
         {selectMenu === "Subjects" && <Subjects schoolId={schoolId} />}
       </SchoolLayout>

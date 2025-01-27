@@ -20,11 +20,15 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ErrorMessages } from "../../interfaces";
 import { ProgressSpinner } from "primereact/progressspinner";
 import ChangePassword from "./ChangePassword";
+import ManageInvite from "./ManageInvite";
+import { useRouter } from "next/router";
 
-const menuItems = ["General", "Change Password"];
+const menuItems = ["General", "Change Password", "Invitations"] as const;
+type MenuItems = (typeof menuItems)[number];
 const AccountComponent = () => {
+  const router = useRouter();
   const queryClient = useQueryClient();
-  const [activeMenu, setActiveMenu] = useState(0);
+  const [selectMenu, setSelectMenu] = useState<MenuItems>("General");
   const user = useGetUser();
   const [form, setForm] = useState<{
     firstName?: string;
@@ -39,6 +43,19 @@ const AccountComponent = () => {
       queryClient.setQueryData(["user"], data);
     },
   });
+
+  useEffect(() => {
+    if (router.isReady) {
+      setSelectMenu(() => {
+        if (!menuItems.includes(router.query.menu as any)) {
+          console.log(router.query.menu);
+          return "General";
+        } else {
+          return router.query.menu as MenuItems;
+        }
+      });
+    }
+  }, [router.isReady]);
 
   useEffect(() => {
     if (user.data) {
@@ -91,10 +108,10 @@ const AccountComponent = () => {
           <ul className="flex space-x-8 text-[#6f47dd]">
             {menuItems.map((item, index) => (
               <li
-                onClick={() => setActiveMenu(index)}
+                onClick={() => setSelectMenu(item)}
                 key={item}
                 className={`border-b-2 cursor-pointer ${
-                  activeMenu === index && "border-b-primary-color "
+                  selectMenu === item && "border-b-primary-color "
                 }  pb-2`}
               >
                 {item}
@@ -103,7 +120,7 @@ const AccountComponent = () => {
           </ul>
         </div>
 
-        {activeMenu === 0 && (
+        {selectMenu === "General" && (
           <div className="flex flex-col md:flex-row gap-8">
             {user.data && (
               <UploadPhoto updateUser={updateUser} user={user.data} />
@@ -161,7 +178,8 @@ const AccountComponent = () => {
           </div>
         )}
 
-        {activeMenu === 1 && <ChangePassword />}
+        {selectMenu === "Change Password" && <ChangePassword />}
+        {selectMenu === "Invitations" && <ManageInvite />}
       </div>
     </div>
   );

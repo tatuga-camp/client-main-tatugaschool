@@ -4,6 +4,7 @@ import { MemberOnSchool, School } from "@/interfaces";
 import BasicInformationSection from "./BasicInformationSection";
 import MemberSection from "./MemberSection";
 import BillingPlanSection from "./BillingPlanSection";
+import { useGetUser } from "../../react-query";
 
 export interface TabsMenuSectionProps {
   school: School;
@@ -17,7 +18,7 @@ const TabsMenuSection: FC<TabsMenuSectionProps> = ({
   onInvite,
 }) => {
   const [activeTab, setActiveTab] = useState("Member");
-
+  const user = useGetUser();
   const tabs = [
     { name: "Member" },
     { name: "Basic information" },
@@ -26,7 +27,7 @@ const TabsMenuSection: FC<TabsMenuSectionProps> = ({
 
   return (
     <>
-      <div className="flex space-x-8 pb-10 px-10">
+      <div className="flex  px-10">
         {tabs.map((tab) => (
           <button
             key={tab.name}
@@ -42,8 +43,12 @@ const TabsMenuSection: FC<TabsMenuSectionProps> = ({
         ))}
       </div>
 
-      {activeTab === "Member" && (
-        <MemberSection members={members} onInvite={onInvite} />
+      {activeTab === "Member" && user.data && (
+        <MemberSection
+          onInvite={onInvite}
+          user={user.data}
+          schoolId={school.id}
+        />
       )}
       {activeTab === "Basic information" && (
         <BasicInformationSection school={school} />

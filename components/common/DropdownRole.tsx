@@ -3,6 +3,7 @@ import { GoChevronDown } from "react-icons/go";
 import { MemberRole } from "../../interfaces";
 import useClickOutside from "../../hook/useClickOutside";
 type Pops = {
+  disabled?: boolean;
   setSelectRole:
     | React.Dispatch<React.SetStateAction<MemberRole>>
     | ((role: MemberRole) => void);
@@ -17,6 +18,7 @@ function DropdownRole({
   setTrigger,
   trigger,
   listRoles,
+  disabled,
 }: Pops) {
   const devRef = React.useRef<HTMLDivElement>(null);
   useClickOutside(devRef, () => {
@@ -25,6 +27,7 @@ function DropdownRole({
   return (
     <>
       <button
+        disabled={disabled}
         type="button"
         onClick={() => {
           setTrigger(true);
@@ -33,13 +36,13 @@ function DropdownRole({
 gap-1 transition text-sm  py-1 rounded-md bg-gray-200/50 hover:bg-gray-300/50 "
       >
         {selectRole}
-        <GoChevronDown />
+        {!disabled && <GoChevronDown />}
       </button>
       {trigger && (
         <div
           ref={devRef}
           className="w-60 h-max rounded-md border absolute 
-top-12 z-10 -right-20 bg-white drop-shadow"
+top-12 z-10 right-10 bg-white drop-shadow"
         >
           {listRoles.map((role) => (
             <div

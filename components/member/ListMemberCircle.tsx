@@ -55,10 +55,16 @@ function ListMemberCircle({ members, setTrigger }: Props) {
         <button
           onClick={() => setTrigger(true)}
           aria-label="invite teacher to subject"
-          className="flex items-center text-xs active:scale-110 justify-center gap-1 hover:bg-primary-color hover:text-white
-               text-primary-color bg-white w-max px-2 py-1 rounded-md"
+          className={`flex items-center text-xs
+            ${
+              members.length === 0
+                ? "text-red-700"
+                : "text-primary-color hover:bg-primary-color hover:text-white"
+            }
+            active:scale-110 justify-center gap-1  
+                bg-white w-max px-2 py-1 rounded-md`}
         >
-          invite
+          {members.length === 0 ? "No Member Please Invite" : "Invite"}
           <IoIosSend />
         </button>
       )}

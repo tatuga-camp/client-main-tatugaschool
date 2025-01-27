@@ -1,9 +1,5 @@
 import React, { memo, useEffect, useState } from "react";
-import {
-  useGetMemberBySchool,
-  useGetUser,
-  useGetUserByEmail,
-} from "../../react-query";
+import { useGetUser, useGetUserByEmail } from "../../react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   CreateMemberOnSchoolService,
@@ -22,15 +18,22 @@ import { ProgressSpinner } from "primereact/progressspinner";
 import Swal from "sweetalert2";
 import Link from "next/link";
 import ListMembers from "../member/ListMembers";
+import {
+  useCreateMemberOnSchool,
+  useGetMemberOnSchoolBySchool,
+  useUpdateMemberOnSchool,
+} from "../../react-query/memberOnSchool";
+import { ListSchoolRoles } from "../../data";
 
 type Props = {
   schoolId: string;
   hideFinishButton?: boolean;
 };
 function InviteJoinSchool({ schoolId, hideFinishButton }: Props) {
-  const queryClient = useQueryClient();
   const user = useGetUser();
-  const memberOnSchools = useGetMemberBySchool({ schoolId: schoolId });
+  const updateMemberOnSchool = useUpdateMemberOnSchool();
+  const createMemberOnSchool = useCreateMemberOnSchool();
+  const memberOnSchools = useGetMemberOnSchoolBySchool({ schoolId: schoolId });
   const [query, setQuery] = useState<string>("");
   const getUsers = useGetUserByEmail(query.length > 5 ? query : "");
 
@@ -48,39 +51,6 @@ function InviteJoinSchool({ schoolId, hideFinishButton }: Props) {
       blurHash?: string;
     }[]
   >([]);
-
-  const createMemberOnSchool = useMutation({
-    mutationKey: ["create-member-on-school"],
-    mutationFn: (input: RequestCreateMemberOnSchoolService) =>
-      CreateMemberOnSchoolService(input),
-    onSuccess(data, _variables, _context) {
-      queryClient.setQueryData(
-        ["member-on-school", { schoolId }],
-        (oldData: MemberOnSchool[]) => {
-          return [...oldData, data];
-        }
-      );
-    },
-  });
-
-  const updateMemberOnSchool = useMutation({
-    mutationKey: ["update-member-on-school"],
-    mutationFn: (input: RequestUpdateMemberOnSchoolService) =>
-      UpdateMemberOnSchoolService(input),
-    onSuccess(data, variables, context) {
-      queryClient.setQueryData(
-        ["member-on-school", { schoolId }],
-        (oldData: MemberOnSchool[]) => {
-          return oldData.map((member) => {
-            if (member.id === data.id) {
-              return data;
-            }
-            return member;
-          });
-        }
-      );
-    },
-  });
 
   useEffect(() => {
     if (getUsers.data && memberOnSchools.data) {
@@ -180,8 +150,9 @@ function InviteJoinSchool({ schoolId, hideFinishButton }: Props) {
         </div>
         {memberOnSchools.data && user.data && (
           <ListMembers
+            listRoles={ListSchoolRoles}
             members={users}
-            listMembers={memberOnSchools.data}
+            currentListMembers={memberOnSchools.data}
             user={user.data}
             handleSummit={handleSummit}
             onRoleChange={async (data) =>

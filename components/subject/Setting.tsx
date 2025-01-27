@@ -14,7 +14,7 @@ import {
 import { ErrorMessages, MemberRole } from "../../interfaces";
 import Image from "next/image";
 import { decodeBlurhashToCanvas } from "../../utils";
-import { defaultBlurHash } from "../../data";
+import { defaultBlurHash, ListSubjectRoles } from "../../data";
 import Link from "next/link";
 import { CiSaveDown2 } from "react-icons/ci";
 import InputNumber from "../common/InputNumber";
@@ -233,9 +233,10 @@ function Setting({ subjectId, setSelectMenu }: Props) {
           </h2>
           {members && teacherOnSubjects.data && user.data && (
             <ListMembers
+              listRoles={ListSubjectRoles}
               members={members}
               onDelete={(data) => handleDeleteTeacher(data.memberId)}
-              listMembers={teacherOnSubjects.data}
+              currentListMembers={teacherOnSubjects.data}
               user={user.data}
               onRoleChange={(data) => console.log(data)}
               handleSummit={(data) => console.log(data)}
