@@ -33,6 +33,8 @@ import AssignmentText from "./AssignmentText";
 import { IoMdClose } from "react-icons/io";
 import { ProgressBar } from "primereact/progressbar";
 import CommentSection from "./CommentSection";
+import PopupLayout from "../layout/PopupLayout";
+import DrawCanva from "../common/DrawCanva";
 
 type Props = {
   assignmentId: string;
@@ -332,6 +334,8 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
     body?: string;
     files?: FileOnStudentOnAssignment[];
   }>();
+  const [selectFileImage, setSelectFileImage] =
+    React.useState<FileOnStudentOnAssignment | null>(null);
 
   useEffect(() => {
     setStudentWork({
@@ -377,6 +381,22 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
   return (
     <>
       <Toast ref={toast} />
+
+      {selectFileImage && (
+        <PopupLayout
+          onClose={() => {
+            setSelectFileImage(null);
+          }}
+        >
+          <div className="w-full flex justify-start items-center flex-col h-full ">
+            <DrawCanva
+              name={selectFileImage.name ?? ""}
+              imageURL={selectFileImage.body}
+              onClose={() => setSelectFileImage(null)}
+            />
+          </div>
+        </PopupLayout>
+      )}
       {selectAssignmentText && (
         <div className="w-screen h-screen flex items-center justify-center fixed z-50 top-0 right-0 bottom-0 left-0 m-auto">
           <div
@@ -495,6 +515,7 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
               return (
                 <FileStudentAssignmentCard
                   onShowText={() => setSelectAssignmentText(file)}
+                  onEditImage={() => setSelectFileImage(file)}
                   file={file}
                   key={index}
                 />

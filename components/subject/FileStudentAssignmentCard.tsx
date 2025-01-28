@@ -11,10 +11,11 @@ import { useDeleteFileStudentOnAssignment } from "../../react-query";
 type Props = {
   file: FileOnStudentOnAssignment;
   onShowText?: (file: FileOnStudentOnAssignment) => void;
+  onEditImage?: (file: FileOnStudentOnAssignment) => void;
 };
-function FileStudentAssignmentCard({ file, onShowText }: Props) {
+function FileStudentAssignmentCard({ file, onShowText, onEditImage }: Props) {
   if (file.contentType === "FILE") {
-    return <FileCard file={file} />;
+    return <FileCard file={file} onEditImage={onEditImage} />;
   }
   if (file.contentType === "TEXT") {
     return <TextCard file={file} onShowText={onShowText} />;
@@ -82,7 +83,7 @@ function TextCard({ file, onShowText }: Props) {
   );
 }
 
-function FileCard({ file }: Props) {
+function FileCard({ file, onEditImage }: Props) {
   const isImage = file.type.includes("image");
 
   const fileName =
@@ -132,26 +133,50 @@ function FileCard({ file }: Props) {
           </div>
         </button>
       </div>
-
-      <button
-        type="button"
-        onClick={handleDeleteFile}
-        disabled={deleteFile.isPending}
-        className="text-xl group-hover:flex  hover:bg-red-300/50 p-2 
-        hidden items-center justify-center
-        rounded-full active:scale-105 text-red-500"
-      >
-        {deleteFile.isPending ? (
-          <ProgressSpinner
-            animationDuration="1s"
-            style={{ width: "20px" }}
-            className="w-5 h-5"
-            strokeWidth="8"
-          />
-        ) : (
-          <MdDelete />
+      <div className="flex items-center justify-center gap-1">
+        {file.type.includes("image") && (
+          <button
+            onClick={() => onEditImage?.(file)}
+            type="button"
+            className="w-6 hover:underline"
+          >
+            Edit
+          </button>
         )}
-      </button>
+        <button
+          type="button"
+          onClick={() => {
+            Swal.fire({
+              title: "Are you sure?",
+              text: "You won't be able to revert this!",
+              icon: "warning",
+              showCancelButton: true,
+              confirmButtonColor: "#3085d6",
+              cancelButtonColor: "#d33",
+              confirmButtonText: "Yes, delete it!",
+            }).then((result) => {
+              if (result.isConfirmed) {
+                handleDeleteFile();
+              }
+            });
+          }}
+          disabled={deleteFile.isPending}
+          className="text-xl flex w-10  hover:bg-red-300/50 p-2 
+         items-center justify-center
+        rounded-full active:scale-105 text-red-500"
+        >
+          {deleteFile.isPending ? (
+            <ProgressSpinner
+              animationDuration="1s"
+              style={{ width: "20px" }}
+              className="w-5 h-5"
+              strokeWidth="8"
+            />
+          ) : (
+            <MdDelete />
+          )}
+        </button>
+      </div>
     </li>
   );
 }

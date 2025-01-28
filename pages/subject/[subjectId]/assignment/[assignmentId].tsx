@@ -274,7 +274,7 @@ function Index({
   return (
     <form
       onSubmit={selectMenu === "classwork" ? handleUpdateClasswork : undefined}
-      className="flex h-full flex-col bg-background-color"
+      className="flex h-full flex-col bg-background-color font-Anuphan"
     >
       <nav
         className={`w-full px-5 ${

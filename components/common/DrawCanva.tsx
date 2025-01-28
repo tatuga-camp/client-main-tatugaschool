@@ -1,6 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
 import CanvasDraw from "react-canvas-draw";
-
 import {
   DndContext,
   useDraggable,
@@ -10,6 +9,20 @@ import {
   DragEndEvent,
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
+import { urlToFile } from "../../utils";
+import {
+  BiSave,
+  BiSolidEraser,
+  BiSolidHand,
+  BiSolidPencil,
+} from "react-icons/bi";
+import { MdOutlineFormatClear, MdTextFields } from "react-icons/md";
+import { IoMdClose } from "react-icons/io";
+import ImageNextJs from "next/image";
+import { defaultCanvas } from "../../data";
+import { IoReturnUpBack } from "react-icons/io5";
+import { TbArrowBackUp } from "react-icons/tb";
+import { GrRevert } from "react-icons/gr";
 
 interface ITextObject {
   id: number;
@@ -64,9 +77,15 @@ function DraggableText({
   );
 }
 
-type ModeCanva = "default" | "draw" | "text-edit";
-const DrawCanva = () => {
-  const canvasRef = useRef<CanvasDraw>(null);
+type Props = {
+  imageURL: string;
+  name: string;
+  onClose: () => void;
+};
+const DrawCanva = ({ imageURL, onClose, name }: Props) => {
+  const canvasRef = useRef<
+    CanvasDraw & { getDataURL: () => string } & { canvas: { drawing: any } }
+  >(null);
 
   const [image, setImage] = useState<string | null>(null);
   const imageRef = useRef<HTMLImageElement>(null);
@@ -110,8 +129,12 @@ const DrawCanva = () => {
     }
   }, [mode, image]);
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  useEffect(() => {
+    handleShowImage();
+  }, []);
+
+  const handleShowImage = async () => {
+    const file = await urlToFile(imageURL);
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -181,8 +204,7 @@ const DrawCanva = () => {
 
   const handleUndo = () => {
     if (textObjectsHistory.length > 0) {
-      const lastState =
-        textObjectsHistory[textObjectsHistory.length - 1];
+      const lastState = textObjectsHistory[textObjectsHistory.length - 1];
       setTextObjects(lastState);
       setTextObjectsHistory(textObjectsHistory.slice(0, -1));
     } else {
@@ -278,19 +300,65 @@ const DrawCanva = () => {
   const isCanvasDisabled = mode !== "draw" && mode !== "eraser";
 
   return (
-    <div className="flex flex-col items-center">
-      <input type="file" accept="image/*" onChange={handleImageUpload} />
+    <div className="flex w-full  grow gap-2 bg-gray-200 flex-col items-center">
+      <div className="w-full gradient-bg  border-b h-14 px-5 items-center flex gap-2 pl-10 justify-between">
+        <div className="flex h-full items-center justify-center gap-2">
+          <div
+            className="w-10 h-10 rounded-md overflow-hidden ring-1 ring-white
+                 relative hover:scale-105 active:scale-110 transition duration-150"
+          >
+            <ImageNextJs
+              src="/favicon.ico"
+              placeholder="blur"
+              blurDataURL={defaultCanvas}
+              fill
+              sizes="(max-width: 768px) 100vw, 33vw"
+              alt="logo tatuga school"
+            />
+          </div>
+          <div className="h-5/6 w-[0.5px] bg-white" />
+          <button
+            type="button"
+            title="Undo"
+            onClick={handleUndo}
+            className=" text-white text-xl border font-normal w-20 hover:bg-gray-100/10 
+            h-10 rounded-md flex items-center justify-center"
+          >
+            <GrRevert />
+          </button>
+          <button
+            type="button"
+            title="Save Image"
+            onClick={handleSave}
+            className="text-black flex 
+          hover:bg-sky-200 active:scale-105
+          items-center justify-center gap-1 w-28 h-10 rounded-lg border  bg-white"
+          >
+            <BiSave />
+            SAVE
+          </button>
+        </div>
+        <div className="flex items-center justify-center gap-5">
+          <h1 className="text-white text-lg font-medium text-right max-w-96 overflow-auto hideScrollBar ">
+            {name}
+          </h1>
+          <button
+            onClick={() => onClose()}
+            className="text-lg text-white hover:text-black  hover:bg-white w-6  border border-white  h-6 
+                rounded flex items-center justify-center"
+          >
+            <IoMdClose />
+          </button>
+        </div>
+      </div>
+      <div className="flex space-x-2 bg-white px-2 py-1 rounded-lg drop-shadow-lg items-center  mt-4">
+        <input
+          type="color"
+          value={brushColor}
+          onChange={(e) => setBrushColor(e.target.value)}
+          className="ml-2"
+        />
 
-      <div className="flex space-x-2 mt-4">
-        <label>
-          Brush Color:
-          <input
-            type="color"
-            value={brushColor}
-            onChange={(e) => setBrushColor(e.target.value)}
-            className="ml-2"
-          />
-        </label>
         <label>
           Brush Size:
           <input
@@ -303,17 +371,72 @@ const DrawCanva = () => {
           />
         </label>
 
-        <button onClick={() => setMode("draw")} className="p-2 bg-blue-500 text-white">
-          Draw Mode
+        <button
+          title="Draw Mode"
+          type="button"
+          className={`
+            ${mode === "draw" ? "bg-sky-200" : "bg-gray-100 "}
+            text-black w-7 h-7 rounded-lg border active:scale-105
+           flex items-center justify-center hover:bg-sky-200`}
+          onClick={() => setMode("draw")}
+        >
+          <BiSolidPencil />
         </button>
-        <button onClick={() => setMode("mouse")} className="p-2 bg-yellow-500 text-white">
-          Mouse Mode
+        <button
+          title="Mouse Mode"
+          type="button"
+          onClick={() => setMode("mouse")}
+          className={`
+            ${mode === "mouse" ? "bg-sky-200" : "bg-gray-100 "}
+            text-black w-7 h-7 rounded-lg border active:scale-105
+           flex items-center justify-center hover:bg-sky-200`}
+        >
+          <BiSolidHand />
         </button>
-        <button onClick={() => setMode("eraser")} className="p-2 bg-red-400 text-white">
-          Eraser Mode
+        <button
+          title="Eraser Mode"
+          type="button"
+          onClick={() => setMode("eraser")}
+          className={`
+            ${mode === "eraser" ? "bg-sky-200" : "bg-gray-100 "}
+            text-black w-7 h-7 rounded-lg border active:scale-105
+           flex items-center justify-center hover:bg-sky-200`}
+        >
+          <BiSolidEraser />
         </button>
-        <button onClick={handleAddText} className="p-2 bg-green-500 text-white">
-          Add Text
+        <button
+          title="Add Text"
+          type="button"
+          onClick={handleAddText}
+          className={`
+            ${mode === "text-edit" ? "bg-sky-200" : "bg-gray-100 "}
+            text-black w-7 h-7 rounded-lg border active:scale-105
+           flex items-center justify-center hover:bg-sky-200`}
+        >
+          <MdTextFields />
+        </button>
+        <button
+          title="Clear All Text"
+          type="button"
+          onClick={handleClearAllText}
+          className={`
+          bg-gray-100
+            text-black w-7 h-7 rounded-lg border active:scale-105
+           flex items-center justify-center hover:bg-sky-200`}
+        >
+          <MdOutlineFormatClear />
+        </button>
+        <button
+          title="Clear All Drawing"
+          type="button"
+          onClick={() => canvasRef.current?.clear()}
+          className={`
+          bg-gray-100
+            text-black w-7 relative h-7 rounded-lg border active:scale-105
+           flex items-center justify-center hover:bg-sky-200`}
+        >
+          <div className="h-5 w-[1.5px] bg-black absolute -rotate-45" />
+          <BiSolidPencil />
         </button>
       </div>
 
@@ -323,7 +446,9 @@ const DrawCanva = () => {
             Text:
             <textarea
               value={currentText}
-              onChange={(e) => setCurrentText(e.target.value)}
+              onChange={(e) => {
+                setCurrentText(e.target.value);
+              }}
               className="ml-2 border"
               rows={3}
               cols={40}
@@ -349,80 +474,65 @@ const DrawCanva = () => {
               className="ml-2 border w-16"
             />
           </label>
-          <button onClick={handleFinishEditing} className="p-2 bg-blue-500 text-white">
+          <button
+            type="button"
+            onClick={handleFinishEditing}
+            className="p-2 bg-blue-500 text-white"
+          >
             Done Editing
           </button>
-          <button onClick={handleDeleteCurrentText} className="p-2 bg-red-500 text-white">
+          <button
+            type="button"
+            onClick={handleDeleteCurrentText}
+            className="p-2 bg-red-500 text-white"
+          >
             Delete This Text
           </button>
         </div>
       )}
+      <div className="w-9/12  bg-slate-50 h-[30rem] overflow-auto">
+        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+          {/* Container สำหรับซ้อนรูปพื้นหลัง + CanvasDraw (โปร่งใส) */}
+          <div
+            className="relative"
+            style={{ width: canvasWidth, height: canvasHeight }}
+          >
+            {/* รูปพื้นหลัง */}
+            {image && (
+              <img
+                ref={imageRef}
+                src={image}
+                alt="Selected"
+                className="absolute top-0 left-0 w-full h-full"
+              />
+            )}
 
-      <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-        {/* Container สำหรับซ้อนรูปพื้นหลัง + CanvasDraw (โปร่งใส) */}
-        <div
-          className="relative mt-4"
-          style={{ width: canvasWidth, height: canvasHeight }}
-        >
-          {/* รูปพื้นหลัง */}
-          {image && (
-            <img
-              ref={imageRef}
-              src={image}
-              alt="Selected"
-              className="absolute top-0 left-0 w-full h-full"
+            {/* CanvasDraw โปร่งใส วางข้างบน */}
+            <CanvasDraw
+              ref={canvasRef}
+              canvasWidth={canvasWidth}
+              canvasHeight={canvasHeight}
+              brushColor={brushColor}
+              brushRadius={brushRadius}
+              className="border"
+              hideGrid={true}
+              lazyRadius={0}
+              backgroundColor="rgba(0,0,0,0)"
+              disabled={isCanvasDisabled}
             />
-          )}
 
-          {/* CanvasDraw โปร่งใส วางข้างบน */}
-          <CanvasDraw
-            ref={canvasRef}
-            canvasWidth={canvasWidth}
-            canvasHeight={canvasHeight}
-            brushColor={brushColor}
-            brushRadius={brushRadius}
-            className="border"
-            hideGrid={true}
-            lazyRadius={0}
-            backgroundColor="rgba(0,0,0,0)"
-            disabled={isCanvasDisabled}
-          />
-
-          {/* ข้อความที่ลากได้ */}
-          {textObjects.map((obj) => (
-            <DraggableText
-              key={obj.id}
-              obj={obj}
-              mode={mode}
-              currentTextId={currentTextId}
-              handleTextClick={handleTextClick}
-            />
-          ))}
-        </div>
-      </DndContext>
-
-      <div className="mt-4 flex space-x-2">
-        <button onClick={handleSave} className="p-2 bg-blue-500 text-white">
-          Save Merged
-        </button>
-        <button
-          onClick={() => canvasRef.current?.clear()}
-          className="p-2 bg-red-500 text-white"
-        >
-          Clear Drawing
-        </button>
-        <button
-          onClick={() => setImage(null)}
-          className="p-2 bg-yellow-500 text-white"
-        >
-          Clear Image
-        </button>
-        <button onClick={handleClearAllText} className="p-2 bg-pink-500 text-white">
-          Clear All Text
-        </button>
-        <button onClick={handleUndo} className="p-2 bg-gray-500 text-white">
-          Undo
-        </button>
+            {/* ข้อความที่ลากได้ */}
+            {textObjects.map((obj) => (
+              <DraggableText
+                key={obj.id}
+                obj={obj}
+                mode={mode}
+                currentTextId={currentTextId}
+                handleTextClick={handleTextClick}
+              />
+            ))}
+          </div>
+        </DndContext>
       </div>
     </div>
   );
