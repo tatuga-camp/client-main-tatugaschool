@@ -101,3 +101,24 @@ export async function CreateAttendanceService(
     throw error?.response?.data;
   }
 }
+
+export type RequestExportAttendanceService = {
+  subjectId: string;
+};
+
+type ResponseExportAttendanceService = string;
+
+export async function ExportAttendanceService(
+  input: RequestExportAttendanceService
+): Promise<ResponseExportAttendanceService> {
+  try {
+    const response = await axiosInstance({
+      method: "GET",
+      url: `/v1/attendances/export-excel/?subjectId=${input.subjectId}`,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Export Attendance request failed:", error.response.data);
+    throw error?.response?.data;
+  }
+}

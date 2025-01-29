@@ -183,3 +183,24 @@ export async function DeleteAssignmentService(
     throw error?.response?.data;
   }
 }
+
+export type RequestExportAssignmentService = {
+  subjectId: string;
+};
+
+type ResponseExportAssignmentService = string;
+
+export async function ExportAssignmentService(
+  input: RequestExportAssignmentService
+): Promise<ResponseExportAssignmentService> {
+  try {
+    const response = await axiosInstance({
+      method: "GET",
+      url: `/v1/assignments/export-excel/?subjectId=${input.subjectId}`,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Export Assignment request failed:", error.response.data);
+    throw error?.response?.data;
+  }
+}

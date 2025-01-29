@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { FaUser } from "react-icons/fa6";
 import { SiMicrosoftexcel } from "react-icons/si";
 import {
+  useExportAssignment,
   useGetAssignmentOverview,
   useGetStudentOnSubject,
 } from "../../react-query";
@@ -15,6 +16,7 @@ import { defaultBlurHash } from "../../data";
 import { Assignment, StudentOnAssignment } from "../../interfaces";
 import GradePopup from "./GradePopup";
 import { Toast } from "primereact/toast";
+import { ExportAssignmentService } from "@/services";
 
 function Grade({
   subjectId,
@@ -38,9 +40,8 @@ function Grade({
   return (
     <>
       <div
-        className={`fixed ${
-          selectStudentOnAssignment ? "flex" : "hidden"
-        } top-0 bottom-0 right-0 left-0 flex items-center justify-center m-auto z-50`}
+        className={`fixed ${selectStudentOnAssignment ? "flex" : "hidden"
+          } top-0 bottom-0 right-0 left-0 flex items-center justify-center m-auto z-50`}
       >
         <div className=" w-max h-max bg-background-color p-2 rounded-md border">
           {selectStudentOnAssignment && (
@@ -68,7 +69,16 @@ function Grade({
           </span>
         </section>
         <section className="flex flex-col xl:flex-row items-center gap-2 md:gap-1">
-          <button className="main-button w-full xl:w-auto flex items-center justify-center gap-1 py-1 ring-1 ring-blue-600">
+          <button
+            onClick={async () => {
+              const response = await ExportAssignmentService({ subjectId });
+              const link = document.createElement("a");
+              link.href = response;
+              link.download = `grade-${subjectId}-${new Date().toISOString()}.xlsx`;
+              link.click();
+            }}
+            className="main-button w-full xl:w-auto flex items-center justify-center gap-1 py-1 ring-1 ring-blue-600"
+          >
             <SiMicrosoftexcel />
             Export
           </button>
@@ -87,44 +97,44 @@ function Grade({
                 </th>
                 {assignmentsOverview.isLoading
                   ? [...Array(20)].map((_, index) => {
-                      const number = getRandomSlateShade();
-                      const color = getSlateColorStyle(number);
-                      return (
-                        <th key={index} className="text-sm  font-semibold">
-                          <div
-                            style={color}
-                            className="w-40 h-14  animate-pulse"
-                          ></div>
-                        </th>
-                      );
-                    })
+                    const number = getRandomSlateShade();
+                    const color = getSlateColorStyle(number);
+                    return (
+                      <th key={index} className="text-sm  font-semibold">
+                        <div
+                          style={color}
+                          className="w-40 h-14  animate-pulse"
+                        ></div>
+                      </th>
+                    );
+                  })
                   : assignmentsOverview.data?.map((data) => {
-                      return (
-                        <th
-                          key={data.assignment.id}
-                          className="text-sm group  font-semibold"
-                        >
-                          <button
-                            onClick={() =>
-                              setSelectStudentOnAssignment({
-                                assignment: data.assignment,
-                              })
-                            }
-                            className="w-40 min-w-40 group-hover:w-max  p-2 relative active:bg-gray-200
+                    return (
+                      <th
+                        key={data.assignment.id}
+                        className="text-sm group  font-semibold"
+                      >
+                        <button
+                          onClick={() =>
+                            setSelectStudentOnAssignment({
+                              assignment: data.assignment,
+                            })
+                          }
+                          className="w-40 min-w-40 group-hover:w-max  p-2 relative active:bg-gray-200
                            hover:bg-gray-100  hover:ring-1 flex items-start flex-col"
-                          >
-                            <span className="w-max group-hover:max-w-none max-w-40 truncate">
-                              {data.assignment.title}
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              {data.assignment.maxScore} points
-                              {data.assignment.weight !== null &&
-                                ` / ${data.assignment.weight}% weight`}
-                            </span>
-                          </button>
-                        </th>
-                      );
-                    })}
+                        >
+                          <span className="w-max group-hover:max-w-none max-w-40 truncate">
+                            {data.assignment.title}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            {data.assignment.maxScore} points
+                            {data.assignment.weight !== null &&
+                              ` / ${data.assignment.weight}% weight`}
+                          </span>
+                        </button>
+                      </th>
+                    );
+                  })}
               </tr>
             </thead>
             <tbody>
@@ -136,16 +146,14 @@ function Grade({
 
                   return (
                     <tr
-                      className={` ${
-                        odd ? "bg-gray-200/20" : "bg-white"
-                      } hover:bg-gray-200/40 group`}
+                      className={` ${odd ? "bg-gray-200/20" : "bg-white"
+                        } hover:bg-gray-200/40 group`}
                       key={student.id}
                     >
                       <td
                         className={`text-sm sticky left-0 z-30 font-semibold
-                        ${
-                          odd ? "bg-gray-100" : "bg-white"
-                        } group-hover:bg-gray-200
+                        ${odd ? "bg-gray-100" : "bg-white"
+                          } group-hover:bg-gray-200
                         `}
                       >
                         <div className="flex items-center h-14 gap-2">
@@ -174,89 +182,89 @@ function Grade({
                       </td>
                       {assignmentsOverview.isLoading
                         ? [...Array(20)].map((_, index) => {
-                            const number = getRandomSlateShade();
-                            const color = getSlateColorStyle(number);
-                            return (
-                              <td key={index}>
-                                <div
-                                  style={color}
-                                  className="flex w-full h-14 animate-pulse"
-                                ></div>
-                              </td>
-                            );
-                          })
+                          const number = getRandomSlateShade();
+                          const color = getSlateColorStyle(number);
+                          return (
+                            <td key={index}>
+                              <div
+                                style={color}
+                                className="flex w-full h-14 animate-pulse"
+                              ></div>
+                            </td>
+                          );
+                        })
                         : assignmentsOverview.data
-                            ?.sort(
-                              (a, b) => a.assignment.order - b.assignment.order
-                            )
-                            .map((data, index) => {
-                              const studentOnAssignment = data.students.find(
-                                (a) => a.studentOnSubjectId === student.id
-                              );
-                              if (!studentOnAssignment) {
-                                return (
-                                  <td key={data.assignment.id + student.id}>
-                                    <button
-                                      className="flex w-full h-14
+                          ?.sort(
+                            (a, b) => a.assignment.order - b.assignment.order
+                          )
+                          .map((data, index) => {
+                            const studentOnAssignment = data.students.find(
+                              (a) => a.studentOnSubjectId === student.id
+                            );
+                            if (!studentOnAssignment) {
+                              return (
+                                <td key={data.assignment.id + student.id}>
+                                  <button
+                                    className="flex w-full h-14
                                relative hover:ring-1  bg-black select-none
                                 text-white ring-black hover:drop-shadow-md cursor-pointer   
                                items-center transition
                                justify-center flex-col"
-                                    >
-                                      NO DATA
-                                    </button>
-                                  </td>
-                                );
-                              }
-
-                              let score: number | string = 0;
-
-                              if (studentOnAssignment.status === "REVIEWD") {
-                                score = studentOnAssignment.score;
-                              }
-                              if (studentOnAssignment.status === "PENDDING") {
-                                score = "No Work";
-                              }
-                              if (studentOnAssignment.status === "SUBMITTED") {
-                                score = "Not Graded";
-                              }
-
-                              const originalScore =
-                                studentOnAssignment.score /
-                                data.assignment.maxScore;
-
-                              if (
-                                data.assignment.weight !== null &&
-                                studentOnAssignment.status === "REVIEWD"
-                              ) {
-                                score = (
-                                  originalScore * data.assignment.weight
-                                ).toFixed(2);
-                              }
-                              return (
-                                <td
-                                  key={
-                                    data.assignment.id + studentOnAssignment.id
-                                  }
-                                  className="text-sm  font-semibold"
-                                >
-                                  <button
-                                    onClick={() => {
-                                      setSelectStudentOnAssignment({
-                                        assignment: data.assignment,
-                                        studentOnAssignment,
-                                      });
-                                    }}
-                                    className="flex w-full h-14
-                               relative hover:ring-1  ring-black hover:drop-shadow-md cursor-pointer   
-                               items-center transition
-                               justify-center flex-col"
                                   >
-                                    <span>{score}</span>
+                                    NO DATA
                                   </button>
                                 </td>
                               );
-                            })}
+                            }
+
+                            let score: number | string = 0;
+
+                            if (studentOnAssignment.status === "REVIEWD") {
+                              score = studentOnAssignment.score;
+                            }
+                            if (studentOnAssignment.status === "PENDDING") {
+                              score = "No Work";
+                            }
+                            if (studentOnAssignment.status === "SUBMITTED") {
+                              score = "Not Graded";
+                            }
+
+                            const originalScore =
+                              studentOnAssignment.score /
+                              data.assignment.maxScore;
+
+                            if (
+                              data.assignment.weight !== null &&
+                              studentOnAssignment.status === "REVIEWD"
+                            ) {
+                              score = (
+                                originalScore * data.assignment.weight
+                              ).toFixed(2);
+                            }
+                            return (
+                              <td
+                                key={
+                                  data.assignment.id + studentOnAssignment.id
+                                }
+                                className="text-sm  font-semibold"
+                              >
+                                <button
+                                  onClick={() => {
+                                    setSelectStudentOnAssignment({
+                                      assignment: data.assignment,
+                                      studentOnAssignment,
+                                    });
+                                  }}
+                                  className="flex w-full h-14
+                               relative hover:ring-1  ring-black hover:drop-shadow-md cursor-pointer   
+                               items-center transition
+                               justify-center flex-col"
+                                >
+                                  <span>{score}</span>
+                                </button>
+                              </td>
+                            );
+                          })}
                     </tr>
                   );
                 })}
