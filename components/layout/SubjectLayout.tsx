@@ -7,24 +7,28 @@ import React, { useRef } from "react";
 import useClickOutside from "../../hook/useClickOutside";
 import Navbar from "../Navbar";
 import { menuSubjectList } from "../../data";
+import { useGetSubject } from "../../react-query";
 
 type LayoutProps = {
   children: ReactNode;
-  subject: UseQueryResult<Subject, Error>;
+  subjectId: string;
   setSelectMenu: React.Dispatch<React.SetStateAction<string>>;
   selectMenu: string;
   setSelectFooter: React.Dispatch<React.SetStateAction<ListMenuFooter>>;
   selectFooter: ListMenuFooter;
 };
 
-function Layout({
+function SubjectLayout({
   children,
-  subject,
+  subjectId,
   setSelectMenu,
   selectMenu,
   setSelectFooter,
   selectFooter,
 }: LayoutProps) {
+  const subject = useGetSubject({
+    subjectId,
+  });
   const navbarRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = React.useState(false);
   // Use the custom hook to detect clicks outside the navbar
@@ -59,4 +63,4 @@ function Layout({
   );
 }
 
-export default Layout;
+export default SubjectLayout;

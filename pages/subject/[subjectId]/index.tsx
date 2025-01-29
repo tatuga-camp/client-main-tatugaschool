@@ -1,34 +1,38 @@
-import React, { useCallback, useEffect, useState } from "react";
-import Layout from "../../../components/layout/SubjectLayout";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { GetServerSideProps } from "next";
 import Head from "next/head";
+import Image from "next/image";
+import { useRouter } from "next/router";
+import { Toast } from "primereact/toast";
+import React, { useCallback, useEffect, useState } from "react";
+import { CiCircleInfo } from "react-icons/ci";
+import { IoMdClose } from "react-icons/io";
+import { IoQrCode } from "react-icons/io5";
+import { MdFullscreen, MdFullscreenExit, MdMenu } from "react-icons/md";
+import { SlPicture } from "react-icons/sl";
+import Swal from "sweetalert2";
+import ListMemberCircle from "../../../components/member/ListMemberCircle";
+import Attendance from "../../../components/subject/Attendance";
+import AttendanceChecker from "../../../components/subject/AttendanceChecker";
+import Classwork from "../../../components/subject/Classwork";
+import { ListMenuFooter } from "../../../components/subject/FooterSubject";
+import Grade from "../../../components/subject/Grade";
+import InviteTeacher from "../../../components/subject/InviteTeacher";
+import PopUpStudent from "../../../components/subject/PopUpStudent";
+import QRCode from "../../../components/subject/QRCode";
+import Setting from "../../../components/subject/Setting";
+import SilderPicker from "../../../components/subject/SilderPicker";
+import StopWatch from "../../../components/subject/StopWatch";
+import Subject from "../../../components/subject/Subject";
+import { defaultBlurHash, MenuSubject } from "../../../data";
+import { useSound } from "../../../hook";
+import useClickOutside from "../../../hook/useClickOutside";
+import { ErrorMessages, StudentOnSubject } from "../../../interfaces";
 import {
   useGetStudentOnSubject,
   useGetSubject,
   useGetTeacherOnSubject,
-  useGetUser,
 } from "../../../react-query";
-import { GetServerSideProps } from "next";
-import Grade from "../../../components/subject/Grade";
-import Attendance from "../../../components/subject/Attendance";
-import { Skeleton } from "primereact/skeleton";
-import { CiCircleInfo } from "react-icons/ci";
-import ListMemberCircle from "../../../components/member/ListMemberCircle";
-import { ListMenuFooter } from "../../../components/subject/FooterSubject";
-import Setting from "../../../components/subject/Setting";
-import { useRouter } from "next/router";
-import Swal from "sweetalert2";
-import { notFound } from "next/navigation";
-import PopUpStudent from "../../../components/subject/PopUpStudent";
-import {
-  ErrorMessages,
-  ScoreOnStudent,
-  StudentOnSubject,
-  Subject as SubjectType,
-} from "../../../interfaces";
-import useClickOutside from "../../../hook/useClickOutside";
-import InviteTeacher from "../../../components/subject/InviteTeacher";
-import { defaultBlurHash, MenuSubject } from "../../../data";
-import { SlPicture } from "react-icons/sl";
 import {
   getSignedURLTeacherService,
   RefreshTokenService,
@@ -41,22 +45,10 @@ import {
   generateBlurHash,
   getRefetchtoken,
   localStorageGetRemoveRandomStudents,
-  localStorageSetRemoveRandomStudents,
   setAccessToken,
 } from "../../../utils";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import Subject from "../../../components/subject/Subject";
-import Image from "next/image";
-import { IoQrCode } from "react-icons/io5";
-import QRCode from "../../../components/subject/QRCode";
-import StopWatch from "../../../components/subject/StopWatch";
-import { useSound } from "../../../hook";
-import SilderPicker from "../../../components/subject/SilderPicker";
-import AttendanceChecker from "../../../components/subject/AttendanceChecker";
-import { Toast } from "primereact/toast";
-import { MdFullscreen, MdFullscreenExit, MdMenu } from "react-icons/md";
-import Classwork from "../../../components/subject/Classwork";
-import { IoMdClose } from "react-icons/io";
+import SubjectLayout from "../../../components/layout/SubjectLayout";
+import DefaultLayout from "../../../components/layout/DefaultLayout";
 type Props = {
   subjectId: string;
 };
@@ -132,15 +124,6 @@ function Index({ subjectId }: Props) {
       setTriggerStopWatch(false);
     }
   }, [selectFooter]);
-
-  if (subject.isError) {
-    Swal.fire({
-      title: "Error",
-      text: "Subject not found",
-      icon: "error",
-    });
-    router.push("/404");
-  }
 
   const updateSubject = useMutation({
     mutationKey: ["update-subject"],
@@ -233,15 +216,33 @@ function Index({ subjectId }: Props) {
       }
     }
   }, [router.isReady]);
+
+  if (subject.error) {
+    return (
+      <DefaultLayout>
+        <div className="flex justify-center gap-3 flex-col items-center h-screen">
+          <h1 className="text-4xl text-red-500">
+            {subject.error?.message || "Something went wrong"}
+          </h1>
+          <button
+            onClick={() => router.back()}
+            className="bg-primary-color w-40 text-white px-4 py-2 rounded-md"
+          >
+            Back
+          </button>
+        </div>
+      </DefaultLayout>
+    );
+  }
   return (
     <>
       <Head>
         <title>{title}</title>
       </Head>
-      <Layout
+      <SubjectLayout
         setSelectFooter={setSelectFooter}
         selectFooter={selectFooter}
-        subject={subject}
+        subjectId={subjectId}
         setSelectMenu={
           setSelectMenu as React.Dispatch<React.SetStateAction<string>>
         }
@@ -521,7 +522,7 @@ function Index({ subjectId }: Props) {
           className="h-96
         "
         ></footer>
-      </Layout>
+      </SubjectLayout>
     </>
   );
 }

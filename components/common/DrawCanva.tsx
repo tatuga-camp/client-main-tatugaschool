@@ -1,29 +1,28 @@
-import React, { useRef, useState, useEffect } from "react";
-import CanvasDraw from "react-canvas-draw";
 import {
   DndContext,
-  useDraggable,
+  DragEndEvent,
   MouseSensor,
+  useDraggable,
   useSensor,
   useSensors,
-  DragEndEvent,
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { urlToFile } from "../../utils";
+import ImageNextJs from "next/image";
+import React, { useEffect, useRef, useState } from "react";
+import CanvasDraw from "react-canvas-draw";
 import {
   BiSave,
   BiSolidEraser,
   BiSolidHand,
   BiSolidPencil,
 } from "react-icons/bi";
-import { MdOutlineFormatClear, MdTextFields } from "react-icons/md";
-import { IoMdClose } from "react-icons/io";
-import ImageNextJs from "next/image";
-import { defaultCanvas } from "../../data";
-import { IoReturnUpBack } from "react-icons/io5";
-import { TbArrowBackUp } from "react-icons/tb";
 import { GrRevert } from "react-icons/gr";
-
+import { IoMdClose } from "react-icons/io";
+import { MdOutlineFormatClear, MdTextFields } from "react-icons/md";
+import { defaultCanvas } from "../../data";
+import { useEnterKey } from "../../hook";
+import { urlToFile } from "../../utils";
+import prase from "html-react-parser";
 interface ITextObject {
   id: number;
   text: string;
@@ -61,9 +60,8 @@ function DraggableText({
     cursor: mode === "mouse" ? "move" : "default",
     pointerEvents: currentTextId === obj.id ? "none" : "auto",
   };
-
   return (
-    <div
+    <p
       ref={setNodeRef}
       style={style}
       onDoubleClick={() => {
@@ -72,24 +70,26 @@ function DraggableText({
       {...attributes}
       {...listeners}
     >
-      {obj.text}
-    </div>
+      {prase(obj.text.replace(/\n/g, "<br />"))}
+    </p>
   );
 }
 
 type Props = {
   imageURL: string;
   name: string;
+  id: string;
   onClose: () => void;
+  onSave: (data: { file: File; id: string }) => void;
 };
-const DrawCanva = ({ imageURL, onClose, name }: Props) => {
+const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
   const canvasRef = useRef<
     CanvasDraw & { getDataURL: () => string } & { canvas: { drawing: any } }
   >(null);
 
   const [image, setImage] = useState<string | null>(null);
   const imageRef = useRef<HTMLImageElement>(null);
-
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const [mode, setMode] = useState<ModeType>("draw");
 
   const [brushColor, setBrushColor] = useState<string>("#000000");
@@ -155,19 +155,23 @@ const DrawCanva = ({ imageURL, onClose, name }: Props) => {
     setMode("text-edit");
     const newTextId = Date.now();
     setCurrentTextId(newTextId);
-    setCurrentText("");
+    setCurrentText("Add Your Text Here");
     saveTextObjectsToHistory();
     setTextObjects((prev) => [
       ...prev,
       {
         id: newTextId,
-        text: "",
+        text: "Add Your Text Here",
         x: canvasWidth / 2,
         y: canvasHeight / 2,
         color: textColor,
         fontSize: textSize,
       },
     ]);
+
+    setTimeout(() => {
+      textAreaRef.current?.focus();
+    }, 250);
   };
 
   const handleFinishEditing = () => {
@@ -179,7 +183,7 @@ const DrawCanva = ({ imageURL, onClose, name }: Props) => {
           : obj
       )
     );
-    setMode("draw");
+    setMode("mouse");
     setCurrentTextId(null);
     setCurrentText("");
   };
@@ -265,7 +269,7 @@ const DrawCanva = ({ imageURL, onClose, name }: Props) => {
     }
   };
 
-  const drawTexts = (context: CanvasRenderingContext2D) => {
+  const drawTexts = async (context: CanvasRenderingContext2D) => {
     textObjects.forEach((obj) => {
       context.fillStyle = obj.color;
       context.font = `${obj.fontSize}px Arial`;
@@ -273,10 +277,10 @@ const DrawCanva = ({ imageURL, onClose, name }: Props) => {
     });
     // แปลงเป็นรูปแล้วดาวน์โหลด
     const newImage = context.canvas.toDataURL("image/png");
-    const link = document.createElement("a");
-    link.href = newImage;
-    link.download = "merged-image.png";
-    link.click();
+    const file = await urlToFile(newImage, name);
+    if (file) {
+      onSave({ file, id: name });
+    }
   };
 
   const mouseSensor = useSensor(MouseSensor, {
@@ -299,8 +303,14 @@ const DrawCanva = ({ imageURL, onClose, name }: Props) => {
   // ถ้าไม่ใช่ draw/eraser => disable canvas
   const isCanvasDisabled = mode !== "draw" && mode !== "eraser";
 
+  useEnterKey(() => {
+    if (mode === "text-edit") {
+      handleFinishEditing();
+    }
+  });
+
   return (
-    <div className="flex w-full  grow gap-2 bg-gray-200 flex-col items-center">
+    <div className="flex w-full h-full grow gap-2 bg-gray-200 flex-col items-center">
       <div className="w-full gradient-bg  border-b h-14 px-5 items-center flex gap-2 pl-10 justify-between">
         <div className="flex h-full items-center justify-center gap-2">
           <div
@@ -351,152 +361,214 @@ const DrawCanva = ({ imageURL, onClose, name }: Props) => {
           </button>
         </div>
       </div>
+
       <div className="flex space-x-2 bg-white px-2 py-1 rounded-lg drop-shadow-lg items-center  mt-4">
-        <input
-          type="color"
-          value={brushColor}
-          onChange={(e) => setBrushColor(e.target.value)}
-          className="ml-2"
-        />
-
-        <label>
-          Brush Size:
-          <input
-            type="range"
-            min="1"
-            max="50"
-            value={brushRadius}
-            onChange={(e) => setBrushRadius(Number(e.target.value))}
-            className="ml-2"
-          />
-        </label>
-
-        <button
-          title="Draw Mode"
-          type="button"
-          className={`
+        {mode !== "text-edit" && (
+          <>
+            {" "}
+            <input
+              type="color"
+              value={brushColor}
+              onChange={(e) => setBrushColor(e.target.value)}
+              className="ml-2"
+            />
+            <label>
+              Brush Size:
+              <input
+                type="range"
+                min="1"
+                max="50"
+                value={brushRadius}
+                onChange={(e) => setBrushRadius(Number(e.target.value))}
+                className="ml-2"
+              />
+            </label>
+            <button
+              title="Draw Mode"
+              type="button"
+              className={`
             ${mode === "draw" ? "bg-sky-200" : "bg-gray-100 "}
             text-black w-7 h-7 rounded-lg border active:scale-105
            flex items-center justify-center hover:bg-sky-200`}
-          onClick={() => setMode("draw")}
-        >
-          <BiSolidPencil />
-        </button>
-        <button
-          title="Mouse Mode"
-          type="button"
-          onClick={() => setMode("mouse")}
-          className={`
+              onClick={() => setMode("draw")}
+            >
+              <BiSolidPencil />
+            </button>
+            <button
+              title="Mouse Mode"
+              type="button"
+              onClick={() => setMode("mouse")}
+              className={`
             ${mode === "mouse" ? "bg-sky-200" : "bg-gray-100 "}
             text-black w-7 h-7 rounded-lg border active:scale-105
            flex items-center justify-center hover:bg-sky-200`}
-        >
-          <BiSolidHand />
-        </button>
-        <button
-          title="Eraser Mode"
-          type="button"
-          onClick={() => setMode("eraser")}
-          className={`
+            >
+              <BiSolidHand />
+            </button>
+            <button
+              title="Eraser Mode"
+              type="button"
+              onClick={() => setMode("eraser")}
+              className={`
             ${mode === "eraser" ? "bg-sky-200" : "bg-gray-100 "}
             text-black w-7 h-7 rounded-lg border active:scale-105
            flex items-center justify-center hover:bg-sky-200`}
-        >
-          <BiSolidEraser />
-        </button>
-        <button
-          title="Add Text"
-          type="button"
-          onClick={handleAddText}
-          className={`
-            ${mode === "text-edit" ? "bg-sky-200" : "bg-gray-100 "}
+            >
+              <BiSolidEraser />
+            </button>
+            <button
+              title="Add Text"
+              type="button"
+              onClick={handleAddText}
+              className={`
+           bg-gray-100
             text-black w-7 h-7 rounded-lg border active:scale-105
            flex items-center justify-center hover:bg-sky-200`}
-        >
-          <MdTextFields />
-        </button>
-        <button
-          title="Clear All Text"
-          type="button"
-          onClick={handleClearAllText}
-          className={`
+            >
+              <MdTextFields />
+            </button>
+            <button
+              title="Clear All Text"
+              type="button"
+              onClick={handleClearAllText}
+              className={`
           bg-gray-100
             text-black w-7 h-7 rounded-lg border active:scale-105
            flex items-center justify-center hover:bg-sky-200`}
-        >
-          <MdOutlineFormatClear />
-        </button>
-        <button
-          title="Clear All Drawing"
-          type="button"
-          onClick={() => canvasRef.current?.clear()}
-          className={`
+            >
+              <MdOutlineFormatClear />
+            </button>
+            <button
+              title="Clear All Drawing"
+              type="button"
+              onClick={() => canvasRef.current?.clear()}
+              className={`
           bg-gray-100
             text-black w-7 relative h-7 rounded-lg border active:scale-105
            flex items-center justify-center hover:bg-sky-200`}
-        >
-          <div className="h-5 w-[1.5px] bg-black absolute -rotate-45" />
-          <BiSolidPencil />
-        </button>
-      </div>
+            >
+              <div className="h-5 w-[1.5px] bg-black absolute -rotate-45" />
+              <BiSolidPencil />
+            </button>
+          </>
+        )}
 
-      {mode === "text-edit" && (
-        <div className="flex space-x-2 mt-4">
-          <label>
-            Text:
-            <textarea
-              value={currentText}
-              onChange={(e) => {
-                setCurrentText(e.target.value);
-              }}
-              className="ml-2 border"
-              rows={3}
-              cols={40}
-            />
-          </label>
-          <label>
-            Text Color:
+        {mode === "text-edit" && (
+          <>
             <input
               type="color"
               value={textColor}
-              onChange={(e) => setTextColor(e.target.value)}
+              onChange={(e) => {
+                const color = e.target.value;
+                setTextColor(color);
+                saveTextObjectsToHistory();
+                setTextObjects((prev) =>
+                  prev.map((obj) =>
+                    obj.id === currentTextId
+                      ? {
+                          ...obj,
+                          color: color,
+                        }
+                      : obj
+                  )
+                );
+              }}
               className="ml-2"
             />
-          </label>
-          <label>
-            Text Size:
-            <input
-              type="number"
-              min="10"
-              max="100"
-              value={textSize}
-              onChange={(e) => setTextSize(Number(e.target.value))}
-              className="ml-2 border w-16"
-            />
-          </label>
-          <button
-            type="button"
-            onClick={handleFinishEditing}
-            className="p-2 bg-blue-500 text-white"
-          >
-            Done Editing
-          </button>
-          <button
-            type="button"
-            onClick={handleDeleteCurrentText}
-            className="p-2 bg-red-500 text-white"
-          >
-            Delete This Text
-          </button>
-        </div>
-      )}
-      <div className="w-9/12  bg-slate-50 h-[30rem] overflow-auto">
+            <label>
+              Text Size:
+              <input
+                type="number"
+                min="10"
+                max="100"
+                value={textSize}
+                onChange={(e) => {
+                  const size = Number(e.target.value);
+                  setTextSize(size);
+                  saveTextObjectsToHistory();
+                  setTextObjects((prev) =>
+                    prev.map((obj) =>
+                      obj.id === currentTextId
+                        ? {
+                            ...obj,
+                            fontSize: size,
+                          }
+                        : obj
+                    )
+                  );
+                }}
+                className="ml-2 border w-16"
+              />
+            </label>
+            <button
+              type="button"
+              onClick={handleFinishEditing}
+              className="p-2 bg-blue-500 text-white"
+            >
+              Done Editing
+            </button>
+            <button
+              type="button"
+              onClick={handleDeleteCurrentText}
+              className="p-2 bg-red-500 text-white"
+            >
+              Delete This Text
+            </button>{" "}
+          </>
+        )}
+      </div>
+
+      <div className="w-9/12  bg-slate-50  overflow-auto">
         <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
           {/* Container สำหรับซ้อนรูปพื้นหลัง + CanvasDraw (โปร่งใส) */}
           <div
             className="relative"
             style={{ width: canvasWidth, height: canvasHeight }}
           >
+            {mode === "text-edit" && (
+              <div
+                style={{
+                  left: textObjects.find((text) => text.id === currentTextId)
+                    ?.x,
+                  top: textObjects.find((text) => text.id === currentTextId)?.y,
+                }}
+                className="absolute z-50"
+              >
+                <textarea
+                  ref={textAreaRef}
+                  value={currentText}
+                  style={{
+                    fontSize: `${
+                      textObjects.find((text) => text.id === currentTextId)
+                        ?.fontSize
+                    }px`,
+                    color: `${
+                      textObjects.find((text) => text.id === currentTextId)
+                        ?.color
+                    }`,
+                  }}
+                  onChange={(e) => {
+                    const text = e.target.value;
+                    setCurrentText(text);
+                    saveTextObjectsToHistory();
+                    setTextObjects((prev) =>
+                      prev.map((obj) =>
+                        obj.id === currentTextId
+                          ? {
+                              ...obj,
+                              text: text,
+                            }
+                          : obj
+                      )
+                    );
+                  }}
+                  className=" border border-dashed bg-white/40 p-1 
+                   appearance-none active:outline-none resize-none focus:outline-none "
+                  rows={3}
+                  cols={40}
+                />
+              </div>
+            )}
             {/* รูปพื้นหลัง */}
             {image && (
               <img
@@ -522,15 +594,17 @@ const DrawCanva = ({ imageURL, onClose, name }: Props) => {
             />
 
             {/* ข้อความที่ลากได้ */}
-            {textObjects.map((obj) => (
-              <DraggableText
-                key={obj.id}
-                obj={obj}
-                mode={mode}
-                currentTextId={currentTextId}
-                handleTextClick={handleTextClick}
-              />
-            ))}
+            {textObjects
+              .filter((text) => text.id !== currentTextId)
+              .map((obj) => (
+                <DraggableText
+                  key={obj.id}
+                  obj={obj}
+                  mode={mode}
+                  currentTextId={currentTextId}
+                  handleTextClick={handleTextClick}
+                />
+              ))}
           </div>
         </DndContext>
       </div>

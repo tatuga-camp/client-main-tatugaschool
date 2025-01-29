@@ -19,7 +19,8 @@ export const useEscKey = (onEscKey: () => void) => {
 export const useEnterKey = (onEnterKey: () => void) => {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Enter" || event.keyCode === 13) {
+      // Check if the Enter key is pressed without the Shift key
+      if (event.key === "Enter" && !event.shiftKey) {
         onEnterKey();
       }
     };

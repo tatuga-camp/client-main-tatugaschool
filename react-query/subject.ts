@@ -39,14 +39,13 @@ export function useGetSubject({
 }: {
   subjectId: string;
 }): UseQueryResult<Subject, Error> {
-  const schools = useQuery({
+  return useQuery({
     queryKey: ["subject", { id: subjectId }],
     queryFn: () =>
       GetSubjectByIdService({
         subjectId: subjectId,
       }),
   });
-  return schools;
 }
 
 export function useGetSubjectFromSchool(

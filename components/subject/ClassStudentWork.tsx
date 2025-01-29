@@ -3,6 +3,7 @@ import {
   useGetAssignment,
   useGetStudentOnAssignments,
   useGetStudentOnSubject,
+  useUpdateFileStudentOnAssignment,
   useUpdateStudentOnAssignments,
 } from "../../react-query";
 import { HiUsers } from "react-icons/hi";
@@ -35,6 +36,11 @@ import { ProgressBar } from "primereact/progressbar";
 import CommentSection from "./CommentSection";
 import PopupLayout from "../layout/PopupLayout";
 import DrawCanva from "../common/DrawCanva";
+import {
+  getSignedURLTeacherService,
+  UploadSignURLService,
+} from "../../services";
+import LoadingBar from "../common/LoadingBar";
 
 type Props = {
   assignmentId: string;
@@ -324,6 +330,8 @@ type PropsStudentWork = {
 };
 function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
   const update = useUpdateStudentOnAssignments();
+  const updateFile = useUpdateFileStudentOnAssignment();
+  const [loadingFile, setLoadingFile] = React.useState(false);
   const toast = React.useRef<Toast>(null);
   const [selectMenu, setSelectMenu] =
     React.useState<MenuViewStudentWorks>("Works");
@@ -378,6 +386,51 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
     }
   };
 
+  const handleSaveImageEdit = async (data: { id: string; file: File }) => {
+    try {
+      setLoadingFile(true);
+      const signURL = await getSignedURLTeacherService({
+        fileName: data.file.name,
+        fileType: data.file.type,
+      });
+
+      const upload = await UploadSignURLService({
+        file: data.file,
+        contentType: data.file.type,
+        signURL: signURL.signURL,
+      });
+
+      await updateFile.mutateAsync({
+        query: {
+          id: data.id,
+        },
+        body: {
+          body: signURL.originalURL,
+        },
+      });
+
+      toast.current?.show({
+        severity: "success",
+        summary: "Success",
+        detail: "File has been updated",
+        life: 2000,
+      });
+      setLoadingFile(false);
+    } catch (error) {
+      setLoadingFile(false);
+      console.log(error);
+      let result = error as ErrorMessages;
+      Swal.fire({
+        title: result.error ? result.error : "Something Went Wrong",
+        text: result.message.toString(),
+        footer: result.statusCode
+          ? "Code Error: " + result.statusCode?.toString()
+          : "",
+        icon: "error",
+      });
+    }
+  };
+
   return (
     <>
       <Toast ref={toast} />
@@ -389,7 +442,17 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
           }}
         >
           <div className="w-full flex justify-start items-center flex-col h-full ">
+            {loadingFile && <LoadingBar />}
             <DrawCanva
+              onSave={(data) => {
+                if (!loadingFile) {
+                  handleSaveImageEdit({
+                    id: selectFileImage.id,
+                    file: data.file,
+                  });
+                }
+              }}
+              id={selectFileImage.id}
               name={selectFileImage.name ?? ""}
               imageURL={selectFileImage.body}
               onClose={() => setSelectFileImage(null)}
