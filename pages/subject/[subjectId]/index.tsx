@@ -333,7 +333,7 @@ function Index({ subjectId }: Props) {
               className="w-[30rem] bg-white drop-shadow-md p-5 h-[30rem] rounded-md overflow-hidden"
             >
               <QRCode
-                url={`${process.env.NEXT_PUBLIC_STUDENT_CLIENT_URL}/school/${subject.data?.schoolId}?subjectId=${subject.data?.id}`}
+                url={`${process.env.NEXT_PUBLIC_STUDENT_CLIENT_URL}/?subject_code=${subject.data?.code}`}
                 code={subject.data?.code}
                 setTriggerQRCode={setTriggerQRCode}
               />

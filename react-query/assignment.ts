@@ -79,6 +79,9 @@ export function useCreateAssignment() {
           return [...(oldData ?? []), data];
         }
       );
+      queryClient.invalidateQueries({
+        queryKey: ["assignment-overview", { subjectId: data.subjectId }],
+      });
     },
   });
 }
@@ -98,6 +101,9 @@ export function useDeleteAssignment() {
       );
       queryClient.invalidateQueries({
         queryKey: ["assignment", { id: data.id }],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["assignment-overview", { subjectId: data.subjectId }],
       });
     },
   });
