@@ -106,19 +106,18 @@ export type RequestExportAttendanceService = {
   subjectId: string;
 };
 
-type ResponseExportAttendanceService = string;
-
 export async function ExportAttendanceService(
   input: RequestExportAttendanceService
-): Promise<ResponseExportAttendanceService> {
+): Promise<string> {
   try {
     const response = await axiosInstance({
       method: "GET",
       url: `/v1/attendances/export-excel/?subjectId=${input.subjectId}`,
+      responseType: "text",
     });
     return response.data;
   } catch (error: any) {
-    console.error("Export Attendance request failed:", error.response.data);
+    console.error("Export Attendance request failed:", error);
     throw error?.response?.data;
   }
 }
