@@ -48,6 +48,7 @@ const ProfileUpload: React.FC<{
       const { signURL, originalURL } = await getSignedURLTeacherService({
         fileName: file.name,
         fileType: file.type,
+        schoolId: school.id,
       });
 
       await UploadSignURLService({ contentType: file.type, file, signURL });

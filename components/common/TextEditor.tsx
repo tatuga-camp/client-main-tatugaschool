@@ -12,10 +12,12 @@ type Props = {
   onChange: (content: string) => void;
   menubar?: boolean;
   toolbar?: boolean | string;
+  schoolId: string;
 };
 function TextEditor({
   value,
   onChange,
+  schoolId,
   menubar = true,
   toolbar = "undo redo | formatselect | blocks | " +
     "bold italic backcolor | alignleft aligncenter " +
@@ -60,6 +62,7 @@ function TextEditor({
               const signURL = await getSignedURLTeacherService({
                 fileName: file.name,
                 fileType: file.type,
+                schoolId: schoolId,
               });
               const upload = await UploadSignURLService({
                 contentType: file.type,

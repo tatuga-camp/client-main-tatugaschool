@@ -392,6 +392,7 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
       const signURL = await getSignedURLTeacherService({
         fileName: data.file.name,
         fileType: data.file.type,
+        schoolId: studentOnAssignment.schoolId,
       });
 
       const upload = await UploadSignURLService({
@@ -590,7 +591,10 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
           </ul>
         )}
         {selectMenu === "Comments" && (
-          <CommentSection studentOnAssignmentId={studentOnAssignment.id} />
+          <CommentSection
+            schoolId={assignment.schoolId}
+            studentOnAssignmentId={studentOnAssignment.id}
+          />
         )}
       </main>
     </>

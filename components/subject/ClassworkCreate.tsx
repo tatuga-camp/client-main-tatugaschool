@@ -41,6 +41,7 @@ type Props = {
   onClose: () => void;
   toast: React.RefObject<Toast>;
   subjectId: string;
+  schoolId: string;
 };
 
 type TitleList =
@@ -84,7 +85,7 @@ export const classworkLists: { title: AssignmentType; icon: ReactNode }[] = [
   },
 ];
 
-function ClassworkCreate({ onClose, toast, subjectId }: Props) {
+function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
   useEffect(() => {
     document.body.style.overflow = "hidden";
   }, []);
@@ -166,6 +167,7 @@ function ClassworkCreate({ onClose, toast, subjectId }: Props) {
           const signURL = await getSignedURLTeacherService({
             fileName: file.file.name,
             fileType: file.file.type,
+            schoolId: schoolId,
           });
 
           await UploadSignURLService({

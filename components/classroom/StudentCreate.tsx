@@ -25,9 +25,10 @@ import * as crypto from "crypto";
 type Props = {
   onClose: () => void;
   classId: string;
+  schoolId: string;
   toast: React.RefObject<Toast>;
 };
-function StudentCreate({ onClose, classId, toast }: Props) {
+function StudentCreate({ onClose, classId, toast, schoolId }: Props) {
   const [triggerExcel, setTriggerExcel] = React.useState(false);
   const create = useCreateStudent();
   const sound = useSound("/sounds/ding.mp3") as HTMLAudioElement;
@@ -98,6 +99,7 @@ function StudentCreate({ onClose, classId, toast }: Props) {
       const signURL = await getSignedURLTeacherService({
         fileName: file.name,
         fileType: file.type,
+        schoolId: schoolId,
       });
 
       await UploadSignURLService({

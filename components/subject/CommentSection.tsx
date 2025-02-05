@@ -17,8 +17,9 @@ import {
 import { useGetUser } from "../../react-query";
 type Props = {
   studentOnAssignmentId: string;
+  schoolId: string;
 };
-function CommentSection({ studentOnAssignmentId }: Props) {
+function CommentSection({ studentOnAssignmentId, schoolId }: Props) {
   const comments = useGetComments({ studentOnAssignmentId });
   const user = useGetUser();
   const [comment, setComment] = React.useState("");
@@ -90,6 +91,7 @@ function CommentSection({ studentOnAssignmentId }: Props) {
         </div>
         <div className="grow h-40 relative ">
           <TextEditor
+            schoolId={schoolId}
             menubar={false}
             toolbar={false}
             value={comment}

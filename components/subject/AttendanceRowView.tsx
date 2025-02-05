@@ -159,6 +159,7 @@ function AttendanceRowView({ selectRow, onClose, toast }: props) {
             </div>
             <div className="h-96 bg-slate-200">
               <TextEditor
+                schoolId={selectRow.schoolId}
                 value={rowData?.note || ""}
                 onChange={(value) =>
                   setRowData((prev) => {

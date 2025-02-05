@@ -319,9 +319,10 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
         )}
       </header>
 
-      {triggerNote ? (
+      {triggerNote && selectTable ? (
         <div className="h-full">
           <TextEditor
+            schoolId={selectTable?.schoolId}
             value={attendanceData?.note}
             onChange={(content) =>
               setAttendanceData((prev) => ({

@@ -153,6 +153,7 @@ function StudentLists({ students, classroom }: Props) {
       const signURL = await getSignedURLTeacherService({
         fileName: file.name,
         fileType: file.type,
+        schoolId: classroom.schoolId,
       });
 
       await UploadSignURLService({
@@ -329,6 +330,7 @@ function StudentLists({ students, classroom }: Props) {
           }}
         >
           <StudentCreate
+            schoolId={classroom.schoolId}
             toast={toast}
             classId={classroom.id}
             onClose={() => {

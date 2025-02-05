@@ -146,6 +146,7 @@ function Index({ subjectId }: Props) {
       const signURL = await getSignedURLTeacherService({
         fileName: file?.name,
         fileType: file?.type,
+        schoolId: subject.data?.schoolId,
       });
 
       const blurHash = await generateBlurHash(file);
@@ -500,8 +501,12 @@ function Index({ subjectId }: Props) {
               subjectId={subjectId}
             />
           )}{" "}
-          {selectMenu === "Classwork" && (
-            <Classwork subjectId={subjectId} toast={toast} />
+          {selectMenu === "Classwork" && subject.data && (
+            <Classwork
+              schoolId={subject.data?.schoolId}
+              subjectId={subjectId}
+              toast={toast}
+            />
           )}
           {selectMenu === "Grade" && (
             <Grade toast={toast} subjectId={subjectId} />

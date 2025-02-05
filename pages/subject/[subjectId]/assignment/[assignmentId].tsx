@@ -237,6 +237,7 @@ function Index({
         const signURL = await getSignedURLTeacherService({
           fileName: file.file.name,
           fileType: file.file.type,
+          schoolId: classwork?.schoolId,
         });
 
         await UploadSignURLService({

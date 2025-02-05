@@ -89,7 +89,11 @@ function AssignmentText({
         </button>
       </div>
       <div className="h-96">
-        <TextEditor value={value} onChange={(content) => setValue(content)} />
+        <TextEditor
+          value={value}
+          onChange={(content) => setValue(content)}
+          schoolId={text.schoolId}
+        />
       </div>
     </form>
   );

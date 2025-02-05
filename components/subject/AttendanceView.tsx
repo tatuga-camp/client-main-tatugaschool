@@ -244,17 +244,20 @@ function AttendanceView({
                 Add note or edit note here
               </span>
             </div>
-            <div className="h-96 bg-slate-200">
-              <TextEditor
-                value={attendanceData?.note || ""}
-                onChange={(value) =>
-                  setAttendanceData((prev) => {
-                    if (!prev) return prev;
-                    return { ...prev, note: value };
-                  })
-                }
-              />
-            </div>
+            {attendanceTable && (
+              <div className="h-96 bg-slate-200">
+                <TextEditor
+                  schoolId={attendanceTable.schoolId}
+                  value={attendanceData?.note || ""}
+                  onChange={(value) =>
+                    setAttendanceData((prev) => {
+                      if (!prev) return prev;
+                      return { ...prev, note: value };
+                    })
+                  }
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>

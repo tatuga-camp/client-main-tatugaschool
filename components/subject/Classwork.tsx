@@ -27,8 +27,9 @@ import {
 type Props = {
   toast: React.RefObject<Toast>;
   subjectId: string;
+  schoolId: string;
 };
-function Classwork({ toast, subjectId }: Props) {
+function Classwork({ toast, subjectId, schoolId }: Props) {
   const [triggerCreate, setTriggerCreate] = React.useState(false);
   const classworks = useGetAssignments({ subjectId: subjectId });
   const [selectClasswork, setSelectClasswork] =
@@ -73,6 +74,7 @@ function Classwork({ toast, subjectId }: Props) {
         >
           <div className="bg-background-color w-screen h-screen ">
             <ClassworkCreate
+              schoolId={schoolId}
               subjectId={subjectId}
               toast={toast}
               onClose={() => {

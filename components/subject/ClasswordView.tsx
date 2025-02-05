@@ -54,17 +54,20 @@ function ClasswordView({
               placeholder="Title"
             />
           </label>
-          <div className="w-full h-96 pb-5 ">
-            <span className="text-base font-medium">Description</span>
-            <TextEditor
-              value={classwork?.description || ""}
-              onChange={(v) =>
-                onChange({
-                  description: v,
-                })
-              }
-            />
-          </div>
+          {classwork && (
+            <div className="w-full h-96 pb-5 ">
+              <span className="text-base font-medium">Description</span>
+              <TextEditor
+                schoolId={classwork?.schoolId}
+                value={classwork?.description || ""}
+                onChange={(v) =>
+                  onChange({
+                    description: v,
+                  })
+                }
+              />
+            </div>
+          )}
 
           <ul className="w-full h-max flex flex-col gap-2">
             {files?.map((file, index) => {
