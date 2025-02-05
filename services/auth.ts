@@ -100,7 +100,7 @@ export async function ForgotPasswordService(
   }
 }
 
-type RequestResetPasswordService = {
+export type RequestResetPasswordService = {
   token: string;
   password: string;
 };

@@ -6,6 +6,7 @@ import Swal from "sweetalert2";
 import { ErrorMessages } from "../../interfaces";
 import { useRouter } from "next-nprogress-bar";
 import { setAccessToken, setRefreshToken } from "../../utils";
+import Password from "../common/Password";
 
 export const LoginForm = () => {
   const router = useRouter();
@@ -53,30 +54,31 @@ export const LoginForm = () => {
 
   return (
     <form
-      className="bg-white p-10 w-11/12 md:w-96 lg:w-4/12  rounded-[40px] shadow-[0_12px_24px_rgba(145,158,171,0.12)] text-center"
+      className="bg-white p-10 w-96 
+      rounded-lg shadow-[0_12px_24px_rgba(145,158,171,0.12)] text-center"
       onSubmit={handleLogin}
     >
       <h2 className="text-[24px] font-bold mb-[40px]">Log in</h2>
-
-      <input
-        type="email"
-        placeholder="E-mail"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        required
-        className="w-full p-[16px] mb-[20px] border border-gray-300 rounded-lg"
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-        className="w-full p-[16px] mb-[20px] border border-gray-300 rounded-lg"
-      />
+      <div className="flex flex-col gap-3  w-full">
+        <input
+          type="email"
+          placeholder="E-mail"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          className="main-input w-full h-10"
+        />
+        <Password
+          feedback={false}
+          toggleMask={true}
+          value={password}
+          placeholder="Password"
+          onChange={(e) => setPassword(e.target.value)}
+        />
+      </div>
       <Link
         href={"/auth/forget-password"}
-        className="block text-left hover:underline text-[14px] text-[#6E6E6E] mb-[40px]"
+        className="block text-left mt-2 hover:underline text-[14px] text-[#6E6E6E] mb-[40px]"
       >
         Forget password?
       </Link>

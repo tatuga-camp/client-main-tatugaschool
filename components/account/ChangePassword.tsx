@@ -75,7 +75,6 @@ function ChangePassword() {
           value={formData?.currentPassword}
           onChange={handleChange}
           name="currentPassword"
-          required
           toggleMask
         />
       </label>
@@ -86,7 +85,6 @@ function ChangePassword() {
           value={formData?.newPassword}
           onChange={handleChange}
           name="newPassword"
-          required
           toggleMask
         />
       </label>
@@ -96,7 +94,6 @@ function ChangePassword() {
           value={formData?.confirmNewPassword}
           onChange={handleChange}
           name="confirmNewPassword"
-          required
           toggleMask
         />
       </label>

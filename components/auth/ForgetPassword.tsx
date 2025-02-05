@@ -46,14 +46,17 @@ export const ForgetPasswordForm = () => {
   return (
     <>
       <form
-        className="bg-white w-full md:w-[600px]
-                 p-[80px_40px] rounded-[40px] flex flex-col gap-5 
+        className="bg-white w-full md:w-5/12
+                 p-[80px_40px] rounded-lg flex flex-col gap-5 
                  shadow-[0_12px_24px_rgba(145,158,171,0.12)] text-center"
         onSubmit={handleForgetPassword}
       >
-        <h2 className="text-[24px] font-bold mb-[40px]">Forget Password ?</h2>
+        <h2 className="text-[24px] font-bold">Forget Password ?</h2>
         {error && <p className="text-red-500 mb-4">{error}</p>}
-
+        <p className="text-sm text-center">
+          Enter your email address and we will send you a link to reset your
+          password
+        </p>
         <input
           type="email"
           placeholder="Enter your Email here"

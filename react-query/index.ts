@@ -9,3 +9,4 @@ export * from "./grade";
 export * from "./classroom";
 export * from "./student";
 export * from "./memberOnSchool";
+export * from "./auth";

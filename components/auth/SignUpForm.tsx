@@ -77,7 +77,8 @@ export const SignUpForm = () => {
 
   return (
     <form
-      className="bg-white p-10  w-11/12 flex flex-col gap-4 md:w-8/12 lg:w-8/12 xl:w-5/12  rounded-[40px] shadow-[0_12px_24px_rgba(145,158,171,0.12)] text-center"
+      className="bg-white p-10   rounded-lg  flex flex-col
+       gap-4 w-96 md:w-5/12  shadow-[0_12px_24px_rgba(145,158,171,0.12)] text-center"
       onSubmit={handleSignUp}
     >
       <h2 className="text-[24px] font-bold mb-[40px]">Create Account</h2>
@@ -126,23 +127,23 @@ export const SignUpForm = () => {
             className="  main-input w-80"
           />
         </label>
-        <label className="h-max  flex flex-col relative items-start">
+        <label className="h-max  flex flex-col  w-80 relative items-start">
           <span className="text-sm">Password</span>
           <Password
             placeholder="Enter Your Password"
             value={password}
+            feedback={true}
             onChange={(e) => setPassword(e.target.value)}
-            required
             toggleMask
           />
         </label>
-        <label className="h-max  flex flex-col relative items-start">
+        <label className="h-max w-80  flex flex-col relative items-start">
           <span className="text-sm">Confirm Password</span>
           <Password
+            feedback={true}
             placeholder="Enter your Confirm Password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            required
             toggleMask
           />
         </label>
