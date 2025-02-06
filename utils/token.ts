@@ -11,6 +11,7 @@ export function getRefetchtoken(ctx?: GetServerSidePropsContext): {
 
 export function getAccessToken(): { access_token: string | null } {
   const cookies = parseCookies();
+  console.log("cookies", cookies);
   const access_token = cookies.access_token;
   return { access_token };
 }
