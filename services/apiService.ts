@@ -13,6 +13,10 @@ const createAxiosInstance = () => {
       const { access_token } = getAccessToken();
       const { refresh_token } = getRefetchtoken();
       const request = config.url;
+
+      console.log("access_token", access_token);
+      console.log("refresh_token", refresh_token);
+      console.log("request", request);
       // Redirect to login if access token is not found and the request is not sign-in
       if (
         (!access_token || !refresh_token) &&
