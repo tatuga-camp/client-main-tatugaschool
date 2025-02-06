@@ -45,7 +45,6 @@ import {
   generateBlurHash,
   getRefetchtoken,
   localStorageGetRemoveRandomStudents,
-  setAccessToken,
 } from "../../../utils";
 import SubjectLayout from "../../../components/layout/SubjectLayout";
 import DefaultLayout from "../../../components/layout/DefaultLayout";
@@ -550,7 +549,6 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     const accessToken = await RefreshTokenService({
       refreshToken: refresh_token,
     });
-    setAccessToken({ access_token: accessToken.accessToken });
 
     return {
       props: {

@@ -1,11 +1,6 @@
 import { GetServerSideProps } from "next";
 import React from "react";
-import {
-  getRefetchtoken,
-  setAccessToken,
-  timeAgo,
-  validateMongodbId,
-} from "../../utils";
+import { getRefetchtoken, timeAgo, validateMongodbId } from "../../utils";
 import {
   GetClassByIdService,
   RefreshTokenService,
@@ -193,7 +188,6 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     const accessToken = await RefreshTokenService({
       refreshToken: refresh_token,
     });
-    setAccessToken({ access_token: accessToken.accessToken });
 
     return {
       props: {

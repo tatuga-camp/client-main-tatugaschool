@@ -3,7 +3,7 @@ import DefaultLayout from "@/components/layout/DefaultLayout";
 import { GetServerSideProps } from "next";
 import { RefreshTokenService } from "../services";
 import Head from "next/head";
-import { setAccessToken, getRefetchtoken } from "../utils";
+import { getRefetchtoken } from "../utils";
 
 export default function Home() {
   return (
@@ -30,7 +30,6 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     const accessToken = await RefreshTokenService({
       refreshToken: refresh_token,
     });
-    setAccessToken({ access_token: accessToken.accessToken });
 
     return {
       props: {},

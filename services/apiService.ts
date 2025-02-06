@@ -1,6 +1,6 @@
 import axios from "axios";
 import { RefreshTokenService } from "./auth";
-import { setAccessToken, getRefetchtoken, getAccessToken } from "../utils";
+import { getRefetchtoken, getAccessToken } from "../utils";
 
 const createAxiosInstance = () => {
   const instance = axios.create({
@@ -63,7 +63,6 @@ const createAxiosInstance = () => {
           const { accessToken } = await RefreshTokenService({
             refreshToken: refresh_token,
           });
-          setAccessToken({ access_token: accessToken });
           instance.defaults.headers.common[
             "Authorization"
           ] = `Bearer ${accessToken}`;

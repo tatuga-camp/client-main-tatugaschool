@@ -3,7 +3,7 @@ import DefaultLayout from "@/components/layout/DefaultLayout";
 import AccountComponent from "@/components/account/AccountComponent";
 import { GetUserService, RefreshTokenService } from "../../services";
 import { GetServerSideProps } from "next";
-import { setAccessToken, getRefetchtoken } from "../../utils";
+import { getRefetchtoken } from "../../utils";
 import Head from "next/head";
 
 const AccountPage = () => {
@@ -33,8 +33,6 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     const accessToken = await RefreshTokenService({
       refreshToken: refresh_token,
     });
-
-    setAccessToken({ access_token: accessToken.accessToken });
 
     return {
       props: {},

@@ -4,7 +4,6 @@ import {
   convertToDateTimeLocalString,
   generateBlurHash,
   getRefetchtoken,
-  setAccessToken,
 } from "../../../../utils";
 import {
   getSignedURLTeacherService,
@@ -496,7 +495,6 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     const accessToken = await RefreshTokenService({
       refreshToken: refresh_token,
     });
-    setAccessToken({ access_token: accessToken.accessToken });
 
     return {
       props: {

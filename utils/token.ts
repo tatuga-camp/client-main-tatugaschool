@@ -14,22 +14,3 @@ export function getAccessToken(): { access_token: string | null } {
   const access_token = cookies.access_token;
   return { access_token };
 }
-
-export function setAccessToken({ access_token }: { access_token: string }) {
-  setCookie(null, "access_token", access_token, {
-    path: "/",
-    maxAge: 5 * 24 * 60 * 60,
-    secure: process.env.NODE_ENV === "production",
-  });
-  return { access_token };
-}
-
-export function setRefreshToken({ refresh_token }: { refresh_token: string }) {
-  setCookie(null, "refresh_token", refresh_token, {
-    path: "/",
-    maxAge: 5 * 24 * 60 * 60,
-    secure: process.env.NODE_ENV === "production",
-  });
-
-  return { refresh_token };
-}

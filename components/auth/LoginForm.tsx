@@ -4,7 +4,6 @@ import Link from "next/link";
 import React, { useState } from "react";
 import Swal from "sweetalert2";
 import { ErrorMessages } from "../../interfaces";
-import { setAccessToken, setRefreshToken } from "../../utils";
 import Password from "../common/Password";
 import { FcGoogle } from "react-icons/fc";
 
