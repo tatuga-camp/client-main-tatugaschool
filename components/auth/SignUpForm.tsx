@@ -55,12 +55,12 @@ export const SignUpForm = () => {
         phone: phone,
         provider: "LOCAL",
       });
+      router.push(response.redirectUrl);
       await Swal.fire({
         title: "Registration Success!",
         text: "Please check your email for verification.",
         icon: "success",
       });
-      router.push("/auth/sign-in");
     } catch (error) {
       console.log(error);
       let result = error as ErrorMessages;

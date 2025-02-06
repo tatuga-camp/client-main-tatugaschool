@@ -14,7 +14,7 @@ import {
   GetUserService,
   RequestUpdateUserService,
 } from "@/services";
-import { useGetUser } from "../../react-query";
+import { useGetUser, useUpdateUser } from "../../react-query";
 import { InputMask } from "primereact/inputmask";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ErrorMessages } from "../../interfaces";
@@ -27,7 +27,6 @@ const menuItems = ["General", "Change Password", "Invitations"] as const;
 type MenuItems = (typeof menuItems)[number];
 const AccountComponent = () => {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const [selectMenu, setSelectMenu] = useState<MenuItems>("General");
   const user = useGetUser();
   const [form, setForm] = useState<{
@@ -36,13 +35,7 @@ const AccountComponent = () => {
     phone?: string;
   }>();
 
-  const updateUser = useMutation({
-    mutationKey: ["update-user"],
-    mutationFn: (input: RequestUpdateUserService) => UpdateUserService(input),
-    onSuccess(data, variables, context) {
-      queryClient.setQueryData(["user"], data);
-    },
-  });
+  const updateUser = useUpdateUser();
 
   useEffect(() => {
     if (router.isReady) {

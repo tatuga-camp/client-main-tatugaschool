@@ -1,12 +1,12 @@
-import React, { useState } from "react";
 import { SignInService } from "@/services";
-import { setCookie } from "nookies";
+import { useRouter } from "next-nprogress-bar";
 import Link from "next/link";
+import React, { useState } from "react";
 import Swal from "sweetalert2";
 import { ErrorMessages } from "../../interfaces";
-import { useRouter } from "next-nprogress-bar";
 import { setAccessToken, setRefreshToken } from "../../utils";
 import Password from "../common/Password";
+import { FcGoogle } from "react-icons/fc";
 
 export const LoginForm = () => {
   const router = useRouter();
@@ -26,10 +26,7 @@ export const LoginForm = () => {
         },
       });
       const response = await SignInService({ email, password });
-      console.log(response);
-      setAccessToken({ access_token: response?.accessToken });
-      setRefreshToken({ refresh_token: response?.refreshToken });
-
+      router.push(response.redirectUrl);
       Swal.fire({
         title: "Login Success!",
         text: "You are now logged in",
@@ -37,7 +34,31 @@ export const LoginForm = () => {
         showConfirmButton: false,
         timer: 1500,
       });
-      router.push("/");
+    } catch (error) {
+      console.log(error);
+      let result = error as ErrorMessages;
+      Swal.fire({
+        title: result?.error ? result?.error : "Something Went Wrong",
+        text: result?.message?.toString(),
+        footer: result?.statusCode
+          ? "Code Error: " + result?.statusCode?.toString()
+          : "",
+        icon: "error",
+      });
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      Swal.fire({
+        title: "Please wait...",
+        text: "We are processing your request",
+        showConfirmButton: false,
+        willOpen: () => {
+          Swal.showLoading();
+        },
+      });
+      router.push(`${process.env.NEXT_PUBLIC_SERVER_URL}/v1/auth/google`);
     } catch (error) {
       console.log(error);
       let result = error as ErrorMessages;
@@ -82,22 +103,21 @@ export const LoginForm = () => {
       >
         Forget password?
       </Link>
-
-      <button
-        type="submit"
-        className="w-full flex items-center justify-center h-5 p-5 bg-secondary-color text-white rounded-md font-semibold
-           hover:bg-primary-color transition duration-300"
-      >
-        Log in
-      </button>
-
-      <Link
-        href="/auth/sign-up"
-        className=" h-5 p-5 ring-0 flex items-center justify-center mt-[20px] hover:ring-1
-         hover:ring-primary-color rounded-md  text-[14px] text-[#6E6E6E]"
-      >
-        No Account ?
-      </Link>
+      <div className="flex flex-col gap-3">
+        <button type="submit" className="w-full main-button p-2">
+          Log in
+        </button>
+        <button
+          onClick={handleGoogleLogin}
+          className="second-button border gap-2 flex items-center justify-center"
+        >
+          <FcGoogle />
+          Log in with Google
+        </button>
+        <Link href="/auth/sign-up" className="second-button border">
+          No Account ?
+        </Link>
+      </div>
     </form>
   );
 };

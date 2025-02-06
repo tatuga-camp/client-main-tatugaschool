@@ -1,3 +1,4 @@
+import { useRouter } from "next/router";
 import { User } from "../interfaces";
 
 import createAxiosInstance from "./apiService";
@@ -9,7 +10,7 @@ type RequestSignInService = {
   password: string;
 };
 
-type ResponseSignInService = { accessToken: string; refreshToken: string };
+type ResponseSignInService = { redirectUrl: string };
 
 export async function SignInService(
   input: RequestSignInService
@@ -18,6 +19,7 @@ export async function SignInService(
     const response = await axiosInstance({
       method: "POST",
       url: "/v1/auth/sign-in",
+      withCredentials: true, // Ensure this is included
       data: { ...input },
     });
     return response.data;
@@ -37,7 +39,7 @@ type RequestSignUpService = {
   provider: "LOCAL" | "GOOGLE";
 };
 
-type ResponseSignUpService = User;
+type ResponseSignUpService = { redirectUrl: string };
 export async function SignUpService(
   input: RequestSignUpService
 ): Promise<ResponseSignUpService> {
@@ -45,6 +47,7 @@ export async function SignUpService(
     const response = await axiosInstance({
       method: "POST",
       url: "/v1/auth/sign-up",
+      withCredentials: true, // Ensure this is included
       data: { ...input },
     });
     return response.data;
@@ -68,6 +71,7 @@ export async function VerifyEmailService(
     const response = await axiosInstance({
       method: "POST",
       url: "/v1/auth/verify-email",
+
       data: { ...input },
     });
     return response.data;

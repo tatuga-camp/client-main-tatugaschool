@@ -34,7 +34,7 @@ const VerifyEmailPage = ({ token }: { token: string | null }) => {
         text: "Your email has been verified successfully",
         icon: "success",
       });
-      router.push("/auth/sign-in");
+      router.push("/");
     } catch (error) {
       setVerificationStatus("fail");
       console.log(error);

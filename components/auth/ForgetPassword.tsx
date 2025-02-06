@@ -86,10 +86,7 @@ export const ForgetPasswordForm = () => {
             <span>Loading...</span>
           </button>
         ) : (
-          <button
-            type="submit"
-            className="w-full p-[16px] bg-[#5F3DC4] text-white rounded-[8px] font-semibold hover:bg-[#482ab4] transition duration-300"
-          >
+          <button type="submit" className="w-full main-button">
             Send Email
           </button>
         )}

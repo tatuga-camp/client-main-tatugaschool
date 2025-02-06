@@ -16,6 +16,31 @@ export async function GetUserService(): Promise<User> {
   }
 }
 
+export async function GetNoVerifyUserService(): Promise<User> {
+  try {
+    const response = await axiosInstance({
+      method: "GET",
+      url: "/v1/users/noverify-user",
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("User request failed:", error?.response?.data);
+    throw error?.response?.data;
+  }
+}
+
+export async function ResendVerifiyEmail(): Promise<User> {
+  try {
+    const response = await axiosInstance({
+      method: "post",
+      url: "/v1/users/resend-verify-email",
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error(error);
+    throw error?.response?.data;
+  }
+}
 export type RequestGetUserByEmailService = {
   email: string;
 };

@@ -83,8 +83,7 @@ function ResetPassword({ token }: { token: string }) {
         <button
           type="submit"
           disabled={resetPassword.isPending}
-          className="w-full p-2 bg-primary-color text-white flex items-center justify-center 
-          rounded-lg font-semibold hover:bg-secondary-color transition duration-300"
+          className="w-full p-2 main-button"
         >
           {resetPassword.isPending ? <LoadingSpinner /> : "Confirm"}
         </button>
