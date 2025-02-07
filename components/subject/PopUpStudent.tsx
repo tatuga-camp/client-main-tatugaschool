@@ -141,6 +141,7 @@ function PopUpStudent({ student, setSelectStudent, toast }: Props) {
         </div>
       </div>
       <ScorePanel
+        subjectId={student.subjectId}
         scoreOnSubjects={scoreOnSubjects}
         onSelectScore={({ inputScore, score }) => {
           setSelectScore({ inputScore, score });

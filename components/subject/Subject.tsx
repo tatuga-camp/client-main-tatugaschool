@@ -241,6 +241,7 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
       >
         <div ref={chooseScoreRef} className="bg-white p-2 rounded-md border">
           <ScorePanel
+            subjectId={subjectId}
             scoreOnSubjects={scoreOnSubjects}
             onSelectScore={({ score, inputScore }) => {
               setSelectScore({ score, inputScore });
