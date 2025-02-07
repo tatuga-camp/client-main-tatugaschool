@@ -4,11 +4,11 @@ import createAxiosInstance from "./apiService";
 
 const axiosInstance = createAxiosInstance();
 
-type RequestCreateScoreOnSubjectService = {
+export type RequestCreateScoreOnSubjectService = {
   score: number;
   title: string;
   icon: string;
-  schoolId: string;
+  blurHash: string;
   subjectId: string;
 };
 
@@ -52,20 +52,25 @@ export async function GetScoresOnSubjectBySubjectIdService(
   }
 }
 
-type RequestUpdateScoreOnSubjectService = {
-  score: number;
-  title?: string;
-  icon?: string;
+export type RequestUpdateScoreOnSubjectService = {
+  query: {
+    socreOnSubjectId: string;
+  };
+  body: {
+    score?: number;
+    title?: string;
+    icon?: string;
+    blurHash?: string;
+  };
 };
 
 export async function UpdateScoreOnSubjectService(
-  scoreId: string,
   input: RequestUpdateScoreOnSubjectService
 ): Promise<ResponseScoreOnSubjectService> {
   try {
     const response = await axiosInstance({
       method: "PATCH",
-      url: `/v1/score-on-subjects/${scoreId}`,
+      url: `/v1/score-on-subjects`,
       data: { ...input },
     });
     return response.data;

@@ -11,6 +11,8 @@ import { IoQrCode } from "react-icons/io5";
 import { MdFullscreen, MdFullscreenExit, MdMenu } from "react-icons/md";
 import { SlPicture } from "react-icons/sl";
 import Swal from "sweetalert2";
+import DefaultLayout from "../../../components/layout/DefaultLayout";
+import SubjectLayout from "../../../components/layout/SubjectLayout";
 import ListMemberCircle from "../../../components/member/ListMemberCircle";
 import Attendance from "../../../components/subject/Attendance";
 import AttendanceChecker from "../../../components/subject/AttendanceChecker";
@@ -46,8 +48,7 @@ import {
   getRefetchtoken,
   localStorageGetRemoveRandomStudents,
 } from "../../../utils";
-import SubjectLayout from "../../../components/layout/SubjectLayout";
-import DefaultLayout from "../../../components/layout/DefaultLayout";
+import PopupLayout from "../../../components/layout/PopupLayout";
 type Props = {
   subjectId: string;
 };
@@ -64,7 +65,6 @@ function Index({ subjectId }: Props) {
     subjectId: subjectId,
   });
   const divRef = React.useRef<HTMLDivElement>(null);
-  const inviteTeacherRef = React.useRef<HTMLDivElement>(null);
   const teacherOnSubjects = useGetTeacherOnSubject({
     subjectId: subjectId,
   });
@@ -78,20 +78,12 @@ function Index({ subjectId }: Props) {
     React.useState<StudentOnSubject | null>(null);
   const [triggerInviteTeacher, setTriggerInviteTeacher] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
-  const qrcodeRef = React.useRef<HTMLDivElement>(null);
   const [triggerQRCode, setTriggerQRCode] = React.useState(false);
   const [triggerStopWatch, setTriggerStopWatch] = React.useState(false);
   const [triggerFullScreen, setTriggerFullScreen] = React.useState(false);
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   useClickOutside(divRef, () => {
     setSelectStudent(null);
-  });
-  useClickOutside(qrcodeRef, () => {
-    setTriggerQRCode(() => false);
-  });
-
-  useClickOutside(inviteTeacherRef, () => {
-    setTriggerInviteTeacher(() => false);
   });
 
   useEffect(() => {
@@ -252,10 +244,7 @@ function Index({ subjectId }: Props) {
         {triggerStopWatch && <StopWatch onClose={handleCloseStopWatch} />}
 
         {selectFooter === "Slide Picker" && randomStudents && (
-          <div
-            className="w-screen z-50 h-screen flex items-center 
-        justify-center fixed top-0 right-0 left-0 bottom-0 m-auto"
-          >
+          <PopupLayout onClose={() => setSelectFooter("EMTY")}>
             <div className="bg-white w-full h-full md:w-max md:h-max  p-5 md:rounded-md md:border">
               <SilderPicker<StudentOnSubject>
                 images={randomStudents
@@ -269,11 +258,7 @@ function Index({ subjectId }: Props) {
                 setSelectFooter={setSelectFooter}
               />
             </div>
-            <div
-              onClick={() => setSelectFooter("EMTY")}
-              className="w-screen -z-10 h-screen bg-black/50 backdrop-blur  fixed top-0 right-0 left-0 bottom-0 m-auto"
-            ></div>
-          </div>
+          </PopupLayout>
         )}
         {selectFooter === "Attendance" && (
           <div
@@ -328,53 +313,40 @@ function Index({ subjectId }: Props) {
             className="w-screen z-40 h-screen flex items-center 
         justify-center fixed top-0 right-0 left-0 bottom-0 m-auto"
           >
-            <div
-              ref={qrcodeRef}
-              className="w-[30rem] bg-white drop-shadow-md p-5 h-[30rem] rounded-md overflow-hidden"
-            >
+            <div className="w-[30rem] bg-white drop-shadow-md p-5 h-[30rem] rounded-md overflow-hidden">
               <QRCode
                 url={`${process.env.NEXT_PUBLIC_STUDENT_CLIENT_URL}/?subject_code=${subject.data?.code}`}
                 code={subject.data?.code}
                 setTriggerQRCode={setTriggerQRCode}
               />
             </div>
-            <div className="w-screen -z-10 h-screen bg-white/50 backdrop-blur  fixed top-0 right-0 left-0 bottom-0 m-auto"></div>
+            <div
+              onClick={() => setTriggerQRCode(false)}
+              className="w-screen 
+            -z-10 h-screen bg-white/50 backdrop-blur  fixed top-0 right-0 left-0 bottom-0 m-auto"
+            ></div>
           </div>
         )}
         {triggerInviteTeacher && (
-          <div
-            className="w-screen z-40 h-screen flex items-center 
-        justify-center fixed top-0 right-0 left-0 bottom-0 m-auto"
-          >
-            <div className="  border rounded-md" ref={inviteTeacherRef}>
+          <PopupLayout onClose={() => setTriggerInviteTeacher(false)}>
+            <div className="  border rounded-md">
               <InviteTeacher
                 setTrigger={setTriggerInviteTeacher}
                 subjectId={subjectId}
               />
             </div>
-            <div className="w-screen -z-10 h-screen bg-black/50 backdrop-blur  fixed top-0 right-0 left-0 bottom-0 m-auto"></div>
-          </div>
+          </PopupLayout>
         )}
         {selectStudent && (
-          <div
-            className="fixed top-28 md:top-20 z-40 right-0 left-0 md:bottom-0 m-auto
-         w-screen overflow-scroll md:h-screen flex items-center justify-center"
-          >
-            <div
-              className="max-h-[calc(100vh-12rem)] md:max-h-screen"
-              ref={divRef}
-            >
+          <PopupLayout onClose={() => setSelectStudent(null)}>
+            <div className="max-h-[calc(100vh-12rem)] md:max-h-screen">
               <PopUpStudent
                 student={selectStudent}
                 setSelectStudent={setSelectStudent}
                 toast={toast}
               />
             </div>
-            <div
-              className="w-screen h-screen fixed top-0 bg-black/20 backdrop-blur
-           -z-10 right-0 left-0 bottom-0 m-auto "
-            ></div>
-          </div>
+          </PopupLayout>
         )}
         <header className="md:max-w-screen-md xl:max-w-screen-lg mx-auto w-full p-5 lg:py-10 pb-10 flex items-center justify-center">
           <section
