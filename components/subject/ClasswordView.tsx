@@ -1,5 +1,10 @@
 import React, { ReactNode } from "react";
-import { Assignment, AssignmentType, FileOnAssignment } from "../../interfaces";
+import {
+  Assignment,
+  AssignmentType,
+  FileOnAssignment,
+  Skill,
+} from "../../interfaces";
 import TextEditor from "../common/TextEditor";
 import { FaRegFile, FaRegFileImage } from "react-icons/fa6";
 import { MdDelete, MdOutlineFileUpload } from "react-icons/md";
@@ -7,6 +12,10 @@ import Dropdown from "../common/Dropdown";
 import { classworkLists } from "./ClassworkCreate";
 import InputNumber from "../common/InputNumber";
 import Switch from "../common/Switch";
+import { SiGooglegemini } from "react-icons/si";
+import { CgInfo } from "react-icons/cg";
+import { useUpdateSkillToAssignment } from "../../react-query";
+import LoadingSpinner from "../common/LoadingSpinner";
 
 export type FileClasswork = {
   file: File | null;
@@ -19,6 +28,7 @@ export type FileClasswork = {
 type Props = {
   classwork: (Assignment & { allowWeight?: boolean }) | undefined;
   files: FileClasswork[];
+  skills: Omit<Skill, "vector">[];
   onChange: (data: {
     title?: string;
     description?: string;
@@ -34,11 +44,13 @@ type Props = {
 };
 function ClasswordView({
   classwork,
+  skills,
   onChange,
   files,
   onDeleteFile,
   onUploadFile,
 }: Props) {
+  const refetchSkill = useUpdateSkillToAssignment();
   return (
     <main className="w-full h-max flex">
       <section className="w-full flex-col h-max flex mb-40 items-center justify-start gap-5">
@@ -138,6 +150,56 @@ function ClasswordView({
             </label>
           </div>
         </div>
+
+        {classwork && (
+          <div className="w-11/12 h-max p-5 rounded-md  text-white gradient-bg border">
+            <div className="w-full flex justify-between">
+              <h1 className="flex gap-2 items-center">
+                <SiGooglegemini />
+                Suggest Skills for Classwork by AI
+              </h1>
+              <a
+                href="#"
+                className="flex gap-2 second-button border items-center"
+              >
+                <CgInfo />
+                Learn more
+              </a>
+            </div>
+
+            <span className="text-xs text-gray-50">
+              Suggest the skill that related to your classwork for evaluation
+            </span>
+
+            <ul className="flex mt-2 flex-wrap gap-2">
+              {skills?.map((skill, index) => (
+                <li
+                  key={index}
+                  className="bg-white text-black p-2 text-sm rounded-md"
+                >
+                  #{skill.title}
+                </li>
+              ))}
+            </ul>
+            {(skills.length === 0 || !skills) && (
+              <div className="flex flex-col">
+                <h1>No skill found</h1>
+              </div>
+            )}
+            <button
+              onClick={async () => {
+                await refetchSkill.mutateAsync({
+                  assignmentId: classwork.id,
+                });
+              }}
+              disabled={refetchSkill.isPending}
+              type="button"
+              className="second-button mt-5 border w-40 flex items-center justify-center"
+            >
+              {refetchSkill.isPending ? <LoadingSpinner /> : "Update skill"}
+            </button>
+          </div>
+        )}
       </section>
       <section className="w-4/12 min-h-screen max-h-max flex flex-col gap-2  bg-white  h-full">
         <div className="w-full py-5 flex items-start flex-col px-5  border-b">
