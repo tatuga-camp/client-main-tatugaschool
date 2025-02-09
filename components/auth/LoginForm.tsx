@@ -1,11 +1,11 @@
 import { SignInService } from "@/services";
-import { useRouter } from "next-nprogress-bar";
 import Link from "next/link";
 import React, { useState } from "react";
 import Swal from "sweetalert2";
 import { ErrorMessages } from "../../interfaces";
 import Password from "../common/Password";
 import { FcGoogle } from "react-icons/fc";
+import { useRouter } from "next/router";
 
 export const LoginForm = () => {
   const router = useRouter();
@@ -79,6 +79,11 @@ export const LoginForm = () => {
       onSubmit={handleLogin}
     >
       <h2 className="text-[24px] font-bold mb-[40px]">Log in</h2>
+      {router.query?.error && (
+        <span className="text-red-700 text-sm">
+          Error: {router.query?.error}
+        </span>
+      )}
       <div className="flex flex-col gap-3  w-full">
         <input
           type="email"
@@ -102,6 +107,7 @@ export const LoginForm = () => {
       >
         Forget password?
       </Link>
+
       <div className="flex flex-col gap-3">
         <button type="submit" className="w-full main-button p-2">
           Log in

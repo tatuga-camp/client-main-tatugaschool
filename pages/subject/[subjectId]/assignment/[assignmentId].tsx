@@ -1,23 +1,26 @@
 import { GetServerSideProps } from "next";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { ProgressBar } from "primereact/progressbar";
 import React, { useEffect } from "react";
-import {
-  convertToDateTimeLocalString,
-  generateBlurHash,
-  getRefetchtoken,
-} from "../../../../utils";
-import {
-  getSignedURLTeacherService,
-  RefreshTokenService,
-  UploadSignURLService,
-} from "../../../../services";
 import { IoChevronDownSharp, IoClose } from "react-icons/io5";
 import { MdAssignmentAdd } from "react-icons/md";
+import Swal from "sweetalert2";
+import ClassStudentAssignWork from "../../../../components/subject/ClassStudentAssignWork";
+import ClassStudentWork from "../../../../components/subject/ClassStudentWork";
 import ClasswordView, {
   FileClasswork,
 } from "../../../../components/subject/ClasswordView";
+import { menuClassworkList } from "../../../../components/subject/ClassworkCreate";
+import { MenuSubject } from "../../../../data";
+import useClickOutside from "../../../../hook/useClickOutside";
 import useAdjustPosition from "../../../../hook/useWindow";
 import {
-  useCreateAssignment,
+  Assignment,
+  AssignmentStatus,
+  ErrorMessages,
+} from "../../../../interfaces";
+import {
   useCreateFileOnAssignment,
   useDeleteAssignment,
   useDeleteFileOnAssignment,
@@ -25,20 +28,15 @@ import {
   useUpdateAssignment,
 } from "../../../../react-query";
 import {
-  Assignment,
-  AssignmentStatus,
-  AssignmentType,
-  ErrorMessages,
-} from "../../../../interfaces";
-import { menuClassworkList } from "../../../../components/subject/ClassworkCreate";
-import { ProgressBar } from "primereact/progressbar";
-import Link from "next/link";
-import { MenuSubject } from "../../../../data";
-import useClickOutside from "../../../../hook/useClickOutside";
-import Swal from "sweetalert2";
-import { useRouter } from "next/router";
-import ClassStudentWork from "../../../../components/subject/ClassStudentWork";
-import ClassStudentAssignWork from "../../../../components/subject/ClassStudentAssignWork";
+  getSignedURLTeacherService,
+  RefreshTokenService,
+  UploadSignURLService,
+} from "../../../../services";
+import {
+  convertToDateTimeLocalString,
+  generateBlurHash,
+  getRefetchtoken,
+} from "../../../../utils";
 
 type SummitValue = "Published" | "Save Change" | "Mark as Draft";
 

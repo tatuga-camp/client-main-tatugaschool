@@ -14,7 +14,9 @@ import {
 import { useGetStudentOnSubject } from "../../react-query";
 import { defaultBlurHash } from "../../data";
 import { ListMenuFooter } from "./FooterSubject";
-import { IoCloseOutline } from "react-icons/io5";
+import { IoCloseOutline, IoPersonAdd, IoPersonRemove } from "react-icons/io5";
+import { UseQueryResult } from "@tanstack/react-query";
+import { StudentOnSubject } from "../../interfaces";
 interface SilderPickerProps<T> {
   images: T[];
   subjectId: string;
@@ -32,13 +34,11 @@ const SilderPicker = <T extends AnimationImageItemProps>({
   const studentOnSubjects = useGetStudentOnSubject({
     subjectId: subjectId,
   });
-  const [selectMenu, setSelectMenu] = useState<"available" | "remove">(
-    "remove"
-  );
+
   const [studentRemoveList, setStudentRemoveList] = useState<{ id: string }[]>(
     localStorageGetRemoveRandomStudents({ subjectId: subjectId }) ?? []
   );
-  const shuffleWithNoAdjacentDuplicates = (arr: T[], count: number) => {
+  const shuffleWithNoAdjacentDuplicates = (arr: any[], count: number) => {
     let selectedImages = arr.slice(0, count);
     // สุ่มลำดับของ selectedImages แบบสุ่ม
     selectedImages.sort(() => Math.random() - 0.5);
@@ -156,23 +156,24 @@ const SilderPicker = <T extends AnimationImageItemProps>({
   };
 
   const handleRemoveAndStartAgain = () => {
+    const studentRemoveId = randomImages[1].id;
+    handleRemoveStudent(studentRemoveId);
+    setFinsh(false);
+    setIsStarted(false);
+  };
+
+  const handleRemoveStudent = (id: string) => {
     setRandomImages((prevs) => {
-      const filterOuts = prevs.filter((prev) => prev.id !== randomImages[1].id);
+      const filterOuts = prevs.filter((prev) => prev.id !== id);
       return filterOuts;
     });
-
     const oldStudentsRemove = localStorageGetRemoveRandomStudents({
       subjectId: subjectId,
     });
     let newStudentsRemove: { id: string }[] = [];
-    const isExist = oldStudentsRemove?.find(
-      (item) => item.id === randomImages[1].id
-    );
+    const isExist = oldStudentsRemove?.find((item) => item.id === id);
     if (!isExist) {
-      newStudentsRemove = [
-        ...(oldStudentsRemove ?? []),
-        { id: randomImages[1].id },
-      ];
+      newStudentsRemove = [...(oldStudentsRemove ?? []), { id: id }];
     } else {
       newStudentsRemove = oldStudentsRemove ?? [];
     }
@@ -181,8 +182,68 @@ const SilderPicker = <T extends AnimationImageItemProps>({
       subjectId: subjectId,
       studentIds: newStudentsRemove,
     });
-    setFinsh(false);
-    setIsStarted(false);
+  };
+
+  const handleAddStudent = (id: string) => {
+    const student = studentOnSubjects.data?.find((s) => s.id === id);
+    if (!student) {
+      return;
+    }
+    let students = studentOnSubjects.data
+      ?.filter((s) => s.isActive)
+      .filter((s) => !studentRemoveList.some((r) => r.id === s.id));
+    if (!students) {
+      return;
+    }
+    const updateRemoveList = studentRemoveList.filter((s) => s.id !== id);
+    students = [...(students ?? []), student];
+    setRandomImages(() => {
+      const newRandoms =
+        students.length >= 30
+          ? shuffleWithNoAdjacentDuplicates(students, 30)
+          : shuffleWithNoAdjacentDuplicates(
+              [
+                ...students,
+                ...students,
+                ...students,
+                ...students,
+                ...students,
+                ...students,
+                ...students,
+                ...students,
+                ...students,
+                ...students,
+                ...students,
+                ...students,
+                ...students,
+                ...students,
+                ...students,
+                ...students,
+                ...students,
+                ...students,
+                ...students,
+                ...students,
+                ...students,
+                ...students,
+                ...students,
+                ...students,
+                ...students,
+                ...students,
+                ...students,
+                ...students,
+                ...students,
+              ],
+              30
+            );
+      setSelectItem(newRandoms[1]);
+      return newRandoms;
+    });
+
+    localStorageSetRemoveRandomStudents({
+      subjectId: subjectId,
+      studentIds: updateRemoveList.map((s) => ({ id: s.id })),
+    });
+    setStudentRemoveList(updateRemoveList);
   };
 
   const handleRestart = () => {
@@ -320,7 +381,6 @@ const SilderPicker = <T extends AnimationImageItemProps>({
                 onStart={(start) => {}}
                 onFinished={() => {
                   setIsStarted(false);
-
                   cheering?.play();
                   setTimeout(() => {
                     setFinsh(true);
@@ -366,7 +426,40 @@ const SilderPicker = <T extends AnimationImageItemProps>({
           </div>
         )}
       </div>
-      <div className="flex items-center justify-center lg:justify-start">
+      <ManageList
+        onClickAdd={(id) => {
+          handleAddStudent(id);
+        }}
+        onClickRemove={(id) => handleRemoveStudent(id)}
+        studentRemoveList={studentRemoveList}
+        studentOnSubjects={studentOnSubjects}
+      />
+    </div>
+  );
+};
+
+export default SilderPicker;
+
+type ManageListProps = {
+  studentRemoveList: {
+    id: string;
+  }[];
+  studentOnSubjects: UseQueryResult<StudentOnSubject[], Error>;
+  onClickRemove: (id: string) => void;
+  onClickAdd: (id: string) => void;
+};
+const ManageList = memo(
+  ({
+    studentRemoveList,
+    studentOnSubjects,
+    onClickRemove,
+    onClickAdd,
+  }: ManageListProps) => {
+    const [selectMenu, setSelectMenu] = useState<"available" | "remove">(
+      "remove"
+    );
+    return (
+      <div className="flex items-center w-80 justify-center lg:justify-start">
         <div className="w-full h-80 lg:border-l pl-5 mt-5 lg:mt-0 max-w-xs sm:max-w-full lg:max-w-none lg:w-full">
           <div className="w-full h-7 flex border-b border-collapse items-center justify-center gap-1">
             <button
@@ -387,7 +480,7 @@ const SilderPicker = <T extends AnimationImageItemProps>({
               Remove List
             </button>
           </div>
-          <ul className="h-72 overflow-y-auto">
+          <ul className="h-72  overflow-y-auto">
             {selectMenu === "remove" &&
               studentRemoveList.map((student, index) => {
                 const image = studentOnSubjects.data?.find(
@@ -398,7 +491,21 @@ const SilderPicker = <T extends AnimationImageItemProps>({
                 }
                 const odd = index % 2 === 0;
                 return (
-                  <StudentCard key={index} odd index={index} image={image} />
+                  <StudentCard
+                    button={
+                      <button
+                        onClick={() => onClickAdd(student.id)}
+                        className="flex items-center p-1
+                      justify-center success-button"
+                      >
+                        <IoPersonAdd />
+                      </button>
+                    }
+                    key={index}
+                    odd={odd}
+                    index={index}
+                    image={image}
+                  />
                 );
               })}
             {selectMenu === "available" &&
@@ -410,8 +517,17 @@ const SilderPicker = <T extends AnimationImageItemProps>({
 
                   return (
                     <StudentCard
+                      button={
+                        <button
+                          onClick={() => onClickRemove(student.id)}
+                          className="flex items-center p-1
+                         justify-center reject-button"
+                        >
+                          <IoPersonRemove />
+                        </button>
+                      }
                       key={index}
-                      odd
+                      odd={odd}
                       index={index}
                       image={student}
                     />
@@ -420,46 +536,54 @@ const SilderPicker = <T extends AnimationImageItemProps>({
           </ul>
         </div>
       </div>
-    </div>
-  );
-};
+    );
+  }
+);
 
-export default SilderPicker;
+const StudentCard = memo(
+  <T extends AnimationImageItemProps>({
+    image,
+    index,
+    odd,
+    button,
+  }: {
+    image: T;
+    index: number;
+    odd: boolean;
+    button: React.ReactNode;
+  }) => {
+    return (
+      <li
+        key={`${image.id}-${index}`}
+        className={`flex justify-between items-center gap-2 p-2 ${
+          odd ? "bg-white" : "bg-gray-100"
+        } `}
+      >
+        <div className="flex items-center justify-center gap-2">
+          {index + 1}
+          <div className="w-10 h-10 relative">
+            <Image
+              src={image.photo}
+              alt={`Scroll item ${index}`}
+              fill
+              sizes="(max-width: 768px) 100vw, 33vw"
+              className="object-cover rounded-full"
+            />
+          </div>
+          <div className="flex flex-col">
+            <h1 className="text-base font-semibold">
+              {image.firstName} {image.lastName}
+            </h1>
+            <h1 className="text-sm font-normal text-gray-500">
+              Number {image.number}
+            </h1>
+          </div>
+        </div>
+        {button}
+      </li>
+    );
+  }
+);
 
-const StudentCard = <T extends AnimationImageItemProps>({
-  image,
-  index,
-  odd,
-}: {
-  image: T;
-  index: number;
-  odd: boolean;
-}) => {
-  return (
-    <li
-      key={`${image.id}-${index}`}
-      className={`flex items-center gap-2 p-2 ${
-        odd ? "bg-white" : "bg-gray-50"
-      } `}
-    >
-      {index + 1}
-      <div className="w-12 h-12 relative">
-        <Image
-          src={image.photo}
-          alt={`Scroll item ${index}`}
-          fill
-          sizes="(max-width: 768px) 100vw, 33vw"
-          className="object-cover rounded-full"
-        />
-      </div>
-      <div className="flex flex-col">
-        <h1 className="text-lg font-semibold">
-          {image.firstName} {image.lastName}
-        </h1>
-        <h1 className="text-sm font-normal text-gray-500">
-          Number {image.number}
-        </h1>
-      </div>
-    </li>
-  );
-};
+StudentCard.displayName = "StudentCard";
+ManageList.displayName = "ManageList";
