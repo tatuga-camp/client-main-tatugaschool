@@ -28,7 +28,7 @@ export type FileClasswork = {
 type Props = {
   classwork: (Assignment & { allowWeight?: boolean }) | undefined;
   files: FileClasswork[];
-  skills: Omit<Skill, "vector">[];
+  skills?: Omit<Skill, "vector">[];
   onChange: (data: {
     title?: string;
     description?: string;
@@ -151,7 +151,7 @@ function ClasswordView({
           </div>
         </div>
 
-        {classwork && (
+        {classwork?.id && (
           <div className="w-11/12 h-max p-5 rounded-md  text-white gradient-bg border">
             <div className="w-full flex justify-between">
               <h1 className="flex gap-2 items-center">
@@ -181,7 +181,7 @@ function ClasswordView({
                 </li>
               ))}
             </ul>
-            {(skills.length === 0 || !skills) && (
+            {(skills?.length === 0 || !skills) && (
               <div className="flex flex-col">
                 <h1>No skill found</h1>
               </div>
