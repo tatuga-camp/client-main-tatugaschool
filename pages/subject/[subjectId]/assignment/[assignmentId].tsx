@@ -441,8 +441,9 @@ function Index({
         ref={bodyRef}
         className={`w-full h-full max-h-screen overflow-auto`}
       >
-        {selectMenu === "classwork" && (
+        {selectMenu === "classwork" && assignment?.data && (
           <ClasswordView
+            skills={assignment?.data?.skills}
             classwork={classwork as Assignment}
             onChange={(d) =>
               setClasswork((prev) => {

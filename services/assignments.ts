@@ -3,6 +3,7 @@ import {
   AssignmentStatus,
   AssignmentType,
   FileOnAssignment,
+  Skill,
   StudentOnAssignment,
 } from "../interfaces";
 import createAxiosInstance from "./apiService";
@@ -87,6 +88,7 @@ type RequestGetAssignmentByIdService = {
 
 export type ResponseGetAssignmentByIdService = Assignment & {
   files: FileOnAssignment[];
+  skills: Omit<Skill, "vector">[];
 };
 
 export async function GetAssignmentByIdService(
@@ -136,6 +138,27 @@ export async function UpdateAssignmentService(
       },
     });
     return response.data;
+  } catch (error: any) {
+    console.error("Update Assignment request failed:", error.response.data);
+    throw error?.response?.data;
+  }
+}
+
+export type RequestUpdateSkillToAssignmentService = {
+  assignmentId: string;
+};
+
+type ResponseUpdateSkillToAssignmentService = void;
+
+export async function UpdateSkillToAssignmentService(
+  input: RequestUpdateSkillToAssignmentService
+): Promise<ResponseUpdateSkillToAssignmentService> {
+  try {
+    const response = await axiosInstance({
+      method: "PATCH",
+      url: `/v1/assignments/update-skills/${input.assignmentId}`,
+    });
+    return response?.data;
   } catch (error: any) {
     console.error("Update Assignment request failed:", error.response.data);
     throw error?.response?.data;

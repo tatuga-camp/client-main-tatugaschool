@@ -13,9 +13,11 @@ import {
   RequestDeleteFileAssignmentService,
   RequestReorderAssignmentService,
   RequestUpdateAssignmentService,
+  RequestUpdateSkillToAssignmentService,
   ResponseGetAssignmentByIdService,
   ResponseGetAssignmentsService,
   UpdateAssignmentService,
+  UpdateSkillToAssignmentService,
 } from "../services";
 
 export function useGetAssignments({ subjectId }: { subjectId: string }) {
@@ -32,6 +34,20 @@ export function useGetAssignment({ id }: { id: string }) {
   return useQuery({
     queryKey: ["assignment", { id: id }],
     queryFn: () => GetAssignmentByIdService({ assignmentId: id }),
+  });
+}
+
+export function useUpdateSkillToAssignment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["update-skill-assignment"],
+    mutationFn: (request: RequestUpdateSkillToAssignmentService) =>
+      UpdateSkillToAssignmentService(request),
+    onSuccess(data, variables, context) {
+      queryClient.refetchQueries({
+        queryKey: ["assignment", { id: variables.assignmentId }],
+      });
+    },
   });
 }
 
@@ -59,7 +75,7 @@ export function useUpdateAssignment() {
         (
           prev: ResponseGetAssignmentByIdService
         ): ResponseGetAssignmentByIdService => {
-          return { ...data, files: prev.files };
+          return { ...data, files: prev.files, skills: prev.skills };
         }
       );
     },

@@ -1,4 +1,4 @@
-export interface Skill {
+export type Skill = {
   id: string;
   createAt: Date;
   updateAt: Date;
@@ -6,4 +6,4 @@ export interface Skill {
   description: string;
   keywords: string;
   vector: number[];
-}
+};
