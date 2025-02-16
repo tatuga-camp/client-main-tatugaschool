@@ -63,6 +63,7 @@ function TextEditor({
                 fileName: file.name,
                 fileType: file.type,
                 schoolId: schoolId,
+                fileSize: file.size,
               });
               const upload = await UploadSignURLService({
                 contentType: file.type,

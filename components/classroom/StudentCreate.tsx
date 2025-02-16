@@ -100,6 +100,7 @@ function StudentCreate({ onClose, classId, toast, schoolId }: Props) {
         fileName: file.name,
         fileType: file.type,
         schoolId: schoolId,
+        fileSize: file.size,
       });
 
       await UploadSignURLService({

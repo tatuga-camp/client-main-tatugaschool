@@ -393,6 +393,7 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
         fileName: data.file.name,
         fileType: data.file.type,
         schoolId: studentOnAssignment.schoolId,
+        fileSize: data.file.size,
       });
 
       const upload = await UploadSignURLService({

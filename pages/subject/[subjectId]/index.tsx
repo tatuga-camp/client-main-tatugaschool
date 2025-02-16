@@ -138,6 +138,7 @@ function Index({ subjectId }: Props) {
         fileName: file?.name,
         fileType: file?.type,
         schoolId: subject.data?.schoolId,
+        fileSize: file.size,
       });
 
       const blurHash = await generateBlurHash(file);

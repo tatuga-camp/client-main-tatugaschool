@@ -5,6 +5,7 @@ const axiosInstance = createAxiosInstance();
 type RequestGetSignedURL = {
   fileName: string;
   fileType: string;
+  fileSize: number;
   schoolId?: string;
 };
 

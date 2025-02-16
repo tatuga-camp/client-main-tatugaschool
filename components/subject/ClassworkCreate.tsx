@@ -168,6 +168,7 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
             fileName: file.file.name,
             fileType: file.file.type,
             schoolId: schoolId,
+            fileSize: file.file.size,
           });
 
           await UploadSignURLService({

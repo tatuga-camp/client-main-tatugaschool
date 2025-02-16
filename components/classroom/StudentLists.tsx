@@ -154,6 +154,7 @@ function StudentLists({ students, classroom }: Props) {
         fileName: file.name,
         fileType: file.type,
         schoolId: classroom.schoolId,
+        fileSize: file.size,
       });
 
       await UploadSignURLService({

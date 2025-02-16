@@ -49,6 +49,7 @@ const ProfileUpload: React.FC<{
         fileName: file.name,
         fileType: file.type,
         schoolId: school.id,
+        fileSize: file.size,
       });
 
       await UploadSignURLService({ contentType: file.type, file, signURL });

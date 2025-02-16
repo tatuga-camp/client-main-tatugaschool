@@ -38,6 +38,7 @@ function UploadPhoto({ user, updateUser }: Prosp) {
       const { signURL, originalURL } = await getSignedURLTeacherService({
         fileName: file.name,
         fileType: file.type,
+        fileSize: file.size,
       });
       const blurHash = await generateBlurHash(file);
       await UploadSignURLService({ contentType: file.type, file, signURL });

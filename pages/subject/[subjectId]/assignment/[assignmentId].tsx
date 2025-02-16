@@ -235,6 +235,7 @@ function Index({
           fileName: file.file.name,
           fileType: file.file.type,
           schoolId: classwork?.schoolId,
+          fileSize: file.file.size,
         });
 
         await UploadSignURLService({

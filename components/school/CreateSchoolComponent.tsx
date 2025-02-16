@@ -87,8 +87,9 @@ const CreateSchoolComponent = () => {
       }
       setLoading(true);
       const signURL = await getSignedURLTeacherService({
-        fileName: file?.name,
-        fileType: file?.type,
+        fileName: file.name,
+        fileType: file.type,
+        fileSize: file.size,
       });
 
       const blurHash = await generateBlurHash(file);
