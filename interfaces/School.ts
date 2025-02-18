@@ -20,4 +20,4 @@ export interface School {
   billingManagerId?: string;
 }
 
-export type Plan = "FREE" | "PREMIUM";
+export type Plan = "FREE" | "PREMIUM" | "ENTERPRISE";

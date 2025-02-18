@@ -1,4 +1,4 @@
-import { School } from "@/interfaces";
+import { School, User } from "@/interfaces";
 
 import createAxiosInstance from "./apiService";
 import { getAccessToken } from "../utils";
@@ -86,9 +86,11 @@ type RequestGetSchoolService = {
   schoolId: string;
 };
 
+export type ResponseGetSchoolService = School & { user: User };
+
 export async function GetSchoolByIdService(
   input: RequestGetSchoolService
-): Promise<ResponseSchoolService> {
+): Promise<ResponseGetSchoolService> {
   try {
     const response = await axiosInstance({
       method: "GET",

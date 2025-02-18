@@ -53,7 +53,9 @@ const TabsMenuSection: FC<TabsMenuSectionProps> = ({
       {activeTab === "Basic information" && (
         <BasicInformationSection school={school} />
       )}
-      {activeTab === "Billing & Plan" && <BillingPlanSection />}
+      {activeTab === "Billing & Plan" && (
+        <BillingPlanSection schoolId={school.id} />
+      )}
     </>
   );
 };
