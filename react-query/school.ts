@@ -21,11 +21,7 @@ export function useGetSchools(): UseQueryResult<School[], Error> {
   });
 }
 
-export function useGetSchool({
-  schoolId,
-}: {
-  schoolId: string;
-}): UseQueryResult<School, Error> {
+export function useGetSchool({ schoolId }: { schoolId: string }) {
   return useQuery({
     queryKey: ["school", { id: schoolId }],
     queryFn: () => GetSchoolByIdService({ schoolId }),

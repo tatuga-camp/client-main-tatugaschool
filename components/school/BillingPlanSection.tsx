@@ -1,77 +1,119 @@
-import React from 'react';
-import PlanComponent from './PlanComponent';
-import InvoiceHistory from './InvoiceHistory';
-import PaymentMethod from './PaymentMethod';
-import AddressBook from './AddressBook';
+import React, { useState } from "react";
+import {
+  useCreateSubscription,
+  useGetSchool,
+  useManageSubscription,
+} from "../../react-query";
+import { ErrorMessages } from "../../interfaces";
+import Swal from "sweetalert2";
+import PopupLayout from "../layout/PopupLayout";
+import CheckoutForm from "../payments/Checkout";
+import PlanCard from "./PlanCard";
+import { RiBillFill } from "react-icons/ri";
+import { useRouter } from "next/router";
+import LoadingSpinner from "../common/LoadingSpinner";
+import SubscriptionPlan from "../payments/SubscriptionPlan";
 
-
-const invoices = [
-    { number: 1990, date: '08 Jun 2024', amount: 94.75, pdfUrl: '#' },
-    { number: 1991, date: '09 Jun 2024', amount: 88.00, pdfUrl: '#' },
-    { number: 1992, date: '10 Jun 2024', amount: 120.50, pdfUrl: '#' },
-    { number: 1993, date: '11 Jun 2024', amount: 99.99, pdfUrl: '#' },
-    { number: 1994, date: '12 Jun 2024', amount: 100.00, pdfUrl: '#' },
-    { number: 1995, date: '13 Jun 2024', amount: 100.00, pdfUrl: '#' },
-    { number: 1996, date: '14 Jun 2024', amount: 100.00, pdfUrl: '#' },
-    { number: 1997, date: '15 Jun 2024', amount: 100.00, pdfUrl: '#' },
-    { number: 1998, date: '16 Jun 2024', amount: 100.00, pdfUrl: '#' },
-    { number: 1999, date: '17 Jun 2024', amount: 100.00, pdfUrl: '#' },
-    { number: 2000, date: '18 Jun 2024', amount: 100.00, pdfUrl: '#' },
-];
-
-const cards = [
-    { type: 'Mastercard', last4: '5678' },
-    { type: 'Visa', last4: '1234' },
-];
-
-const addresses = [
-    {
-        name: 'Deja Brady',
-        street: '18605 Thompson Circle Apt. 086',
-        city: 'Idaho Falls',
-        state: 'WV',
-        zip: '50337',
-        phone: '399-757-9909'
-    },
-    {
-        name: 'Deja Brady',
-        street: '18605 Thompson Circle Apt. 086',
-        city: 'Idaho Falls',
-        state: 'WV',
-        zip: '50337',
-        phone: '399-757-9909'
-    },
-    {
-        name: 'Deja Brady',
-        street: '18605 Thompson Circle Apt. 086',
-        city: 'Idaho Falls',
-        state: 'WV',
-        zip: '50337',
-        phone: '399-757-9909'
-    },
-    {
-        name: 'Deja Brady',
-        street: '18605 Thompson Circle Apt. 086',
-        city: 'Idaho Falls',
-        state: 'WV',
-        zip: '50337',
-        phone: '399-757-9909'
+const BillingPlanSection = (props: { schoolId: string }) => {
+  const router = useRouter();
+  const school = useGetSchool({ schoolId: props.schoolId });
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const managesubscription = useManageSubscription();
+  const createSubscription = useCreateSubscription();
+  const handleCreateSubscription = async ({ priceId }: { priceId: string }) => {
+    try {
+      const create = await createSubscription.mutateAsync({
+        schoolId: props.schoolId,
+        priceId: priceId,
+      });
+      setClientSecret(create.clientSecret);
+    } catch (error) {
+      document.body.style.overflow = "auto";
+      console.log(error);
+      let result = error as ErrorMessages;
+      Swal.fire({
+        title: result.error ? result.error : "Something Went Wrong",
+        text: result.message.toString(),
+        footer: result.statusCode
+          ? "Code Error: " + result.statusCode?.toString()
+          : "",
+        icon: "error",
+      });
     }
-];
+  };
 
-const BillingPlanSection = () => {
-    return (
-        <div className='grid grid-cols-6 gap-4'>
-            <div className='col-span-5'>
-                <PlanComponent />
-                <PaymentMethod cards={cards} />
-                <AddressBook addresses={addresses} />
-            </div>
-            <div className='col-span-1'>
-                <InvoiceHistory invoices={invoices} />
-            </div>
+  const hanldeManageSubscription = async () => {
+    try {
+      const url = await managesubscription.mutateAsync({
+        schoolId: props.schoolId,
+      });
+      router.push(url.url);
+    } catch (error) {
+      console.log(error);
+      let result = error as ErrorMessages;
+      Swal.fire({
+        title: result.error ? result.error : "Something Went Wrong",
+        text: result.message.toString(),
+        footer: result.statusCode
+          ? "Code Error: " + result.statusCode?.toString()
+          : "",
+        icon: "error",
+      });
+    }
+  };
+
+  return (
+    <>
+      {createSubscription.isPending && (
+        <PopupLayout onClose={() => {}}>
+          <div className="w-screen h-screen flex items-center justify-center bg-white/80">
+            <LoadingSpinner />
+          </div>
+        </PopupLayout>
+      )}
+      {clientSecret && school.data && (
+        <PopupLayout onClose={() => setClientSecret(null)}>
+          <div id="checkout" className="bg-white p-5 rounded-md">
+            <CheckoutForm
+              clientSecret={clientSecret}
+              email={school.data?.user.email}
+            />
+          </div>
+        </PopupLayout>
+      )}
+      <div className="w-full rounded-md bg-white border p-10">
+        <h1 className="text-lg sm:text-xl font-medium">
+          Manage Your Subscription
+        </h1>
+        <h4 className="text-xs sm:text-sm text-gray-500">
+          You can dowload invoice, recipet or manage your subscription here
+        </h4>
+        <div className="mt-5">
+          <button
+            disabled={managesubscription.isPending}
+            onClick={() => hanldeManageSubscription()}
+            className="second-button w-40 flex items-center justify-center border"
+          >
+            {managesubscription.isPending ? (
+              <LoadingSpinner />
+            ) : (
+              <>
+                <RiBillFill />
+                Billing Setting
+              </>
+            )}
+          </button>
         </div>
-    );
+
+        {school.data && (
+          <SubscriptionPlan
+            onSelectPlan={(priceId) => handleCreateSubscription({ priceId })}
+            school={school.data}
+          />
+        )}
+      </div>
+    </>
+  );
 };
 
 export default BillingPlanSection;
