@@ -457,7 +457,10 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
               id={selectFileImage.id}
               name={selectFileImage.name ?? ""}
               imageURL={selectFileImage.body}
-              onClose={() => setSelectFileImage(null)}
+              onClose={() => {
+                document.body.style.overflow = "auto";
+                setSelectFileImage(null);
+              }}
             />
           </div>
         </PopupLayout>

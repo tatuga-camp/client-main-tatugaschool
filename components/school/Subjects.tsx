@@ -174,6 +174,7 @@ function Subjects({ schoolId }: Props) {
               educationYear={educationYear}
               schoolId={schoolId}
               onClose={() => {
+                document.body.style.overflow = "auto";
                 setTriggerCreateSubject(false);
               }}
             />

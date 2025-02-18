@@ -141,7 +141,10 @@ function Classrooms({ schoolId }: Props) {
             <div className="w-full flex justify-between border-b pb-1">
               <h1 className="text-lg font-semibold">Create Class</h1>
               <button
-                onClick={() => setTriggerCreateClass(false)}
+                onClick={() => {
+                  setTriggerCreateClass(false);
+                  document.body.style.overflow = "auto";
+                }}
                 className="text-lg hover:bg-gray-300/50 w-6 h-6 rounded flex items-center justify-center font-semibold"
               >
                 <IoMdClose />

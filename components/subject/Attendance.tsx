@@ -122,7 +122,10 @@ function Attendance({
               toast={toast}
               selectAttendance={selectAttendance}
               attendanceTable={selectTable}
-              onClose={() => setSelectAttendance(null)}
+              onClose={() => {
+                document.body.style.overflow = "auto";
+                setSelectAttendance(null);
+              }}
             />
           </div>
         </PopupLayout>
@@ -134,7 +137,11 @@ function Attendance({
             <AttendanceRowView
               toast={toast}
               selectRow={selectRow}
-              onClose={() => setSelectRow(null)}
+              onClose={() => {
+                document.body.style.overflow = "auto";
+
+                setSelectRow(null);
+              }}
             />
           </div>
         </PopupLayout>
@@ -146,7 +153,10 @@ function Attendance({
             <AttendanceTableCreate
               toast={toast}
               subjectId={subjectId}
-              onClose={() => setTriggerCreateAttendanceTable(false)}
+              onClose={() => {
+                document.body.style.overflow = "auto";
+                setTriggerCreateAttendanceTable(false);
+              }}
             />
           </div>
         </PopupLayout>

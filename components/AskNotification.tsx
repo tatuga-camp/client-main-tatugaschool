@@ -39,7 +39,11 @@ function AskNotification() {
   return (
     <>
       {isNotification ? null : (
-        <PopupLayout onClose={() => {}}>
+        <PopupLayout
+          onClose={() => {
+            setIsNotification(true);
+          }}
+        >
           <div className="w-96 h-96 font-Anuphan bg-white border rounded-md p-3 flex flex-col gap-2 items-center justify-center">
             <div className="w-10 h-10 relative">
               <Image
@@ -64,7 +68,10 @@ function AskNotification() {
             </button>
 
             <button
-              onClick={() => setIsNotification(true)}
+              onClick={() => {
+                document.body.style.overflow = "auto";
+                setIsNotification(true);
+              }}
               className="text-gray-500 text-xs mt-10 underline"
             >
               Maybe Later
