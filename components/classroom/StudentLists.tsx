@@ -401,7 +401,7 @@ function StudentLists({ students, classroom }: Props) {
 
         <section
           className="w-80 min-h-screen  md:w-10/12 lg:w-9/12 
-grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5"
+grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-5"
         >
           {studentData.map((student) => {
             return (

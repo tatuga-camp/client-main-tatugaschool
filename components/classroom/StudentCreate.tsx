@@ -130,7 +130,7 @@ function StudentCreate({ onClose, classId, toast, schoolId }: Props) {
   };
 
   return (
-    <div className="lg:w-5/12 2xl:w-4/12 h-[35rem] bg-white rounded-md p-4 border">
+    <div className="w-full md:w-10/12 lg:w-7/12 2xl:w-4/12 h-[35rem] bg-white rounded-md p-4 border">
       <div className="w-full pb-3 border-b items-center justify-between flex">
         <h1 className="text-lg font-semibold">Create Student</h1>
         <div className="flex items-center justify-center gap-2">

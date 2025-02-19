@@ -252,7 +252,7 @@ function Subjects({ schoolId }: Props) {
             onDragEnd={handleDragEnd}
           >
             <SortableContext items={subjectData} strategy={rectSortingStrategy}>
-              <ul className="w-full pb-40 mt-5 grid grid-cols-3 gap-3">
+              <ul className="w-full pb-40 mt-5 grid lg:grid-cols-2 xl:grid-cols-3 gap-3">
                 {subjectData.map((subject) => {
                   return (
                     <SubjectCard

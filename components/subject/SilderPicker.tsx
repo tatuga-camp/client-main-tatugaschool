@@ -304,6 +304,7 @@ const SilderPicker = <T extends AnimationImageItemProps>({
   };
 
   const handleCloseModal = () => {
+    document.body.style.overflow = "auto";
     setSelectFooter("EMTY");
   };
 

@@ -93,7 +93,7 @@ const BillingPlanSection = (props: { schoolId: string }) => {
           </div>
         </PopupLayout>
       )}
-      <div className="w-full rounded-md bg-white border p-10">
+      <div className="w-full rounded-md bg-white border 2xl:p-10">
         <h1 className="text-lg sm:text-xl font-medium">
           Manage Your Subscription
         </h1>

@@ -308,7 +308,7 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
       </header>
       <section
         className="w-80 md:w-10/12 lg:w-9/12 place-items-center 
-      grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5"
+      grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5"
       >
         <div
           onClick={() => setTriggerSelectMultipleStudent((prev) => !prev)}
@@ -330,7 +330,8 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
                   return (
                     <div
                       key={index}
-                      className="w-24 h-32 sm:w-32 sm:h-40 md:w-36 md:h-48 lg:w-48 lg:h-52 bg-gray-200 rounded-2xl animate-pulse"
+                      className="w-24 h-32 sm:w-32 sm:h-40 md:w-36 md:h-48 lg:w-48 
+                      lg:h-52 bg-gray-200 rounded-2xl animate-pulse"
                     ></div>
                   );
                 })

@@ -108,8 +108,8 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
   }
 
   return (
-    <div className="min-h-[100vh] flex items-center justify-center">
-      <div className="mx-5 pb-10">
+    <div className="min-h-[100vh] w-full flex items-center justify-center">
+      <div className="w-full pb-10">
         <div className="py-8 lg:py-14 flex flex-col items-center">
           <span className="text-primary-color text-base">Pricing</span>
           <span className="font-semibold text-center text-4xl sm:text-5xl mt-3 mb-6">
@@ -139,7 +139,7 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
             </button>
           </div>
         </div>
-        <div className="lg:max-w-[1200px] max-w-[450px] mx-auto bg-white rounded-xl">
+        <div className="w-full  mx-auto  rounded-xl">
           <table className="w-full text-start border-spacing-5 border-separate flex flex-col lg:flex-row p-5 lg:p-0">
             {pricingData.map((data, index) => (
               <tbody
@@ -164,7 +164,7 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
                 </tr>
                 <tr>
                   <td className="h-[50px]">
-                    <div>
+                    <div className="w-max">
                       <span className="font-semibold text-5xl">
                         {monthprice ? data.price?.month : data.price?.year}
                       </span>
@@ -251,7 +251,7 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
                   <td
                     className={
                       index === 0
-                        ? "h-5"
+                        ? "h-5 lg:w-60"
                         : "h-6 text-center flex justify-between lg:justify-center flex-row-reverse"
                     }
                   >

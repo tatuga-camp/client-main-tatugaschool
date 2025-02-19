@@ -56,8 +56,8 @@ function SlideLayout({
         className={`
         ${
           triggerShow ? "translate-x-0" : "translate-x-full"
-        } transition-transform duration-300
-        w-5/12 h-full flex justify-between flex-col bg-white`}
+        } transition-transform duration-300 md:w-10/12 lg:w-7/12
+        2xl:w-5/12 h-full flex justify-between flex-col bg-white`}
       >
         <header className="w-full px-3  py-5 border-b justify-between flex">
           <div className="flex items-center justify-start gap-2">

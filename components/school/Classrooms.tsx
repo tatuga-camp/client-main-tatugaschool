@@ -230,7 +230,7 @@ function Classrooms({ schoolId }: Props) {
               items={classroomData}
               strategy={rectSortingStrategy}
             >
-              <ul className="w-full pb-40 mt-5 grid grid-cols-3 gap-3">
+              <ul className="w-full pb-40 mt-5 grid lg:grid-cols-2 xl:grid-cols-3 gap-3">
                 {classroomData?.map((classroom) => {
                   return (
                     <ClassesCard classroom={classroom} key={classroom.id} />
