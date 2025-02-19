@@ -5,7 +5,7 @@ import { classNames } from "primereact/utils";
 type Props = {
   value?: number;
   onValueChange: (data: number) => void;
-  min: number;
+  min?: number;
   max: number;
   useGrouping?: boolean;
   required?: boolean;

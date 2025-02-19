@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo, useEffect } from "react";
 import { EducationYear } from "../../interfaces";
 
 type Props = {
@@ -68,4 +68,4 @@ function InputEducationYear({ value, onChange, required }: Props) {
   );
 }
 
-export default InputEducationYear;
+export default memo(InputEducationYear);

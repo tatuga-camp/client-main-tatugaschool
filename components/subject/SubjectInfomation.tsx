@@ -4,6 +4,7 @@ import { useGetSubject } from "../../react-query";
 import InputNumber from "../common/InputNumber";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { CiSaveDown2 } from "react-icons/ci";
+import InputEducationYear from "../common/InputEducationYear";
 
 type Props = {
   onSummit: (
@@ -31,8 +32,9 @@ function SubjectInfomation({ onSummit, subjectId, isPending = false }: Props) {
 
   React.useEffect(() => {
     if (subject.data) {
-      const term = subject.data.educationYear.split("/")[0];
-      const year = subject.data.educationYear.split("/")[1];
+      const split = subject.data.educationYear.split("/");
+      const term = split[0];
+      const year = split[1];
       setSubjectBasicInfo({
         name: subject.data.title,
         description: subject.data.description,
@@ -42,6 +44,9 @@ function SubjectInfomation({ onSummit, subjectId, isPending = false }: Props) {
       });
     }
   }, [subject.data]);
+
+  console.log(subjectBasicInfo);
+
   return (
     <form
       onSubmit={(e) => {
@@ -132,34 +137,22 @@ function SubjectInfomation({ onSummit, subjectId, isPending = false }: Props) {
           <label className="w-1/2 md:w-full items-center grid md:grid-cols-2 md:gap-10">
             <span className="text-base text-black">Education Year:</span>
             <div className="flex items-center gap-2">
-              <InputNumber
-                required
-                value={Number(subjectBasicInfo?.term)}
-                onValueChange={(e) =>
-                  setSubjectBasicInfo({
-                    ...subjectBasicInfo,
-                    term: e?.toString(),
-                  })
-                }
-                min={1}
-                useGrouping={false}
-                max={10}
-              />
-
-              <span className="text-4xl">/</span>
-              <InputNumber
-                required
-                value={Number(subjectBasicInfo?.year)}
-                onValueChange={(e) =>
-                  setSubjectBasicInfo({
-                    ...subjectBasicInfo,
-                    year: e.toString(),
-                  })
-                }
-                min={1999}
-                useGrouping={false}
-                max={new Date().getFullYear() + 1}
-              />
+              {subjectBasicInfo?.term && subjectBasicInfo.year && (
+                <InputEducationYear
+                  required={true}
+                  value={`${subjectBasicInfo?.term}/${subjectBasicInfo?.year}`}
+                  onChange={(value) => {
+                    const valueSplit = value.split("/");
+                    setSubjectBasicInfo((prev) => {
+                      return {
+                        ...prev,
+                        term: valueSplit[0],
+                        year: valueSplit[1],
+                      };
+                    });
+                  }}
+                />
+              )}
             </div>
           </label>
         </div>
