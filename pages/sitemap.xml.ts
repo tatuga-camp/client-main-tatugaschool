@@ -10,7 +10,7 @@ function generateSiteMap() {
     <priority>1.0</priority>
   </url>
    <url>
-    <loc>https:/tatugaschool.com</loc>
+    <loc>https://tatugaschool.com</loc>
     <lastmod>2025-02-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
