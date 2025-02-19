@@ -90,7 +90,10 @@ const RightIcon = ({ bgcolor }: { bgcolor: string }) => {
 
 type Props = {
   school: School;
-  onSelectPlan: (priceId: string) => void;
+  onSelectPlan: (
+    priceId: string,
+    product: { price: string; title: string; time: string }
+  ) => void;
 };
 const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
   const subscriptions = useGetListSubscription();
@@ -195,7 +198,13 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
                           );
 
                           if (price?.priceId) {
-                            onSelectPlan(price?.priceId);
+                            onSelectPlan(price?.priceId, {
+                              time: monthprice ? "month" : "year",
+                              title: data.product as string,
+                              price: monthprice
+                                ? (data.price.month as string)
+                                : (data.price.year as string),
+                            });
                           }
                         }}
                         disabled={school.plan === data.mainTitle}

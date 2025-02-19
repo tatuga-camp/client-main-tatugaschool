@@ -1,7 +1,11 @@
-import React from "react";
+import StripeLayout from "../../components/layout/StripeLayout";
+import ShowStatusPayment from "../../components/payments/ShowStatus";
 
-function Index() {
-  return <div>SUCCESS</div>;
+function Success() {
+  return (
+    <StripeLayout>
+      <ShowStatusPayment />
+    </StripeLayout>
+  );
 }
-
-export default Index;
+export default Success;

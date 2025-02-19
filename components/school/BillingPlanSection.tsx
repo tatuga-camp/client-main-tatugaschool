@@ -8,7 +8,6 @@ import { ErrorMessages } from "../../interfaces";
 import Swal from "sweetalert2";
 import PopupLayout from "../layout/PopupLayout";
 import CheckoutForm from "../payments/Checkout";
-import PlanCard from "./PlanCard";
 import { RiBillFill } from "react-icons/ri";
 import { useRouter } from "next/router";
 import LoadingSpinner from "../common/LoadingSpinner";
@@ -18,15 +17,27 @@ const BillingPlanSection = (props: { schoolId: string }) => {
   const router = useRouter();
   const school = useGetSchool({ schoolId: props.schoolId });
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [selectProduct, setSelectProduct] = useState<{
+    title: string;
+    time: string;
+    price: string;
+  }>();
   const managesubscription = useManageSubscription();
   const createSubscription = useCreateSubscription();
-  const handleCreateSubscription = async ({ priceId }: { priceId: string }) => {
+  const handleCreateSubscription = async ({
+    priceId,
+    product,
+  }: {
+    priceId: string;
+    product: { title: string; time: string; price: string };
+  }) => {
     try {
       const create = await createSubscription.mutateAsync({
         schoolId: props.schoolId,
         priceId: priceId,
       });
       setClientSecret(create.clientSecret);
+      setSelectProduct(product);
     } catch (error) {
       document.body.style.overflow = "auto";
       console.log(error);
@@ -71,10 +82,11 @@ const BillingPlanSection = (props: { schoolId: string }) => {
           </div>
         </PopupLayout>
       )}
-      {clientSecret && school.data && (
+      {clientSecret && school.data && selectProduct && (
         <PopupLayout onClose={() => setClientSecret(null)}>
           <div id="checkout" className="bg-white p-5 rounded-md">
             <CheckoutForm
+              product={selectProduct}
               clientSecret={clientSecret}
               email={school.data?.user.email}
             />
@@ -107,7 +119,11 @@ const BillingPlanSection = (props: { schoolId: string }) => {
 
         {school.data && (
           <SubscriptionPlan
-            onSelectPlan={(priceId) => handleCreateSubscription({ priceId })}
+            onSelectPlan={(priceId, product) => {
+              if (confirm("Are you confirm to pay?")) {
+                handleCreateSubscription({ priceId, product: product });
+              }
+            }}
             school={school.data}
           />
         )}
