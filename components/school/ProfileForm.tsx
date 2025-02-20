@@ -4,6 +4,7 @@ import { InputMask } from "primereact/inputmask";
 import { UseMutationResult } from "@tanstack/react-query";
 import { RequestUpdateSchoolService } from "@/services";
 import { Toast } from "primereact/toast";
+import { PhoneInput } from "react-international-phone";
 interface ProfileFormProps {
   school: School;
   updateSchool: UseMutationResult<
@@ -75,17 +76,16 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ school, updateSchool }) => {
           <label className="block text-gray-500 text-sm mb-1" htmlFor="phone">
             Phone
           </label>
-          <InputMask
-            mask="(+99) 999-999-9999"
+          <PhoneInput
+            required
+            defaultCountry="th"
             value={formData.phoneNumber}
             onChange={(e) => {
               setFormData((prev) => {
-                return { ...prev, phoneNumber: e.value as string };
+                return { ...prev, phoneNumber: e };
               });
               setIsActive(true);
             }}
-            className="main-input w-full"
-            id="phoneNumber"
           />
         </div>
         <div>

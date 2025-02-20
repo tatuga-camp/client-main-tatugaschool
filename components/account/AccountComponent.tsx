@@ -22,6 +22,7 @@ import { ProgressSpinner } from "primereact/progressspinner";
 import ChangePassword from "./ChangePassword";
 import ManageInvite from "./ManageInvite";
 import { useRouter } from "next/router";
+import { PhoneInput } from "react-international-phone";
 
 const menuItems = ["General", "Change Password", "Invitations"] as const;
 type MenuItems = (typeof menuItems)[number];
@@ -142,14 +143,13 @@ const AccountComponent = () => {
                   value={user.data?.email}
                   onChange={handleChange}
                 />
-                <InputMask
-                  mask="(+99) 999-999-9999"
+                <PhoneInput
+                  required
+                  defaultCountry="th"
                   placeholder="Phone"
                   value={form?.phone}
-                  name="phone"
-                  className="main-input"
                   onChange={(e) => {
-                    setForm((prev) => ({ ...prev, phone: e.value as string }));
+                    setForm((prev) => ({ ...prev, phone: e }));
                   }}
                 />
               </div>

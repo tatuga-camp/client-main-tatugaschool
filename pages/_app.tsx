@@ -1,4 +1,6 @@
 import "@/styles/globals.css";
+import "@/styles/input-phone.css";
+
 import type { AppProps } from "next/app";
 import { Prompt } from "next/font/google";
 import { PrimeReactProvider } from "primereact/api";
