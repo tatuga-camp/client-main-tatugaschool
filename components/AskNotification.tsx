@@ -20,8 +20,10 @@ function AskNotification() {
   }, []);
 
   const requestNotificationPermission = async (): Promise<void> => {
+    document.body.style.overflow = "auto";
     try {
       const permission = await Notification.requestPermission();
+
       if (permission === "granted") {
         setLoading(true);
         await SubscribeToPushService();
