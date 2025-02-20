@@ -5,21 +5,23 @@ import {
   RequestCreateSchoolService,
   UploadSignURLService,
 } from "@/services";
-import { useQueryClient, useMutation } from "@tanstack/react-query";
-import { useRouter } from "next/router";
-import { Toast } from "primereact/toast";
-import { ReactNode, useEffect, useRef, useState, useCallback } from "react";
-import Swal from "sweetalert2";
-import { ProgressSpinner } from "primereact/progressspinner";
-import { LuSchool } from "react-icons/lu";
-import { FaRegAddressCard, FaUserPlus } from "react-icons/fa";
-import { countries, defaultBlurHash } from "../../data";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
-import { InputMask } from "primereact/inputmask";
+import { useRouter } from "next/router";
 import { ProgressBar } from "primereact/progressbar";
-import InviteJoinSchool from "./InviteJoinSchool";
-import Dropdown from "../common/Dropdown";
+import { ProgressSpinner } from "primereact/progressspinner";
+import { Toast } from "primereact/toast";
+import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import { FaRegAddressCard, FaUserPlus } from "react-icons/fa";
+import { LuSchool } from "react-icons/lu";
+import { PhoneInput } from "react-international-phone";
+import styles from "@/styles/input-phone.module.css";
+import Swal from "sweetalert2";
+import { countries, defaultBlurHash } from "../../data";
 import { decodeBlurhashToCanvas, generateBlurHash } from "../../utils";
+import Dropdown from "../common/Dropdown";
+import InviteJoinSchool from "./InviteJoinSchool";
+import { useCreateSchool } from "../../react-query";
 const menuItems: { title: string; icon: ReactNode }[] = [
   {
     title: "Profile",
@@ -36,7 +38,7 @@ const menuItems: { title: string; icon: ReactNode }[] = [
 ];
 
 const CreateSchoolComponent = () => {
-  const router = useRouter();
+  const createSchool = useCreateSchool();
   const toast = useRef<Toast>(null);
   const [loading, setLoading] = useState(false);
   const [activeIndex, setActiveIndex] = useState<number>(0);
@@ -58,19 +60,6 @@ const CreateSchoolComponent = () => {
     name: string;
     code: string;
   }>();
-  const queryClient = useQueryClient();
-
-  const createSchool = useMutation({
-    mutationKey: ["school"],
-    mutationFn: (input: RequestCreateSchoolService) =>
-      CreateSchoolService(input),
-    onSuccess(data, _variables, _context) {
-      queryClient.setQueryData(["schools"], (old: School[] | undefined) => {
-        return [...(old || []), data];
-      });
-      show();
-    },
-  });
 
   const show = () => {
     toast.current?.show({
@@ -159,6 +148,7 @@ const CreateSchoolComponent = () => {
         phoneNumber: address?.phoneNumber,
         blurHash: profile?.blurHash,
       });
+      show();
     } catch (error) {
       console.log(error);
       let result = error as ErrorMessages;
@@ -233,7 +223,6 @@ const CreateSchoolComponent = () => {
       handleChangeActiveIndex(2);
     }
   }, [createSchool.status, handleChangeActiveIndex]);
-
   return (
     <div className="w-full max-w-xl mx-auto flex flex-col gap-2 mb-10 bg-white rounded-3xl shadow-md p-12">
       <Toast ref={toast}></Toast>
@@ -404,7 +393,7 @@ const CreateSchoolComponent = () => {
                 }
               />
             </div>
-            <div className="flex flex-col">
+            <div className="flex  flex-col ">
               <input
                 type="text"
                 required
@@ -418,17 +407,15 @@ const CreateSchoolComponent = () => {
                 }
               />
             </div>
-            <InputMask
+            <PhoneInput
               required
+              defaultCountry="th"
               value={address?.phoneNumber}
-              onChange={(e) =>
+              onChange={(phone) =>
                 setAddress((prev) => {
-                  return { ...prev, phoneNumber: e.value as string };
+                  return { ...prev, phoneNumber: phone as string };
                 })
               }
-              mask="(+99) 999-999-9999"
-              className="w-full p-[16px]  border border-gray-300 rounded-lg"
-              placeholder="(+99) 999-999-9999"
             />
             <button
               disabled={createSchool.isPending}
