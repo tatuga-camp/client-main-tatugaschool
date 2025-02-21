@@ -12,6 +12,8 @@ import {
   GetSchoolByIdService,
   GetSchoolService,
   RequestCreateSchoolService,
+  RequestUpdateSchoolService,
+  UpdateSchoolService,
 } from "../services";
 import { MemberOnSchool, School } from "../interfaces";
 
@@ -43,6 +45,23 @@ export function useCreateSchool() {
           return [...(old || []), data];
         });
       }
+    },
+  });
+}
+
+export function useUpdateSchool() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["update-school"],
+    mutationFn: (input: RequestUpdateSchoolService) =>
+      UpdateSchoolService(input),
+    onSuccess(data, _variables, _context) {
+      queryClient.setQueryData(
+        ["school", { id: data.id }],
+        (oldData: School) => {
+          return { ...oldData, ...data };
+        }
+      );
     },
   });
 }
