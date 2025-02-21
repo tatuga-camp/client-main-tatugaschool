@@ -1,31 +1,10 @@
 import { School } from "@/interfaces";
-import ProfileUpload from "./ProfileUpload";
+import { useUpdateSchool } from "../../react-query";
 import ProfileForm from "./ProfileForm";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { RequestUpdateSchoolService, UpdateSchoolService } from "@/services";
-import { UseMutationResult } from "@tanstack/react-query";
+import ProfileUpload from "./ProfileUpload";
 
 const BasicInformationSection = ({ school }: { school: School }) => {
-  const queryClient = useQueryClient();
-
-  const updateSchool: UseMutationResult<
-    School,
-    Error,
-    RequestUpdateSchoolService,
-    unknown
-  > = useMutation({
-    mutationKey: ["update-school"],
-    mutationFn: (input: RequestUpdateSchoolService) =>
-      UpdateSchoolService(input),
-    onSuccess(data, _variables, _context) {
-      queryClient.setQueryData(
-        ["school", { id: school.id }],
-        (oldData: School) => {
-          return { ...oldData, ...data };
-        }
-      );
-    },
-  });
+  const updateSchool = useUpdateSchool();
 
   return (
     <div className="grid grid-cols-6 gap-4">

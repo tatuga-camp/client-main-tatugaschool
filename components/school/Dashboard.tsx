@@ -26,7 +26,7 @@ const Dashboard: React.FC<DashboardProps> = ({ school }) => {
             onInvite={handleInvite}
           />
         )}
-        <Stats />
+        <Stats schoolId={school.id} />
         <div className="px-12 mt-4 pb-10">
           {members.data && (
             <TabsMenuSection
