@@ -5,7 +5,7 @@ import { getRefetchtoken, getAccessToken } from "../utils";
 const createAxiosInstance = () => {
   const instance = axios.create({
     baseURL: process.env.NEXT_PUBLIC_SERVER_URL,
-    timeout: 10000,
+    timeout: 1000 * 60 * 10,
     withCredentials: true,
   });
   instance.interceptors.request.use(

@@ -54,10 +54,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ school, updateSchool }) => {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="w-full p-6 bg-white rounded-xl space-y-4"
-    >
+    <form onSubmit={handleSubmit}>
       <div>
         <label className="block text-gray-500 text-sm mb-1" htmlFor="title">
           Name
@@ -145,7 +142,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ school, updateSchool }) => {
       <button
         type="submit"
         disabled={!isActive}
-        className={`w-60 py-2 text-white rounded-md focus:outline-none ${
+        className={`w-40 py-2 text-white rounded-md focus:outline-none ${
           !isActive
             ? "bg-gray-400 cursor-not-allowed"
             : "bg-primary-color hover:bg-primary-color-hover"

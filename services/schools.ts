@@ -60,13 +60,11 @@ export async function UpdateSchoolService(
   }
 }
 
-type RequestDeleteSchoolService = {
+export type RequestDeleteSchoolService = {
   schoolId: string;
 };
 
-type ResponseDeleteSchoolService = {
-  message: string;
-};
+type ResponseDeleteSchoolService = School;
 
 export async function DeleteSchoolService(
   input: RequestDeleteSchoolService
