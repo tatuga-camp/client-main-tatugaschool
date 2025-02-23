@@ -8,8 +8,11 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { ProgressSpinner } from "primereact/progressspinner";
 import Password from "../common/Password";
+import { useGetUser } from "../../react-query";
+import { FcGoogle } from "react-icons/fc";
 
 function ChangePassword() {
+  const user = useGetUser();
   const [formData, setFormData] = React.useState<{
     currentPassword?: string;
     newPassword?: string;
@@ -67,6 +70,16 @@ function ChangePassword() {
       });
     }
   };
+
+  if (user.data?.provider === "GOOGLE") {
+    return (
+      <div className="second-button border gap-2 flex items-center justify-center">
+        <FcGoogle />
+        Your password is managed by google
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSummit} className="flex flex-col gap-2">
       <label className=" flex flex-col gap-1 w-full items-start">

@@ -37,6 +37,8 @@ type RequestSignUpService = {
   lastName: string;
   phone: string;
   provider: "LOCAL" | "GOOGLE";
+  providerId?: string;
+  photo?: string;
 };
 
 type ResponseSignUpService = { redirectUrl: string };

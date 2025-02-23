@@ -25,8 +25,6 @@ function Navbar({
   menuLists,
 }: Props) {
   const user = useGetUser();
-
-  const queryClient = new QueryClient();
   return (
     <>
       <div
@@ -63,7 +61,7 @@ function Navbar({
             Tatuga School
           </div>
         </Link>
-        <ButtonProfile user={user} queryClient={queryClient} />
+        <ButtonProfile user={user} />
         <div className="fixed top-0 -z-10 left-0">
           <Sidebar
             menuList={menuLists}

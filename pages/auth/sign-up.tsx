@@ -3,8 +3,19 @@ import { AuthHeader } from "@/components/auth/AuthHeader";
 import { AuthFooter } from "@/components/auth/AuthFooter";
 import { SignUpForm } from "@/components/auth/SignUpForm";
 import Head from "next/head";
+import { GetServerSideProps } from "next";
 
-function SignUpPage() {
+type Props = {
+  googleSignUpData?: {
+    email: string;
+    firstName: string;
+    lastName: string;
+    providerId: string;
+    photo: string;
+    provider: "google";
+  } | null;
+};
+function SignUpPage(data: Props) {
   return (
     <>
       <Head>
@@ -34,7 +45,7 @@ function SignUpPage() {
       </Head>
       <AuthLayout>
         <AuthHeader />
-        <SignUpForm />
+        <SignUpForm {...data?.googleSignUpData} />
         <AuthFooter />
       </AuthLayout>
     </>
@@ -42,3 +53,35 @@ function SignUpPage() {
 }
 
 export default SignUpPage;
+
+export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
+  const query = ctx.query as {
+    email: string;
+    firstName: string;
+    lastName: string;
+    photo: string;
+    providerId: string;
+    provider: "google";
+  };
+
+  if (!query.provider) {
+    return {
+      props: {
+        googleSignUpData: null,
+      },
+    };
+  }
+
+  return {
+    props: {
+      googleSignUpData: {
+        email: query.email,
+        firstName: query.firstName,
+        lastName: query.lastName,
+        photo: query.photo,
+        providerId: query.providerId,
+        provider: query.provider,
+      },
+    },
+  };
+};
