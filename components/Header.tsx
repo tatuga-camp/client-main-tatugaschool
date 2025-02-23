@@ -11,7 +11,6 @@ import ButtonProfile from "./button/ButtonProfile";
 import { defaultBlurHash, defaultCanvas } from "../data";
 
 const Header = () => {
-  const queryCliclient = new QueryClient();
   const user = useGetUser();
   const pathname = usePathname();
 
@@ -58,7 +57,7 @@ const Header = () => {
         </Link>
       </nav>
 
-      <ButtonProfile user={user} queryClient={queryCliclient} />
+      <ButtonProfile user={user} />
     </header>
   );
 };

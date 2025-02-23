@@ -1,16 +1,16 @@
 import React from "react";
-import { AuthLayout } from "../../components/auth/AuthLayout";
-import { AuthHeader } from "../../components/auth/AuthHeader";
+import Swal from "sweetalert2";
 import { AuthFooter } from "../../components/auth/AuthFooter";
-import { GetServerSideProps } from "next";
+import { AuthHeader } from "../../components/auth/AuthHeader";
+import { AuthLayout } from "../../components/auth/AuthLayout";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
+import { ErrorMessages } from "../../interfaces";
 import {
   useGetNoVerifyUser,
   useResendVerifyEmail,
   useUpdateUser,
 } from "../../react-query";
-import Swal from "sweetalert2";
-import { ErrorMessages } from "../../interfaces";
-import LoadingSpinner from "../../components/common/LoadingSpinner";
+import ButtonProfile from "../../components/button/ButtonProfile";
 
 function Index() {
   const user = useGetNoVerifyUser();
@@ -64,11 +64,27 @@ function Index() {
       });
     }
   };
+
+  if (user.data?.isVerifyEmail === true) {
+    return (
+      <AuthLayout>
+        <div className="w-full  flex-col grow  flex justify-center items-center gap-5">
+          <AuthHeader />
+          <div className="w-full md:w-8/12 xl:w-4/12 h-max rounded-md text-center bg-white p-3">
+            Your Account Email has already been verified
+          </div>
+        </div>
+        <AuthFooter />
+      </AuthLayout>
+    );
+  }
   return (
     <AuthLayout>
       <div className="w-full  flex-col grow  flex justify-center items-center gap-5">
         <AuthHeader />
-        <div className="w-full md:w-8/12 xl:w-4/12 h-max rounded-md text-center bg-white p-3">
+        <div className="w-full md:w-8/12 xl:w-4/12 flex flex-col items-center justify-center h-max rounded-md text-center bg-white p-3">
+          <ButtonProfile user={user} />
+
           {triggerUpdate ? (
             <form onSubmit={handleUpdateEmail}>
               <h2 className="text-xl font-semibold">

@@ -84,6 +84,8 @@ export const LoginForm = () => {
           Error: {router.query?.error}
         </span>
       )}
+      <span className="text-gray-500 text-sm">(For Only Teacher)</span>
+
       <div className="flex flex-col gap-3  w-full">
         <input
           type="email"

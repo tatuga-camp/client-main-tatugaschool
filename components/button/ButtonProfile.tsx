@@ -1,4 +1,8 @@
-import { QueryClient, UseQueryResult } from "@tanstack/react-query";
+import {
+  QueryClient,
+  useQueryClient,
+  UseQueryResult,
+} from "@tanstack/react-query";
 import Image from "next/image";
 import router from "next/router";
 import { destroyCookie } from "nookies";
@@ -11,9 +15,9 @@ import { defaultBlurHash, defaultCanvas } from "../../data";
 
 type Props = {
   user: UseQueryResult<User, Error>;
-  queryClient: QueryClient;
 };
-function ButtonProfile({ user, queryClient }: Props) {
+function ButtonProfile({ user }: Props) {
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
 
   const handleLogout = () => {
