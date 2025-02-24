@@ -24,6 +24,7 @@ import { useSound } from "../../hook";
 import { decodeBlurhashToCanvas } from "../../utils";
 import ScorePanel from "./ScorePanel";
 import { CgClose } from "react-icons/cg";
+import { IoMdClose } from "react-icons/io";
 
 type Props = {
   setSelectStudent: React.Dispatch<
@@ -111,14 +112,22 @@ function PopUpStudent({ student, setSelectStudent, toast }: Props) {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectStudent(null);
+    document.body.style.overflow = "auto";
   };
 
   if (!isModalOpen) return null;
 
   return (
-    <section className="w-full border p-5 items-center flex flex-col md:flex-row gap-5 bg-background-color rounded-md">
-      <button onClick={handleCloseModal} className="self-end md:hidden">
-        <CgClose className="text-2xl" />
+    <section
+      className="w-full md:w-10/12 xl:w-7/12 border p-5 items-center 
+    flex flex-col md:flex-row gap-5 relative bg-background-color rounded-md"
+    >
+      <button
+        onClick={handleCloseModal}
+        className="text-lg absolute top-2 right-2  hover:bg-gray-300/50 w-6  h-6  rounded
+         flex items-center justify-center font-semibold"
+      >
+        <IoMdClose />
       </button>
       <div className="w-full md:w-40 h-max border bg-white rounded-md flex flex-col gap-1 items-center justify-center">
         <div className="w-full md:w-40 h-10 gradient-bg rounded-t-md flex items-center justify-center">

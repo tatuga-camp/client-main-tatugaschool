@@ -340,13 +340,11 @@ function Index({ subjectId }: Props) {
         )}
         {selectStudent && (
           <PopupLayout onClose={() => setSelectStudent(null)}>
-            <div className="max-h-[calc(100vh-12rem)] md:max-h-screen">
-              <PopUpStudent
-                student={selectStudent}
-                setSelectStudent={setSelectStudent}
-                toast={toast}
-              />
-            </div>
+            <PopUpStudent
+              student={selectStudent}
+              setSelectStudent={setSelectStudent}
+              toast={toast}
+            />
           </PopupLayout>
         )}
         <header className="md:max-w-screen-md xl:max-w-screen-lg mx-auto w-full p-5 lg:py-10 pb-10 flex items-center justify-center">
