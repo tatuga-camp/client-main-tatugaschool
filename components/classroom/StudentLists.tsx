@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Classroom, ErrorMessages, Student } from "../../interfaces";
 import StudentCard from "../student/StudentCard";
 import { SortByOption, sortByOptions } from "../../data";
@@ -21,7 +21,10 @@ import { generateBlurHash } from "../../utils";
 import Swal from "sweetalert2";
 import LoadingBar from "../common/LoadingBar";
 import { useSound } from "../../hook";
-import { MdOutlinePassword } from "react-icons/md";
+import { MdDelete, MdOutlinePassword } from "react-icons/md";
+import StudentCareerSuggest from "../student/StudentCareerSuggest";
+import { SiGooglegemini } from "react-icons/si";
+import { TbReportSearch } from "react-icons/tb";
 
 type Props = {
   students: Student[];
@@ -32,6 +35,8 @@ function StudentLists({ students, classroom }: Props) {
   const deleteStudent = useDeleteStudent();
   const [triggerCreateStudent, setTriggerCreateStudent] = React.useState(false);
   const updateStudent = useUpdateStudent();
+  const [triggerShowSuggestCareer, setTriggerShowSuggestCareer] =
+    useState(false);
   const [loadingStudent, setLoadingStudent] = React.useState(false);
   const toast = React.useRef<Toast>(null);
   const [studentData, setStudentData] = React.useState<Student[]>(
@@ -281,46 +286,104 @@ function StudentLists({ students, classroom }: Props) {
     <>
       {selectStudent && (
         <SlideLayout
-          onClickDelete={() =>
-            handleDeleteStudent({ studentId: selectStudent.id })
-          }
-          onClickUpdate={() => handleUpdateStudent()}
           loading={loadingStudent || updateStudent.isPending}
-          onClose={() => setSelectStudent(null)}
+          onClose={() => {
+            setTriggerShowSuggestCareer(() => false);
+            setSelectStudent(null);
+          }}
         >
-          <div className="grow overflow-auto p-4">
-            <StudentSection
-              data={selectStudent}
-              setData={(data) => {
-                setSelectStudent((prev) => {
-                  if (!prev) return null;
-                  return {
-                    ...prev,
-                    ...data,
-                  };
-                });
+          {triggerShowSuggestCareer ? (
+            <StudentCareerSuggest
+              onClose={() => {
+                setTriggerShowSuggestCareer(() => false);
               }}
-              handleUpload={handleUpload}
+              studentId={selectStudent.id}
             />
+          ) : (
+            <>
+              <header className="w-full px-3  pb-2 border-b justify-between flex">
+                <div className="flex items-center justify-start gap-2">
+                  <button
+                    onClick={() => setTriggerShowSuggestCareer(() => true)}
+                    className="flex items-center justify-center gap-1 second-button border"
+                  >
+                    <SiGooglegemini />
+                    Suggest Carrer Path (AI)
+                  </button>
+                  {/* <button className="flex items-center justify-center gap-1 second-button border">
+                    <TbReportSearch />
+                    Report
+                  </button> */}
+                </div>
+              </header>
+              <main className="grow overflow-auto p-4">
+                <StudentSection
+                  data={selectStudent}
+                  setData={(data) => {
+                    setSelectStudent((prev) => {
+                      if (!prev) return null;
+                      return {
+                        ...prev,
+                        ...data,
+                      };
+                    });
+                  }}
+                  handleUpload={handleUpload}
+                />
+                <div className="flex flex-col mt-5 gap-1">
+                  <span className=" text-sm">student&lsquo;s password</span>
+                  <button
+                    type="button"
+                    disabled={loadingStudent}
+                    onClick={handleResetPassword}
+                    className="second-button border w-max flex items-center justify-center gap-1"
+                  >
+                    <MdOutlinePassword />
+                    Reset Password
+                  </button>
+                  <span className="text-sm text-red-500">
+                    ** Password is hashed that mean you can&lsquo;t see the
+                    password only reset them. Even the admin doesn&lsquo;t know
+                    the password. **
+                  </span>
+                </div>
+              </main>
 
-            <div className="flex flex-col mt-5 gap-1">
-              <span className=" text-sm">student&lsquo;s password</span>
-              <button
-                type="button"
-                disabled={loadingStudent}
-                onClick={handleResetPassword}
-                className="second-button border w-max flex items-center justify-center gap-1"
-              >
-                <MdOutlinePassword />
-                Reset Password
-              </button>
-              <span className="text-sm text-red-500">
-                ** Password is hashed that mean you can&lsquo;t see the password
-                only reset them. Even the admin doesn&lsquo;t know the password.
-                **
-              </span>
-            </div>
-          </div>
+              <footer className="w-full px-3  py-5  border-t justify-between gap-3 flex">
+                <button
+                  onClick={() => {
+                    document.body.style.overflow = "auto";
+                    handleDeleteStudent({ studentId: selectStudent.id });
+                  }}
+                  className="reject-button flex items-center justify-center gap-1"
+                >
+                  <MdDelete />
+                  Delete student
+                </button>
+                <div className="flex items-center justify-center gap-3">
+                  <button
+                    onClick={() => {
+                      setTriggerShowSuggestCareer(() => false);
+                      setSelectStudent(null);
+                    }}
+                    type="button"
+                    className="second-button border flex items-center justify-center gap-1"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleUpdateStudent();
+                    }}
+                    type="submit"
+                    className="main-button flex items-center justify-center gap-1"
+                  >
+                    <FiPlus /> Update Student
+                  </button>
+                </div>
+              </footer>
+            </>
+          )}
         </SlideLayout>
       )}
       {triggerCreateStudent && (
@@ -411,6 +474,7 @@ grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap
                 isDragable={false}
                 showSelect={false}
                 setSelectStudent={(data) => {
+                  setTriggerShowSuggestCareer(() => false);
                   setSelectStudent(data);
                 }}
               />

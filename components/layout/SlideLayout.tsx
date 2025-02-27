@@ -12,17 +12,9 @@ type LayoutProps = {
   children: ReactNode;
   onClose: () => void;
   loading?: boolean;
-  onClickUpdate: () => void;
-  onClickDelete: () => void;
 };
 
-function SlideLayout({
-  children,
-  onClose,
-  loading,
-  onClickUpdate,
-  onClickDelete,
-}: LayoutProps) {
+function SlideLayout({ children, onClose, loading }: LayoutProps) {
   const [triggerShow, setTriggerShow] = React.useState(false);
   React.useEffect(() => {
     setTriggerShow(true);
@@ -44,10 +36,6 @@ function SlideLayout({
     handleClose();
   });
 
-  useEnterKey(() => {
-    onClickUpdate();
-  });
-
   return (
     <div
       className={`fixed flex top-0 bottom-0 right-0 left-0 items-center justify-end m-auto z-50`}
@@ -57,65 +45,21 @@ function SlideLayout({
         ${
           triggerShow ? "translate-x-0" : "translate-x-full"
         } transition-transform duration-300 md:w-10/12 lg:w-7/12
-        2xl:w-5/12 h-full flex justify-between flex-col bg-white`}
+        2xl:w-5/12 h-full flex justify-between flex-col relative bg-white`}
       >
-        <header className="w-full px-3  py-5 border-b justify-between flex">
-          <div className="flex items-center justify-start gap-2">
-            <button className="flex items-center justify-center gap-1 second-button border">
-              <SiGooglegemini />
-              Suggest Carrer Path (AI)
-            </button>
-            <button className="flex items-center justify-center gap-1 second-button border">
-              <TbReportSearch />
-              Report
-            </button>
-          </div>
-
+        <header className="w-full p-2 flex justify-end">
           <button
             onClick={() => {
               handleClose();
             }}
             type="button"
-            className="text-lg hover:bg-gray-300/50 w-6 h-6 rounded flex items-center justify-center font-semibold"
+            className="text-lg  hover:bg-gray-300/50 w-6 h-6 rounded flex items-center justify-center font-semibold"
           >
             <IoMdClose />
           </button>
         </header>
         {loading && <LoadingBar />}
         {children}
-
-        <div className="w-full px-3  py-5  border-t justify-between gap-3 flex">
-          <button
-            onClick={() => {
-              document.body.style.overflow = "auto";
-              onClickDelete();
-            }}
-            className="reject-button flex items-center justify-center gap-1"
-          >
-            <MdDelete />
-            Delete student
-          </button>
-          <div className="flex items-center justify-center gap-3">
-            <button
-              onClick={() => {
-                handleClose();
-              }}
-              type="button"
-              className="second-button border flex items-center justify-center gap-1"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={() => {
-                onClickUpdate();
-              }}
-              type="submit"
-              className="main-button flex items-center justify-center gap-1"
-            >
-              <FiPlus /> Update Student
-            </button>
-          </div>
-        </div>
       </div>
       <footer
         onClick={() => {
