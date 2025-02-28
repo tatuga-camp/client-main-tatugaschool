@@ -106,7 +106,7 @@ function Classwork({ toast, subjectId, schoolId }: Props) {
         </section>
       </header>
 
-      <main className="w-full mt-20 place-items-center grid gap-5 px-40">
+      <main className="w-full mt-20  flex flex-col items-center  gap-5 px-0 lg:px-10 2xl:px-40">
         {classworks.isLoading && <div>Loading...</div>}
         <DndContext
           sensors={sensors}

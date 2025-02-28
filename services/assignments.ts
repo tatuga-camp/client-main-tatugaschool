@@ -42,6 +42,10 @@ export async function CreateAssignmentService(
 }
 
 export type ResponseGetAssignmentsService = (Assignment & {
+  studentAssign: number;
+  reviewNumber: number;
+  summitNumber: number;
+  penddingNumber: number;
   files: FileOnAssignment[];
 })[];
 
