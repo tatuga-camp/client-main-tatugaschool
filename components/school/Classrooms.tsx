@@ -24,6 +24,7 @@ import ClassesCreate from "../classroom/ClassroomCreate";
 import { IoMdClose } from "react-icons/io";
 import { Toast } from "primereact/toast";
 import { SortByOption, sortByOptions } from "../../data";
+import LoadingBar from "../common/LoadingBar";
 
 type Props = {
   schoolId: string;
@@ -221,6 +222,7 @@ function Classrooms({ schoolId }: Props) {
               </select>
             </label>
           </div>
+          {classrooms.isLoading && <LoadingBar />}
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}

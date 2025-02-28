@@ -27,6 +27,7 @@ import InputEducationYear from "../common/InputEducationYear";
 import PopupLayout from "../layout/PopupLayout";
 import SubjectCreate from "../subject/SubjectCreate";
 import { Toast } from "primereact/toast";
+import LoadingBar from "../common/LoadingBar";
 
 type Props = {
   schoolId: string;
@@ -246,6 +247,8 @@ function Subjects({ schoolId }: Props) {
               </select>
             </label>
           </div>
+          {subjects.isLoading && <LoadingBar />}
+
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}

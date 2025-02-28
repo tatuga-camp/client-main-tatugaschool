@@ -73,12 +73,39 @@ function StudentCareerSuggest({ studentId, onClose }: Props) {
         <div className="gradient-bg text-white text-xl px-5 py-1 rounded-lg">
           {career?.title}
         </div>
+        <ul className="flex w-full items-center justify-center flex-wrap gap-1">
+          {career?.careers.map((c, index) => {
+            return (
+              <li
+                key={index}
+                className="px-3 text-blue-600 bg-blue-100 rounded-md"
+              >
+                #{c.title}
+              </li>
+            );
+          })}
+        </ul>
         <div className="text-sm flex items-center justify-center gap-1 text-gray-400">
           ( <SiGooglegemini />
           Suggest Carrer Path AI)
         </div>
 
         <p className="text-center">{career?.description}</p>
+        <h2 className="mt-5 w-full border-b pb-2">Overall Skill Record</h2>
+        <section className="grid  grid-cols-1 gap-2 w-full">
+          {careers.data?.skills.map((skill) => {
+            return (
+              <div
+                className=" text-black w-full flex justify-between font-semibold "
+                key={skill.skill.id}
+              >
+                {skill.skill.title}
+
+                <span>{skill.average.toFixed(2)}%</span>
+              </div>
+            );
+          })}
+        </section>
       </main>
     </div>
   );
