@@ -1,14 +1,16 @@
-import React, { useEffect, useCallback } from "react";
-import {
-  useGetAssignment,
-  useGetStudentOnAssignments,
-  useGetStudentOnSubject,
-  useUpdateFileStudentOnAssignment,
-  useUpdateStudentOnAssignments,
-} from "../../react-query";
-import { HiUsers } from "react-icons/hi";
 import Image from "next/image";
-import { decodeBlurhashToCanvas } from "../../utils";
+import { ProgressSpinner } from "primereact/progressspinner";
+import { Toast } from "primereact/toast";
+import React, { useCallback, useEffect, useState } from "react";
+import { BiBookOpen, BiComment } from "react-icons/bi";
+import {
+  BsEyeFill,
+  BsLayoutSidebarInset,
+  BsLayoutSidebarInsetReverse,
+} from "react-icons/bs";
+import { IoMdCheckbox, IoMdClose } from "react-icons/io";
+import { MdAssignment } from "react-icons/md";
+import Swal from "sweetalert2";
 import { defaultBlurHash } from "../../data";
 import {
   Assignment,
@@ -17,30 +19,23 @@ import {
   StudentOnAssignment,
 } from "../../interfaces";
 import {
-  BsEyeFill,
-  BsLayoutSidebarInset,
-  BsLayoutSidebarInsetReverse,
-} from "react-icons/bs";
-import { BiBookOpen, BiComment } from "react-icons/bi";
-import TextEditor from "../common/TextEditor";
-import InputNumber from "../common/InputNumber";
-import { FaRegFile, FaRegFileImage } from "react-icons/fa6";
-import { MdAssignment, MdDelete } from "react-icons/md";
-import Swal from "sweetalert2";
-import { ProgressSpinner } from "primereact/progressspinner";
-import { Toast } from "primereact/toast";
-import FileStudentAssignmentCard from "./FileStudentAssignmentCard";
-import AssignmentText from "./AssignmentText";
-import { IoMdClose } from "react-icons/io";
-import { ProgressBar } from "primereact/progressbar";
-import CommentSection from "./CommentSection";
-import PopupLayout from "../layout/PopupLayout";
-import DrawCanva from "../common/DrawCanva";
+  useGetAssignment,
+  useGetStudentOnAssignments,
+  useUpdateFileStudentOnAssignment,
+  useUpdateStudentOnAssignments,
+} from "../../react-query";
 import {
   getSignedURLTeacherService,
   UploadSignURLService,
 } from "../../services";
+import { decodeBlurhashToCanvas } from "../../utils";
+import DrawCanva from "../common/DrawCanva";
+import InputNumber from "../common/InputNumber";
 import LoadingBar from "../common/LoadingBar";
+import PopupLayout from "../layout/PopupLayout";
+import AssignmentText from "./AssignmentText";
+import CommentSection from "./CommentSection";
+import FileStudentAssignmentCard from "./FileStudentAssignmentCard";
 
 type Props = {
   assignmentId: string;
@@ -51,6 +46,12 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
     assignmentId,
     refetchInterval: 5000,
   });
+  const [studentData, setStudentData] = useState<
+    (StudentOnAssignment & {
+      files: FileOnStudentOnAssignment[];
+      select: boolean;
+    })[]
+  >();
   const [triggerHideStudentList, setTriggerHideStudentList] =
     React.useState(false);
 
@@ -75,6 +76,17 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
 
         return updateStudnet;
       });
+    }
+
+    if (studentOnAssignments.data) {
+      setStudentData(() =>
+        studentOnAssignments.data.map((s) => {
+          return {
+            ...s,
+            select: false,
+          };
+        })
+      );
     }
   }, [studentOnAssignments.data]);
 
@@ -127,6 +139,24 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
         >
           <thead>
             <tr>
+              <th>
+                <div className="flex justify-center w-6">
+                  <input
+                    type="checkbox"
+                    className="w-5 h-5"
+                    onChange={(e) => {
+                      setStudentData((prev) => {
+                        return prev?.map((s) => {
+                          return {
+                            ...s,
+                            select: e.target.checked,
+                          };
+                        });
+                      });
+                    }}
+                  />
+                </div>
+              </th>
               <th>
                 <div className="text-start font-normal ">Name</div>
               </th>
@@ -182,7 +212,7 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
                     </tr>
                   );
                 })
-              : studentOnAssignments.data
+              : studentData
                   ?.filter((d) => d.isAssigned === true)
                   .sort((a, b) => Number(a.number) - Number(b.number))
                   .map((student, index) => {
@@ -190,6 +220,7 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
                     return (
                       <StudentList
                         onClick={handleSelectStudentWork}
+                        setStudentData={setStudentData}
                         key={student.id}
                         student={student}
                         odd={odd}
@@ -200,10 +231,17 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
         </table>
       </section>
       <section className="w-full  flex-col min-h-screen h-max flex  items-start justify-start">
-        {selectStudentWork && assignment.data && (
+        {selectStudentWork &&
+        assignment.data &&
+        !studentData?.some((s) => s.select === true) ? (
           <StudentWork
             studentOnAssignment={selectStudentWork}
             assignment={assignment.data}
+          />
+        ) : (
+          <MultipleReview
+            selectStudents={studentData?.filter((s) => s.select === true) ?? []}
+            maxScore={assignment.data?.maxScore ?? 0}
           />
         )}
       </section>
@@ -214,7 +252,19 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
 export default ClassStudentWork;
 
 type StudentListProps = {
-  student: StudentOnAssignment & { files: FileOnStudentOnAssignment[] };
+  student: StudentOnAssignment & {
+    files: FileOnStudentOnAssignment[];
+    select: boolean;
+  };
+  setStudentData: React.Dispatch<
+    React.SetStateAction<
+      | (StudentOnAssignment & {
+          files: FileOnStudentOnAssignment[];
+          select: boolean;
+        })[]
+      | undefined
+    >
+  >;
   odd: boolean;
   onClick: (
     student: StudentOnAssignment & { files: FileOnStudentOnAssignment[] }
@@ -225,10 +275,30 @@ const StudentList = React.memo(function StudentList({
   student,
   odd,
   onClick,
+  setStudentData,
 }: StudentListProps) {
   return (
     <tr className={` ${odd && "bg-gray-200/20"} hover:bg-sky-100  gap-2`}>
-      <th className="">
+      <th>
+        <div className="w-6 flex items-center justify-center">
+          <input
+            checked={student.select}
+            onChange={(e) =>
+              setStudentData((prev) => {
+                return prev?.map((s) => {
+                  if (s.id === student.id) {
+                    return { ...s, select: e.target.checked };
+                  }
+                  return s;
+                });
+              })
+            }
+            type="checkbox"
+            className="w-5 h-5"
+          />
+        </div>
+      </th>
+      <th>
         <div className="flex gap-2 pl-2 h-14 items-center">
           <div className="w-10 h-10 relative rounded-md ring-1  overflow-hidden">
             <Image
@@ -253,7 +323,7 @@ const StudentList = React.memo(function StudentList({
           </div>
         </div>
       </th>
-      <th className="">
+      <th>
         <div
           className={`flex w-full items-center h-full 
             text-white py-2 rounded-md px-2 
@@ -279,7 +349,7 @@ const StudentList = React.memo(function StudentList({
           {student.status === "PENDDING" && "No work"}
         </div>
       </th>
-      <th className="">
+      <th>
         <div
           className={`flex justify-center text-sm font-normal ${
             student.score !== null
@@ -292,11 +362,18 @@ const StudentList = React.memo(function StudentList({
             : "Not Graded"}
         </div>
       </th>
-      <th className="">
+      <th>
         <div className="flex w-full h-full p-2 justify-center">
           <button
             type="button"
-            onClick={() => onClick(student)}
+            onClick={() => {
+              setStudentData((prev) => {
+                return prev?.map((s) => {
+                  return { ...s, select: false };
+                });
+              });
+              onClick(student);
+            }}
             className={`flex items-center font-normal 
            justify-center gap-1 transition
            ${student.id === student.id ? "main-button" : "second-button border"}
@@ -309,6 +386,88 @@ const StudentList = React.memo(function StudentList({
     </tr>
   );
 });
+
+type MultipleReviewProps = {
+  selectStudents: StudentOnAssignment[];
+  maxScore: number;
+};
+function MultipleReview({ selectStudents, maxScore }: MultipleReviewProps) {
+  const update = useUpdateStudentOnAssignments();
+  const [score, setScore] = useState<number>(0);
+  const [loading, setLoading] = useState(false);
+
+  const handleSaveChange = async (e: React.FormEvent) => {
+    try {
+      e.preventDefault();
+      setLoading(true);
+      for (const studentWork of selectStudents) {
+        await update.mutateAsync({
+          query: {
+            studentOnAssignmentId: studentWork.id,
+          },
+          body: {
+            score: score,
+            status: "REVIEWD",
+          },
+        });
+      }
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+      let result = error as ErrorMessages;
+      Swal.fire({
+        title: result.error ? result.error : "Something Went Wrong",
+        text: result.message.toString(),
+        footer: result.statusCode
+          ? "Code Error: " + result.statusCode?.toString()
+          : "",
+        icon: "error",
+      });
+    }
+  };
+
+  return (
+    <div className="w-full flex font-Anuphan items-center justify-center grow h-full">
+      {loading && <LoadingBar />}
+      {selectStudents.length > 0 ? (
+        <form
+          onSubmit={handleSaveChange}
+          className="flex items-center justify-center h-full gap-2"
+        >
+          <div className="w-40">
+            <InputNumber
+              onValueChange={(value) => setScore(() => value)}
+              maxFractionDigits={3}
+              value={score}
+              min={0}
+              placeholder={score ? "Enter score" : "Not graded"}
+              suffix={`/${maxScore}`}
+              max={maxScore}
+            />
+          </div>
+          <button
+            disabled={loading}
+            className="second-button flex items-center justify-center border w-60 text-sm"
+          >
+            {loading ? (
+              <ProgressSpinner
+                animationDuration="1s"
+                style={{ width: "20px" }}
+                className="w-5 h-5"
+                strokeWidth="8"
+              />
+            ) : (
+              "Save Change"
+            )}
+          </button>
+        </form>
+      ) : (
+        <h1 className="text-3xl">Please Select A Student</h1>
+      )}
+    </div>
+  );
+}
 
 const menuViewStudentWorks = [
   {
