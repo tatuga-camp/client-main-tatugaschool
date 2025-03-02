@@ -138,7 +138,7 @@ export const SignUpForm = (props: Props) => {
           <span className="text-sm">First Name</span>
           <input
             type="text"
-            disabled={props.provider === "google"}
+            disabled={props.provider === "google" && !!props.firstName}
             placeholder="Enter Your First Name"
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
@@ -150,7 +150,7 @@ export const SignUpForm = (props: Props) => {
           <span className="text-sm">Last Name</span>
           <input
             type="text"
-            disabled={props.provider === "google"}
+            disabled={props.provider === "google" && !!props.lastName}
             placeholder="Enter Your Last Name"
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
