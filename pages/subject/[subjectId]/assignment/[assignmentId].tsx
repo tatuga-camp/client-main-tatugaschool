@@ -37,6 +37,7 @@ import {
   generateBlurHash,
   getRefetchtoken,
 } from "../../../../utils";
+import Head from "next/head";
 
 type SummitValue = "Published" | "Save Change" | "Mark as Draft";
 
@@ -77,6 +78,7 @@ function Index({
   const createFileAssignment = useCreateFileOnAssignment();
   const deleteAssignment = useDeleteAssignment();
   const adjustedStyle = useAdjustPosition(divRef, 20); // 20px padding
+  const title = assignment.data?.title;
   const [classwork, setClasswork] = React.useState<
     Assignment & { allowWeight: boolean }
   >();
@@ -271,111 +273,117 @@ function Index({
   };
 
   return (
-    <form
-      onSubmit={selectMenu === "classwork" ? handleUpdateClasswork : undefined}
-      className="flex h-full flex-col bg-background-color font-Anuphan"
-    >
-      <nav
-        className={`w-full px-5 ${
-          classwork?.status === "Published" ? "bg-white" : "bg-gray-50"
-        }   border-b h-20 flex items-center justify-between`}
+    <>
+      <Head>
+        <title>{title}</title>
+      </Head>
+      <form
+        onSubmit={
+          selectMenu === "classwork" ? handleUpdateClasswork : undefined
+        }
+        className="flex h-full flex-col bg-background-color font-Anuphan"
       >
-        <section className="flex w-full items-center gap-4">
-          <Link
-            href={{
-              pathname: `/subject/${subjectId}`,
-              query: { menu: "Classwork" as MenuSubject },
-            }}
-            className="w-10 h-10 text-3xl border rounded-full flex items-center justify-center
+        <nav
+          className={`w-full px-5 ${
+            classwork?.status === "Published" ? "bg-white" : "bg-gray-50"
+          }   border-b h-20 flex items-center justify-between`}
+        >
+          <section className="flex w-full items-center gap-4">
+            <Link
+              href={{
+                pathname: `/subject/${subjectId}`,
+                query: { menu: "Classwork" as MenuSubject },
+              }}
+              className="w-10 h-10 text-3xl border rounded-full flex items-center justify-center
        hover:bg-gray-300/50 transition active:scale-105"
-          >
-            <IoClose />
-          </Link>
-
-          <div
-            className="w-10 h-10 text-3xl border rounded-full flex items-center justify-center
-       bg-primary-color/30 text-primary-color"
-          >
-            <MdAssignmentAdd />
-          </div>
-          <h1 className="text-lg font-medium max-w-full truncate">
-            {classwork?.title}
-          </h1>
-        </section>
-        {selectMenu === "classwork" && (
-          <section className="flex items-center gap-[2px]">
-            {classwork?.status === "Draft" ? (
-              <button
-                type="submit"
-                value={"Published" as SummitValue}
-                className="w-40 p-2 h-10 opacity-85 hover:opacity-100 font-medium rounded-r-none rounded-md text-base text-white
-     gradient-bg"
-              >
-                Publish
-              </button>
-            ) : (
-              <button
-                type="submit"
-                value={"Save Change" as SummitValue}
-                className="w-40 p-2 h-10 opacity-85 hover:opacity-100 font-medium rounded-r-none rounded-md text-base text-white
-     gradient-bg"
-              >
-                Save Change
-              </button>
-            )}
-            <button
-              onClick={() => setTriggerOption((prev) => !prev)}
-              type="button"
-              className="w-max p-2 h-10  font-medium rounded-l-none rounded-md text-base text-white
-     gradient-bg"
             >
-              <IoChevronDownSharp />
-            </button>
+              <IoClose />
+            </Link>
 
-            {triggerOption && (
-              <div
-                style={{
-                  position: "absolute",
-                  ...adjustedStyle,
-                }}
-                ref={divRef}
+            <div
+              className="w-10 h-10 text-3xl border rounded-full flex items-center justify-center
+       bg-primary-color/30 text-primary-color"
+            >
+              <MdAssignmentAdd />
+            </div>
+            <h1 className="text-lg font-medium max-w-full truncate">
+              {classwork?.title}
+            </h1>
+          </section>
+          {selectMenu === "classwork" && (
+            <section className="flex items-center gap-[2px]">
+              {classwork?.status === "Draft" ? (
+                <button
+                  type="submit"
+                  value={"Published" as SummitValue}
+                  className="w-40 p-2 h-10 opacity-85 hover:opacity-100 font-medium rounded-r-none rounded-md text-base text-white
+     gradient-bg"
+                >
+                  Publish
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  value={"Save Change" as SummitValue}
+                  className="w-40 p-2 h-10 opacity-85 hover:opacity-100 font-medium rounded-r-none rounded-md text-base text-white
+     gradient-bg"
+                >
+                  Save Change
+                </button>
+              )}
+              <button
+                onClick={() => setTriggerOption((prev) => !prev)}
+                type="button"
+                className="w-max p-2 h-10  font-medium rounded-l-none rounded-md text-base text-white
+     gradient-bg"
               >
-                <div className="w-52 h-max z-40 p-1 absolute top-8 rounded-md bg-white drop-shadow border">
-                  {menuClassworkList.map((menu, index) => {
-                    const disabled =
-                      (menu.title === "Mark as Draft" &&
-                        classwork?.status === "Draft") ||
-                      (menu.title === "Publish" &&
-                        classwork?.status === "Published");
-                    let summitValue: SummitValue = "Published";
+                <IoChevronDownSharp />
+              </button>
 
-                    if (menu.title === "Save Change") {
-                      summitValue = "Save Change";
-                    }
-                    if (menu.title === "Mark as Draft") {
-                      summitValue = "Mark as Draft";
-                    }
-                    if (menu.title === "Publish") {
-                      summitValue = "Published";
-                    }
-                    return (
-                      <button
-                        onClick={() => {
-                          if (menu.title === "Delete") {
-                            handleDeleteAssignment();
+              {triggerOption && (
+                <div
+                  style={{
+                    position: "absolute",
+                    ...adjustedStyle,
+                  }}
+                  ref={divRef}
+                >
+                  <div className="w-52 h-max z-40 p-1 absolute top-8 rounded-md bg-white drop-shadow border">
+                    {menuClassworkList.map((menu, index) => {
+                      const disabled =
+                        (menu.title === "Mark as Draft" &&
+                          classwork?.status === "Draft") ||
+                        (menu.title === "Publish" &&
+                          classwork?.status === "Published");
+                      let summitValue: SummitValue = "Published";
+
+                      if (menu.title === "Save Change") {
+                        summitValue = "Save Change";
+                      }
+                      if (menu.title === "Mark as Draft") {
+                        summitValue = "Mark as Draft";
+                      }
+                      if (menu.title === "Publish") {
+                        summitValue = "Published";
+                      }
+                      return (
+                        <button
+                          onClick={() => {
+                            if (menu.title === "Delete") {
+                              handleDeleteAssignment();
+                            }
+                          }}
+                          disabled={disabled}
+                          type={
+                            menu.title === "Publish" ||
+                            menu.title === "Save Change" ||
+                            menu.title === "Mark as Draft"
+                              ? "submit"
+                              : "button"
                           }
-                        }}
-                        disabled={disabled}
-                        type={
-                          menu.title === "Publish" ||
-                          menu.title === "Save Change" ||
-                          menu.title === "Mark as Draft"
-                            ? "submit"
-                            : "button"
-                        }
-                        value={summitValue}
-                        key={index}
-                        className={`w-full p-2 flex gap-10 items-center justify-start text-base
+                          value={summitValue}
+                          key={index}
+                          className={`w-full p-2 flex gap-10 items-center justify-start text-base
              font-medium 
              ${
                menu.title === "Delete"
@@ -385,62 +393,65 @@ function Index({
                  : "text-gray-500 hover:bg-primary-color hover:text-white"
              }
              `}
-                      >
-                        {menu.icon}
-                        {menu.title}
-                      </button>
-                    );
-                  })}
+                        >
+                          {menu.icon}
+                          {menu.title}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            )}
-          </section>
+              )}
+            </section>
+          )}
+        </nav>
+        {(loading ||
+          assignment.isLoading ||
+          deleteFileAssignment.isPending ||
+          deleteAssignment.isPending) && (
+          <ProgressBar mode="indeterminate" style={{ height: "6px" }} />
         )}
-      </nav>
-      {(loading ||
-        assignment.isLoading ||
-        deleteFileAssignment.isPending ||
-        deleteAssignment.isPending) && (
-        <ProgressBar mode="indeterminate" style={{ height: "6px" }} />
-      )}
 
-      <div className="w-full h-14  bg-white flex border-b justify-start items-center px-10 ">
-        {menuLists
-          .filter((menu) =>
-            assignment.data?.type === "Material"
-              ? menu.query !== "student-work"
-              : true
-          )
-          .map((menu, index) => {
-            return (
-              <Link
-                href={{
-                  pathname: `/subject/${subjectId}/assignment/${assignmentId}`,
-                  query: { menu: menu.query },
-                }}
-                onClick={() => setSelectMenu(menu.query)}
-                key={index}
-                className={`flex flex-col px-10  justify-center p-2 h-full gap-0 ${
-                  selectMenu === menu.query
-                    ? "bg-primary-color text-white hover:bg-primary-color"
-                    : "bg-white text-black hover:bg-gray-100"
-                } `}
-              >
-                <h1>{menu.title}</h1>
-                <span
-                  className={`text-xs ${
-                    selectMenu === menu.query ? " text-white" : "text-gray-400"
+        <div className="w-full h-14  bg-white flex border-b justify-start items-center px-10 ">
+          {menuLists
+            .filter((menu) =>
+              assignment.data?.type === "Material"
+                ? menu.query !== "student-work"
+                : true
+            )
+            .map((menu, index) => {
+              return (
+                <Link
+                  href={{
+                    pathname: `/subject/${subjectId}/assignment/${assignmentId}`,
+                    query: { menu: menu.query },
+                  }}
+                  onClick={() => setSelectMenu(menu.query)}
+                  key={index}
+                  className={`flex flex-col px-10  justify-center p-2 h-full gap-0 ${
+                    selectMenu === menu.query
+                      ? "bg-primary-color text-white hover:bg-primary-color"
+                      : "bg-white text-black hover:bg-gray-100"
                   } `}
                 >
-                  {menu.description}
-                </span>
-              </Link>
-            );
-          })}
-      </div>
+                  <h1>{menu.title}</h1>
+                  <span
+                    className={`text-xs ${
+                      selectMenu === menu.query
+                        ? " text-white"
+                        : "text-gray-400"
+                    } `}
+                  >
+                    {menu.description}
+                  </span>
+                </Link>
+              );
+            })}
+        </div>
+      </form>
       <main
         ref={bodyRef}
-        className={`w-full h-full max-h-screen overflow-auto`}
+        className={`w-full h-full font-Anuphan max-h-screen overflow-auto`}
       >
         {selectMenu === "classwork" && assignment?.data && (
           <ClasswordView
@@ -474,7 +485,7 @@ function Index({
           />
         )}
       </main>
-    </form>
+    </>
   );
 }
 

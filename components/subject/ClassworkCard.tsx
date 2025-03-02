@@ -1,16 +1,21 @@
-import React, { CSSProperties } from "react";
-import { Assignment, FileOnAssignment } from "../../interfaces";
-import Link from "next/link";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import parse from "html-react-parser";
-import { MdAssignment, MdDragIndicator } from "react-icons/md";
-import { classworkLists } from "./ClassworkCreate";
+import Link from "next/link";
+import { CSSProperties } from "react";
 import { BiBook } from "react-icons/bi";
 import { FaRegFile, FaRegFileImage } from "react-icons/fa6";
-import { useSortable, UseSortableArguments } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+import { MdAssignment, MdDragIndicator } from "react-icons/md";
+import { Assignment, FileOnAssignment } from "../../interfaces";
 
 type PropsClassworkCard = {
-  classwork: Assignment & { files: FileOnAssignment[] };
+  classwork: Assignment & {
+    files: FileOnAssignment[];
+    studentAssign: number;
+    reviewNumber: number;
+    summitNumber: number;
+    penddingNumber: number;
+  };
   selectClasswork: Assignment | null;
   subjectId: string;
   onSelect: (classwork: Assignment) => void;
@@ -40,7 +45,13 @@ function ClassworkCard(props: PropsClassworkCard) {
 export default ClassworkCard;
 
 type PropsAssignmentCard = {
-  assignemnt: Assignment & { files: FileOnAssignment[] };
+  assignemnt: Assignment & {
+    files: FileOnAssignment[];
+    studentAssign: number;
+    reviewNumber: number;
+    summitNumber: number;
+    penddingNumber: number;
+  };
   subjectId: string;
   selectAssignment: Assignment | null;
   onSelect: (assignment: Assignment) => void;
@@ -70,7 +81,7 @@ function AssignmentCard({
       ref={sortable.setNodeRef}
       style={inlineStyles}
       {...sortable.attributes}
-      className="w-8/12 h-full flex flex-col transition-height"
+      className="md:w-9/12 xl:w-8/12 h-max flex flex-col transition-height"
       key={assignemnt.id}
     >
       <div
@@ -93,7 +104,7 @@ function AssignmentCard({
           <MdAssignment />
           <span className="text-xs">{assignemnt.status}</span>
         </div>
-        <div className="flex h-max p-2  flex-col gap-2 w-9/12">
+        <div className="flex grow  p-2  flex-col gap-2 w-9/12">
           <div className="font-semibold text-start text-lg border-b max-w-[80%] truncate">
             {assignemnt.title}
           </div>
@@ -106,39 +117,73 @@ function AssignmentCard({
               hour: "numeric",
             })}
           </div>
-          <ul className="flex flex-wrap items-end gap-2 w-full">
-            <li className="w-max h-max bg-gray-50  border p-1 rounded-md flex flex-col items-center justify-start ga-2 ">
-              <span className="font-medium max-w-40 truncate text-primary-color text-base">
-                {assignemnt.maxScore.toLocaleString()}
-              </span>
-              <span className="text-xs">Score</span>
-            </li>
-            {assignemnt.weight !== null && (
+          <div className="w-full flex justify-between items-center">
+            <ul className="flex flex-wrap items-end gap-2 w-full">
               <li className="w-max h-max bg-gray-50  border p-1 rounded-md flex flex-col items-center justify-start ga-2 ">
                 <span className="font-medium max-w-40 truncate text-primary-color text-base">
-                  {assignemnt.weight}%
+                  {assignemnt.maxScore.toLocaleString()}
                 </span>
-                <span className="text-xs">Weight</span>
+                <span className="text-xs">Score</span>
               </li>
-            )}
-            {assignemnt.dueDate && (
-              <li
-                className="w-max h-max bg-gray-50 gap-1  border p-1
+              {assignemnt.weight !== null && (
+                <li className="w-max h-max bg-gray-50  border p-1 rounded-md flex flex-col items-center justify-start ga-2 ">
+                  <span className="font-medium max-w-40 truncate text-primary-color text-base">
+                    {assignemnt.weight}%
+                  </span>
+                  <span className="text-xs">Weight</span>
+                </li>
+              )}
+              {assignemnt.dueDate && (
+                <li
+                  className="w-max h-max bg-gray-50 gap-1  border p-1
            rounded-md flex  items-center justify-start"
+                >
+                  <span className="font-medium  truncate text-red-700 text-sm">
+                    {new Date(assignemnt.dueDate).toLocaleDateString(
+                      undefined,
+                      {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        minute: "numeric",
+                        hour: "numeric",
+                      }
+                    )}
+                  </span>
+                  <span className="text-xs">Deadline</span>
+                </li>
+              )}
+            </ul>
+            <ul className="flex gap-2 ">
+              <li
+                className="lg:w-20 lg:h-20 md:w-16 md:h-16 border border-black
+              rounded-md flex flex-col gap-1 items-center justify-center "
               >
-                <span className="font-medium  truncate text-red-700 text-sm">
-                  {new Date(assignemnt.dueDate).toLocaleDateString(undefined, {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    minute: "numeric",
-                    hour: "numeric",
-                  })}
+                <span className="text-2xl font-semibold">
+                  {assignemnt.penddingNumber}
                 </span>
-                <span className="text-xs">Deadline</span>
+                <span className="text-xs">No Work</span>
               </li>
-            )}
-          </ul>
+              <li
+                className="lg:w-20 lg:h-20 md:w-16 md:h-16 border border-yellow-400
+              rounded-md flex flex-col gap-1 items-center justify-center "
+              >
+                <span className="text-2xl font-semibold">
+                  {assignemnt.summitNumber}
+                </span>
+                <span className="text-xs">Wait Review</span>
+              </li>
+              <li
+                className="lg:w-20 lg:h-20 md:w-16 md:h-16 bg-gradient-to-r text-white from-emerald-400 to-cyan-400
+              rounded-md flex flex-col gap-1 items-center justify-center "
+              >
+                <span className="text-2xl font-semibold">
+                  {assignemnt.reviewNumber}
+                </span>
+                <span className="text-xs">Reviewed</span>
+              </li>
+            </ul>
+          </div>
         </div>
 
         <div
@@ -154,18 +199,45 @@ function AssignmentCard({
           selectAssignment?.id === assignemnt.id && !sortable.isDragging
             ? "h-80  border border-t-0"
             : "h-0"
-        } bg-white rounded-md text-start rounded-t-none overflow-hidden w-full transition-height   `}
+        } bg-white rounded-md flex flex-col text-start rounded-t-none overflow-hidden w-full transition-height   `}
       >
+        <ul className="flex flex-wrap h-20 p-3 overflow-auto gap-2 w-full">
+          {assignemnt.files?.map((file, index) => {
+            const isImage = file.type.includes("image");
+            const fileName = file.url.split("/").pop();
+            return (
+              <li
+                onClick={() => window.open(file.url, "_blank")}
+                key={index}
+                className="w-max pr-2 text-xs hover:cursor-pointer h-14 hover:bg-gray-100 transition
+                   flex overflow-hidden rounded-md items-center justify-between  bg-white border"
+              >
+                <div className="w-full h-full flex items-center justify-start gap-2">
+                  <div
+                    className="w-16 gradient-bg text-white text-lg flex items-center justify-center
+             border-r h-full"
+                  >
+                    {isImage ? <FaRegFileImage /> : <FaRegFile />}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>{fileName}</span>
+                  </div>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
         <p
           className={`  overflow-auto
-        ${selectAssignment?.id === assignemnt.id ? "h-60 p-5" : "h-0"}
+        ${selectAssignment?.id === assignemnt.id ? "h-44 p-5" : "h-0"}
         `}
         >
           {parse(assignemnt.description)}
         </p>
+
         <Link
           href={`/subject/${subjectId}/assignment/${assignemnt.id}`}
-          className="flex gap-2 border-t  items-center p-2 h-20"
+          className="flex gap-2 border-t  items-center p-2 h-14"
         >
           <button className="main-button w-40">View</button>
         </Link>
@@ -206,13 +278,13 @@ function MaterialCard({
       ref={sortable.setNodeRef}
       style={inlineStyles}
       {...sortable.attributes}
-      className="w-8/12 h-full flex flex-col transition-height"
+      className="md:w-9/12 xl:w-8/12 h-full flex flex-col  transition-height"
       key={material.id}
     >
       <button
         onClick={() => onSelect(material)}
         className={`flex items-stretch w-full h-40  relative justify-start gap-2
-      overflow-hidden hover:ring   bg-white  rounded-md border
+      overflow-hidden hover:ring     rounded-md border
       ${
         selectMaterial?.id === material.id &&
         !sortable.isDragging &&
@@ -247,7 +319,7 @@ function MaterialCard({
               hour: "numeric",
             })}
           </div>
-          <ul className="flex max-h-20 p-3 overflow-auto flex-wrap items-end gap-2 w-full">
+          <ul className="flex flex-wrap  max-h-20 p-3 overflow-auto gap-2 w-full">
             {material.files?.map((file, index) => {
               const isImage = file.type.includes("image");
               const fileName = file.url.split("/").pop();
@@ -255,7 +327,7 @@ function MaterialCard({
                 <li
                   onClick={() => window.open(file.url, "_blank")}
                   key={index}
-                  className="w-full hover:cursor-pointer h-14 hover:bg-gray-100 transition
+                  className="w-max pr-2 text-xs hover:cursor-pointer h-14 hover:bg-gray-100 transition
                    flex overflow-hidden rounded-md items-center justify-between  bg-white border"
                 >
                   <div className="w-full h-full flex items-center justify-start gap-2">

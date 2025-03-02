@@ -151,7 +151,7 @@ function ClasswordView({
           </div>
         </div>
 
-        {classwork?.id && (
+        {classwork?.id && classwork.type === "Assignment" && (
           <div className="w-11/12 h-max p-5 rounded-md  text-white gradient-bg border">
             <div className="w-full flex justify-between">
               <h1 className="flex gap-2 items-center">
