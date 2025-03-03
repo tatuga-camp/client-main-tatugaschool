@@ -152,7 +152,10 @@ function InviteTeacher({ subjectId, setTrigger }: Props) {
         </div>
         {setTrigger && (
           <button
-            onClick={() => setTrigger(false)}
+            onClick={() => {
+              document.body.style.overflow = "auto";
+              setTrigger(false);
+            }}
             className="text-base sm:text-lg hover:bg-gray-300/50 w-5 sm:w-6 h-5 sm:h-6 rounded flex items-center justify-center font-semibold"
           >
             <IoMdClose />

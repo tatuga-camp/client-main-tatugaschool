@@ -330,7 +330,7 @@ function Index({ subjectId }: Props) {
         )}
         {triggerInviteTeacher && (
           <PopupLayout onClose={() => setTriggerInviteTeacher(false)}>
-            <div className="  border rounded-md">
+            <div className=" border rounded-md">
               <InviteTeacher
                 setTrigger={setTriggerInviteTeacher}
                 subjectId={subjectId}
