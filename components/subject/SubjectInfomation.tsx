@@ -82,7 +82,7 @@ function SubjectInfomation({ onSummit, subjectId, isPending = false }: Props) {
             </span>
             <Link
               target="_blank"
-              href={`/class/${subject.data?.classId}`}
+              href={`/classroom/${subject.data?.classId}`}
               className="text-base font-semibold underline  text-blue-600"
             >
               {subject.data?.classId}
