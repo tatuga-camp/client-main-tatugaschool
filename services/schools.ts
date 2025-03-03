@@ -86,7 +86,7 @@ type RequestGetSchoolService = {
 
 export type ResponseGetSchoolService = School & {
   user: User;
-  totalStudent: number;
+  totalClass: number;
   totalTeacher: number;
   totalSubject: number;
 };

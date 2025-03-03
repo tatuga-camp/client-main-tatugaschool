@@ -11,7 +11,6 @@ const HeaderSection: React.FC<{
   members: MemberOnSchool[];
   onInvite: () => void;
 }> = ({ school, members, onInvite }) => {
-  const { data: user } = useGetUser();
   return (
     <div className=" p-12 pb-24 text-white gradient-bg">
       {/* Top Section */}
@@ -32,6 +31,9 @@ const HeaderSection: React.FC<{
         <p className="text-gray-300  max-w-[60rem] break-words ">
           {school.phoneNumber}
         </p>
+        <h2 className=" text-white font-semibold">
+          Member Plan: {school?.plan}
+        </h2>
       </div>
       <div className="flex justify-end items-center space-x-2">
         <div>

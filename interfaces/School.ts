@@ -18,6 +18,11 @@ export interface School {
   stripe_subscription_id?: string;
   stripe_subscription_expireAt?: Date;
   billingManagerId?: string;
+  totalStorage: number;
+  limitSchoolMember: number;
+  limitClassNumber: number;
+  limitSubjectNumber: number;
+  limitTotalStorage: number;
 }
 
 export type Plan = "FREE" | "PREMIUM" | "ENTERPRISE";

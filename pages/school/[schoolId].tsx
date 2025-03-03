@@ -10,6 +10,7 @@ import Classes from "../../components/school/Classrooms";
 import { validateMongodbId } from "../../utils";
 import Subjects from "../../components/school/Subjects";
 import DefaultLayout from "../../components/layout/DefaultLayout";
+import Head from "next/head";
 
 const SchoolPage = ({ schoolId }: { schoolId: string }) => {
   const router = useRouter();
@@ -65,8 +66,12 @@ const SchoolPage = ({ schoolId }: { schoolId: string }) => {
       </DefaultLayout>
     );
   }
+  const title = `${school.data.title} - Tatuga School`;
   return (
     <>
+      <Head>
+        <title>{title}</title>
+      </Head>
       <SchoolLayout
         setSelectMenu={
           setSelectMenu as React.Dispatch<React.SetStateAction<string>>
