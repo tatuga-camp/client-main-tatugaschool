@@ -59,7 +59,7 @@ const pricingData = [
       "Enterprise plan is good for a school that has more than 5 teachers",
     "Basic Feature": true,
     Users: 20,
-    "Total Storage Size": "Unlimited",
+    "Total Storage Size": "9.77 TB",
     Support: true,
     Classroom_Limit: "Unlimited",
     Subject_Limit: "Unlimited",
