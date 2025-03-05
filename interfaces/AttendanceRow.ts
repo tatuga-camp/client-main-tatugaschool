@@ -8,4 +8,9 @@ export interface AttendanceRow {
   attendanceTableId: string;
   subjectId: string;
   schoolId: string;
+  type: AttendanceType;
+  expireAt?: string;
+  allowScanAt?: string;
+  isAllowScanManyTime?: boolean;
 }
+export type AttendanceType = "NORMAL" | "SCAN";

@@ -49,6 +49,7 @@ import {
   localStorageGetRemoveRandomStudents,
 } from "../../../utils";
 import PopupLayout from "../../../components/layout/PopupLayout";
+import AttendanceQRcode from "../../../components/subject/AttendanceQRcode";
 type Props = {
   subjectId: string;
 };
@@ -244,6 +245,16 @@ function Index({ subjectId }: Props) {
         <Toast ref={toast} />
         {triggerStopWatch && <StopWatch onClose={handleCloseStopWatch} />}
 
+        {selectFooter === "Attendance QR Code" && (
+          <PopupLayout onClose={() => setSelectFooter("EMTY")}>
+            <AttendanceQRcode
+              toast={toast}
+              onClose={() => setSelectFooter("EMTY")}
+              subjectId={subjectId}
+            />
+          </PopupLayout>
+        )}
+
         {selectFooter === "Slide Picker" && randomStudents && (
           <PopupLayout onClose={() => setSelectFooter("EMTY")}>
             <div className="bg-white w-full h-full md:w-max md:h-max  p-5 md:rounded-md md:border">
@@ -310,23 +321,13 @@ function Index({ subjectId }: Props) {
           </div>
         )}
         {subject.data && triggerQRCode && (
-          <div
-            className="w-screen z-40 h-screen flex items-center 
-        justify-center fixed top-0 right-0 left-0 bottom-0 m-auto"
-          >
-            <div className="w-[30rem] bg-white drop-shadow-md p-5 h-[30rem] rounded-md overflow-hidden">
-              <QRCode
-                url={`${process.env.NEXT_PUBLIC_STUDENT_CLIENT_URL}/?subject_code=${subject.data?.code}`}
-                code={subject.data?.code}
-                setTriggerQRCode={setTriggerQRCode}
-              />
-            </div>
-            <div
-              onClick={() => setTriggerQRCode(false)}
-              className="w-screen 
-            -z-10 h-screen bg-white/50 backdrop-blur  fixed top-0 right-0 left-0 bottom-0 m-auto"
-            ></div>
-          </div>
+          <PopupLayout onClose={() => setTriggerQRCode(false)}>
+            <QRCode
+              url={`${process.env.NEXT_PUBLIC_STUDENT_CLIENT_URL}/?subject_code=${subject.data?.code}`}
+              code={subject.data?.code}
+              setTriggerQRCode={setTriggerQRCode}
+            />
+          </PopupLayout>
         )}
         {triggerInviteTeacher && (
           <PopupLayout onClose={() => setTriggerInviteTeacher(false)}>

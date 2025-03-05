@@ -24,7 +24,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         defaultOptions: {
           queries: {
             staleTime: 2 * 60 * 1000, // 2 minutes
-            refetchOnMount: false, // Disables automatic refetching when component is mounted.removed
+            refetchInterval: 2 * 60 * 1000, // 2 minutes
             refetchOnWindowFocus: false, // Disables automatic refetching when browser window is focused.
             retry: (failureCount, error) => {
               let errorResponse = error as unknown as ErrorMessages;

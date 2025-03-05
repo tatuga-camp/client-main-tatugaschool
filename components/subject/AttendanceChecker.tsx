@@ -27,6 +27,7 @@ import { Toast } from "primereact/toast";
 import { useSound } from "../../hook";
 import { SiMicrosoftexcel } from "react-icons/si";
 import { BiSolidNote } from "react-icons/bi";
+import LoadingSpinner from "../common/LoadingSpinner";
 type Props = {
   subjectId: string;
   onClose: () => void;
@@ -134,14 +135,15 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
         throw new Error("No student found");
       }
       setLoading(true);
+
       const create = await createAttendanceRow.mutateAsync({
         request: {
           startDate: new Date(attendanceData.startDate).toISOString(),
           endDate: new Date(attendanceData.endDate).toISOString(),
           note: attendanceData.note,
           attendanceTableId: selectTable?.id,
+          type: "NORMAL",
         },
-        queryClient,
       });
 
       const data = studentAttendances.map((student) => {
@@ -190,7 +192,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
     });
   };
   return (
-    <div className="w-full h-full flex flex-col gap-1 p-2 md:p-4">
+    <div className="w-full h-full flex flex-col gap-1 p-1">
       <header className="">
         <section className="w-full flex flex-col gap-4 sm:gap-2 sm:flex-row sm:justify-between sm:items-center">
           <div className="text-center sm:text-left">
@@ -200,26 +202,6 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
             <span className="text-sm text-gray-500 block mt-1">
               You can check the attendance of the students here
             </span>
-          </div>
-          <div className="flex justify-center sm:justify-end">
-            <button
-              onClick={handleCreateAttendance}
-              disabled={loading}
-              className="main-button w-48 sm:w-40 h-11 sm:h-10 flex items-center justify-center gap-2 text-base sm:text-sm"
-            >
-              {loading ? (
-                <ProgressSpinner
-                  animationDuration="1s"
-                  style={{ width: "20px" }}
-                  className="w-5 h-5"
-                  strokeWidth="8"
-                />
-              ) : (
-                <div className="flex items-center justify-center gap-2">
-                  Create <IoIosCreate className="text-lg sm:text-base" />
-                </div>
-              )}
-            </button>
           </div>
         </section>
 
@@ -246,7 +228,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
           {/* Date & Note Controls */}
           <div className="flex flex-col sm:flex-row gap-3 w-full">
             <div className="flex-1 flex flex-col sm:flex-row gap-2">
-              <label className="flex-1">
+              <label className="flex flex-col">
                 <span className="text-gray-400 text-xs">Start Date</span>
                 <input
                   value={attendanceData.startDate}
@@ -275,10 +257,11 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
                     })
                   }
                   type="datetime-local"
-                  className="main-input h-8 w-full"
+                  className="main-input h-8 w-60"
                 />
               </label>
-              <label className="flex-1">
+              <label className="flex flex-col">
+                {" "}
                 <span className="text-gray-400 text-xs">End Date</span>
                 <input
                   value={attendanceData.endDate}
@@ -289,13 +272,14 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
                     }))
                   }
                   type="datetime-local"
-                  className="main-input h-8 w-full"
+                  className="main-input h-8 w-60"
                 />
               </label>
             </div>
             <button
               onClick={() => setTriggerNote((prev) => !prev)}
-              className="main-button flex items-center justify-center h-8 px-4 ring-1 ring-blue-600 whitespace-nowrap sm:self-end"
+              className="main-button flex items-center justify-center h-8 px-4
+               ring-1 ring-blue-600 whitespace-nowrap sm:self-end"
             >
               {triggerNote ? (
                 <div className="flex items-center justify-center gap-1">
@@ -474,6 +458,33 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
           </div>
         </>
       )}
+      <footer className="w-full flex justify-end p-1 py-4 border-t">
+        <div className="flex items-center justify-center gap-3">
+          <button
+            onClick={() => {
+              document.body.style.overflow = "auto";
+              onClose();
+            }}
+            type="button"
+            className="second-button border flex items-center justify-center gap-1"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleCreateAttendance}
+            disabled={loading}
+            className="main-button flex items-center justify-center gap-1"
+          >
+            {loading ? (
+              <LoadingSpinner />
+            ) : (
+              <>
+                <IoIosCreate /> Create
+              </>
+            )}
+          </button>
+        </div>
+      </footer>
     </div>
   );
 }

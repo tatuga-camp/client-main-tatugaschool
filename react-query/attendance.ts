@@ -2,6 +2,7 @@ import {
   QueryClient,
   useMutation,
   useQuery,
+  useQueryClient,
   UseQueryResult,
 } from "@tanstack/react-query";
 import {
@@ -52,23 +53,24 @@ export function useGetAttendanceRowByTableId({
   return useQuery({
     queryKey: ["attendance-rows", { attendanceTableId: attendanceTableId }],
     queryFn: () => GetAttendanceRowByTabelIdService({ attendanceTableId }),
+    refetchInterval: 1000 * 5,
+    refetchOnWindowFocus: true, // Disables automatic refetching when browser window is focused.
   });
 }
 
 export function useCreateAttendanceRow() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ["create-attendance-row"],
-    mutationFn: (request: {
-      request: RequestCreateAttendanceRowService;
-      queryClient: QueryClient;
-    }) => CreateAttendanceRowService(request.request),
+    mutationFn: (request: { request: RequestCreateAttendanceRowService }) =>
+      CreateAttendanceRowService(request.request),
     async onSuccess(data, variables, context) {
-      const oldData = variables.queryClient.getQueryData([
+      const oldData = queryClient.getQueryData([
         "attendance-rows",
         { attendanceTableId: data.attendanceTableId },
       ]);
       if (!oldData) {
-        await variables.queryClient.prefetchQuery({
+        await queryClient.prefetchQuery({
           queryKey: [
             "attendance-rows",
             { attendanceTableId: data.attendanceTableId },
@@ -79,7 +81,7 @@ export function useCreateAttendanceRow() {
             }),
         });
       } else {
-        variables.queryClient.setQueryData<
+        queryClient.setQueryData<
           (AttendanceRow & { attendances: Attendance[] })[]
         >(
           ["attendance-rows", { attendanceTableId: data.attendanceTableId }],
@@ -196,14 +198,13 @@ export function useUpdateManyAttendance() {
   });
 }
 export function useUpdateRowAttendance() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ["update-row-attendance"],
-    mutationFn: (request: {
-      request: RequestUpdateAttendanceRowService;
-      queryClient: QueryClient;
-    }) => UpdateAttendanceRowService(request.request),
+    mutationFn: (request: { request: RequestUpdateAttendanceRowService }) =>
+      UpdateAttendanceRowService(request.request),
     onSuccess(data, variables, context) {
-      variables.queryClient.setQueryData(
+      queryClient.setQueryData(
         ["attendance-rows", { attendanceTableId: data.attendanceTableId }],
         (oldData: (AttendanceRow & { attendances: Attendance[] })[]) => {
           return oldData?.map((attendanceRow) => {
