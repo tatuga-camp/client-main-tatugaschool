@@ -1,4 +1,4 @@
-import { Attendance, AttendanceRow } from "../interfaces";
+import { Attendance, AttendanceRow, AttendanceType } from "../interfaces";
 import createAxiosInstance from "./apiService";
 
 const axiosInstance = createAxiosInstance();
@@ -51,6 +51,10 @@ export type RequestCreateAttendanceRowService = {
   endDate: string;
   note?: string;
   attendanceTableId: string;
+  type: AttendanceType;
+  expireAt?: string;
+  allowScanAt?: string;
+  isAllowScanManyTime?: boolean;
 };
 
 export type ResponseCreateAttendanceRowService = AttendanceRow & {
@@ -81,6 +85,9 @@ type UpdateAttendanceRowBody = {
   startDate?: string;
   endDate?: string;
   note?: string;
+  expireAt?: string;
+  allowScanAt?: string;
+  isAllowScanManyTime?: boolean;
 };
 
 export type RequestUpdateAttendanceRowService = {

@@ -1,10 +1,9 @@
-import React, { memo, ReactNode } from "react";
+import React, { memo } from "react";
+import { BsQrCode } from "react-icons/bs";
 import { FaRandom, FaStopwatch20, FaWpforms } from "react-icons/fa";
-import { GiPerspectiveDiceSixFacesRandom } from "react-icons/gi";
-import { PiStudentBold } from "react-icons/pi";
 import { TbArrowsRandom } from "react-icons/tb";
 
-const menuFooters: { title: ListMenuFooter; icon: ReactNode }[] = [
+const menuFooters = [
   {
     title: "Stop Watch",
     icon: <FaStopwatch20 />,
@@ -14,6 +13,10 @@ const menuFooters: { title: ListMenuFooter; icon: ReactNode }[] = [
     icon: <FaWpforms />,
   },
   {
+    title: "Attendance QR Code",
+    icon: <BsQrCode />,
+  },
+  {
     title: "Wheel Of Name",
     icon: <TbArrowsRandom />,
   },
@@ -21,17 +24,9 @@ const menuFooters: { title: ListMenuFooter; icon: ReactNode }[] = [
     title: "Slide Picker",
     icon: <FaRandom />,
   },
-];
+] as const;
 
-export type ListMenuFooter =
-  | "Manage Student"
-  | "Stop Watch"
-  | "Wheel Of Name"
-  | "Attendance"
-  | "Random Picker"
-  | "QR Code"
-  | "EMTY"
-  | "Slide Picker";
+export type ListMenuFooter = (typeof menuFooters)[number]["title"] | "EMTY";
 
 type Props = {
   setSelectFooter: React.Dispatch<React.SetStateAction<ListMenuFooter>>;

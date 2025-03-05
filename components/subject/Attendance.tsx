@@ -32,7 +32,7 @@ import { Toast } from "primereact/toast";
 import { ProgressBar } from "primereact/progressbar";
 import AttendanceTableSetting from "./AttendanceTableSetting";
 import { RiTable3 } from "react-icons/ri";
-import { Bs123 } from "react-icons/bs";
+import { Bs123, BsQrCode } from "react-icons/bs";
 import PopupLayout from "../layout/PopupLayout";
 import { ExportAttendanceService } from "@/services";
 import LoadingSpinner from "../common/LoadingSpinner";
@@ -133,17 +133,15 @@ function Attendance({
 
       {selectRow && (
         <PopupLayout onClose={() => setSelectRow(null)}>
-          <div className="bg-white w-7/12 p-2 rounded-md border">
-            <AttendanceRowView
-              toast={toast}
-              selectRow={selectRow}
-              onClose={() => {
-                document.body.style.overflow = "auto";
+          <AttendanceRowView
+            toast={toast}
+            selectRow={selectRow}
+            onClose={() => {
+              document.body.style.overflow = "auto";
 
-                setSelectRow(null);
-              }}
-            />
-          </div>
+              setSelectRow(null);
+            }}
+          />
         </PopupLayout>
       )}
 
@@ -378,18 +376,21 @@ function DisplayAttendanceTable({
                         <th key={row.id} className="text-sm  font-semibold">
                           <button
                             onClick={() => setSelectRow(row)}
-                            className="w-40 p-2 relative active:bg-gray-200
+                            className="w-max pr-14 p-2 relative active:bg-gray-200
                hover:bg-gray-100  hover:ring-1 flex items-start flex-col"
                           >
-                            {row?.note && (
-                              <div
-                                className="w-5 h-5 bg-white absolute flex items-center justify-center
-                     top-1 m-auto right-1
-                    rounded-full border-2 border-black"
-                              >
-                                <MdOutlineSpeakerNotes />
-                              </div>
-                            )}
+                            <div className="flex items-center justify-end gap-1 absolute  top-1 m-auto right-1 ">
+                              {row?.note && (
+                                <div className="w-5 h-5 bg-white  flex items-center justify-center   rounded-md border">
+                                  <MdOutlineSpeakerNotes />
+                                </div>
+                              )}
+                              {row.type === "SCAN" && (
+                                <div className="w-5 h-5 bg-white  flex items-center justify-center  rounded-md border">
+                                  <BsQrCode />
+                                </div>
+                              )}
+                            </div>
                             <span>{dateFormat}</span>
                             <span className="text-xs text-gray-500">
                               {time}
@@ -523,7 +524,7 @@ function DisplayAttendanceTable({
                                 {attendance?.note && (
                                   <div
                                     className="w-5 h-5 bg-white absolute flex items-center justify-center top-2 m-auto right-2
-                    rounded-full border-2 border-black"
+                    rounded-full"
                                   >
                                     <MdOutlineSpeakerNotes />
                                   </div>
