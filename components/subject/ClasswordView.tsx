@@ -96,9 +96,13 @@ function ClasswordView({
                     >
                       {isImage ? <FaRegFileImage /> : <FaRegFile />}
                     </div>
-                    <div className="flex items-center gap-2">
+                    <a
+                      href={file.url}
+                      target="_blank"
+                      className="flex items-center gap-2"
+                    >
                       <span>{file.name}</span>
-                    </div>
+                    </a>
                   </div>
                   <button
                     type="button"
