@@ -12,3 +12,4 @@ export * from "./memberOnSchool";
 export * from "./auth";
 export * from "./subscription";
 export * from "./career";
+export * from "./language";
