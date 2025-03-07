@@ -3,6 +3,7 @@ import { AuthHeader } from "@/components/auth/AuthHeader";
 import { AuthFooter } from "@/components/auth/AuthFooter";
 import { LoginForm } from "@/components/auth/LoginForm";
 import Head from "next/head";
+import LanguageSelect from "../../components/LanguageSelect";
 
 const LoginPage = () => {
   return (

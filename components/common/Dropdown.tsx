@@ -4,7 +4,7 @@ import { Dropdown as DropdownPrimereact } from "primereact/dropdown";
 import { classNames } from "primereact/utils";
 
 type Props<T> = {
-  value: T;
+  value: any;
   onChange: (e: DropdownChangeEvent) => void;
   options: T[];
   placeholder: string;
