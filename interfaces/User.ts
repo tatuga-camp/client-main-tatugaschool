@@ -21,7 +21,10 @@ export type User = {
   deleteAt?: Date;
   resetPasswordToken?: string;
   resetPasswordTokenExpiresAt?: Date;
+  language: Language;
 };
+
+export type Language = "en" | "th";
 
 export type UserRole = "ADMIN" | "USER";
 export type Provider = "LOCAL" | "GOOGLE";

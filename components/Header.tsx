@@ -9,6 +9,7 @@ import { OverlayPanel } from "primereact/overlaypanel";
 import { useGetUser } from "../react-query";
 import ButtonProfile from "./button/ButtonProfile";
 import { defaultBlurHash, defaultCanvas } from "../data";
+import LanguageSelect from "./LanguageSelect";
 
 const Header = () => {
   const user = useGetUser();
@@ -56,8 +57,10 @@ const Header = () => {
           Account
         </Link>
       </nav>
-
-      <ButtonProfile user={user} />
+      <div className="flex justify-center items-center gap-2">
+        <LanguageSelect />
+        <ButtonProfile user={user} />
+      </div>
     </header>
   );
 };
