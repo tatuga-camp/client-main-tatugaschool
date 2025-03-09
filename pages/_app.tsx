@@ -11,6 +11,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 import { ErrorMessages } from "../interfaces";
 import { classNames } from "primereact/utils";
+import ErrorBoundary from "../components/ErrorBoundary";
 
 const prompt = Prompt({
   subsets: ["latin", "thai"],
@@ -29,7 +30,7 @@ function MyApp({ Component, pageProps }: AppProps) {
             retry: (failureCount, error) => {
               let errorResponse = error as unknown as ErrorMessages;
               // Don't retry for certain error responses
-              if (errorResponse.statusCode === 401) {
+              if (errorResponse?.statusCode === 401) {
                 return false;
               }
               // Retry others just once
@@ -216,7 +217,9 @@ function MyApp({ Component, pageProps }: AppProps) {
           shallowRouting
         />
         <div className={prompt.className}>
-          <Component {...pageProps} />
+          <ErrorBoundary>
+            <Component {...pageProps} />
+          </ErrorBoundary>
         </div>
       </PrimeReactProvider>
     </QueryClientProvider>

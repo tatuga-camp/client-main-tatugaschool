@@ -6,7 +6,6 @@ const DefaultLayout = ({ children }: { children: React.ReactNode }) => {
     <div className="min-h-screen font-Anuphan w-full bg-background-color">
       <SchoolListHeader />
       {children}
-
       <AskNotification />
     </div>
   );
