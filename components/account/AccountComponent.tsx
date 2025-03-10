@@ -1,32 +1,21 @@
-import React, {
-  useEffect,
-  useMemo,
-  useCallback,
-  useState,
-  ChangeEvent,
-} from "react";
+import React, { useEffect, useState } from "react";
 import UploadPhoto from "./UploadPhoto";
 
 import Swal from "sweetalert2";
 
-import {
-  UpdateUserService,
-  GetUserService,
-  RequestUpdateUserService,
-} from "@/services";
-import { useGetUser, useUpdateUser } from "../../react-query";
-import { InputMask } from "primereact/inputmask";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ErrorMessages } from "../../interfaces";
+import { useRouter } from "next/router";
 import { ProgressSpinner } from "primereact/progressspinner";
+import { PhoneInput } from "react-international-phone";
+import { ErrorMessages } from "../../interfaces";
+import { useGetLanguage, useGetUser, useUpdateUser } from "../../react-query";
 import ChangePassword from "./ChangePassword";
 import ManageInvite from "./ManageInvite";
-import { useRouter } from "next/router";
-import { PhoneInput } from "react-international-phone";
+import { accountDataLanguage } from "../../data/languages";
 
-const menuItems = ["General", "Change Password", "Invitations"] as const;
+const menuItems = ["General", "Password", "Invitations"] as const;
 type MenuItems = (typeof menuItems)[number];
 const AccountComponent = () => {
+  const language = useGetLanguage();
   const router = useRouter();
   const [selectMenu, setSelectMenu] = useState<MenuItems>("General");
   const user = useGetUser();
@@ -93,9 +82,11 @@ const AccountComponent = () => {
   return (
     <div className="flex items-center justify-center">
       <div className="w-full max-w-5xl bg-white rounded-lg p-8">
-        <h2 className="text-3xl font-semibold text-[#6f47dd] mb-4">Account</h2>
+        <h2 className="text-3xl font-semibold text-[#6f47dd] mb-4">
+          {accountDataLanguage.title(language.data ?? "en")}
+        </h2>
         <p className="text-gray-600 mb-8">
-          Manage your account and personal information
+          {accountDataLanguage.description(language.data ?? "en")}{" "}
         </p>
 
         <div className="border-b mb-6 overflow-auto">
@@ -108,7 +99,9 @@ const AccountComponent = () => {
                   selectMenu === item && "border-b-primary-color "
                 }  pb-2`}
               >
-                {item}
+                {accountDataLanguage[
+                  item.toLocaleLowerCase() as keyof typeof accountDataLanguage
+                ](language.data ?? "en")}
               </li>
             ))}
           </ul>
@@ -154,7 +147,7 @@ const AccountComponent = () => {
                 />
               </div>
               {updateUser.isPending ? (
-                <div className="w-40 flex items-center">
+                <div className="w-60 flex items-center">
                   <ProgressSpinner
                     animationDuration="1s"
                     style={{ width: "20px" }}
@@ -163,15 +156,15 @@ const AccountComponent = () => {
                   />
                 </div>
               ) : (
-                <button type="submit" className="w-40 main-button">
-                  Save Changes
+                <button type="submit" className="w-60 main-button">
+                  {accountDataLanguage.save(language.data ?? "en")}
                 </button>
               )}
             </form>
           </div>
         )}
 
-        {selectMenu === "Change Password" && <ChangePassword />}
+        {selectMenu === "Password" && <ChangePassword />}
         {selectMenu === "Invitations" && <ManageInvite />}
       </div>
     </div>

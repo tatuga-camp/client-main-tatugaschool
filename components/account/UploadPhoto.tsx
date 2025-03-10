@@ -12,12 +12,15 @@ import { ProgressBar } from "primereact/progressbar";
 import { UseMutationResult } from "@tanstack/react-query";
 import { decodeBlurhashToCanvas, generateBlurHash } from "../../utils";
 import { defaultBlurHash } from "../../data";
+import { accountDataLanguage } from "../../data/languages";
+import { useGetLanguage } from "../../react-query";
 
 type Prosp = {
   updateUser: UseMutationResult<User, Error, RequestUpdateUserService, unknown>;
   user: User;
 };
 function UploadPhoto({ user, updateUser }: Prosp) {
+  const language = useGetLanguage();
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(user.photo);
   const [loading, setLoading] = useState(false);
@@ -102,9 +105,8 @@ function UploadPhoto({ user, updateUser }: Prosp) {
           style={{ height: "6px", width: "100%" }}
         />
       )}
-      <div className="text-center text-sm text-gray-600">
-        <p>Allowed *.jpeg, *.jpg, *.png, *.gif</p>
-        <p>Max size of 3.1 MB</p>
+      <div className="text-center text-wrap text-sm text-gray-600">
+        {accountDataLanguage.upload(language.data ?? "en")}
       </div>
     </div>
   );

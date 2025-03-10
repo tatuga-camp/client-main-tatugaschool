@@ -2,9 +2,12 @@ import { ForgotPasswordService } from "@/services";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import Swal from "sweetalert2";
+import { useGetLanguage } from "../../react-query";
+import { forgetPasswordLanguageData, requestData } from "../../data/languages";
 
 export const ForgetPasswordForm = () => {
   const router = useRouter();
+  const language = useGetLanguage();
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -22,13 +25,14 @@ export const ForgetPasswordForm = () => {
 
     try {
       const response = await ForgotPasswordService({ email: email });
-      console.log("Forgot Password successful:", response);
 
       setLoading(false);
 
       await Swal.fire({
-        title: "Success!",
-        text: "Please check your email for reset password link",
+        title: requestData.successTitle(language.data ?? "en"),
+        text: requestData.successForgetPasswordDesciption(
+          language.data ?? "en"
+        ),
         icon: "success",
       });
 
@@ -51,15 +55,18 @@ export const ForgetPasswordForm = () => {
                  shadow-[0_12px_24px_rgba(145,158,171,0.12)] text-center"
         onSubmit={handleForgetPassword}
       >
-        <h2 className="text-[24px] font-bold">Forget Password ?</h2>
+        <h2 className="text-[24px] font-bold">
+          {forgetPasswordLanguageData.title(language.data ?? "en")}
+        </h2>
         {error && <p className="text-red-500 mb-4">{error}</p>}
         <p className="text-sm text-center">
-          Enter your email address and we will send you a link to reset your
-          password
+          {forgetPasswordLanguageData.description(language.data ?? "en")}
         </p>
         <input
           type="email"
-          placeholder="Enter your Email here"
+          placeholder={forgetPasswordLanguageData.inputEmail(
+            language.data ?? "en"
+          )}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -87,7 +94,7 @@ export const ForgetPasswordForm = () => {
           </button>
         ) : (
           <button type="submit" className="w-full main-button">
-            Send Email
+            {forgetPasswordLanguageData.button(language.data ?? "en")}
           </button>
         )}
       </form>

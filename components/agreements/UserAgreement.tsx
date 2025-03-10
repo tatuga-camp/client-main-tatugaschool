@@ -1,10 +1,131 @@
 import React from "react";
+import { useGetLanguage } from "../../react-query";
 
 function UserAgreement() {
+  const language = useGetLanguage();
+
+  if (language.data === "th") {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <h1 className="text-3xl font-bold text-center mb-6">ข้อตกลงผู้ใช้</h1>
+        <p className="text-sm text-gray-500 mb-6">อัปเดตล่าสุด: 11/03/2025</p>
+
+        <p className="mb-4">
+          ยินดีต้อนรับสู่ TatugaSchool.com การเข้าถึงหรือใช้งานเว็บไซต์และบริการ
+          ของเรา
+          แสดงว่าคุณตกลงที่จะปฏิบัติตามและผูกพันตามข้อกำหนดและเงื่อนไขต่อไปนี้
+          (&quot;ข้อตกลงผู้ใช้&quot;) โปรดตรวจสอบข้อตกลงอย่างละเอียด
+          หากคุณไม่เห็นด้วยกับข้อกำหนดเหล่านี้
+          คุณไม่ควรดำเนินการใช้งานแพลตฟอร์มของเราต่อไป
+        </p>
+
+        <h2 className="text-xl font-semibold mb-4">1. การยอมรับข้อกำหนด</h2>
+        <p className="mb-4">
+          โดยการสร้างบัญชีบน TatugaSchool.com
+          คุณยอมรับข้อกำหนดในการให้บริการเหล่านี้ และรับทราบว่าคุณได้อ่าน เข้าใจ
+          และยอมรับข้อตกลงนี้แล้ว
+        </p>
+
+        <h2 className="text-xl font-semibold mb-4">2. ข้อมูลบัญชีผู้ใช้</h2>
+        <p className="mb-4">
+          ในการใช้คุณสมบัติบางอย่างของเว็บไซต์
+          คุณต้องสร้างบัญชีและให้ข้อมูลต่อไปนี้:
+        </p>
+        <ul className="list-disc list-inside mb-4">
+          <li>ชื่อจริง</li>
+          <li>นามสกุล</li>
+          <li>ที่อยู่อีเมล</li>
+          <li>หมายเลขโทรศัพท์</li>
+        </ul>
+        <p className="mb-4">โดยการให้ข้อมูลนี้ คุณ:</p>
+        <ul className="list-disc list-inside mb-4">
+          <li>
+            ยืนยันว่ารายละเอียดที่คุณให้เป็นข้อมูลที่ถูกต้อง เป็นปัจจุบัน
+            และสมบูรณ์
+          </li>
+          <li>ตกลงที่จะรักษาข้อมูลนี้ให้เป็นปัจจุบัน</li>
+          <li>
+            รับทราบว่าการไม่รักษาข้อมูลที่ถูกต้องอาจส่งผลให้บัญชีของคุณถูกระงับหรือยกเลิก
+          </li>
+        </ul>
+
+        <h2 className="text-xl font-semibold mb-4">
+          3. ความเป็นส่วนตัวและการเก็บรวบรวมข้อมูล
+        </h2>
+        <p className="mb-4">
+          เราให้ความสำคัญกับความเป็นส่วนตัวของคุณ ข้อมูลส่วนบุคคลที่คุณให้
+          (ชื่อจริง นามสกุล อีเมล หมายเลขโทรศัพท์)
+          ถูกเก็บรวบรวมเพื่อวัตถุประสงค์ในการระบุผู้ใช้ การสื่อสาร
+          และการปรับปรุงประสบการณ์ของคุณบน TatugaSchool.com
+          สำหรับรายละเอียดเพิ่มเติมเกี่ยวกับวิธีที่เราจัดการข้อมูลของคุณ
+          โปรดดูที่{" "}
+          <a href="#" className="text-blue-500 hover:underline">
+            นโยบายความเป็นส่วนตัวของเรา
+          </a>
+          .
+        </p>
+
+        <h2 className="text-xl font-semibold mb-4">4. ความปลอดภัยของบัญชี</h2>
+        <p className="mb-4">
+          คุณมีหน้าที่รับผิดชอบในการรักษาความลับของข้อมูลประจำตัวบัญชีของคุณ
+          (ชื่อผู้ใช้และรหัสผ่าน) และกิจกรรมใดๆ ที่เกิดขึ้นภายใต้บัญชีของคุณ
+          TatugaSchool.com จะไม่รับผิดชอบต่อการสูญเสียหรือความเสียหายใดๆ
+          ที่เกิดขึ้นจากการที่คุณไม่ปกป้องข้อมูลบัญชีของคุณ
+        </p>
+
+        <h2 className="text-xl font-semibold mb-4">5. การใช้งานที่ยอมรับได้</h2>
+        <p className="mb-4">โดยการใช้ TatugaSchool.com คุณตกลงที่จะ:</p>
+        <ul className="list-disc list-inside mb-4">
+          <li>ใช้แพลตฟอร์มเพื่อวัตถุประสงค์ที่กำหนดไว้เท่านั้น</li>
+          <li>
+            ไม่กระทำการใดๆ ที่ผิดกฎหมาย
+            หรือการกระทำที่อาจเป็นอันตรายต่อแพลตฟอร์มหรือผู้ใช้
+          </li>
+        </ul>
+        <p className="mb-4">
+          TatugaSchool.com
+          ขอสงวนสิทธิ์ในการระงับหรือยกเลิกบัญชีที่ละเมิดข้อตกลงนี้
+          หรือกระทำการที่ต้องห้าม
+        </p>
+
+        <h2 className="text-xl font-semibold mb-4">6. การยกเลิก</h2>
+        <p className="mb-4">
+          TatugaSchool.com
+          ขอสงวนสิทธิ์ในการยกเลิกหรือระงับบัญชีของคุณตามดุลยพินิจของเรา
+          โดยมีหรือไม่มีการแจ้งให้ทราบล่วงหน้า ด้วยเหตุผลใดก็ตาม
+          รวมถึงการละเมิดข้อกำหนดเหล่านี้
+        </p>
+
+        <h2 className="text-xl font-semibold mb-4">7. การเปลี่ยนแปลงข้อตกลง</h2>
+        <p className="mb-4">
+          TatugaSchool.com อาจแก้ไขหรือปรับปรุงข้อตกลงผู้ใช้นี้เป็นครั้งคราว
+          การใช้งานเว็บไซต์อย่างต่อเนื่องหลังจากมีการเปลี่ยนแปลงดังกล่าว
+          ถือเป็นการยอมรับข้อกำหนดที่ปรับปรุงแล้ว โปรดตรวจสอบข้อตกลงนี้เป็นระยะ
+        </p>
+
+        <h2 className="text-xl font-semibold mb-4">8. ข้อมูลการติดต่อ</h2>
+        <p className="mb-4">
+          สำหรับคำถามใดๆ เกี่ยวกับข้อตกลงผู้ใช้นี้ คุณสามารถติดต่อเราได้ที่{" "}
+          <a
+            href="mailto:permlap@tatugacamp.com"
+            className="text-blue-500 hover:underline"
+          >
+            permlap@tatugacamp.com
+          </a>
+          .
+        </p>
+
+        <p className="text-center mt-8 text-sm text-gray-600">
+          โดยการลงทะเบียนบัญชี คุณรับทราบว่าคุณได้อ่าน เข้าใจ
+          และตกลงที่จะผูกพันตามข้อตกลงผู้ใช้นี้
+        </p>
+      </div>
+    );
+  }
   return (
     <div className="max-w-4xl mx-auto p-6 ">
       <h1 className="text-3xl font-bold text-center mb-6">User Agreement</h1>
-      <p className="text-sm text-gray-500 mb-6">Last Updated: 2/10/2024</p>
+      <p className="text-sm text-gray-500 mb-6">Last Updated: 11/03/2025</p>
 
       <p className="mb-4">
         Welcome to TatugaSchool.com. By accessing or using our website and
@@ -105,10 +226,10 @@ function UserAgreement() {
       <p className="mb-4">
         For any questions regarding this User Agreement, you may contact us at{" "}
         <a
-          href="mailto:support@tatugaschool.com"
+          href="mailto:permlap@tatugacamp.com"
           className="text-blue-500 hover:underline"
         >
-          support@tatugaschool.com
+          permlap@tatugacamp.com
         </a>
         .
       </p>

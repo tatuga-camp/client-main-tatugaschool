@@ -8,6 +8,8 @@ import { useRouter } from "next-nprogress-bar";
 import Password from "../common/Password";
 import { FcGoogle } from "react-icons/fc";
 import { PhoneInput } from "react-international-phone";
+import { requestData, signUpLanguageData } from "../../data/languages";
+import { useGetLanguage } from "../../react-query";
 
 type Props = {
   email?: string | undefined;
@@ -19,7 +21,7 @@ type Props = {
 };
 export const SignUpForm = (props: Props) => {
   const router = useRouter();
-  const [isShowPassword, setIsShowPassword] = useState(false);
+  const language = useGetLanguage();
   const [isAgree, setIsAgree] = useState(false);
   const [firstName, setFirstName] = useState(props.firstName);
   const [phone, setPhone] = useState("");
@@ -55,8 +57,8 @@ export const SignUpForm = (props: Props) => {
       }
 
       Swal.fire({
-        title: "Please wait...",
-        text: "We are processing your request",
+        title: requestData.loadingTitle(language.data ?? "en"),
+        text: requestData.loadingDescription(language.data ?? "en"),
         showConfirmButton: false,
         willOpen: () => {
           Swal.showLoading();
@@ -76,8 +78,8 @@ export const SignUpForm = (props: Props) => {
       router.push(response.redirectUrl);
 
       await Swal.fire({
-        title: "Registration Success!",
-        text: "Please check your email for verification.",
+        title: requestData.successTitle(language.data ?? "en"),
+        text: requestData.successSignUp(language.data ?? "en"),
         icon: "success",
       });
     } catch (error) {
@@ -97,8 +99,8 @@ export const SignUpForm = (props: Props) => {
   const handleGoogleLogin = async () => {
     try {
       Swal.fire({
-        title: "Please wait...",
-        text: "We are processing your request",
+        title: requestData.loadingTitle(language.data ?? "en"),
+        text: requestData.loadingDescription(language.data ?? "en"),
         showConfirmButton: false,
         willOpen: () => {
           Swal.showLoading();
@@ -125,21 +127,29 @@ export const SignUpForm = (props: Props) => {
        gap-4 w-96 md:w-5/12 items-center  shadow-[0_12px_24px_rgba(145,158,171,0.12)] text-center"
       onSubmit={handleSignUp}
     >
-      <h2 className="text-[24px] font-bold">Create Account</h2>
-      <span className="text-gray-500 text-sm">(For Only Teacher)</span>
+      <h2 className="text-[24px] font-bold">
+        {signUpLanguageData.title(language.data ?? "en")}
+      </h2>
+      <span className="text-gray-500 text-sm">
+        ({signUpLanguageData.teacherOnly(language.data ?? "en")})
+      </span>
       {props.provider === "google" && (
         <div className="second-button border gap-2 flex items-center justify-center">
           <FcGoogle />
-          You are creating account with Google
+          {signUpLanguageData.nowCreateAccountOnGoogle(language.data ?? "en")}
         </div>
       )}
       <div className="flex flex-col items-center gap-4">
         <label className="h-max  flex flex-col relative items-start">
-          <span className="text-sm">First Name</span>
+          <span className="text-sm">
+            {signUpLanguageData.firstNameTitle(language.data ?? "en")}
+          </span>
           <input
             type="text"
             disabled={props.provider === "google" && !!props.firstName}
-            placeholder="Enter Your First Name"
+            placeholder={signUpLanguageData.firstNamePlaceholder(
+              language.data ?? "en"
+            )}
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
             required
@@ -147,11 +157,15 @@ export const SignUpForm = (props: Props) => {
           />
         </label>
         <label className="h-max  flex flex-col relative items-start">
-          <span className="text-sm">Last Name</span>
+          <span className="text-sm">
+            {signUpLanguageData.lastNameTitle(language.data ?? "en")}
+          </span>
           <input
             type="text"
             disabled={props.provider === "google" && !!props.lastName}
-            placeholder="Enter Your Last Name"
+            placeholder={signUpLanguageData.lastNamePlaceholder(
+              language.data ?? "en"
+            )}
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
             required
@@ -159,7 +173,9 @@ export const SignUpForm = (props: Props) => {
           />
         </label>
         <label className="h-max w-80  flex flex-col relative items-start">
-          <span className="text-sm">Phone Number</span>
+          <span className="text-sm">
+            {signUpLanguageData.phone(language.data ?? "en")}
+          </span>
           <PhoneInput
             required
             defaultCountry="th"
@@ -170,11 +186,15 @@ export const SignUpForm = (props: Props) => {
           />
         </label>
         <label className="h-max  flex flex-col relative items-start">
-          <span className="text-sm">Email Adress</span>
+          <span className="text-sm">
+            {signUpLanguageData.email(language.data ?? "en")}
+          </span>
           <input
             type="email"
             disabled={props.provider === "google"}
-            placeholder="Enter Your E-mail"
+            placeholder={signUpLanguageData.emailPlaceholder(
+              language.data ?? "en"
+            )}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -183,9 +203,13 @@ export const SignUpForm = (props: Props) => {
         </label>
         {props.provider !== "google" && (
           <label className="h-max  flex flex-col  w-80 relative items-start">
-            <span className="text-sm">Password</span>
+            <span className="text-sm">
+              {signUpLanguageData.password(language.data ?? "en")}
+            </span>
             <Password
-              placeholder="Enter Your Password"
+              placeholder={signUpLanguageData.passwordPlaceholder(
+                language.data ?? "en"
+              )}
               value={password}
               feedback={true}
               onChange={(e) => setPassword(e.target.value)}
@@ -195,10 +219,14 @@ export const SignUpForm = (props: Props) => {
         )}
         {props.provider !== "google" && (
           <label className="h-max w-80  flex flex-col relative items-start">
-            <span className="text-sm">Confirm Password</span>
+            <span className="text-sm">
+              {signUpLanguageData.confirmPassword(language.data ?? "en")}
+            </span>
             <Password
               feedback={true}
-              placeholder="Enter your Confirm Password"
+              placeholder={signUpLanguageData.confirmPasswordPlaceholder(
+                language.data ?? "en"
+              )}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               toggleMask
@@ -217,9 +245,7 @@ export const SignUpForm = (props: Props) => {
           required
         />
         <span className="text-sm">
-          I agree to the{" "}
-          <span className="text-primary-color">Terms of Service</span> and{" "}
-          <span className="text-primary-color">Privacy Policy</span>
+          {signUpLanguageData.acceptPolicy(language.data ?? "en")}
         </span>
       </label>
       <button
@@ -230,7 +256,7 @@ export const SignUpForm = (props: Props) => {
         }  text-white rounded w-80 h-5 flex items-center justify-center
             font-semibold  transition duration-300`}
       >
-        Create Account
+        {signUpLanguageData.createAccount(language.data ?? "en")}
       </button>
       {props.provider !== "google" && (
         <button
@@ -239,7 +265,7 @@ export const SignUpForm = (props: Props) => {
           className="second-button w-80 border gap-2 flex items-center justify-center"
         >
           <FcGoogle />
-          Create Account with Google
+          {signUpLanguageData.createAccountGoogle(language.data ?? "en")}
         </button>
       )}
     </form>

@@ -12,6 +12,8 @@ import { User } from "../../interfaces";
 import { AiOutlineLogout } from "react-icons/ai";
 import { decodeBlurhashToCanvas } from "../../utils";
 import { defaultBlurHash, defaultCanvas } from "../../data";
+import { useGetLanguage } from "../../react-query";
+import { navbarLanguageData } from "../../data/languages";
 
 type Props = {
   user: UseQueryResult<User, Error>;
@@ -19,7 +21,7 @@ type Props = {
 function ButtonProfile({ user }: Props) {
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
-
+  const language = useGetLanguage();
   const handleLogout = () => {
     setLoading(true);
     queryClient.clear();
@@ -30,7 +32,7 @@ function ButtonProfile({ user }: Props) {
   return (
     <div className="flex items-center flex-1 justify-end ">
       <div className="flex items-center justify-end w-60 transition-width hover:w-96 group bg-white rounded-lg px-4 py-2 gap-4">
-        <button className="w-8 h-8 relative bg-white rounded-full  flex items-center justify-center text-primary-color">
+        {/* <button className="w-8 h-8 relative bg-white rounded-full  flex items-center justify-center text-primary-color">
           <div
             className="text-white absolute z-50 -right-1 -top-1 rounded-full flex 
       text-xs items-center justify-center  w-4 h-4 bg-red-600"
@@ -38,7 +40,7 @@ function ButtonProfile({ user }: Props) {
             1
           </div>
           <FaBell />
-        </button>
+        </button> */}
         <div className="flex gap-2">
           <div className="w-10 h-10 relative rounded-full overflow-hidden ">
             <Image
@@ -69,11 +71,13 @@ function ButtonProfile({ user }: Props) {
           disabled={loading}
           onClick={handleLogout}
           className="flex hover:bg-red-600 transition duration-150 hover:drop-shadow-md active:scale-105
-       items-center text-sm justify-center gap-2 px-3
+       items-center text-sm justify-center  gap-2 px-3
      py-1 bg-red-500 text-white font-semibold rounded-md"
         >
           <AiOutlineLogout />
-          <span className="hidden md:block">Logout</span>
+          <span className="hidden md:block w-max">
+            {navbarLanguageData.logoutButton(language.data ?? "en")}
+          </span>
         </button>
       </div>
     </div>

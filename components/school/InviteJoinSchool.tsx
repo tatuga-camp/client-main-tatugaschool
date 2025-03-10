@@ -1,5 +1,9 @@
 import React, { memo, useEffect, useState } from "react";
-import { useGetUser, useGetUserByEmail } from "../../react-query";
+import {
+  useGetLanguage,
+  useGetUser,
+  useGetUserByEmail,
+} from "../../react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   CreateMemberOnSchoolService,
@@ -24,6 +28,7 @@ import {
   useUpdateMemberOnSchool,
 } from "../../react-query/memberOnSchool";
 import { ListSchoolRoles } from "../../data";
+import { createSchoolDataLanguage } from "../../data/languages";
 
 type Props = {
   schoolId: string;
@@ -31,6 +36,7 @@ type Props = {
 };
 function InviteJoinSchool({ schoolId, hideFinishButton }: Props) {
   const user = useGetUser();
+  const language = useGetLanguage();
   const updateMemberOnSchool = useUpdateMemberOnSchool();
   const createMemberOnSchool = useCreateMemberOnSchool();
   const memberOnSchools = useGetMemberOnSchoolBySchool({ schoolId: schoolId });
@@ -127,7 +133,7 @@ function InviteJoinSchool({ schoolId, hideFinishButton }: Props) {
     <div>
       <section className="flex flex-col  w-full gap-2">
         <label className="pb-2 w-full border-b border-b-gray-300">
-          Invite your friends to join your school
+          {createSchoolDataLanguage.inviteTitle(language.data ?? "en")}{" "}
         </label>
         <div className="flex w-full relative bg-slate-200 flex-col">
           <input
@@ -167,7 +173,7 @@ function InviteJoinSchool({ schoolId, hideFinishButton }: Props) {
       <div className="w-full mt-5 flex justify-center">
         {!hideFinishButton && (
           <Link href="/" className="main-button text-center w-40">
-            Finish
+            {createSchoolDataLanguage.inviteDone(language.data ?? "en")}
           </Link>
         )}
       </div>

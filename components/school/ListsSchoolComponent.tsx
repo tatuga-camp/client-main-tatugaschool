@@ -1,14 +1,16 @@
 import React, { useState, memo } from "react";
 import Link from "next/link";
 import { School } from "@/interfaces";
-import { useGetSchools, useGetUser } from "../../react-query";
+import { useGetLanguage, useGetSchools, useGetUser } from "../../react-query";
 import Image from "next/image";
 import { decodeBlurhashToCanvas } from "../../utils";
 import { defaultBlurHash } from "../../data";
+import { homepageDataLanguage } from "../../data/languages";
 
 const ListsSchoolComponent = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedYear] = useState<string>("");
+  const language = useGetLanguage();
   const user = useGetUser().data;
   const tableHeaders = ["Name", "Create At", "Description", "Action"];
   const inputClasses = "border rounded-md px-4 py-2";
@@ -34,18 +36,23 @@ const ListsSchoolComponent = () => {
     <main className="mx-auto w-full flex flex-col items-center  ">
       <header className="w-full h-96 gradient-bg flex flex-col items-start justify-center p-10 ">
         <h2 className="text-4xl font-semibold text-white mb-4">
-          Welcome Back, {user?.firstName}
+          {homepageDataLanguage.welcome(language.data ?? "en")},{" "}
+          {user?.firstName}
           <span role="img" aria-label="wave">
             👋
           </span>
         </h2>
         <p className="text-gray-300 mb-8">
-          This is your Homepage Schools Dashboard.
+          {homepageDataLanguage.welcomeDetail(language.data ?? "en")}
         </p>
       </header>
       <div className="bg-white w-10/12 relative -top-28  rounded-lg p-6">
-        <h3 className="text-xl font-semibold mb-4">Select Your School</h3>
-        <p className="text-gray-600 mb-6">Lists of your school</p>
+        <h3 className="text-xl font-semibold mb-4">
+          {homepageDataLanguage.selectSchool(language.data ?? "en")}
+        </h3>
+        <p className="text-gray-600 mb-6">
+          {homepageDataLanguage.selectSchoolDetail(language.data ?? "en")}
+        </p>
 
         <div className="flex flex-col md:flex-row items-center justify-between mb-4 gap-4">
           <input
@@ -61,7 +68,7 @@ const ListsSchoolComponent = () => {
              w-full md:w-auto hover:bg-primary-color transition duration-300"
             href="/school/create"
           >
-            + create school
+            {homepageDataLanguage.create(language.data ?? "en")}
           </Link>
         </div>
 
@@ -129,7 +136,7 @@ const ListsSchoolComponent = () => {
                           href={`/school/${school.id}`}
                           className="main-button text-nowrap"
                         >
-                          Join School
+                          {homepageDataLanguage.join(language.data ?? "en")}
                         </Link>
                       </td>
                     </tr>

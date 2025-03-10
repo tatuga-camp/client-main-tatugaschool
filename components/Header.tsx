@@ -6,15 +6,16 @@ import { useRouter } from "next/router";
 import { usePathname } from "next/navigation";
 import { QueryClient } from "@tanstack/react-query";
 import { OverlayPanel } from "primereact/overlaypanel";
-import { useGetUser } from "../react-query";
+import { useGetLanguage, useGetUser } from "../react-query";
 import ButtonProfile from "./button/ButtonProfile";
 import { defaultBlurHash, defaultCanvas } from "../data";
 import LanguageSelect from "./LanguageSelect";
+import { navbarLanguageData } from "../data/languages";
 
 const Header = () => {
   const user = useGetUser();
   const pathname = usePathname();
-
+  const language = useGetLanguage();
   const classLinkActive =
     "bg-blue-500/50 text-black px-4 py-2 rounded-md font-semibold";
   const classLinkInactive = "bg-transparent text-black";
@@ -51,10 +52,10 @@ const Header = () => {
 
       <nav className="flex flex-1 flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6 mt-4 md:mt-0 w-full md:w-auto justify-center">
         <Link href="/" className={isActiveClass(isSchoolPage)}>
-          Schools
+          {navbarLanguageData.school(language.data ?? "en")}
         </Link>
         <Link href="/account" className={isActiveClass(isAccountPage)}>
-          Account
+          {navbarLanguageData.account(language.data ?? "en")}
         </Link>
       </nav>
       <div className="flex justify-center items-center gap-2">

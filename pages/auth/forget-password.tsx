@@ -11,8 +11,10 @@ const ForgetPasswordPage = () => {
         <title>Forget Password</title>
       </Head>
       <AuthLayout>
-        <AuthHeader />
-        <ForgetPasswordForm />
+        <div className="w-full grow  flex-col  flex justify-center items-center gap-5">
+          <AuthHeader />
+          <ForgetPasswordForm />
+        </div>
         <AuthFooter />
       </AuthLayout>
     </>

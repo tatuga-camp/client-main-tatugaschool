@@ -21,23 +21,25 @@ import { countries, defaultBlurHash } from "../../data";
 import { decodeBlurhashToCanvas, generateBlurHash } from "../../utils";
 import Dropdown from "../common/Dropdown";
 import InviteJoinSchool from "./InviteJoinSchool";
-import { useCreateSchool } from "../../react-query";
-const menuItems: { title: string; icon: ReactNode }[] = [
-  {
-    title: "Profile",
-    icon: <LuSchool />,
-  },
-  {
-    title: "Address",
-    icon: <FaRegAddressCard />,
-  },
-  {
-    title: "Invite",
-    icon: <FaUserPlus />,
-  },
-];
+import { useCreateSchool, useGetLanguage } from "../../react-query";
+import { createSchoolDataLanguage } from "../../data/languages";
 
 const CreateSchoolComponent = () => {
+  const language = useGetLanguage();
+  const menuItems: { title: string; icon: ReactNode }[] = [
+    {
+      title: createSchoolDataLanguage.profile(language.data ?? "en"),
+      icon: <LuSchool />,
+    },
+    {
+      title: createSchoolDataLanguage.address(language.data ?? "en"),
+      icon: <FaRegAddressCard />,
+    },
+    {
+      title: createSchoolDataLanguage.invite(language.data ?? "en"),
+      icon: <FaUserPlus />,
+    },
+  ];
   const createSchool = useCreateSchool();
   const toast = useRef<Toast>(null);
   const [loading, setLoading] = useState(false);
@@ -110,33 +112,36 @@ const CreateSchoolComponent = () => {
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
-    if (
-      !profile?.school ||
-      !profile?.description ||
-      !profile?.logo ||
-      !country ||
-      !address?.city ||
-      !address?.address ||
-      !address?.zipCode ||
-      !address?.phoneNumber
-    ) {
-      Swal.fire({
-        title: "Error",
-        text: "Please fill the form",
-        icon: "error",
-      });
-      return;
-    }
-
-    if (!profile?.blurHash) {
-      Swal.fire({
-        title: "Error",
-        text: "Please upload a logo",
-        icon: "error",
-      });
-      return;
-    }
     try {
+      if (
+        !profile?.school ||
+        !profile?.description ||
+        !country ||
+        !address?.city ||
+        !address?.address ||
+        !address?.zipCode ||
+        !address?.phoneNumber
+      ) {
+        throw new Error(
+          language.data === "en"
+            ? "Please fill the form"
+            : "โปรดกรอกข้อมูลให้ครบถ้วน"
+        );
+      }
+      if (!profile?.logo) {
+        throw new Error(
+          language.data === "en"
+            ? "Please upload logo of your school"
+            : "กรุณาอัพโหลดรูปภาพ"
+        );
+      }
+      if (!profile?.blurHash) {
+        throw new Error(
+          language.data === "en"
+            ? "Please fill the form"
+            : "โปรดกรอกข้อมูลให้ครบถ้วน"
+        );
+      }
       await createSchool.mutateAsync({
         title: profile?.school,
         description: profile?.description,
@@ -227,7 +232,7 @@ const CreateSchoolComponent = () => {
     <div className="w-full max-w-xl mx-auto flex flex-col gap-2 mb-10 bg-white rounded-3xl shadow-md p-12">
       <Toast ref={toast}></Toast>
       <h2 className="text-xl font-semibold text-center text-black">
-        Create your School here!
+        {createSchoolDataLanguage.title(language.data ?? "en")}
       </h2>
       <ul className="flex items-center py-5 justify-center gap-x-10">
         {menuItems.map((item, index) => (
@@ -291,8 +296,9 @@ const CreateSchoolComponent = () => {
                       />
                     </svg>
                     <p className="mb-2 text-sm text-gray-500 ">
-                      <span className="font-semibold">Click to upload</span> or
-                      drag and drop
+                      {createSchoolDataLanguage.uploadTitle(
+                        language.data ?? "en"
+                      )}
                     </p>
                     <p className="text-xs text-gray-500 ">
                       SVG, PNG, JPG or GIF (MAX. 800x400px)
@@ -317,7 +323,9 @@ const CreateSchoolComponent = () => {
                 required
                 type="text"
                 className={inputClasses}
-                placeholder="School"
+                placeholder={createSchoolDataLanguage.school(
+                  language.data ?? "en"
+                )}
                 aria-label="School Name"
                 value={profile?.school}
                 onChange={(e) =>
@@ -332,7 +340,9 @@ const CreateSchoolComponent = () => {
                 type="text"
                 required
                 className={inputClasses}
-                placeholder="Description"
+                placeholder={createSchoolDataLanguage.description(
+                  language.data ?? "en"
+                )}
                 aria-label="School Description"
                 value={profile?.description}
                 onChange={(e) =>
@@ -349,7 +359,7 @@ const CreateSchoolComponent = () => {
           items-center bg-secondary-color transition duration-150
            justify-center text-white py-2 h-10 rounded-lg font-semibold"
             >
-              Next
+              {createSchoolDataLanguage.button(language.data ?? "en")}
             </button>
           </section>
         )}
