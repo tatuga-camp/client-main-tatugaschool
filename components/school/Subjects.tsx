@@ -145,12 +145,12 @@ function Subjects({ schoolId }: Props) {
           )
         );
         break;
-      case "A-Z":
+      case "AZ":
         setSubjectData((prev) =>
           prev?.sort((a, b) => a.title.localeCompare(b.title))
         );
         break;
-      case "Z-A":
+      case "ZA":
         setSubjectData((prev) =>
           prev?.sort((a, b) => b.title.localeCompare(a.title))
         );
