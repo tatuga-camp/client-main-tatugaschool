@@ -25,18 +25,14 @@ function ButtonProfile({ user }: Props) {
       secure: true,
       sameSite: "none",
       domain:
-        process.env.NODE_ENV === "production"
-          ? ".tatugaschool.com"
-          : "localhost",
+        process.env.cookie === "production" ? ".tatugaschool.com" : "localhost",
     });
     destroyCookie({}, "refresh_token", {
       path: "/",
       secure: true,
       sameSite: "none",
       domain:
-        process.env.NODE_ENV === "production"
-          ? ".tatugaschool.com"
-          : "localhost",
+        process.env.cookie === "production" ? ".tatugaschool.com" : "localhost",
     });
     router.push("/auth/sign-in");
   };
