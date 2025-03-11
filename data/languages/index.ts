@@ -8,3 +8,5 @@ export * from "./homepage";
 export * from "./create-school";
 export * from "./account";
 export * from "./school";
+export * from "./classes";
+export * from "./sidebar";

@@ -38,7 +38,7 @@ export type MenuSubject =
   | "Classwork"
   | "Attendance"
   | "Grade"
-  | "Setting-Subject";
+  | "SettingSubject";
 
 export const menuSubjectList = ({
   schoolId,
@@ -69,7 +69,7 @@ export const menuSubjectList = ({
       icon: <FaStarHalfStroke />,
     },
     {
-      title: "Setting-Subject",
+      title: "SettingSubject",
       icon: <CiSettings />,
     },
     {
@@ -164,10 +164,10 @@ export const sortByOptions = [
     title: "Oldest",
   },
   {
-    title: "A-Z",
+    title: "AZ",
   },
   {
-    title: "Z-A",
+    title: "ZA",
   },
 ] as const;
 export type SortByOption = (typeof sortByOptions)[number]["title"];

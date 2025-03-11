@@ -4,10 +4,8 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { decodeBlurhashToCanvas } from "../utils";
 import { defaultBlurHash } from "../data";
-import {
-  schoolDataLanguage,
-  sidebarSchoolDataLanguage,
-} from "../data/languages";
+import { schoolDataLanguage } from "../data/languages";
+import { sidebarDataLanguage } from "../data/languages/sidebar";
 
 type Props = {
   active: boolean;
@@ -84,8 +82,8 @@ function Sidebar({
             >
               {menu.icon}
               <span>
-                {sidebarSchoolDataLanguage[
-                  menu.title.toLowerCase() as keyof typeof sidebarSchoolDataLanguage
+                {sidebarDataLanguage[
+                  menu.title.toLowerCase() as keyof typeof sidebarDataLanguage
                 ](language.data ?? "en")}
               </span>
             </button>

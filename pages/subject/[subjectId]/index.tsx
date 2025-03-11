@@ -416,7 +416,7 @@ function Index({ subjectId }: Props) {
               >
                 <div className="flex gap-2">
                   <button
-                    onClick={() => setSelectMenu("Setting-Subject")}
+                    onClick={() => setSelectMenu("SettingSubject")}
                     className="flex items-center active:scale-110 justify-center gap-1 hover:bg-primary-color hover:text-white
                       text-primary-color bg-white w-max px-2 py-1 rounded-md"
                   >
@@ -485,7 +485,7 @@ function Index({ subjectId }: Props) {
           {selectMenu === "Attendance" && (
             <Attendance toast={toast} subjectId={subjectId} />
           )}
-          {selectMenu === "Setting-Subject" && (
+          {selectMenu === "SettingSubject" && (
             <Setting
               subjectId={subjectId}
               setSelectMenu={(menu: string) =>
