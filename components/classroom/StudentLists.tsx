@@ -72,12 +72,12 @@ function StudentLists({ students, classroom }: Props) {
           )
         );
         break;
-      case "A-Z":
+      case "AZ":
         setStudentData((prev) =>
           prev.sort((a, b) => a.firstName.localeCompare(b.firstName))
         );
         break;
-      case "Z-A":
+      case "ZA":
         setStudentData((prev) =>
           prev.sort((a, b) => b.firstName.localeCompare(a.firstName))
         );
