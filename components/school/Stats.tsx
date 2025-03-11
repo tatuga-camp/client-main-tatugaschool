@@ -1,4 +1,5 @@
-import { useGetSchool } from "../../react-query";
+import { schoolDataLanguage } from "../../data/languages";
+import { useGetLanguage, useGetSchool } from "../../react-query";
 import { filesize } from "filesize";
 
 type Props = {
@@ -6,6 +7,7 @@ type Props = {
 };
 const Stats = ({ schoolId }: Props) => {
   const school = useGetSchool({ schoolId: schoolId });
+  const language = useGetLanguage();
   return (
     <div className="md:p-5 lg:p-5 xl:p-12">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 xl:gap-4 -mt-24">
@@ -14,7 +16,9 @@ const Stats = ({ schoolId }: Props) => {
          flex items-center justify-between"
         >
           <div>
-            <p className="text-gray-600">Total teachers in school</p>
+            <p className="text-gray-600">
+              {schoolDataLanguage.totalTeacher(language.data ?? "en")}
+            </p>
             <h2 className="lg:text-lg xl:text-2xl font-bold text-gray-900">
               {school.data?.totalTeacher}/{" "}
               <span className="lg:text-sm xl:text-lg text-gray-400">
@@ -35,7 +39,9 @@ const Stats = ({ schoolId }: Props) => {
         </div>
         <div className="bg-white border text-primary-color md:p-4 xl:p-6 rounded-2xl flex items-center justify-between">
           <div>
-            <p className="text-gray-600">Total Classroom</p>
+            <p className="text-gray-600">
+              {schoolDataLanguage.totalClassroom(language.data ?? "en")}
+            </p>
             <h2 className="lg:text-lg xl:text-2xl font-bold text-gray-900">
               {school.data?.totalClass}/{" "}
               <span className="lg:text-sm xl:text-lg text-gray-400">
@@ -56,7 +62,9 @@ const Stats = ({ schoolId }: Props) => {
         </div>
         <div className="bg-white border text-primary-color md:p-4 xl:p-6 rounded-2xl flex items-center justify-between">
           <div>
-            <p className="text-gray-600">Total subjects</p>
+            <p className="text-gray-600">
+              {schoolDataLanguage.totalSubject(language.data ?? "en")}
+            </p>
             <h2 className="lg:text-lg xl:text-2xl font-bold text-gray-900">
               {" "}
               {school.data?.totalSubject} /{" "}
@@ -78,7 +86,9 @@ const Stats = ({ schoolId }: Props) => {
         </div>
         <div className="bg-white border text-primary-color md:p-4 xl:p-6 rounded-2xl flex items-center justify-between">
           <div>
-            <p className="text-gray-600">Total Storage</p>
+            <p className="text-gray-600">
+              {schoolDataLanguage.totalStorage(language.data ?? "en")}
+            </p>
             <h2 className="lg:text-lg xl:text-2xl font-bold text-gray-900">
               {" "}
               {filesize(school.data?.totalStorage ?? 0, {

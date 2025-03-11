@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   useCreateSubscription,
+  useGetLanguage,
   useGetMemberOnSchoolBySchool,
   useGetSchool,
   useManageSubscription,
@@ -17,6 +18,7 @@ import SubscriptionPlan from "../payments/SubscriptionPlan";
 import Dropdown from "../common/Dropdown";
 import { Toast } from "primereact/toast";
 import { useSound } from "../../hook";
+import { schoolDataLanguage } from "../../data/languages";
 
 const BillingPlanSection = (props: { schoolId: string }) => {
   const router = useRouter();
@@ -27,7 +29,7 @@ const BillingPlanSection = (props: { schoolId: string }) => {
     schoolId: props.schoolId,
   });
   const updateSchool = useUpdateSchool();
-
+  const language = useGetLanguage();
   const [selectBillingManager, setSelectBillingManager] =
     useState<MemberOnSchool>();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -152,33 +154,32 @@ const BillingPlanSection = (props: { schoolId: string }) => {
       )}
       <div className="w-full rounded-md bg-white border 2xl:p-10">
         <h1 className="text-lg sm:text-xl font-medium">
-          Manage Your Subscription
+          {schoolDataLanguage.manageSubTitle(language.data ?? "en")}
         </h1>
         <h4 className="text-xs sm:text-sm text-gray-500">
-          You can dowload invoice, recipet or manage your subscription here
+          {schoolDataLanguage.manageSubDescription(language.data ?? "en")}
         </h4>
         <div className="mt-5">
           <button
             disabled={managesubscription.isPending}
             onClick={() => hanldeManageSubscription()}
-            className="second-button w-40 flex items-center justify-center border"
+            className="second-button w-60 flex items-center justify-center border"
           >
             {managesubscription.isPending ? (
               <LoadingSpinner />
             ) : (
               <>
                 <RiBillFill />
-                Billing Setting
+                {schoolDataLanguage.billingButton(language.data ?? "en")}
               </>
             )}
           </button>
         </div>
         <h1 className="text-lg mt-10 sm:text-xl font-medium">
-          Manage A Billing Manager
+          {schoolDataLanguage.billingManagerTitle(language.data ?? "en")}
         </h1>
         <h4 className="text-xs  sm:text-sm text-gray-500">
-          A billing manager is the only account who can manage a subscription.
-          (Only Admin can change a billing manager)
+          {schoolDataLanguage.billingManagerDescription(language.data ?? "en")}
         </h4>
         <div className="w-96">
           {selectBillingManager && members.data && (

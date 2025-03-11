@@ -1,19 +1,14 @@
-import {
-  QueryClient,
-  useQueryClient,
-  UseQueryResult,
-} from "@tanstack/react-query";
+import { useQueryClient, UseQueryResult } from "@tanstack/react-query";
 import Image from "next/image";
 import router from "next/router";
 import { destroyCookie } from "nookies";
-import React, { useState } from "react";
-import { FaBell } from "react-icons/fa";
-import { User } from "../../interfaces";
+import { useState } from "react";
 import { AiOutlineLogout } from "react-icons/ai";
-import { decodeBlurhashToCanvas } from "../../utils";
 import { defaultBlurHash, defaultCanvas } from "../../data";
-import { useGetLanguage } from "../../react-query";
 import { navbarLanguageData } from "../../data/languages";
+import { User } from "../../interfaces";
+import { useGetLanguage } from "../../react-query";
+import { decodeBlurhashToCanvas } from "../../utils";
 
 type Props = {
   user: UseQueryResult<User, Error>;
@@ -25,8 +20,12 @@ function ButtonProfile({ user }: Props) {
   const handleLogout = () => {
     setLoading(true);
     queryClient.clear();
-    destroyCookie(null, "access_token", { path: "/" });
-    destroyCookie(null, "refresh_token", { path: "/" });
+    destroyCookie({}, "access_token", {
+      path: "/", // THE KEY IS TO SET THE SAME PATH
+    });
+    destroyCookie({}, "refresh_token", {
+      path: "/", // THE KEY IS TO SET THE SAME PATH
+    });
     router.push("/auth/sign-in");
   };
   return (

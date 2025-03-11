@@ -8,10 +8,12 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { ProgressSpinner } from "primereact/progressspinner";
 import Password from "../common/Password";
-import { useGetUser } from "../../react-query";
+import { useGetLanguage, useGetUser } from "../../react-query";
 import { FcGoogle } from "react-icons/fc";
+import { accountDataLanguage, requestData } from "../../data/languages";
 
 function ChangePassword() {
+  const language = useGetLanguage();
   const user = useGetUser();
   const [formData, setFormData] = React.useState<{
     currentPassword?: string;
@@ -40,7 +42,7 @@ function ChangePassword() {
       }
       if (formData?.newPassword !== formData?.confirmNewPassword) {
         throw new Error(
-          "New Password and Confirm New Password must be the same"
+          accountDataLanguage.errorUpdatePassword(language.data ?? "en")
         );
       }
       await updatePassword.mutateAsync({
@@ -53,8 +55,8 @@ function ChangePassword() {
         confirmNewPassword: "",
       });
       Swal.fire({
-        title: "Success",
-        text: "Password Updated Successfully",
+        title: requestData.successTitle(language.data ?? "en"),
+        text: accountDataLanguage.successUpdatePassword(language.data ?? "en"),
         icon: "success",
       });
     } catch (error) {
@@ -75,7 +77,7 @@ function ChangePassword() {
     return (
       <div className="second-button border gap-2 flex items-center justify-center">
         <FcGoogle />
-        Your password is managed by google
+        {accountDataLanguage.googlePassword(language.data ?? "en")}
       </div>
     );
   }
@@ -83,8 +85,13 @@ function ChangePassword() {
   return (
     <form onSubmit={handleSummit} className="flex flex-col gap-2">
       <label className=" flex flex-col gap-1 w-full items-start">
-        <span className="text-sm">Current Password</span>
+        <span className="text-sm">
+          {accountDataLanguage.currentPassword(language.data ?? "en")}
+        </span>
         <Password
+          placeholder={accountDataLanguage.currentPassword(
+            language.data ?? "en"
+          )}
           value={formData?.currentPassword}
           onChange={handleChange}
           name="currentPassword"
@@ -93,8 +100,11 @@ function ChangePassword() {
       </label>
 
       <label className=" flex flex-col gap-1 items-start">
-        <span className="text-sm">New Password</span>
+        <span className="text-sm">
+          {accountDataLanguage.newPassword(language.data ?? "en")}
+        </span>
         <Password
+          placeholder={accountDataLanguage.newPassword(language.data ?? "en")}
           value={formData?.newPassword}
           onChange={handleChange}
           name="newPassword"
@@ -102,11 +112,16 @@ function ChangePassword() {
         />
       </label>
       <label className=" flex flex-col gap-1 items-start">
-        <span className="text-sm">Confirm New Password</span>
+        <span className="text-sm">
+          {accountDataLanguage.newConfirmPassword(language.data ?? "en")}
+        </span>
         <Password
           value={formData?.confirmNewPassword}
           onChange={handleChange}
           name="confirmNewPassword"
+          placeholder={accountDataLanguage.newConfirmPassword(
+            language.data ?? "en"
+          )}
           toggleMask
         />
       </label>
@@ -121,7 +136,7 @@ function ChangePassword() {
         </div>
       ) : (
         <button type="submit" className="w-40 main-button">
-          Change Password
+          {accountDataLanguage.buttonPassword(language.data ?? "en")}{" "}
         </button>
       )}
     </form>

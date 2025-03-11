@@ -2,15 +2,17 @@ import React from "react";
 import { FaUserPlus } from "react-icons/fa";
 import Image from "next/image";
 import { MemberOnSchool, School } from "@/interfaces";
-import { useGetUser } from "@/react-query";
+import { useGetLanguage, useGetUser } from "@/react-query";
 
 import ListMemberCircle from "../member/ListMemberCircle";
+import { schoolDataLanguage } from "../../data/languages";
 
 const HeaderSection: React.FC<{
   school: School;
   members: MemberOnSchool[];
   onInvite: () => void;
 }> = ({ school, members, onInvite }) => {
+  const language = useGetLanguage();
   return (
     <div className=" p-12 pb-24 text-white gradient-bg">
       {/* Top Section */}
@@ -32,7 +34,7 @@ const HeaderSection: React.FC<{
           {school.phoneNumber}
         </p>
         <h2 className=" text-white font-semibold">
-          Member Plan: {school?.plan}
+          {schoolDataLanguage.memberPlan(language.data ?? "en")}: {school?.plan}
         </h2>
       </div>
       <div className="flex justify-end items-center space-x-2">
@@ -45,7 +47,7 @@ const HeaderSection: React.FC<{
           font-semibold px-6 py-2 rounded-md hover:bg-opacity-90"
         >
           <FaUserPlus />
-          <span>Invite</span>
+          <span>{schoolDataLanguage.inviteButton(language.data ?? "en")}</span>
         </button>
       </div>
     </div>

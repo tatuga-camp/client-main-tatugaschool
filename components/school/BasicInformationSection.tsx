@@ -1,13 +1,19 @@
 import { ErrorMessages, School } from "@/interfaces";
-import { useDeleteSchool, useUpdateSchool } from "../../react-query";
+import {
+  useDeleteSchool,
+  useGetLanguage,
+  useUpdateSchool,
+} from "../../react-query";
 import ProfileForm from "./ProfileForm";
 import ProfileUpload from "./ProfileUpload";
 import Swal from "sweetalert2";
 import LoadingSpinner from "../common/LoadingSpinner";
 import { useRouter } from "next/router";
 import LoadingBar from "../common/LoadingBar";
+import { requestData, schoolDataLanguage } from "../../data/languages";
 
 const BasicInformationSection = ({ school }: { school: School }) => {
+  const language = useGetLanguage();
   const updateSchool = useUpdateSchool();
   const removeSchool = useDeleteSchool();
   const router = useRouter();
@@ -41,18 +47,19 @@ const BasicInformationSection = ({ school }: { school: School }) => {
       </div>
       <div className="col-span-4 w-full p-6 bg-white rounded-xl space-y-4">
         <ProfileForm school={school} updateSchool={updateSchool} />
-        <h1 className="text-lg sm:text-xl font-medium mt-10">Danger zone</h1>
+        <h1 className="text-lg sm:text-xl font-medium mt-10">
+          {schoolDataLanguage.dangerZoneTitle(language.data ?? "en")}
+        </h1>
         <h4 className="text-xs sm:text-sm text-gray-500">
-          Irreversible and destructive actions
+          {schoolDataLanguage.dangerZoneDescription(language.data ?? "en")}
         </h4>
         <div className="flex flex-col items-start p-4 bg-white rounded-md border gap-5 mt-5">
           {removeSchool.isPending && <LoadingBar />}
           <h2 className="border-b text-base sm:text-lg font-medium py-3">
-            Delete This School
+            {schoolDataLanguage.deleteSchool(language.data ?? "en")}
           </h2>
           <h4 className="text-xs sm:text-sm text-red-700">
-            Once you delete this school, all data will be lost and cannot be
-            recovered. Please be careful.
+            {schoolDataLanguage.deleteSchoolDescription(language.data ?? "en")}
           </h4>
           <button
             disabled={removeSchool.isPending}
@@ -60,20 +67,23 @@ const BasicInformationSection = ({ school }: { school: School }) => {
               const replacedText = "DELETE";
               let content = document.createElement("div");
               content.innerHTML =
-                "<div>To confirm, type <strong>" +
+                `<div>${requestData.deleteInstruction1(
+                  language.data ?? "en"
+                )}<strong>` +
                 replacedText +
-                "</strong> in the box below </div>";
+                `  </strong>${requestData.deleteInstruction2(
+                  language.data ?? "en"
+                )}</div>`;
               const { value } = await Swal.fire({
-                title: "Are you sure?",
+                title: requestData.deleteTitle(language.data ?? "en"),
                 input: "text",
                 icon: "warning",
-                footer:
-                  "This action is irreversible and destructive. Please be careful.",
+                footer: requestData.deleteFooter(language.data ?? "en"),
                 html: content,
                 showCancelButton: true,
                 inputValidator: (value) => {
                   if (value !== replacedText) {
-                    return "Please Type Correctly";
+                    return requestData.deleteError(language.data ?? "en");
                   }
                 },
               });
@@ -83,7 +93,11 @@ const BasicInformationSection = ({ school }: { school: School }) => {
             }}
             className="reject-button mt-5 w-40 flex items-center justify-center"
           >
-            {removeSchool.isPending ? <LoadingSpinner /> : "Delete"}
+            {removeSchool.isPending ? (
+              <LoadingSpinner />
+            ) : (
+              schoolDataLanguage.deleteButton(language.data ?? "en")
+            )}
           </button>
         </div>
       </div>

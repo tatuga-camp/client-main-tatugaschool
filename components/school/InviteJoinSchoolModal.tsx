@@ -1,6 +1,8 @@
 import React from "react";
 import InviteJoinSchool from "./InviteJoinSchool";
 import useClickOutside from "../../hook/useClickOutside";
+import { useGetLanguage } from "../../react-query";
+import { schoolDataLanguage } from "../../data/languages";
 
 interface InviteJoinSchoolModalProps {
   isOpen: boolean;
@@ -13,6 +15,7 @@ const InviteJoinSchoolModal: React.FC<InviteJoinSchoolModalProps> = ({
   onClose,
   schoolId,
 }) => {
+  const lanague = useGetLanguage();
   const divRef = React.useRef<HTMLDivElement>(null);
   useClickOutside(divRef, () => {
     onClose();
@@ -44,7 +47,9 @@ const InviteJoinSchoolModal: React.FC<InviteJoinSchoolModalProps> = ({
             />
           </svg>
         </button>
-        <h2 className="text-xl font-bold mb-4">Invite to Join School</h2>
+        <h2 className="text-xl font-bold mb-4">
+          {schoolDataLanguage.inviteTitle(lanague.data ?? "en")}
+        </h2>
         <InviteJoinSchool schoolId={schoolId} hideFinishButton={true} />
 
         <div className="mt-6 flex justify-end">

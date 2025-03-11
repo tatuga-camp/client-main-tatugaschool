@@ -3,6 +3,7 @@ import { ErrorMessages, MemberOnSchool, MemberRole, User } from "@/interfaces";
 import { FaPlus } from "react-icons/fa6";
 import {
   useDeleteMemberOnSchool,
+  useGetLanguage,
   useGetMemberOnSchoolBySchool,
   useGetUser,
   useUpdateMemberOnSchool,
@@ -12,6 +13,7 @@ import ListMembers from "../member/ListMembers";
 import Swal from "sweetalert2";
 
 import { ListSchoolRoles } from "../../data";
+import { schoolDataLanguage } from "../../data/languages";
 
 export interface MemberSectionProps {
   onInvite: () => void;
@@ -24,6 +26,7 @@ const MemberSection: FC<MemberSectionProps> = ({
   user,
   schoolId,
 }) => {
+  const language = useGetLanguage();
   const members = useGetMemberOnSchoolBySchool({ schoolId: schoolId });
   const deleteMember = useDeleteMemberOnSchool();
   const [searchTerm, setSearchTerm] = useState("");
@@ -127,7 +130,9 @@ const MemberSection: FC<MemberSectionProps> = ({
             className="flex items-center space-x-1 bg-primary-color text-white px-6 py-2 rounded-lg hover:bg-opacity-90"
           >
             <FaPlus />
-            <span>Invite</span>
+            <span>
+              {schoolDataLanguage.inviteButton(language.data ?? "en")}
+            </span>
           </button>
         </div>
       </div>{" "}

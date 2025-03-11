@@ -4,7 +4,8 @@ import { MemberOnSchool, School } from "@/interfaces";
 import BasicInformationSection from "./BasicInformationSection";
 import MemberSection from "./MemberSection";
 import BillingPlanSection from "./BillingPlanSection";
-import { useGetUser } from "../../react-query";
+import { useGetLanguage, useGetUser } from "../../react-query";
+import { schoolDataLanguage } from "../../data/languages";
 
 export interface TabsMenuSectionProps {
   school: School;
@@ -12,18 +13,21 @@ export interface TabsMenuSectionProps {
   onInvite: () => void;
 }
 
+const tabs = [
+  { name: "members" },
+  { name: "basicInfo" },
+  { name: "billing" },
+] as const;
+
 const TabsMenuSection: FC<TabsMenuSectionProps> = ({
   school,
   members,
   onInvite,
 }) => {
-  const [activeTab, setActiveTab] = useState("Member");
+  const language = useGetLanguage();
+  const [activeTab, setActiveTab] =
+    useState<(typeof tabs)[number]["name"]>("members");
   const user = useGetUser();
-  const tabs = [
-    { name: "Member" },
-    { name: "Basic information" },
-    { name: "Billing & Plan" },
-  ];
 
   return (
     <>
@@ -38,24 +42,22 @@ const TabsMenuSection: FC<TabsMenuSectionProps> = ({
                 : "hover:text-gray-800 px-5"
             }`}
           >
-            {tab.name}
+            {schoolDataLanguage[tab.name as keyof typeof schoolDataLanguage](
+              language.data ?? "en"
+            )}
           </button>
         ))}
       </div>
 
-      {activeTab === "Member" && user.data && (
+      {activeTab === "members" && user.data && (
         <MemberSection
           onInvite={onInvite}
           user={user.data}
           schoolId={school.id}
         />
       )}
-      {activeTab === "Basic information" && (
-        <BasicInformationSection school={school} />
-      )}
-      {activeTab === "Billing & Plan" && (
-        <BillingPlanSection schoolId={school.id} />
-      )}
+      {activeTab === "basicInfo" && <BasicInformationSection school={school} />}
+      {activeTab === "billing" && <BillingPlanSection schoolId={school.id} />}
     </>
   );
 };

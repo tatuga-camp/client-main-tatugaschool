@@ -7,3 +7,4 @@ export * from "./navbar";
 export * from "./homepage";
 export * from "./create-school";
 export * from "./account";
+export * from "./school";

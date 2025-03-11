@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import {
+  useGetLanguage,
   useGetMemberOnSchoolByUser,
   useUpdateInviteMemberOnSchool,
 } from "../../react-query";
@@ -11,9 +12,12 @@ import { timeAgo } from "../../utils";
 import { BiCheck, BiX } from "react-icons/bi";
 import { ErrorMessages, MemberRole, Status } from "../../interfaces";
 import Swal from "sweetalert2";
+import { accountDataLanguage, requestData } from "../../data/languages";
+import LoadingBar from "../common/LoadingBar";
 
 function ManageInvite() {
   const memberOnSchools = useGetMemberOnSchoolByUser();
+  const language = useGetLanguage();
   const updateMemberOnSchool = useUpdateInviteMemberOnSchool();
   useEffect(() => {
     memberOnSchools.refetch();
@@ -26,8 +30,8 @@ function ManageInvite() {
   }) => {
     try {
       Swal.fire({
-        title: "Loading",
-        text: "Please wait",
+        title: requestData.loadingTitle(language.data ?? "en"),
+        text: requestData.loadingDescription(language.data ?? "en"),
         showConfirmButton: false,
         willOpen: () => {
           Swal.showLoading();
@@ -69,6 +73,7 @@ function ManageInvite() {
   };
   return (
     <div className="">
+      {memberOnSchools.isLoading && <LoadingBar />}
       <ul className="grid">
         {memberOnSchools.data
           ?.sort(
@@ -130,7 +135,7 @@ function ManageInvite() {
                       className="reject-button w-24 gap-1 h-8 flex items-center justify-between"
                     >
                       <BiX />
-                      Reject
+                      {accountDataLanguage.reject(language.data ?? "en")}
                     </button>
                     <button
                       disabled={updateMemberOnSchool.isPending}
@@ -144,11 +149,13 @@ function ManageInvite() {
                       className="success-button hover:bg-green-700 w-24 gap-1 h-8 flex items-center justify-between"
                     >
                       <BiCheck />
-                      Accept
+                      {accountDataLanguage.accpet(language.data ?? "en")}
                     </button>
                   </div>
                 ) : (
-                  <div>You have joined</div>
+                  <div>
+                    {accountDataLanguage.alreadyJoin(language.data ?? "en")}
+                  </div>
                 )}
               </li>
             );

@@ -61,4 +61,54 @@ export const requestData = {
         return "Please check your email for verification.";
     }
   },
+  deleteTitle: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Are you sure?";
+      case "th":
+        return "คุณแน่ใจใช่ไหม ?";
+      default:
+        return "Are you sure?";
+    }
+  },
+  deleteInstruction1: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "To confirm, type";
+      case "th":
+        return "กรุณาพิมพ์คำว่า ";
+      default:
+        return "To confirm, type";
+    }
+  },
+  deleteInstruction2: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "in the box below";
+      case "th":
+        return "เพื่อเป็นการยืนยัน";
+      default:
+        return "in the box below";
+    }
+  },
+  deleteError: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Please Type Correctly";
+      case "th":
+        return "กรุณาพิมพ์ให้ถูกต้อง";
+      default:
+        return "Please Type Correctly";
+    }
+  },
+  deleteFooter: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "This action is irreversible and destructive. Please be careful.";
+      case "th":
+        return "การกระทำนี้ไม่สามารถกู้คืนใดๆ ได้โปรดตัดสินใจอย่างระมัดระวัง";
+      default:
+        return "This action is irreversible and destructive. Please be careful.";
+    }
+  },
 } as const;
