@@ -21,10 +21,22 @@ function ButtonProfile({ user }: Props) {
     setLoading(true);
     queryClient.clear();
     destroyCookie({}, "access_token", {
-      path: "/", // THE KEY IS TO SET THE SAME PATH
+      path: "/",
+      secure: true,
+      sameSite: "none",
+      domain:
+        process.env.NODE_ENV === "production"
+          ? ".tatugaschool.com"
+          : "localhost",
     });
     destroyCookie({}, "refresh_token", {
-      path: "/", // THE KEY IS TO SET THE SAME PATH
+      path: "/",
+      secure: true,
+      sameSite: "none",
+      domain:
+        process.env.NODE_ENV === "production"
+          ? ".tatugaschool.com"
+          : "localhost",
     });
     router.push("/auth/sign-in");
   };

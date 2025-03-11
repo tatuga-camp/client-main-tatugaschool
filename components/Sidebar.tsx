@@ -1,9 +1,13 @@
 import React, { memo, ReactNode } from "react";
-import { useGetSchool, useGetSchools } from "../react-query";
+import { useGetLanguage, useGetSchool, useGetSchools } from "../react-query";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { decodeBlurhashToCanvas } from "../utils";
 import { defaultBlurHash } from "../data";
+import {
+  schoolDataLanguage,
+  sidebarSchoolDataLanguage,
+} from "../data/languages";
 
 type Props = {
   active: boolean;
@@ -20,6 +24,7 @@ function Sidebar({
   setSelectMenu,
   selectMenu,
 }: Props) {
+  const language = useGetLanguage();
   const router = useRouter();
   const school = useGetSchool({
     schoolId: schoolId,
@@ -78,7 +83,11 @@ function Sidebar({
              hover:gradient-bg active:bg-primary-color hover:text-white`}
             >
               {menu.icon}
-              <span>{menu.title}</span>
+              <span>
+                {sidebarSchoolDataLanguage[
+                  menu.title.toLowerCase() as keyof typeof sidebarSchoolDataLanguage
+                ](language.data ?? "en")}
+              </span>
             </button>
           );
         })}
