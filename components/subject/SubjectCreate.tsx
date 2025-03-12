@@ -5,11 +5,16 @@ import { MdOutlineSubtitles, MdTitle } from "react-icons/md";
 import InputEducationYear from "../common/InputEducationYear";
 import { FiPlus } from "react-icons/fi";
 import { EducationYear, ErrorMessages } from "../../interfaces";
-import { useCreateSubject, useGetClassrooms } from "../../react-query";
+import {
+  useCreateSubject,
+  useGetClassrooms,
+  useGetLanguage,
+} from "../../react-query";
 import Swal from "sweetalert2";
 import { Toast } from "primereact/toast";
 import { useSound } from "../../hook";
 import LoadingBar from "../common/LoadingBar";
+import { subjectDataLanguage } from "../../data/languages/subject";
 
 type Props = {
   onClose: () => void;
@@ -20,6 +25,7 @@ type Props = {
 function SubjectCreate({ onClose, schoolId, educationYear, toast }: Props) {
   const sound = useSound("/sounds/ding.mp3") as HTMLAudioElement;
   const create = useCreateSubject();
+  const language = useGetLanguage();
   const classrooms = useGetClassrooms({
     schoolId: schoolId,
     isAchieved: false,
@@ -80,7 +86,9 @@ function SubjectCreate({ onClose, schoolId, educationYear, toast }: Props) {
       className="xl:w-5/12 2xl:w-4/12 h-4/6 bg-white p-3 rounded-md flex flex-col gap-2 "
     >
       <header className="w-full flex justify-between border-b">
-        <h1 className="font-semibold text-lg">Create subject</h1>
+        <h1 className="font-semibold text-lg">
+          {subjectDataLanguage.create(language.data ?? "en")}
+        </h1>
         <button
           type="button"
           onClick={() => onClose()}
@@ -92,7 +100,9 @@ function SubjectCreate({ onClose, schoolId, educationYear, toast }: Props) {
       {create.isPending && <LoadingBar />}
       <div className="flex flex-col p-2 pt-5 h-96 overflow-auto gap-5">
         <div className="flex flex-col">
-          <span>Education Year</span>
+          <span>
+            {subjectDataLanguage.educationYear(language.data ?? "en")}
+          </span>
           <InputEducationYear
             required={true}
             value={data?.educationYear}
@@ -105,6 +115,7 @@ function SubjectCreate({ onClose, schoolId, educationYear, toast }: Props) {
           />
         </div>
         <InputWithIcon
+          required
           title="Name"
           value={data?.title ?? ""}
           onChange={(value) => {
@@ -114,6 +125,7 @@ function SubjectCreate({ onClose, schoolId, educationYear, toast }: Props) {
           icon={<MdOutlineSubtitles />}
         />
         <InputWithIcon
+          required
           title="Description"
           value={data.description ?? ""}
           onChange={(value) => {
@@ -124,9 +136,12 @@ function SubjectCreate({ onClose, schoolId, educationYear, toast }: Props) {
         />
 
         <label className="flex flex-col ">
-          <span className="text-sm">Select Classroom for subject</span>
+          <span className="text-sm">
+            {subjectDataLanguage.selectClass(language.data ?? "en")}
+          </span>
           <select
             disabled={classrooms.isLoading}
+            required
             className="main-select border"
             value={data?.classId}
             onChange={(e) => {
@@ -169,7 +184,7 @@ function SubjectCreate({ onClose, schoolId, educationYear, toast }: Props) {
             type="submit"
             className="main-button flex items-center justify-center gap-1"
           >
-            <FiPlus /> Create Subject
+            <FiPlus /> {subjectDataLanguage.create(language.data ?? "en")}
           </button>
         </div>
       </div>

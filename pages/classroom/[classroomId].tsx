@@ -104,10 +104,10 @@ function Index({ classroomId }: { classroomId: string }) {
                   router.replace({
                     query: {
                       ...router.query,
-                      menu: "Setting-Classroom",
+                      menu: "SettingClassroom",
                     },
                   });
-                  setSelectMenu("Setting-Classroom");
+                  setSelectMenu("SettingClassroom");
                 }}
                 className="flex items-center active:scale-110 justify-center gap-1
                  hover:bg-primary-color hover:text-white
@@ -151,10 +151,10 @@ function Index({ classroomId }: { classroomId: string }) {
               classroom={classroom.data}
             />
           )}
-          {selectMenu === "Setting-Classroom" && (
+          {selectMenu === "SettingClassroom" && (
             <ClassroomSetting classroom={classroom.data} toast={toast} />
           )}
-          {selectMenu === "Grades-Summary" && (
+          {selectMenu === "GradesSummary" && (
             <GradeSummaryReport
               students={classroom.data.students}
               classroom={classroom.data}

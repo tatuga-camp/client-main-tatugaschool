@@ -91,4 +91,34 @@ export const sidebarDataLanguage = {
         return "Setting Subject";
     }
   },
+  classroom: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Classroom";
+      case "th":
+        return "ชั้นเรียน";
+      default:
+        return "Classroom";
+    }
+  },
+  gradessummary: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Grade Summary";
+      case "th":
+        return "สรุปคะแนนรวม";
+      default:
+        return "Grade Summary";
+    }
+  },
+  settingclassroom: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Setting Classroom";
+      case "th":
+        return "ตั้งค่าชั้นเรียน";
+      default:
+        return "Setting Classroom";
+    }
+  },
 } as const;

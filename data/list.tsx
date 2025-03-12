@@ -120,8 +120,8 @@ export const menuSchoolList = ({
 
 export type MenuClassroom =
   | "Classroom"
-  | "Setting-Classroom"
-  | "Grades-Summary"
+  | "SettingClassroom"
+  | "GradesSummary"
   | "School";
 export const menuClassroomList = ({
   schoolId,
@@ -138,11 +138,11 @@ export const menuClassroomList = ({
       icon: <SiGoogleclassroom />,
     },
     {
-      title: "Grades-Summary",
+      title: "GradesSummary",
       icon: <TbReportAnalytics />,
     },
     {
-      title: "Setting-Classroom",
+      title: "SettingClassroom",
       icon: <CiSettings />,
     },
     {

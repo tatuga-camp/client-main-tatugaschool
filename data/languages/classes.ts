@@ -46,7 +46,7 @@ export const classesDataLanguage = {
       case "en":
         return "Search for classroom";
       case "th":
-        return "ค้นห้าชั้นเรียน เช่น email ครูผู้สอน ชั้นเรียน และข้อมูลต่างๆ ";
+        return "ค้นห้าชั้นเรียน";
       default:
         return "Search for classroom";
     }

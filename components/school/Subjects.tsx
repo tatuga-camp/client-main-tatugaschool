@@ -1,6 +1,10 @@
 import React, { useCallback, useEffect } from "react";
 import { SortByOption, sortByOptions } from "../../data";
-import { useGetSubjectFromSchool, useReorderSubjects } from "../../react-query";
+import {
+  useGetLanguage,
+  useGetSubjectFromSchool,
+  useReorderSubjects,
+} from "../../react-query";
 import {
   Classroom,
   EducationYear,
@@ -28,6 +32,8 @@ import PopupLayout from "../layout/PopupLayout";
 import SubjectCreate from "../subject/SubjectCreate";
 import { Toast } from "primereact/toast";
 import LoadingBar from "../common/LoadingBar";
+import { subjectDataLanguage } from "../../data/languages/subject";
+import { sortByOptionsDataLanguage } from "../../data/languages";
 
 type Props = {
   schoolId: string;
@@ -38,6 +44,7 @@ function Subjects({ schoolId }: Props) {
   const [educationYear, setEducationYear] = React.useState<
     EducationYear | undefined
   >();
+  const language = useGetLanguage();
   const [triggerCreateSubject, setTriggerCreateSubject] = React.useState(false);
   const [sortBy, setSortBy] = React.useState<SortByOption>("Default");
   const [search, setSearch] = React.useState("");
@@ -188,9 +195,11 @@ function Subjects({ schoolId }: Props) {
       md:max-w-screen-md xl:max-w-screen-lg gap-4 md:gap-0 mx-auto"
         >
           <section className="text-center md:text-left">
-            <h1 className="text-2xl md:text-3xl font-semibold">Subjects</h1>
+            <h1 className="text-2xl md:text-3xl font-semibold">
+              {subjectDataLanguage.title(language.data ?? "en")}
+            </h1>
             <p className="text-gray-400 max-w-96 break-words text-sm md:text-base">
-              You can create and manage subjects here.
+              {subjectDataLanguage.descriptiom(language.data ?? "en")}
             </p>
           </section>
           <section className="flex flex-col xl:flex-row items-center gap-2 md:gap-1">
@@ -199,7 +208,7 @@ function Subjects({ schoolId }: Props) {
               className="main-button w-full xl:w-auto flex items-center 
             justify-center gap-1 py-1 ring-1 ring-blue-600"
             >
-              Create Subject
+              {subjectDataLanguage.create(language.data ?? "en")}
             </button>
           </section>
         </header>
@@ -209,18 +218,24 @@ function Subjects({ schoolId }: Props) {
         >
           <div className="flex items-center justify-start gap-2">
             <label className="flex flex-col">
-              <span className="text-gray-400 text-sm">Search</span>
+              <span className="text-gray-400 text-sm">
+                {subjectDataLanguage.search(language.data ?? "en")}
+              </span>
               <input
                 value={search}
                 onChange={(e) => handleSearch(e.target.value)}
                 type="text"
                 className="w-96 border border-gray-300 rounded-lg p-2"
-                placeholder="Search for subject"
+                placeholder={subjectDataLanguage.searchPlaceholder(
+                  language.data ?? "en"
+                )}
               />
             </label>
             {educationYear && (
               <label className="flex flex-col">
-                <span className="text-gray-400 text-sm">Education Year</span>
+                <span className="text-gray-400 text-sm">
+                  {subjectDataLanguage.educationYear(language.data ?? "en")}
+                </span>
                 <InputEducationYear
                   value={educationYear}
                   onChange={(value) => setEducationYear(value as EducationYear)}
@@ -230,7 +245,9 @@ function Subjects({ schoolId }: Props) {
             )}
 
             <label className="flex flex-col">
-              <span className="text-gray-400 text-sm">Sort By</span>
+              <span className="text-gray-400 text-sm">
+                {subjectDataLanguage.sortBy(language.data ?? "en")}
+              </span>
               <select
                 value={sortBy}
                 onChange={(e) => {
@@ -241,7 +258,9 @@ function Subjects({ schoolId }: Props) {
               >
                 {sortByOptions.map((option) => (
                   <option key={option.title} value={option.title}>
-                    {option.title}
+                    {sortByOptionsDataLanguage[
+                      option.title.toLowerCase() as keyof typeof sortByOptionsDataLanguage
+                    ](language.data ?? "en")}
                   </option>
                 ))}
               </select>
