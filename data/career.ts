@@ -44,7 +44,7 @@ export const careerSectors = [
     ],
   },
   {
-    title: "Business management, finance and administration careers",
+    title: "Business management, finance, and administration careers",
     picture:
       "https://storage.googleapis.com/public-tatugaschool/careers/Business.png",
     blurhash: "LMKdxco}Iqs:_Nt7%goe.8e.Nxo0",

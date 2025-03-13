@@ -6,19 +6,25 @@ import InputWithIcon from "../common/InputWithIcon";
 import { SiGoogleclassroom } from "react-icons/si";
 import { TbFileDescription } from "react-icons/tb";
 import InputClassLevel from "../common/InputClassLevel";
-import { useDeleteClassroom, useUpdateClassroom } from "../../react-query";
+import {
+  useDeleteClassroom,
+  useGetLanguage,
+  useUpdateClassroom,
+} from "../../react-query";
 import { Toast } from "primereact/toast";
 import { useSound } from "../../hook";
 import Swal from "sweetalert2";
 import LoadingSpinner from "../common/LoadingSpinner";
 import { useRouter } from "next/router";
 import Switch from "../common/Switch";
+import { settingOnClassroomDataLangugae } from "../../data/languages";
 
 type Props = {
   classroom: Classroom;
   toast: React.RefObject<Toast>;
 };
 function ClassroomSetting({ classroom, toast }: Props) {
+  const lanague = useGetLanguage();
   const update = useUpdateClassroom();
   const router = useRouter();
   const sound = useSound("/sounds/ding.mp3") as HTMLAudioElement;
@@ -122,9 +128,13 @@ function ClassroomSetting({ classroom, toast }: Props) {
   return (
     <main className="flex flex-col items-center w-full gap-5 px-4 sm:px-6 lg:px-8">
       <section className="w-full sm:w-10/12 lg:w-8/12">
-        <h1 className="text-lg sm:text-xl font-medium">General Settings</h1>
+        <h1 className="text-lg sm:text-xl font-medium">
+          {settingOnClassroomDataLangugae.general(lanague.data ?? "en")}
+        </h1>
         <h4 className="text-xs sm:text-sm text-gray-500">
-          Manage your general settings
+          {settingOnClassroomDataLangugae.geernalDescription(
+            lanague.data ?? "en"
+          )}
         </h4>
 
         <form
@@ -132,12 +142,17 @@ function ClassroomSetting({ classroom, toast }: Props) {
           className="flex flex-col p-4 min-h-80 bg-white rounded-md border gap-5 mt-5"
         >
           <h2 className="border-b text-lg font-medium py-3">
-            Classroom Infomation
+            {settingOnClassroomDataLangugae.classroomInfo(lanague.data ?? "en")}
           </h2>
           <div className="grid grid-cols-1 w-full">
             <div className="grid grid-cols-1  bg-gray-200/20 gap-5  p-2 py-4">
               <label className="w-full grid md:grid-cols-2 md:gap-10">
-                <span className="text-base text-black">Classroom ID:</span>
+                <span className="text-base text-black">
+                  {settingOnClassroomDataLangugae.classroomId(
+                    lanague.data ?? "en"
+                  )}
+                  :
+                </span>
                 <Link
                   target="_blank"
                   href={`/classroom/${classroomData.id}`}
@@ -149,10 +164,14 @@ function ClassroomSetting({ classroom, toast }: Props) {
             </div>
             <div className="grid grid-cols-1  gap-5  p-2 py-4">
               <label className="w-full items-center grid md:grid-cols-2 md:gap-10">
-                <span className="text-base text-black">Title</span>
+                <span className="text-base text-black">
+                  {settingOnClassroomDataLangugae.title(lanague.data ?? "en")}
+                </span>
                 <InputWithIcon
                   required
-                  placeholder="Title"
+                  placeholder={settingOnClassroomDataLangugae.title(
+                    lanague.data ?? "en"
+                  )}
                   value={classroomData.title}
                   onChange={(value) => {
                     setClassroomData({
@@ -166,10 +185,17 @@ function ClassroomSetting({ classroom, toast }: Props) {
             </div>
             <div className="grid grid-cols-1  gap-5 bg-gray-200/20  p-2 py-4">
               <label className="w-full grid items-center md:grid-cols-2 md:gap-10">
-                <span className="text-base text-black">Description:</span>
+                <span className="text-base text-black">
+                  {settingOnClassroomDataLangugae.description(
+                    lanague.data ?? "en"
+                  )}
+                  :
+                </span>
                 <InputWithIcon
                   required
-                  placeholder="Description"
+                  placeholder={settingOnClassroomDataLangugae.description(
+                    lanague.data ?? "en"
+                  )}
                   value={classroomData.description ?? ""}
                   onChange={(value) => {
                     setClassroomData({
@@ -183,7 +209,12 @@ function ClassroomSetting({ classroom, toast }: Props) {
             </div>
             <div className="grid grid-cols-1   gap-5  p-2 py-4">
               <label className="w-full items-center grid md:grid-cols-2 md:gap-10">
-                <span className="text-base text-black">Class Level:</span>
+                <span className="text-base text-black">
+                  {settingOnClassroomDataLangugae.classLevel(
+                    lanague.data ?? "en"
+                  )}
+                  :
+                </span>
                 <InputClassLevel
                   value={classroomData.level}
                   onChange={(value) => {
@@ -201,7 +232,7 @@ function ClassroomSetting({ classroom, toast }: Props) {
           <div className="grid grid-cols-1  gap-5 bg-gray-200/20  p-2 py-4">
             <label className="w-full grid items-center md:grid-cols-2 md:gap-10">
               <span className="text-base text-black">
-                You want to achieve this classroom?
+                {settingOnClassroomDataLangugae.achieved(lanague.data ?? "en")}
               </span>
               <div className="w-full flex justify-start">
                 <Switch
@@ -218,37 +249,45 @@ function ClassroomSetting({ classroom, toast }: Props) {
               </div>
             </label>
             <h4 className="text-xs sm:text-sm text-blue-600">
-              Achieve this classroom to make its data that is relate to this
-              classroom read-only for all user. You can undo this action at
-              anytime.
+              {settingOnClassroomDataLangugae.acheveidDescription(
+                lanague.data ?? "en"
+              )}
             </h4>
           </div>
           <button
             disabled={update.isPending}
             className="main-button flex items-center justify-center mt-5 w-60"
           >
-            {update.isPending ? <LoadingSpinner /> : "Save Changes"}
+            {update.isPending ? (
+              <LoadingSpinner />
+            ) : (
+              settingOnClassroomDataLangugae.saveButton(lanague.data ?? "en")
+            )}
           </button>
         </form>
 
-        <h1 className="text-lg sm:text-xl font-medium mt-10">Danger zone</h1>
+        <h1 className="text-lg sm:text-xl font-medium mt-10">
+          {settingOnClassroomDataLangugae.danger(lanague.data ?? "en")}
+        </h1>
         <h4 className="text-xs sm:text-sm text-gray-500">
-          Irreversible and destructive actions
+          {settingOnClassroomDataLangugae.dangerDescription(
+            lanague.data ?? "en"
+          )}
         </h4>
         <div className="flex flex-col items-start p-4 bg-white rounded-md border gap-5 mt-5">
           <h2 className="border-b text-base sm:text-lg font-medium py-3">
-            Delete This Classroom
+            {settingOnClassroomDataLangugae.deleteTitle(lanague.data ?? "en")}
           </h2>
           <h4 className="text-xs sm:text-sm text-red-700">
-            once you delete this classroom, all data that related to this
-            classroom will be deleted and cannot be recovered such as subject,
-            students, assignments, and grades.
+            {settingOnClassroomDataLangugae.deleteDescription(
+              lanague.data ?? "en"
+            )}
           </h4>
           <button
             onClick={() => handleDeleteClassroom({ classId: classroomData.id })}
             className="reject-button w-60 mt-5"
           >
-            Delete This Classroom
+            {settingOnClassroomDataLangugae.deleteButton(lanague.data ?? "en")}
           </button>
         </div>
       </section>

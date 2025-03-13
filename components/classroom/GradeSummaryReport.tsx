@@ -5,7 +5,11 @@ import { FaUser } from "react-icons/fa6";
 import Image from "next/image";
 import { decodeBlurhashToCanvas } from "../../utils";
 import { defaultBlurHash } from "../../data";
-import { useGetGradeSummaryReportOnClassroom } from "../../react-query";
+import {
+  useGetGradeSummaryReportOnClassroom,
+  useGetLanguage,
+} from "../../react-query";
+import { gradeOnClassroomDataLanguage } from "../../data/languages";
 
 function GradeSummaryReport({
   students,
@@ -14,6 +18,7 @@ function GradeSummaryReport({
   students: Student[];
   classroom: Classroom;
 }) {
+  const langugae = useGetLanguage();
   const grades = useGetGradeSummaryReportOnClassroom({
     classId: classroom.id,
   });
@@ -25,18 +30,17 @@ function GradeSummaryReport({
       >
         <section className="text-center md:text-left">
           <h1 className="text-2xl md:text-3xl font-semibold">
-            Grade Summary Report
+            {gradeOnClassroomDataLanguage.title(langugae.data ?? "en")}
           </h1>
           <p className="text-gray-400 max-w-96 break-words text-sm md:text-base">
-            This is the summary of the grade report of the students in the
-            class.
+            {gradeOnClassroomDataLanguage.description(langugae.data ?? "en")}
           </p>
         </section>
         <section className="flex flex-col xl:flex-row items-center gap-2 md:gap-1">
-          <button className="main-button w-full xl:w-auto flex items-center justify-center gap-1 py-1 ring-1 ring-blue-600">
+          {/* <button className="main-button w-full xl:w-auto flex items-center justify-center gap-1 py-1 ring-1 ring-blue-600">
             <SiMicrosoftexcel />
             Export
-          </button>
+          </button> */}
         </section>
       </header>
       <main

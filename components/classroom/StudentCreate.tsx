@@ -5,7 +5,7 @@ import { MdFamilyRestroom, MdOutlineSubtitles } from "react-icons/md";
 import { IoPerson } from "react-icons/io5";
 import { TbNumber123 } from "react-icons/tb";
 import { FiPlus } from "react-icons/fi";
-import { useCreateStudent } from "../../react-query";
+import { useCreateStudent, useGetLanguage } from "../../react-query";
 import { ErrorMessages } from "../../interfaces";
 import Swal from "sweetalert2";
 import {
@@ -21,6 +21,11 @@ import { Toast } from "primereact/toast";
 import StudentSection from "./StudentSection";
 import { PiMicrosoftExcelLogoFill } from "react-icons/pi";
 import * as crypto from "crypto";
+import {
+  classesDataLanguage,
+  classroomDataLanguage,
+  studentOnClassDataLanguage,
+} from "../../data/languages";
 
 type Props = {
   onClose: () => void;
@@ -30,6 +35,7 @@ type Props = {
 };
 function StudentCreate({ onClose, classId, toast, schoolId }: Props) {
   const [triggerExcel, setTriggerExcel] = React.useState(false);
+  const language = useGetLanguage();
   const create = useCreateStudent();
   const sound = useSound("/sounds/ding.mp3") as HTMLAudioElement;
   const [loading, setLoading] = React.useState(false);
@@ -132,19 +138,25 @@ function StudentCreate({ onClose, classId, toast, schoolId }: Props) {
   return (
     <div className="w-full md:w-10/12 lg:w-7/12 2xl:w-4/12 h-[35rem] bg-white rounded-md p-4 border">
       <div className="w-full pb-3 border-b items-center justify-between flex">
-        <h1 className="text-lg font-semibold">Create Student</h1>
+        <h1 className="text-lg font-semibold">
+          {studentOnClassDataLanguage.create(language.data ?? "en")}
+        </h1>
         <div className="flex items-center justify-center gap-2">
           <button
             onClick={() => setTriggerExcel((prev) => !prev)}
             type="button"
-            className="second-button w-40 border"
+            className="second-button w-60 border"
           >
             {triggerExcel ? (
-              "UNDO"
+              studentOnClassDataLanguage.createStudent.cancel(
+                language.data ?? "en"
+              )
             ) : (
               <div className="flex items-center justify-center gap-1">
                 <PiMicrosoftExcelLogoFill />
-                Add by Excel
+                {studentOnClassDataLanguage.createStudent.excel(
+                  language.data ?? "en"
+                )}
               </div>
             )}
           </button>
@@ -188,7 +200,8 @@ function StudentCreate({ onClose, classId, toast, schoolId }: Props) {
               type="submit"
               className="main-button flex items-center justify-center gap-1"
             >
-              <FiPlus /> Create student
+              <FiPlus />{" "}
+              {studentOnClassDataLanguage.create(language.data ?? "en")}
             </button>
           </div>
         </form>
@@ -204,6 +217,7 @@ type PropsCreateByExcel = {
   toast: React.RefObject<Toast>;
 };
 function CreateByExcel({ classId, toast }: PropsCreateByExcel) {
+  const language = useGetLanguage();
   const sound = useSound("/sounds/ding.mp3") as HTMLAudioElement;
   const [textData, setTextData] = React.useState<string>("");
   const tableRef = React.useRef<HTMLUListElement>(null);
@@ -279,10 +293,26 @@ function CreateByExcel({ classId, toast }: PropsCreateByExcel) {
     <form onSubmit={handleCreate} className="mt-5">
       {loading && <LoadingBar />}
       <div className="w-full grid grid-cols-5 pr-8">
-        <div className="text-center">Number</div>
-        <div className="text-center">Title</div>
-        <div className="text-center">First Name</div>
-        <div className="text-center">Last Name</div>
+        <div className="text-center">
+          {studentOnClassDataLanguage.createStudent.number(
+            language.data ?? "en"
+          )}
+        </div>
+        <div className="text-center">
+          {studentOnClassDataLanguage.createStudent.title(
+            language.data ?? "en"
+          )}
+        </div>
+        <div className="text-center">
+          {studentOnClassDataLanguage.createStudent.firstName(
+            language.data ?? "en"
+          )}
+        </div>
+        <div className="text-center">
+          {studentOnClassDataLanguage.createStudent.lastName(
+            language.data ?? "en"
+          )}
+        </div>
         <div className="text-center">Action</div>
       </div>
       {dataStudents.length > 0 ? (
@@ -439,26 +469,20 @@ function CreateByExcel({ classId, toast }: PropsCreateByExcel) {
             placeholder="Paste your excel data here"
           ></textarea>
           <span className="text-sm text-red-500">
-            **Please make sure the data is in the correct format. The data must
-            be in the following format: Number, Title, First Name, Last Name.
+            {studentOnClassDataLanguage.createStudent.excelDescription(
+              language.data ?? "en"
+            )}
           </span>
         </div>
       )}
       <div className="w-full pt-3 border-t  justify-end gap-3 flex">
-        <button
-          disabled={loading}
-          type="button"
-          className="second-button border flex items-center justify-center gap-1"
-        >
-          Cancel
-        </button>
         {dataStudents.length > 0 && (
           <button
             disabled={loading}
             type="submit"
             className="main-button flex items-center justify-center gap-1"
           >
-            <FiPlus /> Create student
+            <FiPlus /> {classesDataLanguage.create(language.data ?? "en")}
           </button>
         )}
       </div>

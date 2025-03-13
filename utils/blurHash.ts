@@ -67,11 +67,11 @@ export const generateBlurHash = async (
 };
 
 import { decode } from "blurhash";
-import { defaultCanvas } from "../data";
+import { defaultBlurHash, defaultCanvas } from "../data";
 
 // Decode the blurhash into pixels
 export const decodeBlurhashToCanvas = (
-  blurhash: string,
+  blurhash: string = defaultBlurHash,
   width: number = 32,
   height: number = 32
 ): string => {

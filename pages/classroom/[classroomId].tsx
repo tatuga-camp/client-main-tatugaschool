@@ -6,7 +6,7 @@ import {
   RefreshTokenService,
   ResponseGetClassByIdService,
 } from "../../services";
-import { useGetClassroom } from "../../react-query";
+import { useGetClassroom, useGetLanguage } from "../../react-query";
 import Head from "next/head";
 import ClassroomLayout from "../../components/layout/ClassroomLayout";
 import { ProgressSpinner } from "primereact/progressspinner";
@@ -18,9 +18,11 @@ import StudentSection from "../../components/classroom/StudentLists";
 import ClassroomSetting from "../../components/classroom/ClassroomSetting";
 import { Toast } from "primereact/toast";
 import GradeSummaryReport from "../../components/classroom/GradeSummaryReport";
+import { classroomDataLanguage } from "../../data/languages";
 
 function Index({ classroomId }: { classroomId: string }) {
   const toast = React.useRef<Toast>(null);
+  const language = useGetLanguage();
   const router = useRouter();
   const [selectMenu, setSelectMenu] =
     React.useState<MenuClassroom>("Classroom");
@@ -76,14 +78,14 @@ function Index({ classroomId }: { classroomId: string }) {
               className="flex w-max text-xs  
              items-center mb-5  text-white  border-white gap-1 border rounded-full px-2 py-1 justify-center"
             >
-              CLASSROOM
+              {classroomDataLanguage.title(language.data ?? "en")}
             </div>
             {classroom.data.isAchieved && (
               <div
                 className="flex w-max text-xs  
              items-center mb-5  text-white  border-white gap-1 border rounded-full px-2 py-1 justify-center"
               >
-                ACHIEVED
+                {classroomDataLanguage.achieved(language.data ?? "en")}
               </div>
             )}
           </div>
@@ -114,7 +116,7 @@ function Index({ classroomId }: { classroomId: string }) {
                   text-primary-color bg-white w-max px-2 py-1 rounded-md"
               >
                 <CiCircleInfo />
-                More Info & Edit
+                {classroomDataLanguage.info(language.data ?? "en")}
               </button>
             </div>
           </div>
@@ -122,20 +124,22 @@ function Index({ classroomId }: { classroomId: string }) {
             <div className="flex w-max  bg-white items-center text-black gap-1 border rounded-full px-2 py-1 justify-center">
               <FaUsers />
               <span className=" text-xs">
-                {classroom.data.students.length} Students
+                {classroom.data.students.length}{" "}
+                {classroomDataLanguage.student(language.data ?? "en")}
               </span>
             </div>
             <div
               className="flex w-max text-xs  
             bg-white items-center text-black gap-1 border rounded-full px-2 py-1 justify-center"
             >
-              Create At: {dateMonth}
+              {classroomDataLanguage.createAt(language.data ?? "en")}:{" "}
+              {dateMonth}
             </div>
             <div
               className="flex w-max text-xs  
             bg-white items-center text-black gap-1 border rounded-full px-2 py-1 justify-center"
             >
-              Last Update:{" "}
+              {classroomDataLanguage.updateAt(language.data ?? "en")}:{" "}
               {timeAgo({
                 pastTime: new Date(classroom.data.updateAt).toISOString(),
               })}{" "}

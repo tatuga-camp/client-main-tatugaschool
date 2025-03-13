@@ -6,6 +6,7 @@ import { careerSectors } from "../../data/career";
 import Image from "next/image";
 import { decodeBlurhashToCanvas } from "../../utils";
 import { SiGooglegemini } from "react-icons/si";
+import { defaultBlurHash } from "../../data";
 
 type Props = {
   studentId: string;
@@ -17,6 +18,8 @@ function StudentCareerSuggest({ studentId, onClose }: Props) {
   const career = careerSectors.find(
     (c) => c.title === careers.data?.careers.title
   );
+
+  console.log(career);
 
   console.log(career);
   if (careers.isLoading) {
@@ -59,17 +62,19 @@ function StudentCareerSuggest({ studentId, onClose }: Props) {
         </h4>
       </header>
       <main className="w-full flex mt-5 items-center flex-col justify-center gap-2">
-        <div className="w-60 h-60 bg-white rounded-lg overflow-hidden drop-shadow-md relative">
-          <Image
-            src={career?.picture as string}
-            blurDataURL={decodeBlurhashToCanvas(career?.blurhash as string)}
-            placeholder="blur"
-            sizes="(max-width: 768px) 100vw, 33vw"
-            fill
-            className="object-fill"
-            alt="career picture"
-          />
-        </div>
+        {career && (
+          <div className="w-60 h-60 bg-white rounded-lg overflow-hidden drop-shadow-md relative">
+            <Image
+              src={career.picture}
+              blurDataURL={decodeBlurhashToCanvas(career.blurhash)}
+              placeholder="blur"
+              sizes="(max-width: 768px) 100vw, 33vw"
+              fill
+              className="object-fill"
+              alt="career picture"
+            />
+          </div>
+        )}
         <div className="gradient-bg text-white text-xl px-5 py-1 rounded-lg">
           {career?.title}
         </div>

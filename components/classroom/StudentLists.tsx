@@ -10,6 +10,7 @@ import SlideLayout from "../layout/SlideLayout";
 import StudentSection from "./StudentSection";
 import {
   useDeleteStudent,
+  useGetLanguage,
   useResetStudentPassword,
   useUpdateStudent,
 } from "../../react-query";
@@ -25,6 +26,12 @@ import { MdDelete, MdOutlinePassword } from "react-icons/md";
 import StudentCareerSuggest from "../student/StudentCareerSuggest";
 import { SiGooglegemini } from "react-icons/si";
 import { TbReportSearch } from "react-icons/tb";
+import ConfirmDeleteMessage from "../common/ConfirmDeleteMessage";
+import {
+  classesDataLanguage,
+  sortByOptionsDataLanguage,
+  studentOnClassDataLanguage,
+} from "../../data/languages";
 
 type Props = {
   students: Student[];
@@ -32,6 +39,7 @@ type Props = {
 };
 function StudentLists({ students, classroom }: Props) {
   const resetPasword = useResetStudentPassword();
+  const language = useGetLanguage();
   const deleteStudent = useDeleteStudent();
   const [triggerCreateStudent, setTriggerCreateStudent] = React.useState(false);
   const updateStudent = useUpdateStudent();
@@ -196,59 +204,38 @@ function StudentLists({ students, classroom }: Props) {
   };
 
   const handleDeleteStudent = async ({ studentId }: { studentId: string }) => {
-    const replacedText = "DELETE";
-    let content = document.createElement("div");
-    content.innerHTML =
-      "<div>To confirm, type <strong>" +
-      replacedText +
-      "</strong> in the box below </div>";
-    const { value } = await Swal.fire({
-      title: "Are you sure?",
-      input: "text",
-      icon: "warning",
-      footer: "This action is irreversible and destructive. Please be careful.",
-      html: content,
-      showCancelButton: true,
-      inputValidator: (value) => {
-        if (value !== replacedText) {
-          return "Please Type Correctly";
-        }
-      },
-    });
-    if (value) {
-      try {
-        Swal.fire({
-          title: "Deleting...",
-          html: "Loading....",
-          allowEscapeKey: false,
-          allowOutsideClick: false,
-          didOpen: () => {
-            Swal.showLoading();
-          },
-        });
+    try {
+      Swal.fire({
+        title: "Deleting...",
+        html: "Loading....",
+        allowEscapeKey: false,
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
 
-        await deleteStudent.mutateAsync({
-          studentId: studentId,
-        });
-        sound.play();
-        Swal.fire({
-          title: "Success",
-          text: "Student Deleted",
-          icon: "success",
-        });
-        setSelectStudent(null);
-      } catch (error) {
-        console.log(error);
-        let result = error as ErrorMessages;
-        Swal.fire({
-          title: result.error ? result.error : "Something Went Wrong",
-          text: result.message.toString(),
-          footer: result.statusCode
-            ? "Code Error: " + result.statusCode?.toString()
-            : "",
-          icon: "error",
-        });
-      }
+      await deleteStudent.mutateAsync({
+        studentId: studentId,
+      });
+      sound.play();
+      Swal.fire({
+        title: "Success",
+        text: "Student Deleted",
+        icon: "success",
+      });
+      setSelectStudent(null);
+    } catch (error) {
+      console.log(error);
+      let result = error as ErrorMessages;
+      Swal.fire({
+        title: result.error ? result.error : "Something Went Wrong",
+        text: result.message.toString(),
+        footer: result.statusCode
+          ? "Code Error: " + result.statusCode?.toString()
+          : "",
+        icon: "error",
+      });
     }
   };
 
@@ -331,7 +318,11 @@ function StudentLists({ students, classroom }: Props) {
                   handleUpload={handleUpload}
                 />
                 <div className="flex flex-col mt-5 gap-1">
-                  <span className=" text-sm">student&lsquo;s password</span>
+                  <span className=" text-sm">
+                    {studentOnClassDataLanguage.studentData.password(
+                      language.data ?? "en"
+                    )}
+                  </span>
                   <button
                     type="button"
                     disabled={loadingStudent}
@@ -339,12 +330,14 @@ function StudentLists({ students, classroom }: Props) {
                     className="second-button border w-max flex items-center justify-center gap-1"
                   >
                     <MdOutlinePassword />
-                    Reset Password
+                    {studentOnClassDataLanguage.studentData.resetPassword(
+                      language.data ?? "en"
+                    )}
                   </button>
                   <span className="text-sm text-red-500">
-                    ** Password is hashed that mean you can&lsquo;t see the
-                    password only reset them. Even the admin doesn&lsquo;t know
-                    the password. **
+                    {studentOnClassDataLanguage.studentData.passwordDescription(
+                      language.data ?? "en"
+                    )}
                   </span>
                 </div>
               </main>
@@ -353,7 +346,14 @@ function StudentLists({ students, classroom }: Props) {
                 <button
                   onClick={() => {
                     document.body.style.overflow = "auto";
-                    handleDeleteStudent({ studentId: selectStudent.id });
+                    ConfirmDeleteMessage({
+                      language: language.data ?? "en",
+                      callback: async () => {
+                        await handleDeleteStudent({
+                          studentId: selectStudent.id,
+                        });
+                      },
+                    });
                   }}
                   className="reject-button flex items-center justify-center gap-1"
                 >
@@ -412,10 +412,11 @@ function StudentLists({ students, classroom }: Props) {
       md:max-w-screen-md xl:max-w-screen-lg gap-4 md:gap-0 mx-auto"
         >
           <section className="text-center md:text-left">
-            <h1 className="text-2xl md:text-3xl font-semibold">Students</h1>
+            <h1 className="text-2xl md:text-3xl font-semibold">
+              {studentOnClassDataLanguage.title(language.data ?? "en")}
+            </h1>
             <p className="text-gray-400 max-w-96 break-words text-sm md:text-base">
-              Manage your students in a classroom here. You can create, edit,
-              and delete students.
+              {studentOnClassDataLanguage.description(language.data ?? "en")}
             </p>
           </section>
           <section className="flex flex-col xl:flex-row items-center gap-2 md:gap-1">
@@ -427,24 +428,30 @@ function StudentLists({ students, classroom }: Props) {
               className="main-button drop-shadow-md w-full xl:w-auto flex items-center justify-center gap-1 py-1 ring-1 ring-blue-600"
             >
               <FiPlus />
-              Create Student
+              {studentOnClassDataLanguage.create(language.data ?? "en")}
             </button>
           </section>
         </header>
         <div className="flex items-center justify-start gap-2">
           <label className="flex flex-col">
-            <span className="text-gray-400 text-sm">Search</span>
+            <span className="text-gray-400 text-sm">
+              {studentOnClassDataLanguage.search(language.data ?? "en")}
+            </span>
             <input
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
               type="text"
               className="w-96 border border-gray-300 rounded-lg p-2"
-              placeholder="Search for student"
+              placeholder={studentOnClassDataLanguage.searchPlaceholder(
+                language.data ?? "en"
+              )}
             />
           </label>
 
           <label className="flex flex-col">
-            <span className="text-gray-400 text-sm">Sort By</span>
+            <span className="text-gray-400 text-sm">
+              {classesDataLanguage.sort(language.data ?? "en")}
+            </span>
             <select
               value={sortBy}
               onChange={(e) => {
@@ -455,7 +462,9 @@ function StudentLists({ students, classroom }: Props) {
             >
               {sortByOptions.map((option) => (
                 <option key={option.title} value={option.title}>
-                  {option.title}
+                  {sortByOptionsDataLanguage[
+                    option.title.toLowerCase() as keyof typeof sortByOptionsDataLanguage
+                  ](language.data ?? "en")}
                 </option>
               ))}
             </select>
@@ -463,7 +472,7 @@ function StudentLists({ students, classroom }: Props) {
         </div>
 
         <section
-          className="w-80 min-h-screen  md:w-10/12 lg:w-9/12 
+          className="w-80   md:w-10/12 lg:w-9/12 
 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-5"
         >
           {studentData.map((student) => {

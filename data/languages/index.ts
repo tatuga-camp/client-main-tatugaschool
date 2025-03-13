@@ -10,3 +10,4 @@ export * from "./account";
 export * from "./school";
 export * from "./classes";
 export * from "./sidebar";
+export * from "./class";

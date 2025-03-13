@@ -11,6 +11,7 @@ import LoadingSpinner from "../common/LoadingSpinner";
 import { useRouter } from "next/router";
 import LoadingBar from "../common/LoadingBar";
 import { requestData, schoolDataLanguage } from "../../data/languages";
+import ConfirmDeleteMessage from "../common/ConfirmDeleteMessage";
 
 const BasicInformationSection = ({ school }: { school: School }) => {
   const language = useGetLanguage();
@@ -64,32 +65,12 @@ const BasicInformationSection = ({ school }: { school: School }) => {
           <button
             disabled={removeSchool.isPending}
             onClick={async () => {
-              const replacedText = "DELETE";
-              let content = document.createElement("div");
-              content.innerHTML =
-                `<div>${requestData.deleteInstruction1(
-                  language.data ?? "en"
-                )}<strong>` +
-                replacedText +
-                `  </strong>${requestData.deleteInstruction2(
-                  language.data ?? "en"
-                )}</div>`;
-              const { value } = await Swal.fire({
-                title: requestData.deleteTitle(language.data ?? "en"),
-                input: "text",
-                icon: "warning",
-                footer: requestData.deleteFooter(language.data ?? "en"),
-                html: content,
-                showCancelButton: true,
-                inputValidator: (value) => {
-                  if (value !== replacedText) {
-                    return requestData.deleteError(language.data ?? "en");
-                  }
+              await ConfirmDeleteMessage({
+                language: language.data ?? "en",
+                callback: async () => {
+                  await handleDeleteSchool();
                 },
               });
-              if (value) {
-                await handleDeleteSchool();
-              }
             }}
             className="reject-button mt-5 w-40 flex items-center justify-center"
           >

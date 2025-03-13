@@ -4,6 +4,8 @@ import { MdFamilyRestroom, MdOutlineSubtitles } from "react-icons/md";
 import { IoPerson } from "react-icons/io5";
 import { TbNumber123 } from "react-icons/tb";
 import Image from "next/image";
+import { useGetLanguage } from "../../react-query";
+import { studentOnClassDataLanguage } from "../../data/languages";
 
 type Props = {
   data: {
@@ -25,6 +27,7 @@ type Props = {
   handleUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
 function StudentSection({ data, setData, handleUpload }: Props) {
+  const language = useGetLanguage();
   return (
     <>
       <h1 className="text-lg py-5 font-medium">Student Information</h1>
@@ -32,9 +35,13 @@ function StudentSection({ data, setData, handleUpload }: Props) {
         <InputWithIcon
           required
           value={data?.title}
-          title="Title"
+          title={studentOnClassDataLanguage.createStudent.title(
+            language.data ?? "en"
+          )}
           minLength={1}
-          placeholder="Title"
+          placeholder={studentOnClassDataLanguage.createStudent.title(
+            language.data ?? "en"
+          )}
           onChange={(value) => {
             setData({ title: value });
           }}
@@ -44,9 +51,13 @@ function StudentSection({ data, setData, handleUpload }: Props) {
           <InputWithIcon
             value={data?.firstName}
             required
-            title="First Name"
+            title={studentOnClassDataLanguage.createStudent.firstName(
+              language.data ?? "en"
+            )}
             minLength={1}
-            placeholder="First Name"
+            placeholder={studentOnClassDataLanguage.createStudent.firstName(
+              language.data ?? "en"
+            )}
             onChange={(value) => {
               setData({ firstName: value });
             }}
@@ -55,9 +66,13 @@ function StudentSection({ data, setData, handleUpload }: Props) {
           <InputWithIcon
             value={data?.lastName}
             required
-            title="Last Name"
+            title={studentOnClassDataLanguage.createStudent.lastName(
+              language.data ?? "en"
+            )}
             minLength={1}
-            placeholder="Last Name"
+            placeholder={studentOnClassDataLanguage.createStudent.lastName(
+              language.data ?? "en"
+            )}
             onChange={(value) => {
               setData({ lastName: value });
             }}
@@ -67,8 +82,12 @@ function StudentSection({ data, setData, handleUpload }: Props) {
         <InputWithIcon
           value={data?.number}
           required
-          title="Number"
-          placeholder="Number"
+          title={studentOnClassDataLanguage.createStudent.number(
+            language.data ?? "en"
+          )}
+          placeholder={studentOnClassDataLanguage.createStudent.number(
+            language.data ?? "en"
+          )}
           minLength={1}
           onChange={(value) => {
             setData({ number: value });
@@ -76,7 +95,9 @@ function StudentSection({ data, setData, handleUpload }: Props) {
           icon={<TbNumber123 />}
         />
       </div>
-      <div className="text-sm mt-10 mb-2">Upload Student Image (Optional)</div>
+      <div className="text-sm mt-10 mb-2">
+        {studentOnClassDataLanguage.createStudent.photo(language.data ?? "en")}
+      </div>
       <label
         htmlFor="dropzone-file"
         className={`flex flex-col relative items-center justify-center w-full h-64 border-2
