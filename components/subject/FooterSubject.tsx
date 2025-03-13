@@ -2,10 +2,12 @@ import React, { memo } from "react";
 import { BsQrCode } from "react-icons/bs";
 import { FaRandom, FaStopwatch20, FaWpforms } from "react-icons/fa";
 import { TbArrowsRandom } from "react-icons/tb";
+import { footerOnSubjectDataLangugae } from "../../data/languages";
+import { useGetLanguage } from "../../react-query";
 
 const menuFooters = [
   {
-    title: "Stop Watch",
+    title: "StopWatch",
     icon: <FaStopwatch20 />,
   },
   {
@@ -13,15 +15,15 @@ const menuFooters = [
     icon: <FaWpforms />,
   },
   {
-    title: "Attendance QR Code",
+    title: "AttendanceQRCode",
     icon: <BsQrCode />,
   },
   {
-    title: "Wheel Of Name",
+    title: "WheelOfName",
     icon: <TbArrowsRandom />,
   },
   {
-    title: "Slide Picker",
+    title: "SlidePicker",
     icon: <FaRandom />,
   },
 ] as const;
@@ -33,6 +35,7 @@ type Props = {
   selectFooter: ListMenuFooter;
 };
 function FooterSubject({ setSelectFooter, selectFooter }: Props) {
+  const language = useGetLanguage();
   return (
     <div className="w-full max-w-full overflow-x-auto ">
       <div
@@ -63,7 +66,9 @@ function FooterSubject({ setSelectFooter, selectFooter }: Props) {
                 selectFooter === menu.title && "text-white"
               } group-active:text-white`}
             >
-              {menu.title}
+              {footerOnSubjectDataLangugae[
+                menu.title as keyof typeof footerOnSubjectDataLangugae
+              ](language.data ?? "en")}
             </h1>
           </button>
         ))}

@@ -1,10 +1,11 @@
 import Link from "next/link";
 import React, { memo } from "react";
-import { useGetSubject } from "../../react-query";
+import { useGetLanguage, useGetSubject } from "../../react-query";
 import InputNumber from "../common/InputNumber";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { CiSaveDown2 } from "react-icons/ci";
 import InputEducationYear from "../common/InputEducationYear";
+import { settingOnSubjectDataLanguage } from "../../data/languages";
 
 type Props = {
   onSummit: (
@@ -21,7 +22,7 @@ type Props = {
 };
 function SubjectInfomation({ onSummit, subjectId, isPending = false }: Props) {
   const subject = useGetSubject({ subjectId });
-
+  const language = useGetLanguage();
   const [subjectBasicInfo, setSubjectBasicInfo] = React.useState<{
     name?: string;
     description?: string;
@@ -61,11 +62,15 @@ function SubjectInfomation({ onSummit, subjectId, isPending = false }: Props) {
       }}
       className="flex flex-col p-4 min-h-80 bg-white rounded-md border gap-5 mt-5"
     >
-      <h2 className="border-b text-lg font-medium py-3">Subject Infomation</h2>
+      <h2 className="border-b text-lg font-medium py-3">
+        {settingOnSubjectDataLanguage.info(language.data ?? "en")}
+      </h2>
       <div className="grid grid-cols-1 w-full">
         <div className="grid grid-cols-1  bg-gray-200/20 gap-5  p-2 py-4">
           <label className="w-full grid md:grid-cols-2 md:gap-10">
-            <span className="text-base text-black">Subject ID:</span>
+            <span className="text-base text-black">
+              {settingOnSubjectDataLanguage.subjectId(language.data ?? "en")}:
+            </span>
             <Link
               target="_blank"
               href={`/subject/${subject.data?.id}`}
@@ -78,7 +83,10 @@ function SubjectInfomation({ onSummit, subjectId, isPending = false }: Props) {
         <div className="grid grid-cols-1  gap-5  p-2 py-4">
           <label className="w-full grid md:grid-cols-2 md:gap-10">
             <span className="text-base text-black">
-              The Subject Connect To Class ID:
+              {settingOnSubjectDataLanguage.connectClassId(
+                language.data ?? "en"
+              )}
+              :
             </span>
             <Link
               target="_blank"
@@ -91,7 +99,9 @@ function SubjectInfomation({ onSummit, subjectId, isPending = false }: Props) {
         </div>
         <div className="grid grid-cols-1  gap-5 bg-gray-200/20  p-2 py-4">
           <label className="w-full grid md:grid-cols-2 md:gap-10">
-            <span className="text-base text-black">Subject Code:</span>
+            <span className="text-base text-black">
+              {settingOnSubjectDataLanguage.code(language.data ?? "en")}:
+            </span>
             <span className="text-base font-semibold  text-black">
               {subject.data?.code}
             </span>
@@ -99,7 +109,9 @@ function SubjectInfomation({ onSummit, subjectId, isPending = false }: Props) {
         </div>
         <div className="grid grid-cols-1   gap-5  p-2 py-4">
           <label className="w-full items-center grid md:grid-cols-2 md:gap-10">
-            <span className="text-base text-black">Subject Name:</span>
+            <span className="text-base text-black">
+              {settingOnSubjectDataLanguage.name(language.data ?? "en")}:
+            </span>
             <input
               required
               type="text"
@@ -110,14 +122,18 @@ function SubjectInfomation({ onSummit, subjectId, isPending = false }: Props) {
                   name: e.target.value,
                 });
               }}
-              placeholder="Subject Name"
+              placeholder={settingOnSubjectDataLanguage.name(
+                language.data ?? "en"
+              )}
               className="main-input"
             />
           </label>
         </div>
         <div className="grid grid-cols-1 bg-gray-200/20   gap-5  p-2 py-4">
           <label className="w-full items-center grid md:grid-cols-2 md:gap-10">
-            <span className="text-base text-black">Description:</span>
+            <span className="text-base text-black">
+              {settingOnSubjectDataLanguage.description(language.data ?? "en")}:
+            </span>
             <input
               required
               type="text"
@@ -128,14 +144,21 @@ function SubjectInfomation({ onSummit, subjectId, isPending = false }: Props) {
                   description: e.target.value,
                 });
               }}
-              placeholder="Description"
+              placeholder={settingOnSubjectDataLanguage.description(
+                language.data ?? "en"
+              )}
               className="main-input"
             />
           </label>
         </div>
         <div className="grid grid-cols-1  gap-5  p-2 py-4">
           <label className="w-1/2 md:w-full items-center grid md:grid-cols-2 md:gap-10">
-            <span className="text-base text-black">Education Year:</span>
+            <span className="text-base text-black">
+              {settingOnSubjectDataLanguage.educationYear(
+                language.data ?? "en"
+              )}
+              :
+            </span>
             <div className="flex items-center gap-2">
               {subjectBasicInfo?.term && subjectBasicInfo.year && (
                 <InputEducationYear
@@ -159,7 +182,7 @@ function SubjectInfomation({ onSummit, subjectId, isPending = false }: Props) {
       </div>
       <button
         disabled={isPending}
-        className="main-button flex justify-center items-center  w-40 mt-5"
+        className="main-button flex justify-center items-center  w-60 mt-5"
       >
         {isPending ? (
           <ProgressSpinner
@@ -171,7 +194,7 @@ function SubjectInfomation({ onSummit, subjectId, isPending = false }: Props) {
         ) : (
           <div className="flex items-center justify-center gap-1">
             <CiSaveDown2 />
-            Save Changes
+            {settingOnSubjectDataLanguage.save(language.data ?? "en")}
           </div>
         )}
       </button>

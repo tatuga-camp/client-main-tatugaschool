@@ -66,7 +66,7 @@ export const sidebarDataLanguage = {
       case "en":
         return "Attendance";
       case "th":
-        return "เช็คชื่อ";
+        return "ข้อมูลเช็คชื่อ";
       default:
         return "Attendance";
     }

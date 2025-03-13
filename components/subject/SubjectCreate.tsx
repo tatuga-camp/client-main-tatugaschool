@@ -14,7 +14,7 @@ import Swal from "sweetalert2";
 import { Toast } from "primereact/toast";
 import { useSound } from "../../hook";
 import LoadingBar from "../common/LoadingBar";
-import { subjectDataLanguage } from "../../data/languages/subject";
+import { subjectsDataLanguage } from "../../data/languages";
 
 type Props = {
   onClose: () => void;
@@ -87,7 +87,7 @@ function SubjectCreate({ onClose, schoolId, educationYear, toast }: Props) {
     >
       <header className="w-full flex justify-between border-b">
         <h1 className="font-semibold text-lg">
-          {subjectDataLanguage.create(language.data ?? "en")}
+          {subjectsDataLanguage.create(language.data ?? "en")}
         </h1>
         <button
           type="button"
@@ -101,7 +101,7 @@ function SubjectCreate({ onClose, schoolId, educationYear, toast }: Props) {
       <div className="flex flex-col p-2 pt-5 h-96 overflow-auto gap-5">
         <div className="flex flex-col">
           <span>
-            {subjectDataLanguage.educationYear(language.data ?? "en")}
+            {subjectsDataLanguage.educationYear(language.data ?? "en")}
           </span>
           <InputEducationYear
             required={true}
@@ -137,7 +137,7 @@ function SubjectCreate({ onClose, schoolId, educationYear, toast }: Props) {
 
         <label className="flex flex-col ">
           <span className="text-sm">
-            {subjectDataLanguage.selectClass(language.data ?? "en")}
+            {subjectsDataLanguage.selectClass(language.data ?? "en")}
           </span>
           <select
             disabled={classrooms.isLoading}
@@ -184,7 +184,7 @@ function SubjectCreate({ onClose, schoolId, educationYear, toast }: Props) {
             type="submit"
             className="main-button flex items-center justify-center gap-1"
           >
-            <FiPlus /> {subjectDataLanguage.create(language.data ?? "en")}
+            <FiPlus /> {subjectsDataLanguage.create(language.data ?? "en")}
           </button>
         </div>
       </div>

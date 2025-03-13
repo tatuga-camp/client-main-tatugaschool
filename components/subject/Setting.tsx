@@ -1,9 +1,15 @@
+import { useQueryClient } from "@tanstack/react-query";
+import Image from "next/image";
+import { useRouter } from "next/router";
+import { Toast } from "primereact/toast";
 import React, { useEffect } from "react";
-import Switch from "../common/Switch";
-import ListMembers from "../member/ListMembers";
+import Swal from "sweetalert2";
+import { defaultBlurHash, ListSubjectRoles } from "../../data";
+import { ErrorMessages, MemberRole } from "../../interfaces";
 import {
   useDeleteSubject,
   useDeleteTeacherOnSubject,
+  useGetLanguage,
   useGetStudentOnSubject,
   useGetSubject,
   useGetTeacherOnSubject,
@@ -11,20 +17,16 @@ import {
   useUpdateStudentOnSubject,
   useUpdateSubject,
 } from "../../react-query";
-import { ErrorMessages, MemberRole } from "../../interfaces";
-import Image from "next/image";
 import { decodeBlurhashToCanvas } from "../../utils";
-import { defaultBlurHash, ListSubjectRoles } from "../../data";
-import Link from "next/link";
-import { CiSaveDown2 } from "react-icons/ci";
-import InputNumber from "../common/InputNumber";
-import Swal from "sweetalert2";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Toast } from "primereact/toast";
-import { ProgressSpinner } from "primereact/progressspinner";
+import Switch from "../common/Switch";
+import ListMembers from "../member/ListMembers";
 import SubjectInfomation from "./SubjectInfomation";
 import SubjectPermission from "./SubjectPermission";
-import { useRouter } from "next/router";
+import {
+  settingOnClassroomDataLangugae,
+  settingOnSubjectDataLanguage,
+} from "../../data/languages";
+import ConfirmDeleteMessage from "../common/ConfirmDeleteMessage";
 
 type Props = {
   subjectId: string;
@@ -34,6 +36,7 @@ function Setting({ subjectId, setSelectMenu }: Props) {
   const teacherOnSubjects = useGetTeacherOnSubject({
     subjectId: subjectId,
   });
+  const language = useGetLanguage();
   const toast = React.useRef<Toast>(null);
   const updateStudentOnSubject = useUpdateStudentOnSubject();
   const deleteTeacherOnSubject = useDeleteTeacherOnSubject();
@@ -149,61 +152,40 @@ function Setting({ subjectId, setSelectMenu }: Props) {
     subjectId: string;
     schoolId: string;
   }) => {
-    const replacedText = "DELETE";
-    let content = document.createElement("div");
-    content.innerHTML =
-      "<div>To confirm, type <strong>" +
-      replacedText +
-      "</strong> in the box below </div>";
-    const { value } = await Swal.fire({
-      title: "Are you sure?",
-      input: "text",
-      icon: "warning",
-      footer: "This action is irreversible and destructive. Please be careful.",
-      html: content,
-      showCancelButton: true,
-      inputValidator: (value) => {
-        if (value !== replacedText) {
-          return "Please Type Correctly";
-        }
-      },
-    });
-    if (value) {
-      try {
-        Swal.fire({
-          title: "Deleting...",
-          html: "Loading....",
-          allowEscapeKey: false,
-          allowOutsideClick: false,
-          didOpen: () => {
-            Swal.showLoading();
-          },
-        });
+    try {
+      Swal.fire({
+        title: "Deleting...",
+        html: "Loading....",
+        allowEscapeKey: false,
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
 
-        await deleteSubject.mutateAsync({
-          request: {
-            subjectId: subjectId,
-          },
-          queryClient: queryClient,
-        });
-        Swal.fire({
-          title: "Success",
-          text: "Subject has been deleted",
-          icon: "success",
-        });
-        router.push(`/school/${schoolId}?menu=Subjects`);
-      } catch (error) {
-        console.log(error);
-        let result = error as ErrorMessages;
-        Swal.fire({
-          title: result.error ? result.error : "Something Went Wrong",
-          text: result.message.toString(),
-          footer: result.statusCode
-            ? "Code Error: " + result.statusCode?.toString()
-            : "",
-          icon: "error",
-        });
-      }
+      await deleteSubject.mutateAsync({
+        request: {
+          subjectId: subjectId,
+        },
+        queryClient: queryClient,
+      });
+      Swal.fire({
+        title: "Success",
+        text: "Subject has been deleted",
+        icon: "success",
+      });
+      router.push(`/school/${schoolId}?menu=Subjects`);
+    } catch (error) {
+      console.log(error);
+      let result = error as ErrorMessages;
+      Swal.fire({
+        title: result.error ? result.error : "Something Went Wrong",
+        text: result.message.toString(),
+        footer: result.statusCode
+          ? "Code Error: " + result.statusCode?.toString()
+          : "",
+        icon: "error",
+      });
     }
   };
 
@@ -211,9 +193,13 @@ function Setting({ subjectId, setSelectMenu }: Props) {
     <main className="flex flex-col items-center w-full gap-5 px-4 sm:px-6 lg:px-8">
       <Toast ref={toast} />
       <section className="w-full sm:w-10/12 lg:w-8/12">
-        <h1 className="text-lg sm:text-xl font-medium">General Settings</h1>
+        <h1 className="text-lg sm:text-xl font-medium">
+          {settingOnSubjectDataLanguage.general(language.data ?? "en")}
+        </h1>
         <h4 className="text-xs sm:text-sm text-gray-500">
-          Manage your general settings
+          {settingOnSubjectDataLanguage.generalDescription(
+            language.data ?? "en"
+          )}
         </h4>
         <SubjectInfomation
           subjectId={subjectId}
@@ -229,7 +215,7 @@ function Setting({ subjectId, setSelectMenu }: Props) {
 
         <div className="flex flex-col p-4 min-h-80 bg-white rounded-md border gap-5 mt-5">
           <h2 className="border-b text-base sm:text-lg font-medium py-3">
-            Manage Co-Teacher
+            {settingOnSubjectDataLanguage.coTeacher(language.data ?? "en")}
           </h2>
           {members && teacherOnSubjects.data && user.data && (
             <ListMembers
@@ -244,20 +230,21 @@ function Setting({ subjectId, setSelectMenu }: Props) {
           )}
         </div>
         <h1 className="text-lg sm:text-xl font-medium mt-10">
-          Students Setting
+          {settingOnSubjectDataLanguage.studentSetting(language.data ?? "en")}
         </h1>
         <h4 className="text-xs sm:text-sm text-gray-500">
-          Manage Students / Import Student Here
+          {settingOnSubjectDataLanguage.studentSettingDescription(
+            language.data ?? "en"
+          )}
         </h4>
         <div className="flex flex-col p-4 min-h-80 bg-white rounded-md border gap-5 mt-5">
           <h2 className="border-b text-base sm:text-lg font-medium py-3">
-            Student Lists On The Subject
+            {settingOnSubjectDataLanguage.listOnStudent(language.data ?? "en")}
           </h2>
           <h4 className="text-xs sm:text-sm text-gray-500">
-            You cannot add student from another class to this subject. Once you
-            create subject and add a class to this subject, the student will be
-            automatically added to this subject. You can only disable a student
-            from this subject not delete them.
+            {settingOnSubjectDataLanguage.listOnStudentDescription(
+              language.data ?? "en"
+            )}
           </h4>
           <ul className="grid max-h-96 overflow-auto grid-cols-1">
             {studentOnSubjects.data
@@ -319,38 +306,43 @@ function Setting({ subjectId, setSelectMenu }: Props) {
               })}
           </ul>
         </div>
-        <h1 className="text-lg sm:text-xl font-medium mt-10">Danger zone</h1>
+        <h1 className="text-lg sm:text-xl font-medium mt-10">
+          {settingOnClassroomDataLangugae.danger(language.data ?? "en")}
+        </h1>
         <h4 className="text-xs sm:text-sm text-gray-500">
-          Irreversible and destructive actions
+          {settingOnClassroomDataLangugae.dangerDescription(
+            language.data ?? "en"
+          )}
         </h4>
         <div className="flex flex-col items-start p-4 bg-white rounded-md border gap-5 mt-5">
           <h2 className="border-b text-base sm:text-lg font-medium py-3">
-            Delete This Subject
+            {settingOnSubjectDataLanguage.deleteSubject(language.data ?? "en")}
           </h2>
           <h4 className="text-xs sm:text-sm text-red-700">
-            Once you delete this subject, all data will be lost and cannot be
-            recovered. Please be careful.
+            {settingOnSubjectDataLanguage.deleteSubjectDescription(
+              language.data ?? "en"
+            )}
           </h4>
           <button
             disabled={deleteSubject.isPending}
             onClick={() => {
               if (!subject.data) return;
-              handleDeleteSubject({
-                subjectId: subjectId,
-                schoolId: subject.data?.schoolId,
+
+              ConfirmDeleteMessage({
+                language: language.data ?? "en",
+                callback: async () => {
+                  await handleDeleteSubject({
+                    subjectId: subjectId,
+                    schoolId: subject.data?.schoolId,
+                  });
+                },
               });
             }}
             className="reject-button mt-5"
           >
-            Delete This Subject
+            {settingOnSubjectDataLanguage.deleteSubject(language.data ?? "en")}
           </button>
         </div>
-        <button
-          onClick={() => setSelectMenu("Subject")}
-          className="main-button mt-5"
-        >
-          Back To Subject
-        </button>
       </section>
     </main>
   );

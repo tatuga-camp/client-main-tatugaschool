@@ -11,3 +11,5 @@ export * from "./school";
 export * from "./classes";
 export * from "./sidebar";
 export * from "./class";
+export * from "./subject";
+export * from "./subjects";

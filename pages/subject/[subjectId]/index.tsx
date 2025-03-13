@@ -12,10 +12,12 @@ import { MdFullscreen, MdFullscreenExit, MdMenu } from "react-icons/md";
 import { SlPicture } from "react-icons/sl";
 import Swal from "sweetalert2";
 import DefaultLayout from "../../../components/layout/DefaultLayout";
+import PopupLayout from "../../../components/layout/PopupLayout";
 import SubjectLayout from "../../../components/layout/SubjectLayout";
 import ListMemberCircle from "../../../components/member/ListMemberCircle";
 import Attendance from "../../../components/subject/Attendance";
 import AttendanceChecker from "../../../components/subject/AttendanceChecker";
+import AttendanceQRcode from "../../../components/subject/AttendanceQRcode";
 import Classwork from "../../../components/subject/Classwork";
 import { ListMenuFooter } from "../../../components/subject/FooterSubject";
 import Grade from "../../../components/subject/Grade";
@@ -31,6 +33,7 @@ import { useSound } from "../../../hook";
 import useClickOutside from "../../../hook/useClickOutside";
 import { ErrorMessages, StudentOnSubject } from "../../../interfaces";
 import {
+  useGetLanguage,
   useGetStudentOnSubject,
   useGetSubject,
   useGetTeacherOnSubject,
@@ -48,8 +51,7 @@ import {
   getRefetchtoken,
   localStorageGetRemoveRandomStudents,
 } from "../../../utils";
-import PopupLayout from "../../../components/layout/PopupLayout";
-import AttendanceQRcode from "../../../components/subject/AttendanceQRcode";
+import { subjectDataLanguage } from "../../../data/languages";
 type Props = {
   subjectId: string;
 };
@@ -58,6 +60,7 @@ function Index({ subjectId }: Props) {
   const toast = React.useRef<Toast>(null);
   const queryClient = useQueryClient();
   const ding = useSound("/sounds/ding.mp3");
+  const language = useGetLanguage();
   const router = useRouter();
   const subject = useGetSubject({
     subjectId: subjectId,
@@ -89,7 +92,7 @@ function Index({ subjectId }: Props) {
 
   useEffect(() => {
     if (
-      selectFooter === "Wheel Of Name" &&
+      selectFooter === "WheelOfName" &&
       subject.data &&
       subject.data.wheelOfNamePath
     ) {
@@ -99,7 +102,7 @@ function Index({ subjectId }: Props) {
       );
       setSelectFooter("EMTY");
     } else if (
-      selectFooter === "Wheel Of Name" &&
+      selectFooter === "WheelOfName" &&
       subject.data &&
       !subject.data.wheelOfNamePath
     ) {
@@ -110,7 +113,7 @@ function Index({ subjectId }: Props) {
         icon: "info",
       });
       setSelectFooter("EMTY");
-    } else if (selectFooter === "Stop Watch") {
+    } else if (selectFooter === "StopWatch") {
       setTriggerStopWatch(true);
     } else {
       setTriggerStopWatch(false);
@@ -245,7 +248,7 @@ function Index({ subjectId }: Props) {
         <Toast ref={toast} />
         {triggerStopWatch && <StopWatch onClose={handleCloseStopWatch} />}
 
-        {selectFooter === "Attendance QR Code" && (
+        {selectFooter === "AttendanceQRCode" && (
           <PopupLayout onClose={() => setSelectFooter("EMTY")}>
             <AttendanceQRcode
               toast={toast}
@@ -255,7 +258,7 @@ function Index({ subjectId }: Props) {
           </PopupLayout>
         )}
 
-        {selectFooter === "Slide Picker" && randomStudents && (
+        {selectFooter === "SlidePicker" && randomStudents && (
           <PopupLayout onClose={() => setSelectFooter("EMTY")}>
             <div className="bg-white w-full h-full md:w-max md:h-max  p-5 md:rounded-md md:border">
               <SilderPicker<StudentOnSubject>
@@ -384,13 +387,13 @@ function Index({ subjectId }: Props) {
               <div className="flex flex-wrap gap-2">
                 <div className="bg-white w-max px-2 py-1 rounded-md">
                   <h2 className="text-xs text-primary-color">
-                    Academic year:{" "}
+                    {subjectDataLanguage.educationYear(language.data ?? "en")}:{" "}
                     {subject.data ? subject.data?.educationYear : "Loading..."}
                   </h2>
                 </div>
                 <div className="bg-white w-max px-2 py-1 rounded-md">
                   <h2 className="text-xs text-primary-color">
-                    Subject Code:{" "}
+                    {subjectDataLanguage.code(language.data ?? "en")}:{" "}
                     {subject.data ? subject.data?.code : "Loading..."}
                   </h2>
                 </div>
@@ -421,7 +424,7 @@ function Index({ subjectId }: Props) {
                       text-primary-color bg-white w-max px-2 py-1 rounded-md"
                   >
                     <CiCircleInfo />
-                    More Info & Edit
+                    {subjectDataLanguage.moreInfo(language.data ?? "en")}
                   </button>
                   <label
                     title="Change Background Image"
@@ -456,7 +459,7 @@ function Index({ subjectId }: Props) {
                       justify-center gap-1 hover:bg-primary-color hover:text-white
                       text-primary-color bg-white px-2 py-1 rounded-md"
                   >
-                    QR Code Subject
+                    {subjectDataLanguage.qrCode(language.data ?? "en")}
                     <IoQrCode />
                   </button>
                 </div>

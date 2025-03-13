@@ -32,8 +32,10 @@ import PopupLayout from "../layout/PopupLayout";
 import SubjectCreate from "../subject/SubjectCreate";
 import { Toast } from "primereact/toast";
 import LoadingBar from "../common/LoadingBar";
-import { subjectDataLanguage } from "../../data/languages/subject";
-import { sortByOptionsDataLanguage } from "../../data/languages";
+import {
+  sortByOptionsDataLanguage,
+  subjectsDataLanguage,
+} from "../../data/languages";
 
 type Props = {
   schoolId: string;
@@ -196,10 +198,10 @@ function Subjects({ schoolId }: Props) {
         >
           <section className="text-center md:text-left">
             <h1 className="text-2xl md:text-3xl font-semibold">
-              {subjectDataLanguage.title(language.data ?? "en")}
+              {subjectsDataLanguage.title(language.data ?? "en")}
             </h1>
             <p className="text-gray-400 max-w-96 break-words text-sm md:text-base">
-              {subjectDataLanguage.descriptiom(language.data ?? "en")}
+              {subjectsDataLanguage.descriptiom(language.data ?? "en")}
             </p>
           </section>
           <section className="flex flex-col xl:flex-row items-center gap-2 md:gap-1">
@@ -208,7 +210,7 @@ function Subjects({ schoolId }: Props) {
               className="main-button w-full xl:w-auto flex items-center 
             justify-center gap-1 py-1 ring-1 ring-blue-600"
             >
-              {subjectDataLanguage.create(language.data ?? "en")}
+              {subjectsDataLanguage.create(language.data ?? "en")}
             </button>
           </section>
         </header>
@@ -219,14 +221,14 @@ function Subjects({ schoolId }: Props) {
           <div className="flex items-center justify-start gap-2">
             <label className="flex flex-col">
               <span className="text-gray-400 text-sm">
-                {subjectDataLanguage.search(language.data ?? "en")}
+                {subjectsDataLanguage.search(language.data ?? "en")}
               </span>
               <input
                 value={search}
                 onChange={(e) => handleSearch(e.target.value)}
                 type="text"
                 className="w-96 border border-gray-300 rounded-lg p-2"
-                placeholder={subjectDataLanguage.searchPlaceholder(
+                placeholder={subjectsDataLanguage.searchPlaceholder(
                   language.data ?? "en"
                 )}
               />
@@ -234,7 +236,7 @@ function Subjects({ schoolId }: Props) {
             {educationYear && (
               <label className="flex flex-col">
                 <span className="text-gray-400 text-sm">
-                  {subjectDataLanguage.educationYear(language.data ?? "en")}
+                  {subjectsDataLanguage.educationYear(language.data ?? "en")}
                 </span>
                 <InputEducationYear
                   value={educationYear}
@@ -246,7 +248,7 @@ function Subjects({ schoolId }: Props) {
 
             <label className="flex flex-col">
               <span className="text-gray-400 text-sm">
-                {subjectDataLanguage.sortBy(language.data ?? "en")}
+                {subjectsDataLanguage.sortBy(language.data ?? "en")}
               </span>
               <select
                 value={sortBy}

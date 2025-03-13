@@ -18,6 +18,7 @@ import LoadingSpinner from "../common/LoadingSpinner";
 import { useRouter } from "next/router";
 import Switch from "../common/Switch";
 import { settingOnClassroomDataLangugae } from "../../data/languages";
+import ConfirmDeleteMessage from "../common/ConfirmDeleteMessage";
 
 type Props = {
   classroom: Classroom;
@@ -67,62 +68,41 @@ function ClassroomSetting({ classroom, toast }: Props) {
   };
 
   const handleDeleteClassroom = async ({ classId }: { classId: string }) => {
-    const replacedText = "DELETE";
-    let content = document.createElement("div");
-    content.innerHTML =
-      "<div>To confirm, type <strong>" +
-      replacedText +
-      "</strong> in the box below </div>";
-    const { value } = await Swal.fire({
-      title: "Are you sure?",
-      input: "text",
-      icon: "warning",
-      footer: "This action is irreversible and destructive. Please be careful.",
-      html: content,
-      showCancelButton: true,
-      inputValidator: (value) => {
-        if (value !== replacedText) {
-          return "Please Type Correctly";
-        }
-      },
-    });
-    if (value) {
-      try {
-        Swal.fire({
-          title: "Deleting...",
-          html: "Loading....",
-          allowEscapeKey: false,
-          allowOutsideClick: false,
-          didOpen: () => {
-            Swal.showLoading();
-          },
-        });
+    try {
+      Swal.fire({
+        title: "Deleting...",
+        html: "Loading....",
+        allowEscapeKey: false,
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
 
-        await deleteClass.mutateAsync({
-          classId: classId,
-        });
-        sound.play();
-        Swal.fire({
-          title: "Success",
-          text: "Classroom Deleted",
-          icon: "success",
-        });
-        router.push({
-          pathname: `/school/${classroomData.schoolId}`,
-          query: { selectMenu: "Classes" },
-        });
-      } catch (error) {
-        console.log(error);
-        let result = error as ErrorMessages;
-        Swal.fire({
-          title: result.error ? result.error : "Something Went Wrong",
-          text: result.message.toString(),
-          footer: result.statusCode
-            ? "Code Error: " + result.statusCode?.toString()
-            : "",
-          icon: "error",
-        });
-      }
+      await deleteClass.mutateAsync({
+        classId: classId,
+      });
+      sound.play();
+      Swal.fire({
+        title: "Success",
+        text: "Classroom Deleted",
+        icon: "success",
+      });
+      router.push({
+        pathname: `/school/${classroomData.schoolId}`,
+        query: { selectMenu: "Classes" },
+      });
+    } catch (error) {
+      console.log(error);
+      let result = error as ErrorMessages;
+      Swal.fire({
+        title: result.error ? result.error : "Something Went Wrong",
+        text: result.message.toString(),
+        footer: result.statusCode
+          ? "Code Error: " + result.statusCode?.toString()
+          : "",
+        icon: "error",
+      });
     }
   };
   return (
@@ -284,7 +264,14 @@ function ClassroomSetting({ classroom, toast }: Props) {
             )}
           </h4>
           <button
-            onClick={() => handleDeleteClassroom({ classId: classroomData.id })}
+            onClick={() => {
+              ConfirmDeleteMessage({
+                language: lanague.data ?? "en",
+                callback: async () => {
+                  await handleDeleteClassroom({ classId: classroomData.id });
+                },
+              });
+            }}
             className="reject-button w-60 mt-5"
           >
             {settingOnClassroomDataLangugae.deleteButton(lanague.data ?? "en")}
