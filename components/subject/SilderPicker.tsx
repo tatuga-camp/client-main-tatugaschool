@@ -374,9 +374,15 @@ const SilderPicker = <T extends AnimationImageItemProps>({
                 randomImages={randomImages}
                 onPassPointer={() => {
                   if (ding) {
-                    ding.pause(); // Stop the current audio if it's playing
-                    ding.currentTime = 1; // Reset to the beginning
-                    ding.play();
+                    if (!ding.paused) {
+                      ding.pause(); // Stop the current audio if it's playing
+                      ding.currentTime = 1; // Reset to the beginning
+                    }
+                    ding
+                      .play()
+                      .catch((error) =>
+                        console.error("Playback error:", error)
+                      );
                   }
                 }}
                 onStart={(start) => {}}
