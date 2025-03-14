@@ -1,13 +1,3 @@
-import { Toast } from "primereact/toast";
-import React, { useCallback, useEffect } from "react";
-import { FaBook, FaPlus } from "react-icons/fa6";
-import { MdAssignment, MdDragIndicator } from "react-icons/md";
-import ClassworkCreate, { classworkLists } from "./ClassworkCreate";
-import { useGetAssignments, useReoderAssignment } from "../../react-query";
-import parse from "html-react-parser";
-import { Assignment } from "../../interfaces";
-import Link from "next/link";
-import ClassworkCard from "./ClassworkCard";
 import {
   closestCenter,
   DndContext,
@@ -17,12 +7,24 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { ResponseGetAssignmentsService } from "../../services";
 import {
   arrayMove,
   rectSortingStrategy,
   SortableContext,
 } from "@dnd-kit/sortable";
+import { Toast } from "primereact/toast";
+import React, { useCallback, useEffect } from "react";
+import { FaPlus } from "react-icons/fa6";
+import { Assignment } from "../../interfaces";
+import {
+  useGetAssignments,
+  useGetLanguage,
+  useReoderAssignment,
+} from "../../react-query";
+import { ResponseGetAssignmentsService } from "../../services";
+import ClassworkCard from "./ClassworkCard";
+import ClassworkCreate from "./ClassworkCreate";
+import { classworksDataLanguage } from "../../data/languages";
 
 type Props = {
   toast: React.RefObject<Toast>;
@@ -30,6 +32,7 @@ type Props = {
   schoolId: string;
 };
 function Classwork({ toast, subjectId, schoolId }: Props) {
+  const language = useGetLanguage();
   const [triggerCreate, setTriggerCreate] = React.useState(false);
   const classworks = useGetAssignments({ subjectId: subjectId });
   const [selectClasswork, setSelectClasswork] =
@@ -87,9 +90,11 @@ function Classwork({ toast, subjectId, schoolId }: Props) {
       )}
       <header className="w-full flex justify-between px-40">
         <section>
-          <h1 className="text-3xl font-semibold">Classwork</h1>
+          <h1 className="text-3xl font-semibold">
+            {classworksDataLanguage.title(language.data ?? "en")}
+          </h1>
           <span className="text-gray-400">
-            You can assign a task to your students here and track their progress
+            {classworksDataLanguage.description(language.data ?? "en")}{" "}
           </span>
         </section>
 
@@ -100,7 +105,7 @@ function Classwork({ toast, subjectId, schoolId }: Props) {
           >
             <div className="flex items-center justify-center gap-2">
               <FaPlus />
-              Create Classwork
+              {classworksDataLanguage.create(language.data ?? "en")}
             </div>
           </button>
         </section>

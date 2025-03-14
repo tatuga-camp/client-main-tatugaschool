@@ -13,3 +13,4 @@ export * from "./sidebar";
 export * from "./class";
 export * from "./subject";
 export * from "./subjects";
+export * from "./classwork";

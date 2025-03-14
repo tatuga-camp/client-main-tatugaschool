@@ -1,33 +1,32 @@
+import Image from "next/image";
 import React, { useEffect } from "react";
-import {
-  useCreateAttendanceRow,
-  useGetAttendancesTable,
-  useGetStudentOnSubject,
-  useUpdateAttendance,
-  useUpdateManyAttendance,
-} from "../../react-query";
+import { TbSelectAll } from "react-icons/tb";
+import { defaultBlurHash } from "../../data";
 import {
   AttendanceStatusList,
   AttendanceTable,
   ErrorMessages,
   StudentOnSubject,
 } from "../../interfaces";
-import Image from "next/image";
+import {
+  useCreateAttendanceRow,
+  useGetAttendancesTable,
+  useGetLanguage,
+  useGetStudentOnSubject,
+  useUpdateManyAttendance,
+} from "../../react-query";
 import { decodeBlurhashToCanvas } from "../../utils";
-import { defaultBlurHash } from "../../data";
-import { TbSelectAll } from "react-icons/tb";
 
-import TextEditor from "../common/TextEditor";
-import { IoIosArrowBack, IoIosCreate } from "react-icons/io";
-import Swal from "sweetalert2";
 import { useQueryClient } from "@tanstack/react-query";
-import { ProgressSpinner } from "primereact/progressspinner";
 import { ProgressBar } from "primereact/progressbar";
 import { Toast } from "primereact/toast";
-import { useSound } from "../../hook";
-import { SiMicrosoftexcel } from "react-icons/si";
 import { BiSolidNote } from "react-icons/bi";
+import { IoIosArrowBack, IoIosCreate } from "react-icons/io";
+import Swal from "sweetalert2";
+import { useSound } from "../../hook";
 import LoadingSpinner from "../common/LoadingSpinner";
+import TextEditor from "../common/TextEditor";
+import { attendanceCheckerDataLanugae } from "../../data/languages";
 type Props = {
   subjectId: string;
   onClose: () => void;
@@ -42,7 +41,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
     | null
   >(null);
   const successSong = useSound("/sounds/ding.mp3");
-
+  const language = useGetLanguage();
   const [loading, setLoading] = React.useState(false);
   const createAttendanceRow = useCreateAttendanceRow();
   const updateAttendance = useUpdateManyAttendance();
@@ -197,10 +196,10 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
         <section className="w-full flex flex-col gap-4 sm:gap-2 sm:flex-row sm:justify-between sm:items-center">
           <div className="text-center sm:text-left">
             <h1 className="text-2xl sm:text-xl font-medium">
-              Attendance Checker
+              {attendanceCheckerDataLanugae.title(language.data ?? "en")}
             </h1>
             <span className="text-sm text-gray-500 block mt-1">
-              You can check the attendance of the students here
+              {attendanceCheckerDataLanugae.description(language.data ?? "en")}
             </span>
           </div>
         </section>
@@ -229,7 +228,11 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
           <div className="flex flex-col sm:flex-row gap-3 w-full">
             <div className="flex-1 flex flex-col sm:flex-row gap-2">
               <label className="flex flex-col">
-                <span className="text-gray-400 text-xs">Start Date</span>
+                <span className="text-gray-400 text-xs">
+                  {attendanceCheckerDataLanugae.startDate(
+                    language.data ?? "en"
+                  )}
+                </span>
                 <input
                   value={attendanceData.startDate}
                   onChange={(e) =>
@@ -262,7 +265,9 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
               </label>
               <label className="flex flex-col">
                 {" "}
-                <span className="text-gray-400 text-xs">End Date</span>
+                <span className="text-gray-400 text-xs">
+                  {attendanceCheckerDataLanugae.endDate(language.data ?? "en")}
+                </span>
                 <input
                   value={attendanceData.endDate}
                   onChange={(e) =>
@@ -284,12 +289,12 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
               {triggerNote ? (
                 <div className="flex items-center justify-center gap-1">
                   <IoIosArrowBack />
-                  Back
+                  {attendanceCheckerDataLanugae.back(language.data ?? "en")}
                 </div>
               ) : (
                 <div className="flex items-center justify-center gap-1">
                   <BiSolidNote />
-                  Add Note
+                  {attendanceCheckerDataLanugae.addNote(language.data ?? "en")}
                 </div>
               )}
             </button>
@@ -479,7 +484,8 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
               <LoadingSpinner />
             ) : (
               <>
-                <IoIosCreate /> Create
+                <IoIosCreate />{" "}
+                {attendanceCheckerDataLanugae.create(language.data ?? "en")}
               </>
             )}
           </button>

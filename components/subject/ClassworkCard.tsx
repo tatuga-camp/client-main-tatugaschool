@@ -7,6 +7,8 @@ import { BiBook } from "react-icons/bi";
 import { FaRegFile, FaRegFileImage } from "react-icons/fa6";
 import { MdAssignment, MdDragIndicator } from "react-icons/md";
 import { Assignment, FileOnAssignment } from "../../interfaces";
+import { useGetLanguage } from "../../react-query";
+import { classworkCardDataLanguage } from "../../data/languages";
 
 type PropsClassworkCard = {
   classwork: Assignment & {
@@ -67,7 +69,7 @@ function AssignmentCard({
     transform: CSS.Transform.toString(sortable.transform),
     transition: sortable.transition || undefined,
   };
-
+  const language = useGetLanguage();
   const inlineStyles: CSSProperties = {
     opacity: sortable.isDragging ? "0.5" : "1",
     transformOrigin: "50% 50%",
@@ -102,7 +104,11 @@ function AssignmentCard({
     `}
         >
           <MdAssignment />
-          <span className="text-xs">{assignemnt.status}</span>
+          <span className="text-xs">
+            {classworkCardDataLanguage[
+              assignemnt.status as keyof typeof classworkCardDataLanguage
+            ](language.data ?? "en")}
+          </span>
         </div>
         <div className="flex grow  p-2  flex-col gap-2 w-9/12">
           <div className="font-semibold text-start text-lg border-b max-w-[80%] truncate">
@@ -123,14 +129,18 @@ function AssignmentCard({
                 <span className="font-medium max-w-40 truncate text-primary-color text-base">
                   {assignemnt.maxScore.toLocaleString()}
                 </span>
-                <span className="text-xs">Score</span>
+                <span className="text-xs">
+                  {classworkCardDataLanguage.score(language.data ?? "en")}
+                </span>
               </li>
               {assignemnt.weight !== null && (
                 <li className="w-max h-max bg-gray-50  border p-1 rounded-md flex flex-col items-center justify-start ga-2 ">
                   <span className="font-medium max-w-40 truncate text-primary-color text-base">
                     {assignemnt.weight}%
                   </span>
-                  <span className="text-xs">Weight</span>
+                  <span className="text-xs">
+                    {classworkCardDataLanguage.weight(language.data ?? "en")}
+                  </span>
                 </li>
               )}
               {assignemnt.dueDate && (
@@ -150,7 +160,9 @@ function AssignmentCard({
                       }
                     )}
                   </span>
-                  <span className="text-xs">Deadline</span>
+                  <span className="text-xs">
+                    {classworkCardDataLanguage.Deadline(language.data ?? "en")}
+                  </span>
                 </li>
               )}
             </ul>
@@ -162,7 +174,9 @@ function AssignmentCard({
                 <span className="text-2xl font-semibold">
                   {assignemnt.penddingNumber}
                 </span>
-                <span className="text-xs">No Work</span>
+                <span className="text-xs">
+                  {classworkCardDataLanguage.NoWork(language.data ?? "en")}
+                </span>
               </li>
               <li
                 className="lg:w-20 lg:h-20 md:w-16 md:h-16 border border-yellow-400
@@ -171,7 +185,9 @@ function AssignmentCard({
                 <span className="text-2xl font-semibold">
                   {assignemnt.summitNumber}
                 </span>
-                <span className="text-xs">Wait Review</span>
+                <span className="text-xs">
+                  {classworkCardDataLanguage.WaitReview(language.data ?? "en")}
+                </span>
               </li>
               <li
                 className="lg:w-20 lg:h-20 md:w-16 md:h-16 bg-gradient-to-r text-white from-emerald-400 to-cyan-400
@@ -180,7 +196,9 @@ function AssignmentCard({
                 <span className="text-2xl font-semibold">
                   {assignemnt.reviewNumber}
                 </span>
-                <span className="text-xs">Reviewed</span>
+                <span className="text-xs">
+                  {classworkCardDataLanguage.Reviewed(language.data ?? "en")}
+                </span>
               </li>
             </ul>
           </div>
@@ -263,6 +281,7 @@ function MaterialCard({
     transform: CSS.Transform.toString(sortable.transform),
     transition: sortable.transition || undefined,
   };
+  const language = useGetLanguage();
 
   const inlineStyles: CSSProperties = {
     opacity: sortable.isDragging ? "0.5" : "1",
@@ -304,7 +323,12 @@ function MaterialCard({
         >
           <BiBook />
 
-          <span className="text-xs">{material.status}</span>
+          <span className="text-xs">
+            {" "}
+            {classworkCardDataLanguage[
+              material.status as keyof typeof classworkCardDataLanguage
+            ](language.data ?? "en")}
+          </span>
         </div>
         <div className="flex h-max p-2  flex-col gap-2 w-9/12">
           <div className="font-semibold text-start text-lg border-b max-w-[80%] truncate">

@@ -3,6 +3,7 @@ import { IoIosCreate, IoMdClose } from "react-icons/io";
 import {
   useCreateAttendanceRow,
   useGetAttendancesTable,
+  useGetLanguage,
 } from "../../react-query";
 import {
   AttendanceStatusList,
@@ -16,6 +17,10 @@ import LoadingBar from "../common/LoadingBar";
 import { Toast } from "primereact/toast";
 import { timeLeft } from "../../utils";
 import QRCode from "./QRCode";
+import {
+  attendanceCheckerDataLanugae,
+  attendanceQRCodeDatLanguage,
+} from "../../data/languages";
 
 type Props = {
   onClose: () => void;
@@ -24,6 +29,7 @@ type Props = {
 };
 function AttendanceQRcode({ onClose, subjectId, toast }: Props) {
   const createRow = useCreateAttendanceRow();
+  const language = useGetLanguage();
   const [attendanceData, setAttendanceData] = React.useState<{
     startDate?: string;
     endDate?: string;
@@ -118,11 +124,10 @@ function AttendanceQRcode({ onClose, subjectId, toast }: Props) {
           <header className="w-full flex border-b pb-2 justify-between">
             <div className="text-center sm:text-left">
               <h1 className="text-2xl sm:text-xl font-medium">
-                Attendance Checker By QR Code
+                {attendanceQRCodeDatLanguage.title(language.data ?? "en")}
               </h1>
               <span className="text-sm text-gray-500 block mt-1">
-                You can create qr code for students to check attendance by
-                themselve
+                {attendanceQRCodeDatLanguage.description(language.data ?? "en")}
               </span>
             </div>
             <button
@@ -164,7 +169,11 @@ function AttendanceQRcode({ onClose, subjectId, toast }: Props) {
               <div className="flex flex-col sm:flex-row gap-3 w-full">
                 <div className="flex-1 flex  gap-2">
                   <label className=" flex flex-col">
-                    <span className="text-gray-400 text-xs">Start Date</span>
+                    <span className="text-gray-400 text-xs">
+                      {attendanceCheckerDataLanugae.startDate(
+                        language.data ?? "en"
+                      )}
+                    </span>
                     <input
                       required
                       value={attendanceData?.startDate}
@@ -200,7 +209,11 @@ function AttendanceQRcode({ onClose, subjectId, toast }: Props) {
                     />
                   </label>
                   <label className="flex flex-col">
-                    <span className="text-gray-400 text-xs">End Date</span>
+                    <span className="text-gray-400 text-xs">
+                      {attendanceCheckerDataLanugae.endDate(
+                        language.data ?? "en"
+                      )}
+                    </span>
                     <input
                       required
                       value={attendanceData?.endDate}
@@ -219,16 +232,20 @@ function AttendanceQRcode({ onClose, subjectId, toast }: Props) {
             </section>
             <section className="mt-5">
               <h1 className="text-base sm:text-base font-medium">
-                QR Code Setting{" "}
+                {attendanceQRCodeDatLanguage.qrSetting(language.data ?? "en")}
               </h1>
               <h4 className="text-xs sm:text-sm text-gray-500">
-                Manage Your QR code setting here such as set expire time.
+                {attendanceQRCodeDatLanguage.qrSettingDescription(
+                  language.data ?? "en"
+                )}
               </h4>
             </section>
             <section className="flex  gap-2 mt-5">
               <label className="flex flex-col">
                 <span className="text-gray-400 text-xs">
-                  This Qr Code will be allowed to scan at
+                  {attendanceQRCodeDatLanguage.qrAllowToScan(
+                    language.data ?? "en"
+                  )}
                 </span>
                 <input
                   required
@@ -246,7 +263,7 @@ function AttendanceQRcode({ onClose, subjectId, toast }: Props) {
               </label>
               <label className="flex flex-col">
                 <span className="text-gray-400 text-xs">
-                  This Qr Code will exipre in the next{" "}
+                  {attendanceQRCodeDatLanguage.qrExpire(language.data ?? "en")}
                   {attendanceData.expireAt &&
                     timeLeft({
                       targetTime: new Date(
@@ -275,7 +292,9 @@ function AttendanceQRcode({ onClose, subjectId, toast }: Props) {
               </label>
               <label className="flex flex-col ">
                 <span className="text-gray-400 text-xs">
-                  Allow student to scan multiple times
+                  {attendanceQRCodeDatLanguage.qrAllowStudent(
+                    language.data ?? "en"
+                  )}
                 </span>
                 <Switch
                   checked={attendanceData?.isAllowScanManyTime}
@@ -306,7 +325,8 @@ function AttendanceQRcode({ onClose, subjectId, toast }: Props) {
                   <LoadingSpinner />
                 ) : (
                   <>
-                    <IoIosCreate /> Create
+                    <IoIosCreate />{" "}
+                    {attendanceQRCodeDatLanguage.create(language.data ?? "en")}
                   </>
                 )}
               </button>
