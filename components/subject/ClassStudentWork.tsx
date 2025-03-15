@@ -8,7 +8,7 @@ import {
   BsLayoutSidebarInset,
   BsLayoutSidebarInsetReverse,
 } from "react-icons/bs";
-import { IoMdCheckbox, IoMdClose } from "react-icons/io";
+import { IoMdClose } from "react-icons/io";
 import { MdAssignment } from "react-icons/md";
 import Swal from "sweetalert2";
 import { defaultBlurHash } from "../../data";
@@ -20,6 +20,7 @@ import {
 } from "../../interfaces";
 import {
   useGetAssignment,
+  useGetLanguage,
   useGetStudentOnAssignments,
   useUpdateFileStudentOnAssignment,
   useUpdateStudentOnAssignments,
@@ -36,12 +37,14 @@ import PopupLayout from "../layout/PopupLayout";
 import AssignmentText from "./AssignmentText";
 import CommentSection from "./CommentSection";
 import FileStudentAssignmentCard from "./FileStudentAssignmentCard";
+import { studentWorkDataLanguage } from "../../data/languages";
 
 type Props = {
   assignmentId: string;
   onScroll?: () => void;
 };
 function ClassStudentWork({ assignmentId, onScroll }: Props) {
+  const language = useGetLanguage();
   const studentOnAssignments = useGetStudentOnAssignments({
     assignmentId,
     refetchInterval: 5000,
@@ -115,7 +118,7 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
             ? ""
             : studentOnAssignments.isFetching
             ? "Student Loading.."
-            : "Student"}
+            : studentWorkDataLanguage.student(language.data ?? "en")}
           <button
             type="button"
             className={`${
@@ -158,18 +161,24 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
                 </div>
               </th>
               <th>
-                <div className="text-start font-normal ">Name</div>
+                <div className="text-start font-normal ">
+                  {studentWorkDataLanguage.name(language.data ?? "en")}
+                </div>
               </th>
               <th>
-                <div className="text-center font-normal ">Status</div>
+                <div className="text-center font-normal ">
+                  {studentWorkDataLanguage.status(language.data ?? "en")}
+                </div>
               </th>
               <th>
-                <div className="text-center font-normal ">Score</div>
+                <div className="text-center font-normal ">
+                  {studentWorkDataLanguage.score(language.data ?? "en")}
+                </div>
               </th>
               <th>
                 <div className="text-base font-normal flex gap-2 items-center justify-center ">
                   <BiBookOpen />
-                  View Work
+                  {studentWorkDataLanguage.viewWork(language.data ?? "en")}
                 </div>
               </th>
             </tr>
@@ -277,6 +286,7 @@ const StudentList = React.memo(function StudentList({
   onClick,
   setStudentData,
 }: StudentListProps) {
+  const language = useGetLanguage();
   return (
     <tr className={` ${odd && "bg-gray-200/20"} hover:bg-sky-100  gap-2`}>
       <th>
@@ -344,9 +354,12 @@ const StudentList = React.memo(function StudentList({
             }
             justify-center text-sm font-normal `}
         >
-          {student.status === "SUBMITTED" && "Waiting for Review"}
-          {student.status === "REVIEWD" && "Reviewed"}
-          {student.status === "PENDDING" && "No work"}
+          {student.status === "SUBMITTED" &&
+            studentWorkDataLanguage.waitForReview(language.data ?? "en")}
+          {student.status === "REVIEWD" &&
+            studentWorkDataLanguage.reviewed(language.data ?? "en")}
+          {student.status === "PENDDING" &&
+            studentWorkDataLanguage.noWork(language.data ?? "en")}
         </div>
       </th>
       <th>
@@ -359,7 +372,7 @@ const StudentList = React.memo(function StudentList({
         >
           {student.score !== null
             ? student.score?.toLocaleString()
-            : "Not Graded"}
+            : studentWorkDataLanguage.notGrade(language.data ?? "en")}
         </div>
       </th>
       <th>
@@ -379,7 +392,8 @@ const StudentList = React.memo(function StudentList({
            ${student.id === student.id ? "main-button" : "second-button border"}
            `}
           >
-            <BsEyeFill /> View
+            <BsEyeFill />
+            {studentWorkDataLanguage.viewWork(language.data ?? "en")}
           </button>
         </div>
       </th>
@@ -395,6 +409,7 @@ function MultipleReview({ selectStudents, maxScore }: MultipleReviewProps) {
   const update = useUpdateStudentOnAssignments();
   const [score, setScore] = useState<number>(0);
   const [loading, setLoading] = useState(false);
+  const language = useGetLanguage();
 
   const handleSaveChange = async (e: React.FormEvent) => {
     try {
@@ -463,7 +478,9 @@ function MultipleReview({ selectStudents, maxScore }: MultipleReviewProps) {
           </button>
         </form>
       ) : (
-        <h1 className="text-3xl">Please Select A Student</h1>
+        <h1 className="text-3xl">
+          {studentWorkDataLanguage.pleaseSelectStudent(language.data ?? "en")}
+        </h1>
       )}
     </div>
   );
@@ -488,6 +505,7 @@ type PropsStudentWork = {
   assignment: Assignment;
 };
 function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
+  const language = useGetLanguage();
   const update = useUpdateStudentOnAssignments();
   const updateFile = useUpdateFileStudentOnAssignment();
   const [loadingFile, setLoadingFile] = React.useState(false);
@@ -711,7 +729,7 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
                 strokeWidth="8"
               />
             ) : (
-              "Save Change"
+              studentWorkDataLanguage.saveChange(language.data ?? "en")
             )}
           </button>
         </div>
@@ -731,7 +749,9 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
                 `}
               >
                 {menu.icon}
-                {menu.title}
+                {studentWorkDataLanguage[
+                  menu.title.toLowerCase() as keyof typeof studentWorkDataLanguage
+                ](language.data ?? "en")}
               </button>
             );
           })}
@@ -749,7 +769,9 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
               );
             })}
             {studentOnAssignment.files.length === 0 && (
-              <p>Student has not upload any files</p>
+              <p>
+                {studentWorkDataLanguage.noFileAdded(language.data ?? "en")}
+              </p>
             )}
           </ul>
         )}

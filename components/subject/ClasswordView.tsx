@@ -14,8 +14,9 @@ import InputNumber from "../common/InputNumber";
 import Switch from "../common/Switch";
 import { SiGooglegemini } from "react-icons/si";
 import { CgInfo } from "react-icons/cg";
-import { useUpdateSkillToAssignment } from "../../react-query";
+import { useGetLanguage, useUpdateSkillToAssignment } from "../../react-query";
 import LoadingSpinner from "../common/LoadingSpinner";
+import { classworkViewDataLanguage } from "../../data/languages";
 
 export type FileClasswork = {
   file: File | null;
@@ -51,24 +52,31 @@ function ClasswordView({
   onUploadFile,
 }: Props) {
   const refetchSkill = useUpdateSkillToAssignment();
+  const language = useGetLanguage();
   return (
     <main className="w-full h-max flex">
       <section className="w-full flex-col h-max flex mb-40 items-center justify-start gap-5">
         <div className="w-11/12  h-max max-h-max mt-10 p-5 bg-white flex flex-col gap-2 rounded-md border">
           <label className="flex flex-col ">
-            <span className="text-base font-medium">Title</span>
+            <span className="text-base font-medium">
+              {classworkViewDataLanguage.title(language.data ?? "en")}
+            </span>
             <input
               value={classwork?.title}
               onChange={(e) => onChange({ title: e.target.value })}
               required
               maxLength={999}
               className="main-input"
-              placeholder="Title"
+              placeholder={classworkViewDataLanguage.title(
+                language.data ?? "en"
+              )}
             />
           </label>
           {classwork && (
             <div className="w-full h-96 pb-5 ">
-              <span className="text-base font-medium">Description</span>
+              <span className="text-base font-medium">
+                {classworkViewDataLanguage.description(language.data ?? "en")}
+              </span>
               <TextEditor
                 schoolId={classwork?.schoolId}
                 value={classwork?.description || ""}
@@ -118,9 +126,9 @@ function ClasswordView({
         </div>
 
         <div className="w-11/12 h-max p-5 rounded-md bg-white border">
-          <h1>Attach File</h1>
+          <h1>{classworkViewDataLanguage.fileTilte(language.data ?? "en")}</h1>
           <span className="text-xs text-gray-400">
-            Attach file to your classwork, you can attach multiple files.
+            {classworkViewDataLanguage.fileDescription(language.data ?? "en")}
           </span>
           <div className="w-full  flex items-center justify-center h-20">
             <label
@@ -130,7 +138,7 @@ function ClasswordView({
          gradient-bg px-3 py-1 text-lg rounded-md"
             >
               <MdOutlineFileUpload />
-              Upload
+              {classworkViewDataLanguage.uploadButton(language.data ?? "en")}
               <input
                 onChange={(e) => {
                   const files = e.target.files;
@@ -207,18 +215,22 @@ function ClasswordView({
       </section>
       <section className="w-4/12 min-h-screen max-h-max flex flex-col gap-2  bg-white  h-full">
         <div className="w-full py-5 flex items-start flex-col px-5  border-b">
-          <h1 className="text-lg font-medium">Classwork setting</h1>
+          <h1 className="text-lg font-medium">
+            {classworkViewDataLanguage.settingTitle(language.data ?? "en")}
+          </h1>
           <span className="text-xs text-gray-400">
-            Manage the setting of your classwork here
+            {classworkViewDataLanguage.settingDescription(
+              language.data ?? "en"
+            )}
           </span>
           {classwork?.status === "Draft" && (
             <div className="mt-5 bg-gray-500 text-white px-5 py-1 rounded-md">
-              {classwork?.status}
+              {classworkViewDataLanguage.draft(language.data ?? "en")}
             </div>
           )}
           {classwork?.status === "Published" && (
             <div className="mt-5  text-white px-5 py-1 rounded-md gradient-bg ">
-              {classwork?.status}
+              {classworkViewDataLanguage.published(language.data ?? "en")}
             </div>
           )}
         </div>
@@ -226,7 +238,7 @@ function ClasswordView({
         <section className="flex flex-col gap-3 mt-5 px-5 w-10/12">
           <label className="flex border-b pb-2 flex-col  w-full">
             <span className="text-base font-medium">
-              Choose Type of Classword
+              {classworkViewDataLanguage.type(language.data ?? "en")}
             </span>
             <Dropdown<{ title: string; icon: ReactNode }>
               value={
@@ -253,7 +265,9 @@ function ClasswordView({
             />
           </label>
           <label className="flex flex-col bg-gray-50  w-full">
-            <span className="text-base font-medium">Assign At</span>
+            <span className="text-base font-medium">
+              {classworkViewDataLanguage.assignAt(language.data ?? "en")}
+            </span>
             <input
               required
               value={classwork?.beginDate}
@@ -268,7 +282,9 @@ function ClasswordView({
           </label>
           {classwork?.type === "Assignment" && (
             <label className="flex flex-col  w-full  border-b pb-2">
-              <span className="text-base font-medium">Deadline</span>
+              <span className="text-base font-medium">
+                {classworkViewDataLanguage.deadLine(language.data ?? "en")}
+              </span>
               <input
                 value={classwork?.dueDate}
                 onChange={(e) =>
@@ -284,7 +300,9 @@ function ClasswordView({
 
           {classwork?.type === "Assignment" && (
             <label className="flex flex-col  w-full border-b pb-2">
-              <span className="text-base font-medium">Max Score</span>
+              <span className="text-base font-medium">
+                {classworkViewDataLanguage.maxScore(language.data ?? "en")}
+              </span>
               <InputNumber
                 required={classwork?.type === "Assignment"}
                 value={classwork?.maxScore}
@@ -301,7 +319,7 @@ function ClasswordView({
           {classwork?.type === "Assignment" && (
             <label className="flex gap-2 items-center justify-between   w-full">
               <span className="text-base font-medium">
-                Allow Weight of Classwork
+                {classworkViewDataLanguage.allowWeight(language.data ?? "en")}
               </span>
               <Switch
                 checked={classwork?.allowWeight}
@@ -322,7 +340,7 @@ function ClasswordView({
           {classwork?.allowWeight && classwork.type === "Assignment" && (
             <label className="flex flex-col  w-full">
               <span className="text-base font-medium">
-                Weight of Classwork (Optional)
+                {classworkViewDataLanguage.weight(language.data ?? "en")}
               </span>
               <InputNumber
                 value={classwork?.weight || 0}

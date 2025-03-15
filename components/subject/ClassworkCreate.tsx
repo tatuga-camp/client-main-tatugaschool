@@ -23,7 +23,7 @@ import { FaBook, FaRegFile, FaRegFileImage } from "react-icons/fa6";
 import Dropdown from "../common/Dropdown";
 import InputNumber from "../common/InputNumber";
 import Switch from "../common/Switch";
-import { useCreateAssignment } from "../../react-query";
+import { useCreateAssignment, useGetLanguage } from "../../react-query";
 import Swal from "sweetalert2";
 import { Toast } from "primereact/toast";
 import { ProgressBar } from "primereact/progressbar";
@@ -36,6 +36,7 @@ import {
 import ClasswordView, { FileClasswork } from "./ClasswordView";
 import { useRouter } from "next/router";
 import { MenuAssignmentQuery } from "../../pages/subject/[subjectId]/assignment/[assignmentId]";
+import { classworkHeadMenuBarDataLanguage } from "../../data/languages";
 
 type Props = {
   onClose: () => void;
@@ -51,26 +52,35 @@ type TitleList =
   | "Duplicate"
   | "Delete";
 
-export const menuClassworkList: { title: TitleList; icon: ReactNode }[] = [
+export const menuClassworkList: {
+  title: TitleList;
+  icon: ReactNode;
+  value: string;
+}[] = [
   {
     title: "Publish",
     icon: <MdPublish />,
+    value: "publish",
   },
   {
     title: "Mark as Draft",
     icon: <MdUnpublished />,
+    value: "markAsDraft",
   },
   {
     title: "Save Change",
     icon: <MdOutlineDataSaverOn />,
+    value: "saveChange",
   },
   {
     title: "Duplicate",
     icon: <IoDuplicate />,
+    value: "duplicate",
   },
   {
     title: "Delete",
     icon: <MdDelete />,
+    value: "delete",
   },
 ];
 
@@ -90,6 +100,7 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
     document.body.style.overflow = "hidden";
   }, []);
   const router = useRouter();
+  const language = useGetLanguage();
   const [triggerOption, setTriggerOption] = React.useState(false);
   const [files, setFiles] = React.useState<FileClasswork[]>([]);
   const divRef = React.useRef<HTMLDivElement | null>(null);
@@ -233,7 +244,7 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
           >
             <MdAssignmentAdd />
           </div>
-          <h1 className="text-lg font-medium">Create Classwork</h1>
+          <h1 className="text-lg font-medium">Classwork</h1>
         </section>
         <section className="flex items-center gap-[2px]">
           <button
@@ -243,7 +254,9 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
             className="w-40 p-2 h-10 opacity-85 hover:opacity-100 font-medium rounded-r-none rounded-md text-base text-white
          gradient-bg"
           >
-            Publish
+            {classworkHeadMenuBarDataLanguage.button.publish(
+              language.data ?? "en"
+            )}
           </button>
           <button
             type="button"
@@ -290,7 +303,9 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
                  `}
                     >
                       {menu.icon}
-                      {menu.title}
+                      {classworkHeadMenuBarDataLanguage.button[
+                        menu.value as keyof typeof classworkHeadMenuBarDataLanguage.button
+                      ](language.data ?? "en")}
                     </button>
                   ))}
               </div>

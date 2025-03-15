@@ -25,6 +25,7 @@ import {
   useDeleteAssignment,
   useDeleteFileOnAssignment,
   useGetAssignment,
+  useGetLanguage,
   useUpdateAssignment,
 } from "../../../../react-query";
 import {
@@ -38,6 +39,7 @@ import {
   getRefetchtoken,
 } from "../../../../utils";
 import Head from "next/head";
+import { classworkHeadMenuBarDataLanguage } from "../../../../data/languages";
 
 type SummitValue = "Published" | "Save Change" | "Mark as Draft";
 
@@ -49,12 +51,12 @@ const menuLists = [
   },
   {
     title: "Student work",
-    query: "student-work",
+    query: "studentwork",
     description: "View and Assign student work here",
   },
   {
     title: "Manage Assigning",
-    query: "manage-assigning",
+    query: "manageassigning",
     description: "Manage the assigning of student work here",
   },
 ] as const;
@@ -68,6 +70,7 @@ function Index({
   assignmentId: string;
 }) {
   const router = useRouter();
+  const language = useGetLanguage();
   const [triggerOption, setTriggerOption] = React.useState(false);
   const [files, setFiles] = React.useState<FileClasswork[]>([]);
   const divRef = React.useRef<HTMLDivElement | null>(null);
@@ -316,19 +319,23 @@ function Index({
                 <button
                   type="submit"
                   value={"Published" as SummitValue}
-                  className="w-40 p-2 h-10 opacity-85 hover:opacity-100 font-medium rounded-r-none rounded-md text-base text-white
+                  className="w-max min-w-40 p-2 h-10 opacity-85 hover:opacity-100 font-medium rounded-r-none rounded-md text-base text-white
      gradient-bg"
                 >
-                  Publish
+                  {classworkHeadMenuBarDataLanguage.button.publish(
+                    language.data ?? "en"
+                  )}
                 </button>
               ) : (
                 <button
                   type="submit"
                   value={"Save Change" as SummitValue}
-                  className="w-40 p-2 h-10 opacity-85 hover:opacity-100 font-medium rounded-r-none rounded-md text-base text-white
+                  className="w-max min-w-40 p-2 h-10 opacity-85 hover:opacity-100 font-medium rounded-r-none rounded-md text-base text-white
      gradient-bg"
                 >
-                  Save Change
+                  {classworkHeadMenuBarDataLanguage.button.saveChange(
+                    language.data ?? "en"
+                  )}
                 </button>
               )}
               <button
@@ -348,7 +355,7 @@ function Index({
                   }}
                   ref={divRef}
                 >
-                  <div className="w-52 h-max z-40 p-1 absolute top-8 rounded-md bg-white drop-shadow border">
+                  <div className="w-60 h-max z-40 p-1 -right-40  absolute top-8 rounded-md bg-white drop-shadow border">
                     {menuClassworkList.map((menu, index) => {
                       const disabled =
                         (menu.title === "Mark as Draft" &&
@@ -383,7 +390,7 @@ function Index({
                           }
                           value={summitValue}
                           key={index}
-                          className={`w-full p-2 flex gap-10 items-center justify-start text-base
+                          className={`w-60 p-2 flex gap-10 items-center justify-start text-base
              font-medium 
              ${
                menu.title === "Delete"
@@ -395,7 +402,9 @@ function Index({
              `}
                         >
                           {menu.icon}
-                          {menu.title}
+                          {classworkHeadMenuBarDataLanguage.button[
+                            menu.value as keyof typeof classworkHeadMenuBarDataLanguage.button
+                          ](language.data ?? "en")}
                         </button>
                       );
                     })}
@@ -416,7 +425,7 @@ function Index({
           {menuLists
             .filter((menu) =>
               assignment.data?.type === "Material"
-                ? menu.query !== "student-work"
+                ? menu.query !== "studentwork"
                 : true
             )
             .map((menu, index) => {
@@ -434,7 +443,11 @@ function Index({
                       : "bg-white text-black hover:bg-gray-100"
                   } `}
                 >
-                  <h1>{menu.title}</h1>
+                  <h1>
+                    {classworkHeadMenuBarDataLanguage.title[
+                      menu.query as keyof typeof classworkHeadMenuBarDataLanguage.title
+                    ](language.data ?? "en")}
+                  </h1>
                   <span
                     className={`text-xs ${
                       selectMenu === menu.query
@@ -442,7 +455,9 @@ function Index({
                         : "text-gray-400"
                     } `}
                   >
-                    {menu.description}
+                    {classworkHeadMenuBarDataLanguage.description[
+                      menu.query as keyof typeof classworkHeadMenuBarDataLanguage.description
+                    ](language.data ?? "en")}
                   </span>
                 </Link>
               );
@@ -468,7 +483,7 @@ function Index({
             onUploadFile={(file) => handleUploadFile(file)}
           />
         )}
-        {selectMenu === "student-work" && (
+        {selectMenu === "studentwork" && (
           <ClassStudentWork
             assignmentId={assignmentId}
             onScroll={() =>
@@ -478,7 +493,7 @@ function Index({
             }
           />
         )}
-        {selectMenu === "manage-assigning" && (
+        {selectMenu === "manageassigning" && (
           <ClassStudentAssignWork
             assignmentId={assignmentId}
             subjectId={subjectId}
