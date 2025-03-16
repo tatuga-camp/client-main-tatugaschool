@@ -121,9 +121,11 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
   // sort by date
   useEffect(() => {
     if (dates?.[0] && dates?.[1] && scoreOnStudents.data) {
-      const startDate = dates?.[0];
-      const endDate = dates?.[1];
-      endDate.setHours(24, 0, 0, 0);
+      const startDate = new Date(dates[0]);
+      const endDate = new Date(dates[1]);
+      startDate.setHours(0, 0, 0, 0);
+      endDate.setHours(23, 59, 59, 999);
+
       setStudents((prev) => {
         return prev.map((student) => {
           const scores = scoreOnStudents.data.filter((score) => {
