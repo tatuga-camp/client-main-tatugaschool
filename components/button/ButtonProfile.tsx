@@ -20,17 +20,18 @@ function ButtonProfile({ user }: Props) {
   const handleLogout = () => {
     setLoading(true);
     queryClient.clear();
+    console.log("process.env.cookie:", process?.env?.cookie); // Check the env var
     destroyCookie({}, "access_token", {
       path: "/",
       secure: true,
-      sameSite: "none",
+      sameSite: "None",
       domain:
         process.env.cookie === "production" ? ".tatugaschool.com" : "localhost",
     });
     destroyCookie({}, "refresh_token", {
       path: "/",
       secure: true,
-      sameSite: "none",
+      sameSite: "None",
       domain:
         process.env.cookie === "production" ? ".tatugaschool.com" : "localhost",
     });
