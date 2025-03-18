@@ -207,7 +207,7 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
       });
       router.push({
         pathname: `/subject/${subjectId}/assignment/${assignment.id}`,
-        query: { menu: "manage-assigning" as MenuAssignmentQuery },
+        query: { menu: "manageassigning" as MenuAssignmentQuery },
       });
     } catch (error) {
       console.log(error);
