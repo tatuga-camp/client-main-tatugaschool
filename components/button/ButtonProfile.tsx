@@ -20,7 +20,6 @@ function ButtonProfile({ user }: Props) {
   const handleLogout = () => {
     setLoading(true);
     queryClient.clear();
-    console.log("process.env.cookie:", process?.env?.NEXT_PUBLIC_COOKIE); // Check the env var
     destroyCookie({}, "access_token", {
       path: "/",
       secure: true,
