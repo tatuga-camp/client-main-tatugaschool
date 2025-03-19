@@ -1,20 +1,20 @@
 let CACHE = [];
-
+const MAX_CACHE_SIZE = 50; // Limit the cache to 50 items
 const ONE_MINUTE = 1 * 60 * 1000;
 
 async function cacheNotification(data) {
   const now = Date.now();
 
+  // Remove expired items
   CACHE = CACHE.filter((item) => item.timestamp >= now - ONE_MINUTE);
-  
-  const cachedData = CACHE.find(
-    (item) => item.assignmentId === data.assignmentId
-  );
 
-  console.log("cachedData", cachedData);
+  const duplicateData = CACHE.find((item) => item.groupId === data.groupId);
 
-  if (cachedData) {
-    if (now - cachedData.timestamp < ONE_MINUTE) {
+  console.log("cachedData", CACHE);
+  console.log("duplicateData", duplicateData);
+
+  if (duplicateData) {
+    if (now - duplicateData.timestamp < ONE_MINUTE) {
       console.log(
         "Notification suppressed due to recent similar notification."
       );
@@ -22,7 +22,15 @@ async function cacheNotification(data) {
     }
   }
 
+  // Add the new item
   CACHE.push({ ...data, timestamp: now });
+
+  // Limit the cache size
+  if (CACHE.length > MAX_CACHE_SIZE) {
+    CACHE = CACHE.slice(CACHE.length - MAX_CACHE_SIZE); // Keep the most recent items
+    console.log("Cache size limit reached.  Oldest entries removed.");
+  }
+
   return true;
 }
 
