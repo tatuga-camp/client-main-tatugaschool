@@ -6,6 +6,7 @@ import { FiPlus } from "react-icons/fi";
 import { useCreateGrade, useUpdateGrade } from "../../react-query";
 import Swal from "sweetalert2";
 import { Toast } from "primereact/toast";
+import { defaultGradeRule } from "../../utils";
 
 type Props = {
   onClose: () => void;
@@ -27,7 +28,11 @@ function GradeSetting({ onClose, grade, subjectId, toast }: Props) {
           id: crypto.randomUUID(),
           ...g,
         };
-      }) ?? null
+      }) ?? [
+      ...defaultGradeRule.map((g) => {
+        return { ...g, id: crypto.randomUUID() };
+      }),
+    ]
   );
 
   const handleAddRow = () => {
