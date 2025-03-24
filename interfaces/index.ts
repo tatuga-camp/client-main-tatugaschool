@@ -29,3 +29,4 @@ export * from "./Team";
 export * from "./Error";
 export * from "./User";
 export * from "./Exception";
+export * from "./Grade";

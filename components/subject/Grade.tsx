@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { FaUser } from "react-icons/fa6";
 import { SiMicrosoftexcel } from "react-icons/si";
 import {
@@ -6,17 +6,22 @@ import {
   useGetStudentOnSubject,
 } from "../../react-query";
 import {
+  calulateGrade,
   decodeBlurhashToCanvas,
+  defaultGradeRule,
   getRandomSlateShade,
   getSlateColorStyle,
 } from "../../utils";
 import Image from "next/image";
 import { defaultBlurHash } from "../../data";
-import { Assignment, StudentOnAssignment } from "../../interfaces";
+import { Assignment, GradeRule, StudentOnAssignment } from "../../interfaces";
 import GradePopup from "./GradePopup";
 import { Toast } from "primereact/toast";
 import { ExportAssignmentService } from "@/services";
 import LoadingSpinner from "../common/LoadingSpinner";
+import { IoMdSettings } from "react-icons/io";
+import PopupLayout from "../layout/PopupLayout";
+import GradeSetting from "./GradeSetting";
 
 function Grade({
   subjectId,
@@ -32,6 +37,7 @@ function Grade({
   const studentOnSubjects = useGetStudentOnSubject({
     subjectId,
   });
+  const [triggerGradeSetting, setTriggerGradeSetting] = useState(false);
   const handleExportExcel = async () => {
     try {
       setLoading(true);
@@ -62,29 +68,40 @@ function Grade({
 
   return (
     <>
-      <div
-        className={`fixed ${
-          selectStudentOnAssignment ? "flex" : "hidden"
-        } top-0 bottom-0 right-0 left-0 flex items-center justify-center m-auto z-50`}
-      >
-        <div className=" w-max h-max bg-background-color p-2 rounded-md border">
-          {selectStudentOnAssignment && (
-            <GradePopup
-              studentOnAssignment={
-                selectStudentOnAssignment.studentOnAssignment
-              }
-              assignment={selectStudentOnAssignment.assignment}
-              toast={toast}
-              onClose={() => setSelectStudentOnAssignment(null)}
-            />
-          )}
-        </div>
-        <footer
-          onClick={() => setSelectStudentOnAssignment(null)}
-          className="top-0 bottom-0 w-screen h-screen right-0 left-0 
-          bg-white/50 backdrop-blur fixed  m-auto -z-10"
-        ></footer>
-      </div>
+      {selectStudentOnAssignment && (
+        <PopupLayout
+          onClose={() => {
+            setSelectStudentOnAssignment(null);
+          }}
+        >
+          <div className=" w-max h-max bg-background-color p-2 rounded-md border">
+            {selectStudentOnAssignment && (
+              <GradePopup
+                studentOnAssignment={
+                  selectStudentOnAssignment.studentOnAssignment
+                }
+                assignment={selectStudentOnAssignment.assignment}
+                toast={toast}
+                onClose={() => setSelectStudentOnAssignment(null)}
+              />
+            )}
+          </div>
+        </PopupLayout>
+      )}
+
+      {triggerGradeSetting && assignmentsOverview.data && (
+        <PopupLayout onClose={() => setTriggerGradeSetting(false)}>
+          <GradeSetting
+            toast={toast}
+            subjectId={subjectId}
+            grade={assignmentsOverview.data?.grade}
+            onClose={() => {
+              setTriggerGradeSetting(false);
+            }}
+          />
+        </PopupLayout>
+      )}
+
       <header className="w-full flex flex-col md:flex-row justify-between p-3 md:px-5 md:max-w-screen-md xl:max-w-screen-lg gap-4 md:gap-0 mx-auto">
         <section className="text-center md:text-left">
           <h1 className="text-2xl md:text-3xl font-semibold">Grade Overview</h1>
@@ -93,6 +110,20 @@ function Grade({
           </span>
         </section>
         <section className="flex flex-col xl:flex-row items-center gap-2 md:gap-1">
+          <button
+            onClick={() => setTriggerGradeSetting(true)}
+            className="main-button w-max
+            flex items-center justify-center gap-1 py-1 ring-1 ring-blue-600"
+          >
+            {loading ? (
+              <LoadingSpinner />
+            ) : (
+              <>
+                <IoMdSettings />
+                Grade Setting
+              </>
+            )}
+          </button>
           <button
             disabled={loading}
             onClick={handleExportExcel}
@@ -134,7 +165,7 @@ function Grade({
                         </th>
                       );
                     })
-                  : assignmentsOverview.data?.map((data) => {
+                  : assignmentsOverview.data?.assignments.map((data) => {
                       return (
                         <th
                           key={data.assignment.id}
@@ -161,6 +192,19 @@ function Grade({
                         </th>
                       );
                     })}
+                <th className="text-sm group  font-semibold">
+                  <button
+                    className="w-40 min-w-40 group-hover:w-max  p-2 relative active:bg-gray-200
+                           hover:bg-gray-100  hover:ring-1 flex items-start flex-col"
+                  >
+                    <span className="w-max group-hover:max-w-none max-w-40 truncate">
+                      Grade
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      show student grade
+                    </span>
+                  </button>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -169,7 +213,28 @@ function Grade({
                 ?.sort((a, b) => Number(a.number) - Number(b.number))
                 ?.map((student, index) => {
                   const odd = index % 2 === 0;
+                  const totalScore =
+                    assignmentsOverview.data?.assignments.reduce(
+                      (prev, current) => {
+                        let score =
+                          current.students.find(
+                            (s) => s.studentOnSubjectId === student.id
+                          )?.score ?? 0;
+                        if (current.assignment.weight !== null) {
+                          const originalScore =
+                            score / current.assignment.maxScore;
+                          score = originalScore * current.assignment.weight;
+                        }
 
+                        return prev + score;
+                      },
+                      0
+                    ) ?? 0;
+                  const grade = calulateGrade(
+                    assignmentsOverview.data?.grade?.gradeRules ??
+                      defaultGradeRule,
+                    totalScore
+                  );
                   return (
                     <tr
                       className={` ${
@@ -221,7 +286,7 @@ function Grade({
                               </td>
                             );
                           })
-                        : assignmentsOverview.data
+                        : assignmentsOverview.data?.assignments
                             ?.sort(
                               (a, b) => a.assignment.order - b.assignment.order
                             )
@@ -257,14 +322,13 @@ function Grade({
                                 score = "Not Graded";
                               }
 
-                              const originalScore =
-                                studentOnAssignment.score /
-                                data.assignment.maxScore;
-
                               if (
                                 data.assignment.weight !== null &&
                                 studentOnAssignment.status === "REVIEWD"
                               ) {
+                                const originalScore =
+                                  studentOnAssignment.score /
+                                  data.assignment.maxScore;
                                 score = (
                                   originalScore * data.assignment.weight
                                 ).toFixed(2);
@@ -293,6 +357,16 @@ function Grade({
                                 </td>
                               );
                             })}
+                      <td className="text-sm  font-semibold">
+                        <button
+                          className="flex w-full h-14
+                               relative hover:ring-1  ring-black hover:drop-shadow-md cursor-pointer   
+                               items-center transition
+                               justify-center flex-col"
+                        >
+                          <span>{grade}</span>
+                        </button>
+                      </td>
                     </tr>
                   );
                 })}

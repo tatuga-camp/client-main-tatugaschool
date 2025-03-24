@@ -1,21 +1,20 @@
+import Image from "next/image";
+import { ProgressSpinner } from "primereact/progressspinner";
 import { Toast } from "primereact/toast";
-import React, { useEffect } from "react";
+import React from "react";
 import { CiSaveUp2 } from "react-icons/ci";
 import { IoMdClose } from "react-icons/io";
+import Swal from "sweetalert2";
 import {
   Assignment,
   ErrorMessages,
   StudentOnAssignment,
 } from "../../interfaces";
-import Image from "next/image";
-import InputNumber from "../common/InputNumber";
 import {
   useUpdateAssignmentOverview,
   useUpdateStudentAssignmentOverview,
-  useUpdateStudentOnAssignments,
 } from "../../react-query";
-import Swal from "sweetalert2";
-import { ProgressSpinner } from "primereact/progressspinner";
+import InputNumber from "../common/InputNumber";
 import Switch from "../common/Switch";
 
 type Props = {

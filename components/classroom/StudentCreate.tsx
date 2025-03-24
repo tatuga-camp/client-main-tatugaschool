@@ -1,31 +1,24 @@
+import * as crypto from "crypto";
+import { Toast } from "primereact/toast";
 import React, { useEffect } from "react";
-import { IoMdClose } from "react-icons/io";
-import InputWithIcon from "../common/InputWithIcon";
-import { MdFamilyRestroom, MdOutlineSubtitles } from "react-icons/md";
-import { IoPerson } from "react-icons/io5";
-import { TbNumber123 } from "react-icons/tb";
 import { FiPlus } from "react-icons/fi";
-import { useCreateStudent, useGetLanguage } from "../../react-query";
-import { ErrorMessages } from "../../interfaces";
+import { IoMdClose } from "react-icons/io";
+import { PiMicrosoftExcelLogoFill } from "react-icons/pi";
 import Swal from "sweetalert2";
+import {
+  classesDataLanguage,
+  studentOnClassDataLanguage,
+} from "../../data/languages";
+import { useSound } from "../../hook";
+import { ErrorMessages } from "../../interfaces";
+import { useCreateStudent, useGetLanguage } from "../../react-query";
 import {
   getSignedURLTeacherService,
   UploadSignURLService,
 } from "../../services";
-import Image from "next/image";
-import LoadingSpinner from "../common/LoadingSpinner";
-import LoadingBar from "../common/LoadingBar";
 import { generateBlurHash } from "../../utils";
-import { useSound } from "../../hook";
-import { Toast } from "primereact/toast";
+import LoadingBar from "../common/LoadingBar";
 import StudentSection from "./StudentSection";
-import { PiMicrosoftExcelLogoFill } from "react-icons/pi";
-import * as crypto from "crypto";
-import {
-  classesDataLanguage,
-  classroomDataLanguage,
-  studentOnClassDataLanguage,
-} from "../../data/languages";
 
 type Props = {
   onClose: () => void;

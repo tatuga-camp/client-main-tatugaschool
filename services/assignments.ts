@@ -3,6 +3,7 @@ import {
   AssignmentStatus,
   AssignmentType,
   FileOnAssignment,
+  Grade,
   Skill,
   StudentOnAssignment,
 } from "../interfaces";
@@ -68,9 +69,9 @@ export type RequestGetOverviewAssignmentService = {
   subjectId: string;
 };
 export type ResponseGetOverviewAssignmentService = {
-  assignment: Assignment;
-  students: StudentOnAssignment[];
-}[];
+  grade: Grade | null;
+  assignments: { assignment: Assignment; students: StudentOnAssignment[] }[];
+};
 
 export async function GetOverviewAssignmentService(
   input: RequestGetOverviewAssignmentService

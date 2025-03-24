@@ -23,3 +23,4 @@ export * from "./teacher-on-subjects";
 export * from "./team";
 export * from "./attendance-status";
 export * from "./subscription";
+export * from "./grade";

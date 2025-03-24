@@ -6,7 +6,7 @@ type Props = {
   value?: number;
   onValueChange: (data: number) => void;
   min?: number;
-  max: number;
+  max?: number;
   useGrouping?: boolean;
   required?: boolean;
   suffix?: string;
