@@ -115,14 +115,10 @@ function Grade({
             className="main-button w-max
             flex items-center justify-center gap-1 py-1 ring-1 ring-blue-600"
           >
-            {loading ? (
-              <LoadingSpinner />
-            ) : (
-              <>
-                <IoMdSettings />
-                Grade Setting
-              </>
-            )}
+            <>
+              <IoMdSettings />
+              Grade Setting
+            </>
           </button>
           <button
             disabled={loading}
@@ -193,7 +189,20 @@ function Grade({
                       );
                     })}
                 <th className="text-sm group  font-semibold">
-                  <button
+                  <div
+                    className="w-40 min-w-40 group-hover:w-max  p-2 relative active:bg-gray-200
+                           hover:bg-gray-100  hover:ring-1 flex items-start flex-col"
+                  >
+                    <span className="w-max group-hover:max-w-none max-w-40 truncate">
+                      Total Score
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      student total score
+                    </span>
+                  </div>
+                </th>
+                <th className="text-sm group  font-semibold">
+                  <div
                     className="w-40 min-w-40 group-hover:w-max  p-2 relative active:bg-gray-200
                            hover:bg-gray-100  hover:ring-1 flex items-start flex-col"
                   >
@@ -203,7 +212,7 @@ function Grade({
                     <span className="text-xs text-gray-500">
                       show student grade
                     </span>
-                  </button>
+                  </div>
                 </th>
               </tr>
             </thead>
@@ -358,14 +367,24 @@ function Grade({
                               );
                             })}
                       <td className="text-sm  font-semibold">
-                        <button
+                        <div
                           className="flex w-full h-14
-                               relative hover:ring-1  ring-black hover:drop-shadow-md cursor-pointer   
-                               items-center transition
+                               relative  ring-black    
+                               items-center 
+                               justify-center flex-col"
+                        >
+                          <span>{totalScore.toFixed(2)}</span>
+                        </div>
+                      </td>
+                      <td className="text-sm  font-semibold">
+                        <div
+                          className="flex w-full h-14
+                               relative  ring-black    
+                               items-center 
                                justify-center flex-col"
                         >
                           <span>{grade}</span>
-                        </button>
+                        </div>
                       </td>
                     </tr>
                   );
