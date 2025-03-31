@@ -135,13 +135,7 @@ const CreateSchoolComponent = () => {
             : "กรุณาอัพโหลดรูปภาพ"
         );
       }
-      if (!profile?.blurHash) {
-        throw new Error(
-          language.data === "en"
-            ? "Please fill the form"
-            : "โปรดกรอกข้อมูลให้ครบถ้วน"
-        );
-      }
+
       await createSchool.mutateAsync({
         title: profile?.school,
         description: profile?.description,
@@ -151,7 +145,7 @@ const CreateSchoolComponent = () => {
         address: address?.address,
         zipCode: address?.zipCode,
         phoneNumber: address?.phoneNumber,
-        blurHash: profile?.blurHash,
+        blurHash: profile?.blurHash ?? defaultBlurHash,
       });
       show();
     } catch (error) {
