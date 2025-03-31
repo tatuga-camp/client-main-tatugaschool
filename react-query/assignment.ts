@@ -84,6 +84,7 @@ export function useUpdateAssignment() {
 
 export function useCreateAssignment() {
   const queryClient = useQueryClient();
+  const updateSkill = useUpdateSkillToAssignment();
   return useMutation({
     mutationKey: ["create-assignment"],
     mutationFn: (request: RequestCreateAssignmentService) =>
@@ -95,6 +96,13 @@ export function useCreateAssignment() {
           return [...(oldData ?? []), data];
         }
       );
+
+      if (data.type === "Assignment") {
+        updateSkill.mutate({
+          assignmentId: data.id,
+        });
+      }
+
       queryClient.invalidateQueries({
         queryKey: ["assignment-overview", { subjectId: data.subjectId }],
       });
