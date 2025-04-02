@@ -10,7 +10,11 @@ type RequestSignInService = {
   password: string;
 };
 
-type ResponseSignInService = { redirectUrl: string };
+type ResponseSignInService = {
+  redirectUrl: string;
+  refreshToken: string;
+  accessToken: string;
+};
 
 export async function SignInService(
   input: RequestSignInService

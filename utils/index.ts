@@ -6,3 +6,4 @@ export * from "./date";
 export * from "./regex";
 export * from "./file";
 export * from "./grade";
+export * from "./cookie";

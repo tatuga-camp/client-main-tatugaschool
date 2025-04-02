@@ -12,6 +12,9 @@ function AskNotification() {
   }, []);
 
   const isNotificationGranted = (): boolean => {
+    if (typeof Notification === "undefined") {
+      return true;
+    }
     return Notification.permission === "granted";
   };
 

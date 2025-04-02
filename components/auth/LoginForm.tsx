@@ -8,6 +8,7 @@ import { FcGoogle } from "react-icons/fc";
 import { useRouter } from "next/router";
 import { useGetLanguage } from "../../react-query";
 import { requestData, signInData } from "../../data/languages";
+import { setAccessToken, setRefreshToken } from "../../utils";
 
 export const LoginForm = () => {
   const router = useRouter();
@@ -27,6 +28,8 @@ export const LoginForm = () => {
         },
       });
       const response = await SignInService({ email, password });
+      // setAccessToken({ access_token: response.accessToken });
+      // setRefreshToken({ refresh_token: response.refreshToken });
       router.push(response.redirectUrl);
       Swal.fire({
         title: requestData.successTitle(language.data ?? "en"),
