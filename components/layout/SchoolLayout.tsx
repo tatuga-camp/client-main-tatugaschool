@@ -3,6 +3,8 @@ import Navbar from "../Navbar";
 import React from "react";
 import useClickOutside from "../../hook/useClickOutside";
 import { menuSchoolList } from "../../data";
+import { useGetSchool } from "../../react-query";
+import TawkToChat from "../common/TawkToChat";
 
 type LayoutProps = {
   children: ReactNode;
@@ -19,7 +21,7 @@ function SchoolLayout({
 }: LayoutProps) {
   const navbarRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = React.useState(false);
-  // Use the custom hook to detect clicks outside the navbar
+  const school = useGetSchool({ schoolId });
   useClickOutside(navbarRef, () => {
     setActive(() => false); // Close the SubjectNavbar when clicking outside
   });
@@ -36,6 +38,7 @@ function SchoolLayout({
         />
       </div>
       {children}
+      {school.data && <TawkToChat school={school.data} />}
     </section>
   );
 }
