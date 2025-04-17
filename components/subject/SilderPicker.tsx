@@ -29,6 +29,7 @@ const SilderPicker = <T extends AnimationImageItemProps>({
   setSelectFooter,
 }: SilderPickerProps<T>) => {
   const [selectItem, setSelectItem] = useState<T | null>(null);
+  const [speedUp, SetSpeedUp] = useState(1)
   const cheering = useSound("/sounds/cheering.mp3");
   const ding = useSound("/sounds/ding.mp3");
   const studentOnSubjects = useGetStudentOnSubject({
@@ -308,6 +309,9 @@ const SilderPicker = <T extends AnimationImageItemProps>({
     setSelectFooter("EMTY");
   };
 
+  const handleFast = () => SetSpeedUp(3)
+  const handleSlow = () => SetSpeedUp(1)
+
   return (
     <div
       className="relative w-full h-full flex flex-col lg:flex-row 
@@ -394,12 +398,14 @@ const SilderPicker = <T extends AnimationImageItemProps>({
                   }, 1000);
                 }}
                 isStarted={isStarted}
+                speedUp={speedUp}
               />
             )}
             <div className="w-full flex gap-2 justify-center z-10">
               <button
                 disabled={isStarted || randomImages.length === 0}
                 onClick={handleOpenModal}
+                onMouseOver={handleFast}
                 className="main-button flex items-center w-40 h-10 justify-center"
               >
                 {isStarted ? (
@@ -410,7 +416,24 @@ const SilderPicker = <T extends AnimationImageItemProps>({
                     strokeWidth="8"
                   />
                 ) : (
-                  "START"
+                  "FAST"
+                )}
+              </button>
+              <button
+                disabled={isStarted || randomImages.length === 0}
+                onClick={handleOpenModal}
+                onMouseOver={handleSlow}
+                className="main-button flex items-center w-40 h-10 justify-center"
+              >
+                {isStarted ? (
+                  <ProgressSpinner
+                    animationDuration="1s"
+                    style={{ width: "20px" }}
+                    className="w-5 h-5"
+                    strokeWidth="8"
+                  />
+                ) : (
+                  "SLOW"
                 )}
               </button>
               <button
