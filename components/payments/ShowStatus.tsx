@@ -5,10 +5,12 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { defaultCanvas } from "../../data";
 import AnimationFireworkEffect from "../animation/AnimationFireworkEffect";
+import { useQueryClient } from "@tanstack/react-query";
 
 function ShowStatusPayment() {
   const stripe = useStripe();
   const [message, setMessage] = useState<string>();
+  const queryClient = useQueryClient();
   const [status, setStatus] = useState<PaymentIntent.Status>();
   const router = useRouter();
   useEffect(() => {
@@ -77,6 +79,9 @@ function ShowStatusPayment() {
           <div className="w-full flex items-center justify-center gap-3">
             <button
               onClick={() => {
+                queryClient.refetchQueries({
+                  queryKey: ["school"],
+                });
                 router.back();
               }}
               className="second-button flex items-center justify-center border w-40"

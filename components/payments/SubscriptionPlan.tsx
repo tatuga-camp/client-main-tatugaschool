@@ -1,15 +1,18 @@
 import { useState } from "react";
 import { School } from "../../interfaces";
 import { useGetListSubscription } from "../../react-query";
-import LoadingSpinner from "../common/LoadingSpinner";
 import LoadingBar from "../common/LoadingBar";
+import InputNumber from "../common/InputNumber";
 const pricingData = [
   {
     mainTitle: "",
     price: {
       month: null,
       year: null,
+      permember: false,
     },
+    popular: false,
+    product: false,
     infoNote: "",
     "Basic Feature": "Basic Feature",
     Users: "Members in a school",
@@ -20,9 +23,14 @@ const pricingData = [
   },
   {
     mainTitle: "FREE",
+    popular: false,
+    product: false,
     price: {
       month: "Free",
       year: "Free",
+      monthValue: 0,
+      yearValue: 0,
+      permember: false,
     },
     infoNote: "Free plan is good for 1 teacher in a school.",
     "Basic Feature": true,
@@ -38,7 +46,10 @@ const pricingData = [
     popular: true,
     price: {
       month: "290฿",
-      year: "990฿",
+      monthValue: 290,
+      year: "2,490฿",
+      yearValue: 2490,
+      permember: false,
     },
     infoNote: "Premium plan is good for 1 - 3 teachers in a school",
     "Basic Feature": true,
@@ -46,25 +57,29 @@ const pricingData = [
     "Total Storage Size": "100GB",
     Support: true,
     Classroom_Limit: "20 classrooms",
-    Subject_Limit: "20 subjects",
+    Subject_Limit: "30 subjects",
   },
   {
+    popular: false,
     mainTitle: "ENTERPRISE",
     product: "Tatuga School Enterprise",
     price: {
-      month: "500฿",
-      year: "5,000฿",
+      month: "150฿",
+      monthValue: 150,
+      year: "1,100฿",
+      yearValue: 1100,
+      permember: true,
     },
     infoNote:
       "Enterprise plan is good for a school that has more than 5 teachers",
     "Basic Feature": true,
-    Users: 20,
+    Users: "custom",
     "Total Storage Size": "9.77 TB",
     Support: true,
     Classroom_Limit: "Unlimited",
     Subject_Limit: "Unlimited",
   },
-];
+] as const;
 
 const RightIcon = ({ bgcolor }: { bgcolor: string }) => {
   return (
@@ -92,13 +107,16 @@ type Props = {
   school: School;
   onSelectPlan: (
     priceId: string,
-    product: { price: string; title: string; time: string }
+    product: { price: string; title: string; time: string },
+    members: number
   ) => void;
 };
 const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
   const subscriptions = useGetListSubscription();
   const [monthprice, setMonthPrice] = useState(true);
-
+  const [members, setMembers] = useState(
+    school.limitSchoolMember < 4 ? 4 : school.limitSchoolMember
+  );
   if (subscriptions.isLoading || !subscriptions.data) {
     return (
       <div className="mt-5">
@@ -165,12 +183,33 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
                 <tr>
                   <td className="h-[50px]">
                     <div className="w-max">
-                      <span className="font-semibold text-5xl">
-                        {monthprice ? data.price?.month : data.price?.year}
-                      </span>
+                      {(data.mainTitle === "FREE" ||
+                        data.mainTitle === "PREMIUM") && (
+                        <span className="font-semibold text-5xl">
+                          {monthprice ? data.price?.month : data.price?.year}
+                        </span>
+                      )}
+                      {data.mainTitle === "ENTERPRISE" && (
+                        <span className="font-semibold text-5xl">
+                          {monthprice
+                            ? (
+                                data.price?.monthValue * members
+                              ).toLocaleString()
+                            : (
+                                data.price?.yearValue * members
+                              ).toLocaleString()}
+                          ฿
+                        </span>
+                      )}
                       {data.price && (
                         <span className="text-[#475467] font-normal ml-1">
-                          {monthprice ? "per month" : "per year"}
+                          {data.price.permember
+                            ? monthprice
+                              ? "Per member/month"
+                              : "Per member/year"
+                            : monthprice
+                            ? "per month"
+                            : "per year"}
                         </span>
                       )}
                     </div>
@@ -188,36 +227,98 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
                     <td className="h-[50px]"></td>
                   ) : (
                     <td>
-                      <button
-                        onClick={() => {
-                          const prices = subscriptions.data.filter(
-                            (s) => s.title === data.product
-                          );
-                          const price = prices.find((p) =>
-                            monthprice ? p.time === "month" : p.time === "year"
-                          );
+                      {data.price.permember ? (
+                        <div className="w-full flex items-center justify-center gap-2">
+                          <InputNumber
+                            placeholder="Enter number of members"
+                            min={4}
+                            max={500}
+                            value={members}
+                            onValueChange={(data) => {}}
+                            onChange={(value) => {
+                              if (value > 3 && value <= 500) {
+                                setMembers(value);
+                              } else if (value < 4) {
+                                setMembers(4);
+                              } else if (value > 500) {
+                                setMembers(500);
+                              }
+                            }}
+                          />
+                          <button
+                            onClick={() => {
+                              const prices = subscriptions.data.filter(
+                                (s) => s.title === data.product
+                              );
+                              const price = prices.find((p) =>
+                                monthprice
+                                  ? p.time === "month"
+                                  : p.time === "year"
+                              );
 
-                          if (price?.priceId) {
-                            onSelectPlan(price?.priceId, {
-                              time: monthprice ? "month" : "year",
-                              title: data.product as string,
-                              price: monthprice
-                                ? (data.price.month as string)
-                                : (data.price.year as string),
-                            });
-                          }
-                        }}
-                        disabled={school.plan === data.mainTitle}
-                        className={`w-full ${
-                          school.plan === data.mainTitle
-                            ? "second-button text-black border"
-                            : "main-button text-white"
-                        }  rounded-lg py-3 font-semibold`}
-                      >
-                        {school.plan === data.mainTitle
-                          ? "You are on this plan"
-                          : "Get Started"}
-                      </button>
+                              if (price?.priceId) {
+                                onSelectPlan(
+                                  price?.priceId,
+                                  {
+                                    time: monthprice ? "month" : "year",
+                                    title: data.product as string,
+                                    price: monthprice
+                                      ? (data.price.month as string)
+                                      : (data.price.year as string),
+                                  },
+                                  members
+                                );
+                              }
+                            }}
+                            className={`w-full ${
+                              school.plan === data.mainTitle
+                                ? "second-button text-black border"
+                                : "main-button text-white"
+                            }  rounded-lg py-3 font-semibold`}
+                          >
+                            {school.plan === data.mainTitle
+                              ? "Update Members"
+                              : "Get Started"}
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            const prices = subscriptions.data.filter(
+                              (s) => s.title === data.product
+                            );
+                            const price = prices.find((p) =>
+                              monthprice
+                                ? p.time === "month"
+                                : p.time === "year"
+                            );
+
+                            if (price?.priceId) {
+                              onSelectPlan(
+                                price?.priceId,
+                                {
+                                  time: monthprice ? "month" : "year",
+                                  title: data.product as string,
+                                  price: monthprice
+                                    ? (data.price.month as string)
+                                    : (data.price.year as string),
+                                },
+                                1
+                              );
+                            }
+                          }}
+                          disabled={school.plan === data.mainTitle}
+                          className={`w-full ${
+                            school.plan === data.mainTitle
+                              ? "second-button text-black border"
+                              : "main-button text-white"
+                          }  rounded-lg py-3 font-semibold`}
+                        >
+                          {school.plan === data.mainTitle
+                            ? "You are on this plan"
+                            : "Get Started"}
+                        </button>
+                      )}
                     </td>
                   )}
                 </tr>

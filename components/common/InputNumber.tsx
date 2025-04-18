@@ -5,6 +5,7 @@ import { classNames } from "primereact/utils";
 type Props = {
   value?: number;
   onValueChange: (data: number) => void;
+  onChange?: (data: number) => void;
   min?: number;
   max?: number;
   useGrouping?: boolean;
@@ -29,6 +30,7 @@ function InputNumber({
   disabled,
   minFractionDigits,
   maxFractionDigits,
+  onChange,
 }: Props) {
   return (
     <InputNumberPrimereact
@@ -43,7 +45,8 @@ function InputNumber({
       placeholder={placeholder}
       useGrouping={useGrouping}
       max={max}
-      onChange={(e) => onValueChange(e.value as number)}
+      onChange={(e) => onChange?.(e.value as number)}
+      onValueChange={(e) => onValueChange(e.value as number)}
       pt={{
         root: {
           className: " inline-flex w-full",

@@ -5,11 +5,13 @@ const axiosInstance = createAxiosInstance();
 export type RequestCreateSubscriptionService = {
   priceId: string;
   schoolId: string;
+  members: number;
 };
 
 type ResponseCreateSubscriptionService = {
   subscriptionId: string;
   clientSecret: string;
+  price: number;
 };
 
 export async function CreateSubscriptionService(

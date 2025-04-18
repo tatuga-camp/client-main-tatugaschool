@@ -52,17 +52,37 @@ const BillingPlanSection = (props: { schoolId: string }) => {
   const handleCreateSubscription = async ({
     priceId,
     product,
+    members = 1,
   }: {
     priceId: string;
     product: { title: string; time: string; price: string };
+    members: number;
   }) => {
     try {
       const create = await createSubscription.mutateAsync({
         schoolId: props.schoolId,
         priceId: priceId,
+        members: members,
       });
+      if (create.clientSecret === null) {
+        Swal.fire({
+          title: "Request Complete",
+          text: "You have paid by your own credit from previous subscription",
+          icon: "success",
+        });
+        document.body.style.overflow = "auto";
+        setTimeout(() => {
+          school.refetch();
+        }, 2000);
+        return;
+      }
       setClientSecret(create.clientSecret);
-      setSelectProduct(product);
+      setSelectProduct(() => {
+        return {
+          ...product,
+          price: (create.price / 100).toLocaleString(),
+        };
+      });
     } catch (error) {
       document.body.style.overflow = "auto";
       console.log(error);
@@ -196,9 +216,13 @@ const BillingPlanSection = (props: { schoolId: string }) => {
         </div>
         {school.data && (
           <SubscriptionPlan
-            onSelectPlan={(priceId, product) => {
+            onSelectPlan={(priceId, product, members) => {
               if (confirm("Are you confirm to pay?")) {
-                handleCreateSubscription({ priceId, product: product });
+                handleCreateSubscription({
+                  priceId,
+                  product: product,
+                  members,
+                });
               }
             }}
             school={school.data}
