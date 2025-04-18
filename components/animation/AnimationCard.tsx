@@ -13,16 +13,9 @@ interface AnimationCardProps<T> {
   onStart: (start: boolean) => void;
   onFinished: () => void;
   isStarted: boolean;
+  speedUp: number;
 }
 
-const IMAGE_WIDTH = 200;
-const GAP = 0.9 * 16; // Gap in pixels (0.9rem)
-const GAP_BETWEEN_IMAGE = 10;
-const INITIAL_SPEED = 1;
-const TIME_INITIAL = INITIAL_SPEED * 2 * 1000;
-const SLOWDOWN_SPEED = 3;
-const TIME_SLOWDOWN = SLOWDOWN_SPEED * 1000 + TIME_INITIAL;
-const SLOWDOWN_STOP = 7;
 
 const AnimationCard = <T extends AnimationImageItemProps>({
   randomImages,
@@ -30,7 +23,18 @@ const AnimationCard = <T extends AnimationImageItemProps>({
   onStart,
   onFinished,
   isStarted,
+  speedUp = 2
 }: AnimationCardProps<T>) => {
+
+const IMAGE_WIDTH = 200;
+const GAP = 0.9 * 16; // Gap in pixels (0.9rem)
+const GAP_BETWEEN_IMAGE = 10;
+const INITIAL_SPEED = 1 / speedUp;
+const TIME_INITIAL = INITIAL_SPEED * 2 * 1000 / speedUp;
+const SLOWDOWN_SPEED = 3 / speedUp;
+const TIME_SLOWDOWN = SLOWDOWN_SPEED * 1000 + TIME_INITIAL / speedUp;
+const SLOWDOWN_STOP = 7 / speedUp;
+
   const controls = useAnimationControls();
   const [onProgress, setOnProgress] = React.useState(false);
   const x = useMotionValue(0);
