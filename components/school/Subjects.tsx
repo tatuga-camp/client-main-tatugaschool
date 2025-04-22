@@ -81,15 +81,16 @@ function Subjects({ schoolId }: Props) {
           const oldIndex = prevs.findIndex((item) => item.id === active.id);
           const newIndex = prevs.findIndex((item) => item.id === over!.id);
           newSort = arrayMove(prevs, oldIndex, newIndex);
-
           return newSort;
         });
       }
-      await reorder.mutateAsync({
-        subjectIds: newSort.map((item) => item.id),
-        schoolId: schoolId,
-        educationYear: educationYear,
-      });
+      if (newSort.length > 0) {
+        await reorder.mutateAsync({
+          subjectIds: newSort.map((item) => item.id),
+          schoolId: schoolId,
+          educationYear: educationYear,
+        });
+      }
     },
     [educationYear]
   );

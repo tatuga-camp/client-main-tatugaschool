@@ -69,11 +69,13 @@ function Classrooms({ schoolId }: Props) {
       });
     }
 
-    await reorder.mutateAsync({
-      classIds: newSort.map((item) => item.id),
-      schoolId: schoolId,
-      isAchieved: !triggerActiveClasses,
-    });
+    if (newSort.length > 0) {
+      await reorder.mutateAsync({
+        classIds: newSort.map((item) => item.id),
+        schoolId: schoolId,
+        isAchieved: !triggerActiveClasses,
+      });
+    }
   }, []);
 
   useEffect(() => {

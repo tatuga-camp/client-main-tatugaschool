@@ -154,7 +154,7 @@ export async function ReorderSubjectsService(
     });
     return response.data;
   } catch (error: any) {
-    console.error("Reorder Subjects request failed:", error.response.data);
+    console.error("Reorder Subjects request failed:", error.response?.data);
     throw error?.response?.data;
   }
 }

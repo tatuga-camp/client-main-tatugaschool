@@ -282,7 +282,7 @@ export const footerOnSubjectDataLangugae = {
       case "en":
         return "Stop Watch";
       case "th":
-        return "จัวเวลา";
+        return "จับเวลา";
       default:
         return "Stop Watch";
     }
