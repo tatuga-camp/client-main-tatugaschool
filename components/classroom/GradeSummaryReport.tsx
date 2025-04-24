@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { SiMicrosoftexcel } from "react-icons/si";
-import { Classroom, Student } from "../../interfaces";
+import { Classroom, EducationYear, Student } from "../../interfaces";
 import { FaUser } from "react-icons/fa6";
 import Image from "next/image";
 import { decodeBlurhashToCanvas } from "../../utils";
@@ -9,7 +9,13 @@ import {
   useGetGradeSummaryReportOnClassroom,
   useGetLanguage,
 } from "../../react-query";
-import { gradeOnClassroomDataLanguage } from "../../data/languages";
+import {
+  gradeOnClassroomDataLanguage,
+  subjectsDataLanguage,
+} from "../../data/languages";
+import InputEducationYear from "../common/InputEducationYear";
+import LoadingBar from "../common/LoadingBar";
+import Link from "next/link";
 
 function GradeSummaryReport({
   students,
@@ -19,8 +25,13 @@ function GradeSummaryReport({
   classroom: Classroom;
 }) {
   const langugae = useGetLanguage();
+  const [educationYear, setEducationYear] = useState<EducationYear>(() => {
+    const year = new Date().getFullYear();
+    return `1/${year}`;
+  });
   const grades = useGetGradeSummaryReportOnClassroom({
     classId: classroom.id,
+    educationYear: educationYear,
   });
   return (
     <>
@@ -41,8 +52,19 @@ function GradeSummaryReport({
             <SiMicrosoftexcel />
             Export
           </button> */}
+          <div>
+            <span>
+              {subjectsDataLanguage.educationYear(langugae.data ?? "en")}
+            </span>
+            <InputEducationYear
+              value={educationYear}
+              onChange={(v) => setEducationYear(v as EducationYear)}
+              required
+            />
+          </div>
         </section>
       </header>
+      {grades.isLoading && <LoadingBar />}
       <main
         className="w-full flex flex-col md:flex-row justify-between p-3 bg-white rounded-md 
         md:max-w-screen-md xl:max-w-screen-lg gap-4 md:gap-0 mx-auto"
@@ -60,10 +82,13 @@ function GradeSummaryReport({
                 {grades.data?.map((grade) => {
                   return (
                     <th key={grade.id}>
-                      <div className="flex items-start hover:w-max min-w-40 w-40 flex-col gap-1">
-                        <h1 className="text-xs md:text-sm truncate font-semibold text-start">
+                      <div className="flex items-start hover:w-max w-44  truncate flex-col gap-1">
+                        <Link
+                          href={`/subject/${grade.id}`}
+                          className="text-xs underline text-blue-700 md:text-sm truncate w-40 font-semibold text-start"
+                        >
                           {grade.title}
-                        </h1>
+                        </Link>
                         <p className="text-xs font-normal hover:line-clamp-none text-start line-clamp-2 text-gray-500">
                           {grade.description}
                         </p>
@@ -125,7 +150,9 @@ function GradeSummaryReport({
                             ${odd ? "bg-gray-100" : "bg-white"}
                             `}
                           >
-                            {studentGrade?.totalScore.toFixed(2) ?? "-"}
+                            <div className="w-44 text-center">
+                              {studentGrade?.totalScore.toFixed(2) ?? "-"}
+                            </div>
                           </td>
                         );
                       })}

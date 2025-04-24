@@ -18,7 +18,7 @@ const TawkToChat = ({ school, user }: TawkToChatProps) => {
 
   useEffect(() => {
     if (!shouldShowChat) return;
-
+    if (window.origin.includes("localhost:")) return;
     const script = document.createElement("script");
     script.async = true;
     script.src = `https://embed.tawk.to/${TAWK_TO_PROPERTY_ID}/${TAWK_TO_WIDGET_ID}`;
