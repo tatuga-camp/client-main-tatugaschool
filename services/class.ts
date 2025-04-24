@@ -1,4 +1,4 @@
-import { Classroom, Student, Subject } from "@/interfaces";
+import { Classroom, EducationYear, Student, Subject } from "@/interfaces";
 import { Pagination } from "@/interfaces/Pagination";
 
 import createAxiosInstance from "./apiService";
@@ -80,6 +80,7 @@ export async function GetClassByIdService(
 
 export type RequestGetGradeSummaryOnClassroomService = {
   classId: string;
+  educationYear: EducationYear;
 };
 
 export type ResponseGetGradeSummaryOnClassroomService = (Subject & {
@@ -100,6 +101,7 @@ export async function GetGradeSummaryOnClassroomService(
     const response = await axiosInstance({
       method: "GET",
       url: `/v1/classes/${input.classId}/grade-summary`,
+      params: { educationYear: input.educationYear },
     });
     return response.data;
   } catch (error: any) {

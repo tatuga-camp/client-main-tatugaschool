@@ -32,7 +32,7 @@ export function useGetGradeSummaryReportOnClassroom(
   input: RequestGetGradeSummaryOnClassroomService
 ) {
   return useQuery({
-    queryKey: ["grade-summary", { classId: input.classId }],
+    queryKey: ["grade-summary", input],
     queryFn: () => GetGradeSummaryOnClassroomService(input),
   });
 }
