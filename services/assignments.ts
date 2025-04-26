@@ -4,6 +4,8 @@ import {
   AssignmentType,
   FileOnAssignment,
   Grade,
+  ScoreOnStudent,
+  ScoreOnSubject,
   Skill,
   StudentOnAssignment,
 } from "../interfaces";
@@ -71,6 +73,10 @@ export type RequestGetOverviewAssignmentService = {
 export type ResponseGetOverviewAssignmentService = {
   grade: Grade | null;
   assignments: { assignment: Assignment; students: StudentOnAssignment[] }[];
+  scoreOnSubjects: {
+    scoreOnSubject: ScoreOnSubject;
+    students: ScoreOnStudent[];
+  }[];
 };
 
 export async function GetOverviewAssignmentService(
