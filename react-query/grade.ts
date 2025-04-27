@@ -37,6 +37,7 @@ export function useCreateGrade() {
             return {
               assignments: prev.assignments,
               grade: data,
+              scoreOnSubjects: prev.scoreOnSubjects,
             };
           }
         );
@@ -65,6 +66,7 @@ export function useUpdateGrade() {
             return {
               assignments: prev.assignments,
               grade: data,
+              scoreOnSubjects: prev.scoreOnSubjects,
             };
           }
         );
@@ -94,11 +96,13 @@ export function useUpdateAssignmentOverview() {
         ): ResponseGetOverviewAssignmentService => {
           return {
             grade: oldData.grade,
+            scoreOnSubjects: oldData.scoreOnSubjects,
             assignments: oldData?.assignments.map((prevAssignment) => {
               if (prevAssignment.assignment.id === updateData.id) {
                 return {
                   assignment: updateData,
                   students: prevAssignment.students,
+                  scoreOnSubjects: oldData.scoreOnSubjects,
                 };
               }
               return prevAssignment;
@@ -140,6 +144,7 @@ export function useUpdateStudentAssignmentOverview() {
               }
               return prevAssignment;
             }),
+            scoreOnSubjects: oldData.scoreOnSubjects,
           };
         }
       );

@@ -14,3 +14,4 @@ export * from "./class";
 export * from "./subject";
 export * from "./subjects";
 export * from "./classwork";
+export * from "./grade";

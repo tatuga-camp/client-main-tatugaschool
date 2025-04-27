@@ -1,30 +1,20 @@
-import React, { memo, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import Image from "next/image";
+import { Toast } from "primereact/toast";
+import React, { memo, useState } from "react";
+import { IoMdClose } from "react-icons/io";
+import Swal from "sweetalert2";
+import { useSound } from "../../hook";
 import {
   ErrorMessages,
-  ScoreOnStudent,
   ScoreOnSubject,
   StudentOnSubject,
 } from "../../interfaces";
-import Image from "next/image";
 import {
   useCreateScoreOnStudent,
   useGetScoreOnSubject,
 } from "../../react-query";
-import { IoStar } from "react-icons/io5";
-import { InputNumber } from "primereact/inputnumber";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  CreateScoreOnStudentService,
-  RequestCreateScoreOnStudentService,
-} from "../../services";
-import Swal from "sweetalert2";
-import { Toast } from "primereact/toast";
-import { ProgressSpinner } from "primereact/progressspinner";
-import { useSound } from "../../hook";
-import { decodeBlurhashToCanvas } from "../../utils";
 import ScorePanel from "./ScorePanel";
-import { CgClose } from "react-icons/cg";
-import { IoMdClose } from "react-icons/io";
 
 type Props = {
   setSelectStudent: React.Dispatch<
