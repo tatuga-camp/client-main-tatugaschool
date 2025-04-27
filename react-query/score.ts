@@ -8,10 +8,12 @@ import {
 import {
   CreateScoreOnStudentService,
   CreateScoreOnSubjectService,
+  DeleteScoreOnSubjectService,
   GetScoresOnStudentBySubjectIdService,
   GetScoresOnSubjectBySubjectIdService,
   RequestCreateScoreOnStudentService,
   RequestCreateScoreOnSubjectService,
+  RequestDeleteScoreOnSubjectService,
   RequestGetScoresOnStudentBySubjectIdService,
   RequestUpdateScoreOnSubjectService,
   UpdateScoreOnSubjectService,
@@ -23,13 +25,24 @@ import {
   StudentOnSubject,
 } from "../interfaces";
 
+export const scoretKey = {
+  getScoreOnSubjectBySubjectId: (subjectId: string) => [
+    "scoreOnSubjects",
+    { subjectId: subjectId },
+  ],
+  getScoreOnStudentBySubjectId: (subjectId: string) => [
+    "scoreOnStudents",
+    { subjectId: subjectId },
+  ],
+} as const;
+
 export function useGetScoreOnSubject({
   subjectId,
 }: {
   subjectId: string;
 }): UseQueryResult<ScoreOnSubject[], Error> {
   const scores = useQuery({
-    queryKey: ["scoreOnSubjects", { subjectId }],
+    queryKey: scoretKey.getScoreOnSubjectBySubjectId(subjectId),
     queryFn: () =>
       GetScoresOnSubjectBySubjectIdService({
         subjectId: subjectId,
@@ -63,7 +76,7 @@ export function useUpdateScoreOnSubject() {
       UpdateScoreOnSubjectService(request),
     onSuccess(data, variables, context) {
       queryClient.setQueryData(
-        ["scoreOnSubjects", { subjectId: data.subjectId }],
+        scoretKey.getScoreOnSubjectBySubjectId(data.subjectId),
         (prev: ScoreOnSubject[]) => {
           return prev.map((score) => {
             if (score.id === data.id) {
@@ -81,12 +94,7 @@ export function useGetScoreOnStudent(
   request: RequestGetScoresOnStudentBySubjectIdService
 ): UseQueryResult<ScoreOnStudent[], Error> {
   const scores = useQuery({
-    queryKey: [
-      "scoreOnStudents",
-      {
-        subjectId: request.subjectId,
-      },
-    ],
+    queryKey: scoretKey.getScoreOnStudentBySubjectId(request.subjectId),
     queryFn: () => GetScoresOnStudentBySubjectIdService(request),
   });
   return scores;
@@ -108,20 +116,14 @@ export function useCreateScoreOnStudent() {
       };
 
       variables.queryClient.setQueryData(
-        [
-          "scoreOnStudents",
-          { subjectId: variables.studentOnSubject.subjectId },
-        ],
+        scoretKey.getScoreOnStudentBySubjectId(data.subjectId),
         (prev: ScoreOnStudent[]) => {
           return [...prev, data];
         }
       );
 
       variables.queryClient.setQueryData(
-        [
-          "studentOnSubjects",
-          { subjectId: variables.studentOnSubject.subjectId },
-        ],
+        scoretKey.getScoreOnStudentBySubjectId(data.subjectId),
         (
           prev: (StudentOnSubject & {
             scores: ScoreOnStudent[];
@@ -141,4 +143,24 @@ export function useCreateScoreOnStudent() {
   });
 
   return createScoreOnStudent;
+}
+
+export function useDeleteScoreOnSubject() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["delete-score-on-subject"],
+    mutationFn: (request: RequestDeleteScoreOnSubjectService) =>
+      DeleteScoreOnSubjectService(request),
+    onSuccess(data, variables, context) {
+      queryClient.setQueryData(
+        ["scoreOnSubjects", { subjectId: data.subjectId }],
+        (prev: ScoreOnSubject[]) => {
+          return prev.filter((p) => p.id !== data.id);
+        }
+      );
+      queryClient.refetchQueries({
+        queryKey: scoretKey.getScoreOnStudentBySubjectId(data.subjectId),
+      });
+    },
+  });
 }

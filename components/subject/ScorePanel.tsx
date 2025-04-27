@@ -1,21 +1,25 @@
-import React from "react";
-import { ErrorMessages, ScoreOnSubject } from "../../interfaces";
+import { UseQueryResult } from "@tanstack/react-query";
 import Image from "next/image";
-import { decodeBlurhashToCanvas } from "../../utils";
 import { InputNumber } from "primereact/inputnumber";
 import { ProgressSpinner } from "primereact/progressspinner";
-import { IoStar } from "react-icons/io5";
-import { UseQueryResult } from "@tanstack/react-query";
+import { Toast } from "primereact/toast";
+import React from "react";
+import { BiEdit } from "react-icons/bi";
 import { CiSquarePlus } from "react-icons/ci";
+import { IoStar } from "react-icons/io5";
+import Swal from "sweetalert2";
 import { scoreOnSubjectTitlesDefault } from "../../data/socre";
+import { ErrorMessages, ScoreOnSubject } from "../../interfaces";
 import {
   useCreateScoreOnSubject,
+  useDeleteScoreOnSubject,
+  useGetLanguage,
   useUpdateScoreOnSubject,
 } from "../../react-query";
-import Swal from "sweetalert2";
-import { Toast } from "primereact/toast";
-import { BiEdit } from "react-icons/bi";
+import { decodeBlurhashToCanvas } from "../../utils";
 import LoadingSpinner from "../common/LoadingSpinner";
+import ConfirmDeleteMessage from "../common/ConfirmDeleteMessage";
+import LoadingBar from "../common/LoadingBar";
 
 type Props = {
   scoreOnSubjects: UseQueryResult<ScoreOnSubject[], Error>;
@@ -212,6 +216,8 @@ function ScoreOnSubjectForm({
   const toast = React.useRef<Toast>(null);
   const update = useUpdateScoreOnSubject();
   const create = useCreateScoreOnSubject();
+  const remove = useDeleteScoreOnSubject();
+  const language = useGetLanguage();
   const [data, setData] = React.useState<{
     title?: string;
     score?: number;
@@ -220,7 +226,8 @@ function ScoreOnSubjectForm({
   }>({
     title: scoreOnSubject?.title,
     score: scoreOnSubject?.score ?? 1,
-    blurHash: scoreOnSubject?.blurHash,
+    blurHash:
+      scoreOnSubject?.blurHash ?? scoreOnSubjectTitlesDefault[0].blurHash,
     icon: scoreOnSubject?.icon ?? scoreOnSubjectTitlesDefault[0].icon,
   });
 
@@ -268,6 +275,33 @@ function ScoreOnSubjectForm({
         });
       }
 
+      setTimeout(() => {
+        onClose();
+      }, 1000);
+    } catch (error) {
+      console.error(error);
+      let result = error as ErrorMessages;
+      Swal.fire({
+        title: result?.error ? result?.error : "Something Went Wrong",
+        text: result?.message?.toString(),
+        footer: result?.statusCode
+          ? "Code Error: " + result?.statusCode?.toString()
+          : "",
+        icon: "error",
+      });
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await remove.mutateAsync({
+        scoreOnSubjectId: id,
+      });
+      toast.current?.show({
+        severity: "success",
+        summary: "Score Deleted",
+        life: 3000,
+      });
       setTimeout(() => {
         onClose();
       }, 1000);
@@ -362,7 +396,26 @@ function ScoreOnSubjectForm({
               "Create"
             )}
           </button>
+          {scoreOnSubject?.id && (
+            <button
+              type="button"
+              onClick={() => {
+                if (scoreOnSubject) {
+                  ConfirmDeleteMessage({
+                    language: language.data ?? "en",
+                    callback: async () => {
+                      handleDelete(scoreOnSubject.id);
+                    },
+                  });
+                }
+              }}
+              className="reject-button w-full flex items-center justify-center"
+            >
+              Delete
+            </button>
+          )}
         </div>
+        {remove.isPending && <LoadingBar />}
       </form>
     </>
   );

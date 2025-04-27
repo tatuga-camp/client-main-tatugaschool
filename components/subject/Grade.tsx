@@ -181,7 +181,7 @@ function Grade({
                                   assignment: data.assignment,
                                 })
                               }
-                              className="w-40 min-w-40 group-hover:w-max  p-2 relative active:bg-gray-200
+                              className="w-52 min-w-52 group-hover:w-max  p-2 relative active:bg-gray-200
                            hover:bg-gray-100  hover:ring-1 flex items-start flex-col"
                             >
                               <span className="w-max group-hover:max-w-none max-w-40 truncate">
@@ -197,6 +197,11 @@ function Grade({
                                     language.data ?? "en"
                                   )}`}
                               </span>
+                              <div className="text-xs  text-white bg-gradient-to-r from-emerald-400 to-cyan-400 px-2 rounded-md">
+                                {gradeData.assignment_score(
+                                  language.data ?? "en"
+                                )}{" "}
+                              </div>
                             </button>
                           </th>
                         );
@@ -256,7 +261,7 @@ function Grade({
                 ?.sort((a, b) => Number(a.number) - Number(b.number))
                 ?.map((student, index) => {
                   const odd = index % 2 === 0;
-                  const totalScore =
+                  let totalScore =
                     assignmentsOverview.data?.assignments.reduce(
                       (prev, current) => {
                         let score =
@@ -273,6 +278,27 @@ function Grade({
                       },
                       0
                     ) ?? 0;
+
+                  totalScore =
+                    assignmentsOverview.data?.scoreOnSubjects.reduce(
+                      (prev, scoreOnSubject) => {
+                        const summaryScore = scoreOnSubject.students.reduce(
+                          (prev, studentOnScore) => {
+                            if (
+                              studentOnScore.studentOnSubjectId === student.id
+                            ) {
+                              return (prev += studentOnScore.score);
+                            }
+                            return prev;
+                          },
+                          0
+                        );
+
+                        return (prev += summaryScore);
+                      },
+                      totalScore
+                    ) ?? 0;
+
                   const grade = calulateGrade(
                     assignmentsOverview.data?.grade?.gradeRules ??
                       defaultGradeRule,

@@ -61,6 +61,16 @@ export const gradeData = {
         return "special score";
     }
   },
+  assignment_score: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "assignment score";
+      case "th":
+        return "คะแนนชิ้นงาน";
+      default:
+        return "assignment score";
+    }
+  },
   score: (language: Language) => {
     switch (language) {
       case "en":

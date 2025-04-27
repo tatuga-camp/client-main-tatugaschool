@@ -79,3 +79,22 @@ export async function UpdateScoreOnSubjectService(
     throw error?.response?.data;
   }
 }
+
+export type RequestDeleteScoreOnSubjectService = {
+  scoreOnSubjectId: string;
+};
+
+export async function DeleteScoreOnSubjectService(
+  input: RequestDeleteScoreOnSubjectService
+): Promise<ResponseScoreOnSubjectService> {
+  try {
+    const response = await axiosInstance({
+      method: "DELETE",
+      url: `/v1/score-on-subjects/${input.scoreOnSubjectId}`,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Failed to Delete score on subject:", error.response?.data);
+    throw error?.response?.data;
+  }
+}
