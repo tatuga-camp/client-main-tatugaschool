@@ -25,6 +25,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ school, updateSchool }) => {
     city: school.city,
     zip: school.zipCode,
     about: school.description,
+    address: school.address,
   });
 
   const handleChange = (
@@ -68,21 +69,34 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ school, updateSchool }) => {
         />
       </div>
 
+      <div>
+        <label className="block text-gray-500 text-sm mb-1" htmlFor="phone">
+          Phone
+        </label>
+        <PhoneInput
+          required
+          defaultCountry="th"
+          value={formData.phoneNumber}
+          onChange={(e) => {
+            setFormData((prev) => {
+              return { ...prev, phoneNumber: e };
+            });
+            setIsActive(true);
+          }}
+        />
+      </div>
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-gray-500 text-sm mb-1" htmlFor="phone">
-            Phone
+          <label className="block text-gray-500 text-sm mb-1" htmlFor="address">
+            address
           </label>
-          <PhoneInput
+          <input
+            type="text"
             required
-            defaultCountry="th"
-            value={formData.phoneNumber}
-            onChange={(e) => {
-              setFormData((prev) => {
-                return { ...prev, phoneNumber: e };
-              });
-              setIsActive(true);
-            }}
+            id="address"
+            className="main-input w-full"
+            value={formData.address}
+            onChange={handleChange}
           />
         </div>
         <div>
