@@ -161,39 +161,41 @@ export function useCreateAttendance() {
 }
 
 export function useUpdateManyAttendance() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationKey: ["update-many-attendance"],
-    mutationFn: (request: {
-      request: RequestUpdateManyAttendanceService;
-      queryClient: QueryClient;
-    }) => UpdateManyAttendanceService(request.request),
+    mutationFn: (request: { request: RequestUpdateManyAttendanceService }) =>
+      UpdateManyAttendanceService(request.request),
     onSuccess(data, variables, context) {
-      variables.queryClient.setQueryData(
-        ["attendance-rows", { attendanceTableId: data[0].attendanceTableId }],
-        (oldData: (AttendanceRow & { attendances: Attendance[] })[]) => {
-          return oldData?.map((attendanceRow) => {
-            const attendanceWIthRowIds = data.filter(
-              (a) => a.attendanceRowId === attendanceRow.id
-            );
-            if (attendanceWIthRowIds.length > 0) {
-              return {
-                ...attendanceRow,
-                attendances: attendanceRow.attendances.map((attendance) => {
-                  const updatedAttendance = attendanceWIthRowIds.find(
-                    (a) => a.id === attendance.id
-                  );
-                  if (updatedAttendance) {
-                    return updatedAttendance;
-                  }
-                  return attendance;
-                }),
-              };
-            } else {
-              return attendanceRow;
-            }
-          });
-        }
-      );
+      if (data.length > 0) {
+        queryClient.setQueryData(
+          ["attendance-rows", { attendanceTableId: data[0].attendanceTableId }],
+          (oldData: (AttendanceRow & { attendances: Attendance[] })[]) => {
+            return oldData?.map((attendanceRow) => {
+              const attendanceWIthRowIds = data.filter(
+                (a) => a.attendanceRowId === attendanceRow.id
+              );
+              if (attendanceWIthRowIds.length > 0) {
+                return {
+                  ...attendanceRow,
+                  attendances: attendanceRow.attendances.map((attendance) => {
+                    const updatedAttendance = attendanceWIthRowIds.find(
+                      (a) => a.id === attendance.id
+                    );
+                    if (updatedAttendance) {
+                      return updatedAttendance;
+                    }
+                    return attendance;
+                  }),
+                };
+              } else {
+                return attendanceRow;
+              }
+            });
+          }
+        );
+      }
     },
   });
 }

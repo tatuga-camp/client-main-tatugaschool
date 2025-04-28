@@ -300,10 +300,10 @@ function DisplayAttendanceTable({
   });
 
   useEffect(() => {
-    if (rows.data && scrollRef.current) {
+    if (rows.isSuccess && scrollRef.current) {
       scrollRef.current.scrollLeft = scrollRef.current.scrollWidth;
     }
-  }, [rows.data]);
+  }, [rows.isSuccess]);
 
   return (
     <div className="w-full flex flex-col items-center">

@@ -356,8 +356,9 @@ function Grade({
                             );
                           })
                         : [
-                            assignmentsOverview.data?.assignments.map(
-                              (data, index) => {
+                            assignmentsOverview.data?.assignments
+                              .filter((a) => a.assignment.type !== "Material")
+                              .map((data, index) => {
                                 const studentOnAssignment = data.students.find(
                                   (a) => a.studentOnSubjectId === student.id
                                 );
@@ -466,8 +467,7 @@ function Grade({
                                     </button>
                                   </td>
                                 );
-                              }
-                            ),
+                              }),
                             assignmentsOverview.data?.scoreOnSubjects.map(
                               (data) => {
                                 const scoreOnStudents = data.students.filter(

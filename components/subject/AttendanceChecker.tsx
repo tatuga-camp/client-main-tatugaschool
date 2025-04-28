@@ -33,7 +33,7 @@ type Props = {
   toast: React.RefObject<Toast>;
 };
 function AttendanceChecker({ subjectId, onClose, toast }: Props) {
-  const queryClient = useQueryClient();
+  const formRef = React.useRef<HTMLFormElement | null>(null);
   const [selectTable, setSelectTable] = React.useState<
     | (AttendanceTable & {
         statusLists: AttendanceStatusList[];
@@ -123,6 +123,9 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
 
   const handleCreateAttendance = async () => {
     try {
+      if (formRef.current?.reportValidity() === false) {
+        return;
+      }
       if (
         !attendanceData.startDate ||
         !attendanceData.endDate ||
@@ -163,7 +166,6 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
       const filterData = data.filter((d) => d !== null);
       await updateAttendance.mutateAsync({
         request: filterData,
-        queryClient,
       });
       show();
       successSong?.play();
@@ -226,7 +228,10 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
 
           {/* Date & Note Controls */}
           <div className="flex flex-col sm:flex-row gap-3 w-full">
-            <div className="flex-1 flex flex-col sm:flex-row gap-2">
+            <form
+              ref={formRef}
+              className="flex-1 flex flex-col sm:flex-row gap-2"
+            >
               <label className="flex flex-col">
                 <span className="text-gray-400 text-xs">
                   {attendanceCheckerDataLanugae.startDate(
@@ -234,6 +239,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
                   )}
                 </span>
                 <input
+                  required
                   value={attendanceData.startDate}
                   onChange={(e) =>
                     setAttendanceData((prev) => {
@@ -269,6 +275,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
                   {attendanceCheckerDataLanugae.endDate(language.data ?? "en")}
                 </span>
                 <input
+                  required
                   value={attendanceData.endDate}
                   onChange={(e) =>
                     setAttendanceData((prev) => ({
@@ -280,7 +287,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
                   className="main-input h-8 w-60"
                 />
               </label>
-            </div>
+            </form>
             <button
               onClick={() => setTriggerNote((prev) => !prev)}
               className="main-button flex items-center justify-center h-8 px-4
