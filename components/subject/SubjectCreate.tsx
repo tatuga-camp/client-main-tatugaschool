@@ -40,7 +40,7 @@ function SubjectCreate({ onClose, schoolId, educationYear, toast }: Props) {
   });
 
   useEffect(() => {
-    if (classrooms.data) {
+    if (classrooms.data && classrooms.data?.length > 0) {
       setData((prev) => ({ ...prev, classId: classrooms.data[0].id }));
     }
   }, [classrooms.data]);
@@ -165,6 +165,11 @@ function SubjectCreate({ onClose, schoolId, educationYear, toast }: Props) {
                 );
               })}
           </select>
+          {classrooms.data && classrooms.data?.length === 0 && (
+            <span className="text-red-700 text-sm">
+              {subjectsDataLanguage.create_class_first(language.data ?? "en")}
+            </span>
+          )}
         </label>
       </div>
 

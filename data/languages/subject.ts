@@ -89,7 +89,7 @@ export const settingOnSubjectDataLanguage = {
       case "en":
         return "Subject ID";
       case "th":
-        return "รหัสวิชา";
+        return "ไอดีรายวิชา";
       default:
         return "Subject ID";
     }
@@ -99,7 +99,7 @@ export const settingOnSubjectDataLanguage = {
       case "en":
         return "The Subject Connect To Class ID";
       case "th":
-        return "รหัสชั้นเรียนที่เชื่อมกับรายวิชานี้";
+        return "ไอดีชั้นเรียนที่เชื่อมกับรายวิชานี้";
       default:
         return "The Subject Connect To Class ID";
     }
@@ -109,7 +109,7 @@ export const settingOnSubjectDataLanguage = {
       case "en":
         return "Subject Code";
       case "th":
-        return "รหัสเข้สรายวิชา";
+        return "รหัสเข้ารายวิชา";
       default:
         return "Subject Code";
     }

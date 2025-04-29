@@ -81,4 +81,14 @@ export const subjectsDataLanguage = {
         return "Select Classroom for subject";
     }
   },
+  create_class_first: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Please Create A Class First";
+      case "th":
+        return "กรุณาสร้างชั้นเรียนก่อน";
+      default:
+        return "Please Create A Class First";
+    }
+  },
 } as const;
