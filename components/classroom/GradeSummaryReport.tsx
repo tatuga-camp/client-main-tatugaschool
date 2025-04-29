@@ -151,7 +151,7 @@ function GradeSummaryReport({
                             `}
                           >
                             <div className="w-44 text-center">
-                              {studentGrade?.totalScore.toFixed(2) ?? "-"}
+                              {studentGrade?.totalScore?.toFixed(2) ?? "-"}
                             </div>
                           </td>
                         );
