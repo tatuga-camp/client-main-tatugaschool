@@ -24,3 +24,6 @@ export * from "./team";
 export * from "./attendance-status";
 export * from "./subscription";
 export * from "./grade";
+export * from "./group-on-subject";
+export * from "./unit-on-group";
+export * from "./student-on-group";
