@@ -72,11 +72,11 @@ export const menuClassworkList: {
     icon: <MdOutlineDataSaverOn />,
     value: "saveChange",
   },
-  {
-    title: "Duplicate",
-    icon: <IoDuplicate />,
-    value: "duplicate",
-  },
+  // {
+  //   title: "Duplicate",
+  //   icon: <IoDuplicate />,
+  //   value: "duplicate",
+  // },
   {
     title: "Delete",
     icon: <MdDelete />,
