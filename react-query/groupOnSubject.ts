@@ -1,15 +1,29 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   CreateGroupOnSubjectService,
+  CreateStudentOnGroupService,
+  CreateUnitOnGroupService,
   DeleteeGroupOnSubjectService,
+  DeleteStudentOnGroupService,
+  DeleteUnitOnGroupService,
   GetGroupOnSubjectService,
   GetGroupOnSubjectsService,
+  ReorderStudentOnGroupService,
+  ReorderUnitOnGroupService,
   RequestCreateGroupOnSubjectService,
+  RequestCreateStudentOnGroupService,
+  RequestCreateUnitOnGroupService,
   RequestDeleteeGroupOnSubjectService,
+  RequestDeleteStudentOnGroupService,
+  RequestDeleteUnitOnGroupService,
+  RequestReorderStudentOnGroupService,
+  RequestReorderUnitOnGroupService,
   RequestUpdateGroupOnSubjectService,
+  RequestUpdateUnitOnGroupService,
   ResponseGetGroupOnSubjectService,
   ResponseGetGroupOnSubjectsService,
   UpdateGroupOnSubjectService,
+  UpdateUnitOnGroupService,
 } from "../services";
 
 export const keyGroupOnSubject = {
@@ -113,6 +127,188 @@ export function useDeleteGroupOnSubject() {
           prev: ResponseGetGroupOnSubjectsService
         ): ResponseGetGroupOnSubjectsService => {
           return prev.filter((g) => g.id !== data.id);
+        }
+      );
+    },
+  });
+}
+
+export function useCreateUnitOnGroup() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: keyUnitOnGroup.create,
+    mutationFn: (request: RequestCreateUnitOnGroupService) =>
+      CreateUnitOnGroupService(request),
+    onSuccess(data, variables, context) {
+      queryClient.setQueryData(
+        keyGroupOnSubject.getById({ id: data.groupOnSubjectId }),
+        (
+          prev: ResponseGetGroupOnSubjectService
+        ): ResponseGetGroupOnSubjectService => {
+          return { ...prev, units: [...prev.units, { ...data, students: [] }] };
+        }
+      );
+    },
+  });
+}
+
+export function useUpdateUnitOnGroup() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: keyUnitOnGroup.update,
+    mutationFn: (request: RequestUpdateUnitOnGroupService) =>
+      UpdateUnitOnGroupService(request),
+    onSuccess(data, variables, context) {
+      queryClient.setQueryData(
+        keyGroupOnSubject.getById({ id: data.groupOnSubjectId }),
+        (
+          prev: ResponseGetGroupOnSubjectService
+        ): ResponseGetGroupOnSubjectService => {
+          return {
+            ...prev,
+            units: prev.units.map((u) => {
+              if (u.id === data.id) {
+                return { ...data, students: u.students };
+              }
+              return u;
+            }),
+          };
+        }
+      );
+    },
+  });
+}
+
+export function useReorderUnitGroup() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: keyUnitOnGroup.reorder,
+    mutationFn: (request: RequestReorderUnitOnGroupService) =>
+      ReorderUnitOnGroupService(request),
+    onSuccess(data, variables, context) {
+      queryClient.setQueryData(
+        keyGroupOnSubject.getById({ id: data[0].groupOnSubjectId }),
+        (
+          prev: ResponseGetGroupOnSubjectService
+        ): ResponseGetGroupOnSubjectService => {
+          return {
+            ...prev,
+            units: data.map((u) => {
+              const students = prev.units.find(
+                (prevUnit) => prevUnit.id === u.id
+              );
+              return { ...u, students: students?.students ?? [] };
+            }),
+          };
+        }
+      );
+    },
+  });
+}
+
+export function useDeleteUnitOnGroup() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: keyUnitOnGroup.delete,
+    mutationFn: (request: RequestDeleteUnitOnGroupService) =>
+      DeleteUnitOnGroupService(request),
+    onSuccess(data, variables, context) {
+      queryClient.setQueryData(
+        keyGroupOnSubject.getById({ id: data.groupOnSubjectId }),
+        (
+          prev: ResponseGetGroupOnSubjectService
+        ): ResponseGetGroupOnSubjectService => {
+          return {
+            ...prev,
+            units: prev.units.filter((u) => u.id !== data.id),
+          };
+        }
+      );
+    },
+  });
+}
+
+export function useCreateStudentOnGroup() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: keyStudentOnGroup.create,
+    mutationFn: (request: RequestCreateStudentOnGroupService) =>
+      CreateStudentOnGroupService(request),
+    onSuccess(data, variables, context) {
+      queryClient.setQueryData(
+        keyGroupOnSubject.getById({ id: data.groupOnSubjectId }),
+        (
+          prev: ResponseGetGroupOnSubjectService
+        ): ResponseGetGroupOnSubjectService => {
+          return {
+            ...prev,
+            units: prev.units.map((unit) => {
+              if (unit.id !== data.unitOnGroupId) {
+                return unit;
+              }
+
+              return { ...unit, students: [...unit.students, data] };
+            }),
+          };
+        }
+      );
+    },
+  });
+}
+
+export function useReorderStudentOnGroup() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: keyStudentOnGroup.reorder,
+    mutationFn: (request: RequestReorderStudentOnGroupService) =>
+      ReorderStudentOnGroupService(request),
+    onSuccess(data, variables, context) {
+      queryClient.setQueryData(
+        keyGroupOnSubject.getById({ id: data[0].groupOnSubjectId }),
+        (
+          prev: ResponseGetGroupOnSubjectService
+        ): ResponseGetGroupOnSubjectService => {
+          return {
+            ...prev,
+            units: prev.units.map((unit) => {
+              if (unit.id !== data[0].unitOnGroupId) {
+                return unit;
+              }
+
+              return { ...unit, students: data };
+            }),
+          };
+        }
+      );
+    },
+  });
+}
+
+export function useDeleteStudentOnGroup() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: keyStudentOnGroup.delete,
+    mutationFn: (request: RequestDeleteStudentOnGroupService) =>
+      DeleteStudentOnGroupService(request),
+    onSuccess(data, variables, context) {
+      queryClient.setQueryData(
+        keyGroupOnSubject.getById({ id: data.groupOnSubjectId }),
+        (
+          prev: ResponseGetGroupOnSubjectService
+        ): ResponseGetGroupOnSubjectService => {
+          return {
+            ...prev,
+            units: prev.units.map((unit) => {
+              if (unit.id !== data.unitOnGroupId) {
+                return unit;
+              }
+
+              return {
+                ...unit,
+                students: unit.students.filter((s) => s.id !== data.id),
+              };
+            }),
+          };
         }
       );
     },

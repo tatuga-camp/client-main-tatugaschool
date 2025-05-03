@@ -25,7 +25,7 @@ export async function CreateStudentOnGroupService(
   }
 }
 
-export type ResponseReorderStudentOnGroupService = StudentOnGroup;
+export type ResponseReorderStudentOnGroupService = StudentOnGroup[];
 
 export type RequestReorderStudentOnGroupService = {
   studentOnGroupIds: string[];

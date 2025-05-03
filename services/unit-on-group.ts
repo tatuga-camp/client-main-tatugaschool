@@ -78,7 +78,7 @@ export async function ReorderUnitOnGroupService(
   }
 }
 
-export type ResponseDeleteUnitOnGroupService = UnitOnGroup[];
+export type ResponseDeleteUnitOnGroupService = UnitOnGroup;
 
 export type RequestDeleteUnitOnGroupService = {
   unitOnGroupId: string;
