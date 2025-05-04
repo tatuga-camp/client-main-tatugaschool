@@ -64,7 +64,7 @@ function Navbar({
             </div>
           </Link>
         </div>
-        <div className="flex w-max items-center justify-center">
+        <div className="flex  items-center justify-center w-max">
           <LanguageSelect />
           <ButtonProfile user={user} />
         </div>

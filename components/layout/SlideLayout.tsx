@@ -1,12 +1,8 @@
 import type { ReactNode } from "react";
-import React, { use, useEffect } from "react";
-import { FiPlus } from "react-icons/fi";
+import React from "react";
 import { IoMdClose } from "react-icons/io";
-import { TbReportSearch } from "react-icons/tb";
-import { SiGooglegemini } from "react-icons/si";
-import { MdDelete } from "react-icons/md";
+import { useEscKey } from "../../hook";
 import LoadingBar from "../common/LoadingBar";
-import { useEnterKey, useEscKey } from "../../hook";
 
 type LayoutProps = {
   children: ReactNode;

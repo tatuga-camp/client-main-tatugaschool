@@ -77,8 +77,8 @@ export type RequestUpdateGroupOnSubjectService = {
     groupOnSubjectId: string;
   };
   body: {
-    title: string;
-    description: string;
+    title?: string;
+    description?: string;
   };
 };
 

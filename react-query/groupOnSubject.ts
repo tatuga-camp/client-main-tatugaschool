@@ -82,7 +82,7 @@ export function useCreateGroupOnSubject() {
         (
           prev: ResponseGetGroupOnSubjectsService
         ): ResponseGetGroupOnSubjectsService => {
-          return [...prev, data];
+          return [...(prev ?? []), data];
         }
       );
     },

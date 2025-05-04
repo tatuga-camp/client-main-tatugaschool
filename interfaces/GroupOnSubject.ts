@@ -3,7 +3,7 @@ export type GroupOnSubject = {
   createAt: Date;
   updateAt: Date;
   title: string;
-  description: string | null;
+  description: string;
   subjectId: string;
   schoolId: string;
 };
@@ -30,7 +30,7 @@ export type StudentOnGroup = {
   firstName: string;
   lastName: string;
   photo: string;
-  blurHash: string | null;
+  blurHash?: string | null;
   number: string;
   order: number | null;
   unitOnGroupId: string;
