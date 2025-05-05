@@ -8,6 +8,7 @@ import {
   DeleteUnitOnGroupService,
   GetGroupOnSubjectService,
   GetGroupOnSubjectsService,
+  RefetchGroupOnSubjectService,
   ReorderStudentOnGroupService,
   ReorderUnitOnGroupService,
   RequestCreateGroupOnSubjectService,
@@ -16,13 +17,16 @@ import {
   RequestDeleteeGroupOnSubjectService,
   RequestDeleteStudentOnGroupService,
   RequestDeleteUnitOnGroupService,
+  RequestRefetchGroupOnSubjectService,
   RequestReorderStudentOnGroupService,
   RequestReorderUnitOnGroupService,
   RequestUpdateGroupOnSubjectService,
+  RequestUpdateStudentOnGroupService,
   RequestUpdateUnitOnGroupService,
   ResponseGetGroupOnSubjectService,
   ResponseGetGroupOnSubjectsService,
   UpdateGroupOnSubjectService,
+  UpdateStudentOnGroupService,
   UpdateUnitOnGroupService,
 } from "../services";
 
@@ -35,6 +39,7 @@ export const keyGroupOnSubject = {
   create: ["groupOnSubject-create"],
   update: ["groupOnSubject-update"],
   delete: ["groupOnSubject-delete"],
+  refetch: ["groupOnSubject-refetch"],
 } as const;
 
 export const keyUnitOnGroup = {
@@ -46,6 +51,7 @@ export const keyUnitOnGroup = {
 
 export const keyStudentOnGroup = {
   create: ["studentOnGroup-create"],
+  update: ["studentOnGroup-update"],
   delete: ["studentOnGroup-delete"],
   reorder: ["studentOnGroup-reorder"],
 } as const;
@@ -133,6 +139,30 @@ export function useDeleteGroupOnSubject() {
   });
 }
 
+export function useRefetchGroupOnSubject() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: keyGroupOnSubject.refetch,
+    mutationFn: (request: RequestRefetchGroupOnSubjectService) =>
+      RefetchGroupOnSubjectService(request),
+    onSuccess(data, variables, context) {
+      queryClient.setQueryData(
+        keyGroupOnSubject.getById({ id: data.id }),
+        (
+          prev: ResponseGetGroupOnSubjectService
+        ): ResponseGetGroupOnSubjectService => {
+          return data;
+        }
+      );
+      queryClient.refetchQueries({
+        queryKey: keyGroupOnSubject.getById({
+          id: data.id,
+        }),
+      });
+    },
+  });
+}
+
 export function useCreateUnitOnGroup() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -148,6 +178,11 @@ export function useCreateUnitOnGroup() {
           return { ...prev, units: [...prev.units, { ...data, students: [] }] };
         }
       );
+      queryClient.refetchQueries({
+        queryKey: keyGroupOnSubject.getById({
+          id: data.groupOnSubjectId,
+        }),
+      });
     },
   });
 }
@@ -224,6 +259,11 @@ export function useDeleteUnitOnGroup() {
           };
         }
       );
+      queryClient.refetchQueries({
+        queryKey: keyGroupOnSubject.getById({
+          id: data.groupOnSubjectId,
+        }),
+      });
     },
   });
 }
@@ -231,9 +271,44 @@ export function useDeleteUnitOnGroup() {
 export function useCreateStudentOnGroup() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationKey: keyStudentOnGroup.create,
+    mutationKey: keyStudentOnGroup.update,
     mutationFn: (request: RequestCreateStudentOnGroupService) =>
       CreateStudentOnGroupService(request),
+    onSuccess(data, variables, context) {
+      queryClient.setQueryData(
+        keyGroupOnSubject.getById({ id: data.groupOnSubjectId }),
+        (
+          prev: ResponseGetGroupOnSubjectService
+        ): ResponseGetGroupOnSubjectService => {
+          const oldStudent = prev.units
+            .flatMap((u) => u.students)
+            .find((s) => s.id === variables.studentOnSubjectId);
+          return {
+            ...prev,
+            units: prev.units.map((unit) => {
+              if (unit.id === data.unitOnGroupId) {
+                return { ...unit, students: [...unit.students, data] };
+              } else if (unit.id === oldStudent?.unitOnGroupId) {
+                return {
+                  ...unit,
+                  students: unit.students.filter((s) => s.id !== oldStudent.id),
+                };
+              }
+              return unit;
+            }),
+          };
+        }
+      );
+    },
+  });
+}
+
+export function useUpdateStudentOnGroup() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: keyStudentOnGroup.update,
+    mutationFn: (request: RequestUpdateStudentOnGroupService) =>
+      UpdateStudentOnGroupService(request),
     onSuccess(data, variables, context) {
       queryClient.setQueryData(
         keyGroupOnSubject.getById({ id: data.groupOnSubjectId }),

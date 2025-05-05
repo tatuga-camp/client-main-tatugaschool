@@ -25,6 +25,33 @@ export async function CreateStudentOnGroupService(
   }
 }
 
+export type ResponseUpdateStudentOnGroupService = StudentOnGroup;
+
+export type RequestUpdateStudentOnGroupService = {
+  query: {
+    studentOnGroupId: string;
+  };
+  body: {
+    unitOnGroupId?: string;
+    order?: number;
+  };
+};
+
+export async function UpdateStudentOnGroupService(
+  request: RequestUpdateStudentOnGroupService
+): Promise<ResponseUpdateStudentOnGroupService> {
+  try {
+    const response = await axiosInstance({
+      method: "PATCH",
+      url: `/v1/student-on-groups`,
+      data: request,
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data;
+  }
+}
+
 export type ResponseReorderStudentOnGroupService = StudentOnGroup[];
 
 export type RequestReorderStudentOnGroupService = {

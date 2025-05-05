@@ -1,11 +1,11 @@
-import React from 'react';
-import { useDroppable } from '@dnd-kit/core';
+import React from "react";
+import { useDroppable } from "@dnd-kit/core";
 import {
   SortableContext,
   verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import { TaskType } from './types';
-import SortableTask from './SortableTask';
+} from "@dnd-kit/sortable";
+import { TaskType } from "./types";
+import SortableTask from "./SortableTask";
 
 interface ColumnProps {
   id: string;
@@ -18,7 +18,7 @@ export default function Column({ id, title, tasks, onAddTask }: ColumnProps) {
   const { setNodeRef } = useDroppable({ id });
 
   return (
-    <div 
+    <div
       ref={setNodeRef}
       className="bg-gray-200 p-4 rounded-lg w-80 flex flex-col"
     >
@@ -34,11 +34,8 @@ export default function Column({ id, title, tasks, onAddTask }: ColumnProps) {
           Add Task
         </button> */}
       </div>
-      
-      <SortableContext 
-        items={tasks}
-        strategy={verticalListSortingStrategy}
-      >
+
+      <SortableContext items={tasks} strategy={verticalListSortingStrategy}>
         <div className="flex flex-col gap-2">
           {tasks.map((task) => (
             <SortableTask key={task.id} {...task} />

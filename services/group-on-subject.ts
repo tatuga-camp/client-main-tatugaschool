@@ -97,6 +97,28 @@ export async function UpdateGroupOnSubjectService(
   }
 }
 
+export type ResponseRefetchGroupOnSubjectService = GroupOnSubject & {
+  units: (UnitOnGroup & { students: StudentOnGroup[] })[];
+};
+export type RequestRefetchGroupOnSubjectService = {
+  groupOnSubjectId: string;
+};
+
+export async function RefetchGroupOnSubjectService(
+  request: RequestRefetchGroupOnSubjectService
+): Promise<ResponseRefetchGroupOnSubjectService> {
+  try {
+    const response = await axiosInstance({
+      method: "PATCH",
+      url: `/v1/group-on-subjects/refetch`,
+      data: request,
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data;
+  }
+}
+
 export type ResponseDeleteeGroupOnSubjectService = GroupOnSubject;
 
 export type RequestDeleteeGroupOnSubjectService = {

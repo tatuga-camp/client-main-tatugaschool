@@ -38,7 +38,7 @@ import Filter, { FilterTitle } from "../common/Filter";
 import StudentCard from "../student/StudentCard";
 import ScorePanel from "./ScorePanel";
 import { BsPeople } from "react-icons/bs";
-import ShowGroups from "./ShowGroups";
+import ShowGroups from "./groupOnSubject/ShowGroups";
 
 type Props = {
   subjectId: string;
@@ -360,8 +360,8 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
                         selectFilter
                           ? false
                           : triggerSelectMultipleStudent
-                            ? false
-                            : true
+                          ? false
+                          : true
                       }
                       setSelectStudent={(data) => {
                         if (triggerSelectMultipleStudent) {
