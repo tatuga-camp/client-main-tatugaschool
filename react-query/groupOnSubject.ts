@@ -210,6 +210,11 @@ export function useUpdateUnitOnGroup() {
           };
         }
       );
+      queryClient.refetchQueries({
+        queryKey: keyGroupOnSubject.getById({
+          id: data.groupOnSubjectId,
+        }),
+      });
     },
   });
 }

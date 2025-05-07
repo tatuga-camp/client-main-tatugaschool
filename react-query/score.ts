@@ -101,42 +101,16 @@ export function useGetScoreOnStudent(
 }
 
 export function useCreateScoreOnStudent() {
+  const queryClient = useQueryClient();
   const createScoreOnStudent = useMutation({
     mutationKey: ["createScoreOnStudent"],
-    mutationFn: (request: {
-      request: RequestCreateScoreOnStudentService;
-      studentOnSubject: StudentOnSubject;
-      totalScore: number;
-      queryClient: QueryClient;
-    }) => CreateScoreOnStudentService(request.request),
+    mutationFn: (request: RequestCreateScoreOnStudentService) =>
+      CreateScoreOnStudentService(request),
     onSuccess(data, variables, context) {
-      const newScore: StudentOnSubject = {
-        ...variables.studentOnSubject,
-        totalSpeicalScore: variables.totalScore + data.score,
-      };
-
-      variables.queryClient.setQueryData(
+      queryClient.setQueryData(
         scoretKey.getScoreOnStudentBySubjectId(data.subjectId),
         (prev: ScoreOnStudent[]) => {
           return [...prev, data];
-        }
-      );
-
-      variables.queryClient.setQueryData(
-        scoretKey.getScoreOnStudentBySubjectId(data.subjectId),
-        (
-          prev: (StudentOnSubject & {
-            scores: ScoreOnStudent[];
-            totalScore: number;
-          })[]
-        ) => {
-          const newData = prev?.map((student) => {
-            if (student.id === newScore.id) {
-              return newScore;
-            }
-            return student;
-          });
-          return newData;
         }
       );
     },

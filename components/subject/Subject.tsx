@@ -65,7 +65,6 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
   const [triggerChooseScore, setTriggerChooseScore] = useState<boolean>(false);
   const chooseScoreRef = useRef<HTMLDivElement>(null);
 
-  const scoreOnSubjects = useGetScoreOnSubject({ subjectId: subjectId });
   const [selectFilter, setSelectFilter] = useState<{
     title: FilterTitle;
     orderBy: "asc" | "desc";
@@ -176,14 +175,9 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
         await Promise.allSettled(
           filterSelectStudent.map((student) => {
             return createStudentScore.mutateAsync({
-              request: {
-                studentOnSubjectId: student.id,
-                scoreOnSubjectId: selectScore.score?.id as string,
-                score: selectScore.inputScore,
-              },
-              studentOnSubject: student,
-              totalScore: student.totalSpeicalScore,
-              queryClient,
+              studentOnSubjectId: student.id,
+              scoreOnSubjectId: selectScore.score?.id as string,
+              score: selectScore.inputScore,
             });
           })
         );
@@ -242,7 +236,6 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
         <div ref={chooseScoreRef} className="bg-white p-2 rounded-md border">
           <ScorePanel
             subjectId={subjectId}
-            scoreOnSubjects={scoreOnSubjects}
             onSelectScore={({ score, inputScore }) => {
               setSelectScore({ score, inputScore });
             }}

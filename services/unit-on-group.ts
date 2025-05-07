@@ -38,6 +38,7 @@ export type RequestUpdateUnitOnGroupService = {
     icon?: string;
     title?: string;
     description?: string;
+    score?: number;
     order?: number;
   };
 };

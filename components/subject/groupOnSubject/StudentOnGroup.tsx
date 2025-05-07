@@ -16,6 +16,7 @@ type StudentOnGroupProps = {
     lastName: string;
     blurHash?: string | null;
     number: string;
+    score?: number;
   };
   type: "studentOnGroup" | "ungroupStudent";
   studentOnSubjectId: string | null;
@@ -74,22 +75,27 @@ function StudentOnGroup({
       >
         <MdDragIndicator />
       </div>
-      <div className="flex items-center h-14 gap-2">
-        {(isDragOver === undefined || isDragOver === false) && (
-          <div className="w-5 h-5 md:w-6 md:h-6 relative rounded-md ring-1 overflow-hidden">
-            <img
-              src={student.photo}
-              alt={student.firstName}
-              sizes="(max-width: 768px) 100vw, 33vw"
-              className="object-cover"
-            />
+      <div className="flex items-center w-full justify-between h-14 gap-2">
+        <div className="flex items-center gap-2">
+          {(isDragOver === undefined || isDragOver === false) && (
+            <div className="w-5 h-5 md:w-6 md:h-6 relative rounded-md ring-1 overflow-hidden">
+              <img
+                src={student.photo}
+                alt={student.firstName}
+                sizes="(max-width: 768px) 100vw, 33vw"
+                className="object-cover"
+              />
+            </div>
+          )}
+          <div>
+            <h1 className="text-xs md:text-sm font-semibold">
+              {student.firstName} {student.lastName}
+            </h1>
+            <p className="text-xs text-gray-500">Number {student.number}</p>
           </div>
-        )}
-        <div>
-          <h1 className="text-xs md:text-sm font-semibold">
-            {student.firstName} {student.lastName}
-          </h1>
-          <p className="text-xs text-gray-500">Number {student.number}</p>
+        </div>
+        <div className="flex  gradient-bg px-2 rounded-sm text-white">
+          {student.score}
         </div>
       </div>
     </li>

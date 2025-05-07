@@ -1,5 +1,32 @@
-import { Toast } from "primereact/toast";
 import {
+  closestCorners,
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  rectSortingStrategy,
+  SortableContext,
+} from "@dnd-kit/sortable";
+import { Toast } from "primereact/toast";
+import { useEffect, useState } from "react";
+import { IoMdSettings } from "react-icons/io";
+import { MdAutoAwesome, MdCreate, MdDelete } from "react-icons/md";
+import Swal from "sweetalert2";
+import {
+  ErrorMessages,
+  StudentOnGroup,
+  StudentOnSubject,
+  UnitOnGroup,
+} from "../../../interfaces";
+import {
+  useCreateScoreOnStudent,
   useCreateStudentOnGroup,
   useCreateUnitOnGroup,
   useDeleteGroupOnSubject,
@@ -11,44 +38,15 @@ import {
   useReorderStudentOnGroup,
   useReorderUnitGroup,
   useUpdateStudentOnGroup,
+  useUpdateUnitOnGroup,
 } from "../../../react-query";
-import { CSSProperties, useCallback, useEffect, useState } from "react";
-import {
-  ErrorMessages,
-  StudentOnGroup,
-  StudentOnSubject,
-  UnitOnGroup,
-} from "../../../interfaces";
-import {
-  closestCorners,
-  DndContext,
-  DragEndEvent,
-  DragOverlay,
-  DragStartEvent,
-  MouseSensor,
-  TouchSensor,
-  useDroppable,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import Swal from "sweetalert2";
-import {
-  arrayMove,
-  rectSortingStrategy,
-  SortableContext,
-  useSortable,
-} from "@dnd-kit/sortable";
-import PopupLayout from "../../layout/PopupLayout";
-import GroupSetting from "./GroupSetting";
-import LoadingBar from "../../common/LoadingBar";
-import { IoMdSettings } from "react-icons/io";
 import ConfirmDeleteMessage from "../../common/ConfirmDeleteMessage";
-import { MdAutoAwesome, MdCreate, MdDelete } from "react-icons/md";
+import LoadingBar from "../../common/LoadingBar";
 import LoadingSpinner from "../../common/LoadingSpinner";
+import PopupLayout from "../../layout/PopupLayout";
 import ColumMemo from "./ColumOnGroup";
-import StudentCardMemo from "./StudentOnGroup";
+import GroupSetting from "./GroupSetting";
 import StudentOnGroupMemo from "./StudentOnGroup";
-import { CSS } from "@dnd-kit/utilities";
 
 export type SortableIdType = {
   type: "ungroupStudent" | "studentOnGroup" | "unitOnGroup";
@@ -78,6 +76,7 @@ function ShowSelectGroup({
   const [units, setUnits] = useState<
     (UnitOnGroup & { students: StudentOnGroup[] })[]
   >([]);
+
   const reorderUnit = useReorderUnitGroup();
   const createColum = useCreateUnitOnGroup();
   const language = useGetLanguage();
@@ -86,7 +85,9 @@ function ShowSelectGroup({
   const updatestudentOnGroup = useUpdateStudentOnGroup();
   const createStudentOnGroup = useCreateStudentOnGroup();
   const refetchGroup = useRefetchGroupOnSubject();
+
   const deleteStudentOnGroup = useDeleteStudentOnGroup();
+
   const [activeSortableId, setActiveSortableId] = useState<
     | (SortableIdType & {
         student?: StudentOnGroup | StudentOnSubject;
@@ -406,6 +407,67 @@ function ShowSelectGroup({
           />
         </PopupLayout>
       )}
+
+      <header className="mt-2">
+        {deleteGroup.isPending && <LoadingBar />}
+
+        <section className="w-full flex  gap-3 justify-between">
+          <div>
+            <h3 className="text-base font-semibold max-w-40 truncate">
+              {groupOnSubject.data?.title}
+            </h3>
+            <p className="text-gray-600 max-w-40 truncate text-sm">
+              {groupOnSubject.data?.description}
+            </p>
+          </div>
+          <div className="flex justify-center items-center gap-3">
+            <button
+              disabled={refetchGroup.isPending}
+              onClick={handleRefetchGroup}
+              className="second-button w-52
+                        flex items-center justify-center gap-1 py-1 border"
+            >
+              {refetchGroup.isPending ? (
+                <LoadingSpinner />
+              ) : (
+                <>
+                  <MdAutoAwesome />
+                  Auto Refetch Group
+                </>
+              )}
+            </button>
+            <button
+              onClick={() => {
+                setTriggerUpdate(true);
+              }}
+              className="main-button w-max
+                        flex items-center justify-center gap-1 py-1 ring-1 ring-blue-600"
+            >
+              <>
+                <IoMdSettings />
+                Group Setting
+              </>
+            </button>
+            <button
+              disabled={deleteGroup.isPending}
+              onClick={() => {
+                ConfirmDeleteMessage({
+                  language: language.data ?? "en",
+                  callback: async () => {
+                    await handleDeleteGroup();
+                  },
+                });
+              }}
+              className="reject-button w-max flex items-center justify-center gap-1 py-1 ring-1 ring-red-600"
+            >
+              <>
+                <MdDelete />
+                Group Delete
+              </>
+            </button>
+          </div>
+        </section>
+      </header>
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}
@@ -413,66 +475,6 @@ function ShowSelectGroup({
         onDragEnd={handleDragEnd}
       >
         <SortableContext items={units} strategy={rectSortingStrategy}>
-          <header className="mt-2">
-            {deleteGroup.isPending && <LoadingBar />}
-
-            <section className="w-full flex  gap-3 justify-between">
-              <div>
-                <h3 className="text-base font-semibold max-w-40 truncate">
-                  {groupOnSubject.data?.title}
-                </h3>
-                <p className="text-gray-600 max-w-40 truncate text-sm">
-                  {groupOnSubject.data?.description}
-                </p>
-              </div>
-              <div className="flex justify-center items-center gap-3">
-                <button
-                  disabled={refetchGroup.isPending}
-                  onClick={handleRefetchGroup}
-                  className="second-button w-52
-                        flex items-center justify-center gap-1 py-1 border"
-                >
-                  {refetchGroup.isPending ? (
-                    <LoadingSpinner />
-                  ) : (
-                    <>
-                      <MdAutoAwesome />
-                      Auto Refetch Group
-                    </>
-                  )}
-                </button>
-                <button
-                  onClick={() => {
-                    setTriggerUpdate(true);
-                  }}
-                  className="main-button w-max
-                        flex items-center justify-center gap-1 py-1 ring-1 ring-blue-600"
-                >
-                  <>
-                    <IoMdSettings />
-                    Group Setting
-                  </>
-                </button>
-                <button
-                  disabled={deleteGroup.isPending}
-                  onClick={() => {
-                    ConfirmDeleteMessage({
-                      language: language.data ?? "en",
-                      callback: async () => {
-                        await handleDeleteGroup();
-                      },
-                    });
-                  }}
-                  className="reject-button w-max flex items-center justify-center gap-1 py-1 ring-1 ring-red-600"
-                >
-                  <>
-                    <MdDelete />
-                    Group Delete
-                  </>
-                </button>
-              </div>
-            </section>
-          </header>
           <ul className="grid mt-5 lg:grid-cols-2 xl:grid-cols-3 gap-5">
             <ColumMemo type="ungroupStudent" students={unGroupStudents} />
             {units
@@ -514,6 +516,7 @@ function ShowSelectGroup({
                   <ColumMemo type="unitOnGroup" unit={activeSortableId.unit} />
                 )}
             </DragOverlay>
+
             <button
               onClick={handleCreate}
               className="w-full active:scale-105 min-h-40 hover:bg-primary-color hover:text-white
