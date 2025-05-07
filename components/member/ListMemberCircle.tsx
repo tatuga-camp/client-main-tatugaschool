@@ -1,35 +1,30 @@
-import React from "react";
-import { MemberRole, Status, TeacherOnSubject } from "../../interfaces";
 import Image from "next/image";
+import React from "react";
 import { IoIosSend } from "react-icons/io";
-import { decodeBlurhashToCanvas } from "../../utils";
 import { defaultBlurHash } from "../../data";
+import { decodeBlurhashToCanvas } from "../../utils";
 
 type Props = {
   members: {
     id: string;
     createAt: Date;
     updateAt: Date;
-    status: Status;
-    role: MemberRole;
     firstName: string;
     lastName: string;
-    email: string;
-    blurHash: string;
+    email?: string | undefined;
+    blurHash?: string | null;
     photo: string;
-    phone: string;
-    userId: string;
     schoolId: string;
   }[];
+  maxShow?: number;
   setTrigger?: React.Dispatch<React.SetStateAction<boolean>>;
 };
-function ListMemberCircle({ members, setTrigger }: Props) {
+function ListMemberCircle({ members, setTrigger, maxShow }: Props) {
+  const membersToShow = maxShow ? members.slice(0, maxShow) : members;
+  const remainingMembersCount = maxShow ? members.length - maxShow : 0;
   return (
     <div className="w-max flex items-end justify-center">
-      {members.map((teacher, index) => {
-        const odd = index % 2 === 0;
-        ``;
-
+      {membersToShow.map((teacher, index) => {
         return (
           <div
             title={`${teacher.firstName} ${teacher.lastName} : ${teacher.email}`}
@@ -51,6 +46,17 @@ function ListMemberCircle({ members, setTrigger }: Props) {
           </div>
         );
       })}
+
+      {/* Display count of remaining members if maxShow is used */}
+      {remainingMembersCount > 0 && (
+        <div
+          className="w-6 h-6 ring-1 ring-white bg-gray-300 relative rounded-full flex items-center justify-center text-xs font-bold text-gray-700"
+          style={{ left: `-${membersToShow.length * 5}px` }}
+          title={`${remainingMembersCount} more members`}
+        >
+          +{remainingMembersCount}
+        </div>
+      )}
       {setTrigger && (
         <button
           onClick={() => setTrigger(true)}

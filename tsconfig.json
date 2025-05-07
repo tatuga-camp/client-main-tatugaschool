@@ -29,7 +29,7 @@
     "**/*.ts",
     "**/*.tsx",
     "public/sw.js"
-  ],
+, "prettier.config.js"  ],
   "exclude": [
     "node_modules"
   ]

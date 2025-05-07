@@ -27,7 +27,6 @@ function PopUpStudent({ student, setSelectStudent, toast }: Props) {
   const [isModalOpen, setIsModalOpen] = useState(true);
   const successSound = useSound("/sounds/ding.mp3");
   const failSound = useSound("/sounds/fail.mp3");
-  const queryClient = useQueryClient();
 
   const createScoreOnStudent = useCreateScoreOnStudent();
   const scoreOnSubjects = useGetScoreOnSubject({
@@ -55,14 +54,9 @@ function PopUpStudent({ student, setSelectStudent, toast }: Props) {
       }
 
       const data = await createScoreOnStudent.mutateAsync({
-        request: {
-          studentOnSubjectId: student.id,
-          scoreOnSubjectId: selectScore?.score.id,
-          score: selectScore?.inputScore,
-        },
-        studentOnSubject: student,
-        totalScore: totalScore,
-        queryClient,
+        studentOnSubjectId: student.id,
+        scoreOnSubjectId: selectScore?.score.id,
+        score: selectScore?.inputScore,
       });
 
       setTotalScore((prev) => prev + data.score);
@@ -141,7 +135,6 @@ function PopUpStudent({ student, setSelectStudent, toast }: Props) {
       </div>
       <ScorePanel
         subjectId={student.subjectId}
-        scoreOnSubjects={scoreOnSubjects}
         onSelectScore={({ inputScore, score }) => {
           setSelectScore({ inputScore, score });
         }}

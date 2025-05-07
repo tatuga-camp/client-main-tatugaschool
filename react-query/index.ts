@@ -13,3 +13,4 @@ export * from "./auth";
 export * from "./subscription";
 export * from "./career";
 export * from "./language";
+export * from "./groupOnSubject";

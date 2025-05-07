@@ -3,7 +3,7 @@ import Image from "next/image";
 import { InputNumber } from "primereact/inputnumber";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { Toast } from "primereact/toast";
-import React from "react";
+import React, { useState } from "react";
 import { BiEdit } from "react-icons/bi";
 import { CiSquarePlus } from "react-icons/ci";
 import { IoStar } from "react-icons/io5";
@@ -14,6 +14,7 @@ import {
   useCreateScoreOnSubject,
   useDeleteScoreOnSubject,
   useGetLanguage,
+  useGetScoreOnSubject,
   useUpdateScoreOnSubject,
 } from "../../react-query";
 import { decodeBlurhashToCanvas } from "../../utils";
@@ -22,7 +23,6 @@ import ConfirmDeleteMessage from "../common/ConfirmDeleteMessage";
 import LoadingBar from "../common/LoadingBar";
 
 type Props = {
-  scoreOnSubjects: UseQueryResult<ScoreOnSubject[], Error>;
   subjectId: string;
   onSelectScore: ({
     score,
@@ -31,26 +31,31 @@ type Props = {
     score?: ScoreOnSubject;
     inputScore: number;
   }) => void;
-  selectScore: { score?: ScoreOnSubject } & { inputScore: number };
-  isLoading: boolean;
-  onCreateScore: () => void;
+  selectScore?: { score?: ScoreOnSubject } & { inputScore: number };
+  isLoading?: boolean;
+  onCreateScore?: (data: { score: ScoreOnSubject; inputScore: number }) => void;
 };
 
 function ScorePanel({
-  scoreOnSubjects,
   subjectId,
   onSelectScore,
   selectScore,
   isLoading,
   onCreateScore,
 }: Props) {
+  const scoreOnSubjects = useGetScoreOnSubject({
+    subjectId: subjectId,
+  });
   const scoreRef = React.useRef<HTMLButtonElement>(null);
   const [triggerFormScoreOnSubject, setTriggerFormScoreOnSubject] =
     React.useState(false);
   const [selectScoreOnSubject, setSelectScoreOnSubject] =
-    React.useState<ScoreOnSubject | null>(null);
+    React.useState<ScoreOnSubject | null>(selectScore?.score ?? null);
+  const [inputScore, setInputScore] = useState<number | null>(
+    selectScore?.inputScore ?? null
+  );
   return (
-    <div className="flex flex-col gap-3 p-4 sm:p-6 md:p-8 lg:p-10">
+    <div className="flex flex-col bg-white gap-3 p-4 sm:p-6 md:p-8 lg:p-10">
       {triggerFormScoreOnSubject ? (
         <ScoreOnSubjectForm
           onClose={() => {
@@ -93,6 +98,7 @@ function ScorePanel({
                       ref={index === 0 ? scoreRef : null}
                       onClick={() => {
                         setSelectScoreOnSubject(score);
+                        setInputScore(score.score);
                         onSelectScore({
                           score: score,
                           inputScore: score.score,
@@ -100,7 +106,7 @@ function ScorePanel({
                       }}
                       key={score.id}
                       className={` ${
-                        selectScore?.score?.id === score.id
+                        selectScoreOnSubject?.id === score.id
                           ? "gradient-bg "
                           : "bg-white "
                       } p-2  w-32 active:gradient-bg transition rounded-md group hover:bg-secondary-color 
@@ -127,7 +133,7 @@ function ScorePanel({
                       <span
                         className={`text-xs w-20 break-words line-clamp-2
                 group-hover:text-white text-gray-500 ${
-                  selectScore?.score?.id === score.id && "text-white"
+                  selectScoreOnSubject?.id === score.id && "text-white"
                 }`}
                       >
                         {score.title}
@@ -144,19 +150,20 @@ function ScorePanel({
                 },
               }}
               style={{ width: "15rem" }}
-              value={selectScore?.inputScore}
-              onValueChange={(e) =>
+              value={inputScore}
+              onValueChange={(e) => {
+                setInputScore(e.value ?? 0);
                 onSelectScore({
-                  score: selectScore.score,
+                  score: selectScore?.score,
                   inputScore: e.value ?? 0,
-                })
-              }
+                });
+              }}
             />
 
             <button
               disabled={isLoading}
               onClick={() => {
-                if (!selectScore?.score) {
+                if (!selectScoreOnSubject) {
                   scoreRef.current?.style.setProperty(
                     "border",
                     "1px solid red"
@@ -168,7 +175,10 @@ function ScorePanel({
                   }, 100);
                   return;
                 }
-                onCreateScore();
+                onCreateScore?.({
+                  inputScore: inputScore ?? 0,
+                  score: selectScoreOnSubject,
+                });
               }}
               className="main-button w-full sm:w-56 flex items-center justify-center"
             >

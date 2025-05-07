@@ -1,26 +1,3 @@
-import React, {
-  memo,
-  use,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import {
-  useGetScoreOnStudent,
-  useGetStudentOnSubject,
-  useGetScoreOnSubject,
-  useCreateScoreOnStudent,
-} from "../../react-query";
-import StudentCard from "../student/StudentCard";
-import {
-  ErrorMessages,
-  ScoreOnStudent,
-  ScoreOnSubject,
-  StudentOnSubject,
-} from "../../interfaces";
-import { Nullable } from "primereact/ts-helpers";
-import { CgClose } from "react-icons/cg";
 import {
   closestCenter,
   DndContext,
@@ -35,17 +12,33 @@ import {
   rectSortingStrategy,
   SortableContext,
 } from "@dnd-kit/sortable";
-import { SortStudentOnSubjectService } from "../../services";
 import { useQueryClient } from "@tanstack/react-query";
-import Filter, { FilterTitle } from "../common/Filter";
-import Calendar from "../common/Calendar";
 import Image from "next/image";
+import { Toast } from "primereact/toast";
+import { Nullable } from "primereact/ts-helpers";
+import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import { BiSelectMultiple, BiSolidSelectMultiple } from "react-icons/bi";
-import ScorePanel from "./ScorePanel";
-import useClickOutside from "../../hook/useClickOutside";
 import Swal from "sweetalert2";
 import { useSound } from "../../hook";
-import { Toast } from "primereact/toast";
+import useClickOutside from "../../hook/useClickOutside";
+import {
+  ErrorMessages,
+  ScoreOnSubject,
+  StudentOnSubject,
+} from "../../interfaces";
+import {
+  useCreateScoreOnStudent,
+  useGetScoreOnStudent,
+  useGetScoreOnSubject,
+  useGetStudentOnSubject,
+} from "../../react-query";
+import { SortStudentOnSubjectService } from "../../services";
+import Calendar from "../common/Calendar";
+import Filter, { FilterTitle } from "../common/Filter";
+import StudentCard from "../student/StudentCard";
+import ScorePanel from "./ScorePanel";
+import { BsPeople } from "react-icons/bs";
+import ShowGroups from "./groupOnSubject/ShowGroups";
 
 type Props = {
   subjectId: string;
@@ -58,7 +51,7 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
   const queryClient = useQueryClient();
   const successSound = useSound("/sounds/ding.mp3");
   const failSound = useSound("/sounds/fail.mp3");
-
+  const [triggerShowGroup, setTriggerShowGroup] = useState<boolean>(false);
   const studentOnSubjects = useGetStudentOnSubject({
     subjectId: subjectId,
   });
@@ -72,7 +65,6 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
   const [triggerChooseScore, setTriggerChooseScore] = useState<boolean>(false);
   const chooseScoreRef = useRef<HTMLDivElement>(null);
 
-  const scoreOnSubjects = useGetScoreOnSubject({ subjectId: subjectId });
   const [selectFilter, setSelectFilter] = useState<{
     title: FilterTitle;
     orderBy: "asc" | "desc";
@@ -100,7 +92,12 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
         const newIndex = prevs.findIndex((item) => item.id === over!.id);
         newSort = arrayMove(prevs, oldIndex, newIndex);
 
-        return newSort;
+        return newSort.map((s, index) => {
+          return {
+            ...s,
+            order: index,
+          };
+        });
       });
       await SortStudentOnSubjectService({
         studentOnSubjectIds: newSort.map((item) => item.id),
@@ -116,7 +113,7 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
     if (studentOnSubjects.data) {
       setStudents(studentOnSubjects.data.filter((item) => item.isActive));
     }
-  }, [studentOnSubjects.data]);
+  }, [studentOnSubjects.isSuccess]);
 
   // sort by date
   useEffect(() => {
@@ -178,14 +175,9 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
         await Promise.allSettled(
           filterSelectStudent.map((student) => {
             return createStudentScore.mutateAsync({
-              request: {
-                studentOnSubjectId: student.id,
-                scoreOnSubjectId: selectScore.score?.id as string,
-                score: selectScore.inputScore,
-              },
-              studentOnSubject: student,
-              totalScore: student.totalSpeicalScore,
-              queryClient,
+              studentOnSubjectId: student.id,
+              scoreOnSubjectId: selectScore.score?.id as string,
+              score: selectScore.inputScore,
             });
           })
         );
@@ -244,7 +236,6 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
         <div ref={chooseScoreRef} className="bg-white p-2 rounded-md border">
           <ScorePanel
             subjectId={subjectId}
-            scoreOnSubjects={scoreOnSubjects}
             onSelectScore={({ score, inputScore }) => {
               setSelectScore({ score, inputScore });
             }}
@@ -261,7 +252,17 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
           bg-white/50 backdrop-blur fixed  m-auto -z-10"
         ></footer>
       </div>
-      <header className="w-full md:w-10/12 lg:w-9/12 h-16 flex justify-end items-end gap-1 border-b pb-5">
+      <header className="w-full md:w-10/12 lg:w-9/12 h-16 flex justify-end items-end gap-5 border-b pb-5">
+        <button
+          onClick={() => setTriggerShowGroup((prev) => !prev)}
+          className="border-primary-color border hover:bg-primary-color hover:text-white active:scale-105  transition duration-200 text-primary-color
+         w-40 flex items-center justify-center gap-2 rounded-md h-12 "
+        >
+          <BsPeople className="" />
+          <span className="">
+            {triggerShowGroup ? "Close Groups" : "Show Groups"}
+          </span>
+        </button>
         <div className="h-16">
           <Calendar onValue={(value) => setDates(value)} value={dates} />
         </div>
@@ -308,66 +309,75 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
           }}
         />
       </header>
-      <section
-        className="w-80 md:w-10/12 lg:w-9/12 place-items-center 
+      {triggerShowGroup ? (
+        <ShowGroups subjectId={subjectId} />
+      ) : (
+        <section
+          className="w-80 md:w-10/12 lg:w-9/12 place-items-center 
       grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5"
-      >
-        <div
-          onClick={() => setTriggerSelectMultipleStudent((prev) => !prev)}
-          onDragStart={(e) => e.preventDefault()}
-          className="w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 ring-4 ring-white gradient-bg select-none drop-shadow-md 
+        >
+          <div
+            onClick={() => setTriggerSelectMultipleStudent((prev) => !prev)}
+            onDragStart={(e) => e.preventDefault()}
+            className="w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 ring-4 ring-white gradient-bg select-none drop-shadow-md 
          hover:scale-105 flex items-center justify-center p-3
            rounded-full transition cursor-pointer active:scale-110"
-        >
-          <Image src="/svg/trophy.svg" height={100} width={100} alt="trophy" />
-        </div>
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext items={students} strategy={rectSortingStrategy}>
-            {studentOnSubjects.isLoading
-              ? [...Array(12)].map((_, index) => {
-                  return (
-                    <div
-                      key={index}
-                      className="w-24 h-32 sm:w-32 sm:h-40 md:w-36 md:h-48 lg:w-48 
+          >
+            <Image
+              src="/svg/trophy.svg"
+              height={100}
+              width={100}
+              alt="trophy"
+            />
+          </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext items={students} strategy={rectSortingStrategy}>
+              {studentOnSubjects.isLoading
+                ? [...Array(12)].map((_, index) => {
+                    return (
+                      <div
+                        key={index}
+                        className="w-24 h-32 sm:w-32 sm:h-40 md:w-36 md:h-48 lg:w-48 
                       lg:h-52 bg-gray-200 rounded-2xl animate-pulse"
-                    ></div>
-                  );
-                })
-              : students.map((student, index) => (
-                  <StudentCard
-                    showSelect={triggerSelectMultipleStudent}
-                    isDragable={
-                      selectFilter
-                        ? false
-                        : triggerSelectMultipleStudent
-                        ? false
-                        : true
-                    }
-                    setSelectStudent={(data) => {
-                      if (triggerSelectMultipleStudent) {
-                        setStudents((prev) => {
-                          return prev.map((item) => {
-                            if (item.id === data.id) {
-                              return { ...item, select: !item.select };
-                            }
-                            return item;
-                          });
-                        });
-                      } else {
-                        setSelectStudent(data as StudentOnSubject);
+                      ></div>
+                    );
+                  })
+                : students.map((student, index) => (
+                    <StudentCard
+                      showSelect={triggerSelectMultipleStudent}
+                      isDragable={
+                        selectFilter
+                          ? false
+                          : triggerSelectMultipleStudent
+                          ? false
+                          : true
                       }
-                    }}
-                    key={student.id}
-                    student={student}
-                  />
-                ))}
-          </SortableContext>
-        </DndContext>
-      </section>
+                      setSelectStudent={(data) => {
+                        if (triggerSelectMultipleStudent) {
+                          setStudents((prev) => {
+                            return prev.map((item) => {
+                              if (item.id === data.id) {
+                                return { ...item, select: !item.select };
+                              }
+                              return item;
+                            });
+                          });
+                        } else {
+                          setSelectStudent(data as StudentOnSubject);
+                        }
+                      }}
+                      key={student.id}
+                      student={student}
+                    />
+                  ))}
+            </SortableContext>
+          </DndContext>
+        </section>
+      )}
 
       <footer
         className={`flex justify-center  items-center ease-in-out gap-3 fixed bottom-20 

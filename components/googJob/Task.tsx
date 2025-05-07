@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef } from "react";
 
 interface TaskProps {
   id: string;
@@ -29,5 +29,5 @@ const Task = forwardRef<HTMLDivElement, TaskProps>(
   }
 );
 
-Task.displayName = 'Task';
-export default Task; 
+Task.displayName = "Task";
+export default Task;
