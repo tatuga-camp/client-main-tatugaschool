@@ -1,15 +1,15 @@
-import React, { useState } from "react";
-import Image from "next/image";
-import { School } from "@/interfaces";
-import { ProgressBar } from "primereact/progressbar";
-import Swal from "sweetalert2";
+import { ErrorMessages, School } from "@/interfaces";
 import {
   getSignedURLTeacherService,
   RequestUpdateSchoolService,
   UploadSignURLService,
 } from "@/services";
 import { UseMutationResult } from "@tanstack/react-query";
-import { defaultBlurHash, defaultCanvas } from "../../data";
+import Image from "next/image";
+import { ProgressBar } from "primereact/progressbar";
+import React, { useState } from "react";
+import Swal from "sweetalert2";
+import { defaultBlurHash } from "../../data";
 import { decodeBlurhashToCanvas } from "../../utils";
 
 const ProfileUpload: React.FC<{
@@ -23,14 +23,6 @@ const ProfileUpload: React.FC<{
 }> = ({ school, updateSchool }) => {
   const [loading, setLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(school.logo);
-
-  const handleUpload = async (url: string) => {
-    if (!url) return;
-    await updateSchool.mutateAsync({
-      query: { schoolId: school.id },
-      body: { logo: url },
-    });
-  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -52,16 +44,30 @@ const ProfileUpload: React.FC<{
         fileSize: file.size,
       });
 
+      await updateSchool.mutateAsync({
+        query: { schoolId: school.id },
+        body: {},
+      });
       await UploadSignURLService({ contentType: file.type, file, signURL });
 
       setPreviewUrl(originalURL);
-
-      await handleUpload(originalURL);
+      await updateSchool.mutateAsync({
+        query: { schoolId: school.id },
+        body: { logo: originalURL },
+      });
 
       Swal.fire("Success", "Logo uploaded successfully!", "success");
     } catch (error) {
-      console.error(error);
-      Swal.fire("Error", "Failed to upload logo", "error");
+      console.log(error);
+      let result = error as ErrorMessages;
+      Swal.fire({
+        title: result.error ? result.error : "Something Went Wrong",
+        text: result.message.toString(),
+        footer: result.statusCode
+          ? "Code Error: " + result.statusCode?.toString()
+          : "",
+        icon: "error",
+      });
     } finally {
       setLoading(false);
     }

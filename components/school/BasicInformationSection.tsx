@@ -1,17 +1,17 @@
 import { ErrorMessages, School } from "@/interfaces";
+import { useRouter } from "next/router";
+import Swal from "sweetalert2";
+import { schoolDataLanguage } from "../../data/languages";
 import {
   useDeleteSchool,
   useGetLanguage,
   useUpdateSchool,
 } from "../../react-query";
+import ConfirmDeleteMessage from "../common/ConfirmDeleteMessage";
+import LoadingBar from "../common/LoadingBar";
+import LoadingSpinner from "../common/LoadingSpinner";
 import ProfileForm from "./ProfileForm";
 import ProfileUpload from "./ProfileUpload";
-import Swal from "sweetalert2";
-import LoadingSpinner from "../common/LoadingSpinner";
-import { useRouter } from "next/router";
-import LoadingBar from "../common/LoadingBar";
-import { requestData, schoolDataLanguage } from "../../data/languages";
-import ConfirmDeleteMessage from "../common/ConfirmDeleteMessage";
 
 const BasicInformationSection = ({ school }: { school: School }) => {
   const language = useGetLanguage();

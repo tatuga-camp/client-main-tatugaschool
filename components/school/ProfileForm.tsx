@@ -1,10 +1,11 @@
 import React, { useRef, useState } from "react";
-import { School } from "@/interfaces";
+import { ErrorMessages, School } from "@/interfaces";
 import { InputMask } from "primereact/inputmask";
 import { UseMutationResult } from "@tanstack/react-query";
 import { RequestUpdateSchoolService } from "@/services";
 import { Toast } from "primereact/toast";
 import { PhoneInput } from "react-international-phone";
+import Swal from "sweetalert2";
 interface ProfileFormProps {
   school: School;
   updateSchool: UseMutationResult<
@@ -40,18 +41,32 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ school, updateSchool }) => {
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    await updateSchool.mutateAsync({
-      query: { schoolId: school.id },
-      body: formData,
-    });
+    try {
+      e.preventDefault();
+      await updateSchool.mutateAsync({
+        query: { schoolId: school.id },
+        body: formData,
+      });
 
-    toast.current?.show({
-      severity: "info",
-      summary: "Updated",
-      detail: "School has been updated",
-    });
-    setIsActive(false);
+      toast.current?.show({
+        severity: "info",
+        summary: "Updated",
+        detail: "School has been updated",
+      });
+      setIsActive(false);
+    } catch (error) {
+      setIsActive(false);
+      console.log(error);
+      let result = error as ErrorMessages;
+      Swal.fire({
+        title: result.error ? result.error : "Something Went Wrong",
+        text: result.message.toString(),
+        footer: result.statusCode
+          ? "Code Error: " + result.statusCode?.toString()
+          : "",
+        icon: "error",
+      });
+    }
   };
 
   return (
