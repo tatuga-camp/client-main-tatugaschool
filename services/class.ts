@@ -1,5 +1,4 @@
 import { Classroom, EducationYear, Student, Subject } from "@/interfaces";
-import { Pagination } from "@/interfaces/Pagination";
 
 import createAxiosInstance from "./apiService";
 

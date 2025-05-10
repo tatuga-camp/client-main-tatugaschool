@@ -132,7 +132,7 @@ function ManageInvite() {
                           schoolId: member.school.id,
                         })
                       }
-                      className="reject-button w-24 gap-1 h-8 flex items-center justify-between"
+                      className="reject-button w-32 gap-1 h-8 flex items-center justify-between"
                     >
                       <BiX />
                       {accountDataLanguage.reject(language.data ?? "en")}
@@ -146,7 +146,7 @@ function ManageInvite() {
                           schoolId: member.school.id,
                         })
                       }
-                      className="success-button hover:bg-green-700 w-24 gap-1 h-8 flex items-center justify-between"
+                      className="success-button hover:bg-green-700 w-32 gap-1 h-8 flex items-center justify-between"
                     >
                       <BiCheck />
                       {accountDataLanguage.accpet(language.data ?? "en")}
