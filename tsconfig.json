@@ -1,11 +1,6 @@
 {
   "compilerOptions": {
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext",
-      "webworker"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext", "webworker"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -18,9 +13,7 @@
     "jsx": "preserve",
     "incremental": true,
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"]
     },
     "target": "ES2017"
   },
@@ -28,9 +21,9 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "public/sw.js"
-, "prettier.config.js"  ],
-  "exclude": [
-    "node_modules"
-  ]
+    "public/sw.js",
+    "prettier.config.js",
+    "hook/useGetRoleOnSubject.ts"
+  ],
+  "exclude": ["node_modules"]
 }

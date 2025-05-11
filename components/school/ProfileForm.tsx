@@ -1,11 +1,11 @@
-import React, { useRef, useState } from "react";
 import { ErrorMessages, School } from "@/interfaces";
-import { InputMask } from "primereact/inputmask";
-import { UseMutationResult } from "@tanstack/react-query";
 import { RequestUpdateSchoolService } from "@/services";
+import { UseMutationResult } from "@tanstack/react-query";
 import { Toast } from "primereact/toast";
+import React, { useRef, useState } from "react";
 import { PhoneInput } from "react-international-phone";
 import Swal from "sweetalert2";
+import useGetRoleOnSchool from "../../hook/useGetRoleOnSchool";
 interface ProfileFormProps {
   school: School;
   updateSchool: UseMutationResult<
@@ -19,6 +19,9 @@ interface ProfileFormProps {
 const ProfileForm: React.FC<ProfileFormProps> = ({ school, updateSchool }) => {
   const toast = useRef<Toast>(null);
   const [isActive, setIsActive] = useState(false);
+  const role = useGetRoleOnSchool({
+    schoolId: school.id,
+  });
   const [formData, setFormData] = useState({
     title: school.title,
     phoneNumber: school.phoneNumber,
@@ -70,7 +73,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ school, updateSchool }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
       <div>
         <label className="block text-gray-500 text-sm mb-1" htmlFor="title">
           Name
@@ -78,6 +81,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ school, updateSchool }) => {
         <input
           type="text"
           id="title"
+          disabled={role === "TEACHER"}
           value={formData.title}
           onChange={handleChange}
           className="main-input w-full"
@@ -90,6 +94,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ school, updateSchool }) => {
         </label>
         <PhoneInput
           required
+          disabled={role === "TEACHER"}
           defaultCountry="th"
           value={formData.phoneNumber}
           onChange={(e) => {
@@ -106,6 +111,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ school, updateSchool }) => {
             address
           </label>
           <input
+            disabled={role === "TEACHER"}
             type="text"
             required
             id="address"
@@ -119,6 +125,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ school, updateSchool }) => {
             Country
           </label>
           <input
+            disabled={role === "TEACHER"}
             type="text"
             id="country"
             value={formData.country}
@@ -134,6 +141,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ school, updateSchool }) => {
             City
           </label>
           <input
+            disabled={role === "TEACHER"}
             type="text"
             id="city"
             value={formData.city}
@@ -147,6 +155,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ school, updateSchool }) => {
           </label>
           <input
             type="text"
+            disabled={role === "TEACHER"}
             id="zip"
             value={formData.zip}
             onChange={handleChange}
@@ -162,6 +171,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ school, updateSchool }) => {
         <textarea
           id="about"
           rows={4}
+          disabled={role === "TEACHER"}
           value={formData.about}
           onChange={handleChange}
           className="main-input w-full"
@@ -170,7 +180,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ school, updateSchool }) => {
 
       <button
         type="submit"
-        disabled={!isActive}
+        disabled={!isActive || role === "TEACHER"}
         className={`w-40 py-2 text-white rounded-md focus:outline-none ${
           !isActive
             ? "bg-gray-400 cursor-not-allowed"
@@ -179,6 +189,11 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ school, updateSchool }) => {
       >
         Save Changes
       </button>
+      {role === "TEACHER" && (
+        <span className="text-red-600">
+          You are not allow to make any change because you are not an admin.
+        </span>
+      )}
     </form>
   );
 };

@@ -19,8 +19,12 @@ import Dropdown from "../common/Dropdown";
 import { Toast } from "primereact/toast";
 import { useSound } from "../../hook";
 import { schoolDataLanguage } from "../../data/languages";
+import useGetRoleOnSchool from "../../hook/useGetRoleOnSchool";
 
 const BillingPlanSection = (props: { schoolId: string }) => {
+  const role = useGetRoleOnSchool({
+    schoolId: props.schoolId,
+  });
   const router = useRouter();
   const toast = useRef<Toast>(null);
   const song = useSound("/sounds/ding.mp3") as HTMLAudioElement;
@@ -205,6 +209,7 @@ const BillingPlanSection = (props: { schoolId: string }) => {
           {selectBillingManager && members.data && (
             <Dropdown<MemberOnSchool>
               optionLabel="email"
+              disabled={role === "TEACHER"}
               value={selectBillingManager}
               onChange={(e) => {
                 handleChangeBillingManager(e.value);

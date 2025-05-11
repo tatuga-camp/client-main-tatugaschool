@@ -27,14 +27,23 @@ import {
   settingOnSubjectDataLanguage,
 } from "../../data/languages";
 import ConfirmDeleteMessage from "../common/ConfirmDeleteMessage";
+import useGetRoleOnSubject from "../../hook/useGetRoleOnSubject";
+import useGetRoleOnSchool from "../../hook/useGetRoleOnSchool";
 
 type Props = {
   subjectId: string;
+  schoolId: string;
   setSelectMenu: (menu: string) => void;
 };
-function Setting({ subjectId, setSelectMenu }: Props) {
+function Setting({ subjectId, setSelectMenu, schoolId }: Props) {
   const teacherOnSubjects = useGetTeacherOnSubject({
     subjectId: subjectId,
+  });
+  const roleSubject = useGetRoleOnSubject({
+    subjectId: subjectId,
+  });
+  const roleSchool = useGetRoleOnSchool({
+    schoolId: schoolId,
   });
   const language = useGetLanguage();
   const toast = React.useRef<Toast>(null);
@@ -323,8 +332,12 @@ function Setting({ subjectId, setSelectMenu }: Props) {
               language.data ?? "en"
             )}
           </h4>
+
           <button
-            disabled={deleteSubject.isPending}
+            disabled={
+              deleteSubject.isPending ||
+              (roleSchool !== "ADMIN" && roleSubject !== "ADMIN")
+            }
             onClick={() => {
               if (!subject.data) return;
 
@@ -342,6 +355,12 @@ function Setting({ subjectId, setSelectMenu }: Props) {
           >
             {settingOnSubjectDataLanguage.deleteSubject(language.data ?? "en")}
           </button>
+          {roleSchool !== "ADMIN" && roleSubject !== "ADMIN" && (
+            <h4 className="text-xs sm:text-sm text-red-700">
+              Only the school admin and the admin of this subject can delete
+              them
+            </h4>
+          )}
         </div>
       </section>
     </main>

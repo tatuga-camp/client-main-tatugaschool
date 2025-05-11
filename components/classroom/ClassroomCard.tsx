@@ -1,10 +1,12 @@
-import React, { CSSProperties, memo } from "react";
-import { Classroom } from "../../interfaces";
+import React, { CSSProperties, memo, useEffect, useState } from "react";
+import { Classroom, MemberOnSchool } from "../../interfaces";
 import { MdDragIndicator } from "react-icons/md";
 import { FaUsers } from "react-icons/fa6";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import Link from "next/link";
+import { useGetMemberOnSchoolBySchool } from "../../react-query";
+import ListMemberCircle from "../member/ListMemberCircle";
 
 type Props = {
   classroom: Classroom & { studentNumbers: number };
@@ -22,6 +24,26 @@ function ClassroomCard({ classroom }: Props) {
     transform: CSS.Transform.toString(transform),
     transition: transition || undefined,
   };
+  const [creator, setCreator] = useState<MemberOnSchool>();
+  const memberOnSchool = useGetMemberOnSchoolBySchool({
+    schoolId: classroom.schoolId,
+  });
+
+  useEffect(() => {
+    if (
+      memberOnSchool.data &&
+      classroom.userId !== undefined &&
+      classroom.userId !== undefined
+    ) {
+      const member = memberOnSchool.data.find(
+        (m) => m.userId === classroom.userId
+      );
+
+      if (member) {
+        setCreator(member);
+      }
+    }
+  }, [memberOnSchool.data]);
 
   const inlineStyles: CSSProperties = {
     opacity: isDragging ? "0.5" : "1",
@@ -101,7 +123,14 @@ items-center justify-center absolute top-2 right-2 "
               </span>
             </div>
           </div>
-          <div className="text-gray-400 text-xs">Create At: {dateMonth}</div>
+          {creator ? (
+            <div className="text-gray-400 text-xs flex items-center justify-start gap-2">
+              Created By: <ListMemberCircle members={[creator]} />{" "}
+              {creator.firstName} {creator.lastName}
+            </div>
+          ) : (
+            <div className="text-gray-400 text-xs">Created At: {dateMonth}</div>
+          )}
         </div>
       </li>
     </Link>

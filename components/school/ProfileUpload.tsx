@@ -11,6 +11,7 @@ import React, { useState } from "react";
 import Swal from "sweetalert2";
 import { defaultBlurHash } from "../../data";
 import { decodeBlurhashToCanvas } from "../../utils";
+import useGetRoleOnSchool from "../../hook/useGetRoleOnSchool";
 
 const ProfileUpload: React.FC<{
   school: School;
@@ -22,6 +23,9 @@ const ProfileUpload: React.FC<{
   >;
 }> = ({ school, updateSchool }) => {
   const [loading, setLoading] = useState(false);
+  const role = useGetRoleOnSchool({
+    schoolId: school.id,
+  });
   const [previewUrl, setPreviewUrl] = useState<string | null>(school.logo);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -95,6 +99,7 @@ const ProfileUpload: React.FC<{
             type="file"
             className="hidden"
             accept="image/*"
+            disabled={role === "TEACHER"}
             aria-label="Upload school logo"
             onChange={handleFileChange}
           />
@@ -111,6 +116,11 @@ const ProfileUpload: React.FC<{
           mode="indeterminate"
           style={{ height: "6px", width: "100%" }}
         />
+      )}
+      {role === "TEACHER" && (
+        <span className="text-red-600">
+          You are not allow to make any change because you are not an admin.
+        </span>
       )}
     </div>
   );

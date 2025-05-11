@@ -1,24 +1,25 @@
 import Link from "next/link";
+import { useRouter } from "next/router";
+import { Toast } from "primereact/toast";
 import React from "react";
-import { Classroom, ErrorMessages } from "../../interfaces";
-import InputNumber from "../common/InputNumber";
-import InputWithIcon from "../common/InputWithIcon";
 import { SiGoogleclassroom } from "react-icons/si";
 import { TbFileDescription } from "react-icons/tb";
-import InputClassLevel from "../common/InputClassLevel";
+import Swal from "sweetalert2";
+import { settingOnClassroomDataLangugae } from "../../data/languages";
+import { useSound } from "../../hook";
+import { Classroom, ErrorMessages } from "../../interfaces";
 import {
   useDeleteClassroom,
   useGetLanguage,
+  useGetUser,
   useUpdateClassroom,
 } from "../../react-query";
-import { Toast } from "primereact/toast";
-import { useSound } from "../../hook";
-import Swal from "sweetalert2";
-import LoadingSpinner from "../common/LoadingSpinner";
-import { useRouter } from "next/router";
-import Switch from "../common/Switch";
-import { settingOnClassroomDataLangugae } from "../../data/languages";
 import ConfirmDeleteMessage from "../common/ConfirmDeleteMessage";
+import InputClassLevel from "../common/InputClassLevel";
+import InputWithIcon from "../common/InputWithIcon";
+import LoadingSpinner from "../common/LoadingSpinner";
+import Switch from "../common/Switch";
+import useGetRoleOnSchool from "../../hook/useGetRoleOnSchool";
 
 type Props = {
   classroom: Classroom;
@@ -27,6 +28,10 @@ type Props = {
 function ClassroomSetting({ classroom, toast }: Props) {
   const lanague = useGetLanguage();
   const update = useUpdateClassroom();
+  const role = useGetRoleOnSchool({
+    schoolId: classroom.schoolId,
+  });
+  const user = useGetUser();
   const router = useRouter();
   const sound = useSound("/sounds/ding.mp3") as HTMLAudioElement;
   const deleteClass = useDeleteClassroom();
@@ -264,6 +269,11 @@ function ClassroomSetting({ classroom, toast }: Props) {
             )}
           </h4>
           <button
+            disabled={
+              role === "TEACHER" &&
+              user.data &&
+              user.data.id !== classroom.userId
+            }
             onClick={() => {
               ConfirmDeleteMessage({
                 language: lanague.data ?? "en",
@@ -276,6 +286,14 @@ function ClassroomSetting({ classroom, toast }: Props) {
           >
             {settingOnClassroomDataLangugae.deleteButton(lanague.data ?? "en")}
           </button>
+          {role === "TEACHER" &&
+            user.data &&
+            user.data.id !== classroom.userId && (
+              <div className="text-red-700">
+                Only the school admin and the creator of this classroom can
+                delete them
+              </div>
+            )}
         </div>
       </section>
     </main>

@@ -7,5 +7,6 @@ export interface Classroom {
   description?: string;
   isAchieved: boolean;
   order: number | undefined;
+  userId: string | undefined | null;
   schoolId: string;
 }

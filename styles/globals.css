@@ -23,7 +23,7 @@
     @apply bg-success-color text-white  py-2 px-4 rounded-md active:scale-105 hover:bg-success-color active:drop-shadow-md transition duration-150;
   }
   .reject-button {
-    @apply bg-red-500 text-white  py-2 px-4 rounded-md active:scale-105 hover:bg-red-700 active:drop-shadow-md transition duration-150;
+    @apply bg-red-500 text-white py-2 disabled:active:scale-100 px-4 rounded-md active:scale-105 hover:bg-red-700 active:drop-shadow-md transition duration-150 disabled:bg-red-300 disabled:cursor-not-allowed disabled:opacity-60;
   }
   .main-input {
     @apply border rounded-md outline-none hover:border-blue-500  focus:shadow-[0_0_0_0.2rem_rgba(191,219,254,1)] px-4 py-2;

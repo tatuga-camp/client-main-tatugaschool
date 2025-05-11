@@ -34,6 +34,7 @@ import useClickOutside from "../../../hook/useClickOutside";
 import { ErrorMessages, StudentOnSubject } from "../../../interfaces";
 import {
   useGetLanguage,
+  useGetSchool,
   useGetStudentOnSubject,
   useGetSubject,
   useGetTeacherOnSubject,
@@ -65,6 +66,9 @@ function Index({ subjectId }: Props) {
   const subject = useGetSubject({
     subjectId: subjectId,
   });
+  const school = useGetSchool({
+    schoolId: subject.data?.schoolId ?? "",
+  });
   const studentOnSubjects = useGetStudentOnSubject({
     subjectId: subjectId,
   });
@@ -75,6 +79,7 @@ function Index({ subjectId }: Props) {
   const [randomStudents, setRandomStudents] = React.useState<
     StudentOnSubject[]
   >([]);
+
   const [selectMenu, setSelectMenu] = React.useState<MenuSubject>("Subject");
   const [selectFooter, setSelectFooter] =
     React.useState<ListMenuFooter>("EMTY");
@@ -488,9 +493,10 @@ function Index({ subjectId }: Props) {
           {selectMenu === "Attendance" && (
             <Attendance toast={toast} subjectId={subjectId} />
           )}
-          {selectMenu === "SettingSubject" && (
+          {selectMenu === "SettingSubject" && school.data && (
             <Setting
               subjectId={subjectId}
+              schoolId={school.data.id}
               setSelectMenu={(menu: string) =>
                 setSelectMenu(menu as MenuSubject)
               }

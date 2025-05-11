@@ -423,7 +423,11 @@ function ShowSelectGroup({
           <div className="flex justify-center items-center gap-3">
             <button
               disabled={refetchGroup.isPending}
-              onClick={handleRefetchGroup}
+              onClick={() => {
+                if (confirm("Are you sure?")) {
+                  handleRefetchGroup();
+                }
+              }}
               className="second-button w-52
                         flex items-center justify-center gap-1 py-1 border"
             >
@@ -476,7 +480,11 @@ function ShowSelectGroup({
       >
         <SortableContext items={units} strategy={rectSortingStrategy}>
           <ul className="grid mt-5 lg:grid-cols-2 xl:grid-cols-3 gap-5">
-            <ColumMemo type="ungroupStudent" students={unGroupStudents} />
+            {groupOnSubject.isLoading ? (
+              <LoadingBar />
+            ) : (
+              <ColumMemo type="ungroupStudent" students={unGroupStudents} />
+            )}
             {units
               .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
               .map((unit) => {
@@ -498,6 +506,7 @@ function ShowSelectGroup({
                     isDragOver={true}
                   />
                 )}
+
               {activeSortableId &&
                 activeSortableId.type === "ungroupStudent" &&
                 activeSortableId.student && (

@@ -12,8 +12,12 @@ import LoadingBar from "../common/LoadingBar";
 import LoadingSpinner from "../common/LoadingSpinner";
 import ProfileForm from "./ProfileForm";
 import ProfileUpload from "./ProfileUpload";
+import useGetRoleOnSchool from "../../hook/useGetRoleOnSchool";
 
 const BasicInformationSection = ({ school }: { school: School }) => {
+  const role = useGetRoleOnSchool({
+    schoolId: school.id,
+  });
   const language = useGetLanguage();
   const updateSchool = useUpdateSchool();
   const removeSchool = useDeleteSchool();
@@ -63,7 +67,7 @@ const BasicInformationSection = ({ school }: { school: School }) => {
             {schoolDataLanguage.deleteSchoolDescription(language.data ?? "en")}
           </h4>
           <button
-            disabled={removeSchool.isPending}
+            disabled={removeSchool.isPending || role === "TEACHER"}
             onClick={async () => {
               await ConfirmDeleteMessage({
                 language: language.data ?? "en",
