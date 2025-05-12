@@ -38,10 +38,16 @@ export async function CreateSchoolService(
 export type RequestUpdateSchoolService = {
   query: { schoolId: string };
   body: {
+    billingManagerId?: string;
     title?: string;
     description?: string;
-    billingManagerId?: string;
+    blurHash?: string;
+    country?: string;
+    city?: string;
+    address?: string;
+    zipCode?: string;
     logo?: string;
+    phoneNumber?: string;
   };
 };
 

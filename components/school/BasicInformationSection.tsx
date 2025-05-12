@@ -18,10 +18,12 @@ const BasicInformationSection = ({ school }: { school: School }) => {
   const role = useGetRoleOnSchool({
     schoolId: school.id,
   });
+
   const language = useGetLanguage();
   const updateSchool = useUpdateSchool();
   const removeSchool = useDeleteSchool();
   const router = useRouter();
+
   const handleDeleteSchool = async () => {
     try {
       await removeSchool.mutateAsync({ schoolId: school.id });

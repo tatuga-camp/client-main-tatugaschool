@@ -22,8 +22,7 @@
     "**/*.ts",
     "**/*.tsx",
     "public/sw.js",
-    "prettier.config.js",
-    "hook/useGetRoleOnSubject.ts"
+    "prettier.config.js"
   ],
   "exclude": ["node_modules"]
 }

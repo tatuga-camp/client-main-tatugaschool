@@ -6,6 +6,7 @@ import React, { useRef, useState } from "react";
 import { PhoneInput } from "react-international-phone";
 import Swal from "sweetalert2";
 import useGetRoleOnSchool from "../../hook/useGetRoleOnSchool";
+import LoadingSpinner from "../common/LoadingSpinner";
 interface ProfileFormProps {
   school: School;
   updateSchool: UseMutationResult<
@@ -28,7 +29,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ school, updateSchool }) => {
     country: school.country,
     city: school.city,
     zip: school.zipCode,
-    about: school.description,
+    description: school.description,
     address: school.address,
   });
 
@@ -169,10 +170,10 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ school, updateSchool }) => {
           About
         </label>
         <textarea
-          id="about"
+          id="description"
           rows={4}
           disabled={role === "TEACHER"}
-          value={formData.about}
+          value={formData.description}
           onChange={handleChange}
           className="main-input w-full"
         ></textarea>
@@ -181,13 +182,13 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ school, updateSchool }) => {
       <button
         type="submit"
         disabled={!isActive || role === "TEACHER"}
-        className={`w-40 py-2 text-white rounded-md focus:outline-none ${
+        className={`w-40 py-2 text-white rounded-md flex items-center justify-center focus:outline-none ${
           !isActive
             ? "bg-gray-400 cursor-not-allowed"
             : "bg-primary-color hover:bg-primary-color-hover"
         }`}
       >
-        Save Changes
+        {updateSchool.isPending ? <LoadingSpinner /> : "Save Changes"}
       </button>
       {role === "TEACHER" && (
         <span className="text-red-600">
