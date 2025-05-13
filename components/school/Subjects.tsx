@@ -2,7 +2,9 @@ import React, { useCallback, useEffect } from "react";
 import { SortByOption, sortByOptions } from "../../data";
 import {
   useGetLanguage,
+  useGetMemberOnSchoolBySchool,
   useGetSubjectFromSchool,
+  useGetUser,
   useReorderSubjects,
 } from "../../react-query";
 import {
@@ -36,6 +38,7 @@ import {
   sortByOptionsDataLanguage,
   subjectsDataLanguage,
 } from "../../data/languages";
+import LoadingSpinner from "../common/LoadingSpinner";
 
 type Props = {
   schoolId: string;
@@ -43,9 +46,16 @@ type Props = {
 function Subjects({ schoolId }: Props) {
   const toast = React.useRef<Toast>(null);
   const reorder = useReorderSubjects();
+  const memberOnSchools = useGetMemberOnSchoolBySchool({
+    schoolId,
+  });
   const [educationYear, setEducationYear] = React.useState<
     EducationYear | undefined
   >();
+  const user = useGetUser();
+  const [selectFilterUserId, setSelectFilterUserId] = React.useState<
+    string | "show-all"
+  >(user.data?.id ?? "show-all");
   const language = useGetLanguage();
   const [triggerCreateSubject, setTriggerCreateSubject] = React.useState(false);
   const [sortBy, setSortBy] = React.useState<SortByOption>("Default");
@@ -96,12 +106,11 @@ function Subjects({ schoolId }: Props) {
   );
 
   React.useEffect(() => {
-    if (subjects.data) {
-      setSubjectData(
-        subjects.data.sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-      );
+    if (subjects.data && user.data) {
+      setSelectFilterUserId(user.data.id);
+      handleFilterByUser(user.data.id);
     }
-  }, [subjects.data]);
+  }, [subjects.data, user.data]);
 
   const handleSearch = (search: string) => {
     if (!subjects.data) {
@@ -170,6 +179,25 @@ function Subjects({ schoolId }: Props) {
     }
   };
 
+  const handleFilterByUser = (userId: string | "show-all") => {
+    if (!subjects.data) {
+      return;
+    }
+
+    setSelectFilterUserId(userId);
+    setSubjectData((prev) => {
+      if (!prev) {
+        return [];
+      }
+      if (userId !== "show-all") {
+        return subjects.data.filter((subject) =>
+          subject.teachers.some((t) => t.userId === userId)
+        );
+      } else {
+        return subjects.data;
+      }
+    });
+  };
   return (
     <>
       <Toast ref={toast} />
@@ -219,7 +247,7 @@ function Subjects({ schoolId }: Props) {
           className="w-full min-h-screen flex flex-col  p-3 md:px-5 
       md:max-w-screen-md xl:max-w-screen-lg gap-4 md:gap-0 mx-auto"
         >
-          <div className="flex items-center justify-start gap-2">
+          <div className="flex items-center justify-start gap-2 flex-wrap">
             <label className="flex flex-col">
               <span className="text-gray-400 text-sm">
                 {subjectsDataLanguage.search(language.data ?? "en")}
@@ -246,7 +274,36 @@ function Subjects({ schoolId }: Props) {
                 />
               </label>
             )}
-
+            <label className="flex flex-col w-80">
+              <span className="text-gray-400 text-sm">
+                ค้นหาตามรายชื่อคุณครูในโรงเรียน
+              </span>
+              {memberOnSchools.isLoading ? (
+                <LoadingSpinner />
+              ) : (
+                <select
+                  value={selectFilterUserId}
+                  onChange={(e) => {
+                    handleFilterByUser(e.target.value);
+                  }}
+                  className="second-button w-80 border"
+                >
+                  {[
+                    ...(memberOnSchools.data ?? []),
+                    {
+                      firstName: "Show All",
+                      lastName: "",
+                      email: "subjects",
+                      userId: "show-all",
+                    },
+                  ].map((option) => (
+                    <option key={option.userId} value={option.userId}>
+                      {option.firstName} {option.lastName} : {option.email}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </label>
             <label className="flex flex-col">
               <span className="text-gray-400 text-sm">
                 {subjectsDataLanguage.sortBy(language.data ?? "en")}

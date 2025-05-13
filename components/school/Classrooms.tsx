@@ -1,12 +1,3 @@
-import React, { useCallback, useEffect, useRef } from "react";
-import {
-  useGetClassrooms,
-  useGetLanguage,
-  useReorderClassrooms,
-} from "../../react-query";
-import { Classroom } from "../../interfaces";
-import { MdDragIndicator } from "react-icons/md";
-import { FaUsers } from "react-icons/fa6";
 import {
   closestCenter,
   DndContext,
@@ -16,23 +7,33 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { ResponseGetClassesBySchoolIdService } from "../../services";
 import {
   arrayMove,
   rectSortingStrategy,
   SortableContext,
 } from "@dnd-kit/sortable";
-import ClassesCard from "../classroom/ClassroomCard";
-import PopupLayout from "../layout/PopupLayout";
-import ClassesCreate from "../classroom/ClassroomCreate";
-import { IoMdClose } from "react-icons/io";
 import { Toast } from "primereact/toast";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { IoMdClose } from "react-icons/io";
 import { SortByOption, sortByOptions } from "../../data";
-import LoadingBar from "../common/LoadingBar";
 import {
   classesDataLanguage,
   sortByOptionsDataLanguage,
 } from "../../data/languages";
+import { Classroom, User } from "../../interfaces";
+import {
+  useGetClassrooms,
+  useGetLanguage,
+  useGetMemberOnSchoolBySchool,
+  useGetUser,
+  useReorderClassrooms,
+} from "../../react-query";
+import { ResponseGetClassesBySchoolIdService } from "../../services";
+import ClassesCard from "../classroom/ClassroomCard";
+import ClassesCreate from "../classroom/ClassroomCreate";
+import LoadingBar from "../common/LoadingBar";
+import PopupLayout from "../layout/PopupLayout";
+import LoadingSpinner from "../common/LoadingSpinner";
 
 type Props = {
   schoolId: string;
@@ -40,11 +41,19 @@ type Props = {
 function Classrooms({ schoolId }: Props) {
   const reorder = useReorderClassrooms();
   const language = useGetLanguage();
+  const user = useGetUser();
+  const memberOnSchools = useGetMemberOnSchoolBySchool({
+    schoolId: schoolId,
+  });
   const [classroomData, setClassroomData] = React.useState<
     (Classroom & {
       studentNumbers: number;
+      creator: User | null;
     })[]
   >([]);
+  const [selectFilterUserId, setSelectFilterUserId] = useState<
+    string | "show-all"
+  >(user.data?.id ?? "show-all");
   const [triggerCreateClass, setTriggerCreateClass] = React.useState(false);
   const [triggerActiveClasses, setTriggerActiveClasses] = React.useState(true);
   const [sortBy, setSortBy] = React.useState<SortByOption>("Default");
@@ -79,12 +88,11 @@ function Classrooms({ schoolId }: Props) {
   }, []);
 
   useEffect(() => {
-    if (classrooms.data) {
-      setClassroomData(
-        classrooms.data.sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-      );
+    if (classrooms.data && user.data) {
+      setSelectFilterUserId(user.data.id);
+      handleFilterByUser(user.data.id);
     }
-  }, [classrooms.data]);
+  }, [classrooms.data, user.data]);
 
   const handleSearch = (search: string) => {
     if (!classrooms.data) {
@@ -138,6 +146,26 @@ function Classrooms({ schoolId }: Props) {
       default:
         break;
     }
+  };
+
+  const handleFilterByUser = (userId: string | "show-all") => {
+    if (!classrooms.data) {
+      return;
+    }
+
+    setSelectFilterUserId(userId);
+    setClassroomData((prev) => {
+      if (!prev) {
+        return [];
+      }
+      if (userId !== "show-all") {
+        return classrooms.data.filter(
+          (classroom) => classroom.userId === userId
+        );
+      } else {
+        return classrooms.data;
+      }
+    });
   };
 
   return (
@@ -194,7 +222,7 @@ function Classrooms({ schoolId }: Props) {
           className="w-full min-h-screen flex flex-col  p-3 md:px-5 
       md:max-w-screen-md xl:max-w-screen-lg gap-4 md:gap-0 mx-auto"
         >
-          <div className="flex items-center justify-start gap-2">
+          <div className="flex items-center flex-wrap justify-start gap-2">
             <label className="flex flex-col">
               <span className="text-gray-400 text-sm">
                 {classesDataLanguage.search(language.data ?? "en")}
@@ -203,7 +231,7 @@ function Classrooms({ schoolId }: Props) {
                 value={search}
                 onChange={(e) => handleSearch(e.target.value)}
                 type="text"
-                className="w-96 border border-gray-300 rounded-lg p-2"
+                className="w-72 border border-gray-300 rounded-lg p-2"
                 placeholder={classesDataLanguage.searchPlaceholder(
                   language.data ?? "en"
                 )}
@@ -221,6 +249,36 @@ function Classrooms({ schoolId }: Props) {
                   ? classesDataLanguage.activeClass(language.data ?? "en")
                   : classesDataLanguage.inactiveClass(language.data ?? "en")}
               </button>
+            </label>
+            <label className="flex flex-col w-80">
+              <span className="text-gray-400 text-sm">
+                ค้นหาตามรายชื่อคุณครูในโรงเรียน
+              </span>
+              {memberOnSchools.isLoading ? (
+                <LoadingSpinner />
+              ) : (
+                <select
+                  value={selectFilterUserId}
+                  onChange={(e) => {
+                    handleFilterByUser(e.target.value);
+                  }}
+                  className="second-button w-80 border"
+                >
+                  {[
+                    ...(memberOnSchools.data ?? []),
+                    {
+                      firstName: "Show All",
+                      lastName: "",
+                      email: "Classrooms",
+                      userId: "show-all",
+                    },
+                  ].map((option) => (
+                    <option key={option.userId} value={option.userId}>
+                      {option.firstName} {option.lastName} : {option.email}
+                    </option>
+                  ))}
+                </select>
+              )}
             </label>
             <label className="flex flex-col">
               <span className="text-gray-400 text-sm">
