@@ -1,4 +1,4 @@
-import { Classroom, EducationYear, Student, Subject } from "@/interfaces";
+import { Classroom, EducationYear, Student, Subject, User } from "@/interfaces";
 
 import createAxiosInstance from "./apiService";
 
@@ -36,6 +36,7 @@ export type RequestetClassesBySchoolIdService = {
 
 export type ResponseGetClassesBySchoolIdService = (Classroom & {
   studentNumbers: number;
+  creator: User | null;
 })[];
 
 export async function GetClassesBySchoolIdService(

@@ -150,15 +150,18 @@ function SubjectCreate({ onClose, schoolId, educationYear, toast }: Props) {
           >
             {classrooms.isLoading && <option>Loading...</option>}
             {classrooms.data
-              ?.sort((a, b) => Number(a.order) - Number(b.order))
+              ?.sort((a, b) =>
+                (a.creator?.email ?? "").localeCompare(b.creator?.email ?? "")
+              )
               .map((classroom) => {
                 return (
                   <option key={classroom.id} value={classroom.id}>
-                    <div className="flex">
+                    <div className="">
                       <span>{classroom.title}</span>
                       {" - "}
-                      <span className="text-sm text-gray-400">
-                        {classroom.level}
+                      <span className="">{classroom.level}</span>:{" "}
+                      <span className="">
+                        {classroom.creator?.email ?? "No Creator Found"}
                       </span>
                     </div>
                   </option>
