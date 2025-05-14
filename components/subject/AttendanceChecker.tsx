@@ -197,7 +197,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
       <header className="">
         <section className="w-full flex flex-col gap-4 sm:gap-2 sm:flex-row sm:justify-between sm:items-center">
           <div className="text-center sm:text-left">
-            <h1 className="text-2xl sm:text-xl font-medium">
+            <h1 className="text-base sm:text-base font-medium">
               {attendanceCheckerDataLanugae.title(language.data ?? "en")}
             </h1>
             <span className="text-sm text-gray-500 block mt-1">
@@ -206,7 +206,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
           </div>
         </section>
 
-        <section className="w-full flex flex-col gap-4 mt-5 border-b pb-2">
+        <section className="w-full flex flex-col gap-4  border-b">
           {/* Table Selection */}
           <div className="w-full overflow-x-auto">
             <div className="flex flex-nowrap min-w-0">
@@ -412,10 +412,10 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
 
           {/* Desktop View */}
           <div className="hidden lg:block w-full max-h-full overflow-auto">
-            <table className="table-fixed w-max min-w-full">
+            <table className=" w-max min-w-full">
               <thead>
                 <tr className="bg-gray-100 z-30 sticky top-0">
-                  <th className="sticky left-0 z-40 bg-gray-100">Name</th>
+                  <th className="sticky left-0 z-40 w-60 bg-gray-100">Name</th>
                   {selectTable?.statusLists
                     .filter((s) => !s.isHidden)
                     .sort((a, b) => b.title.localeCompare(a.title))
@@ -539,7 +539,7 @@ const StudentAttendanceItem = React.memo(
         } border-spacing-2 border-4 border-transparent`}
       >
         <td className={`sticky left-0 z-10 ${odd ? "bg-gray-50" : "bg-white"}`}>
-          <div className="flex w-80 gap-2">
+          <div className="flex w-60 truncate gap-2">
             <div className="w-10 h-10 relative rounded-md ring-1 overflow-hidden">
               <Image
                 src={student.photo}
