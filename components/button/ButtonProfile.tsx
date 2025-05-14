@@ -42,16 +42,7 @@ function ButtonProfile({ user }: Props) {
   };
   return (
     <div className="flex items-center flex-1 justify-end ">
-      <div className="flex items-center justify-end w-60 transition-width hover:w-96 group bg-white rounded-lg px-4 py-2 gap-4">
-        {/* <button className="w-8 h-8 relative bg-white rounded-full  flex items-center justify-center text-primary-color">
-          <div
-            className="text-white absolute z-50 -right-1 -top-1 rounded-full flex 
-      text-xs items-center justify-center  w-4 h-4 bg-red-600"
-          >
-            1
-          </div>
-          <FaBell />
-        </button> */}
+      <div className="flex items-center justify-end w-max transition-width md:hover:w-96 group bg-white rounded-lg px-4 py-2 gap-4">
         <div className="flex gap-2">
           <div className="w-10 h-10 relative rounded-full overflow-hidden ">
             <Image
@@ -69,7 +60,7 @@ function ButtonProfile({ user }: Props) {
               }}
             />
           </div>
-          <div className=" items-start w-0 h-0 overflow-hidden group-hover:w-max group-hover:h-max duration-300 transition-width flex-col justify-center gap-0 hidden md:flex">
+          <div className=" items-start w-0 h-0  overflow-hidden group-hover:w-max group-hover:h-max duration-300 transition-width flex-col justify-center gap-0 hidden md:flex">
             <h2 className="font-semibold text-sm text-gray-800">
               {user.data?.email}
             </h2>

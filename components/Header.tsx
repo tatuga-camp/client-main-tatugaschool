@@ -17,7 +17,7 @@ const Header = () => {
   const pathname = usePathname();
   const language = useGetLanguage();
   const classLinkActive =
-    "bg-blue-500/50 text-black px-4 py-2 rounded-md font-semibold";
+    "bg-blue-500/50 text-black px-4  py-2 rounded-md font-semibold";
   const classLinkInactive = "bg-transparent text-black";
   const isSchoolPage = pathname === "/";
   const isAccountPage = pathname.startsWith("/account");
@@ -25,8 +25,8 @@ const Header = () => {
     path ? classLinkActive : classLinkInactive;
   return (
     <header
-      className="flex flex-col h-20 sticky z-50
-     top-0 md:flex-row justify-between items-center p-4 bg-white/50 backdrop-blur text-white gap-4"
+      className="flex  h-20 sticky z-50 
+     top-0 flex-row justify-between items-center md:p-4 bg-white/50 backdrop-blur text-white gap-4"
     >
       <Link
         href="/"
@@ -49,17 +49,28 @@ const Header = () => {
           Tatuga School
         </div>
       </Link>
-
-      <nav className="flex flex-1 flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6 mt-4 md:mt-0 w-full md:w-auto justify-center">
-        <Link href="/" className={isActiveClass(isSchoolPage)}>
-          {navbarLanguageData.school(language.data ?? "en")}
-        </Link>
-        <Link href="/account" className={isActiveClass(isAccountPage)}>
-          {navbarLanguageData.account(language.data ?? "en")}
-        </Link>
-      </nav>
+      <div className="w-40 overflow-auto md:w-max">
+        <nav className="flex items-center w-max justify-center gap-2 md:gap-5">
+          <Link
+            href="/"
+            className={`${isActiveClass(
+              isSchoolPage
+            )} border h-10 flex items-center justify-center rounded-md px-3`}
+          >
+            {navbarLanguageData.school(language.data ?? "en")}
+          </Link>
+          <Link
+            href="/account"
+            className={`${isActiveClass(
+              isAccountPage
+            )} border h-10 flex items-center justify-center rounded-md px-3`}
+          >
+            {navbarLanguageData.account(language.data ?? "en")}
+          </Link>
+          <LanguageSelect />
+        </nav>
+      </div>
       <div className="flex justify-center items-center gap-2">
-        <LanguageSelect />
         <ButtonProfile user={user} />
       </div>
     </header>

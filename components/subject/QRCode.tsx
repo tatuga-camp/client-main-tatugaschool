@@ -43,7 +43,7 @@ function QRCode({ url, code, setTriggerQRCode, expireAt }: Props) {
       className={`${
         triggerFullScreen
           ? "w-screen h-screen flex items-center justify-center"
-          : "w-7/12 h-4/6"
+          : "w-7/12 md:h-4/6"
       }  bg-white flex flex-col gap-2 p-4 relative  sm:p-6 md:p-8`}
     >
       <header className="w-full absolute z-20 top-10 right-10 flex justify-end gap-2 items-center">

@@ -23,14 +23,14 @@ const HeaderSection: React.FC<{
         SCHOOL
       </div>
       <div className="w-max border-b border-b-white pb-2">
-        <h1 className="text-4xl font-bold max-w-[60rem] break-words">
+        <h1 className="text-4xl font-bold max-w-80 md:max-w-[60rem] break-words">
           โรงเรียน - {school.title}{" "}
         </h1>
         <p className="text-xl">{school.description}</p>
-        <p className="text-gray-300  max-w-[60rem] break-words ">
+        <p className="text-gray-300 max-w-60 line-clamp-2  md:max-w-[60rem] break-words ">
           {school.address} {school.city} {school.country} {school.zipCode}
         </p>
-        <p className="text-gray-300  max-w-[60rem] break-words ">
+        <p className="text-gray-300  md:max-w-[60rem] break-words ">
           {school.phoneNumber}
         </p>
         <h2 className=" text-white font-semibold">

@@ -119,7 +119,7 @@ function AttendanceQRcode({ onClose, subjectId, toast }: Props) {
       ) : (
         <form
           onSubmit={handleCreate}
-          className="w-full md:w-10/12 lg:w-9/12 xl:w-6/12 h-96 md:h-max bg-white rounded-md p-3"
+          className="w-full md:w-10/12 lg:w-9/12 xl:w-6/12 h-max md:h-max bg-white rounded-md p-3"
         >
           <header className="w-full flex border-b pb-2 justify-between">
             <div className="text-center sm:text-left">
@@ -143,7 +143,7 @@ function AttendanceQRcode({ onClose, subjectId, toast }: Props) {
             </button>
           </header>
           {createRow.isPending && <LoadingBar />}
-          <main className="py-3">
+          <main className="py-3 w-96 md:w-full overflow-auto">
             <section className="w-full flex flex-col gap-4 mt-5">
               {/* Table Selection */}
               <div className="w-full overflow-x-auto">
@@ -240,7 +240,7 @@ function AttendanceQRcode({ onClose, subjectId, toast }: Props) {
                 )}
               </h4>
             </section>
-            <section className="flex  gap-2 mt-5">
+            <section className="flex flex-wrap  gap-2 mt-5">
               <label className="flex flex-col">
                 <span className="text-gray-400 text-xs">
                   {attendanceQRCodeDatLanguage.qrAllowToScan(

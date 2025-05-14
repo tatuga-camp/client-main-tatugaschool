@@ -46,7 +46,7 @@ const ListsSchoolComponent = () => {
           {homepageDataLanguage.welcomeDetail(language.data ?? "en")}
         </p>
       </header>
-      <div className="bg-white w-10/12 relative -top-28  rounded-lg p-6">
+      <div className="bg-white w-full md:w-10/12 relative -top-28  rounded-lg p-6">
         <h3 className="text-xl font-semibold mb-4">
           {homepageDataLanguage.selectSchool(language.data ?? "en")}
         </h3>

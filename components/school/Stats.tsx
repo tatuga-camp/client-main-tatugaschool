@@ -9,10 +9,10 @@ const Stats = ({ schoolId }: Props) => {
   const school = useGetSchool({ schoolId: schoolId });
   const language = useGetLanguage();
   return (
-    <div className="md:p-5 lg:p-5 xl:p-12">
+    <div className="p-4 md:p-5 lg:p-5 xl:p-12">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 xl:gap-4 -mt-24">
         <div
-          className="bg-white border text-primary-color md:p-4 xl:p-6 rounded-2xl
+          className="bg-white border text-primary-color p-2 md:p-4 xl:p-6 rounded-2xl
          flex items-center justify-between"
         >
           <div>
@@ -37,7 +37,10 @@ const Stats = ({ schoolId }: Props) => {
             </svg>
           </div>
         </div>
-        <div className="bg-white border text-primary-color md:p-4 xl:p-6 rounded-2xl flex items-center justify-between">
+        <div
+          className="bg-white border text-primary-color p-2
+         md:p-4 xl:p-6 rounded-2xl flex items-center justify-between"
+        >
           <div>
             <p className="text-gray-600">
               {schoolDataLanguage.totalClassroom(language.data ?? "en")}
@@ -60,7 +63,7 @@ const Stats = ({ schoolId }: Props) => {
             </svg>
           </div>
         </div>
-        <div className="bg-white border text-primary-color md:p-4 xl:p-6 rounded-2xl flex items-center justify-between">
+        <div className="bg-white border text-primary-color p-2 md:p-4 xl:p-6 rounded-2xl flex items-center justify-between">
           <div>
             <p className="text-gray-600">
               {schoolDataLanguage.totalSubject(language.data ?? "en")}
@@ -84,7 +87,7 @@ const Stats = ({ schoolId }: Props) => {
             </svg>
           </div>
         </div>
-        <div className="bg-white border text-primary-color md:p-4 xl:p-6 rounded-2xl flex items-center justify-between">
+        <div className="bg-white border text-primary-color p-2 md:p-4 xl:p-6 rounded-2xl flex items-center justify-between">
           <div>
             <p className="text-gray-600">
               {schoolDataLanguage.totalStorage(language.data ?? "en")}

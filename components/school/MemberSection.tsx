@@ -115,7 +115,7 @@ const MemberSection: FC<MemberSectionProps> = ({
   };
 
   return (
-    <div className="bg-white h-max border max-w-4xl px-5 rounded-lg">
+    <div className="bg-white h-max border max-w-4xl md:px-5 rounded-lg">
       <div className="bg-white p-6 pb-0 mb-0 rounded-t-2xl">
         {/* Header Section */}
         <div className="flex justify-between items-center mb-4">
@@ -146,7 +146,7 @@ const MemberSection: FC<MemberSectionProps> = ({
           className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-color-focus"
         />
       </div>
-      <div className="pt-6 h-max bg-white rounded-b-lg">
+      <div className="pt-6 h-max overflow-auto bg-white rounded-b-lg">
         <ListMembers
           listRoles={ListSchoolRoles}
           members={memberData.map((member) => {

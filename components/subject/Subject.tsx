@@ -252,7 +252,7 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
           bg-white/50 backdrop-blur fixed  m-auto -z-10"
         ></footer>
       </div>
-      <header className="w-full md:w-10/12 lg:w-9/12 h-16 flex justify-end items-end gap-5 border-b pb-5">
+      <header className="w-full md:w-10/12 lg:w-9/12 h-16 hidden md:flex justify-end items-end gap-5 border-b pb-5">
         <button
           onClick={() => setTriggerShowGroup((prev) => !prev)}
           className="border-primary-color border hover:bg-primary-color hover:text-white active:scale-105  transition duration-200 text-primary-color

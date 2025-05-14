@@ -289,7 +289,7 @@ function Index({ subjectId }: Props) {
               className={`${
                 triggerFullScreen
                   ? "h-screen w-screen p-10"
-                  : "h-screen w-screen p-10 md:w-9/12 md:h-5/6 md:p-5 lg:w-11/12 xl:w-10/23 "
+                  : "h-screen w-screen p-2 md:w-11/12 md:h-5/6 md:p-5 lg:w-11/12 xl:w-10/23 "
               } flex flex-col gap-1 border bg-white 
              rounded-md overflow-hidden`}
             >

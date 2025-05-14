@@ -195,7 +195,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
   return (
     <div className="w-full h-full flex flex-col gap-1 p-1">
       <header className="">
-        <section className="w-full flex flex-col gap-4 sm:gap-2 sm:flex-row sm:justify-between sm:items-center">
+        <section className="w-full hidden md:flex flex-col gap-4 sm:gap-2 sm:flex-row sm:justify-between sm:items-center">
           <div className="text-center sm:text-left">
             <h1 className="text-base sm:text-base font-medium">
               {attendanceCheckerDataLanugae.title(language.data ?? "en")}
@@ -307,7 +307,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
             </button>
           </div>
         </section>
-        <h2 className="w-full line-clamp-2 text-sm text-gray-400">
+        <h2 className="w-full hidden md:block line-clamp-2 text-sm text-gray-400">
           {selectTable?.description}
         </h2>
         {loading && (
@@ -330,92 +330,14 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
         </div>
       ) : (
         <>
-          {/* Mobile View */}
-          <div className="lg:hidden w-full h-full overflow-y-auto space-y-4 pb-16">
-            {selectTable?.statusLists &&
-              studentAttendances
-                ?.filter((s) => s.isActive)
-                .sort((a, b) => Number(a.number) - Number(b.number))
-                .map((student) => (
-                  <div
-                    key={student.id}
-                    className="bg-white rounded-xl shadow-md p-4"
-                  >
-                    <div className="flex items-center gap-4 mb-4">
-                      <div className="w-20 h-20 relative rounded-lg ring-1 ring-gray-200 overflow-hidden shrink-0">
-                        <Image
-                          src={student.photo}
-                          alt={student.firstName}
-                          fill
-                          sizes="(max-width: 768px) 100vw, 33vw"
-                          placeholder="blur"
-                          blurDataURL={decodeBlurhashToCanvas(
-                            student.blurHash ?? defaultBlurHash
-                          )}
-                          className="object-cover"
-                        />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-lg truncate">
-                          {student.firstName} {student.lastName}
-                        </h3>
-                        <p className="text-sm text-gray-500">
-                          Student No. {student.number}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3 mb-4">
-                      {selectTable.statusLists
-                        .filter((s) => !s.isHidden)
-                        .sort((a, b) => b.title.localeCompare(a.title))
-                        .map((status) => (
-                          <label
-                            key={status.id}
-                            className="flex items-center gap-3 p-3 rounded-lg transition-all active:scale-95"
-                            style={{ backgroundColor: `${status.color}15` }}
-                          >
-                            <input
-                              type="checkbox"
-                              name={status.title}
-                              checked={student.status === status.title}
-                              onChange={(e) =>
-                                handleCheck({
-                                  studentId: student.id,
-                                  key: e.target.name,
-                                })
-                              }
-                              style={{ accentColor: status.color }}
-                              className="w-5 h-5 rounded-md"
-                            />
-                            <span className="text-sm font-medium">
-                              {status.title}
-                            </span>
-                          </label>
-                        ))}
-                    </div>
-
-                    <textarea
-                      value={student.note}
-                      onChange={(e) =>
-                        handleNoteChange({
-                          studentId: student.id,
-                          note: e.target.value,
-                        })
-                      }
-                      placeholder="Add note for this student..."
-                      className="main-input w-full h-24 resize-none rounded-xl text-sm"
-                    />
-                  </div>
-                ))}
-          </div>
-
           {/* Desktop View */}
-          <div className="hidden lg:block w-full max-h-full overflow-auto">
+          <div className="w-full max-h-full overflow-auto">
             <table className=" w-max min-w-full">
               <thead>
                 <tr className="bg-gray-100 z-30 sticky top-0">
-                  <th className="sticky left-0 z-40 w-60 bg-gray-100">Name</th>
+                  <th className="sticky left-0 z-40 w-40 md:w-60 bg-gray-100">
+                    Name
+                  </th>
                   {selectTable?.statusLists
                     .filter((s) => !s.isHidden)
                     .sort((a, b) => b.title.localeCompare(a.title))
@@ -441,8 +363,8 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
                         </th>
                       );
                     })}
-                  <th className="z-10 bg-gray-100 text-sm sticky right-0">
-                    <div className="flex items-center justify-center gap-1">
+                  <th className="z-10 bg-gray-100 text-sm md:sticky md:right-0">
+                    <div className="flex w-40 items-center justify-center gap-1">
                       <BiSolidNote /> Note
                     </div>
                   </th>
@@ -539,8 +461,8 @@ const StudentAttendanceItem = React.memo(
         } border-spacing-2 border-4 border-transparent`}
       >
         <td className={`sticky left-0 z-10 ${odd ? "bg-gray-50" : "bg-white"}`}>
-          <div className="flex w-60 truncate gap-2">
-            <div className="w-10 h-10 relative rounded-md ring-1 overflow-hidden">
+          <div className="flex w-40 md:w-60 truncate gap-2">
+            <div className="md:block hidden w-10 h-10 relative rounded-md ring-1 overflow-hidden">
               <Image
                 src={student.photo}
                 alt={student.firstName}
@@ -587,7 +509,9 @@ const StudentAttendanceItem = React.memo(
             );
           })}
         <td
-          className={`z-10 ${odd ? "bg-gray-50" : "bg-white"} sticky right-0`}
+          className={`z-10 ${
+            odd ? "bg-gray-50" : "bg-white"
+          } md:sticky md:right-0`}
         >
           <textarea
             value={student.note}
@@ -597,7 +521,7 @@ const StudentAttendanceItem = React.memo(
                 note: e.target.value,
               })
             }
-            className="main-input w-full h-10 resize-none"
+            className="main-input w-40 h-10 resize-none"
           />
         </td>
       </tr>

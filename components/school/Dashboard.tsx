@@ -27,7 +27,7 @@ const Dashboard: React.FC<DashboardProps> = ({ school }) => {
           />
         )}
         <Stats schoolId={school.id} />
-        <div className="px-12 mt-4 pb-10">
+        <div className="md:px-12 mt-4 pb-10">
           {members.data && (
             <TabsMenuSection
               school={school}
