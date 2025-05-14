@@ -68,6 +68,9 @@ function Classrooms({ schoolId }: Props) {
   const handleDragEnd = useCallback(async (event: DragEndEvent) => {
     const { active, over } = event;
     let newSort: ResponseGetClassesBySchoolIdService = [];
+    if (!over) {
+      return;
+    }
     if (active.id !== over?.id) {
       setClassroomData((prevs) => {
         const oldIndex = prevs.findIndex((item) => item.id === active.id);

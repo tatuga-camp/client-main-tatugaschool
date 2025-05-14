@@ -85,6 +85,9 @@ function Subjects({ schoolId }: Props) {
         return;
       }
       const { active, over } = event;
+      if (!over) {
+        return;
+      }
       let newSort: ResponseGetSubjectBySchoolsService = [];
       if (active.id !== over?.id) {
         setSubjectData((prevs) => {

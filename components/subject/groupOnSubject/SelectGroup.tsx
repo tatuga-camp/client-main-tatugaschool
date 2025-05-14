@@ -214,6 +214,9 @@ function ShowSelectGroup({
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     try {
+      if (!over) {
+        return;
+      }
       if (over !== null && active.id !== over?.id) {
         const activeId = JSON.parse(active.id as string) as SortableIdType;
         const overId = JSON.parse(over.id as string) as SortableIdType;

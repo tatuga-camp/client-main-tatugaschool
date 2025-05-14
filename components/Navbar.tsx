@@ -64,9 +64,11 @@ function Navbar({
             </div>
           </Link>
         </div>
-        <div className="flex  items-center justify-center w-max">
-          <LanguageSelect />
-          <ButtonProfile user={user} />
+        <div className=" w-60 overflow-auto md:w-max">
+          <div className="flex w-max   items-center justify-center ">
+            <LanguageSelect />
+            <ButtonProfile user={user} />
+          </div>
         </div>
         <div className="fixed top-0 -z-10 left-0">
           <Sidebar

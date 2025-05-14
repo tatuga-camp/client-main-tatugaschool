@@ -44,6 +44,9 @@ function Classwork({ toast, subjectId, schoolId }: Props) {
 
   const handleDragEnd = useCallback(async (event: DragEndEvent) => {
     const { active, over } = event;
+    if (!over) {
+      return;
+    }
     let newSort: ResponseGetAssignmentsService = [];
     if (active.id !== over?.id) {
       setClassworksData((prevs) => {

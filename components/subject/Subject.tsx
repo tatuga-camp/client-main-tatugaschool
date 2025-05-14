@@ -86,6 +86,9 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
   const handleDragEnd = useCallback(async (event: DragEndEvent) => {
     const { active, over } = event;
     let newSort: StudentOnSubject[] = [];
+    if (!over) {
+      return;
+    }
     if (active.id !== over?.id) {
       setStudents((prevs) => {
         const oldIndex = prevs.findIndex((item) => item.id === active.id);

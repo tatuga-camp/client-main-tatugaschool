@@ -42,7 +42,10 @@ function ButtonProfile({ user }: Props) {
   };
   return (
     <div className="flex items-center flex-1 justify-end ">
-      <div className="flex items-center justify-end w-max transition-width md:hover:w-96 group bg-white rounded-lg px-4 py-2 gap-4">
+      <div
+        className="flex items-center justify-end w-max transition-width
+       md:hover:w-96 group bg-white rounded-lg px-4 py-2 gap-4"
+      >
         <div className="flex gap-2">
           <div className="w-10 h-10 relative rounded-full overflow-hidden ">
             <Image
