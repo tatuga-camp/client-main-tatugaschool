@@ -29,7 +29,7 @@ import {
   getSignedURLTeacherService,
   UploadSignURLService,
 } from "../../services";
-import { decodeBlurhashToCanvas } from "../../utils";
+import { decodeBlurhashToCanvas, timeAgo, timeLeft } from "../../utils";
 import DrawCanva from "../common/DrawCanva";
 import InputNumber from "../common/InputNumber";
 import LoadingBar from "../common/LoadingBar";
@@ -37,7 +37,13 @@ import PopupLayout from "../layout/PopupLayout";
 import AssignmentText from "./AssignmentText";
 import CommentSection from "./CommentSection";
 import FileStudentAssignmentCard from "./FileStudentAssignmentCard";
-import { studentWorkDataLanguage } from "../../data/languages";
+import {
+  classworkViewDataLanguage,
+  studentWorkDataLanguage,
+} from "../../data/languages";
+import StatusAssignmentButton from "./StatusAssignmentButton";
+import { FaRegSadTear } from "react-icons/fa";
+import { RiEmotionHappyFill } from "react-icons/ri";
 
 type Props = {
   assignmentId: string;
@@ -80,7 +86,6 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
         return updateStudnet;
       });
     }
-
     if (studentOnAssignments.data) {
       setStudentData(() =>
         studentOnAssignments.data.map((s) => {
@@ -334,33 +339,7 @@ const StudentList = React.memo(function StudentList({
         </div>
       </th>
       <th>
-        <div
-          className={`flex w-full items-center h-full 
-            text-white py-2 rounded-md px-2 
-
-            ${
-              student.status === "SUBMITTED" &&
-              "bg-gradient-to-r from-amber-200 to-yellow-400"
-            }
-
-            ${
-              student.status === "REVIEWD" &&
-              "bg-gradient-to-r from-emerald-400 to-cyan-400"
-            }
-
-            ${
-              student.status === "PENDDING" &&
-              "bg-gradient-to-r from-stone-500 to-stone-700"
-            }
-            justify-center text-sm font-normal `}
-        >
-          {student.status === "SUBMITTED" &&
-            studentWorkDataLanguage.waitForReview(language.data ?? "en")}
-          {student.status === "REVIEWD" &&
-            studentWorkDataLanguage.reviewed(language.data ?? "en")}
-          {student.status === "PENDDING" &&
-            studentWorkDataLanguage.noWork(language.data ?? "en")}
-        </div>
+        <StatusAssignmentButton studentOnAssignment={student} />
       </th>
       <th>
         <div
@@ -645,8 +624,8 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
       {selectAssignmentText && (
         <div className="w-screen h-screen flex items-center justify-center fixed z-50 top-0 right-0 bottom-0 left-0 m-auto">
           <div
-            className="w-full md:w-10/12 lg:w-[35rem] relative 
-          h-max p-3 bg-white rounded-md"
+            className="w-full md:w-10/12 lg:w-10/12 relative 
+          h-max md:h-5/6 p-3 bg-white rounded-md"
           >
             <div className="w-full flex justify-end">
               <button
@@ -670,69 +649,172 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
           ></footer>
         </div>
       )}
-      <form
-        onSubmit={handleSaveChange}
-        className="w-full bg-white  h-16 flex items-center justify-between p-2 px-4"
-      >
-        <div className="flex gap-2 pl-2 h-14 items-center">
-          <div className="w-10 h-10 relative rounded-md ring-1  overflow-hidden">
-            <Image
-              src={studentOnAssignment.photo}
-              alt={studentOnAssignment.firstName}
-              fill
-              placeholder="blur"
-              sizes="(max-width: 768px) 100vw, 33vw"
-              blurDataURL={decodeBlurhashToCanvas(
-                studentOnAssignment.blurHash ?? defaultBlurHash
-              )}
-              className="object-cover"
-            />
-          </div>
-          <div className="flex flex-col  items-start">
-            <h1 className="text-sm font-semibold">
-              {studentOnAssignment.firstName} {studentOnAssignment.lastName}{" "}
-            </h1>
-            <p className="text-xs text-gray-500">
-              Number {studentOnAssignment.number}{" "}
-              {!studentOnAssignment.isAssigned && "(NOT Assigned)"}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex gap-2">
-          <div className="w-40">
-            <InputNumber
-              onValueChange={(value) => {
-                setStudentWork((prev) => ({
-                  ...prev,
-                  score: value,
-                }));
-              }}
-              maxFractionDigits={3}
-              value={studentWork?.score ?? undefined}
-              min={0}
-              placeholder={studentWork?.score ? "Enter score" : "Not graded"}
-              suffix={`/${assignment.maxScore}`}
-              max={assignment.maxScore}
-            />
-          </div>
-          <button
-            disabled={update.isPending}
-            onClick={handleSaveChange}
-            className="second-button flex items-center justify-center border w-60 text-sm"
-          >
-            {update.isPending ? (
-              <ProgressSpinner
-                animationDuration="1s"
-                style={{ width: "20px" }}
-                className="w-5 h-5"
-                strokeWidth="8"
+      <form className="w-full flex flex-col" onSubmit={handleSaveChange}>
+        <header className="w-full bg-white  h-max flex items-center justify-between p-2 px-4">
+          <div className="flex gap-2 pl-2 h-14 items-center">
+            <div className="w-10 h-10 relative rounded-md ring-1  overflow-hidden">
+              <Image
+                src={studentOnAssignment.photo}
+                alt={studentOnAssignment.firstName}
+                fill
+                placeholder="blur"
+                sizes="(max-width: 768px) 100vw, 33vw"
+                blurDataURL={decodeBlurhashToCanvas(
+                  studentOnAssignment.blurHash ?? defaultBlurHash
+                )}
+                className="object-cover"
               />
-            ) : (
-              studentWorkDataLanguage.saveChange(language.data ?? "en")
-            )}
-          </button>
-        </div>
+            </div>
+            <div className="flex flex-col  items-start">
+              <h1 className="text-sm font-semibold">
+                {studentOnAssignment.firstName} {studentOnAssignment.lastName}{" "}
+              </h1>
+              <p className="text-xs text-gray-500">
+                Number {studentOnAssignment.number}{" "}
+                {!studentOnAssignment.isAssigned && "(NOT Assigned)"}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex gap-2 flex-wrap">
+            <StatusAssignmentButton studentOnAssignment={studentOnAssignment} />
+            <div className="w-40">
+              <InputNumber
+                onValueChange={(value) => {
+                  setStudentWork((prev) => ({
+                    ...prev,
+                    score: value,
+                  }));
+                }}
+                maxFractionDigits={3}
+                value={studentWork?.score ?? undefined}
+                min={0}
+                placeholder={studentWork?.score ? "Enter score" : "Not graded"}
+                suffix={`/${assignment.maxScore}`}
+                max={assignment.maxScore}
+              />
+            </div>
+            <button
+              disabled={update.isPending}
+              onClick={handleSaveChange}
+              className="second-button flex items-center justify-center border grow text-sm"
+            >
+              {update.isPending ? (
+                <ProgressSpinner
+                  animationDuration="1s"
+                  style={{ width: "20px" }}
+                  className="w-5 h-5"
+                  strokeWidth="8"
+                />
+              ) : (
+                studentWorkDataLanguage.saveChange(language.data ?? "en")
+              )}
+            </button>
+          </div>
+        </header>
+        <ul className="grid grid-cols-3">
+          {studentOnAssignment.completedAt && (
+            <li className="flex h-full items-center justify-start bg-slate-100 gap-1 border p-2">
+              <div className="w-40 font-semibold">
+                {studentWorkDataLanguage.summit_at(language.data ?? "en")}:
+              </div>
+              <div className="flex flex-col text-sm items-start gap-1">
+                {assignment.dueDate &&
+                new Date(studentOnAssignment.completedAt).getTime() >
+                  new Date(assignment.dueDate).getTime() ? (
+                  <span className="font-semibold text-red-600">
+                    {studentWorkDataLanguage.summit_at_status_late(
+                      language.data ?? "en"
+                    )}
+                  </span>
+                ) : assignment.dueDate &&
+                  new Date(studentOnAssignment.completedAt).getTime() <
+                    new Date(assignment.dueDate).getTime() ? (
+                  <span className="font-semibold text-blue-600">
+                    {studentWorkDataLanguage.summit_at_status_on_time(
+                      language.data ?? "en"
+                    )}
+                  </span>
+                ) : (
+                  <span className="font-semibold text-blue-600">-</span>
+                )}
+                <span className="text-xs">
+                  {new Date(studentOnAssignment.completedAt).toLocaleTimeString(
+                    undefined,
+                    {
+                      hour: "numeric",
+                      minute: "numeric",
+                      day: "numeric",
+                      month: "long",
+                    }
+                  )}
+                </span>
+              </div>
+            </li>
+          )}
+          {assignment.dueDate && (
+            <li className="flex h-full items-center justify-start gap-1 bg-slate-100 border p-2">
+              <div className="w-40 font-semibold">
+                {classworkViewDataLanguage.deadLine(language.data ?? "en")}:
+              </div>
+              <div className="w-max">
+                {new Date(assignment.dueDate).getTime() <=
+                new Date().getTime() ? (
+                  <div className="flex w-max items-center gap-1 font-semibold text-red-600">
+                    {timeAgo({
+                      pastTime: new Date(assignment.dueDate).toISOString(),
+                    })}{" "}
+                    ago <FaRegSadTear />
+                  </div>
+                ) : (
+                  <div className="flex w-max items-center gap-1  font-semibold text-green-600">
+                    {timeLeft({
+                      targetTime: new Date(assignment.dueDate).toISOString(),
+                    })}{" "}
+                    left <RiEmotionHappyFill />
+                  </div>
+                )}{" "}
+                <span className="text-xs">
+                  {new Date(assignment.dueDate).toLocaleTimeString(undefined, {
+                    hour: "numeric",
+                    minute: "numeric",
+                    day: "numeric",
+                    month: "long",
+                  })}
+                </span>
+              </div>
+            </li>
+          )}
+          {studentOnAssignment.reviewdAt && (
+            <li className="flex h-full items-center justify-start bg-slate-100 gap-1 border p-2">
+              <div className="w-40 font-semibold">
+                {studentWorkDataLanguage.review_work_at(language.data ?? "en")}:
+              </div>
+              <div className="flex flex-col items-start gap-1">
+                <span className="font-semibold text-green-600">
+                  {new Date(studentOnAssignment.reviewdAt).toLocaleDateString(
+                    undefined,
+                    {
+                      day: "numeric",
+                      month: "long",
+                    }
+                  )}
+                </span>
+                <span className="text-xs">
+                  {new Date(studentOnAssignment.reviewdAt).toLocaleTimeString(
+                    undefined,
+                    {
+                      hour: "numeric",
+                      minute: "numeric",
+                      day: "numeric",
+                      month: "long",
+                    }
+                  )}
+                </span>
+              </div>
+            </li>
+          )}
+        </ul>
       </form>
       <main className="w-full bg-white p-5 flex pb-40  flex-col gap-2">
         <div className="w-full font-semibold text-lg gap-3 flex border-b pb-2">

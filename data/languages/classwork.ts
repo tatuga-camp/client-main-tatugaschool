@@ -223,6 +223,7 @@ export const classworkViewDataLanguage = {
         return "Description";
     }
   },
+
   fileTilte: (language: Language) => {
     switch (language) {
       case "en":
@@ -494,6 +495,47 @@ export const studentWorkDataLanguage = {
         return "บันทึกการเปลี่ยนแปลง";
       default:
         return "Save Changes";
+    }
+  },
+  summit_at: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Summit Work At";
+      case "th":
+        return "นักเรียนส่งงานเมื่อ";
+      default:
+        return "Summit Work At";
+    }
+  },
+  summit_at_status_late: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "WORK LATE";
+      case "th":
+        return "ส่งงานเลยกำหนด";
+      default:
+        return "WORK LATE";
+    }
+  },
+  summit_at_status_on_time: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "WORK ON TIME";
+      case "th":
+        return "ส่งงานตามกำหนด";
+      default:
+        return "WORK ON TIME";
+    }
+  },
+
+  review_work_at: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Review Work At";
+      case "th":
+        return "ตรวจงานเมื่อ";
+      default:
+        return "Review Work At";
     }
   },
 } as const;

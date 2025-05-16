@@ -88,7 +88,7 @@ function AssignmentText({
           )}
         </button>
       </div>
-      <div className="h-96">
+      <div className="grow">
         <TextEditor
           value={value}
           onChange={(content) => setValue(content)}
