@@ -14,8 +14,9 @@ type Props = {
   subject: Subject;
   teachers: TeacherOnSubject[];
   classroom: Classroom;
+  onClick?: () => void;
 };
-function SubjectCard({ subject, teachers, classroom }: Props) {
+function SubjectCard({ subject, teachers, classroom, onClick }: Props) {
   const {
     isDragging,
     attributes,
@@ -43,11 +44,12 @@ function SubjectCard({ subject, teachers, classroom }: Props) {
       ref={setNodeRef}
       style={inlineStyles}
       {...attributes}
+      onClick={() => onClick?.()}
       className="w-full h-64 cursor-pointer active:scale-105 flex flex-col rounded-lg overflow-hidden border"
     >
       <Link
         style={{
-          pointerEvents: isDragging ? "none" : undefined,
+          pointerEvents: isDragging || onClick ? "none" : "auto",
         }}
         href={`/subject/${subject.id}`}
       >

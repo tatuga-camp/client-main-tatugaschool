@@ -83,13 +83,13 @@ function AssignmentCard({
       ref={sortable.setNodeRef}
       style={inlineStyles}
       {...sortable.attributes}
-      className="md:w-9/12 xl:w-8/12 h-max flex flex-col transition-height"
+      className="w-full h-max flex flex-col transition-height "
       key={assignemnt.id}
     >
       <div
         onClick={() => onSelect(assignemnt)}
         className={`flex items-stretch w-full h-40  relative justify-start gap-2
-       overflow-hidden hover:ring   bg-white  rounded-md border
+       overflow-hidden hover:ring   bg-white  rounded-md 
        ${
          selectAssignment?.id === assignemnt.id &&
          !sortable.isDragging &&
@@ -297,13 +297,13 @@ function MaterialCard({
       ref={sortable.setNodeRef}
       style={inlineStyles}
       {...sortable.attributes}
-      className="md:w-9/12 xl:w-8/12 h-full flex flex-col  transition-height"
+      className="w-full h-full flex flex-col  transition-height"
       key={material.id}
     >
       <button
         onClick={() => onSelect(material)}
         className={`flex items-stretch w-full h-40  relative justify-start gap-2
-      overflow-hidden hover:ring     rounded-md border
+      overflow-hidden hover:ring     rounded-md 
       ${
         selectMaterial?.id === material.id &&
         !sortable.isDragging &&

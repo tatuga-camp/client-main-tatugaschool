@@ -13,7 +13,7 @@ import {
   SortableContext,
 } from "@dnd-kit/sortable";
 import { Toast } from "primereact/toast";
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa6";
 import { Assignment } from "../../interfaces";
 import {
@@ -25,6 +25,9 @@ import { ResponseGetAssignmentsService } from "../../services";
 import ClassworkCard from "./ClassworkCard";
 import ClassworkCreate from "./ClassworkCreate";
 import { classworksDataLanguage } from "../../data/languages";
+import { MdImportContacts, MdImportExport } from "react-icons/md";
+import PopupLayout from "../layout/PopupLayout";
+import ImportAssignment from "./ImportAssignment";
 
 type Props = {
   toast: React.RefObject<Toast>;
@@ -37,6 +40,7 @@ function Classwork({ toast, subjectId, schoolId }: Props) {
   const classworks = useGetAssignments({ subjectId: subjectId });
   const [selectClasswork, setSelectClasswork] =
     React.useState<Assignment | null>(null);
+  const [triggerImportAssignment, setTriggerImportAssignment] = useState(false);
   const [classworksData, setClassworksData] =
     React.useState<ResponseGetAssignmentsService>([]);
   const reorderAssignment = useReoderAssignment();
@@ -74,11 +78,8 @@ function Classwork({ toast, subjectId, schoolId }: Props) {
   return (
     <>
       {triggerCreate && (
-        <div
-          className={`fixed flex
-          } top-0 bottom-0 right-0 left-0 flex items-center justify-center m-auto z-50`}
-        >
-          <div className="bg-background-color w-screen h-screen ">
+        <PopupLayout onClose={() => {}}>
+          <div className="h-screen w-screen bg-background-color">
             <ClassworkCreate
               schoolId={schoolId}
               subjectId={subjectId}
@@ -89,9 +90,26 @@ function Classwork({ toast, subjectId, schoolId }: Props) {
               }}
             />
           </div>
-        </div>
+        </PopupLayout>
       )}
-      <header className="w-full flex justify-between px-40">
+      {triggerImportAssignment && (
+        <PopupLayout
+          onClose={() => {
+            setTriggerImportAssignment(false);
+          }}
+        >
+          <ImportAssignment
+            schoolId={schoolId}
+            toast={toast}
+            targetSubjectId={subjectId}
+            onClose={() => {
+              document.body.style.overflow = "auto";
+              setTriggerImportAssignment(false);
+            }}
+          />
+        </PopupLayout>
+      )}
+      <header className="flex w-full justify-between px-40">
         <section>
           <h1 className="text-3xl font-semibold">
             {classworksDataLanguage.title(language.data ?? "en")}
@@ -101,10 +119,19 @@ function Classwork({ toast, subjectId, schoolId }: Props) {
           </span>
         </section>
 
-        <section className="flex font-Anuphan items-center gap-1">
+        <section className="flex items-center gap-1 font-Anuphan">
+          <button
+            onClick={() => setTriggerImportAssignment(true)}
+            className="second-button relative flex w-52 items-center justify-center gap-1 border py-1"
+          >
+            <div className="flex items-center justify-center gap-2">
+              <MdImportContacts />
+              {classworksDataLanguage.import(language.data ?? "en")}
+            </div>
+          </button>
           <button
             onClick={() => setTriggerCreate((prev) => !prev)}
-            className="second-button relative   flex items-center w-52 justify-center gap-1 py-1 border "
+            className="second-button relative flex w-52 items-center justify-center gap-1 border py-1"
           >
             <div className="flex items-center justify-center gap-2">
               <FaPlus />
@@ -114,7 +141,7 @@ function Classwork({ toast, subjectId, schoolId }: Props) {
         </section>
       </header>
 
-      <main className="w-full mt-20  flex flex-col items-center  gap-5 px-0 lg:px-10 2xl:px-40">
+      <main className="mt-20 flex w-full flex-col items-center gap-5 px-0 lg:px-10 2xl:px-40">
         {classworks.isLoading && <div>Loading...</div>}
         <DndContext
           sensors={sensors}
@@ -127,20 +154,22 @@ function Classwork({ toast, subjectId, schoolId }: Props) {
           >
             {classworksData?.map((classwork) => {
               return (
-                <ClassworkCard
-                  key={classwork.id}
-                  classwork={classwork}
-                  selectClasswork={selectClasswork}
-                  subjectId={subjectId}
-                  onSelect={(classwork) => {
-                    setSelectClasswork((prev) => {
-                      if (prev?.id === classwork.id) {
-                        return null;
-                      }
-                      return classwork;
-                    });
-                  }}
-                />
+                <div className="w-full md:w-9/12 xl:w-8/12">
+                  <ClassworkCard
+                    key={classwork.id}
+                    classwork={classwork}
+                    selectClasswork={selectClasswork}
+                    subjectId={subjectId}
+                    onSelect={(classwork) => {
+                      setSelectClasswork((prev) => {
+                        if (prev?.id === classwork.id) {
+                          return null;
+                        }
+                        return classwork;
+                      });
+                    }}
+                  />
+                </div>
               );
             })}
           </SortableContext>

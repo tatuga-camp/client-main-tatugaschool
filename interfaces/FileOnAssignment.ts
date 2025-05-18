@@ -7,5 +7,6 @@ export interface FileOnAssignment {
   size: number;
   subjectId: string;
   schoolId: string;
+  blurHash?: string | null | undefined;
   assignmentId: string;
 }

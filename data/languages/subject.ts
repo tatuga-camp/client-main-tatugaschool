@@ -503,6 +503,16 @@ export const classworksDataLanguage = {
         return "Create Classwork";
     }
   },
+  import: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Import Classwork";
+      case "th":
+        return "นำเข้าชิ้นงาน";
+      default:
+        return "Import Classwork";
+    }
+  },
   title: (language: Language) => {
     switch (language) {
       case "en":

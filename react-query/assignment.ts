@@ -68,15 +68,15 @@ export function useUpdateAssignment() {
               return prevAssignment;
             }
           });
-        }
+        },
       );
       queryClient.setQueryData(
         ["assignment", { id: data.id }],
         (
-          prev: ResponseGetAssignmentByIdService
+          prev: ResponseGetAssignmentByIdService,
         ): ResponseGetAssignmentByIdService => {
           return { ...data, files: prev.files, skills: prev.skills };
-        }
+        },
       );
     },
   });
@@ -94,7 +94,7 @@ export function useCreateAssignment() {
         ["assignments", { subjectId: data.subjectId }],
         (oldData: ResponseGetAssignmentsService) => {
           return [...(oldData ?? []), data];
-        }
+        },
       );
 
       if (data.type === "Assignment") {
@@ -121,7 +121,7 @@ export function useDeleteAssignment() {
         ["assignments", { subjectId: data.subjectId }],
         (oldData: ResponseGetAssignmentsService) => {
           return oldData?.filter((assignment) => assignment.id !== data.id);
-        }
+        },
       );
       queryClient.invalidateQueries({
         queryKey: ["assignment", { id: data.id }],
@@ -147,7 +147,7 @@ export function useReoderAssignment() {
         (oldData: ResponseGetAssignmentsService) => {
           return oldData?.map((prevAssignment) => {
             const newAssignment = newDatas.find(
-              (newData) => newData.id === prevAssignment.id
+              (newData) => newData.id === prevAssignment.id,
             );
             if (newAssignment) {
               return {
@@ -158,7 +158,7 @@ export function useReoderAssignment() {
               return prevAssignment;
             }
           });
-        }
+        },
       );
     },
   });
@@ -172,15 +172,22 @@ export function useCreateFileOnAssignment() {
     mutationFn: (request: RequestCreateFileAssignmentService) =>
       CreateFileAssignmentService(request),
     onSuccess(data, variables, context) {
-      queryClient.setQueryData(
-        ["assignment", { id: data.assignmentId }],
-        (oldData: ResponseGetAssignmentByIdService) => {
-          return {
-            ...oldData,
-            files: [...oldData.files, data],
-          };
-        }
-      );
+      const cacheAssignment = queryClient.getQueryData([
+        "assignment",
+        { id: data.assignmentId },
+      ]);
+      if (cacheAssignment) {
+        queryClient.setQueryData(
+          ["assignment", { id: data.assignmentId }],
+          (oldData: ResponseGetAssignmentByIdService) => {
+            return {
+              ...oldData,
+              files: [...oldData.files, data],
+            };
+          },
+        );
+      }
+
       queryClient.setQueryData(
         ["assignments", { subjectId: data.subjectId }],
         (oldData: ResponseGetAssignmentsService) => {
@@ -194,7 +201,7 @@ export function useCreateFileOnAssignment() {
               return prevAssignment;
             }
           });
-        }
+        },
       );
     },
   });
@@ -215,7 +222,7 @@ export function useDeleteFileOnAssignment() {
             ...oldData,
             files: oldData.files.filter((file) => file.id !== data.id),
           };
-        }
+        },
       );
 
       queryClient.setQueryData(
@@ -226,14 +233,14 @@ export function useDeleteFileOnAssignment() {
               return {
                 ...prevAssignment,
                 files: prevAssignment.files.filter(
-                  (file) => file.id !== data.id
+                  (file) => file.id !== data.id,
                 ),
               };
             } else {
               return prevAssignment;
             }
           });
-        }
+        },
       );
     },
   });
