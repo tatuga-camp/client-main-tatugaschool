@@ -154,9 +154,8 @@ function Classwork({ toast, subjectId, schoolId }: Props) {
           >
             {classworksData?.map((classwork) => {
               return (
-                <div className="w-full md:w-9/12 xl:w-8/12">
+                <div key={classwork.id} className="w-full md:w-9/12 xl:w-8/12">
                   <ClassworkCard
-                    key={classwork.id}
                     classwork={classwork}
                     selectClasswork={selectClasswork}
                     subjectId={subjectId}

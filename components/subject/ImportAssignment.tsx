@@ -334,6 +334,7 @@ function AssignmentLists({
           .map((classwork) => {
             return (
               <div
+                key={classwork.id}
                 className={`w-full rounded-md ${selectClasswork && selectClasswork.id === classwork.id && "ring-2 ring-black"} md:w-9/12 xl:w-8/12`}
               >
                 <ClassworkCard
