@@ -437,6 +437,16 @@ export const studentWorkDataLanguage = {
         return "No Work";
     }
   },
+  improve: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Need Improvement";
+      case "th":
+        return "ต้องการปรับปรุง";
+      default:
+        return "Need Improvement";
+    }
+  },
   waitForReview: (language: Language) => {
     switch (language) {
       case "en":
@@ -487,16 +497,7 @@ export const studentWorkDataLanguage = {
         return "Comment";
     }
   },
-  saveChange: (language: Language) => {
-    switch (language) {
-      case "en":
-        return "Save Changes";
-      case "th":
-        return "บันทึกการเปลี่ยนแปลง";
-      default:
-        return "Save Changes";
-    }
-  },
+
   summit_at: (language: Language) => {
     switch (language) {
       case "en":
@@ -536,6 +537,39 @@ export const studentWorkDataLanguage = {
         return "ตรวจงานเมื่อ";
       default:
         return "Review Work At";
+    }
+  },
+} as const;
+
+export const dropdownStatusStudentOnAssignmentLanguage = {
+  review: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Review Work";
+      case "th":
+        return "ตรวจงาน";
+      default:
+        return "Review Work";
+    }
+  },
+  improve: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Need Improvement";
+      case "th":
+        return "แจ้งนักเรียนแก้ไข";
+      default:
+        return "Need Improvement";
+    }
+  },
+  delete: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Delete Work";
+      case "th":
+        return "ลบงานนักเรียน";
+      default:
+        return "Delete Work";
     }
   },
 } as const;

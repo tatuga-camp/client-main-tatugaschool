@@ -21,4 +21,8 @@ export interface StudentOnAssignment {
   subjectId: string;
 }
 
-export type StudentAssignmentStatus = "PENDDING" | "SUBMITTED" | "REVIEWD";
+export type StudentAssignmentStatus =
+  | "PENDDING"
+  | "SUBMITTED"
+  | "REVIEWD"
+  | "IMPROVED";

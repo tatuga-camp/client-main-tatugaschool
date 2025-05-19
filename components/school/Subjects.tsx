@@ -105,7 +105,7 @@ function Subjects({ schoolId }: Props) {
         });
       }
     },
-    [educationYear]
+    [educationYear],
   );
 
   React.useEffect(() => {
@@ -133,14 +133,14 @@ function Subjects({ schoolId }: Props) {
             (teacher) =>
               teacher.firstName.toLowerCase().includes(search.toLowerCase()) ||
               teacher.lastName.toLowerCase().includes(search.toLowerCase()) ||
-              teacher.email.toLowerCase().includes(search.toLowerCase())
+              teacher.email.toLowerCase().includes(search.toLowerCase()),
           ) ||
           classroom.class.title.toLowerCase().includes(search.toLowerCase()) ||
           classroom.class.level.toLowerCase().includes(search.toLowerCase()) ||
           classroom.class.description
             ?.toLowerCase()
-            .includes(search.toLowerCase())
-      )
+            .includes(search.toLowerCase()),
+      ),
     );
   };
 
@@ -148,33 +148,33 @@ function Subjects({ schoolId }: Props) {
     switch (sortBy) {
       case "Default":
         setSubjectData((prev) =>
-          prev?.sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+          prev?.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)),
         );
         break;
       case "Newest":
         setSubjectData((prev) =>
           prev?.sort(
             (a, b) =>
-              new Date(b.createAt).getTime() - new Date(a.createAt).getTime()
-          )
+              new Date(b.createAt).getTime() - new Date(a.createAt).getTime(),
+          ),
         );
         break;
       case "Oldest":
         setSubjectData((prev) =>
           prev?.sort(
             (a, b) =>
-              new Date(a.createAt).getTime() - new Date(b.createAt).getTime()
-          )
+              new Date(a.createAt).getTime() - new Date(b.createAt).getTime(),
+          ),
         );
         break;
       case "AZ":
         setSubjectData((prev) =>
-          prev?.sort((a, b) => a.title.localeCompare(b.title))
+          prev?.sort((a, b) => a.title.localeCompare(b.title)),
         );
         break;
       case "ZA":
         setSubjectData((prev) =>
-          prev?.sort((a, b) => b.title.localeCompare(a.title))
+          prev?.sort((a, b) => b.title.localeCompare(a.title)),
         );
         break;
       default:
@@ -194,7 +194,7 @@ function Subjects({ schoolId }: Props) {
       }
       if (userId !== "show-all") {
         return subjects.data.filter((subject) =>
-          subject.teachers.some((t) => t.userId === userId)
+          subject.teachers.some((t) => t.userId === userId),
         );
       } else {
         return subjects.data;
@@ -223,51 +223,44 @@ function Subjects({ schoolId }: Props) {
           )}
         </PopupLayout>
       )}
-      <div className="w-full bg-white flex  flex-col justify-center">
-        <header
-          className="w-full flex flex-col md:flex-row justify-between p-3 md:px-5 
-      md:max-w-screen-md xl:max-w-screen-lg gap-4 md:gap-0 mx-auto"
-        >
+      <div className="flex w-full flex-col justify-center bg-white">
+        <header className="mx-auto flex w-full flex-col justify-between gap-4 p-3 md:max-w-screen-md md:flex-row md:gap-0 md:px-5 xl:max-w-screen-lg">
           <section className="text-center md:text-left">
-            <h1 className="text-2xl md:text-3xl font-semibold">
+            <h1 className="text-2xl font-semibold md:text-3xl">
               {subjectsDataLanguage.title(language.data ?? "en")}
             </h1>
-            <p className="text-gray-400 max-w-96 break-words text-sm md:text-base">
+            <p className="max-w-96 break-words text-sm text-gray-400 md:text-base">
               {subjectsDataLanguage.descriptiom(language.data ?? "en")}
             </p>
           </section>
-          <section className="flex flex-col xl:flex-row items-center gap-2 md:gap-1">
+          <section className="flex flex-col items-center gap-2 md:gap-1 xl:flex-row">
             <button
               onClick={() => setTriggerCreateSubject(true)}
-              className="main-button w-full xl:w-auto flex items-center 
-            justify-center gap-1 py-1 ring-1 ring-blue-600"
+              className="main-button flex w-full items-center justify-center gap-1 py-1 ring-1 ring-blue-600 xl:w-auto"
             >
               {subjectsDataLanguage.create(language.data ?? "en")}
             </button>
           </section>
         </header>
-        <main
-          className="w-full min-h-screen flex flex-col  p-3 md:px-5 
-      md:max-w-screen-md xl:max-w-screen-lg gap-4 md:gap-0 mx-auto"
-        >
-          <div className="flex items-center justify-start gap-2 flex-wrap">
+        <main className="mx-auto flex min-h-screen w-full flex-col gap-4 p-3 md:max-w-screen-md md:gap-0 md:px-5 xl:max-w-screen-lg">
+          <div className="flex flex-wrap items-center justify-start gap-2">
             <label className="flex flex-col">
-              <span className="text-gray-400 text-sm">
+              <span className="text-sm text-gray-400">
                 {subjectsDataLanguage.search(language.data ?? "en")}
               </span>
               <input
                 value={search}
                 onChange={(e) => handleSearch(e.target.value)}
                 type="text"
-                className="w-96 border border-gray-300 rounded-lg p-2"
+                className="w-96 rounded-lg border border-gray-300 p-2"
                 placeholder={subjectsDataLanguage.searchPlaceholder(
-                  language.data ?? "en"
+                  language.data ?? "en",
                 )}
               />
             </label>
             {educationYear && (
               <label className="flex flex-col">
-                <span className="text-gray-400 text-sm">
+                <span className="text-sm text-gray-400">
                   {subjectsDataLanguage.educationYear(language.data ?? "en")}
                 </span>
                 <InputEducationYear
@@ -277,8 +270,8 @@ function Subjects({ schoolId }: Props) {
                 />
               </label>
             )}
-            <label className="flex flex-col w-80">
-              <span className="text-gray-400 text-sm">
+            <label className="flex w-80 flex-col">
+              <span className="text-sm text-gray-400">
                 ค้นหาตามรายชื่อคุณครูในโรงเรียน
               </span>
               {memberOnSchools.isLoading ? (
@@ -308,7 +301,7 @@ function Subjects({ schoolId }: Props) {
               )}
             </label>
             <label className="flex flex-col">
-              <span className="text-gray-400 text-sm">
+              <span className="text-sm text-gray-400">
                 {subjectsDataLanguage.sortBy(language.data ?? "en")}
               </span>
               <select
@@ -337,7 +330,7 @@ function Subjects({ schoolId }: Props) {
             onDragEnd={handleDragEnd}
           >
             <SortableContext items={subjectData} strategy={rectSortingStrategy}>
-              <ul className="w-full pb-40 mt-5 grid lg:grid-cols-2 xl:grid-cols-3 gap-3">
+              <ul className="mt-5 grid w-full gap-3 pb-40 lg:grid-cols-2 xl:grid-cols-3">
                 {subjectData.map((subject) => {
                   return (
                     <SubjectCard

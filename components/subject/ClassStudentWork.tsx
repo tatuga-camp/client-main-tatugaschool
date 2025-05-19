@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { Toast } from "primereact/toast";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { BiBookOpen, BiComment } from "react-icons/bi";
 import {
   BsEyeFill,
@@ -9,16 +9,24 @@ import {
   BsLayoutSidebarInsetReverse,
 } from "react-icons/bs";
 import { IoMdClose } from "react-icons/io";
-import { MdAssignment } from "react-icons/md";
+import {
+  MdAssignment,
+  MdDelete,
+  MdEditDocument,
+  MdFeedback,
+  MdReviews,
+} from "react-icons/md";
 import Swal from "sweetalert2";
 import { defaultBlurHash } from "../../data";
 import {
   Assignment,
   ErrorMessages,
   FileOnStudentOnAssignment,
+  StudentAssignmentStatus,
   StudentOnAssignment,
 } from "../../interfaces";
 import {
+  useDeleteFileStudentOnAssignment,
   useGetAssignment,
   useGetLanguage,
   useGetStudentOnAssignments,
@@ -39,16 +47,21 @@ import CommentSection from "./CommentSection";
 import FileStudentAssignmentCard from "./FileStudentAssignmentCard";
 import {
   classworkViewDataLanguage,
+  dropdownStatusStudentOnAssignmentLanguage,
   studentWorkDataLanguage,
 } from "../../data/languages";
 import StatusAssignmentButton from "./StatusAssignmentButton";
 import { FaRegSadTear } from "react-icons/fa";
 import { RiEmotionHappyFill } from "react-icons/ri";
+import { IoChevronDownSharp } from "react-icons/io5";
+import useClickOutside from "../../hook/useClickOutside";
+import ConfirmDeleteMessage from "../common/ConfirmDeleteMessage";
 
 type Props = {
   assignmentId: string;
   onScroll?: () => void;
 };
+
 function ClassStudentWork({ assignmentId, onScroll }: Props) {
   const language = useGetLanguage();
   const studentOnAssignments = useGetStudentOnAssignments({
@@ -80,7 +93,7 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
         const updateStudnet =
           studentOnAssignments.data.find(
             (studentOnAssignment) =>
-              studentOnAssignment.id === prevSelectedStudent.id
+              studentOnAssignment.id === prevSelectedStudent.id,
           ) ?? null;
 
         return updateStudnet;
@@ -93,7 +106,7 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
             ...s,
             select: false,
           };
-        })
+        }),
       );
     }
   }, [studentOnAssignments.data]);
@@ -108,30 +121,29 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
         return student;
       });
     },
-    []
+    [],
   );
   return (
-    <main className="w-full h-max  flex ">
+    <main className="flex h-max w-full">
       <section
         className={`${
-          triggerHideStudentList ? "w-20  " : " w-8/12  "
-        } overflow-auto transition-width p-5 min-h-screen max-h-screen pb-40  
-       flex flex-col gap-2 bg-white  h-max border-r sticky top-0`}
+          triggerHideStudentList ? "w-20" : "w-8/12"
+        } sticky top-0 flex h-max max-h-screen min-h-screen flex-col gap-2 overflow-auto border-r bg-white p-5 pb-40 transition-width`}
       >
-        <div className="text-xl w-full justify-between flex gap-2 items-center ">
+        <div className="flex w-full items-center justify-between gap-2 text-xl">
           {triggerHideStudentList
             ? ""
             : studentOnAssignments.isFetching
-            ? "Student Loading.."
-            : studentWorkDataLanguage.student(language.data ?? "en")}
+              ? "Student Loading.."
+              : studentWorkDataLanguage.student(language.data ?? "en")}
           <button
             type="button"
             className={`${
-              triggerHideStudentList && "absolute right-0 top-0 left-0 m-auto"
+              triggerHideStudentList && "absolute left-0 right-0 top-0 m-auto"
             } `}
             onClick={() => setTriggerHideStudentList((prev) => !prev)}
           >
-            <div className="second-button p-2 rounded-full  overflow-hidden flex items-center justify-center">
+            <div className="second-button flex items-center justify-center overflow-hidden rounded-full p-2">
               {triggerHideStudentList ? (
                 <BsLayoutSidebarInset />
               ) : (
@@ -140,111 +152,111 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
             </div>
           </button>
         </div>
-        <table
-          className={`${
-            triggerHideStudentList ? "hidden" : "w-full table-auto"
-          } `}
+        <div
+          className={`${triggerHideStudentList ? "hidden" : "w-full"} overflow-auto`}
         >
-          <thead>
-            <tr>
-              <th>
-                <div className="flex justify-center w-6">
-                  <input
-                    type="checkbox"
-                    className="w-5 h-5"
-                    onChange={(e) => {
-                      setStudentData((prev) => {
-                        return prev?.map((s) => {
-                          return {
-                            ...s,
-                            select: e.target.checked,
-                          };
+          <table className="w-max min-w-full">
+            <thead>
+              <tr>
+                <th>
+                  <div className="flex w-6 justify-center">
+                    <input
+                      type="checkbox"
+                      className="h-5 w-5"
+                      onChange={(e) => {
+                        setStudentData((prev) => {
+                          return prev?.map((s) => {
+                            return {
+                              ...s,
+                              select: e.target.checked,
+                            };
+                          });
                         });
-                      });
-                    }}
-                  />
-                </div>
-              </th>
-              <th>
-                <div className="text-start font-normal ">
-                  {studentWorkDataLanguage.name(language.data ?? "en")}
-                </div>
-              </th>
-              <th>
-                <div className="text-center font-normal ">
-                  {studentWorkDataLanguage.status(language.data ?? "en")}
-                </div>
-              </th>
-              <th>
-                <div className="text-center font-normal ">
-                  {studentWorkDataLanguage.score(language.data ?? "en")}
-                </div>
-              </th>
-              <th>
-                <div className="text-base font-normal flex gap-2 items-center justify-center ">
-                  <BiBookOpen />
-                  {studentWorkDataLanguage.viewWork(language.data ?? "en")}
-                </div>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {studentOnAssignments.isLoading
-              ? [...Array(20)].map((_, index) => {
-                  const odd = index % 2 === 0;
-                  return (
-                    <tr
-                      key={index}
-                      className={` ${odd && "bg-gray-200/20"} gap-2`}
-                    >
-                      <th>
-                        <div className="flex gap-2 h-14 items-center">
-                          <div className="w-10 h-10 relative rounded-md ring-1  overflow-hidden">
-                            <div className="w-full h-full bg-gray-200 animate-pulse"></div>
-                          </div>
-                          <div className="flex flex-col  items-start">
-                            <div className="w-20 h-4 bg-gray-200 animate-pulse"></div>
-                            <div className="w-10 h-3 bg-gray-200 animate-pulse"></div>
-                          </div>
-                        </div>
-                      </th>
-                      <th>
-                        <div className="flex  justify-center">
-                          <div className="w-5 h-5 bg-gray-400 animate-pulse"></div>
-                        </div>
-                      </th>
-                      <th>
-                        <div className="flex  justify-center">
-                          <div className="w-5 h-5 bg-gray-400 animate-pulse"></div>
-                        </div>
-                      </th>
-                      <th>
-                        <div className="flex  justify-center">
-                          <div className="w-10 h-5 bg-gray-200 animate-pulse"></div>
-                        </div>
-                      </th>
-                    </tr>
-                  );
-                })
-              : studentData
-                  ?.filter((d) => d.isAssigned === true)
-                  .sort((a, b) => Number(a.number) - Number(b.number))
-                  .map((student, index) => {
+                      }}
+                    />
+                  </div>
+                </th>
+                <th>
+                  <div className="text-start font-normal">
+                    {studentWorkDataLanguage.name(language.data ?? "en")}
+                  </div>
+                </th>
+                <th>
+                  <div className="text-center font-normal">
+                    {studentWorkDataLanguage.status(language.data ?? "en")}
+                  </div>
+                </th>
+                <th>
+                  <div className="text-center font-normal">
+                    {studentWorkDataLanguage.score(language.data ?? "en")}
+                  </div>
+                </th>
+                <th>
+                  <div className="flex items-center justify-center gap-2 text-base font-normal">
+                    <BiBookOpen />
+                    {studentWorkDataLanguage.viewWork(language.data ?? "en")}
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {studentOnAssignments.isLoading
+                ? [...Array(20)].map((_, index) => {
                     const odd = index % 2 === 0;
                     return (
-                      <StudentList
-                        onClick={handleSelectStudentWork}
-                        setStudentData={setStudentData}
-                        key={student.id}
-                        student={student}
-                        odd={odd}
-                      />
+                      <tr
+                        key={index}
+                        className={` ${odd && "bg-gray-200/20"} gap-2`}
+                      >
+                        <th>
+                          <div className="flex h-14 items-center gap-2">
+                            <div className="relative h-10 w-10 overflow-hidden rounded-md ring-1">
+                              <div className="h-full w-full animate-pulse bg-gray-200"></div>
+                            </div>
+                            <div className="flex flex-col items-start">
+                              <div className="h-4 w-20 animate-pulse bg-gray-200"></div>
+                              <div className="h-3 w-10 animate-pulse bg-gray-200"></div>
+                            </div>
+                          </div>
+                        </th>
+                        <th>
+                          <div className="flex justify-center">
+                            <div className="h-5 w-5 animate-pulse bg-gray-400"></div>
+                          </div>
+                        </th>
+                        <th>
+                          <div className="flex justify-center">
+                            <div className="h-5 w-5 animate-pulse bg-gray-400"></div>
+                          </div>
+                        </th>
+                        <th>
+                          <div className="flex justify-center">
+                            <div className="h-5 w-10 animate-pulse bg-gray-200"></div>
+                          </div>
+                        </th>
+                      </tr>
                     );
-                  })}
-          </tbody>
-        </table>
+                  })
+                : studentData
+                    ?.filter((d) => d.isAssigned === true)
+                    .sort((a, b) => Number(a.number) - Number(b.number))
+                    .map((student, index) => {
+                      const odd = index % 2 === 0;
+                      return (
+                        <StudentList
+                          onClick={handleSelectStudentWork}
+                          setStudentData={setStudentData}
+                          key={student.id}
+                          student={student}
+                          odd={odd}
+                        />
+                      );
+                    })}
+            </tbody>
+          </table>
+        </div>
       </section>
-      <section className="w-full  flex-col min-h-screen h-max flex  items-start justify-start">
+      <section className="flex h-max min-h-screen w-full flex-col items-start justify-start">
         {selectStudentWork &&
         assignment.data &&
         !studentData?.some((s) => s.select === true) ? (
@@ -281,7 +293,7 @@ type StudentListProps = {
   >;
   odd: boolean;
   onClick: (
-    student: StudentOnAssignment & { files: FileOnStudentOnAssignment[] }
+    student: StudentOnAssignment & { files: FileOnStudentOnAssignment[] },
   ) => void;
 };
 
@@ -293,9 +305,9 @@ const StudentList = React.memo(function StudentList({
 }: StudentListProps) {
   const language = useGetLanguage();
   return (
-    <tr className={` ${odd && "bg-gray-200/20"} hover:bg-sky-100  gap-2`}>
+    <tr className={` ${odd && "bg-gray-200/20"} gap-2 hover:bg-sky-100`}>
       <th>
-        <div className="w-6 flex items-center justify-center">
+        <div className="flex w-6 items-center justify-center">
           <input
             checked={student.select}
             onChange={(e) =>
@@ -309,13 +321,13 @@ const StudentList = React.memo(function StudentList({
               })
             }
             type="checkbox"
-            className="w-5 h-5"
+            className="h-5 w-5"
           />
         </div>
       </th>
       <th>
-        <div className="flex gap-2 pl-2 h-14 items-center">
-          <div className="w-10 h-10 relative rounded-md ring-1  overflow-hidden">
+        <div className="flex h-14 items-center gap-2 pl-2">
+          <div className="relative h-10 w-10 overflow-hidden rounded-md ring-1">
             <Image
               src={student.photo}
               alt={student.firstName}
@@ -323,12 +335,12 @@ const StudentList = React.memo(function StudentList({
               placeholder="blur"
               sizes="(max-width: 768px) 100vw, 33vw"
               blurDataURL={decodeBlurhashToCanvas(
-                student.blurHash ?? defaultBlurHash
+                student.blurHash ?? defaultBlurHash,
               )}
               className="object-cover"
             />
           </div>
-          <div className="flex flex-col  items-start">
+          <div className="flex flex-col items-start">
             <h1 className="text-sm font-semibold">
               {student.firstName} {student.lastName}{" "}
             </h1>
@@ -345,7 +357,7 @@ const StudentList = React.memo(function StudentList({
         <div
           className={`flex justify-center text-sm font-normal ${
             student.score !== null
-              ? "text-primary-color font-medium"
+              ? "font-medium text-primary-color"
               : "text-gray-400"
           }`}
         >
@@ -355,7 +367,7 @@ const StudentList = React.memo(function StudentList({
         </div>
       </th>
       <th>
-        <div className="flex w-full h-full p-2 justify-center">
+        <div className="flex h-full w-full justify-center p-2">
           <button
             type="button"
             onClick={() => {
@@ -366,10 +378,7 @@ const StudentList = React.memo(function StudentList({
               });
               onClick(student);
             }}
-            className={`flex items-center font-normal 
-           justify-center gap-1 transition
-           ${student.id === student.id ? "main-button" : "second-button border"}
-           `}
+            className={`flex items-center justify-center gap-1 font-normal transition ${student.id === student.id ? "main-button" : "second-button border"} `}
           >
             <BsEyeFill />
             {studentWorkDataLanguage.viewWork(language.data ?? "en")}
@@ -422,12 +431,12 @@ function MultipleReview({ selectStudents, maxScore }: MultipleReviewProps) {
   };
 
   return (
-    <div className="w-full flex font-Anuphan items-center justify-center grow h-full">
+    <div className="flex h-full w-full grow items-center justify-center font-Anuphan">
       {loading && <LoadingBar />}
       {selectStudents.length > 0 ? (
         <form
           onSubmit={handleSaveChange}
-          className="flex items-center justify-center h-full gap-2"
+          className="flex h-full items-center justify-center gap-2"
         >
           <div className="w-40">
             <InputNumber
@@ -442,13 +451,13 @@ function MultipleReview({ selectStudents, maxScore }: MultipleReviewProps) {
           </div>
           <button
             disabled={loading}
-            className="second-button flex items-center justify-center border w-60 text-sm"
+            className="second-button flex w-60 items-center justify-center border text-sm"
           >
             {loading ? (
               <ProgressSpinner
                 animationDuration="1s"
                 style={{ width: "20px" }}
-                className="w-5 h-5"
+                className="h-5 w-5"
                 strokeWidth="8"
               />
             ) : (
@@ -475,7 +484,20 @@ const menuViewStudentWorks = [
     icon: <BiComment />,
   },
 ] as const;
-
+const menuDropdowns = [
+  {
+    title: "review",
+    icon: <MdReviews />,
+  },
+  {
+    title: "improve",
+    icon: <MdEditDocument />,
+  },
+  {
+    title: "delete",
+    icon: <MdDelete />,
+  },
+] as const;
 type MenuViewStudentWorks = (typeof menuViewStudentWorks)[number]["title"];
 type PropsStudentWork = {
   studentOnAssignment: StudentOnAssignment & {
@@ -487,6 +509,7 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
   const language = useGetLanguage();
   const update = useUpdateStudentOnAssignments();
   const updateFile = useUpdateFileStudentOnAssignment();
+  const [triggerDropdown, setTriggerDropdown] = useState<boolean>(false);
   const [loadingFile, setLoadingFile] = React.useState(false);
   const toast = React.useRef<Toast>(null);
   const [selectMenu, setSelectMenu] =
@@ -498,9 +521,11 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
     body?: string;
     files?: FileOnStudentOnAssignment[];
   }>();
+  const deleteFile = useDeleteFileStudentOnAssignment();
+
   const [selectFileImage, setSelectFileImage] =
     React.useState<FileOnStudentOnAssignment | null>(null);
-
+  const dropdownRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     setStudentWork({
       score: studentOnAssignment.score,
@@ -509,19 +534,32 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
     });
   }, [studentOnAssignment]);
 
-  const handleSaveChange = async (e: React.FormEvent) => {
+  const handleSaveChange = async (status: StudentAssignmentStatus) => {
     try {
-      e.preventDefault();
       await update.mutateAsync({
         query: {
           studentOnAssignmentId: studentOnAssignment.id,
         },
         body: {
           score: studentWork?.score,
-          status: "REVIEWD",
+          status: status,
           body: studentWork?.body,
         },
       });
+
+      if (
+        status === "PENDDING" &&
+        studentWork?.files &&
+        studentWork.files.length > 0
+      ) {
+        await Promise.allSettled(
+          studentWork.files.map((f) =>
+            deleteFile.mutateAsync({
+              fileOnStudentAssignmentId: f.id,
+            }),
+          ),
+        );
+      }
       toast.current?.show({
         severity: "success",
         summary: "Success",
@@ -588,7 +626,9 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
       });
     }
   };
-
+  useClickOutside(dropdownRef, () => {
+    setTriggerDropdown(false);
+  });
   return (
     <>
       <Toast ref={toast} />
@@ -599,7 +639,7 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
             setSelectFileImage(null);
           }}
         >
-          <div className="w-full flex justify-start items-center flex-col h-full ">
+          <div className="flex h-full w-full flex-col items-center justify-start">
             {loadingFile && <LoadingBar />}
             <DrawCanva
               onSave={(data) => {
@@ -622,15 +662,12 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
         </PopupLayout>
       )}
       {selectAssignmentText && (
-        <div className="w-screen h-screen flex items-center justify-center fixed z-50 top-0 right-0 bottom-0 left-0 m-auto">
-          <div
-            className="w-full md:w-10/12 lg:w-10/12 relative 
-          h-max md:h-5/6 p-3 bg-white rounded-md"
-          >
-            <div className="w-full flex justify-end">
+        <div className="fixed bottom-0 left-0 right-0 top-0 z-50 m-auto flex h-screen w-screen items-center justify-center">
+          <div className="relative h-max w-full rounded-md bg-white p-3 md:h-5/6 md:w-10/12 lg:w-10/12">
+            <div className="flex w-full justify-end">
               <button
                 onClick={() => setSelectAssignmentText(null)}
-                className="text-lg  hover:bg-gray-300/50 w-6 h-6 rounded flex items-center justify-center font-semibold"
+                className="flex h-6 w-6 items-center justify-center rounded text-lg font-semibold hover:bg-gray-300/50"
               >
                 <IoMdClose />
               </button>
@@ -643,16 +680,13 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
               toast={toast}
             />
           </div>
-          <footer
-            className="w-screen h-screen bg-black/50 fixed
-          -z-10 top-0 right-0 bottom-0 left-0 m-auto"
-          ></footer>
+          <footer className="fixed bottom-0 left-0 right-0 top-0 -z-10 m-auto h-screen w-screen bg-black/50"></footer>
         </div>
       )}
-      <form className="w-full flex flex-col" onSubmit={handleSaveChange}>
-        <header className="w-full bg-white  h-max flex items-center justify-between p-2 px-4">
-          <div className="flex gap-2 pl-2 h-14 items-center">
-            <div className="w-10 h-10 relative rounded-md ring-1  overflow-hidden">
+      <div className="flex w-full flex-col">
+        <header className="flex h-max w-full items-center justify-between gap-5 bg-white p-2 px-4">
+          <div className="flex h-14 w-max items-center gap-2 pl-2">
+            <div className="relative h-10 w-10 overflow-hidden rounded-md ring-1">
               <Image
                 src={studentOnAssignment.photo}
                 alt={studentOnAssignment.firstName}
@@ -660,14 +694,15 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
                 placeholder="blur"
                 sizes="(max-width: 768px) 100vw, 33vw"
                 blurDataURL={decodeBlurhashToCanvas(
-                  studentOnAssignment.blurHash ?? defaultBlurHash
+                  studentOnAssignment.blurHash ?? defaultBlurHash,
                 )}
                 className="object-cover"
               />
             </div>
-            <div className="flex flex-col  items-start">
-              <h1 className="text-sm font-semibold">
-                {studentOnAssignment.firstName} {studentOnAssignment.lastName}{" "}
+            <div className="flex flex-col items-start">
+              <h1 className="w-32 truncate text-sm font-semibold">
+                {studentOnAssignment.firstName}{" "}
+                {studentOnAssignment.lastName}{" "}
               </h1>
               <p className="text-xs text-gray-500">
                 Number {studentOnAssignment.number}{" "}
@@ -676,7 +711,7 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
             </div>
           </div>
 
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex flex-wrap gap-2">
             <StatusAssignmentButton studentOnAssignment={studentOnAssignment} />
             <div className="w-40">
               <InputNumber
@@ -694,37 +729,93 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
                 max={assignment.maxScore}
               />
             </div>
-            <button
-              disabled={update.isPending}
-              onClick={handleSaveChange}
-              className="second-button flex items-center justify-center border grow text-sm"
-            >
-              {update.isPending ? (
-                <ProgressSpinner
-                  animationDuration="1s"
-                  style={{ width: "20px" }}
-                  className="w-5 h-5"
-                  strokeWidth="8"
-                />
-              ) : (
-                studentWorkDataLanguage.saveChange(language.data ?? "en")
+            <div className="relative flex grow items-center">
+              <button
+                disabled={update.isPending}
+                onClick={() => handleSaveChange("REVIEWD")}
+                className="second-button h-10 w-40 grow rounded-md rounded-r-none border border-r-0 p-2 text-base font-medium text-black opacity-85 hover:opacity-100"
+              >
+                {update.isPending ? (
+                  <ProgressSpinner
+                    animationDuration="1s"
+                    style={{ width: "20px" }}
+                    className="h-5 w-5"
+                    strokeWidth="8"
+                  />
+                ) : (
+                  dropdownStatusStudentOnAssignmentLanguage.review(
+                    language.data ?? "en",
+                  )
+                )}
+              </button>
+              <button
+                onClick={() => setTriggerDropdown((prev) => !prev)}
+                type="button"
+                className="second-button h-10 w-max rounded-md rounded-l-none border p-2 text-base font-medium text-black"
+              >
+                <IoChevronDownSharp />
+              </button>
+              {triggerDropdown && (
+                <div
+                  ref={dropdownRef}
+                  className="absolute left-6 top-12 z-40 h-max w-60 rounded-md border bg-white p-1 drop-shadow"
+                >
+                  {menuDropdowns.map((menu) => {
+                    let textColor = "text-gray-400";
+                    let hoverBg = "hover:bg-primary-color";
+                    let status: StudentAssignmentStatus = "REVIEWD";
+                    if (menu.title === "improve") {
+                      status = "IMPROVED";
+                      hoverBg = "hover:bg-info-color";
+                    } else if (menu.title === "delete") {
+                      status = "PENDDING";
+                      textColor = "text-red-400";
+                      hoverBg = "hover:bg-error-color";
+                    }
+
+                    return (
+                      <button
+                        key={menu.title}
+                        type="button"
+                        onClick={() => {
+                          if (menu.title === "delete") {
+                            ConfirmDeleteMessage({
+                              language: language.data ?? "en",
+                              async callback() {
+                                handleSaveChange(status);
+                              },
+                            });
+                          } else {
+                            handleSaveChange(status);
+                          }
+                        }}
+                        className={`flex h-10 w-full items-center justify-start gap-10 px-4 ${textColor} hover:scale-105 ${hoverBg} hover:text-white`}
+                      >
+                        {menu.icon}
+                        {dropdownStatusStudentOnAssignmentLanguage[
+                          menu.title as keyof typeof dropdownStatusStudentOnAssignmentLanguage
+                        ](language.data ?? "en")}
+                      </button>
+                    );
+                  })}
+                </div>
               )}
-            </button>
+            </div>
           </div>
         </header>
-        <ul className="grid grid-cols-3">
+        <ul className="grid lg:grid-cols-1 xl:grid-cols-3">
           {studentOnAssignment.completedAt && (
-            <li className="flex h-full items-center justify-start bg-slate-100 gap-1 border p-2">
+            <li className="flex h-full items-center justify-start gap-1 border bg-slate-100 p-2">
               <div className="w-40 font-semibold">
                 {studentWorkDataLanguage.summit_at(language.data ?? "en")}:
               </div>
-              <div className="flex flex-col text-sm items-start gap-1">
+              <div className="flex flex-col items-start gap-1 text-sm">
                 {assignment.dueDate &&
                 new Date(studentOnAssignment.completedAt).getTime() >
                   new Date(assignment.dueDate).getTime() ? (
                   <span className="font-semibold text-red-600">
                     {studentWorkDataLanguage.summit_at_status_late(
-                      language.data ?? "en"
+                      language.data ?? "en",
                     )}
                   </span>
                 ) : assignment.dueDate &&
@@ -732,7 +823,7 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
                     new Date(assignment.dueDate).getTime() ? (
                   <span className="font-semibold text-blue-600">
                     {studentWorkDataLanguage.summit_at_status_on_time(
-                      language.data ?? "en"
+                      language.data ?? "en",
                     )}
                   </span>
                 ) : (
@@ -746,14 +837,14 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
                       minute: "numeric",
                       day: "numeric",
                       month: "long",
-                    }
+                    },
                   )}
                 </span>
               </div>
             </li>
           )}
           {assignment.dueDate && (
-            <li className="flex h-full items-center justify-start gap-1 bg-slate-100 border p-2">
+            <li className="flex h-full items-center justify-start gap-1 border bg-slate-100 p-2">
               <div className="w-40 font-semibold">
                 {classworkViewDataLanguage.deadLine(language.data ?? "en")}:
               </div>
@@ -767,7 +858,7 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
                     ago <FaRegSadTear />
                   </div>
                 ) : (
-                  <div className="flex w-max items-center gap-1  font-semibold text-green-600">
+                  <div className="flex w-max items-center gap-1 font-semibold text-green-600">
                     {timeLeft({
                       targetTime: new Date(assignment.dueDate).toISOString(),
                     })}{" "}
@@ -786,7 +877,7 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
             </li>
           )}
           {studentOnAssignment.reviewdAt && (
-            <li className="flex h-full items-center justify-start bg-slate-100 gap-1 border p-2">
+            <li className="flex h-full items-center justify-start gap-1 border bg-slate-100 p-2">
               <div className="w-40 font-semibold">
                 {studentWorkDataLanguage.review_work_at(language.data ?? "en")}:
               </div>
@@ -797,7 +888,7 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
                     {
                       day: "numeric",
                       month: "long",
-                    }
+                    },
                   )}
                 </span>
                 <span className="text-xs">
@@ -808,16 +899,16 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
                       minute: "numeric",
                       day: "numeric",
                       month: "long",
-                    }
+                    },
                   )}
                 </span>
               </div>
             </li>
           )}
         </ul>
-      </form>
-      <main className="w-full bg-white p-5 flex pb-40  flex-col gap-2">
-        <div className="w-full font-semibold text-lg gap-3 flex border-b pb-2">
+      </div>
+      <main className="flex w-full flex-col gap-2 bg-white p-5 pb-40">
+        <div className="flex w-full gap-3 border-b pb-2 text-lg font-semibold">
           {menuViewStudentWorks.map((menu, index) => {
             return (
               <button
@@ -826,9 +917,7 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
                 type="button"
                 className={`${
                   menu.title === selectMenu ? "text-black" : "text-gray-500"
-                } flex items-center gap-2
-                
-                `}
+                } flex items-center gap-2`}
               >
                 {menu.icon}
                 {studentWorkDataLanguage[
@@ -839,7 +928,7 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
           })}
         </div>
         {selectMenu === "Works" && (
-          <ul className="w-96 min-h-96 h-max flex flex-col gap-2">
+          <ul className="flex h-max min-h-96 w-96 flex-col gap-2">
             {studentWork?.files?.map((file, index) => {
               return (
                 <FileStudentAssignmentCard

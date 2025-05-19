@@ -50,7 +50,7 @@ function Grade({
       const response = await ExportAssignmentService({ subjectId });
       const link = document.createElement("a");
       link.href = response;
-      link.download = `attendance.xlsx`;
+      link.download = `grade.xlsx`;
       link.click();
 
       setLoading(false);
@@ -79,7 +79,7 @@ function Grade({
             setSelectStudentOnAssignment(null);
           }}
         >
-          <div className=" w-max h-max bg-background-color p-2 rounded-md border">
+          <div className="h-max w-max rounded-md border bg-background-color p-2">
             {selectStudentOnAssignment && (
               <GradePopup
                 studentOnAssignment={
@@ -107,20 +107,19 @@ function Grade({
         </PopupLayout>
       )}
 
-      <header className="w-full flex flex-col md:flex-row justify-between p-3 md:px-5 md:max-w-screen-md xl:max-w-screen-lg gap-4 md:gap-0 mx-auto">
+      <header className="mx-auto flex w-full flex-col justify-between gap-4 p-3 md:max-w-screen-md md:flex-row md:gap-0 md:px-5 xl:max-w-screen-lg">
         <section className="text-center md:text-left">
-          <h1 className="text-2xl md:text-3xl font-semibold">
+          <h1 className="text-2xl font-semibold md:text-3xl">
             {gradeData.title(language.data ?? "en")}
           </h1>
-          <span className="text-gray-400 text-sm md:text-base">
+          <span className="text-sm text-gray-400 md:text-base">
             {gradeData.description(language.data ?? "en")}
           </span>
         </section>
-        <section className="flex flex-col xl:flex-row items-center gap-2 md:gap-1">
+        <section className="flex flex-col items-center gap-2 md:gap-1 xl:flex-row">
           <button
             onClick={() => setTriggerGradeSetting(true)}
-            className="main-button w-max
-            flex items-center justify-center gap-1 py-1 ring-1 ring-blue-600"
+            className="main-button flex w-max items-center justify-center gap-1 py-1 ring-1 ring-blue-600"
           >
             <>
               <IoMdSettings />
@@ -130,8 +129,7 @@ function Grade({
           <button
             disabled={loading}
             onClick={handleExportExcel}
-            className="main-button w-32
-            flex items-center justify-center gap-1 py-1 ring-1 ring-blue-600"
+            className="main-button flex w-32 items-center justify-center gap-1 py-1 ring-1 ring-blue-600"
           >
             {loading ? (
               <LoadingSpinner />
@@ -144,13 +142,13 @@ function Grade({
           </button>
         </section>
       </header>
-      <main className="w-full mt-5 flex flex-col items-center md:px-0 md:max-w-screen-md xl:max-w-screen-lg mx-auto">
-        <div className="w-full h-[30rem] px-2 overflow-auto relative bg-white rounded-md mt-5">
+      <main className="mx-auto mt-5 flex w-full flex-col items-center md:max-w-screen-md md:px-0 xl:max-w-screen-lg">
+        <div className="relative mt-5 h-[30rem] w-full overflow-auto rounded-md bg-white px-2">
           <table className="table-fixed bg-white md:min-w-[640px]">
             <thead className="">
-              <tr className="border-b  bg-white sticky top-0 z-40">
-                <th className="text-sm z-40 sticky left-0 bg-white font-semibold">
-                  <div className="w-48 md:w-96 flex justify-start items-center gap-2">
+              <tr className="sticky top-0 z-40 border-b bg-white">
+                <th className="sticky left-0 z-40 bg-white text-sm font-semibold">
+                  <div className="flex w-48 items-center justify-start gap-2 md:w-96">
                     <FaUser />
                     Name
                   </div>
@@ -160,10 +158,10 @@ function Grade({
                       const number = getRandomSlateShade();
                       const color = getSlateColorStyle(number);
                       return (
-                        <th key={index} className="text-sm  font-semibold">
+                        <th key={index} className="text-sm font-semibold">
                           <div
                             style={color}
-                            className="w-40 h-14  animate-pulse"
+                            className="h-14 w-40 animate-pulse"
                           ></div>
                         </th>
                       );
@@ -173,7 +171,7 @@ function Grade({
                         return (
                           <th
                             key={data.assignment.id}
-                            className="text-sm group  font-semibold"
+                            className="group text-sm font-semibold"
                           >
                             <button
                               onClick={() =>
@@ -181,10 +179,9 @@ function Grade({
                                   assignment: data.assignment,
                                 })
                               }
-                              className="w-52 min-w-52 group-hover:w-max  p-2 relative active:bg-gray-200
-                           hover:bg-gray-100  hover:ring-1 flex items-start flex-col"
+                              className="relative flex w-52 min-w-52 flex-col items-start p-2 hover:bg-gray-100 hover:ring-1 active:bg-gray-200 group-hover:w-max"
                             >
-                              <span className="w-max group-hover:max-w-none max-w-40 truncate">
+                              <span className="w-max max-w-40 truncate group-hover:max-w-none">
                                 {data.assignment.title}
                               </span>
                               <span className="text-xs text-gray-500">
@@ -194,12 +191,12 @@ function Grade({
                                   ` / ${
                                     data.assignment.weight
                                   }% ${gradeData.weight(
-                                    language.data ?? "en"
+                                    language.data ?? "en",
                                   )}`}
                               </span>
-                              <div className="text-xs  text-white bg-gradient-to-r from-emerald-400 to-cyan-400 px-2 rounded-md">
+                              <div className="rounded-md bg-gradient-to-r from-emerald-400 to-cyan-400 px-2 text-xs text-white">
                                 {gradeData.assignment_score(
-                                  language.data ?? "en"
+                                  language.data ?? "en",
                                 )}{" "}
                               </div>
                             </button>
@@ -210,29 +207,25 @@ function Grade({
                         return (
                           <th
                             key={data.scoreOnSubject.id}
-                            className="text-sm group  font-semibold"
+                            className="group text-sm font-semibold"
                           >
-                            <button
-                              className="w-40 min-w-40 group-hover:w-max  p-2 relative active:bg-gray-200
-                       hover:bg-gray-100  hover:ring-1 flex items-start flex-col"
-                            >
-                              <span className="w-max group-hover:max-w-none max-w-40 truncate">
+                            <button className="relative flex w-40 min-w-40 flex-col items-start p-2 hover:bg-gray-100 hover:ring-1 active:bg-gray-200 group-hover:w-max">
+                              <span className="w-max max-w-40 truncate group-hover:max-w-none">
                                 {data.scoreOnSubject.title}
                               </span>
-                              <div className="text-xs  text-white gradient-bg px-2 rounded-md">
-                                {gradeData.speical_score(language.data ?? "en")}{" "}
+                              <div className="gradient-bg rounded-md px-2 text-xs text-white">
+                                {gradeData.speical_score(
+                                  language.data ?? "en",
+                                )}{" "}
                               </div>
                             </button>
                           </th>
                         );
                       }),
                     ]}
-                <th className="text-sm group  font-semibold">
-                  <div
-                    className="w-40 min-w-40 group-hover:w-max  p-2 relative active:bg-gray-200
-                           hover:bg-gray-100  hover:ring-1 flex items-start flex-col"
-                  >
-                    <span className="w-max group-hover:max-w-none max-w-40 truncate">
+                <th className="group text-sm font-semibold">
+                  <div className="relative flex w-40 min-w-40 flex-col items-start p-2 hover:bg-gray-100 hover:ring-1 active:bg-gray-200 group-hover:w-max">
+                    <span className="w-max max-w-40 truncate group-hover:max-w-none">
                       Total Score
                     </span>
                     <span className="text-xs text-gray-500">
@@ -240,12 +233,9 @@ function Grade({
                     </span>
                   </div>
                 </th>
-                <th className="text-sm group  font-semibold">
-                  <div
-                    className="w-40 min-w-40 group-hover:w-max  p-2 relative active:bg-gray-200
-                           hover:bg-gray-100  hover:ring-1 flex items-start flex-col"
-                  >
-                    <span className="w-max group-hover:max-w-none max-w-40 truncate">
+                <th className="group text-sm font-semibold">
+                  <div className="relative flex w-40 min-w-40 flex-col items-start p-2 hover:bg-gray-100 hover:ring-1 active:bg-gray-200 group-hover:w-max">
+                    <span className="w-max max-w-40 truncate group-hover:max-w-none">
                       Grade
                     </span>
                     <span className="text-xs text-gray-500">
@@ -266,7 +256,7 @@ function Grade({
                       (prev, current) => {
                         let score =
                           current.students.find(
-                            (s) => s.studentOnSubjectId === student.id
+                            (s) => s.studentOnSubjectId === student.id,
                           )?.score ?? 0;
                         if (current.assignment.weight !== null) {
                           const originalScore =
@@ -276,7 +266,7 @@ function Grade({
 
                         return prev + score;
                       },
-                      0
+                      0,
                     ) ?? 0;
 
                   totalScore =
@@ -291,35 +281,33 @@ function Grade({
                             }
                             return prev;
                           },
-                          0
+                          0,
                         );
 
                         return (prev += summaryScore);
                       },
-                      totalScore
+                      totalScore,
                     ) ?? 0;
 
                   const grade = calulateGrade(
                     assignmentsOverview.data?.grade?.gradeRules ??
                       defaultGradeRule,
-                    totalScore
+                    totalScore,
                   );
                   return (
                     <tr
                       className={` ${
                         odd ? "bg-gray-200/20" : "bg-white"
-                      } hover:bg-gray-200/40 group`}
+                      } group hover:bg-gray-200/40`}
                       key={student.id}
                     >
                       <td
-                        className={`text-sm sticky left-0 z-30 font-semibold
-                        ${
+                        className={`sticky left-0 z-30 text-sm font-semibold ${
                           odd ? "bg-gray-100" : "bg-white"
-                        } group-hover:bg-gray-200
-                        `}
+                        } group-hover:bg-gray-200`}
                       >
-                        <div className="flex items-center h-14 gap-2">
-                          <div className="w-8 h-8 md:w-10 md:h-10 relative rounded-md ring-1 overflow-hidden">
+                        <div className="flex h-14 items-center gap-2">
+                          <div className="relative h-8 w-8 overflow-hidden rounded-md ring-1 md:h-10 md:w-10">
                             <Image
                               src={student.photo}
                               alt={student.firstName}
@@ -327,13 +315,13 @@ function Grade({
                               sizes="(max-width: 768px) 100vw, 33vw"
                               placeholder="blur"
                               blurDataURL={decodeBlurhashToCanvas(
-                                student.blurHash ?? defaultBlurHash
+                                student.blurHash ?? defaultBlurHash,
                               )}
                               className="object-cover"
                             />
                           </div>
                           <div>
-                            <h1 className="text-xs md:text-sm font-semibold">
+                            <h1 className="text-xs font-semibold md:text-sm">
                               {student.firstName} {student.lastName}
                             </h1>
                             <p className="text-xs text-gray-500">
@@ -350,7 +338,7 @@ function Grade({
                               <td key={index}>
                                 <div
                                   style={color}
-                                  className="flex w-full h-14 animate-pulse"
+                                  className="flex h-14 w-full animate-pulse"
                                 ></div>
                               </td>
                             );
@@ -360,18 +348,12 @@ function Grade({
                               .filter((a) => a.assignment.type !== "Material")
                               .map((data, index) => {
                                 const studentOnAssignment = data.students.find(
-                                  (a) => a.studentOnSubjectId === student.id
+                                  (a) => a.studentOnSubjectId === student.id,
                                 );
                                 if (!studentOnAssignment) {
                                   return (
                                     <td key={data.assignment.id + student.id}>
-                                      <button
-                                        className="flex w-full h-14
-                               relative hover:ring-1  bg-black select-none
-                                text-white ring-black hover:drop-shadow-md cursor-pointer   
-                               items-center transition
-                               justify-center flex-col"
-                                      >
+                                      <button className="relative flex h-14 w-full cursor-pointer select-none flex-col items-center justify-center bg-black text-white ring-black transition hover:ring-1 hover:drop-shadow-md">
                                         NO DATA
                                       </button>
                                     </td>
@@ -413,7 +395,7 @@ function Grade({
                                       data.assignment.id +
                                       studentOnAssignment.id
                                     }
-                                    className="text-sm  font-semibold"
+                                    className="text-sm font-semibold"
                                   >
                                     <button
                                       onClick={() => {
@@ -422,45 +404,28 @@ function Grade({
                                           studentOnAssignment,
                                         });
                                       }}
-                                      className="w-full h-14 "
+                                      className="h-14 w-full"
                                     >
                                       {score === "No Work" ? (
-                                        <div
-                                          className="flex w-full h-14
-                                        relative hover:ring-1  bg-red-500 select-none
-                                         text-white ring-red-500 hover:drop-shadow-md cursor-pointer   
-                                        items-center transition
-                                        justify-center flex-col"
-                                        >
+                                        <div className="relative flex h-14 w-full cursor-pointer select-none flex-col items-center justify-center bg-red-500 text-white ring-red-500 transition hover:ring-1 hover:drop-shadow-md">
                                           <span>
                                             {gradeData.no_work(
-                                              language.data ?? "en"
+                                              language.data ?? "en",
                                             )}
                                           </span>
                                           <MdMoodBad />
                                         </div>
                                       ) : score === "Not Graded" ? (
-                                        <div
-                                          className="flex w-full h-14
-                                        relative hover:ring-1  bg-orange-500 select-none
-                                         text-white ring-orange-500 hover:drop-shadow-md cursor-pointer   
-                                        items-center transition
-                                        justify-center flex-col"
-                                        >
+                                        <div className="relative flex h-14 w-full cursor-pointer select-none flex-col items-center justify-center bg-orange-500 text-white ring-orange-500 transition hover:ring-1 hover:drop-shadow-md">
                                           <span>
                                             {gradeData.wait_reviewed(
-                                              language.data ?? "en"
+                                              language.data ?? "en",
                                             )}
                                           </span>
                                           <FaCheckSquare />
                                         </div>
                                       ) : (
-                                        <div
-                                          className="flex w-full h-14
-                               relative hover:ring-1  ring-black hover:drop-shadow-md cursor-pointer   
-                               items-center transition
-                               justify-center flex-col"
-                                        >
+                                        <div className="relative flex h-14 w-full cursor-pointer flex-col items-center justify-center ring-black transition hover:ring-1 hover:drop-shadow-md">
                                           <span>{score}</span>
                                         </div>
                                       )}
@@ -471,7 +436,7 @@ function Grade({
                             assignmentsOverview.data?.scoreOnSubjects.map(
                               (data) => {
                                 const scoreOnStudents = data.students.filter(
-                                  (s) => s.studentOnSubjectId === student.id
+                                  (s) => s.studentOnSubjectId === student.id,
                                 );
 
                                 if (scoreOnStudents.length === 0) {
@@ -479,13 +444,7 @@ function Grade({
                                     <td
                                       key={data.scoreOnSubject.id + student.id}
                                     >
-                                      <button
-                                        className="flex w-full h-14
-                                 relative hover:ring-1  bg-black select-none
-                                  text-white ring-black hover:drop-shadow-md cursor-pointer   
-                                 items-center transition
-                                 justify-center flex-col"
-                                      >
+                                      <button className="relative flex h-14 w-full cursor-pointer select-none flex-col items-center justify-center bg-black text-white ring-black transition hover:ring-1 hover:drop-shadow-md">
                                         NO DATA
                                       </button>
                                     </td>
@@ -496,7 +455,7 @@ function Grade({
                                   (previousValue, current) => {
                                     return (previousValue += current.score);
                                   },
-                                  0
+                                  0,
                                 );
                                 return (
                                   <td
@@ -504,38 +463,23 @@ function Grade({
                                       data.scoreOnSubject.id +
                                       scoreOnStudents[0].id
                                     }
-                                    className="text-sm  font-semibold"
+                                    className="text-sm font-semibold"
                                   >
-                                    <button
-                                      className="flex w-full h-14
-                           relative hover:ring-1  ring-black hover:drop-shadow-md cursor-pointer   
-                           items-center transition
-                           justify-center flex-col"
-                                    >
+                                    <button className="relative flex h-14 w-full cursor-pointer flex-col items-center justify-center ring-black transition hover:ring-1 hover:drop-shadow-md">
                                       <span>{totalScore}</span>
                                     </button>
                                   </td>
                                 );
-                              }
+                              },
                             ),
                           ]}
-                      <td className="text-sm  font-semibold">
-                        <div
-                          className="flex w-full h-14
-                               relative  ring-black    
-                               items-center 
-                               justify-center flex-col"
-                        >
+                      <td className="text-sm font-semibold">
+                        <div className="relative flex h-14 w-full flex-col items-center justify-center ring-black">
                           <span>{totalScore.toFixed(2)}</span>
                         </div>
                       </td>
-                      <td className="text-sm  font-semibold">
-                        <div
-                          className="flex w-full h-14
-                               relative  ring-black    
-                               items-center 
-                               justify-center flex-col"
-                        >
+                      <td className="text-sm font-semibold">
+                        <div className="relative flex h-14 w-full flex-col items-center justify-center ring-black">
                           <span>{grade}</span>
                         </div>
                       </td>
