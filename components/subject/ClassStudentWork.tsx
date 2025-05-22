@@ -56,6 +56,7 @@ import { RiEmotionHappyFill } from "react-icons/ri";
 import { IoChevronDownSharp } from "react-icons/io5";
 import useClickOutside from "../../hook/useClickOutside";
 import ConfirmDeleteMessage from "../common/ConfirmDeleteMessage";
+import { useEnterKey } from "../../hook";
 
 type Props = {
   assignmentId: string;
@@ -499,6 +500,7 @@ const menuDropdowns = [
   },
 ] as const;
 type MenuViewStudentWorks = (typeof menuViewStudentWorks)[number]["title"];
+
 type PropsStudentWork = {
   studentOnAssignment: StudentOnAssignment & {
     files: FileOnStudentOnAssignment[];
@@ -511,6 +513,7 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
   const updateFile = useUpdateFileStudentOnAssignment();
   const [triggerDropdown, setTriggerDropdown] = useState<boolean>(false);
   const [loadingFile, setLoadingFile] = React.useState(false);
+  const scoreInputRef = useRef<HTMLInputElement>(null);
   const toast = React.useRef<Toast>(null);
   const [selectMenu, setSelectMenu] =
     React.useState<MenuViewStudentWorks>("Works");
@@ -526,12 +529,19 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
   const [selectFileImage, setSelectFileImage] =
     React.useState<FileOnStudentOnAssignment | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      scoreInputRef.current?.focus();
+    }, 200);
     setStudentWork({
       score: studentOnAssignment.score,
       body: studentOnAssignment.body,
       files: studentOnAssignment.files,
     });
+    return () => {
+      clearTimeout(timeoutId); // cleanup
+    };
   }, [studentOnAssignment]);
 
   const handleSaveChange = async (status: StudentAssignmentStatus) => {
@@ -579,6 +589,10 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
       });
     }
   };
+
+  useEnterKey(() => {
+    handleSaveChange("REVIEWD");
+  });
 
   const handleSaveImageEdit = async (data: { id: string; file: File }) => {
     try {
@@ -629,6 +643,7 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
   useClickOutside(dropdownRef, () => {
     setTriggerDropdown(false);
   });
+
   return (
     <>
       <Toast ref={toast} />
@@ -715,14 +730,16 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
             <StatusAssignmentButton studentOnAssignment={studentOnAssignment} />
             <div className="w-40">
               <InputNumber
+                inputRef={scoreInputRef}
                 onValueChange={(value) => {
+                  console.log(value);
                   setStudentWork((prev) => ({
                     ...prev,
                     score: value,
                   }));
                 }}
                 maxFractionDigits={3}
-                value={studentWork?.score ?? undefined}
+                value={studentWork?.score ?? 0}
                 min={0}
                 placeholder={studentWork?.score ? "Enter score" : "Not graded"}
                 suffix={`/${assignment.maxScore}`}

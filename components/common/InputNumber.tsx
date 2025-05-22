@@ -16,6 +16,7 @@ type Props = {
   placeholder?: string;
   minFractionDigits?: number;
   maxFractionDigits?: number;
+  inputRef?: React.Ref<HTMLInputElement>;
 };
 function InputNumber({
   value,
@@ -31,10 +32,12 @@ function InputNumber({
   minFractionDigits,
   maxFractionDigits,
   onChange,
+  inputRef,
 }: Props) {
   return (
     <InputNumberPrimereact
       suffix={suffix}
+      inputRef={inputRef}
       prefix={prefix}
       required={required}
       disabled={disabled}

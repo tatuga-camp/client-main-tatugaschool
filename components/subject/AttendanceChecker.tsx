@@ -80,7 +80,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
           ...student,
           status: "UNKNOW",
           note: "",
-        }))
+        })),
       );
     }
   }, [studentOnSubjects.data]);
@@ -90,11 +90,11 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
       setStudentAttendances((prev) => {
         if (!prev) return null;
         return prev?.map((student) =>
-          student.id === studentId ? { ...student, status: key } : student
+          student.id === studentId ? { ...student, status: key } : student,
         );
       });
     },
-    []
+    [],
   );
 
   const handleCheckAll = ({ key, check }: { key: string; check: boolean }) => {
@@ -114,11 +114,11 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
       setStudentAttendances((prev) => {
         if (!prev) return null;
         return prev?.map((student) =>
-          student.id === studentId ? { ...student, note } : student
+          student.id === studentId ? { ...student, note } : student,
         );
       });
     },
-    []
+    [],
   );
 
   const handleCreateAttendance = async () => {
@@ -150,7 +150,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
 
       const data = studentAttendances.map((student) => {
         const attendanceId = create.attendances.find(
-          (a) => a.studentOnSubjectId === student.id
+          (a) => a.studentOnSubjectId === student.id,
         )?.id;
         if (!attendanceId) return null;
         return {
@@ -193,30 +193,30 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
     });
   };
   return (
-    <div className="w-full h-full flex flex-col gap-1 p-1">
+    <div className="flex h-full w-full flex-col gap-1 p-1">
       <header className="">
-        <section className="w-full hidden md:flex flex-col gap-4 sm:gap-2 sm:flex-row sm:justify-between sm:items-center">
+        <section className="hidden w-full flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-2 md:flex">
           <div className="text-center sm:text-left">
-            <h1 className="text-base sm:text-base font-medium">
+            <h1 className="text-base font-medium sm:text-base">
               {attendanceCheckerDataLanugae.title(language.data ?? "en")}
             </h1>
-            <span className="text-sm text-gray-500 block mt-1">
+            <span className="mt-1 block text-sm text-gray-500">
               {attendanceCheckerDataLanugae.description(language.data ?? "en")}
             </span>
           </div>
         </section>
 
-        <section className="w-full flex flex-col gap-4  border-b">
+        <section className="flex w-full flex-col gap-4 border-b">
           {/* Table Selection */}
           <div className="w-full overflow-x-auto">
-            <div className="flex flex-nowrap min-w-0">
+            <div className="flex min-w-0 flex-nowrap">
               {attendanceTables.data?.map((table, index) => (
                 <button
                   key={index}
                   onClick={() => setSelectTable(table)}
-                  className={`px-3 py-1 whitespace-nowrap ${
+                  className={`whitespace-nowrap px-3 py-1 ${
                     selectTable?.id === table.id
-                      ? "font-semibold border-b-2 border-b-black"
+                      ? "border-b-2 border-b-black font-semibold"
                       : ""
                   }`}
                 >
@@ -227,15 +227,15 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
           </div>
 
           {/* Date & Note Controls */}
-          <div className="flex flex-col sm:flex-row gap-3 w-full">
+          <div className="flex w-full flex-col gap-3 sm:flex-row">
             <form
               ref={formRef}
-              className="flex-1 flex flex-col sm:flex-row gap-2"
+              className="flex flex-1 flex-col gap-2 sm:flex-row"
             >
               <label className="flex flex-col">
-                <span className="text-gray-400 text-xs">
+                <span className="text-xs text-gray-400">
                   {attendanceCheckerDataLanugae.startDate(
-                    language.data ?? "en"
+                    language.data ?? "en",
                   )}
                 </span>
                 <input
@@ -271,7 +271,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
               </label>
               <label className="flex flex-col">
                 {" "}
-                <span className="text-gray-400 text-xs">
+                <span className="text-xs text-gray-400">
                   {attendanceCheckerDataLanugae.endDate(language.data ?? "en")}
                 </span>
                 <input
@@ -290,8 +290,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
             </form>
             <button
               onClick={() => setTriggerNote((prev) => !prev)}
-              className="main-button flex items-center justify-center h-8 px-4
-               ring-1 ring-blue-600 whitespace-nowrap sm:self-end"
+              className="main-button flex h-8 items-center justify-center whitespace-nowrap px-4 ring-1 ring-blue-600 sm:self-end"
             >
               {triggerNote ? (
                 <div className="flex items-center justify-center gap-1">
@@ -307,10 +306,12 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
             </button>
           </div>
         </section>
-        <h2 className="w-full hidden md:block line-clamp-2 text-sm text-gray-400">
+        <h2 className="line-clamp-2 hidden w-full text-sm text-gray-400 md:block">
           {selectTable?.description}
         </h2>
-        {loading && (
+        {(loading ||
+          studentOnSubjects.isLoading ||
+          attendanceTables.isLoading) && (
           <ProgressBar mode="indeterminate" style={{ height: "6px" }} />
         )}
       </header>
@@ -331,11 +332,11 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
       ) : (
         <>
           {/* Desktop View */}
-          <div className="w-full max-h-full overflow-auto">
-            <table className=" w-max min-w-full">
+          <div className="max-h-full w-full overflow-auto">
+            <table className="w-max min-w-full">
               <thead>
-                <tr className="bg-gray-100 z-30 sticky top-0">
-                  <th className="sticky left-0 z-40 w-40 md:w-60 bg-gray-100">
+                <tr className="sticky top-0 z-30 bg-gray-100">
+                  <th className="sticky left-0 z-40 w-40 bg-gray-100 md:w-60">
                     Name
                   </th>
                   {selectTable?.statusLists
@@ -353,7 +354,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
                             }
                             style={{ backgroundColor: status.color }}
                             name={status.title}
-                            className={`text-center w-24 p-2 select-none rounded-md hover:drop-shadow-md cursor-pointer active:scale-105 transition hover:text-black text-sm font-medium flex items-center justify-center gap-1`}
+                            className={`flex w-24 cursor-pointer select-none items-center justify-center gap-1 rounded-md p-2 text-center text-sm font-medium transition hover:text-black hover:drop-shadow-md active:scale-105`}
                           >
                             <span className="max-w-20 truncate">
                               {status.title}
@@ -392,7 +393,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
           </div>
         </>
       )}
-      <footer className="w-full flex justify-end p-1 py-4 border-t">
+      <footer className="flex w-full justify-end border-t p-1 py-4">
         <div className="flex items-center justify-center gap-3">
           <button
             onClick={() => {
@@ -400,7 +401,7 @@ function AttendanceChecker({ subjectId, onClose, toast }: Props) {
               onClose();
             }}
             type="button"
-            className="second-button border flex items-center justify-center gap-1"
+            className="second-button flex items-center justify-center gap-1 border"
           >
             Cancel
           </button>
@@ -461,8 +462,8 @@ const StudentAttendanceItem = React.memo(
         } border-spacing-2 border-4 border-transparent`}
       >
         <td className={`sticky left-0 z-10 ${odd ? "bg-gray-50" : "bg-white"}`}>
-          <div className="flex w-40 md:w-60 truncate gap-2">
-            <div className="md:block hidden w-10 h-10 relative rounded-md ring-1 overflow-hidden">
+          <div className="flex w-40 gap-2 truncate md:w-60">
+            <div className="relative hidden h-10 w-10 overflow-hidden rounded-md ring-1 md:block">
               <Image
                 src={student.photo}
                 alt={student.firstName}
@@ -470,7 +471,7 @@ const StudentAttendanceItem = React.memo(
                 sizes="(max-width: 768px) 100vw, 33vw"
                 placeholder="blur"
                 blurDataURL={decodeBlurhashToCanvas(
-                  student.blurHash ?? defaultBlurHash
+                  student.blurHash ?? defaultBlurHash,
                 )}
                 className="object-cover"
               />
@@ -490,7 +491,7 @@ const StudentAttendanceItem = React.memo(
           .map((status, index) => {
             return (
               <td key={student.id + status.id}>
-                <div className="w-full flex justify-center items-center">
+                <div className="flex w-full items-center justify-center">
                   <input
                     name={status.title}
                     checked={student.status === status.title}
@@ -502,7 +503,7 @@ const StudentAttendanceItem = React.memo(
                     }
                     style={{ accentColor: status.color }}
                     type="checkbox"
-                    className="w-6 h-6"
+                    className="h-6 w-6"
                   />
                 </div>
               </td>
@@ -521,11 +522,11 @@ const StudentAttendanceItem = React.memo(
                 note: e.target.value,
               })
             }
-            className="main-input w-40 h-10 resize-none"
+            className="main-input h-10 w-40 resize-none"
           />
         </td>
       </tr>
     );
-  }
+  },
 );
 StudentAttendanceItem.displayName = "StudentAttendanceItem";
