@@ -1,14 +1,18 @@
 import { ReactNode } from "react";
-import { MemberRole } from "../interfaces";
-import { LuSchool } from "react-icons/lu";
-import { SiGoogleclassroom } from "react-icons/si";
-import { MdAssignmentAdd } from "react-icons/md";
-import { FaStarHalfStroke, FaUserGroup } from "react-icons/fa6";
-import { CiSettings } from "react-icons/ci";
 import { BsPeopleFill } from "react-icons/bs";
-import { PiWechatLogoBold } from "react-icons/pi";
+import { CiSettings } from "react-icons/ci";
+import { FaStarHalfStroke, FaUserGroup } from "react-icons/fa6";
 import { IoHome } from "react-icons/io5";
+import { LuSchool } from "react-icons/lu";
+import {
+  MdAssignmentAdd,
+  MdGridView,
+  MdSettings,
+  MdSubscriptions,
+} from "react-icons/md";
+import { SiGoogleclassroom } from "react-icons/si";
 import { TbReportAnalytics } from "react-icons/tb";
+import { MemberRole } from "../interfaces";
 
 export const ListSubjectRoles: { title: MemberRole; describe: string }[] = [
   {
@@ -38,7 +42,8 @@ export type MenuSubject =
   | "Classwork"
   | "Attendance"
   | "Grade"
-  | "SettingSubject";
+  | "SettingSubject"
+  | "Subjects";
 
 export const menuSubjectList = ({
   schoolId,
@@ -73,9 +78,14 @@ export const menuSubjectList = ({
       icon: <CiSettings />,
     },
     {
+      title: "Subjects",
+      icon: <MdGridView />,
+      url: `/school/${schoolId}?menu=Subjects`,
+    },
+    {
       title: "School",
       icon: <LuSchool />,
-      url: `/school/${schoolId}?menu=Subjects`,
+      url: `/school/${schoolId}?menu=School`,
     },
   ];
 };
@@ -85,14 +95,10 @@ export type MenuSchool =
   | "Classes"
   | "Teams"
   | "Homepage"
-  | "Subjects";
-export const menuSchoolList = ({
-  schoolId,
-  subjectId,
-}: {
-  schoolId?: string;
-  subjectId?: string;
-}): {
+  | "Subjects"
+  | "Setting"
+  | "Subscription";
+export const menuSchoolList = (): {
   title: MenuSchool;
   icon: ReactNode;
   url?: string | undefined;
@@ -111,6 +117,14 @@ export const menuSchoolList = ({
       icon: <SiGoogleclassroom />,
     },
     {
+      title: "Setting",
+      icon: <MdSettings />,
+    },
+    {
+      title: "Subscription",
+      icon: <MdSubscriptions />,
+    },
+    {
       title: "Homepage",
       icon: <IoHome />,
       url: "/",
@@ -122,7 +136,9 @@ export type MenuClassroom =
   | "Classroom"
   | "SettingClassroom"
   | "GradesSummary"
-  | "School";
+  | "OverViewClassroom"
+  | "School"
+  | "Subjects";
 export const menuClassroomList = ({
   schoolId,
 }: {
@@ -146,9 +162,14 @@ export const menuClassroomList = ({
       icon: <CiSettings />,
     },
     {
+      title: "Subjects",
+      icon: <MdGridView />,
+      url: `/school/${schoolId}?menu=Classes`,
+    },
+    {
       title: "School",
       icon: <LuSchool />,
-      url: `/school/${schoolId}?menu=Classes`,
+      url: `/school/${schoolId}?menu=School`,
     },
   ];
 };

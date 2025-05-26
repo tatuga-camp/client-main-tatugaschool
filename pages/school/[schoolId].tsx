@@ -27,7 +27,7 @@ const SchoolPage = ({ schoolId }: { schoolId: string }) => {
 
   if (school.isLoading) {
     return (
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex h-screen items-center justify-center">
         <ProgressSpinner />
       </div>
     );
@@ -36,13 +36,13 @@ const SchoolPage = ({ schoolId }: { schoolId: string }) => {
   if (school.error) {
     return (
       <DefaultLayout>
-        <div className="flex justify-center gap-3 flex-col items-center h-screen">
+        <div className="flex h-screen flex-col items-center justify-center gap-3">
           <h1 className="text-4xl text-red-500">
             {school.error.message || "Something went wrong"}
           </h1>
           <button
             onClick={() => router.back()}
-            className="bg-primary-color w-40 text-white px-4 py-2 rounded-md"
+            className="w-40 rounded-md bg-primary-color px-4 py-2 text-white"
           >
             Back
           </button>
@@ -54,11 +54,11 @@ const SchoolPage = ({ schoolId }: { schoolId: string }) => {
   if (!school.data) {
     return (
       <DefaultLayout>
-        <div className="flex justify-center gap-3 flex-col items-center h-screen">
+        <div className="flex h-screen flex-col items-center justify-center gap-3">
           <h1 className="text-4xl text-red-500">No School Found</h1>
           <button
             onClick={() => router.back()}
-            className="bg-primary-color w-40 text-white px-4 py-2 rounded-md"
+            className="w-40 rounded-md bg-primary-color px-4 py-2 text-white"
           >
             Back
           </button>
@@ -79,7 +79,9 @@ const SchoolPage = ({ schoolId }: { schoolId: string }) => {
         selectMenu={selectMenu}
         schoolId={schoolId}
       >
-        {selectMenu === "School" && <Dashboard school={school.data} />}
+        {(selectMenu === "School" ||
+          selectMenu === "Setting" ||
+          selectMenu === "Subscription") && <Dashboard school={school.data} />}
         {selectMenu === "Classes" && <Classes schoolId={schoolId} />}
         {selectMenu === "Subjects" && <Subjects schoolId={schoolId} />}
       </SchoolLayout>

@@ -83,7 +83,7 @@ export const schoolDataLanguage = {
     }
   },
 
-  basicInfo: (language: Language) => {
+  setting: (language: Language) => {
     switch (language) {
       case "en":
         return "Basic Information";
@@ -93,7 +93,7 @@ export const schoolDataLanguage = {
         return "Basic Information";
     }
   },
-  billing: (language: Language) => {
+  subscription: (language: Language) => {
     switch (language) {
       case "en":
         return "Billing & Plan";

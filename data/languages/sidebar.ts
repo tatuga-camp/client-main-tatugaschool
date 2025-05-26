@@ -11,12 +11,32 @@ export const sidebarDataLanguage = {
         return "School";
     }
   },
+  setting: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Setting";
+      case "th":
+        return "ตั้งค่าโรงเรียน";
+      default:
+        return "Setting";
+    }
+  },
+  subscription: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Subscription";
+      case "th":
+        return "จัดการระบบสมาชิก";
+      default:
+        return "Subscription";
+    }
+  },
   classes: (language: Language) => {
     switch (language) {
       case "en":
         return "Classes";
       case "th":
-        return "ชั้นเรียน";
+        return "ชั้นเรียนรวม";
       default:
         return "Classes";
     }
@@ -26,7 +46,7 @@ export const sidebarDataLanguage = {
       case "en":
         return "Subjects";
       case "th":
-        return "รายวิชา";
+        return "รายวิชารวม";
       default:
         return "Subjects";
     }
