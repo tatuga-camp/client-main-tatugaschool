@@ -43,6 +43,7 @@ const CreateSchoolComponent = () => {
   const createSchool = useCreateSchool();
   const toast = useRef<Toast>(null);
   const [loading, setLoading] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const inputClasses = "border rounded-md px-6 py-4";
   const [profile, setProfile] = useState<{
@@ -125,14 +126,14 @@ const CreateSchoolComponent = () => {
         throw new Error(
           language.data === "en"
             ? "Please fill the form"
-            : "โปรดกรอกข้อมูลให้ครบถ้วน"
+            : "โปรดกรอกข้อมูลให้ครบถ้วน",
         );
       }
       if (!profile?.logo) {
         throw new Error(
           language.data === "en"
             ? "Please upload logo of your school"
-            : "กรุณาอัพโหลดรูปภาพ"
+            : "กรุณาอัพโหลดรูปภาพ",
         );
       }
 
@@ -164,11 +165,11 @@ const CreateSchoolComponent = () => {
 
   const selectedCountryTemplate = (
     option: { name: string; code: string } | undefined,
-    props: any
+    props: any,
   ) => {
     if (option) {
       return (
-        <div className="flex gap-5 align-items-center">
+        <div className="align-items-center flex gap-5">
           <Image
             alt={option.name}
             src={`/svg/flags/1x1/${option.code.toLowerCase()}.svg`}
@@ -185,13 +186,13 @@ const CreateSchoolComponent = () => {
   };
 
   const countryOptionTemplate = (
-    option: { name: string; code: string } | undefined
+    option: { name: string; code: string } | undefined,
   ) => {
     if (!option) {
       return;
     }
     return (
-      <div className="flex gap-5 align-items-center">
+      <div className="align-items-center flex gap-5">
         <Image
           alt={option.name}
           src={`/svg/flags/1x1/${option.code.toLowerCase()}.svg`}
@@ -214,7 +215,7 @@ const CreateSchoolComponent = () => {
         setActiveIndex(index);
       }
     },
-    [createSchool.isSuccess, createSchool.data]
+    [createSchool.isSuccess, createSchool.data],
   );
 
   useEffect(() => {
@@ -223,26 +224,23 @@ const CreateSchoolComponent = () => {
     }
   }, [createSchool.status, handleChangeActiveIndex]);
   return (
-    <div className="w-full max-w-xl mx-auto flex flex-col gap-2 mb-10 bg-white rounded-3xl shadow-md p-12">
+    <div className="mx-auto mb-10 flex w-full max-w-xl flex-col gap-2 rounded-3xl bg-white p-12 shadow-md">
       <Toast ref={toast}></Toast>
-      <h2 className="text-xl font-semibold text-center text-black">
+      <h2 className="text-center text-xl font-semibold text-black">
         {createSchoolDataLanguage.title(language.data ?? "en")}
       </h2>
-      <ul className="flex items-center py-5 justify-center gap-x-10">
+      <ul className="flex items-center justify-center gap-x-10 py-5">
         {menuItems.map((item, index) => (
           <li
             key={index}
-            className={`
-              cursor-pointer flex flex-col items-center justify-center gap-2
-             ${
-               activeIndex === index
-                 ? "text-primary-color"
-                 : "text-gray-400 hover:text-primary-color"
-             }
-            `}
+            className={`flex cursor-pointer flex-col items-center justify-center gap-2 ${
+              activeIndex === index
+                ? "text-primary-color"
+                : "text-gray-400 hover:text-primary-color"
+            } `}
             onClick={() => handleChangeActiveIndex(index)}
           >
-            <div className="w-10 h-10 text-2xl rounded-full border flex items-center justify-center">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full border text-2xl">
               {item.icon}
             </div>
             <span className="text-sm font-semibold">{item.title}</span>
@@ -250,22 +248,20 @@ const CreateSchoolComponent = () => {
         ))}
       </ul>
 
-      <form onSubmit={handleSubmit}>
+      <form ref={formRef} onSubmit={handleSubmit}>
         {activeIndex === 0 && (
           <section className="flex flex-col gap-2">
-            <div className="flex items-center justify-center w-full">
+            <div className="flex w-full items-center justify-center">
               <label
-                className={`flex flex-col items-center justify-center w-full h-64 border-2
-               border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50
-                ${loading && "animate-pulse"}`}
+                className={`flex h-64 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 ${loading && "animate-pulse"}`}
               >
                 {profile?.logo ? (
-                  <div className="w-full h-full p-5 relative">
+                  <div className="relative h-full w-full p-5">
                     <Image
                       src={profile?.logo}
                       layout="fill"
                       blurDataURL={decodeBlurhashToCanvas(
-                        profile?.blurHash || defaultBlurHash
+                        profile?.blurHash || defaultBlurHash,
                       )}
                       placeholder="blur"
                       objectFit="contain"
@@ -273,9 +269,9 @@ const CreateSchoolComponent = () => {
                     />
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  <div className="flex flex-col items-center justify-center pb-6 pt-5">
                     <svg
-                      className="w-8 h-8 mb-4 text-gray-500 "
+                      className="mb-4 h-8 w-8 text-gray-500"
                       aria-hidden="true"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
@@ -289,12 +285,12 @@ const CreateSchoolComponent = () => {
                         d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
                       />
                     </svg>
-                    <p className="mb-2 text-sm text-gray-500 ">
+                    <p className="mb-2 text-sm text-gray-500">
                       {createSchoolDataLanguage.uploadTitle(
-                        language.data ?? "en"
+                        language.data ?? "en",
                       )}
                     </p>
-                    <p className="text-xs text-gray-500 ">
+                    <p className="text-xs text-gray-500">
                       SVG, PNG, JPG or GIF (MAX. 800x400px)
                     </p>
                   </div>
@@ -312,13 +308,13 @@ const CreateSchoolComponent = () => {
             {loading && (
               <ProgressBar mode="indeterminate" style={{ height: "6px" }} />
             )}
-            <div className="flex flex-col ">
+            <div className="flex flex-col">
               <input
                 required
                 type="text"
                 className={inputClasses}
                 placeholder={createSchoolDataLanguage.school(
-                  language.data ?? "en"
+                  language.data ?? "en",
                 )}
                 aria-label="School Name"
                 value={profile?.school}
@@ -335,7 +331,7 @@ const CreateSchoolComponent = () => {
                 required
                 className={inputClasses}
                 placeholder={createSchoolDataLanguage.description(
-                  language.data ?? "en"
+                  language.data ?? "en",
                 )}
                 aria-label="School Description"
                 value={profile?.description}
@@ -348,10 +344,12 @@ const CreateSchoolComponent = () => {
             </div>
             <button
               type="button"
-              onClick={() => handleChangeActiveIndex(1)}
-              className="w-full hover:bg-primary-color flex active:drop-shadow-md
-          items-center bg-secondary-color transition duration-150
-           justify-center text-white py-2 h-10 rounded-lg font-semibold"
+              onClick={() => {
+                if (formRef.current?.reportValidity()) {
+                  handleChangeActiveIndex(1);
+                }
+              }}
+              className="flex h-10 w-full items-center justify-center rounded-lg bg-secondary-color py-2 font-semibold text-white transition duration-150 hover:bg-primary-color active:drop-shadow-md"
             >
               {createSchoolDataLanguage.button(language.data ?? "en")}
             </button>
@@ -359,7 +357,7 @@ const CreateSchoolComponent = () => {
         )}
 
         {activeIndex === 1 && (
-          <section className="flex flex-col  w-full gap-2">
+          <section className="flex w-full flex-col gap-2">
             <Dropdown<{ name: string; code: string } | undefined>
               value={country}
               onChange={(e) => setCountry(e.value)}
@@ -397,7 +395,7 @@ const CreateSchoolComponent = () => {
                 }
               />
             </div>
-            <div className="flex  flex-col ">
+            <div className="flex flex-col">
               <input
                 type="text"
                 required
@@ -426,16 +424,14 @@ const CreateSchoolComponent = () => {
               className={`w-full ${
                 createSchool.isPending
                   ? "bg-white ring-1 ring-primary-color"
-                  : "bg-secondary-color "
-              } hover:bg-primary-color flex active:drop-shadow-md
-items-center transition duration-150
-justify-center text-white py-2 h-10 rounded-lg font-semibold`}
+                  : "bg-secondary-color"
+              } flex h-10 items-center justify-center rounded-lg py-2 font-semibold text-white transition duration-150 hover:bg-primary-color active:drop-shadow-md`}
             >
               {createSchool.isPending ? (
                 <ProgressSpinner
                   animationDuration="1s"
                   style={{ width: "20px" }}
-                  className="w-5 h-5"
+                  className="h-5 w-5"
                   strokeWidth="8"
                 />
               ) : (
