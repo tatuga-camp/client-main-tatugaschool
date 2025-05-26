@@ -27,10 +27,10 @@ function SchoolLayout({
     setActive(() => false); // Close the SubjectNavbar when clicking outside
   });
   return (
-    <section className="min-h-screen font-Anuphan bg-background-color ">
-      <div ref={navbarRef} className="sticky z-50 top-0">
+    <section className="min-h-screen bg-background-color font-Anuphan">
+      <div ref={navbarRef} className="sticky top-0 z-50">
         <Navbar
-          menuLists={menuSchoolList({ schoolId: schoolId })}
+          menuLists={menuSchoolList()}
           schoolId={schoolId}
           setTrigger={setActive}
           trigger={active}
