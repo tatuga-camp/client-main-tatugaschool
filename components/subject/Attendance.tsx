@@ -1,41 +1,40 @@
+import { ExportAttendanceService } from "@/services";
+import Image from "next/image";
+import { ProgressBar } from "primereact/progressbar";
+import { Toast } from "primereact/toast";
 import React, { useEffect } from "react";
+import { BiCustomize } from "react-icons/bi";
+import { Bs123, BsQrCode } from "react-icons/bs";
+import { CiViewTable } from "react-icons/ci";
+import { FaUser } from "react-icons/fa6";
+import { MdOutlineSpeakerNotes } from "react-icons/md";
+import { RiTable3 } from "react-icons/ri";
+import { SiMicrosoftexcel } from "react-icons/si";
+import { defaultBlurHash } from "../../data";
+import {
+  AttendanceRow,
+  AttendanceStatusList,
+  AttendanceTable,
+  Attendance as AttendanceType,
+  PartialExcept,
+  StudentOnSubject,
+} from "../../interfaces";
 import {
   useGetAttendanceRowByTableId,
   useGetAttendancesTable,
   useGetStudentOnSubject,
 } from "../../react-query";
-import { SiMicrosoftexcel } from "react-icons/si";
-import { BiCustomize } from "react-icons/bi";
-import {
-  Attendance as AttendanceType,
-  AttendanceRow,
-  AttendanceStatusList,
-  AttendanceTable,
-  StudentOnSubject,
-  PartialExcept,
-} from "../../interfaces";
-import { FaUser } from "react-icons/fa6";
-import Image from "next/image";
 import {
   decodeBlurhashToCanvas,
   getRandomSlateShade,
   getSlateColorStyle,
 } from "../../utils";
-import { defaultBlurHash } from "../../data";
-import { MdOutlineSpeakerNotes } from "react-icons/md";
-import useClickOutside from "../../hook/useClickOutside";
-import AttendanceView from "./AttendanceView";
-import AttendanceRowView from "./AttendanceRowView";
-import { CiViewTable } from "react-icons/ci";
-import AttendanceTableCreate from "./AttendanceTableCreate";
-import { Toast } from "primereact/toast";
-import { ProgressBar } from "primereact/progressbar";
-import AttendanceTableSetting from "./AttendanceTableSetting";
-import { RiTable3 } from "react-icons/ri";
-import { Bs123, BsQrCode } from "react-icons/bs";
-import PopupLayout from "../layout/PopupLayout";
-import { ExportAttendanceService } from "@/services";
 import LoadingSpinner from "../common/LoadingSpinner";
+import PopupLayout from "../layout/PopupLayout";
+import AttendanceChecker from "./AttendanceChecker";
+import AttendanceTableCreate from "./AttendanceTableCreate";
+import AttendanceTableSetting from "./AttendanceTableSetting";
+import AttendanceView from "./AttendanceView";
 
 const menuAttendances = [
   {
@@ -81,7 +80,9 @@ function Attendance({
     | null
   >(null);
   const [loading, setLoading] = React.useState(false);
-  const [selectRow, setSelectRow] = React.useState<AttendanceRow | null>(null);
+  const [selectRow, setSelectRow] = React.useState<
+    (AttendanceRow & { attendances: AttendanceType[] }) | null
+  >(null);
 
   useEffect(() => {
     if (!selectTable && tables.data) {
@@ -117,7 +118,7 @@ function Attendance({
     <>
       {selectAttendance && selectTable && (
         <PopupLayout onClose={() => setSelectAttendance(null)}>
-          <div className="bg-white border rounded-md p-2">
+          <div className="rounded-md border bg-white p-2">
             <AttendanceView
               toast={toast}
               selectAttendance={selectAttendance}
@@ -133,21 +134,18 @@ function Attendance({
 
       {selectRow && (
         <PopupLayout onClose={() => setSelectRow(null)}>
-          <AttendanceRowView
+          <AttendanceChecker
+            subjectId={subjectId}
+            onClose={() => setSelectRow(null)}
+            selectAttendanceRow={selectRow}
             toast={toast}
-            selectRow={selectRow}
-            onClose={() => {
-              document.body.style.overflow = "auto";
-
-              setSelectRow(null);
-            }}
           />
         </PopupLayout>
       )}
 
       {triggerCreateAttendanceTable && (
         <PopupLayout onClose={() => setTriggerCreateAttendanceTable(false)}>
-          <div className="bg-white w-96 p-2 rounded-md border">
+          <div className="w-96 rounded-md border bg-white p-2">
             <AttendanceTableCreate
               toast={toast}
               subjectId={subjectId}
@@ -160,19 +158,19 @@ function Attendance({
         </PopupLayout>
       )}
 
-      <header className="w-full flex flex-col md:flex-row justify-between p-3 md:px-5 md:max-w-screen-md xl:max-w-screen-lg gap-4 md:gap-0 mx-auto">
+      <header className="mx-auto flex w-full flex-col justify-between gap-4 p-3 md:max-w-screen-md md:flex-row md:gap-0 md:px-5 xl:max-w-screen-lg">
         <section className="text-center md:text-left">
-          <h1 className="text-2xl md:text-3xl font-semibold">
+          <h1 className="text-2xl font-semibold md:text-3xl">
             Attendance Data
           </h1>
-          <span className="text-gray-400 text-sm md:text-base">
+          <span className="text-sm text-gray-400 md:text-base">
             You can view the attendance data of this subject here.
           </span>
         </section>
-        <section className="flex flex-col xl:flex-row items-center gap-2 md:gap-1">
+        <section className="flex flex-col items-center gap-2 md:gap-1 xl:flex-row">
           <button
             onClick={() => setTriggerCreateAttendanceTable(true)}
-            className="main-button w-full h-8 xl:w-auto flex items-center justify-center gap-1 py-1 ring-1 ring-blue-600"
+            className="main-button flex h-8 w-full items-center justify-center gap-1 py-1 ring-1 ring-blue-600 xl:w-auto"
           >
             <CiViewTable />
             Create Table
@@ -180,7 +178,7 @@ function Attendance({
           <button
             disabled={loading}
             onClick={handleDolwnloadExcel}
-            className="main-button  w-28 h-8  flex items-center justify-center gap-1 py-1 ring-1 ring-blue-600"
+            className="main-button flex h-8 w-28 items-center justify-center gap-1 py-1 ring-1 ring-blue-600"
           >
             {loading ? (
               <LoadingSpinner />
@@ -194,7 +192,7 @@ function Attendance({
 
           <button
             onClick={() => setTriggerSetting((prev) => !prev)}
-            className="second-button w-full h-8 xl:w-52 flex items-center justify-center gap-1 py-1 border"
+            className="second-button flex h-8 w-full items-center justify-center gap-1 border py-1 xl:w-52"
           >
             {triggerSetting ? (
               <div className="flex items-center justify-center gap-1">
@@ -210,11 +208,11 @@ function Attendance({
           </button>
         </section>
       </header>
-      <div className="w-full md:max-w-screen-md xl:max-w-screen-lg mx-auto border-b pb-5 px-3 md:px-5">
+      <div className="mx-auto w-full border-b px-3 pb-5 md:max-w-screen-md md:px-5 xl:max-w-screen-lg">
         {tables.isLoading && (
           <ProgressBar mode="indeterminate" style={{ height: "6px" }} />
         )}
-        <ul className="mt-5 flex items-center justify-start w-full overflow-x-auto gap-2">
+        <ul className="mt-5 flex w-full items-center justify-start gap-2 overflow-x-auto">
           {tables.isLoading ? (
             <div>Loading..</div>
           ) : (
@@ -222,21 +220,19 @@ function Attendance({
               <li
                 onClick={() => setSelectTable(table)}
                 key={table.id}
-                className={`w-max min-w-40 rounded-md shrink-0 p-3 cursor-pointer ${
+                className={`w-max min-w-40 shrink-0 cursor-pointer rounded-md p-3 ${
                   table.id === selectTable?.id
-                    ? "border-primary-color gradient-bg text-white"
-                    : "border bg-white  text-black"
+                    ? "gradient-bg border-primary-color text-white"
+                    : "border bg-white text-black"
                 }`}
               >
                 <h2 className="text-base font-semibold">{table.title}</h2>
                 <p
-                  className={`text-xs text-gray-400
-                  ${
+                  className={`text-xs text-gray-400 ${
                     table.id === selectTable?.id
-                      ? " text-white"
-                      : " text-gray-400"
-                  }
-                  `}
+                      ? "text-white"
+                      : "text-gray-400"
+                  } `}
                 >
                   {table.description}
                 </p>
@@ -246,7 +242,7 @@ function Attendance({
         </ul>
       </div>
 
-      <main className="w-full mt-5 flex flex-col items-center md:px-0 md:max-w-screen-md xl:max-w-screen-lg mx-auto">
+      <main className="mx-auto mt-5 flex w-full flex-col items-center md:max-w-screen-md md:px-0 xl:max-w-screen-lg">
         <div className="w-full">
           {triggerSetting && selectTable ? (
             <div className="px-5">
@@ -279,7 +275,11 @@ type Props = {
   selectTable: AttendanceTable & {
     statusLists: AttendanceStatusList[];
   };
-  setSelectRow: React.Dispatch<React.SetStateAction<AttendanceRow | null>>;
+  setSelectRow: React.Dispatch<
+    React.SetStateAction<
+      (AttendanceRow & { attendances: AttendanceType[] }) | null
+    >
+  >;
   setSelectAttendance: React.Dispatch<
     React.SetStateAction<SelectAttendance | null>
   >;
@@ -306,16 +306,15 @@ function DisplayAttendanceTable({
   }, [rows.isSuccess]);
 
   return (
-    <div className="w-full flex flex-col items-center">
-      <ul className="w-full flex flex-col md:flex-row items-center justify-center gap-2">
+    <div className="flex w-full flex-col items-center">
+      <ul className="flex w-full flex-col items-center justify-center gap-2 md:flex-row">
         {menuAttendances.map((menu) => (
           <li key={menu.title} className="w-full md:w-auto">
             <button
               onClick={() => setSelectMenu(menu.title)}
-              className={`border-b w-full md:w-52 p-2 rounded-md transition flex justify-start items-center gap-1
-              ${
+              className={`flex w-full items-center justify-start gap-1 rounded-md border-b p-2 transition md:w-52 ${
                 menu.title === selectMenu
-                  ? "border-primary-color text-primary-color bg-white drop-shadow"
+                  ? "border-primary-color bg-white text-primary-color drop-shadow"
                   : "border-gray-400"
               }`}
             >
@@ -326,13 +325,13 @@ function DisplayAttendanceTable({
       </ul>
       <div
         ref={scrollRef}
-        className="w-full h-[30rem] overflow-auto relative bg-white rounded-md mt-5"
+        className="relative mt-5 h-[30rem] w-full overflow-auto rounded-md bg-white"
       >
         <table className="table-fixed bg-white md:min-w-[640px]">
           <thead className="">
-            <tr className="border-b  bg-white sticky top-0 z-40">
-              <th className="text-sm z-40 sticky left-0 bg-white font-semibold">
-                <div className="w-48 md:w-96 flex justify-start items-center gap-2">
+            <tr className="sticky top-0 z-40 border-b bg-white">
+              <th className="sticky left-0 z-40 bg-white text-sm font-semibold">
+                <div className="flex w-48 items-center justify-start gap-2 md:w-96">
                   <FaUser />
                   Name
                 </div>
@@ -342,76 +341,72 @@ function DisplayAttendanceTable({
                     const number = getRandomSlateShade();
                     const color = getSlateColorStyle(number);
                     return (
-                      <th key={index} className="text-sm  font-semibold">
+                      <th key={index} className="text-sm font-semibold">
                         <div
                           style={color}
-                          className="w-40 h-14  animate-pulse"
+                          className="h-14 w-40 animate-pulse"
                         ></div>
                       </th>
                     );
                   })
                 : selectMenu === "Attendances"
-                ? rows?.data
-                    ?.sort(
-                      (a, b) =>
-                        new Date(a.startDate).getTime() -
-                        new Date(b.startDate).getTime()
-                    )
-                    .map((row) => {
-                      const dateFormat = new Date(
-                        row.startDate
-                      ).toLocaleDateString(undefined, {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      });
-                      const time = new Date(row.startDate).toLocaleTimeString(
-                        undefined,
-                        {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        }
-                      );
+                  ? rows?.data
+                      ?.sort(
+                        (a, b) =>
+                          new Date(a.startDate).getTime() -
+                          new Date(b.startDate).getTime(),
+                      )
+                      .map((row) => {
+                        const dateFormat = new Date(
+                          row.startDate,
+                        ).toLocaleDateString(undefined, {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        });
+                        const time = new Date(row.startDate).toLocaleTimeString(
+                          undefined,
+                          {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          },
+                        );
+                        return (
+                          <th key={row.id} className="text-sm font-semibold">
+                            <button
+                              onClick={() => setSelectRow(row)}
+                              className="relative flex w-max flex-col items-start p-2 pr-14 hover:bg-gray-100 hover:ring-1 active:bg-gray-200"
+                            >
+                              <div className="absolute right-1 top-1 m-auto flex items-center justify-end gap-1">
+                                {row?.note && (
+                                  <div className="flex h-5 w-5 items-center justify-center rounded-md border bg-white">
+                                    <MdOutlineSpeakerNotes />
+                                  </div>
+                                )}
+                                {row.type === "SCAN" && (
+                                  <div className="flex h-5 w-5 items-center justify-center rounded-md border bg-white">
+                                    <BsQrCode />
+                                  </div>
+                                )}
+                              </div>
+                              <span>{dateFormat}</span>
+                              <span className="text-xs text-gray-500">
+                                {time}
+                              </span>
+                            </button>
+                          </th>
+                        );
+                      })
+                  : selectTable.statusLists.map((status) => {
                       return (
-                        <th key={row.id} className="text-sm  font-semibold">
-                          <button
-                            onClick={() => setSelectRow(row)}
-                            className="w-max pr-14 p-2 relative active:bg-gray-200
-               hover:bg-gray-100  hover:ring-1 flex items-start flex-col"
-                          >
-                            <div className="flex items-center justify-end gap-1 absolute  top-1 m-auto right-1 ">
-                              {row?.note && (
-                                <div className="w-5 h-5 bg-white  flex items-center justify-center   rounded-md border">
-                                  <MdOutlineSpeakerNotes />
-                                </div>
-                              )}
-                              {row.type === "SCAN" && (
-                                <div className="w-5 h-5 bg-white  flex items-center justify-center  rounded-md border">
-                                  <BsQrCode />
-                                </div>
-                              )}
-                            </div>
-                            <span>{dateFormat}</span>
-                            <span className="text-xs text-gray-500">
-                              {time}
-                            </span>
+                        <th key={status.id} className="text-sm font-semibold">
+                          <button className="relative flex w-40 flex-col items-start p-2 hover:bg-gray-100 hover:ring-1 active:bg-gray-200">
+                            <span>{status.title}</span>
+                            <span className="text-xs text-gray-500">Total</span>
                           </button>
                         </th>
                       );
-                    })
-                : selectTable.statusLists.map((status) => {
-                    return (
-                      <th key={status.id} className="text-sm  font-semibold">
-                        <button
-                          className="w-40 p-2 relative active:bg-gray-200
-       hover:bg-gray-100  hover:ring-1 flex items-start flex-col"
-                        >
-                          <span>{status.title}</span>
-                          <span className="text-xs text-gray-500">Total</span>
-                        </button>
-                      </th>
-                    );
-                  })}
+                    })}
             </tr>
           </thead>
           <tbody>
@@ -424,16 +419,14 @@ function DisplayAttendanceTable({
                   <tr
                     className={` ${
                       odd ? "bg-gray-200/20" : "bg-white"
-                    } hover:bg-gray-200/40 group`}
+                    } group hover:bg-gray-200/40`}
                     key={student.id}
                   >
                     <td
-                      className={`text-sm sticky left-0 z-30 font-semibold
-            ${odd ? "bg-gray-100" : "bg-white"} group-hover:bg-gray-200
-            `}
+                      className={`sticky left-0 z-30 text-sm font-semibold ${odd ? "bg-gray-100" : "bg-white"} group-hover:bg-gray-200`}
                     >
-                      <div className="flex items-center h-14 gap-2">
-                        <div className="w-8 h-8 md:w-10 md:h-10 relative rounded-md ring-1 overflow-hidden">
+                      <div className="flex h-14 items-center gap-2">
+                        <div className="relative h-8 w-8 overflow-hidden rounded-md ring-1 md:h-10 md:w-10">
                           <Image
                             src={student.photo}
                             alt={student.firstName}
@@ -441,13 +434,13 @@ function DisplayAttendanceTable({
                             sizes="(max-width: 768px) 100vw, 33vw"
                             placeholder="blur"
                             blurDataURL={decodeBlurhashToCanvas(
-                              student.blurHash ?? defaultBlurHash
+                              student.blurHash ?? defaultBlurHash,
                             )}
                             className="object-cover"
                           />
                         </div>
                         <div>
-                          <h1 className="text-xs md:text-sm font-semibold">
+                          <h1 className="text-xs font-semibold md:text-sm">
                             {student.firstName} {student.lastName}
                           </h1>
                           <p className="text-xs text-gray-500">
@@ -464,109 +457,96 @@ function DisplayAttendanceTable({
                             <td key={index}>
                               <div
                                 style={color}
-                                className="flex w-full h-14 animate-pulse"
+                                className="flex h-14 w-full animate-pulse"
                               ></div>
                             </td>
                           );
                         })
                       : selectMenu === "Attendances"
-                      ? rows?.data?.map((row, index) => {
-                          const attendance = row.attendances.find(
-                            (a) => a.studentOnSubjectId === student.id
-                          );
-                          if (!attendance)
+                        ? rows?.data?.map((row, index) => {
+                            const attendance = row.attendances.find(
+                              (a) => a.studentOnSubjectId === student.id,
+                            );
+                            if (!attendance)
+                              return (
+                                <td key={row.id}>
+                                  <button
+                                    onClick={() => {
+                                      setSelectAttendance(() => {
+                                        return {
+                                          attendanceRowId: row.id,
+                                          student,
+                                        };
+                                      });
+                                    }}
+                                    className="relative flex h-14 w-full cursor-pointer select-none flex-col items-center justify-center bg-black text-white ring-black transition hover:ring-1 hover:drop-shadow-md"
+                                  >
+                                    NO DATA
+                                  </button>
+                                </td>
+                              );
                             return (
-                              <td key={row.id}>
+                              <td
+                                key={row.id + attendance.id}
+                                className="text-sm font-semibold"
+                              >
                                 <button
                                   onClick={() => {
                                     setSelectAttendance(() => {
                                       return {
-                                        attendanceRowId: row.id,
+                                        ...attendance,
                                         student,
                                       };
                                     });
                                   }}
-                                  className="flex w-full h-14
-                   relative hover:ring-1  bg-black select-none
-                    text-white ring-black hover:drop-shadow-md cursor-pointer   
-                   items-center transition
-                   justify-center flex-col"
+                                  style={{
+                                    backgroundColor:
+                                      selectTable?.statusLists.find(
+                                        (s) => s.title === attendance?.status,
+                                      )?.color ?? "#94a3b8",
+                                  }}
+                                  className="relative flex h-14 w-full cursor-pointer flex-col items-center justify-center ring-black transition hover:ring-1 hover:drop-shadow-md"
                                 >
-                                  NO DATA
+                                  {attendance?.note && (
+                                    <div className="absolute right-2 top-2 m-auto flex h-5 w-5 items-center justify-center rounded-full bg-white">
+                                      <MdOutlineSpeakerNotes />
+                                    </div>
+                                  )}
+                                  <span>{attendance?.status}</span>
                                 </button>
                               </td>
                             );
-                          return (
-                            <td
-                              key={row.id + attendance.id}
-                              className="text-sm  font-semibold"
-                            >
-                              <button
-                                onClick={() => {
-                                  setSelectAttendance(() => {
-                                    return {
-                                      ...attendance,
-                                      student,
-                                    };
-                                  });
-                                }}
-                                style={{
-                                  backgroundColor:
-                                    selectTable?.statusLists.find(
-                                      (s) => s.title === attendance?.status
-                                    )?.color ?? "#94a3b8",
-                                }}
-                                className="flex w-full h-14
-                   relative hover:ring-1  ring-black hover:drop-shadow-md cursor-pointer   
-                   items-center transition
-                   justify-center flex-col"
-                              >
-                                {attendance?.note && (
-                                  <div
-                                    className="w-5 h-5 bg-white absolute flex items-center justify-center top-2 m-auto right-2
-                    rounded-full"
-                                  >
-                                    <MdOutlineSpeakerNotes />
-                                  </div>
-                                )}
-                                <span>{attendance?.status}</span>
-                              </button>
-                            </td>
-                          );
-                        })
-                      : selectTable.statusLists.map((status) => {
-                          const attendances = rows.data
-                            ?.map((row) => {
-                              const attendances = row.attendances.filter(
-                                (a) => a.studentOnSubjectId === student.id
-                              );
-                              return attendances;
-                            })
-                            .flat();
+                          })
+                        : selectTable.statusLists.map((status) => {
+                            const attendances = rows.data
+                              ?.map((row) => {
+                                const attendances = row.attendances.filter(
+                                  (a) => a.studentOnSubjectId === student.id,
+                                );
+                                return attendances;
+                              })
+                              .flat();
 
-                          const total = attendances?.reduce((acc, curr) => {
-                            if (curr.status === status.title) {
-                              return acc + 1;
-                            } else {
-                              return acc;
-                            }
-                          }, 0);
-                          return (
-                            <td key={status.id}>
-                              <div
-                                style={{
-                                  backgroundColor: `${status.color}`,
-                                }}
-                                className="flex w-full h-14
-                   relative hover:ring-1  ring-black hover:drop-shadow-md cursor-pointer   
-                   items-center transition
-                   justify-center flex-col"
-                              >
-                                <span>{total}</span>
-                              </div>
-                            </td>
-                          );
-                        })}
+                            const total = attendances?.reduce((acc, curr) => {
+                              if (curr.status === status.title) {
+                                return acc + 1;
+                              } else {
+                                return acc;
+                              }
+                            }, 0);
+                            return (
+                              <td key={status.id}>
+                                <div
+                                  style={{
+                                    backgroundColor: `${status.color}`,
+                                  }}
+                                  className="relative flex h-14 w-full cursor-pointer flex-col items-center justify-center ring-black transition hover:ring-1 hover:drop-shadow-md"
+                                >
+                                  <span>{total}</span>
+                                </div>
+                              </td>
+                            );
+                          })}
                   </tr>
                 );
               })}

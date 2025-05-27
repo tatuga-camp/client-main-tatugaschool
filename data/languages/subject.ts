@@ -400,6 +400,16 @@ export const attendanceCheckerDataLanugae = {
         return "Create";
     }
   },
+  update: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Update";
+      case "th":
+        return "อัพเดต";
+      default:
+        return "Update";
+    }
+  },
 } as const;
 
 export const attendanceQRCodeDatLanguage = {

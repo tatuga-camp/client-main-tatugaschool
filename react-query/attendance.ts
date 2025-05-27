@@ -88,7 +88,7 @@ export function useCreateAttendanceRow() {
           (
             oldData:
               | (AttendanceRow & { attendances: Attendance[] })[]
-              | undefined
+              | undefined,
           ) => {
             return [
               ...(oldData ?? []),
@@ -96,7 +96,7 @@ export function useCreateAttendanceRow() {
                 ...data,
               },
             ];
-          }
+          },
         );
       }
     },
@@ -128,7 +128,7 @@ export function useUpdateAttendance() {
             }
             return attendanceRow;
           });
-        }
+        },
       );
     },
   });
@@ -154,7 +154,7 @@ export function useCreateAttendance() {
             }
             return attendanceRow;
           });
-        }
+        },
       );
     },
   });
@@ -174,14 +174,14 @@ export function useUpdateManyAttendance() {
           (oldData: (AttendanceRow & { attendances: Attendance[] })[]) => {
             return oldData?.map((attendanceRow) => {
               const attendanceWIthRowIds = data.filter(
-                (a) => a.attendanceRowId === attendanceRow.id
+                (a) => a.attendanceRowId === attendanceRow.id,
               );
               if (attendanceWIthRowIds.length > 0) {
                 return {
                   ...attendanceRow,
                   attendances: attendanceRow.attendances.map((attendance) => {
                     const updatedAttendance = attendanceWIthRowIds.find(
-                      (a) => a.id === attendance.id
+                      (a) => a.id === attendance.id,
                     );
                     if (updatedAttendance) {
                       return updatedAttendance;
@@ -193,7 +193,7 @@ export function useUpdateManyAttendance() {
                 return attendanceRow;
               }
             });
-          }
+          },
         );
       }
     },
@@ -203,8 +203,8 @@ export function useUpdateRowAttendance() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ["update-row-attendance"],
-    mutationFn: (request: { request: RequestUpdateAttendanceRowService }) =>
-      UpdateAttendanceRowService(request.request),
+    mutationFn: (request: RequestUpdateAttendanceRowService) =>
+      UpdateAttendanceRowService(request),
     onSuccess(data, variables, context) {
       queryClient.setQueryData(
         ["attendance-rows", { attendanceTableId: data.attendanceTableId }],
@@ -218,25 +218,24 @@ export function useUpdateRowAttendance() {
             }
             return attendanceRow;
           });
-        }
+        },
       );
     },
   });
 }
 
 export function useDeleteRowAttendance() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ["delete-row-attendance"],
-    mutationFn: (request: {
-      request: RequestDeleteAttendanceRowService;
-      queryClient: QueryClient;
-    }) => DeleteAttendanceRowService(request.request),
+    mutationFn: (request: RequestDeleteAttendanceRowService) =>
+      DeleteAttendanceRowService(request),
     onSuccess(data, variables, context) {
-      variables.queryClient.setQueryData(
+      queryClient.setQueryData(
         ["attendance-rows", { attendanceTableId: data.attendanceTableId }],
         (oldData: (AttendanceRow & { attendances: Attendance[] })[]) => {
           return oldData.filter((row) => row.id !== data.id);
-        }
+        },
       );
     },
   });
@@ -254,7 +253,7 @@ export function useCreateAttendanceTable() {
         ["attendance-tables", { subjectId: data.subjectId }],
         (oldData: ResponseGetAttendanceTablesService) => {
           return [...(oldData ?? []), data];
-        }
+        },
       );
     },
   });
@@ -272,7 +271,7 @@ export function useDeleteAttendanceTable() {
         ["attendance-tables", { subjectId: data.subjectId }],
         (oldData: ResponseGetAttendanceTablesService) => {
           return oldData?.filter((table) => table.id !== data.id);
-        }
+        },
       );
     },
   });
@@ -298,7 +297,7 @@ export function useUpdateAttendanceTable() {
             }
             return table;
           });
-        }
+        },
       );
     },
   });
@@ -329,7 +328,7 @@ export function useUpdateAttendanceStatus() {
             }
             return table;
           });
-        }
+        },
       );
     },
   });
@@ -355,7 +354,7 @@ export function useCreateAttendanceStatus() {
             }
             return table;
           });
-        }
+        },
       );
     },
   });
@@ -377,13 +376,13 @@ export function useDeleteAttendanceStatus() {
               return {
                 ...table,
                 statusLists: table.statusLists.filter(
-                  (s) => s.id !== status.id
+                  (s) => s.id !== status.id,
                 ),
               };
             }
             return table;
           });
-        }
+        },
       );
     },
   });
