@@ -1,9 +1,9 @@
-import createAxiosInstance from "./apiService";
+import createAxiosInstance from "./api-service";
 
 export enum FeedbackTag {
-  COMPLIMENT = 'COMPLIMENT',
-  BUG = 'BUG',
-  REQUEST_FEATURE = 'REQUEST_FEATURE',
+  COMPLIMENT = "COMPLIMENT",
+  BUG = "BUG",
+  REQUEST_FEATURE = "REQUEST_FEATURE",
 }
 
 const axiosInstance = createAxiosInstance();
@@ -23,7 +23,7 @@ export type ResponseFeedbackService = {
 };
 
 export async function CreateFeedbackService(
-  input: RequestCreateFeedbackService
+  input: RequestCreateFeedbackService,
 ): Promise<ResponseFeedbackService> {
   try {
     const response = await axiosInstance({

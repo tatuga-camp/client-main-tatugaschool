@@ -1,5 +1,5 @@
 import { FileOnStudentOnAssignment } from "@/interfaces";
-import createAxiosInstance from "./apiService";
+import createAxiosInstance from "./api-service";
 
 const axiosInstance = createAxiosInstance();
 
@@ -13,7 +13,7 @@ type RequestCreateFileOnStudentAssignmentsService = {
 type ResponseCreateFileOnStudentAssignmentsService = FileOnStudentOnAssignment;
 
 export async function CreateFileOnStudentAssignmentsService(
-  input: RequestCreateFileOnStudentAssignmentsService
+  input: RequestCreateFileOnStudentAssignmentsService,
 ): Promise<ResponseCreateFileOnStudentAssignmentsService> {
   try {
     const response = await axiosInstance({
@@ -34,7 +34,7 @@ type RequestGetFileOnStudentAssignmentsByStudentOnAssignmentIdService = {
 type ResponseGetFileOnStudentAssignmentsService = FileOnStudentOnAssignment[];
 
 export async function GetFileOnStudentAssignmentsByStudentOnAssignmentIdService(
-  input: RequestGetFileOnStudentAssignmentsByStudentOnAssignmentIdService
+  input: RequestGetFileOnStudentAssignmentsByStudentOnAssignmentIdService,
 ): Promise<ResponseGetFileOnStudentAssignmentsService> {
   try {
     const response = await axiosInstance({
@@ -48,7 +48,7 @@ export async function GetFileOnStudentAssignmentsByStudentOnAssignmentIdService(
 }
 
 export async function GetFileOnStudentAssignmentsByTeacherOnAssignmentIdService(
-  input: RequestGetFileOnStudentAssignmentsByStudentOnAssignmentIdService
+  input: RequestGetFileOnStudentAssignmentsByStudentOnAssignmentIdService,
 ): Promise<ResponseGetFileOnStudentAssignmentsService> {
   try {
     const response = await axiosInstance({
@@ -73,7 +73,7 @@ export type RequestUpdateFileOnStudentAssignmentService = {
 
 type ResponseUpdateFileOnStudentAssignmentService = FileOnStudentOnAssignment;
 export async function UpdateFileOnStudentAssignmentService(
-  input: RequestUpdateFileOnStudentAssignmentService
+  input: RequestUpdateFileOnStudentAssignmentService,
 ): Promise<ResponseUpdateFileOnStudentAssignmentService> {
   try {
     const response = await axiosInstance({
@@ -85,7 +85,7 @@ export async function UpdateFileOnStudentAssignmentService(
   } catch (error: any) {
     console.error(
       "Update FileOnStudentAssignment request failed:",
-      error.response.data
+      error.response.data,
     );
     throw error?.response?.data;
   }
@@ -96,7 +96,7 @@ export type RequestDeleteFileOnStudentAssignmentService = {
 
 type ResponseDeleteFileOnStudentAssignmentService = FileOnStudentOnAssignment;
 export async function DeleteFileOnStudentAssignmentService(
-  input: RequestDeleteFileOnStudentAssignmentService
+  input: RequestDeleteFileOnStudentAssignmentService,
 ): Promise<ResponseDeleteFileOnStudentAssignmentService> {
   try {
     const response = await axiosInstance({

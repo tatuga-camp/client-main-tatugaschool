@@ -1,6 +1,6 @@
 import { ScoreOnStudent, StudentOnSubject } from "@/interfaces";
 
-import createAxiosInstance from "./apiService";
+import createAxiosInstance from "./api-service";
 
 const axiosInstance = createAxiosInstance();
 
@@ -12,7 +12,7 @@ type RequestCreateStudentOnSubjectService = {
 type ResponseCreateStudentOnSubjectService = StudentOnSubject;
 
 export async function CreateStudentOnSubjectService(
-  input: RequestCreateStudentOnSubjectService
+  input: RequestCreateStudentOnSubjectService,
 ): Promise<ResponseCreateStudentOnSubjectService> {
   try {
     const response = await axiosInstance({
@@ -24,7 +24,82 @@ export async function CreateStudentOnSubjectService(
   } catch (error: any) {
     console.error(
       "Create StudentOnSubject request failed:",
-      error.response.data
+      error.response.data,
+    );
+    throw error?.response?.data;
+  }
+}
+
+type RequestGetStudentOnSubjectReportService = {
+  studentOnSubjectId: string;
+};
+
+export type ResponseGetStudentOnSubjectReportService = {
+  schoolName: string;
+  reportTitle: string;
+  studentInfo: {
+    name: string;
+    imageURL: string;
+    class: string;
+  };
+  courseInfo: {
+    subject: string;
+    description: string;
+    educationYear: string;
+  };
+  teachers: {
+    homeroom: string;
+    instructor: {
+      name: string;
+      imageURL: string;
+      email: string;
+    }[];
+  };
+  attendance: {
+    status: string; // "ผ่านเกณฑ์" - consider using a more specific literal type if other statuses are known e.g., "ผ่านเกณฑ์" | "ไม่ผ่านเกณฑ์"
+    totalHours: number;
+    summary: {
+      status: string;
+      value: number;
+    }[];
+  };
+  academicPerformance: {
+    overallGrade: string;
+    overallScore: number;
+    maxScore: string;
+    assessments: {
+      item: string;
+      score: number;
+      maxScore: string;
+    }[];
+  };
+  skillAssessment: {
+    title: string;
+    skills: {
+      skill: string;
+      percentage: number;
+    }[];
+  };
+  recommendations: string;
+  signatureFields: {
+    position: string;
+    name: string;
+  };
+};
+
+export async function GetStudentOnSubjectReportService(
+  input: RequestGetStudentOnSubjectReportService,
+): Promise<ResponseGetStudentOnSubjectReportService> {
+  try {
+    const response = await axiosInstance({
+      method: "GET",
+      url: `/v1/student-on-subjects/${input.studentOnSubjectId}/report`,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error(
+      "Create StudentOnSubject request failed:",
+      error.response.data,
     );
     throw error?.response?.data;
   }
@@ -37,7 +112,7 @@ type RequestSortStudentOnSubjectService = {
 type ResponseSortStudentOnSubjectService = StudentOnSubject;
 
 export async function SortStudentOnSubjectService(
-  input: RequestSortStudentOnSubjectService
+  input: RequestSortStudentOnSubjectService,
 ): Promise<ResponseSortStudentOnSubjectService> {
   try {
     const response = await axiosInstance({
@@ -49,7 +124,7 @@ export async function SortStudentOnSubjectService(
   } catch (error: any) {
     console.error(
       "Create StudentOnSubject request failed:",
-      error.response.data
+      error.response.data,
     );
     throw error?.response?.data;
   }
@@ -62,7 +137,7 @@ type RequestGetStudentOnSubjectBySubjectService = {
 type ResponseGetStudentOnSubjectBySubjectService = StudentOnSubject[];
 
 export async function GetStudentOnSubjectBySubjectService(
-  input: RequestGetStudentOnSubjectBySubjectService
+  input: RequestGetStudentOnSubjectBySubjectService,
 ): Promise<ResponseGetStudentOnSubjectBySubjectService> {
   try {
     const response = await axiosInstance({
@@ -73,7 +148,7 @@ export async function GetStudentOnSubjectBySubjectService(
   } catch (error: any) {
     console.error(
       "Get StudentOnSubject by Subject request failed:",
-      error.response.data
+      error.response.data,
     );
     throw error?.response?.data;
   }
@@ -86,7 +161,7 @@ type RequestGetStudentOnSubjectByStudentService = {
 type ResponseGetStudentOnSubjectByStudentService = StudentOnSubject[];
 
 export async function GetStudentOnSubjectByStudentService(
-  input: RequestGetStudentOnSubjectByStudentService
+  input: RequestGetStudentOnSubjectByStudentService,
 ): Promise<ResponseGetStudentOnSubjectByStudentService> {
   try {
     const response = await axiosInstance({
@@ -97,7 +172,7 @@ export async function GetStudentOnSubjectByStudentService(
   } catch (error: any) {
     console.error(
       "Get StudentOnSubject by Student request failed:",
-      error.response.data
+      error.response.data,
     );
     throw error?.response?.data;
   }
@@ -110,7 +185,7 @@ type RequestGetStudentOnSubjectByIdService = {
 type ResponseGetStudentOnSubjectByIdService = StudentOnSubject;
 
 export async function GetStudentOnSubjectByIdService(
-  input: RequestGetStudentOnSubjectByIdService
+  input: RequestGetStudentOnSubjectByIdService,
 ): Promise<ResponseGetStudentOnSubjectByIdService> {
   try {
     const response = await axiosInstance({
@@ -121,7 +196,7 @@ export async function GetStudentOnSubjectByIdService(
   } catch (error: any) {
     console.error(
       "Get StudentOnSubject by ID request failed:",
-      error.response.data
+      error.response.data,
     );
     throw error?.response?.data;
   }
@@ -136,7 +211,7 @@ type ResponseDeleteStudentOnSubjectService = {
 };
 
 export async function DeleteStudentOnSubjectService(
-  input: RequestDeleteStudentOnSubjectService
+  input: RequestDeleteStudentOnSubjectService,
 ): Promise<ResponseDeleteStudentOnSubjectService> {
   try {
     const response = await axiosInstance({
@@ -147,7 +222,7 @@ export async function DeleteStudentOnSubjectService(
   } catch (error: any) {
     console.error(
       "Delete StudentOnSubject request failed:",
-      error.response.data
+      error.response.data,
     );
     throw error?.response?.data;
   }
@@ -163,7 +238,7 @@ export type RequestUpdateStudentOnSubjectService = {
   };
 };
 export async function UpdateStudentOnSubjectService(
-  input: RequestUpdateStudentOnSubjectService
+  input: RequestUpdateStudentOnSubjectService,
 ): Promise<ResponseUpdateStudentOnSubjectService> {
   try {
     const response = await axiosInstance({
@@ -175,7 +250,7 @@ export async function UpdateStudentOnSubjectService(
   } catch (error: any) {
     console.error(
       "Delete StudentOnSubject request failed:",
-      error.response.data
+      error.response.data,
     );
     throw error?.response?.data;
   }

@@ -9,7 +9,7 @@ import {
   Skill,
   StudentOnAssignment,
 } from "../interfaces";
-import createAxiosInstance from "./apiService";
+import createAxiosInstance from "./api-service";
 
 const axiosInstance = createAxiosInstance();
 
@@ -28,7 +28,7 @@ export type RequestCreateAssignmentService = {
 type ResponseCreateAssignmentService = Assignment;
 
 export async function CreateAssignmentService(
-  input: RequestCreateAssignmentService
+  input: RequestCreateAssignmentService,
 ): Promise<ResponseCreateAssignmentService> {
   try {
     const response = await axiosInstance({
@@ -80,7 +80,7 @@ export type ResponseGetOverviewAssignmentService = {
 };
 
 export async function GetOverviewAssignmentService(
-  input: RequestGetOverviewAssignmentService
+  input: RequestGetOverviewAssignmentService,
 ): Promise<ResponseGetOverviewAssignmentService> {
   try {
     const response = await axiosInstance({
@@ -103,7 +103,7 @@ export type ResponseGetAssignmentByIdService = Assignment & {
 };
 
 export async function GetAssignmentByIdService(
-  input: RequestGetAssignmentByIdService
+  input: RequestGetAssignmentByIdService,
 ): Promise<ResponseGetAssignmentByIdService> {
   try {
     const response = await axiosInstance({
@@ -135,7 +135,7 @@ export type RequestUpdateAssignmentService = {
 type ResponseUpdateAssignmentService = Assignment;
 
 export async function UpdateAssignmentService(
-  input: RequestUpdateAssignmentService
+  input: RequestUpdateAssignmentService,
 ): Promise<ResponseUpdateAssignmentService> {
   try {
     const response = await axiosInstance({
@@ -162,7 +162,7 @@ export type RequestUpdateSkillToAssignmentService = {
 type ResponseUpdateSkillToAssignmentService = void;
 
 export async function UpdateSkillToAssignmentService(
-  input: RequestUpdateSkillToAssignmentService
+  input: RequestUpdateSkillToAssignmentService,
 ): Promise<ResponseUpdateSkillToAssignmentService> {
   try {
     const response = await axiosInstance({
@@ -183,7 +183,7 @@ export type RequestReorderAssignmentService = {
 type ResponseReorderAssignmentService = Assignment[];
 
 export async function ReorderAssignmentService(
-  input: RequestReorderAssignmentService
+  input: RequestReorderAssignmentService,
 ): Promise<ResponseReorderAssignmentService> {
   try {
     const response = await axiosInstance({
@@ -204,7 +204,7 @@ export type RequestDeleteAssignmentService = {
 
 type ResponseDeleteAssignmentService = Assignment;
 export async function DeleteAssignmentService(
-  input: RequestDeleteAssignmentService
+  input: RequestDeleteAssignmentService,
 ): Promise<ResponseDeleteAssignmentService> {
   try {
     const response = await axiosInstance({
@@ -225,7 +225,7 @@ export type RequestExportAssignmentService = {
 type ResponseExportAssignmentService = string;
 
 export async function ExportAssignmentService(
-  input: RequestExportAssignmentService
+  input: RequestExportAssignmentService,
 ): Promise<ResponseExportAssignmentService> {
   try {
     const response = await axiosInstance({

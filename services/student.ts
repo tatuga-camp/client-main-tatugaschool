@@ -1,6 +1,6 @@
 import { Student } from "@/interfaces";
 
-import createAxiosInstance from "./apiService";
+import createAxiosInstance from "./api-service";
 
 const axiosInstance = createAxiosInstance();
 
@@ -17,7 +17,7 @@ export type RequestCreateStudentService = {
 type ResponseCreateStudentService = Student;
 
 export async function CreateStudentService(
-  input: RequestCreateStudentService
+  input: RequestCreateStudentService,
 ): Promise<ResponseCreateStudentService> {
   try {
     const response = await axiosInstance({
@@ -39,7 +39,7 @@ type RequestGetStudentByIdService = {
 type ResponseGetStudentByIdService = Student;
 
 export async function GetStudentByIdService(
-  input: RequestGetStudentByIdService
+  input: RequestGetStudentByIdService,
 ): Promise<ResponseGetStudentByIdService> {
   try {
     const response = await axiosInstance({
@@ -60,7 +60,7 @@ type RequestGetStudentsByClassIdService = {
 type ResponseGetStudentsByClassIdService = Student[];
 
 export async function GetStudentsByClassIdService(
-  input: RequestGetStudentsByClassIdService
+  input: RequestGetStudentsByClassIdService,
 ): Promise<ResponseGetStudentsByClassIdService> {
   try {
     const response = await axiosInstance({
@@ -71,7 +71,7 @@ export async function GetStudentsByClassIdService(
   } catch (error: any) {
     console.error(
       "Get Students by ClassId request failed:",
-      error.response.data
+      error.response.data,
     );
     throw error?.response?.data;
   }
@@ -93,7 +93,7 @@ export type RequestUpdateStudentService = {
 type ResponseUpdateStudentService = Student;
 
 export async function UpdateStudentService(
-  input: RequestUpdateStudentService
+  input: RequestUpdateStudentService,
 ): Promise<ResponseUpdateStudentService> {
   try {
     const response = await axiosInstance({
@@ -115,7 +115,7 @@ type RequestDeleteStudentService = {
 type ResponseDeleteStudentService = Student;
 
 export async function DeleteStudentService(
-  input: RequestDeleteStudentService
+  input: RequestDeleteStudentService,
 ): Promise<ResponseDeleteStudentService> {
   try {
     const response = await axiosInstance({
@@ -136,7 +136,7 @@ type RequestResetPasswordStudentService = {
 type ResponseResetPasswordStudentService = Student;
 
 export async function ResetPasswordStudentService(
-  input: RequestResetPasswordStudentService
+  input: RequestResetPasswordStudentService,
 ): Promise<ResponseResetPasswordStudentService> {
   try {
     const response = await axiosInstance({

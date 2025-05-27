@@ -1,6 +1,6 @@
 import { ScoreOnSubject } from "@/interfaces";
 
-import createAxiosInstance from "./apiService";
+import createAxiosInstance from "./api-service";
 
 const axiosInstance = createAxiosInstance();
 
@@ -15,7 +15,7 @@ export type RequestCreateScoreOnSubjectService = {
 export type ResponseScoreOnSubjectService = ScoreOnSubject;
 
 export async function CreateScoreOnSubjectService(
-  input: RequestCreateScoreOnSubjectService
+  input: RequestCreateScoreOnSubjectService,
 ): Promise<ResponseScoreOnSubjectService> {
   try {
     const response = await axiosInstance({
@@ -35,7 +35,7 @@ type RequestGetScoresOnSubjectBySubjectIdService = {
 };
 
 export async function GetScoresOnSubjectBySubjectIdService(
-  input: RequestGetScoresOnSubjectBySubjectIdService
+  input: RequestGetScoresOnSubjectBySubjectIdService,
 ): Promise<ResponseScoreOnSubjectService[]> {
   try {
     const response = await axiosInstance({
@@ -46,7 +46,7 @@ export async function GetScoresOnSubjectBySubjectIdService(
   } catch (error: any) {
     console.error(
       "Failed to fetch scores by subject ID:",
-      error.response?.data
+      error.response?.data,
     );
     throw error?.response?.data;
   }
@@ -65,7 +65,7 @@ export type RequestUpdateScoreOnSubjectService = {
 };
 
 export async function UpdateScoreOnSubjectService(
-  input: RequestUpdateScoreOnSubjectService
+  input: RequestUpdateScoreOnSubjectService,
 ): Promise<ResponseScoreOnSubjectService> {
   try {
     const response = await axiosInstance({
@@ -85,7 +85,7 @@ export type RequestDeleteScoreOnSubjectService = {
 };
 
 export async function DeleteScoreOnSubjectService(
-  input: RequestDeleteScoreOnSubjectService
+  input: RequestDeleteScoreOnSubjectService,
 ): Promise<ResponseScoreOnSubjectService> {
   try {
     const response = await axiosInstance({

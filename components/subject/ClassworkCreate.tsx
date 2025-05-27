@@ -1,42 +1,36 @@
+import { useRouter } from "next/router";
+import { ProgressBar } from "primereact/progressbar";
+import { Toast } from "primereact/toast";
 import React, { ReactNode, useEffect } from "react";
-import { IoChevronDownSharp, IoClose, IoDuplicate } from "react-icons/io5";
+import { FaRegFile } from "react-icons/fa6";
+import { IoChevronDownSharp, IoClose } from "react-icons/io5";
 import {
   MdAssignment,
   MdAssignmentAdd,
   MdDelete,
   MdOutlineDataSaverOn,
-  MdOutlineFileUpload,
   MdPublish,
   MdUnpublished,
 } from "react-icons/md";
-import useAdjustPosition from "../../hook/useWindow";
+import Swal from "sweetalert2";
+import { classworkHeadMenuBarDataLanguage } from "../../data/languages";
 import useClickOutside from "../../hook/useClickOutside";
-import TextEditor from "../common/TextEditor";
+import useAdjustPosition from "../../hook/useWindow";
 import {
   Assignment,
   AssignmentStatus,
   AssignmentType,
   ErrorMessages,
-  FileOnAssignment,
 } from "../../interfaces";
-import { FaBook, FaRegFile, FaRegFileImage } from "react-icons/fa6";
-import Dropdown from "../common/Dropdown";
-import InputNumber from "../common/InputNumber";
-import Switch from "../common/Switch";
+import { MenuAssignmentQuery } from "../../pages/subject/[subjectId]/assignment/[assignmentId]";
 import { useCreateAssignment, useGetLanguage } from "../../react-query";
-import Swal from "sweetalert2";
-import { Toast } from "primereact/toast";
-import { ProgressBar } from "primereact/progressbar";
-import { convertToDateTimeLocalString, generateBlurHash } from "../../utils";
 import {
   CreateFileAssignmentService,
   getSignedURLTeacherService,
   UploadSignURLService,
 } from "../../services";
+import { convertToDateTimeLocalString, generateBlurHash } from "../../utils";
 import ClasswordView, { FileClasswork } from "./ClasswordView";
-import { useRouter } from "next/router";
-import { MenuAssignmentQuery } from "../../pages/subject/[subjectId]/assignment/[assignmentId]";
-import { classworkHeadMenuBarDataLanguage } from "../../data/languages";
 
 type Props = {
   onClose: () => void;
@@ -72,11 +66,6 @@ export const menuClassworkList: {
     icon: <MdOutlineDataSaverOn />,
     value: "saveChange",
   },
-  // {
-  //   title: "Duplicate",
-  //   icon: <IoDuplicate />,
-  //   value: "duplicate",
-  // },
   {
     title: "Delete",
     icon: <MdDelete />,
@@ -227,21 +216,17 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
 
   return (
     <form onSubmit={handleCreateClasswork} className="flex flex-col">
-      <nav className="w-full px-5  bg-white border-b h-20 flex items-center justify-between">
+      <nav className="flex h-20 w-full items-center justify-between border-b bg-white px-5">
         <section className="flex items-center gap-4">
           <button
             type="button"
             onClick={onClose}
-            className="w-10 h-10 text-3xl border rounded-full flex items-center justify-center
-           hover:bg-gray-300/50 transition active:scale-105"
+            className="flex h-10 w-10 items-center justify-center rounded-full border text-3xl transition hover:bg-gray-300/50 active:scale-105"
           >
             <IoClose />
           </button>
 
-          <div
-            className="w-10 h-10 text-3xl border rounded-full flex items-center justify-center
-           bg-primary-color/30 text-primary-color"
-          >
+          <div className="flex h-10 w-10 items-center justify-center rounded-full border bg-primary-color/30 text-3xl text-primary-color">
             <MdAssignmentAdd />
           </div>
           <h1 className="text-lg font-medium">Classwork</h1>
@@ -251,18 +236,16 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
             type="submit"
             value="Published"
             disabled={loading}
-            className="w-40 p-2 h-10 opacity-85 hover:opacity-100 font-medium rounded-r-none rounded-md text-base text-white
-         gradient-bg"
+            className="gradient-bg h-10 w-40 rounded-md rounded-r-none p-2 text-base font-medium text-white opacity-85 hover:opacity-100"
           >
             {classworkHeadMenuBarDataLanguage.button.publish(
-              language.data ?? "en"
+              language.data ?? "en",
             )}
           </button>
           <button
             type="button"
             onClick={() => setTriggerOption((prev) => !prev)}
-            className="w-max p-2 h-10  font-medium rounded-l-none rounded-md text-base text-white
-         gradient-bg"
+            className="gradient-bg h-10 w-max rounded-md rounded-l-none p-2 text-base font-medium text-white"
           >
             <IoChevronDownSharp />
           </button>
@@ -275,13 +258,13 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
               }}
               ref={divRef}
             >
-              <div className="w-52 h-max z-40 p-1 absolute top-8 rounded-md bg-white drop-shadow border">
+              <div className="absolute top-8 z-40 h-max w-52 rounded-md border bg-white p-1 drop-shadow">
                 {menuClassworkList
                   .filter(
                     (i) =>
                       i.title !== "Duplicate" &&
                       i.title !== "Delete" &&
-                      i.title !== "Save Change"
+                      i.title !== "Save Change",
                   )
                   .map((menu, index) => (
                     <button
@@ -293,14 +276,11 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
                       }
                       value={menu.title === "Publish" ? "Published" : "Draft"}
                       key={index}
-                      className={`w-full p-2 flex gap-10 items-center justify-start text-base
-                 font-medium 
-                 ${
-                   menu.title === "Delete"
-                     ? "text-red-500 hover:bg-red-500 hover:text-white"
-                     : "text-gray-500 hover:bg-primary-color hover:text-white"
-                 }
-                 `}
+                      className={`flex w-full items-center justify-start gap-10 p-2 text-base font-medium ${
+                        menu.title === "Delete"
+                          ? "text-red-500 hover:bg-red-500 hover:text-white"
+                          : "text-gray-500 hover:bg-primary-color hover:text-white"
+                      } `}
                     >
                       {menu.icon}
                       {classworkHeadMenuBarDataLanguage.button[
@@ -316,7 +296,7 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
       {loading && (
         <ProgressBar mode="indeterminate" style={{ height: "6px" }} />
       )}
-      <main className="w-full h-max max-h-screen overflow-auto flex">
+      <main className="flex h-max max-h-screen w-full overflow-auto">
         <ClasswordView
           classwork={classwork as Assignment}
           onChange={(d) => setClasswork((prev) => ({ ...prev, ...d }))}

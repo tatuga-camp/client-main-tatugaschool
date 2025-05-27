@@ -1,7 +1,6 @@
 import { Task } from "../interfaces";
 
-
-import createAxiosInstance from "./apiService";
+import createAxiosInstance from "./api-service";
 
 const axiosInstance = createAxiosInstance();
 
@@ -10,7 +9,7 @@ type RequestCreateTaskService = Task;
 type ResponseCreateTaskService = Task;
 
 export async function CreateTaskService(
-  input: RequestCreateTaskService
+  input: RequestCreateTaskService,
 ): Promise<ResponseCreateTaskService> {
   try {
     const response = await axiosInstance({
@@ -28,7 +27,7 @@ type RequestUpdateTaskService = Task;
 type ResponseUpdateTaskService = Task;
 
 export async function UpdateTaskService(
-  input: RequestUpdateTaskService
+  input: RequestUpdateTaskService,
 ): Promise<ResponseUpdateTaskService> {
   try {
     const response = await axiosInstance({
@@ -49,7 +48,7 @@ type RequestGetTaskByIdService = {
 type ResponseGetTaskByIdService = Task;
 
 export async function GetTaskByIdService(
-  input: RequestGetTaskByIdService
+  input: RequestGetTaskByIdService,
 ): Promise<ResponseGetTaskByIdService> {
   try {
     const response = await axiosInstance({
@@ -69,7 +68,7 @@ type RequestGetTasksByColumnService = {
 type ResponseGetTasksByColumnService = Task[];
 
 export async function GetTasksByColumnService(
-  input: RequestGetTasksByColumnService
+  input: RequestGetTasksByColumnService,
 ): Promise<ResponseGetTasksByColumnService> {
   try {
     const response = await axiosInstance({
@@ -91,7 +90,7 @@ type ResponseDeleteTaskService = {
 };
 
 export async function DeleteTaskService(
-  input: RequestDeleteTaskService
+  input: RequestDeleteTaskService,
 ): Promise<ResponseDeleteTaskService> {
   try {
     const response = await axiosInstance({

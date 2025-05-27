@@ -1,7 +1,7 @@
 import { Team } from "@/interfaces";
 import { Pagination } from "@/interfaces/Pagination";
 
-import createAxiosInstance from "./apiService";
+import createAxiosInstance from "./api-service";
 
 const axiosInstance = createAxiosInstance();
 
@@ -10,7 +10,7 @@ type RequestCreateTeamService = Team;
 type ResponseCreateTeamService = Team;
 
 export async function CreateTeamService(
-  input: RequestCreateTeamService
+  input: RequestCreateTeamService,
 ): Promise<ResponseCreateTeamService> {
   try {
     const response = await axiosInstance({
@@ -32,7 +32,7 @@ type RequestGetTeamsService = {
 type ResponseGetTeamsService = Team;
 
 export async function GetTeamsBySchoolIdService(
-  input: RequestGetTeamsService
+  input: RequestGetTeamsService,
 ): Promise<ResponseGetTeamsService> {
   try {
     const response = await axiosInstance({
@@ -54,7 +54,7 @@ type RequestGetTeamByIdService = {
 type ResponseGetTeamByIdService = Pagination<Team>;
 
 export async function GetTeamByIdService(
-  input: RequestGetTeamByIdService
+  input: RequestGetTeamByIdService,
 ): Promise<ResponseGetTeamByIdService> {
   try {
     const response = await axiosInstance({
@@ -69,19 +69,19 @@ export async function GetTeamByIdService(
 }
 
 type RequestUpdateTeamService = {
-    query: { teamId: string };
-    body: {
-        schoolId: string;
-        title: string;
-        description: string;
-        icon: string;
-    };
+  query: { teamId: string };
+  body: {
+    schoolId: string;
+    title: string;
+    description: string;
+    icon: string;
   };
+};
 
 type ResponseUpdateTeamService = Team;
 
 export async function UpdateTeamService(
-  input: RequestUpdateTeamService
+  input: RequestUpdateTeamService,
 ): Promise<ResponseUpdateTeamService> {
   try {
     const response = await axiosInstance({
@@ -103,7 +103,7 @@ type RequestDeleteTeamService = {
 type ResponseDeleteTeamService = Team;
 
 export async function DeleteTeamService(
-  input: RequestDeleteTeamService
+  input: RequestDeleteTeamService,
 ): Promise<ResponseDeleteTeamService> {
   try {
     const response = await axiosInstance({

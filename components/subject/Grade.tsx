@@ -23,9 +23,10 @@ import LoadingSpinner from "../common/LoadingSpinner";
 import { IoMdSettings } from "react-icons/io";
 import PopupLayout from "../layout/PopupLayout";
 import GradeSetting from "./GradeSetting";
-import { MdMoodBad } from "react-icons/md";
+import { MdFileDownload, MdMoodBad, MdReport } from "react-icons/md";
 import { FaCheckSquare } from "react-icons/fa";
 import { gradeData } from "../../data/languages";
+import Link from "next/link";
 
 function Grade({
   subjectId,
@@ -87,7 +88,10 @@ function Grade({
                 }
                 assignment={selectStudentOnAssignment.assignment}
                 toast={toast}
-                onClose={() => setSelectStudentOnAssignment(null)}
+                onClose={() => {
+                  document.body.style.overflow = "auto";
+                  setSelectStudentOnAssignment(null);
+                }}
               />
             )}
           </div>
@@ -143,12 +147,12 @@ function Grade({
         </section>
       </header>
       <main className="mx-auto mt-5 flex w-full flex-col items-center md:max-w-screen-md md:px-0 xl:max-w-screen-lg">
-        <div className="relative mt-5 h-[30rem] w-full overflow-auto rounded-md bg-white px-2">
+        <div className="relative mt-5 h-[30rem] w-full overflow-auto rounded-md bg-white">
           <table className="table-fixed bg-white md:min-w-[640px]">
             <thead className="">
               <tr className="sticky top-0 z-40 border-b bg-white">
                 <th className="sticky left-0 z-40 bg-white text-sm font-semibold">
-                  <div className="flex w-48 items-center justify-start gap-2 md:w-96">
+                  <div className="flex w-48 items-center justify-start gap-2 pl-4 md:w-96">
                     <FaUser />
                     Name
                   </div>
@@ -306,28 +310,37 @@ function Grade({
                           odd ? "bg-gray-100" : "bg-white"
                         } group-hover:bg-gray-200`}
                       >
-                        <div className="flex h-14 items-center gap-2">
-                          <div className="relative h-8 w-8 overflow-hidden rounded-md ring-1 md:h-10 md:w-10">
-                            <Image
-                              src={student.photo}
-                              alt={student.firstName}
-                              fill
-                              sizes="(max-width: 768px) 100vw, 33vw"
-                              placeholder="blur"
-                              blurDataURL={decodeBlurhashToCanvas(
-                                student.blurHash ?? defaultBlurHash,
-                              )}
-                              className="object-cover"
-                            />
+                        <div className="flex h-14 w-96 items-center justify-between gap-2 px-4">
+                          <div className="flex items-center gap-2">
+                            <div className="relative h-8 w-8 overflow-hidden rounded-md ring-1 md:h-10 md:w-10">
+                              <Image
+                                src={student.photo}
+                                alt={student.firstName}
+                                fill
+                                sizes="(max-width: 768px) 100vw, 33vw"
+                                placeholder="blur"
+                                blurDataURL={decodeBlurhashToCanvas(
+                                  student.blurHash ?? defaultBlurHash,
+                                )}
+                                className="object-cover"
+                              />
+                            </div>
+                            <div>
+                              <h1 className="text-xs font-semibold md:text-sm">
+                                {student.firstName} {student.lastName}
+                              </h1>
+                              <p className="text-xs text-gray-500">
+                                Number {student.number}
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <h1 className="text-xs font-semibold md:text-sm">
-                              {student.firstName} {student.lastName}
-                            </h1>
-                            <p className="text-xs text-gray-500">
-                              Number {student.number}
-                            </p>
-                          </div>
+                          <Link
+                            href={`/subject/${subjectId}/studentOnSubject/${student.id}`}
+                            target="_blank"
+                            className="second-button hidden items-center justify-center border text-sm md:flex"
+                          >
+                            Dowload Report <MdFileDownload />
+                          </Link>
                         </div>
                       </td>
                       {assignmentsOverview.isLoading

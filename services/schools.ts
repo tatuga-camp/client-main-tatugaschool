@@ -1,6 +1,6 @@
 import { School, User } from "@/interfaces";
 
-import createAxiosInstance from "./apiService";
+import createAxiosInstance from "./api-service";
 import { getAccessToken } from "../utils";
 import axios from "axios";
 
@@ -21,7 +21,7 @@ export type RequestCreateSchoolService = {
 export type ResponseSchoolService = School;
 
 export async function CreateSchoolService(
-  input: RequestCreateSchoolService
+  input: RequestCreateSchoolService,
 ): Promise<ResponseSchoolService> {
   try {
     const response = await axiosInstance({
@@ -52,7 +52,7 @@ export type RequestUpdateSchoolService = {
 };
 
 export async function UpdateSchoolService(
-  input: RequestUpdateSchoolService
+  input: RequestUpdateSchoolService,
 ): Promise<ResponseSchoolService> {
   try {
     const response = await axiosInstance({
@@ -73,7 +73,7 @@ export type RequestDeleteSchoolService = {
 type ResponseDeleteSchoolService = School;
 
 export async function DeleteSchoolService(
-  input: RequestDeleteSchoolService
+  input: RequestDeleteSchoolService,
 ): Promise<ResponseDeleteSchoolService> {
   try {
     const response = await axiosInstance({
@@ -98,7 +98,7 @@ export type ResponseGetSchoolService = School & {
 };
 
 export async function GetSchoolByIdService(
-  input: RequestGetSchoolService
+  input: RequestGetSchoolService,
 ): Promise<ResponseGetSchoolService> {
   try {
     const response = await axiosInstance({

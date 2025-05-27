@@ -1,5 +1,5 @@
 import { User } from "../interfaces";
-import createAxiosInstance from "./apiService";
+import createAxiosInstance from "./api-service";
 
 const axiosInstance = createAxiosInstance();
 
@@ -45,7 +45,7 @@ export type RequestGetUserByEmailService = {
   email: string;
 };
 export async function GetUserByEmailService(
-  input: RequestGetUserByEmailService
+  input: RequestGetUserByEmailService,
 ): Promise<User[]> {
   try {
     const response = await axiosInstance({
@@ -69,7 +69,7 @@ export type RequestUpdateUserService = {
   blurHash?: string;
 };
 export async function UpdateUserService(
-  input: RequestUpdateUserService
+  input: RequestUpdateUserService,
 ): Promise<User> {
   try {
     const response = await axiosInstance({
@@ -90,7 +90,7 @@ export type RequestUpdatePasswordService = {
   newPassword: string;
 };
 export async function UpdatePasswordService(
-  input: RequestUpdatePasswordService
+  input: RequestUpdatePasswordService,
 ): Promise<User> {
   try {
     const response = await axiosInstance({

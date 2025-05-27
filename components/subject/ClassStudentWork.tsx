@@ -431,8 +431,12 @@ function MultipleReview({ selectStudents, maxScore }: MultipleReviewProps) {
   };
 
   return (
-    <div className="flex h-full w-full grow items-center justify-center font-Anuphan">
-      {loading && <LoadingBar />}
+    <div className="flex h-full w-full grow flex-col items-center justify-center gap-5 font-Anuphan">
+      {loading && (
+        <div className="w-96">
+          <LoadingBar />
+        </div>
+      )}
       {selectStudents.length > 0 ? (
         <form
           onSubmit={handleSaveChange}

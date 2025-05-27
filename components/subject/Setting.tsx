@@ -90,7 +90,7 @@ function Setting({ subjectId, setSelectMenu, schoolId }: Props) {
             role: teacher.role,
             userId: teacher.userId,
           };
-        })
+        }),
       );
     }
   }, [teacherOnSubjects.data]);
@@ -199,15 +199,15 @@ function Setting({ subjectId, setSelectMenu, schoolId }: Props) {
   };
 
   return (
-    <main className="flex flex-col items-center w-full gap-5 px-4 sm:px-6 lg:px-8">
+    <main className="flex w-full flex-col items-center gap-5 px-4 sm:px-6 lg:px-8">
       <Toast ref={toast} />
       <section className="w-full sm:w-10/12 lg:w-8/12">
-        <h1 className="text-lg sm:text-xl font-medium">
+        <h1 className="text-lg font-medium sm:text-xl">
           {settingOnSubjectDataLanguage.general(language.data ?? "en")}
         </h1>
-        <h4 className="text-xs sm:text-sm text-gray-500">
+        <h4 className="text-xs text-gray-500 sm:text-sm">
           {settingOnSubjectDataLanguage.generalDescription(
-            language.data ?? "en"
+            language.data ?? "en",
           )}
         </h4>
         <SubjectInfomation
@@ -222,8 +222,8 @@ function Setting({ subjectId, setSelectMenu, schoolId }: Props) {
           isPending={updateSubject.isPending}
         />
 
-        <div className="flex flex-col p-4 min-h-80 bg-white rounded-md border gap-5 mt-5">
-          <h2 className="border-b text-base sm:text-lg font-medium py-3">
+        <div className="mt-5 flex min-h-80 flex-col gap-5 rounded-md border bg-white p-4">
+          <h2 className="border-b py-3 text-base font-medium sm:text-lg">
             {settingOnSubjectDataLanguage.coTeacher(language.data ?? "en")}
           </h2>
           {members && teacherOnSubjects.data && user.data && (
@@ -238,24 +238,24 @@ function Setting({ subjectId, setSelectMenu, schoolId }: Props) {
             />
           )}
         </div>
-        <h1 className="text-lg sm:text-xl font-medium mt-10">
+        <h1 className="mt-10 text-lg font-medium sm:text-xl">
           {settingOnSubjectDataLanguage.studentSetting(language.data ?? "en")}
         </h1>
-        <h4 className="text-xs sm:text-sm text-gray-500">
+        <h4 className="text-xs text-gray-500 sm:text-sm">
           {settingOnSubjectDataLanguage.studentSettingDescription(
-            language.data ?? "en"
+            language.data ?? "en",
           )}
         </h4>
-        <div className="flex flex-col p-4 min-h-80 bg-white rounded-md border gap-5 mt-5">
-          <h2 className="border-b text-base sm:text-lg font-medium py-3">
+        <div className="mt-5 flex min-h-80 flex-col gap-5 rounded-md border bg-white p-4">
+          <h2 className="border-b py-3 text-base font-medium sm:text-lg">
             {settingOnSubjectDataLanguage.listOnStudent(language.data ?? "en")}
           </h2>
-          <h4 className="text-xs sm:text-sm text-gray-500">
+          <h4 className="text-xs text-gray-500 sm:text-sm">
             {settingOnSubjectDataLanguage.listOnStudentDescription(
-              language.data ?? "en"
+              language.data ?? "en",
             )}
           </h4>
-          <ul className="grid max-h-96 overflow-auto grid-cols-1">
+          <ul className="grid max-h-96 grid-cols-1 overflow-auto">
             {studentOnSubjects.data
               ?.sort((a, b) => Number(a.number) - Number(b.number))
               .map((student, index) => {
@@ -263,12 +263,12 @@ function Setting({ subjectId, setSelectMenu, schoolId }: Props) {
                 return (
                   <li
                     key={student.id}
-                    className={`flex justify-between py-2 items-center ${
+                    className={`flex items-center justify-between py-2 ${
                       odd && "bg-gray-200/20"
                     } gap-2`}
                   >
                     <div className="flex gap-2">
-                      <div className="w-10 h-10 relative rounded-md ring-1 overflow-hidden">
+                      <div className="relative h-10 w-10 overflow-hidden rounded-md ring-1">
                         <Image
                           src={student.photo}
                           alt={student.firstName}
@@ -276,7 +276,7 @@ function Setting({ subjectId, setSelectMenu, schoolId }: Props) {
                           sizes="(max-width: 768px) 100vw, 33vw"
                           placeholder="blur"
                           blurDataURL={decodeBlurhashToCanvas(
-                            student.blurHash ?? defaultBlurHash
+                            student.blurHash ?? defaultBlurHash,
                           )}
                           className="object-cover"
                         />
@@ -297,15 +297,12 @@ function Setting({ subjectId, setSelectMenu, schoolId }: Props) {
                         setChecked={async (e) => {
                           if (updateStudentOnSubject.isPending) return;
                           await updateStudentOnSubject.mutateAsync({
-                            request: {
-                              query: {
-                                id: student.id,
-                              },
-                              data: {
-                                isActive: e,
-                              },
+                            query: {
+                              id: student.id,
                             },
-                            queryClient: queryClient,
+                            data: {
+                              isActive: e,
+                            },
                           });
                         }}
                       />
@@ -315,21 +312,21 @@ function Setting({ subjectId, setSelectMenu, schoolId }: Props) {
               })}
           </ul>
         </div>
-        <h1 className="text-lg sm:text-xl font-medium mt-10">
+        <h1 className="mt-10 text-lg font-medium sm:text-xl">
           {settingOnClassroomDataLangugae.danger(language.data ?? "en")}
         </h1>
-        <h4 className="text-xs sm:text-sm text-gray-500">
+        <h4 className="text-xs text-gray-500 sm:text-sm">
           {settingOnClassroomDataLangugae.dangerDescription(
-            language.data ?? "en"
+            language.data ?? "en",
           )}
         </h4>
-        <div className="flex flex-col items-start p-4 bg-white rounded-md border gap-5 mt-5">
-          <h2 className="border-b text-base sm:text-lg font-medium py-3">
+        <div className="mt-5 flex flex-col items-start gap-5 rounded-md border bg-white p-4">
+          <h2 className="border-b py-3 text-base font-medium sm:text-lg">
             {settingOnSubjectDataLanguage.deleteSubject(language.data ?? "en")}
           </h2>
-          <h4 className="text-xs sm:text-sm text-red-700">
+          <h4 className="text-xs text-red-700 sm:text-sm">
             {settingOnSubjectDataLanguage.deleteSubjectDescription(
-              language.data ?? "en"
+              language.data ?? "en",
             )}
           </h4>
 
@@ -356,7 +353,7 @@ function Setting({ subjectId, setSelectMenu, schoolId }: Props) {
             {settingOnSubjectDataLanguage.deleteSubject(language.data ?? "en")}
           </button>
           {roleSchool !== "ADMIN" && roleSubject !== "ADMIN" && (
-            <h4 className="text-xs sm:text-sm text-red-700">
+            <h4 className="text-xs text-red-700 sm:text-sm">
               Only the school admin and the admin of this subject can delete
               them
             </h4>

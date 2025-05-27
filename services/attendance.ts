@@ -1,5 +1,5 @@
 import { Attendance } from "../interfaces";
-import createAxiosInstance from "./apiService";
+import createAxiosInstance from "./api-service";
 
 const axiosInstance = createAxiosInstance();
 type RequestGetAttendanceByIdService = {
@@ -7,7 +7,7 @@ type RequestGetAttendanceByIdService = {
 };
 
 export async function GetAttendanceByIdService(
-  input: RequestGetAttendanceByIdService
+  input: RequestGetAttendanceByIdService,
 ): Promise<Attendance> {
   try {
     const response = await axiosInstance({
@@ -34,7 +34,7 @@ export type RequestUpdateAttendanceService = {
 type ResponseUpdateAttendanceService = Attendance;
 
 export async function UpdateAttendanceService(
-  input: RequestUpdateAttendanceService
+  input: RequestUpdateAttendanceService,
 ): Promise<ResponseUpdateAttendanceService> {
   try {
     const response = await axiosInstance({
@@ -62,7 +62,7 @@ export type RequestUpdateManyAttendanceService = {
 type ResponseUpdateManyAttendanceService = Attendance[];
 
 export async function UpdateManyAttendanceService(
-  input: RequestUpdateManyAttendanceService
+  input: RequestUpdateManyAttendanceService,
 ): Promise<ResponseUpdateManyAttendanceService> {
   try {
     const response = await axiosInstance({
@@ -87,7 +87,7 @@ export type RequestCreateAttendanceService = {
 type ResponseCreateAttendanceService = Attendance;
 
 export async function CreateAttendanceService(
-  input: RequestCreateAttendanceService
+  input: RequestCreateAttendanceService,
 ): Promise<ResponseCreateAttendanceService> {
   try {
     const response = await axiosInstance({
@@ -107,7 +107,7 @@ export type RequestExportAttendanceService = {
 };
 
 export async function ExportAttendanceService(
-  input: RequestExportAttendanceService
+  input: RequestExportAttendanceService,
 ): Promise<string> {
   try {
     const response = await axiosInstance({

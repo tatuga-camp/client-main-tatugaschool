@@ -49,7 +49,7 @@ export function useGetSubject({
 }
 
 export function useGetSubjectFromSchool(
-  input: RequestGetSubjectBySchoolsService
+  input: RequestGetSubjectBySchoolsService,
 ) {
   return useQuery({
     queryKey: [
@@ -69,7 +69,7 @@ export function useReorderSubjects() {
       input: RequestReorderSubjectsService & {
         schoolId: string;
         educationYear: EducationYear;
-      }
+      },
     ) => ReorderSubjectsService(input),
     onSuccess(data, variables, context) {
       queryClient.setQueryData(
@@ -81,7 +81,7 @@ export function useReorderSubjects() {
           },
         ],
         (
-          prevs: ResponseGetSubjectBySchoolsService
+          prevs: ResponseGetSubjectBySchoolsService,
         ): ResponseGetSubjectBySchoolsService => {
           return prevs.map((subject) => {
             const newOrder = data.find((d) => d.id === subject.id);
@@ -95,7 +95,7 @@ export function useReorderSubjects() {
               return subject;
             }
           });
-        }
+        },
       );
     },
   });
@@ -114,21 +114,6 @@ export function useGetTeacherOnSubject({
       }),
   });
   return teachers;
-}
-
-export function useGetStudentOnSubject({
-  subjectId,
-}: {
-  subjectId: string;
-}): UseQueryResult<StudentOnSubject[], Error> {
-  const students = useQuery({
-    queryKey: ["studentOnSubjects", { subjectId: subjectId }],
-    queryFn: () =>
-      GetStudentOnSubjectBySubjectService({
-        subjectId: subjectId,
-      }),
-  });
-  return students;
 }
 
 export function useCreateSubject() {
@@ -161,7 +146,7 @@ export function useUpdateSubject() {
         ["subject", { id: data.id }],
         (prev: Subject) => {
           return data;
-        }
+        },
       );
       variables.queryClient.invalidateQueries({
         queryKey: ["subjects", { schoolId: data.schoolId }],
@@ -169,30 +154,6 @@ export function useUpdateSubject() {
     },
   });
   return updateSubject;
-}
-
-export function useUpdateStudentOnSubject() {
-  const updateStudentOnSubject = useMutation({
-    mutationKey: ["update-student-on-subject"],
-    mutationFn: (request: {
-      request: RequestUpdateStudentOnSubjectService;
-      queryClient: QueryClient;
-    }) => UpdateStudentOnSubjectService(request.request),
-    onSuccess(data, variables, context) {
-      variables.queryClient.setQueryData(
-        ["studentOnSubjects", { subjectId: data.subjectId }],
-        (prev: StudentOnSubject[]) => {
-          return prev.map((student) => {
-            if (student.id === data.id) {
-              return data;
-            }
-            return student;
-          });
-        }
-      );
-    },
-  });
-  return updateStudentOnSubject;
 }
 
 export function useDeleteTeacherOnSubject() {
@@ -208,9 +169,9 @@ export function useDeleteTeacherOnSubject() {
         ["teacherOnSubject", { subjectId: variables.subjectId }],
         (oldData: TeacherOnSubject[]) => {
           return oldData.filter(
-            (teacher) => teacher.id !== variables.request.teacherOnSubjectId
+            (teacher) => teacher.id !== variables.request.teacherOnSubjectId,
           );
-        }
+        },
       );
     },
   });

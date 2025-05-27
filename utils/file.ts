@@ -1,7 +1,7 @@
 export async function urlToFile(
   url: string,
   fileName: string = "image.jpg",
-  mimeType: string = "image/jpeg"
+  mimeType: string = "image/jpeg",
 ) {
   try {
     // Fetch the image from the URL
@@ -23,4 +23,22 @@ export async function urlToFile(
     console.error("Error converting URL to File:", error);
     return null;
   }
+}
+
+export async function imageUrlToBase64(url: string): Promise<string> {
+  const response = await fetch(url);
+  const blob = await response.blob();
+
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (typeof reader.result === "string") {
+        resolve(reader.result); // this is a base64 data URL
+      } else {
+        reject("Failed to convert to base64");
+      }
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
 }
