@@ -1,6 +1,6 @@
 import { Skill } from "@/interfaces";
 
-import createAxiosInstance from "./apiService";
+import createAxiosInstance from "./api-service";
 
 const axiosInstance = createAxiosInstance();
 
@@ -13,7 +13,7 @@ type RequestCreateSkillService = {
 type ResponseCreateSkillService = Skill;
 
 export async function CreateSkillService(
-  input: RequestCreateSkillService
+  input: RequestCreateSkillService,
 ): Promise<ResponseCreateSkillService> {
   try {
     const response = await axiosInstance({
@@ -40,7 +40,7 @@ type RequestUpdateSkillService = {
 type ResponseUpdateSkillService = Skill;
 
 export async function UpdateSkillService(
-  input: RequestUpdateSkillService
+  input: RequestUpdateSkillService,
 ): Promise<ResponseUpdateSkillService> {
   try {
     const response = await axiosInstance({
@@ -64,7 +64,7 @@ type ResponseDeleteSkillService = {
 };
 
 export async function DeleteSkillService(
-  input: RequestDeleteSkillService
+  input: RequestDeleteSkillService,
 ): Promise<ResponseDeleteSkillService> {
   try {
     const response = await axiosInstance({

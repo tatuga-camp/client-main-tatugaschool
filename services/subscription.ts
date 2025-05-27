@@ -1,4 +1,4 @@
-import createAxiosInstance from "./apiService";
+import createAxiosInstance from "./api-service";
 
 const axiosInstance = createAxiosInstance();
 
@@ -15,7 +15,7 @@ type ResponseCreateSubscriptionService = {
 };
 
 export async function CreateSubscriptionService(
-  input: RequestCreateSubscriptionService
+  input: RequestCreateSubscriptionService,
 ): Promise<ResponseCreateSubscriptionService> {
   try {
     const response = await axiosInstance({
@@ -39,7 +39,7 @@ type ResponseGetManageSubscriptionService = {
 };
 
 export async function GetManageSubscriptionService(
-  input: RequestGetManageSubscriptionService
+  input: RequestGetManageSubscriptionService,
 ): Promise<ResponseGetManageSubscriptionService> {
   try {
     const response = await axiosInstance({

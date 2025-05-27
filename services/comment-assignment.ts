@@ -1,6 +1,6 @@
 import { CommentOnAssignment } from "@/interfaces";
 
-import createAxiosInstance from "./apiService";
+import createAxiosInstance from "./api-service";
 
 const axiosInstance = createAxiosInstance();
 
@@ -25,7 +25,7 @@ export type RequestDeleteCommentService = {
 type ResponseCommentOnAssignmentComment = CommentOnAssignment;
 
 export async function CreateCommentTeacherService(
-  input: RequestCreateCommentTeacher
+  input: RequestCreateCommentTeacher,
 ): Promise<ResponseCommentOnAssignmentComment> {
   try {
     const response = await axiosInstance({
@@ -45,7 +45,7 @@ type RequestGetCommentService = {
 export type ResponseGetCommentService = CommentOnAssignment[];
 
 export async function GetCommentTeacherService(
-  input: RequestGetCommentService
+  input: RequestGetCommentService,
 ): Promise<ResponseGetCommentService> {
   try {
     const response = await axiosInstance({
@@ -59,7 +59,7 @@ export async function GetCommentTeacherService(
 }
 
 export async function UpdateCommentTeacherService(
-  input: RequestUpdateCommentService
+  input: RequestUpdateCommentService,
 ): Promise<ResponseCommentOnAssignmentComment> {
   try {
     const response = await axiosInstance({
@@ -78,7 +78,7 @@ export async function UpdateCommentTeacherService(
 export type ResponseDeleteCommentService = CommentOnAssignment;
 
 export async function DeleteCommentTeacherService(
-  input: RequestDeleteCommentService
+  input: RequestDeleteCommentService,
 ): Promise<ResponseDeleteCommentService> {
   try {
     const response = await axiosInstance({

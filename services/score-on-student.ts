@@ -1,6 +1,6 @@
 import { ScoreOnStudent } from "@/interfaces";
 
-import createAxiosInstance from "./apiService";
+import createAxiosInstance from "./api-service";
 
 const axiosInstance = createAxiosInstance();
 
@@ -13,7 +13,7 @@ export type RequestCreateScoreOnStudentService = {
 export type ResponseScoreOnStudentService = ScoreOnStudent;
 
 export async function CreateScoreOnStudentService(
-  input: RequestCreateScoreOnStudentService
+  input: RequestCreateScoreOnStudentService,
 ): Promise<ResponseScoreOnStudentService> {
   try {
     const response = await axiosInstance({
@@ -37,7 +37,7 @@ export type RequestGetScoresOnStudentBySubjectIdService = {
 };
 
 export async function GetScoresOnStudentBySubjectIdService(
-  input: RequestGetScoresOnStudentBySubjectIdService
+  input: RequestGetScoresOnStudentBySubjectIdService,
 ): Promise<ResponseScoreOnStudentService[]> {
   try {
     const response = await axiosInstance({
@@ -49,7 +49,7 @@ export async function GetScoresOnStudentBySubjectIdService(
   } catch (error: any) {
     console.error(
       "Failed to fetch scores by subject ID:",
-      error.response?.data
+      error.response?.data,
     );
     throw error?.response?.data;
   }
@@ -60,7 +60,7 @@ type RequestGetScoresByStudentOnSubjectIdService = {
 };
 
 export async function GetScoresByStudentOnSubjectIdService(
-  input: RequestGetScoresByStudentOnSubjectIdService
+  input: RequestGetScoresByStudentOnSubjectIdService,
 ): Promise<ResponseScoreOnStudentService[]> {
   try {
     const response = await axiosInstance({
@@ -71,7 +71,7 @@ export async function GetScoresByStudentOnSubjectIdService(
   } catch (error: any) {
     console.error(
       "Failed to fetch scores by studentOnSubjectId:",
-      error.response?.data
+      error.response?.data,
     );
     throw error?.response?.data;
   }
@@ -84,7 +84,7 @@ export type ResponseDeleteScoreOnStudentService = {
 };
 
 export async function DeleteScoreOnStudentService(
-  input: RequestDeleteScoreOnStudentService
+  input: RequestDeleteScoreOnStudentService,
 ): Promise<ResponseDeleteScoreOnStudentService> {
   try {
     const response = await axiosInstance({

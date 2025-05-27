@@ -5,7 +5,7 @@ import {
 } from "@/interfaces";
 import { Pagination } from "@/interfaces/Pagination";
 
-import createAxiosInstance from "./apiService";
+import createAxiosInstance from "./api-service";
 
 const axiosInstance = createAxiosInstance();
 
@@ -17,7 +17,7 @@ type RequestCreateStudentOnAssignmentService = {
 type ResponseCreateStudentOnAssignmentService = StudentOnAssignment;
 
 export async function CreateStudentOnAssignmentService(
-  input: RequestCreateStudentOnAssignmentService
+  input: RequestCreateStudentOnAssignmentService,
 ): Promise<ResponseCreateStudentOnAssignmentService> {
   try {
     const response = await axiosInstance({
@@ -29,7 +29,7 @@ export async function CreateStudentOnAssignmentService(
   } catch (error: any) {
     console.error(
       "Create Student on Assignment request failed:",
-      error.response.data
+      error.response.data,
     );
     throw error?.response?.data;
   }
@@ -44,7 +44,7 @@ export type ResponseGetStudentOnAssignmentsService = (StudentOnAssignment & {
 })[];
 
 export async function GetStudentOnAssignmentsByAssignmentIdService(
-  input: RequestGetStudentOnAssignmentsService
+  input: RequestGetStudentOnAssignmentsService,
 ): Promise<ResponseGetStudentOnAssignmentsService> {
   try {
     const response = await axiosInstance({
@@ -55,7 +55,7 @@ export async function GetStudentOnAssignmentsByAssignmentIdService(
   } catch (error: any) {
     console.error(
       "Get Student on Assignments request failed:",
-      error.response.data
+      error.response.data,
     );
     throw error?.response?.data;
   }
@@ -68,7 +68,7 @@ type RequestGetStudentOnAssignmentByStudentIdService = {
 type ResponseGetStudentOnAssignmentByStudentIdService = StudentOnAssignment;
 
 export async function GetStudentOnAssignmentByStudentIdService(
-  input: RequestGetStudentOnAssignmentByStudentIdService
+  input: RequestGetStudentOnAssignmentByStudentIdService,
 ): Promise<ResponseGetStudentOnAssignmentByStudentIdService> {
   try {
     const response = await axiosInstance({
@@ -79,7 +79,7 @@ export async function GetStudentOnAssignmentByStudentIdService(
   } catch (error: any) {
     console.error(
       "Get Student on Assignment by StudentId request failed:",
-      error.response.data
+      error.response.data,
     );
     throw error?.response?.data;
   }
@@ -98,7 +98,7 @@ export type RequestUpdateStudentOnAssignmentService = {
 export type ResponseUpdateStudentOnAssignmentService = StudentOnAssignment;
 
 export async function UpdateStudentOnAssignmentService(
-  input: RequestUpdateStudentOnAssignmentService
+  input: RequestUpdateStudentOnAssignmentService,
 ): Promise<ResponseUpdateStudentOnAssignmentService> {
   try {
     const response = await axiosInstance({
@@ -110,7 +110,7 @@ export async function UpdateStudentOnAssignmentService(
   } catch (error: any) {
     console.error(
       "Update Student on Assignment request failed:",
-      error.response.data
+      error.response.data,
     );
     throw error?.response?.data;
   }
@@ -125,7 +125,7 @@ type ResponseDeleteStudentOnAssignmentService = {
 };
 
 export async function DeleteStudentOnAssignmentService(
-  input: RequestDeleteStudentOnAssignmentService
+  input: RequestDeleteStudentOnAssignmentService,
 ): Promise<ResponseDeleteStudentOnAssignmentService> {
   try {
     const response = await axiosInstance({
@@ -136,7 +136,7 @@ export async function DeleteStudentOnAssignmentService(
   } catch (error: any) {
     console.error(
       "Delete Student on Assignment request failed:",
-      error.response.data
+      error.response.data,
     );
     throw error?.response?.data;
   }

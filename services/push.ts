@@ -1,5 +1,5 @@
 import { subscribeUserToPush } from "../utils/notifications";
-import createAxiosInstance from "./apiService";
+import createAxiosInstance from "./api-service";
 
 const axiosInstance = createAxiosInstance();
 

@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import { User } from "../interfaces";
 
-import createAxiosInstance from "./apiService";
+import createAxiosInstance from "./api-service";
 
 const axiosInstance = createAxiosInstance();
 
@@ -17,7 +17,7 @@ type ResponseSignInService = {
 };
 
 export async function SignInService(
-  input: RequestSignInService
+  input: RequestSignInService,
 ): Promise<ResponseSignInService> {
   try {
     const response = await axiosInstance({
@@ -47,7 +47,7 @@ type RequestSignUpService = {
 
 type ResponseSignUpService = { redirectUrl: string };
 export async function SignUpService(
-  input: RequestSignUpService
+  input: RequestSignUpService,
 ): Promise<ResponseSignUpService> {
   try {
     const response = await axiosInstance({
@@ -71,7 +71,7 @@ type RequestVerifyEmailService = {
 type ResponseVerifyEmailService = {};
 
 export async function VerifyEmailService(
-  input: RequestVerifyEmailService
+  input: RequestVerifyEmailService,
 ): Promise<ResponseVerifyEmailService> {
   try {
     const response = await axiosInstance({
@@ -95,7 +95,7 @@ type RequestForgotPasswordService = {
 type ResponseForgotPasswordService = {};
 
 export async function ForgotPasswordService(
-  input: RequestForgotPasswordService
+  input: RequestForgotPasswordService,
 ): Promise<ResponseForgotPasswordService> {
   try {
     const response = await axiosInstance({
@@ -118,7 +118,7 @@ export type RequestResetPasswordService = {
 type ResponseResetPasswordService = {};
 
 export async function ResetPasswordService(
-  input: RequestResetPasswordService
+  input: RequestResetPasswordService,
 ): Promise<ResponseResetPasswordService> {
   try {
     const response = await axiosInstance({
@@ -142,7 +142,7 @@ type ResponseRefreshTokenService = {
 };
 
 export async function RefreshTokenService(
-  input: RequestRefreshTokenService
+  input: RequestRefreshTokenService,
 ): Promise<ResponseRefreshTokenService> {
   try {
     const response = await axiosInstance({

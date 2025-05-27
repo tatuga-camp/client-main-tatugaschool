@@ -1,4 +1,4 @@
-import createAxiosInstance from "./apiService";
+import createAxiosInstance from "./api-service";
 
 const axiosInstance = createAxiosInstance();
 
@@ -17,7 +17,7 @@ type ResponseGetSignedURL = {
 };
 
 export async function getSignedURLTeacherService(
-  input: RequestGetSignedURL
+  input: RequestGetSignedURL,
 ): Promise<ResponseGetSignedURL> {
   try {
     const response = await axiosInstance({
@@ -39,7 +39,7 @@ type RequestUploadSignURLService = {
   signURL: string;
 };
 export async function UploadSignURLService(
-  input: RequestUploadSignURLService
+  input: RequestUploadSignURLService,
 ): Promise<{
   message: "success" | "error";
 }> {

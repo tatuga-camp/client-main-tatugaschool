@@ -8,16 +8,25 @@ import {
   BsLayoutSidebarInset,
   BsLayoutSidebarInsetReverse,
 } from "react-icons/bs";
+import { FaRegSadTear } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
+import { IoChevronDownSharp } from "react-icons/io5";
 import {
   MdAssignment,
   MdDelete,
   MdEditDocument,
-  MdFeedback,
   MdReviews,
 } from "react-icons/md";
+import { RiEmotionHappyFill } from "react-icons/ri";
 import Swal from "sweetalert2";
 import { defaultBlurHash } from "../../data";
+import {
+  classworkViewDataLanguage,
+  dropdownStatusStudentOnAssignmentLanguage,
+  studentWorkDataLanguage,
+} from "../../data/languages";
+import { useEnterKey } from "../../hook";
+import useClickOutside from "../../hook/useClickOutside";
 import {
   Assignment,
   ErrorMessages,
@@ -38,6 +47,7 @@ import {
   UploadSignURLService,
 } from "../../services";
 import { decodeBlurhashToCanvas, timeAgo, timeLeft } from "../../utils";
+import ConfirmDeleteMessage from "../common/ConfirmDeleteMessage";
 import DrawCanva from "../common/DrawCanva";
 import InputNumber from "../common/InputNumber";
 import LoadingBar from "../common/LoadingBar";
@@ -45,18 +55,7 @@ import PopupLayout from "../layout/PopupLayout";
 import AssignmentText from "./AssignmentText";
 import CommentSection from "./CommentSection";
 import FileStudentAssignmentCard from "./FileStudentAssignmentCard";
-import {
-  classworkViewDataLanguage,
-  dropdownStatusStudentOnAssignmentLanguage,
-  studentWorkDataLanguage,
-} from "../../data/languages";
 import StatusAssignmentButton from "./StatusAssignmentButton";
-import { FaRegSadTear } from "react-icons/fa";
-import { RiEmotionHappyFill } from "react-icons/ri";
-import { IoChevronDownSharp } from "react-icons/io5";
-import useClickOutside from "../../hook/useClickOutside";
-import ConfirmDeleteMessage from "../common/ConfirmDeleteMessage";
-import { useEnterKey } from "../../hook";
 
 type Props = {
   assignmentId: string;
@@ -432,8 +431,12 @@ function MultipleReview({ selectStudents, maxScore }: MultipleReviewProps) {
   };
 
   return (
-    <div className="flex h-full w-full grow items-center justify-center font-Anuphan">
-      {loading && <LoadingBar />}
+    <div className="flex h-full w-full grow flex-col items-center justify-center gap-5 font-Anuphan">
+      {loading && (
+        <div className="w-96">
+          <LoadingBar />
+        </div>
+      )}
       {selectStudents.length > 0 ? (
         <form
           onSubmit={handleSaveChange}

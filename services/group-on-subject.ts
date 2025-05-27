@@ -1,5 +1,5 @@
 import { GroupOnSubject, StudentOnGroup, UnitOnGroup } from "../interfaces";
-import createAxiosInstance from "./apiService";
+import createAxiosInstance from "./api-service";
 
 const axiosInstance = createAxiosInstance();
 
@@ -10,7 +10,7 @@ export type RequestGetGroupOnSubjectsService = {
 };
 
 export async function GetGroupOnSubjectsService(
-  request: RequestGetGroupOnSubjectsService
+  request: RequestGetGroupOnSubjectsService,
 ): Promise<ResponseGetGroupOnSubjectsService> {
   try {
     const response = await axiosInstance({
@@ -32,7 +32,7 @@ export type RequestGetGroupOnSubjectService = {
 };
 
 export async function GetGroupOnSubjectService(
-  request: RequestGetGroupOnSubjectService
+  request: RequestGetGroupOnSubjectService,
 ): Promise<ResponseGetGroupOnSubjectService> {
   try {
     const response = await axiosInstance({
@@ -56,7 +56,7 @@ export type RequestCreateGroupOnSubjectService = {
 };
 
 export async function CreateGroupOnSubjectService(
-  request: RequestCreateGroupOnSubjectService
+  request: RequestCreateGroupOnSubjectService,
 ): Promise<ResponseCreateGroupOnSubjectService> {
   try {
     const response = await axiosInstance({
@@ -83,7 +83,7 @@ export type RequestUpdateGroupOnSubjectService = {
 };
 
 export async function UpdateGroupOnSubjectService(
-  request: RequestUpdateGroupOnSubjectService
+  request: RequestUpdateGroupOnSubjectService,
 ): Promise<ResponseUpdateGroupOnSubjectService> {
   try {
     const response = await axiosInstance({
@@ -105,7 +105,7 @@ export type RequestRefetchGroupOnSubjectService = {
 };
 
 export async function RefetchGroupOnSubjectService(
-  request: RequestRefetchGroupOnSubjectService
+  request: RequestRefetchGroupOnSubjectService,
 ): Promise<ResponseRefetchGroupOnSubjectService> {
   try {
     const response = await axiosInstance({
@@ -126,7 +126,7 @@ export type RequestDeleteeGroupOnSubjectService = {
 };
 
 export async function DeleteeGroupOnSubjectService(
-  request: RequestDeleteeGroupOnSubjectService
+  request: RequestDeleteeGroupOnSubjectService,
 ): Promise<ResponseDeleteeGroupOnSubjectService> {
   try {
     const response = await axiosInstance({

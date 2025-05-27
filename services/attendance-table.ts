@@ -2,7 +2,7 @@ import {
   AttendanceStatusList,
   AttendanceTable,
 } from "@/interfaces/AttendanceTable";
-import createAxiosInstance from "./apiService";
+import createAxiosInstance from "./api-service";
 
 const axiosInstance = createAxiosInstance();
 type RequestGetAttendanceTablesService = {
@@ -14,7 +14,7 @@ export type ResponseGetAttendanceTablesService = (AttendanceTable & {
 })[];
 
 export async function GetAttendanceTablesService(
-  input: RequestGetAttendanceTablesService
+  input: RequestGetAttendanceTablesService,
 ): Promise<ResponseGetAttendanceTablesService> {
   try {
     const response = await axiosInstance({
@@ -36,7 +36,7 @@ type RequestGetAttendanceTableByIdService = {
 type ResponseGetAttendanceTableByIdService = AttendanceTable;
 
 export async function GetAttendanceTableByIdService(
-  input: RequestGetAttendanceTableByIdService
+  input: RequestGetAttendanceTableByIdService,
 ): Promise<ResponseGetAttendanceTableByIdService> {
   try {
     const response = await axiosInstance({
@@ -60,7 +60,7 @@ export type RequestCreateAttendanceTableService = {
 type ResponseCreateAttendanceTableService = AttendanceTable;
 
 export async function CreateAttendanceTableService(
-  input: RequestCreateAttendanceTableService
+  input: RequestCreateAttendanceTableService,
 ): Promise<ResponseCreateAttendanceTableService> {
   try {
     const response = await axiosInstance({
@@ -88,7 +88,7 @@ export type RequestUpdateAttendanceTableService = {
 type ResponseUpdateAttendanceTableService = AttendanceTable;
 
 export async function UpdateAttendanceTableService(
-  input: RequestUpdateAttendanceTableService
+  input: RequestUpdateAttendanceTableService,
 ): Promise<ResponseUpdateAttendanceTableService> {
   try {
     const response = await axiosInstance({
@@ -102,7 +102,7 @@ export async function UpdateAttendanceTableService(
   } catch (error: any) {
     console.error(
       "Update Attendance Table request failed:",
-      error.response?.data
+      error.response?.data,
     );
     throw error?.response?.data;
   }
@@ -114,7 +114,7 @@ export type RequestDeleteAttendanceTableService = {
 type ResponseDeleteAttendanceTableService = AttendanceTable;
 
 export async function DeleteAttendanceTableService(
-  input: RequestDeleteAttendanceTableService
+  input: RequestDeleteAttendanceTableService,
 ): Promise<ResponseDeleteAttendanceTableService> {
   try {
     const response = await axiosInstance({
@@ -125,7 +125,7 @@ export async function DeleteAttendanceTableService(
   } catch (error: any) {
     console.error(
       "Delete Attendance Table request failed:",
-      error.response?.data
+      error.response?.data,
     );
     throw error?.response?.data;
   }

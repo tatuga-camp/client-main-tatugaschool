@@ -1,6 +1,6 @@
 import { SkillOnAssignment } from "@/interfaces";
 
-import createAxiosInstance from "./apiService";
+import createAxiosInstance from "./api-service";
 
 const axiosInstance = createAxiosInstance();
 type RequestCreateSkillOnAssignmentService = {
@@ -11,7 +11,7 @@ type RequestCreateSkillOnAssignmentService = {
 type ResponseCreateSkillOnAssignmentService = SkillOnAssignment;
 
 export async function CreateSkillOnAssignmentService(
-  input: RequestCreateSkillOnAssignmentService
+  input: RequestCreateSkillOnAssignmentService,
 ): Promise<ResponseCreateSkillOnAssignmentService> {
   try {
     const response = await axiosInstance({
@@ -23,7 +23,7 @@ export async function CreateSkillOnAssignmentService(
   } catch (error: any) {
     console.error(
       "Create Skill on Assignment request failed:",
-      error.response.data
+      error.response.data,
     );
     throw error?.response?.data;
   }
@@ -36,7 +36,7 @@ type RequestGetSkillOnAssignmentByAssignmentIdService = {
 type ResponseGetSkillOnAssignmentByAssignmentIdService = SkillOnAssignment;
 
 export async function GetSkillOnAssignmentByAssignmentIdService(
-  input: RequestGetSkillOnAssignmentByAssignmentIdService
+  input: RequestGetSkillOnAssignmentByAssignmentIdService,
 ): Promise<ResponseGetSkillOnAssignmentByAssignmentIdService> {
   try {
     const response = await axiosInstance({
@@ -47,7 +47,7 @@ export async function GetSkillOnAssignmentByAssignmentIdService(
   } catch (error: any) {
     console.error(
       "Get Skill on Assignment by AssignmentId request failed:",
-      error.response.data
+      error.response.data,
     );
     throw error?.response?.data;
   }
@@ -62,7 +62,7 @@ type ResponseDeleteSkillOnAssignmentService = {
 };
 
 export async function DeleteSkillOnAssignmentService(
-  input: RequestDeleteSkillOnAssignmentService
+  input: RequestDeleteSkillOnAssignmentService,
 ): Promise<ResponseDeleteSkillOnAssignmentService> {
   try {
     const response = await axiosInstance({
@@ -73,7 +73,7 @@ export async function DeleteSkillOnAssignmentService(
   } catch (error: any) {
     console.error(
       "Delete Skill on Assignment request failed:",
-      error.response.data
+      error.response.data,
     );
     throw error?.response?.data;
   }

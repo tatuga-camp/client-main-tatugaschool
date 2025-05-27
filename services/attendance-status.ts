@@ -1,5 +1,5 @@
 import { AttendanceStatusList } from "../interfaces";
-import createAxiosInstance from "./apiService";
+import createAxiosInstance from "./api-service";
 const axiosInstance = createAxiosInstance();
 
 export type RequestCreateAttendanceStatusListService = {
@@ -12,7 +12,7 @@ export type RequestCreateAttendanceStatusListService = {
 type ResponseCreateAttendanceStatusListService = AttendanceStatusList;
 
 export async function CreateAttendanceStatusListService(
-  input: RequestCreateAttendanceStatusListService
+  input: RequestCreateAttendanceStatusListService,
 ): Promise<ResponseCreateAttendanceStatusListService> {
   try {
     const response = await axiosInstance({
@@ -26,7 +26,7 @@ export async function CreateAttendanceStatusListService(
   } catch (error: any) {
     console.error(
       "Update Attendance Status request failed:",
-      error.response?.data
+      error.response?.data,
     );
     throw error?.response?.data;
   }
@@ -46,7 +46,7 @@ export type RequestUpdateAttendanceStatusListService = {
 type ResponseUpdateAttendanceStatusListService = AttendanceStatusList;
 
 export async function UpdateAttendanceStatusListService(
-  input: RequestUpdateAttendanceStatusListService
+  input: RequestUpdateAttendanceStatusListService,
 ): Promise<ResponseUpdateAttendanceStatusListService> {
   try {
     const response = await axiosInstance({
@@ -60,7 +60,7 @@ export async function UpdateAttendanceStatusListService(
   } catch (error: any) {
     console.error(
       "Update Attendance Status request failed:",
-      error.response?.data
+      error.response?.data,
     );
     throw error?.response?.data;
   }
@@ -73,7 +73,7 @@ export type RequestDeleteAttendanceStatusListService = {
 type ResponseDeleteAttendanceStatusListService = AttendanceStatusList;
 
 export async function DeleteAttendanceStatusListService(
-  input: RequestDeleteAttendanceStatusListService
+  input: RequestDeleteAttendanceStatusListService,
 ): Promise<ResponseDeleteAttendanceStatusListService> {
   try {
     const response = await axiosInstance({
@@ -84,7 +84,7 @@ export async function DeleteAttendanceStatusListService(
   } catch (error: any) {
     console.error(
       "Update Attendance Status request failed:",
-      error.response?.data
+      error.response?.data,
     );
     throw error?.response?.data;
   }

@@ -1,5 +1,5 @@
 import { Grade } from "../interfaces";
-import createAxiosInstance from "./apiService";
+import createAxiosInstance from "./api-service";
 
 const axiosInstance = createAxiosInstance();
 export type RequestCreateGradeService = {
@@ -10,7 +10,7 @@ export type RequestCreateGradeService = {
 type ResponseCreateGradeService = Grade;
 
 export async function CreateGradeService(
-  input: RequestCreateGradeService
+  input: RequestCreateGradeService,
 ): Promise<ResponseCreateGradeService> {
   try {
     const response = await axiosInstance({
@@ -36,7 +36,7 @@ export type RequestUpdateGradeService = {
 type ResponseUpdateGradeService = Grade;
 
 export async function UpdateGradeService(
-  input: RequestUpdateGradeService
+  input: RequestUpdateGradeService,
 ): Promise<ResponseUpdateGradeService> {
   try {
     const response = await axiosInstance({

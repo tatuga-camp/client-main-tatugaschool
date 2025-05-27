@@ -1,6 +1,6 @@
 import { TeacherOnSubject } from "@/interfaces";
 
-import createAxiosInstance from "./apiService";
+import createAxiosInstance from "./api-service";
 
 const axiosInstance = createAxiosInstance();
 
@@ -13,7 +13,7 @@ export type RequestCreateTeacherOnSubjectService = {
 type ResponseCreateTeacherOnSubjectService = TeacherOnSubject;
 
 export async function CreateTeacherOnSubjectService(
-  input: RequestCreateTeacherOnSubjectService
+  input: RequestCreateTeacherOnSubjectService,
 ): Promise<ResponseCreateTeacherOnSubjectService> {
   try {
     const response = await axiosInstance({
@@ -25,7 +25,7 @@ export async function CreateTeacherOnSubjectService(
   } catch (error: any) {
     console.error(
       "Create Teacher on Subject request failed:",
-      error.response.data
+      error.response.data,
     );
     throw error?.response?.data;
   }
@@ -38,7 +38,7 @@ type RequestGetTeacherOnSubjectBySubjectService = {
 type ResponseGetTeacherOnSubjectBySubjectService = TeacherOnSubject[];
 
 export async function GetTeacherOnSubjectBySubjectService(
-  input: RequestGetTeacherOnSubjectBySubjectService
+  input: RequestGetTeacherOnSubjectBySubjectService,
 ): Promise<ResponseGetTeacherOnSubjectBySubjectService> {
   try {
     const response = await axiosInstance({
@@ -49,7 +49,7 @@ export async function GetTeacherOnSubjectBySubjectService(
   } catch (error: any) {
     console.error(
       "Get Teacher on Subject by Subject request failed:",
-      error.response.data
+      error.response.data,
     );
     throw error?.response?.data;
   }
@@ -62,7 +62,7 @@ type RequestGetTeacherOnSubjectByIdService = {
 type ResponseGetTeacherOnSubjectByIdService = TeacherOnSubject;
 
 export async function GetTeacherOnSubjectByIdService(
-  input: RequestGetTeacherOnSubjectByIdService
+  input: RequestGetTeacherOnSubjectByIdService,
 ): Promise<ResponseGetTeacherOnSubjectByIdService> {
   try {
     const response = await axiosInstance({
@@ -73,7 +73,7 @@ export async function GetTeacherOnSubjectByIdService(
   } catch (error: any) {
     console.error(
       "Get Teacher on Subject by ID request failed:",
-      error.response.data
+      error.response.data,
     );
     throw error?.response?.data;
   }
@@ -90,7 +90,7 @@ export type RequestUpdateTeacherOnSubjectService = {
 type ResponseUpdateTeacherOnSubjectService = TeacherOnSubject;
 
 export async function UpdateTeacherOnSubjectService(
-  input: RequestUpdateTeacherOnSubjectService
+  input: RequestUpdateTeacherOnSubjectService,
 ): Promise<ResponseUpdateTeacherOnSubjectService> {
   try {
     const response = await axiosInstance({
@@ -102,7 +102,7 @@ export async function UpdateTeacherOnSubjectService(
   } catch (error: any) {
     console.error(
       "Update Teacher on Subject request failed:",
-      error.response.data
+      error.response.data,
     );
     throw error?.response?.data;
   }
@@ -117,7 +117,7 @@ type ResponseDeleteTeacherOnSubjectService = {
 };
 
 export async function DeleteTeacherOnSubjectService(
-  input: RequestDeleteTeacherOnSubjectService
+  input: RequestDeleteTeacherOnSubjectService,
 ): Promise<ResponseDeleteTeacherOnSubjectService> {
   try {
     const response = await axiosInstance({
@@ -128,7 +128,7 @@ export async function DeleteTeacherOnSubjectService(
   } catch (error: any) {
     console.error(
       "Delete Teacher on Subject request failed:",
-      error.response.data
+      error.response.data,
     );
     throw error?.response?.data;
   }

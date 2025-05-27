@@ -1,5 +1,5 @@
 import { StudentOnGroup } from "../interfaces";
-import createAxiosInstance from "./apiService";
+import createAxiosInstance from "./api-service";
 
 const axiosInstance = createAxiosInstance();
 
@@ -11,7 +11,7 @@ export type RequestCreateStudentOnGroupService = {
 };
 
 export async function CreateStudentOnGroupService(
-  request: RequestCreateStudentOnGroupService
+  request: RequestCreateStudentOnGroupService,
 ): Promise<ResponseCreateStudentOnGroupService> {
   try {
     const response = await axiosInstance({
@@ -38,7 +38,7 @@ export type RequestUpdateStudentOnGroupService = {
 };
 
 export async function UpdateStudentOnGroupService(
-  request: RequestUpdateStudentOnGroupService
+  request: RequestUpdateStudentOnGroupService,
 ): Promise<ResponseUpdateStudentOnGroupService> {
   try {
     const response = await axiosInstance({
@@ -59,7 +59,7 @@ export type RequestReorderStudentOnGroupService = {
 };
 
 export async function ReorderStudentOnGroupService(
-  request: RequestReorderStudentOnGroupService
+  request: RequestReorderStudentOnGroupService,
 ): Promise<ResponseReorderStudentOnGroupService> {
   try {
     const response = await axiosInstance({
@@ -80,7 +80,7 @@ export type RequestDeleteStudentOnGroupService = {
 };
 
 export async function DeleteStudentOnGroupService(
-  request: RequestDeleteStudentOnGroupService
+  request: RequestDeleteStudentOnGroupService,
 ): Promise<ResponseDeleteStudentOnGroupService> {
   try {
     const response = await axiosInstance({

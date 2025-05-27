@@ -1,6 +1,6 @@
 import { Classroom, EducationYear, Student, Subject, User } from "@/interfaces";
 
-import createAxiosInstance from "./apiService";
+import createAxiosInstance from "./api-service";
 
 const axiosInstance = createAxiosInstance();
 
@@ -14,7 +14,7 @@ export type RequestCreateClassService = {
 type ResponseCreateClassService = Classroom;
 
 export async function CreateClassService(
-  input: RequestCreateClassService
+  input: RequestCreateClassService,
 ): Promise<ResponseCreateClassService> {
   try {
     const response = await axiosInstance({
@@ -40,7 +40,7 @@ export type ResponseGetClassesBySchoolIdService = (Classroom & {
 })[];
 
 export async function GetClassesBySchoolIdService(
-  input: RequestetClassesBySchoolIdService
+  input: RequestetClassesBySchoolIdService,
 ): Promise<ResponseGetClassesBySchoolIdService> {
   try {
     const response = await axiosInstance({
@@ -64,7 +64,7 @@ export type RequestGetClassByIdService = {
 export type ResponseGetClassByIdService = Classroom & { students: Student[] };
 
 export async function GetClassByIdService(
-  input: RequestGetClassByIdService
+  input: RequestGetClassByIdService,
 ): Promise<ResponseGetClassByIdService> {
   try {
     const response = await axiosInstance({
@@ -95,7 +95,7 @@ export type ResponseGetGradeSummaryOnClassroomService = (Subject & {
 })[];
 
 export async function GetGradeSummaryOnClassroomService(
-  input: RequestGetGradeSummaryOnClassroomService
+  input: RequestGetGradeSummaryOnClassroomService,
 ): Promise<ResponseGetGradeSummaryOnClassroomService> {
   try {
     const response = await axiosInstance({
@@ -124,7 +124,7 @@ export type RequestUpdateClassService = {
 type ResponseUpdateClassService = Classroom;
 
 export async function UpdateClassService(
-  input: RequestUpdateClassService
+  input: RequestUpdateClassService,
 ): Promise<ResponseUpdateClassService> {
   try {
     const response = await axiosInstance({
@@ -146,7 +146,7 @@ export type RequestDeleteClassService = {
 type ResponseDeleteClassService = Classroom;
 
 export async function DeleteClassService(
-  input: RequestDeleteClassService
+  input: RequestDeleteClassService,
 ): Promise<ResponseDeleteClassService> {
   try {
     const response = await axiosInstance({
@@ -167,7 +167,7 @@ export type RequestReorderClassesService = {
 type ResponseReorderClassesService = Classroom[];
 
 export async function ReorderClassesService(
-  input: RequestReorderClassesService
+  input: RequestReorderClassesService,
 ): Promise<ResponseReorderClassesService> {
   try {
     const response = await axiosInstance({

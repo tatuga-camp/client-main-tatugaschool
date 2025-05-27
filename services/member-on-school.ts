@@ -1,6 +1,6 @@
 import { MemberOnSchool, MemberRole, School } from "@/interfaces";
 
-import createAxiosInstance from "./apiService";
+import createAxiosInstance from "./api-service";
 
 const axiosInstance = createAxiosInstance();
 
@@ -29,7 +29,7 @@ export type RequestCreateMemberOnSchoolService = {
 export type ResponseMemberOnSchoolService = MemberOnSchool;
 
 export async function CreateMemberOnSchoolService(
-  input: RequestCreateMemberOnSchoolService
+  input: RequestCreateMemberOnSchoolService,
 ): Promise<ResponseMemberOnSchoolService> {
   try {
     const response = await axiosInstance({
@@ -52,7 +52,7 @@ export type RequestUpdateMemberOnSchoolService = {
 };
 
 export async function UpdateMemberOnSchoolService(
-  input: RequestUpdateMemberOnSchoolService
+  input: RequestUpdateMemberOnSchoolService,
 ): Promise<ResponseMemberOnSchoolService> {
   try {
     const response = await axiosInstance({
@@ -71,7 +71,7 @@ export type RequestDeleteMemberOnSchoolService = {
 };
 
 export async function DeleteMemberOnSchoolService(
-  input: RequestDeleteMemberOnSchoolService
+  input: RequestDeleteMemberOnSchoolService,
 ): Promise<MemberOnSchool> {
   try {
     const response = await axiosInstance({
@@ -90,7 +90,7 @@ type RequestGetMembersBySchoolIdService = {
 };
 
 export async function GetMembersBySchoolIdService(
-  input: RequestGetMembersBySchoolIdService
+  input: RequestGetMembersBySchoolIdService,
 ): Promise<ResponseMemberOnSchoolService[]> {
   try {
     const response = await axiosInstance({
@@ -108,7 +108,7 @@ type RequestGetMembersByUserIdService = {
 };
 
 export async function GetMembersByUserIdService(
-  input: RequestGetMembersByUserIdService
+  input: RequestGetMembersByUserIdService,
 ): Promise<ResponseMemberOnSchoolService[]> {
   try {
     const response = await axiosInstance({
@@ -129,7 +129,7 @@ export type RequestUpdateMemberInvitationService = {
 };
 
 export async function UpdateMemberInvitationService(
-  input: RequestUpdateMemberInvitationService
+  input: RequestUpdateMemberInvitationService,
 ): Promise<{ message: string }> {
   try {
     const response = await axiosInstance({

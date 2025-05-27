@@ -1,6 +1,6 @@
 import { FileOnAssignment } from "@/interfaces";
 
-import createAxiosInstance from "./apiService";
+import createAxiosInstance from "./api-service";
 
 const axiosInstance = createAxiosInstance();
 
@@ -27,7 +27,7 @@ export type RequestDeleteFileAssignmentService = {
 type ResponseDeleteFileAssignmentService = FileOnAssignment;
 
 export async function CreateFileAssignmentService(
-  input: RequestCreateFileAssignmentService
+  input: RequestCreateFileAssignmentService,
 ): Promise<ResponseCreateFileAssignmentService> {
   try {
     const response = await axiosInstance({
@@ -42,7 +42,7 @@ export async function CreateFileAssignmentService(
 }
 
 export async function GetFileAssignmentService(
-  input: RequestGetFileAssignmentService
+  input: RequestGetFileAssignmentService,
 ): Promise<ResponseGetFileAssignmentService> {
   try {
     const response = await axiosInstance({
@@ -56,7 +56,7 @@ export async function GetFileAssignmentService(
 }
 
 export async function DeleteFileAssignmentService(
-  input: RequestDeleteFileAssignmentService
+  input: RequestDeleteFileAssignmentService,
 ): Promise<ResponseDeleteFileAssignmentService> {
   try {
     const response = await axiosInstance({

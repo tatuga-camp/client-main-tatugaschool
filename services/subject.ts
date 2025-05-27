@@ -6,7 +6,7 @@ import {
 } from "@/interfaces";
 import { Pagination } from "@/interfaces/Pagination";
 
-import createAxiosInstance from "./apiService";
+import createAxiosInstance from "./api-service";
 
 const axiosInstance = createAxiosInstance();
 
@@ -21,7 +21,7 @@ export type RequestCreateSubjectService = {
 type ResponseCreateSubjectService = Subject;
 
 export async function CreateSubjectService(
-  input: RequestCreateSubjectService
+  input: RequestCreateSubjectService,
 ): Promise<ResponseCreateSubjectService> {
   try {
     const response = await axiosInstance({
@@ -47,7 +47,7 @@ export type ResponseGetSubjectBySchoolsService = (Subject & {
 })[];
 
 export async function GetSubjectBySchoolsBySchoolIdService(
-  input: RequestGetSubjectBySchoolsService
+  input: RequestGetSubjectBySchoolsService,
 ): Promise<ResponseGetSubjectBySchoolsService> {
   try {
     const response = await axiosInstance({
@@ -69,7 +69,7 @@ type RequestGetSubjectByIdService = {
 type ResponseGetSubjectByIdService = Subject;
 
 export async function GetSubjectByIdService(
-  input: RequestGetSubjectByIdService
+  input: RequestGetSubjectByIdService,
 ): Promise<ResponseGetSubjectByIdService> {
   try {
     const response = await axiosInstance({
@@ -101,7 +101,7 @@ export type RequestUpdateSubjectService = {
 type ResponseUpdateSubjectService = Subject;
 
 export async function UpdateSubjectService(
-  input: RequestUpdateSubjectService
+  input: RequestUpdateSubjectService,
 ): Promise<ResponseUpdateSubjectService> {
   try {
     const response = await axiosInstance({
@@ -123,7 +123,7 @@ export type RequestDeleteSubjectService = {
 type ResponseDeleteSubjectService = Subject;
 
 export async function DeleteSubjectService(
-  input: RequestDeleteSubjectService
+  input: RequestDeleteSubjectService,
 ): Promise<ResponseDeleteSubjectService> {
   try {
     const response = await axiosInstance({
@@ -144,7 +144,7 @@ export type RequestReorderSubjectsService = {
 type ResponseReorderSubjectsService = Subject[];
 
 export async function ReorderSubjectsService(
-  input: RequestReorderSubjectsService
+  input: RequestReorderSubjectsService,
 ): Promise<ResponseReorderSubjectsService> {
   try {
     const response = await axiosInstance({

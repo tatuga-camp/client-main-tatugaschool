@@ -1,5 +1,5 @@
 import { Career, Skill } from "../interfaces";
-import createAxiosInstance from "./apiService";
+import createAxiosInstance from "./api-service";
 
 const axiosInstance = createAxiosInstance();
 
@@ -16,7 +16,7 @@ type ResponseGetSuggestCareerService = {
 };
 
 export async function GetSuggestCareerService(
-  input: RequestGetSuggestCareerService
+  input: RequestGetSuggestCareerService,
 ): Promise<ResponseGetSuggestCareerService> {
   try {
     const response = await axiosInstance({

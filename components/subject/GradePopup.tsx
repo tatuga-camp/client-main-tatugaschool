@@ -16,6 +16,7 @@ import {
 } from "../../react-query";
 import InputNumber from "../common/InputNumber";
 import Switch from "../common/Switch";
+import Link from "next/link";
 
 type Props = {
   toast: React.RefObject<Toast>;
@@ -76,42 +77,48 @@ function GradePopup({
   return (
     <form
       onSubmit={handleUpdate}
-      className="w-full min-w-96 h-max flex flex-col gap-2 items-start"
+      className="flex h-max w-full min-w-96 flex-col items-start gap-2"
     >
-      <div className="flex gap-2 border-b pb-2 items-center w-full justify-end">
+      <div className="flex w-full items-center justify-end gap-2 border-b pb-2">
         {update.isPending ? (
           <div className="h-8">
             <ProgressSpinner
               animationDuration="1s"
               style={{ width: "20px" }}
-              className="w-5 h-5"
+              className="h-5 w-5"
               strokeWidth="8"
             />
           </div>
         ) : (
-          <button className="second-button h-8 flex items-center justify-center gap-1 py-1 border ">
+          <button className="second-button flex h-8 items-center justify-center gap-1 border py-1">
             <CiSaveUp2 />
             Save Change
           </button>
         )}
         <button
           onClick={() => onClose()}
-          className="text-lg hover:bg-gray-300/50 w-6 h-6 rounded flex items-center justify-center font-semibold"
+          className="flex h-6 w-6 items-center justify-center rounded text-lg font-semibold hover:bg-gray-300/50"
         >
           <IoMdClose />
         </button>
       </div>
-      <div className="w-full flex justify-center gap-3 ">
-        <div className="w-80 flex flex-col gap-5">
+      <div className="flex w-full justify-center gap-3">
+        <div className="flex w-80 flex-col gap-5">
           <div className="flex flex-col gap-0">
-            <h1 className="max-w-60 truncate">{assignment.title}</h1>
+            <Link
+              target="_blank"
+              href={`/subject/${assignment.subjectId}/assignment/${assignment.id}`}
+              className="max-w-60 truncate text-blue-700 underline"
+            >
+              {assignment.title}
+            </Link>
             <span className="text-xs text-gray-500">
               Update Assignment Weight{" "}
               {assignment.weight && `/ ${assignment.weight}% weight `}
             </span>
           </div>
 
-          <label className="flex gap-2 items-center justify-between   w-full">
+          <label className="flex w-full items-center justify-between gap-2">
             <span className="text-base font-medium">
               Allow Weight of Classwork
             </span>
@@ -129,7 +136,7 @@ function GradePopup({
             />
           </label>
           {assignmentData.allowWeight && (
-            <label className="flex flex-col  w-full">
+            <label className="flex w-full flex-col">
               <span className="text-base font-medium">
                 Weight of Classwork (Optional)
               </span>
@@ -169,7 +176,7 @@ function StudentUpdateGrade({
   studentOnAssignment,
 }: PropsStudentUpdateGrade) {
   const [score, setScore] = React.useState<number | undefined>(
-    studentOnAssignment.score
+    studentOnAssignment.score,
   );
   const update = useUpdateStudentAssignmentOverview();
 
@@ -206,34 +213,34 @@ function StudentUpdateGrade({
   return (
     <form
       onSubmit={handleUpdate}
-      className="w-full h-max flex flex-col gap-2 items-start"
+      className="flex h-max w-full flex-col items-start gap-2"
     >
-      <div className="flex gap-2 border-b pb-2 items-center w-full justify-end">
+      <div className="flex w-full items-center justify-end gap-2 border-b pb-2">
         {update.isPending ? (
           <div className="h-8">
             <ProgressSpinner
               animationDuration="1s"
               style={{ width: "20px" }}
-              className="w-5 h-5"
+              className="h-5 w-5"
               strokeWidth="8"
             />
           </div>
         ) : (
-          <button className="second-button h-8 flex items-center justify-center gap-1 py-1 border ">
+          <button className="second-button flex h-8 items-center justify-center gap-1 border py-1">
             <CiSaveUp2 />
             Save Change
           </button>
         )}
         <button
           onClick={() => onClose()}
-          className="text-lg hover:bg-gray-300/50 w-6 h-6 rounded flex items-center justify-center font-semibold"
+          className="flex h-6 w-6 items-center justify-center rounded text-lg font-semibold hover:bg-gray-300/50"
         >
           <IoMdClose />
         </button>
       </div>
-      <div className="w-full flex justify-between gap-3 ">
-        <div className="flex flex-col w-40 items-center justify-center">
-          <div className="w-20 h-20 relative">
+      <div className="flex w-full justify-between gap-3">
+        <div className="flex w-40 flex-col items-center justify-center">
+          <div className="relative h-20 w-20">
             <Image
               src={studentOnAssignment.photo}
               alt="Student"
@@ -242,16 +249,16 @@ function StudentUpdateGrade({
               className="rounded-full"
             />
           </div>
-          <div className="w-full md:w-40 h-16 flex flex-col items-center justify-center">
-            <span className="text-gray-800 font-semibold text-sm">
+          <div className="flex h-16 w-full flex-col items-center justify-center md:w-40">
+            <span className="text-sm font-semibold text-gray-800">
               {studentOnAssignment.firstName} {studentOnAssignment.lastName}
             </span>
-            <span className="text-gray-500 text-xs">
+            <span className="text-xs text-gray-500">
               Number {studentOnAssignment.number}
             </span>
           </div>
         </div>
-        <div className="w-80 flex flex-col gap-5">
+        <div className="flex w-80 flex-col gap-5">
           <div className="flex flex-col gap-0">
             <h1 className="max-w-60 truncate">{assignment.title}</h1>
             <span className="text-xs text-gray-500">

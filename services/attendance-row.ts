@@ -1,5 +1,5 @@
 import { Attendance, AttendanceRow, AttendanceType } from "../interfaces";
-import createAxiosInstance from "./apiService";
+import createAxiosInstance from "./api-service";
 
 const axiosInstance = createAxiosInstance();
 
@@ -8,7 +8,7 @@ type RequestGetAttendanceRowByTabelIdService = {
 };
 
 export async function GetAttendanceRowByTabelIdService(
-  input: RequestGetAttendanceRowByTabelIdService
+  input: RequestGetAttendanceRowByTabelIdService,
 ): Promise<(AttendanceRow & { attendances: Attendance[] })[]> {
   try {
     const response = await axiosInstance({
@@ -31,7 +31,7 @@ export type ResponseGetAttendanceRowByIdService = AttendanceRow & {
 };
 
 export async function GetAttendanceRowByIdService(
-  input: RequestGetAttendanceRowByIdService
+  input: RequestGetAttendanceRowByIdService,
 ): Promise<ResponseGetAttendanceRowByIdService> {
   try {
     const response = await axiosInstance({
@@ -61,7 +61,7 @@ export type ResponseCreateAttendanceRowService = AttendanceRow & {
   attendances: Attendance[];
 };
 export async function CreateAttendanceRowService(
-  input: RequestCreateAttendanceRowService
+  input: RequestCreateAttendanceRowService,
 ): Promise<ResponseCreateAttendanceRowService> {
   try {
     const response = await axiosInstance({
@@ -96,7 +96,7 @@ export type RequestUpdateAttendanceRowService = {
 };
 
 export async function UpdateAttendanceRowService(
-  input: RequestUpdateAttendanceRowService
+  input: RequestUpdateAttendanceRowService,
 ): Promise<AttendanceRow> {
   try {
     const response = await axiosInstance({
@@ -117,7 +117,7 @@ export type RequestDeleteAttendanceRowService = {
 };
 
 export async function DeleteAttendanceRowService(
-  input: RequestDeleteAttendanceRowService
+  input: RequestDeleteAttendanceRowService,
 ): Promise<AttendanceRow> {
   try {
     const remove = await axiosInstance<AttendanceRow>({
