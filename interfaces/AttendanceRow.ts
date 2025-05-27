@@ -1,9 +1,9 @@
 export interface AttendanceRow {
   id: string;
-  createAt: Date;
-  updateAt: Date;
-  startDate: Date;
-  endDate: Date;
+  createAt: string;
+  updateAt: string;
+  startDate: string;
+  endDate: string;
   note?: string;
   attendanceTableId: string;
   subjectId: string;

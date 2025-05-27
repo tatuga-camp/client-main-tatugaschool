@@ -1,22 +1,19 @@
+import { useQueryClient } from "@tanstack/react-query";
+import Image from "next/image";
+import { ProgressBar } from "primereact/progressbar";
+import { Toast } from "primereact/toast";
 import React, { useEffect } from "react";
+import { CiSaveUp2 } from "react-icons/ci";
+import { IoMdClose } from "react-icons/io";
+import Swal from "sweetalert2";
+import { useSound } from "../../hook";
 import {
-  Attendance,
   AttendanceStatusList,
   AttendanceTable,
   ErrorMessages,
-  StudentOnSubject,
 } from "../../interfaces";
-import { IoMdClose } from "react-icons/io";
-import Image from "next/image";
-import TextEditor from "../common/TextEditor";
-import { BiCustomize } from "react-icons/bi";
-import { CiSaveUp2 } from "react-icons/ci";
 import { useCreateAttendance, useUpdateAttendance } from "../../react-query";
-import Swal from "sweetalert2";
-import { useQueryClient } from "@tanstack/react-query";
-import { Toast } from "primereact/toast";
-import { useSound } from "../../hook";
-import { ProgressBar } from "primereact/progressbar";
+import TextEditor from "../common/TextEditor";
 import { SelectAttendance } from "./Attendance";
 
 type props = {
@@ -135,25 +132,25 @@ function AttendanceView({
   }, [attendanceData]);
 
   return (
-    <main className="flex flex-col gap-2 max-h-screen overflow-y-auto">
+    <main className="flex max-h-screen flex-col gap-2 overflow-y-auto">
       {updateAttendance.isPending && (
         <ProgressBar mode="indeterminate" style={{ height: "6px" }} />
       )}
 
-      <section className="w-full border-b flex flex-col md:flex-row py-2 justify-between">
+      <section className="flex w-full flex-col justify-between border-b py-2 md:flex-row">
         <div className="text-lg font-semibold">
           View Attendance Detail{" "}
-          <span className="text-xs text-gray-400 font-normal">
+          <span className="text-xs font-normal text-gray-400">
             ( View / Edit )
           </span>
         </div>
-        <div className="flex gap-2 items-center md:order-2">
+        <div className="flex items-center gap-2 md:order-2">
           {selectAttendance?.id ? (
             <button
               ref={saveRef}
               disabled={updateAttendance.isPending}
               onClick={handleUpdate}
-              className="second-button flex items-center justify-center gap-1 py-1 border "
+              className="second-button flex items-center justify-center gap-1 border py-1"
             >
               <CiSaveUp2 />
               Save Change
@@ -163,7 +160,7 @@ function AttendanceView({
               ref={saveRef}
               disabled={createAttendance.isPending}
               onClick={handleCreate}
-              className="second-button flex items-center justify-center gap-1 py-1 border "
+              className="second-button flex items-center justify-center gap-1 border py-1"
             >
               <CiSaveUp2 />
               Create
@@ -171,16 +168,16 @@ function AttendanceView({
           )}
           <button
             onClick={() => onClose()}
-            className="text-lg hover:bg-gray-300/50 w-6 h-6 rounded flex items-center justify-center font-semibold"
+            className="flex h-6 w-6 items-center justify-center rounded text-lg font-semibold hover:bg-gray-300/50"
           >
             <IoMdClose />
           </button>
         </div>
       </section>
 
-      <div className="flex flex-col md:flex-row w-full h-full md:h-max  md:max-h-96 overflow-auto ">
-        <div className="w-full md:w-1/4 bg-white flex flex-col gap-1 items-center justify-center overflow-y-auto">
-          <div className="w-20 h-20 relative">
+      <div className="flex h-full w-full flex-col overflow-auto md:h-max md:max-h-96 md:flex-row">
+        <div className="flex w-full flex-col items-center justify-center gap-1 overflow-y-auto bg-white md:w-1/4">
+          <div className="relative h-20 w-20">
             <Image
               src={selectAttendance.student.photo}
               alt="Student"
@@ -189,21 +186,21 @@ function AttendanceView({
               className="rounded-full object-contain"
             />
           </div>
-          <div className="w-full h-16 flex flex-col items-center justify-center">
-            <span className="text-gray-800 font-semibold text-sm">
+          <div className="flex h-16 w-full flex-col items-center justify-center">
+            <span className="text-sm font-semibold text-gray-800">
               {selectAttendance.student.firstName}{" "}
               {selectAttendance.student.lastName}
             </span>
-            <span className="text-gray-500 text-xs">
+            <span className="text-xs text-gray-500">
               Number {selectAttendance.student.number}
             </span>
           </div>
         </div>
-        <div className="w-full md:w-3/4 h-full overflow-y-auto">
-          <div className="flex w-full h-full p-2 flex-col gap-2">
+        <div className="h-full w-full overflow-y-auto md:w-3/4">
+          <div className="flex h-full w-full flex-col gap-2 p-2">
             <div className="flex flex-col gap-0 border-b">
               <div className="font-medium leading-4">Attendance Status</div>
-              <span className="text-gray-400 text-xs">
+              <span className="text-xs text-gray-400">
                 modify attendance status here
               </span>
             </div>
@@ -216,7 +213,7 @@ function AttendanceView({
                     <div
                       onClick={(e) => handleCheck({ key: status.title })}
                       key={status.id}
-                      className={`w-full hover:bg-gray-100 h-8 flex items-center justify-between px-2 ${
+                      className={`flex h-8 w-full items-center justify-between px-2 hover:bg-gray-100 ${
                         odd ? "bg-white" : "bg-gray-50"
                       }`}
                     >
@@ -230,7 +227,7 @@ function AttendanceView({
                         onChange={(e) => handleCheck({ key: status.title })}
                         type="checkbox"
                         style={{ accentColor: status.color }}
-                        className="w-5 h-5"
+                        className="h-5 w-5"
                         name={status.title}
                         checked={attendanceData?.status === status.title}
                       />
@@ -240,7 +237,7 @@ function AttendanceView({
             </div>
             <div className="flex flex-col gap-0 border-b">
               <div className="font-medium leading-4">Attendance Note</div>
-              <span className="text-gray-400 text-xs">
+              <span className="text-xs text-gray-400">
                 Add note or edit note here
               </span>
             </div>
