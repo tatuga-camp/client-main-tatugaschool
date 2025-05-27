@@ -136,7 +136,10 @@ function Attendance({
         <PopupLayout onClose={() => setSelectRow(null)}>
           <AttendanceChecker
             subjectId={subjectId}
-            onClose={() => setSelectRow(null)}
+            onClose={() => {
+              document.body.style.overflow = "auto";
+              setSelectRow(null);
+            }}
             selectAttendanceRow={selectRow}
             toast={toast}
           />
