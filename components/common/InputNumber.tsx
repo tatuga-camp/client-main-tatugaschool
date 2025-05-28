@@ -17,6 +17,8 @@ type Props = {
   minFractionDigits?: number;
   maxFractionDigits?: number;
   inputRef?: React.Ref<HTMLInputElement>;
+  onBlur?: any;
+  name?: string;
 };
 function InputNumber({
   value,
@@ -30,7 +32,9 @@ function InputNumber({
   prefix,
   disabled,
   minFractionDigits,
+  name,
   maxFractionDigits,
+  onBlur,
   onChange,
   inputRef,
 }: Props) {
@@ -39,12 +43,14 @@ function InputNumber({
       suffix={suffix}
       inputRef={inputRef}
       prefix={prefix}
+      onBlur={onBlur}
       required={required}
       disabled={disabled}
       minFractionDigits={minFractionDigits}
       maxFractionDigits={maxFractionDigits}
       value={value}
       min={min}
+      name={name}
       placeholder={placeholder}
       useGrouping={useGrouping}
       max={max}

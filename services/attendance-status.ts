@@ -37,7 +37,7 @@ export type RequestUpdateAttendanceStatusListService = {
     id: string;
   };
   body: {
-    isHidden?: boolean;
+    title?: string;
     color?: string;
     value?: number;
   };
