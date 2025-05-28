@@ -64,21 +64,19 @@ function StudentOnGroup({
       ref={setNodeRef}
       style={inlineStyles}
       {...attributes}
-      className="w-full h-10  bg-white border-b 
-  flex items-center justify-start gap-2 px-2"
+      className="flex h-10 w-full items-center justify-start gap-2 border-b bg-white px-2"
     >
       <div
         {...listeners}
         style={{ cursor: isDragging ? "grabbing" : "grab" }}
-        className="w-6 h-6  rounded-md text-black hover:bg-gray-300/50 flex 
-  items-center justify-center "
+        className="flex h-6 w-6 items-center justify-center rounded-md text-black hover:bg-gray-300/50"
       >
         <MdDragIndicator />
       </div>
-      <div className="flex items-center w-full justify-between h-14 gap-2">
+      <div className="flex h-14 w-full items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           {(isDragOver === undefined || isDragOver === false) && (
-            <div className="w-5 h-5 md:w-6 md:h-6 relative rounded-md ring-1 overflow-hidden">
+            <div className="relative h-5 w-5 overflow-hidden rounded-md ring-1 md:h-6 md:w-6">
               <img
                 src={student.photo}
                 alt={student.firstName}
@@ -87,14 +85,16 @@ function StudentOnGroup({
               />
             </div>
           )}
-          <div>
-            <h1 className="text-xs md:text-sm font-semibold">
+          <div className="flex grow flex-col gap-0">
+            <h1
+              className={`text-xs font-semibold ${type === "ungroupStudent" ? "text-red-700" : "text-primary-color"} md:text-base`}
+            >
               {student.firstName} {student.lastName}
             </h1>
             <p className="text-xs text-gray-500">Number {student.number}</p>
           </div>
         </div>
-        <div className="flex  gradient-bg px-2 rounded-sm text-white">
+        <div className="gradient-bg flex rounded-sm px-2 text-white">
           {student.score}
         </div>
       </div>

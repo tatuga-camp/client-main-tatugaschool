@@ -24,18 +24,12 @@ const Header = () => {
   const isActiveClass = (path: boolean) =>
     path ? classLinkActive : classLinkInactive;
   return (
-    <header
-      className="flex  h-20 sticky z-50 
-     top-0 flex-row justify-between items-center md:p-4 bg-white/50 backdrop-blur text-white gap-4"
-    >
+    <header className="sticky top-0 z-50 flex h-20 flex-row items-center justify-between gap-4 bg-white/50 text-white backdrop-blur md:p-4">
       <Link
         href="/"
         className="flex items-center justify-center gap-1 md:gap-3"
       >
-        <div
-          className="w-10 h-10 rounded-md overflow-hidden ring-1 ring-white
-         relative hover:scale-105 active:scale-110 transition duration-150"
-        >
+        <div className="relative h-10 w-10 overflow-hidden rounded-md ring-1 ring-white transition duration-150 hover:scale-105 active:scale-110">
           <Image
             src="/favicon.ico"
             blurDataURL={defaultCanvas}
@@ -45,32 +39,32 @@ const Header = () => {
             alt="logo tatuga school"
           />
         </div>
-        <div className="font-bold uppercase hidden md:block text-xs md:text-base text-black">
+        <div className="hidden text-xs font-bold uppercase text-black lg:block xl:text-base">
           Tatuga School
         </div>
       </Link>
       <div className="w-40 overflow-auto md:w-max">
-        <nav className="flex items-center w-max justify-center gap-2 md:gap-5">
+        <nav className="flex w-max items-center justify-center gap-2 md:gap-5">
           <Link
             href="/"
             className={`${isActiveClass(
-              isSchoolPage
-            )} border h-10 flex items-center justify-center rounded-md px-3`}
+              isSchoolPage,
+            )} flex h-10 items-center justify-center rounded-md border px-3`}
           >
             {navbarLanguageData.school(language.data ?? "en")}
           </Link>
           <Link
             href="/account"
             className={`${isActiveClass(
-              isAccountPage
-            )} border h-10 flex items-center justify-center rounded-md px-3`}
+              isAccountPage,
+            )} flex h-10 items-center justify-center rounded-md border px-3`}
           >
             {navbarLanguageData.account(language.data ?? "en")}
           </Link>
           <LanguageSelect />
         </nav>
       </div>
-      <div className="flex justify-center items-center gap-2">
+      <div className="flex items-center justify-center gap-2">
         <ButtonProfile user={user} />
       </div>
     </header>

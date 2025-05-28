@@ -33,39 +33,38 @@ const ListsSchoolComponent = () => {
   }
 
   return (
-    <main className="mx-auto w-full flex flex-col items-center  ">
-      <header className="w-full h-96 gradient-bg flex flex-col items-start justify-center p-10 ">
-        <h2 className="text-4xl font-semibold text-white mb-4">
+    <main className="mx-auto flex w-full flex-col items-center">
+      <header className="gradient-bg flex h-96 w-full flex-col items-start justify-center p-10">
+        <h2 className="mb-4 text-4xl font-semibold text-white">
           {homepageDataLanguage.welcome(language.data ?? "en")},{" "}
           {user?.firstName}
           <span role="img" aria-label="wave">
             👋
           </span>
         </h2>
-        <p className="text-gray-300 mb-8">
+        <p className="mb-8 text-gray-300">
           {homepageDataLanguage.welcomeDetail(language.data ?? "en")}
         </p>
       </header>
-      <div className="bg-white w-full md:w-10/12 relative -top-28  rounded-lg p-6">
-        <h3 className="text-xl font-semibold mb-4">
+      <div className="relative -top-28 w-full rounded-lg bg-white p-6 md:w-10/12">
+        <h3 className="mb-4 text-xl font-semibold">
           {homepageDataLanguage.selectSchool(language.data ?? "en")}
         </h3>
-        <p className="text-gray-600 mb-6">
+        <p className="mb-6 text-gray-600">
           {homepageDataLanguage.selectSchoolDetail(language.data ?? "en")}
         </p>
 
-        <div className="flex flex-col md:flex-row items-center justify-between mb-4 gap-4">
+        <div className="mb-4 flex flex-col items-center justify-between gap-4 md:flex-row">
           <input
             type="text"
             placeholder="Search by name..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className={`${inputClasses} flex-grow w-full md:w-auto`}
+            className={`${inputClasses} w-full flex-grow md:w-auto`}
             aria-label="Search schools"
           />
           <Link
-            className="bg-secondary-color text-white px-6 py-2 rounded-md active:scale-105
-             w-full md:w-auto hover:bg-primary-color transition duration-300"
+            className="w-full rounded-md bg-secondary-color px-6 py-2 text-white transition duration-300 hover:bg-primary-color active:scale-105 md:w-auto"
             href="/school/create"
           >
             {homepageDataLanguage.create(language.data ?? "en")}
@@ -76,7 +75,7 @@ const ListsSchoolComponent = () => {
           {schools.isLoading ? (
             <p>Loading schools...</p>
           ) : (
-            <table className="min-w-full table-auto text-left">
+            <table className="w-max min-w-full table-auto text-left">
               <thead>
                 <tr className="bg-gray-100">
                   {tableHeaders.map((header, index) => (
@@ -92,14 +91,14 @@ const ListsSchoolComponent = () => {
                     <tr key={index} className="border-b">
                       <td className="p-4">
                         <div className="flex items-center justify-start gap-1">
-                          <div className="w-10 h-10 rounded-md overflow-hidden relative">
+                          <div className="relative h-10 w-10 overflow-hidden rounded-md">
                             <Image
                               src={school.logo}
                               fill
                               sizes="(max-width: 768px) 100vw, 33vw"
                               placeholder="blur"
                               blurDataURL={decodeBlurhashToCanvas(
-                                school.blurHash || defaultBlurHash
+                                school.blurHash || defaultBlurHash,
                               )}
                               alt="logo tatuga school"
                               className="object-cover"
@@ -120,7 +119,7 @@ const ListsSchoolComponent = () => {
                             year: "numeric",
                             month: "long",
                             day: "numeric",
-                          }
+                          },
                         )}
                       </td>
                       <td className="p-4">

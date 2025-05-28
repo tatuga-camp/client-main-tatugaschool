@@ -10,7 +10,7 @@ type Props = {
   student: (StudentOnSubject | Student) & { select?: boolean };
   showSelect: boolean;
   setSelectStudent: (
-    data: (StudentOnSubject | Student) & { select?: boolean }
+    data: (StudentOnSubject | Student) & { select?: boolean },
   ) => void;
   isDragable?: boolean;
 };
@@ -49,18 +49,15 @@ function StudentCard({
       onClick={() => {
         setSelectStudent(student);
       }}
-      className={`w-full p-3 group flex flex-col items-center justify-center
-     gap-2  rounded-xl relative hover:drop-shadow-md active:scale-105 ${
-       student.select && showSelect ? "gradient-bg " : "bg-white"
-     }
-      overflow-hidden hover:bg-primary-color bg-white
-     h-60 sm:h-60 md:h-60 lg:h-60 xl:h-60`}
+      className={`group relative flex w-full flex-col items-center justify-center gap-2 rounded-xl p-3 hover:drop-shadow-md active:scale-105 ${
+        student.select && showSelect ? "gradient-bg" : "bg-white"
+      } h-60 overflow-hidden bg-white hover:bg-primary-color sm:h-60 md:h-60 lg:h-60 xl:h-60`}
     >
       {isDragable && (
         <div
           {...listeners}
           style={{ cursor: isDragging ? "grabbing" : "grab" }}
-          className="w-6 h-10 rounded-md hover:bg-gray-300/50 flex items-center justify-center absolute top-2 right-2 "
+          className="absolute right-2 top-2 flex h-10 w-6 items-center justify-center rounded-md hover:bg-gray-300/50"
         >
           <MdDragIndicator />
         </div>
@@ -69,53 +66,47 @@ function StudentCard({
         <input
           checked={student.select}
           type="checkbox"
-          className="w-5 h-5 rounded-full bg-primary-color absolute top-2 right-2"
+          className="absolute right-2 top-2 h-5 w-5 rounded-full bg-primary-color"
         />
       )}
 
       {"totalSpeicalScore" in student && (
         <div
-          className={`min-w-10 w-max max-w-20 h-12 absolute left-0 right-0 -top-3 ${
+          className={`absolute -top-3 left-0 right-0 h-12 w-max min-w-10 max-w-20 ${
             student.select && showSelect ? "bg-white" : "bg-primary-color"
-          }
-      m-auto bg-primary-color group-hover:bg-white rounded-2xl flex items-center justify-center text-white`}
+          } m-auto flex items-center justify-center rounded-2xl bg-primary-color text-white group-hover:bg-white`}
         >
           <span
-            className={`max-w-14 truncate
-            ${
+            className={`max-w-14 truncate ${
               student.select && showSelect ? "text-primary-color" : "text-white"
-            }
-            w-max group-hover:text-primary-color `}
+            } w-max group-hover:text-primary-color`}
           >
             {student.totalSpeicalScore}
           </span>
         </div>
       )}
-      <div className="w-20 h-20 relative rounded-full overflow-hidden">
+      <div className="relative h-20 w-20 overflow-hidden rounded-full">
         <Image
           fill
           sizes="(max-width: 768px) 100vw, 33vw"
           src={student.photo}
           alt="Student"
-          className="object-cover w-full h-full"
+          className="h-full w-full object-cover"
         />
       </div>
-      <h2
-        className={`text-sm group-hover:text-white 
-          ${student.select && showSelect ? "text-white" : "text-gray-800"}
-          w-11/12 truncate text-center font-semibold text-gray-800
-          sm:text-base md:text-base lg:text-base`}
-      >
-        {student.firstName} {student.lastName}
-      </h2>
-      <span
-        className={`text-xs
-        ${student.select && showSelect ? "text-white" : "text-gray-500"}
-        group-hover:text-white text-gray-500
-        sm:text-sm md:text-sm`}
-      >
-        Number {student.number}
-      </span>
+      <div className="flex w-full flex-col items-center justify-center gap-0 text-center">
+        <span className="text-xs text-gray-500">{student.title}</span>
+        <h2
+          className={`text-center text-sm group-hover:text-white ${student.select && showSelect ? "text-white" : "text-primary-color"} w-11/12 truncate text-center font-semibold text-gray-800 sm:text-base md:text-lg lg:text-base`}
+        >
+          {student.firstName} {student.lastName}
+        </h2>
+        <span
+          className={`text-xs font-medium ${student.select && showSelect ? "text-white" : "text-gray-500"} text-gray-500 group-hover:text-white sm:text-sm md:text-sm`}
+        >
+          Number {student.number}
+        </span>
+      </div>
     </button>
   );
 }

@@ -105,8 +105,8 @@ function ShowSelectGroup({
           .flat()
           .some(
             (studentOnGroup) =>
-              studentOnGroup.studentOnSubjectId === studentOnSubject.id
-          )
+              studentOnGroup.studentOnSubjectId === studentOnSubject.id,
+          ),
     );
 
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
@@ -202,7 +202,7 @@ function ShowSelectGroup({
     }
     if (id.type === "ungroupStudent") {
       const student = studentOnSubjects.data?.find(
-        (u) => u.id === id.studentOnSubjectId
+        (u) => u.id === id.studentOnSubjectId,
       );
       setActiveSortableId({
         ...id,
@@ -227,10 +227,10 @@ function ShowSelectGroup({
 
           setUnits((prevs) => {
             const oldIndex = prevs.findIndex(
-              (item) => item.id === activeId.unitOnGroupId
+              (item) => item.id === activeId.unitOnGroupId,
             );
             const newIndex = prevs.findIndex(
-              (item) => item.id === overId.unitOnGroupId
+              (item) => item.id === overId.unitOnGroupId,
             );
             newSort = arrayMove(prevs, oldIndex, newIndex);
 
@@ -256,10 +256,10 @@ function ShowSelectGroup({
                   return prev;
                 }
                 const oldIndex = prev.students.findIndex(
-                  (item) => item.id === activeId.studentOnGroupId
+                  (item) => item.id === activeId.studentOnGroupId,
                 );
                 const newIndex = prev.students.findIndex(
-                  (item) => item.id === overId.studentOnGroupId
+                  (item) => item.id === overId.studentOnGroupId,
                 );
                 newSort = arrayMove(prev.students, oldIndex, newIndex);
                 return {
@@ -297,7 +297,7 @@ function ShowSelectGroup({
                   return {
                     ...prev,
                     students: prev.students.filter(
-                      (s) => s.id !== activeId.studentOnGroupId
+                      (s) => s.id !== activeId.studentOnGroupId,
                     ),
                   };
                 } else if (prev.id === overId.unitOnGroupId && targetStudent) {
@@ -361,7 +361,7 @@ function ShowSelectGroup({
               return {
                 ...prev,
                 students: prev.students.filter(
-                  (s) => s.id !== activeId.studentOnGroupId
+                  (s) => s.id !== activeId.studentOnGroupId,
                 ),
               };
             });
@@ -414,16 +414,16 @@ function ShowSelectGroup({
       <header className="mt-2">
         {deleteGroup.isPending && <LoadingBar />}
 
-        <section className="w-full flex  gap-3 justify-between">
+        <section className="flex w-full justify-between gap-3">
           <div>
-            <h3 className="text-base font-semibold max-w-40 truncate">
+            <h3 className="max-w-40 truncate text-base font-semibold">
               {groupOnSubject.data?.title}
             </h3>
-            <p className="text-gray-600 max-w-40 truncate text-sm">
+            <p className="max-w-40 truncate text-sm text-gray-600">
               {groupOnSubject.data?.description}
             </p>
           </div>
-          <div className="flex justify-center items-center gap-3">
+          <div className="flex items-center justify-center gap-3">
             <button
               disabled={refetchGroup.isPending}
               onClick={() => {
@@ -431,15 +431,14 @@ function ShowSelectGroup({
                   handleRefetchGroup();
                 }
               }}
-              className="second-button w-52
-                        flex items-center justify-center gap-1 py-1 border"
+              className="second-button flex w-52 items-center justify-center gap-1 border py-1"
             >
               {refetchGroup.isPending ? (
                 <LoadingSpinner />
               ) : (
                 <>
                   <MdAutoAwesome />
-                  Auto Refetch Group
+                  Auto Refresh Group
                 </>
               )}
             </button>
@@ -447,8 +446,7 @@ function ShowSelectGroup({
               onClick={() => {
                 setTriggerUpdate(true);
               }}
-              className="main-button w-max
-                        flex items-center justify-center gap-1 py-1 ring-1 ring-blue-600"
+              className="main-button flex w-max items-center justify-center gap-1 py-1 ring-1 ring-blue-600"
             >
               <>
                 <IoMdSettings />
@@ -465,7 +463,7 @@ function ShowSelectGroup({
                   },
                 });
               }}
-              className="reject-button w-max flex items-center justify-center gap-1 py-1 ring-1 ring-red-600"
+              className="reject-button flex w-max items-center justify-center gap-1 py-1 ring-1 ring-red-600"
             >
               <>
                 <MdDelete />
@@ -482,7 +480,7 @@ function ShowSelectGroup({
         onDragEnd={handleDragEnd}
       >
         <SortableContext items={units} strategy={rectSortingStrategy}>
-          <ul className="grid mt-5 lg:grid-cols-2 xl:grid-cols-3 gap-5">
+          <ul className="mt-5 grid gap-5 md:grid-cols-2 2xl:grid-cols-3">
             {groupOnSubject.isLoading ? (
               <LoadingBar />
             ) : (
@@ -531,9 +529,7 @@ function ShowSelectGroup({
 
             <button
               onClick={handleCreate}
-              className="w-full active:scale-105 min-h-40 hover:bg-primary-color hover:text-white
-             transition text-gray-500 h-full flex-col text-xl
-           bg-white border border-dashed  rounded-md flex items-center justify-center"
+              className="flex h-full min-h-40 w-full flex-col items-center justify-center rounded-md border border-dashed bg-white text-xl text-gray-500 transition hover:bg-primary-color hover:text-white active:scale-105"
             >
               {createColum.isPending ? (
                 <LoadingSpinner />

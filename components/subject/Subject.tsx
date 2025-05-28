@@ -18,6 +18,7 @@ import { Toast } from "primereact/toast";
 import { Nullable } from "primereact/ts-helpers";
 import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import { BiSelectMultiple, BiSolidSelectMultiple } from "react-icons/bi";
+import { BsPeople } from "react-icons/bs";
 import Swal from "sweetalert2";
 import { useSound } from "../../hook";
 import useClickOutside from "../../hook/useClickOutside";
@@ -29,16 +30,14 @@ import {
 import {
   useCreateScoreOnStudent,
   useGetScoreOnStudent,
-  useGetScoreOnSubject,
   useGetStudentOnSubject,
 } from "../../react-query";
 import { SortStudentOnSubjectService } from "../../services";
 import Calendar from "../common/Calendar";
 import Filter, { FilterTitle } from "../common/Filter";
 import StudentCard from "../student/StudentCard";
-import ScorePanel from "./ScorePanel";
-import { BsPeople } from "react-icons/bs";
 import ShowGroups from "./groupOnSubject/ShowGroups";
+import ScorePanel from "./ScorePanel";
 
 type Props = {
   subjectId: string;
@@ -107,7 +106,7 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
       });
       queryClient.setQueryData<StudentOnSubject[]>(
         ["studentOnSubjects", { subjectId }],
-        newSort
+        newSort,
       );
     }
   }, []);
@@ -149,7 +148,7 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
       setStudents((prev) => {
         return prev.map((student) => {
           const scores = scoreOnStudents.data.filter(
-            (score) => score.studentOnSubjectId === student.id
+            (score) => score.studentOnSubjectId === student.id,
           );
 
           const totalScore = scores.reduce((acc, score) => {
@@ -182,7 +181,7 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
               scoreOnSubjectId: selectScore.score?.id as string,
               score: selectScore.inputScore,
             });
-          })
+          }),
         );
         if (selectScore.inputScore >= 0) {
           successSound?.play();
@@ -230,13 +229,13 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
     });
   };
   return (
-    <div className="flex flex-col items-center w-full gap-5">
+    <div className="flex w-full flex-col items-center gap-5">
       <div
         className={`fixed ${
           triggerChooseScore ? "flex" : "hidden"
-        } top-0 bottom-0 right-0 left-0 flex items-center justify-center m-auto z-40`}
+        } bottom-0 left-0 right-0 top-0 z-40 m-auto flex items-center justify-center`}
       >
-        <div ref={chooseScoreRef} className="bg-white p-2 rounded-md border">
+        <div ref={chooseScoreRef} className="rounded-md border bg-white p-2">
           <ScorePanel
             subjectId={subjectId}
             onSelectScore={({ score, inputScore }) => {
@@ -250,16 +249,12 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
             onCreateScore={() => handleCreateMultipleScore()}
           />
         </div>
-        <footer
-          className="top-0 bottom-0 w-screen h-screen right-0 left-0 
-          bg-white/50 backdrop-blur fixed  m-auto -z-10"
-        ></footer>
+        <footer className="fixed bottom-0 left-0 right-0 top-0 -z-10 m-auto h-screen w-screen bg-white/50 backdrop-blur"></footer>
       </div>
-      <header className="w-full md:w-10/12 lg:w-9/12 h-16 hidden md:flex justify-end items-end gap-5 border-b pb-5">
+      <header className="hidden h-16 w-full items-end justify-end gap-5 border-b pb-5 md:flex md:w-10/12 lg:w-9/12">
         <button
           onClick={() => setTriggerShowGroup((prev) => !prev)}
-          className="border-primary-color border hover:bg-primary-color hover:text-white active:scale-105  transition duration-200 text-primary-color
-         w-40 flex items-center justify-center gap-2 rounded-md h-12 "
+          className="flex h-12 w-40 items-center justify-center gap-2 rounded-md border border-primary-color text-primary-color transition duration-200 hover:bg-primary-color hover:text-white active:scale-105"
         >
           <BsPeople className="" />
           <span className="">
@@ -315,16 +310,11 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
       {triggerShowGroup ? (
         <ShowGroups subjectId={subjectId} />
       ) : (
-        <section
-          className="w-80 md:w-10/12 lg:w-9/12 place-items-center 
-      grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5"
-        >
+        <section className="grid w-80 grid-cols-2 place-items-center gap-5 sm:grid-cols-3 md:w-10/12 md:grid-cols-4 lg:w-9/12 xl:grid-cols-5">
           <div
             onClick={() => setTriggerSelectMultipleStudent((prev) => !prev)}
             onDragStart={(e) => e.preventDefault()}
-            className="w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 ring-4 ring-white gradient-bg select-none drop-shadow-md 
-         hover:scale-105 flex items-center justify-center p-3
-           rounded-full transition cursor-pointer active:scale-110"
+            className="gradient-bg flex h-24 w-24 cursor-pointer select-none items-center justify-center rounded-full p-3 ring-4 ring-white drop-shadow-md transition hover:scale-105 active:scale-110 sm:h-32 sm:w-32 md:h-36 md:w-36 lg:h-40 lg:w-40"
           >
             <Image
               src="/svg/trophy.svg"
@@ -344,8 +334,7 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
                     return (
                       <div
                         key={index}
-                        className="w-24 h-32 sm:w-32 sm:h-40 md:w-36 md:h-48 lg:w-48 
-                      lg:h-52 bg-gray-200 rounded-2xl animate-pulse"
+                        className="h-32 w-24 animate-pulse rounded-2xl bg-gray-200 sm:h-40 sm:w-32 md:h-48 md:w-36 lg:h-52 lg:w-48"
                       ></div>
                     );
                   })
@@ -356,8 +345,8 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
                         selectFilter
                           ? false
                           : triggerSelectMultipleStudent
-                          ? false
-                          : true
+                            ? false
+                            : true
                       }
                       setSelectStudent={(data) => {
                         if (triggerSelectMultipleStudent) {
@@ -383,10 +372,9 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
       )}
 
       <footer
-        className={`flex justify-center  items-center ease-in-out gap-3 fixed bottom-20 
-       right-0 left-0 m-auto z-30 w-max transition-transform ${
-         triggerSelectMultipleStudent ? "translate-y-0" : "translate-y-40"
-       } h-10`}
+        className={`fixed bottom-20 left-0 right-0 z-30 m-auto flex w-max items-center justify-center gap-3 transition-transform ease-in-out ${
+          triggerSelectMultipleStudent ? "translate-y-0" : "translate-y-40"
+        } h-10`}
       >
         <button
           onClick={() => {
@@ -405,9 +393,8 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
           className={`border-2 ${
             students.every((item) => item.select)
               ? "border-primary-color bg-primary-color text-white"
-              : "border-gray-200 bg-white text-primary-color "
-          }
-         border-primary-color rounded-md px-2 w-28 md:w-36 drop-shadow-md h-8 gap-2 flex items-center justify-between`}
+              : "border-gray-200 bg-white text-primary-color"
+          } flex h-8 w-28 items-center justify-between gap-2 rounded-md border-primary-color px-2 drop-shadow-md md:w-36`}
         >
           {students.every((item) => item.select) ? (
             <>
@@ -425,7 +412,7 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
           onClick={() => {
             setTriggerChooseScore((prev) => !prev);
           }}
-          className="main-button w-28 md:w-36 px-2 h-8 flex items-center justify-center "
+          className="main-button flex h-8 w-28 items-center justify-center px-2 md:w-36"
         >
           Choose Score
         </button>
