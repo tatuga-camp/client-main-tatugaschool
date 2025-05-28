@@ -146,22 +146,22 @@ function AttendanceTableSetting({ table, toast, onDelete }: Props) {
 
   return (
     <div className="">
-      <h1 className="text-lg sm:text-xl font-medium">General Settings</h1>
-      <h4 className="text-xs sm:text-sm text-gray-500">
+      <h1 className="text-lg font-medium sm:text-xl">General Settings</h1>
+      <h4 className="text-xs text-gray-500 sm:text-sm">
         Manage your general settings
       </h4>
 
       <form
         onSubmit={handleUpdate}
-        className="flex flex-col p-2 sm:p-4 min-h-80 bg-white rounded-md border gap-3 sm:gap-5 mt-3 sm:mt-5"
+        className="mt-3 flex min-h-80 flex-col gap-3 rounded-md border bg-white p-2 sm:mt-5 sm:gap-5 sm:p-4"
       >
-        <div className="border-b w-full justify-between text-base sm:text-lg font-medium py-2 sm:py-3">
+        <div className="w-full justify-between border-b py-2 text-base font-medium sm:py-3 sm:text-lg">
           Subject Information
         </div>
-        <div className="grid grid-cols-1 w-full">
-          <div className="grid grid-cols-1 gap-3 sm:gap-5 p-2 py-3 sm:py-4">
-            <label className="w-full items-start sm:items-center grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-10">
-              <span className="text-sm sm:text-base text-black">
+        <div className="grid w-full grid-cols-1">
+          <div className="grid grid-cols-1 gap-3 p-2 py-3 sm:gap-5 sm:py-4">
+            <label className="grid w-full grid-cols-1 items-start gap-2 sm:grid-cols-2 sm:items-center sm:gap-10">
+              <span className="text-sm text-black sm:text-base">
                 Table Name:
               </span>
               <input
@@ -183,9 +183,9 @@ function AttendanceTableSetting({ table, toast, onDelete }: Props) {
               />
             </label>
           </div>
-          <div className="grid grid-cols-1 bg-gray-200/20 gap-3 sm:gap-5 p-2 py-3 sm:py-4">
-            <label className="w-full items-start sm:items-center grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-10">
-              <span className="text-sm sm:text-base text-black">
+          <div className="grid grid-cols-1 gap-3 bg-gray-200/20 p-2 py-3 sm:gap-5 sm:py-4">
+            <label className="grid w-full grid-cols-1 items-start gap-2 sm:grid-cols-2 sm:items-center sm:gap-10">
+              <span className="text-sm text-black sm:text-base">
                 Description:
               </span>
               <input
@@ -210,13 +210,13 @@ function AttendanceTableSetting({ table, toast, onDelete }: Props) {
         </div>
         <button
           disabled={updateTable.isPending}
-          className="main-button flex justify-center items-center  w-40 mt-5"
+          className="main-button mt-5 flex w-40 items-center justify-center"
         >
           {updateTable.isPending ? (
             <ProgressSpinner
               animationDuration="1s"
               style={{ width: "20px" }}
-              className="w-5 h-5"
+              className="h-5 w-5"
               strokeWidth="8"
             />
           ) : (
@@ -228,27 +228,27 @@ function AttendanceTableSetting({ table, toast, onDelete }: Props) {
         </button>
       </form>
 
-      <h1 className="text-xl mt-10 font-medium">Attendance Status</h1>
+      <h1 className="mt-10 text-xl font-medium">Attendance Status</h1>
       <h4 className="text-sm text-gray-500">
         Customize your attendance status here
       </h4>
 
-      <div className="flex flex-col p-4 min-h-80 bg-white rounded-md border gap-5 mt-5">
-        <div className="border-b w-full flex justify-between  text-lg font-medium py-3">
+      <div className="mt-5 flex min-h-80 flex-col gap-5 rounded-md border bg-white p-4">
+        <div className="flex w-full justify-between border-b py-3 text-lg font-medium">
           Attendance Status
           {updateStatus.isPending && (
             <div>
               <ProgressSpinner
                 animationDuration="1s"
                 style={{ width: "20px" }}
-                className="w-5 h-5"
+                className="h-5 w-5"
                 strokeWidth="8"
               />
             </div>
           )}
         </div>
-        <div className="w-full max-h-[35rem] overflow-auto">
-          <table className="table-fixed w-full">
+        <div className="max-h-[35rem] w-full overflow-auto">
+          <table className="w-full table-fixed">
             <thead>
               <tr>
                 <th>
@@ -301,12 +301,12 @@ function AttendanceTableSetting({ table, toast, onDelete }: Props) {
         </div>
       </div>
 
-      <h1 className="text-xl font-medium mt-10">Danger zone</h1>
+      <h1 className="mt-10 text-xl font-medium">Danger zone</h1>
       <h4 className="text-sm text-gray-500">
         Irreversible and destructive actions
       </h4>
-      <div className="flex flex-col items-start p-4  bg-white rounded-md border gap-5 mt-5">
-        <h2 className="border-b text-lg font-medium py-3">
+      <div className="mt-5 flex flex-col items-start gap-5 rounded-md border bg-white p-4">
+        <h2 className="border-b py-3 text-lg font-medium">
           Delete This Attendance Table
         </h2>
         <h4 className="text-sm text-red-700">
@@ -350,7 +350,6 @@ const AttendanceStatusRow = memo(
   }) => {
     const [data, setData] = React.useState<AttendanceStatusList>(status);
     const queryClient = useQueryClient();
-    const debounceTimeout = React.useRef<NodeJS.Timeout | null>(null);
     const deleteStatus = useDeleteAttendanceStatus();
     useEffect(() => {
       setData(status);
@@ -369,24 +368,44 @@ const AttendanceStatusRow = memo(
           [name]: value,
         };
       });
-      if (debounceTimeout.current) {
-        clearTimeout(debounceTimeout.current);
-      }
+    };
 
-      debounceTimeout.current = setTimeout(async () => {
+    const handleUpdate = async (
+      e: React.FocusEvent<HTMLInputElement, Element>,
+    ) => {
+      try {
+        const name = e.target.name as keyof AttendanceStatusList;
+        if (data.title === "") {
+          return;
+        }
+        if (data[name] === status[name]) {
+          return;
+        }
         await updateStatus.mutateAsync({
           request: {
             query: {
               id: status.id,
             },
             body: {
-              [name]: value,
+              title: data.title,
+              color: data.color,
+              value: data.value,
             },
           },
           queryClient: queryClient,
         });
-        debounceTimeout.current = null; // Reset timeout reference
-      }, 1000);
+      } catch (error) {
+        console.log(error);
+        let result = error as ErrorMessages;
+        Swal.fire({
+          title: result.error ? result.error : "Something Went Wrong",
+          text: result.message.toString(),
+          footer: result.statusCode
+            ? "Code Error: " + result.statusCode?.toString()
+            : "",
+          icon: "error",
+        });
+      }
     };
 
     const handleDelete = async () => {
@@ -423,30 +442,37 @@ const AttendanceStatusRow = memo(
         } relative border-spacing-2 border-4 border-transparent`}
       >
         <td className="p-2 sm:p-3">
-          <div className="w-full rounded-md text-center text-sm sm:text-base">
-            {data.title}
-          </div>
-          {data.isHidden && (
-            <div className="w-full absolute top-0 bottom-0 m-auto h-[1px] bg-black"></div>
-          )}
+          <input
+            onBlur={handleUpdate}
+            name="title"
+            disabled={updateStatus.isPending}
+            onChange={(e) => {
+              handleChange({ name: "title", value: e.target.value });
+            }}
+            required
+            value={data.title}
+            className="bg-transparent text-center text-base focus:border-b focus:outline-none"
+          />
         </td>
         <td className="p-2 sm:p-3">
-          <div className="w-full flex items-center justify-center">
+          <div className="flex w-full items-center justify-center">
             <label
               htmlFor={`hs-color-input-${data.id}`}
               style={{
                 backgroundColor: `${data.color}`,
               }}
-              className="w-max p-1.5 sm:p-2 rounded-md text-center text-xs sm:text-sm cursor-pointer active:scale-105 transition"
+              className="w-max cursor-pointer rounded-md p-1.5 text-center text-xs transition active:scale-105 sm:p-2 sm:text-sm"
             >
               {data.color}
             </label>
             <input
+              onBlur={handleUpdate}
               type="color"
               id={`hs-color-input-${data.id}`}
-              disabled={data.isHidden}
-              className="w-0 h-0"
+              disabled={updateStatus.isPending}
+              className="h-0 w-0"
               required
+              name="color"
               value={data.color}
               onChange={(e) => {
                 handleChange({ name: "color", value: e.target.value });
@@ -455,25 +481,29 @@ const AttendanceStatusRow = memo(
           </div>
         </td>
         <td className="p-2 sm:p-3">
-          <div className="w-full flex items-center justify-center">
-            <div className="w-16 sm:w-20 flex items-center justify-center">
+          <div className="flex w-full items-center justify-center">
+            <div className="flex w-16 items-center justify-center sm:w-20">
               <InputNumber
+                onBlur={handleUpdate}
                 value={data.value}
                 max={10}
+                name="value"
+                required
+                disabled={updateStatus.isPending}
                 min={-1}
-                onValueChange={(data) =>
+                onValueChange={() => {}}
+                onChange={(data) =>
                   handleChange({ name: "value", value: data })
                 }
-                disabled={data.isHidden}
               />
             </div>
           </div>
         </td>
         <td className="p-2 sm:p-3">
-          <div className="w-full flex items-center justify-center">
+          <div className="flex w-full items-center justify-center">
             <button
               onClick={handleDelete}
-              className="reject-button flex items-center justify-center text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-1.5"
+              className="reject-button flex items-center justify-center px-2 py-1 text-xs sm:px-3 sm:py-1.5 sm:text-sm"
             >
               DELETE
             </button>
@@ -481,7 +511,7 @@ const AttendanceStatusRow = memo(
         </td>
       </tr>
     );
-  }
+  },
 );
 AttendanceStatusRow.displayName = "AttendanceStatusRow";
 
@@ -545,13 +575,13 @@ const CreateAttendanceStatus = memo(
       <tr
         className={`${
           odd ? "bg-white" : "bg-gray-50"
-        } gap-3 sm:gap-5 p-1 sm:p-2 py-2 sm:py-4 relative border-spacing-2 border-4 border-transparent`}
+        } relative border-spacing-2 gap-3 border-4 border-transparent p-1 py-2 sm:gap-5 sm:p-2 sm:py-4`}
       >
         <td>
-          <div className="w-full p-1 sm:p-2 rounded-md text-center">
+          <div className="w-full rounded-md p-1 text-center sm:p-2">
             <input
               type="text"
-              className="main-input text-sm sm:text-base w-full"
+              className="main-input w-full text-sm sm:text-base"
               maxLength={20}
               required
               value={createData.title}
@@ -565,18 +595,18 @@ const CreateAttendanceStatus = memo(
           </div>
         </td>
         <td>
-          <div className="w-full flex items-center justify-center">
+          <div className="flex w-full items-center justify-center">
             <label
               htmlFor="hs-color-input"
               style={{ backgroundColor: createData.color }}
-              className="w-max p-1 sm:p-2 rounded-md text-center cursor-pointer active:scale-105 transition text-xs sm:text-sm"
+              className="w-max cursor-pointer rounded-md p-1 text-center text-xs transition active:scale-105 sm:p-2 sm:text-sm"
             >
               {createData.color}
             </label>
             <input
               type="color"
               id="hs-color-input"
-              className="w-0 h-0"
+              className="h-0 w-0"
               required
               value={createData.color}
               onChange={(e) => {
@@ -589,8 +619,8 @@ const CreateAttendanceStatus = memo(
           </div>
         </td>
         <td>
-          <div className="w-full flex items-center justify-center">
-            <div className="w-16 sm:w-20 flex items-center justify-center">
+          <div className="flex w-full items-center justify-center">
+            <div className="flex w-16 items-center justify-center sm:w-20">
               <InputNumber
                 required
                 value={createData.value}
@@ -604,17 +634,17 @@ const CreateAttendanceStatus = memo(
           </div>
         </td>
         <td>
-          <div className="w-full flex items-center justify-center">
+          <div className="flex w-full items-center justify-center">
             <button
               disabled={create.isPending}
               onClick={handleCreate}
-              className="main-button flex justify-center items-center text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-1.5"
+              className="main-button flex items-center justify-center px-2 py-1 text-xs sm:px-3 sm:py-1.5 sm:text-sm"
             >
               {create.isPending ? (
                 <ProgressSpinner
                   animationDuration="1s"
                   style={{ width: "16px" }}
-                  className="w-4 sm:w-5 h-4 sm:h-5"
+                  className="h-4 w-4 sm:h-5 sm:w-5"
                   strokeWidth="8"
                 />
               ) : (
@@ -628,6 +658,6 @@ const CreateAttendanceStatus = memo(
         </td>
       </tr>
     );
-  }
+  },
 );
 CreateAttendanceStatus.displayName = "CreateAttendanceStatus";
