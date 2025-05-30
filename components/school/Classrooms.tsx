@@ -76,7 +76,7 @@ function Classrooms({ schoolId }: Props) {
         const oldIndex = prevs.findIndex((item) => item.id === active.id);
         const newIndex = prevs.findIndex((item) => item.id === over!.id);
         newSort = arrayMove(prevs, oldIndex, newIndex);
-
+        console.log(newSort);
         return newSort;
       });
     }
@@ -162,11 +162,11 @@ function Classrooms({ schoolId }: Props) {
         return [];
       }
       if (userId !== "show-all") {
-        return classrooms.data.filter(
-          (classroom) => classroom.userId === userId,
-        );
+        return classrooms.data
+          .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+          .filter((classroom) => classroom.userId === userId);
       } else {
-        return classrooms.data;
+        return classrooms.data.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
       }
     });
   };

@@ -193,11 +193,13 @@ function Subjects({ schoolId }: Props) {
         return [];
       }
       if (userId !== "show-all") {
-        return subjects.data.filter((subject) =>
-          subject.teachers.some((t) => t.userId === userId),
-        );
+        return subjects.data
+          .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+          .filter((subject) =>
+            subject.teachers.some((t) => t.userId === userId),
+          );
       } else {
-        return subjects.data;
+        return subjects.data.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
       }
     });
   };
