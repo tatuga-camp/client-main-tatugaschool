@@ -594,7 +594,9 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
   };
 
   useEnterKey(() => {
-    handleSaveChange("REVIEWD");
+    if (!selectFileImage) {
+      handleSaveChange("REVIEWD");
+    }
   });
 
   const handleSaveImageEdit = async (data: { id: string; file: File }) => {
@@ -657,8 +659,12 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
             setSelectFileImage(null);
           }}
         >
-          <div className="flex h-full w-full flex-col items-center justify-start">
-            {loadingFile && <LoadingBar />}
+          <div className="relative flex h-full w-full flex-col items-center justify-start">
+            {loadingFile && (
+              <div className="absolute top-0 z-50 flex h-full w-full items-center justify-center bg-white/80 backdrop-blur-sm">
+                Save....
+              </div>
+            )}
             <DrawCanva
               onSave={(data) => {
                 if (!loadingFile) {

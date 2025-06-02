@@ -90,15 +90,15 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
   const [image, setImage] = useState<string | null>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
-  const [mode, setMode] = useState<ModeType>("draw");
-
+  const [mode, setMode] = useState<ModeType>("mouse");
   const [brushColor, setBrushColor] = useState<string>("#000000");
   const [brushRadius, setBrushRadius] = useState<number>(5);
 
   const [textObjects, setTextObjects] = useState<ITextObject[]>([]);
   const [textObjectsHistory, setTextObjectsHistory] = useState<ITextObject[][]>(
-    []
+    [],
   );
+  const [isDraggingText, setIsDraggingText] = useState<boolean>(false);
 
   const [currentText, setCurrentText] = useState<string>("");
   const [currentTextId, setCurrentTextId] = useState<number | null>(null);
@@ -108,6 +108,73 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
 
   const [canvasWidth, setCanvasWidth] = useState<number>(1000);
   const [canvasHeight, setCanvasHeight] = useState<number>(1000);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+  const [startPan, setStartPan] = useState({ x: 0, y: 0 });
+
+  const MIN_SCALE = 0.1;
+  const MAX_SCALE = 3;
+
+  const handleWheel = (e: WheelEvent) => {
+    e.preventDefault();
+
+    const delta = e.deltaY > 0 ? -0.06 : 0.06;
+    const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale + delta));
+
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    const scaleFactor = newScale / scale;
+
+    const newX = mouseX - scaleFactor * (mouseX - position.x);
+    const newY = mouseY - scaleFactor * (mouseY - position.y);
+
+    setScale(newScale);
+    setPosition({ x: newX, y: newY });
+  };
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    if (mode !== "mouse" || isDraggingText === true) {
+      return;
+    }
+    setIsPanning(true);
+    setStartPan({ x: e.clientX - position.x, y: e.clientY - position.y });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    if (mode !== "mouse" || isDraggingText === true) {
+      return;
+    }
+    if (!isPanning) return;
+    setPosition({
+      x: e.clientX - startPan.x,
+      y: e.clientY - startPan.y,
+    });
+  };
+
+  const handleMouseUp = () => {
+    setIsPanning(false);
+  };
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    container.addEventListener("wheel", handleWheel, { passive: false });
+
+    return () => {
+      container.removeEventListener("wheel", handleWheel);
+    };
+  }, [scale, position]);
+
+  const handleDragStart = () => {
+    setIsDraggingText(true);
+  };
 
   // สำคัญ: ให้ effect นี้รันซ้ำทั้งตอน mode เปลี่ยน และ image เปลี่ยน (เช่นหลังอัปโหลดรูป)
   useEffect(() => {
@@ -180,8 +247,8 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
       prev.map((obj) =>
         obj.id === currentTextId
           ? { ...obj, text: currentText, color: textColor, fontSize: textSize }
-          : obj
-      )
+          : obj,
+      ),
     );
     setMode("mouse");
     setCurrentTextId(null);
@@ -295,9 +362,10 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
       prev.map((obj) =>
         obj.id === activeId
           ? { ...obj, x: obj.x + delta.x, y: obj.y + delta.y }
-          : obj
-      )
+          : obj,
+      ),
     );
+    setIsDraggingText(false);
   };
 
   // ถ้าไม่ใช่ draw/eraser => disable canvas
@@ -310,13 +378,10 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
   });
 
   return (
-    <div className="flex w-full h-full grow gap-2 bg-gray-200 flex-col items-center">
-      <div className="w-full gradient-bg  border-b h-14 px-5 items-center flex gap-2 pl-10 justify-between">
+    <div className="flex h-full w-full flex-col items-center bg-gray-200">
+      <div className="gradient-bg flex w-full items-center justify-between gap-2 border-b px-5 py-2 pl-10">
         <div className="flex h-full items-center justify-center gap-2">
-          <div
-            className="w-10 h-10 rounded-md overflow-hidden ring-1 ring-white
-                 relative hover:scale-105 active:scale-110 transition duration-150"
-          >
+          <div className="relative h-10 w-10 overflow-hidden rounded-md ring-1 ring-white transition duration-150 hover:scale-105 active:scale-110">
             <ImageNextJs
               src="/favicon.ico"
               placeholder="blur"
@@ -331,8 +396,7 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
             type="button"
             title="Undo"
             onClick={handleUndo}
-            className=" text-white text-xl border font-normal w-20 hover:bg-gray-100/10 
-            h-10 rounded-md flex items-center justify-center"
+            className="flex h-10 w-20 items-center justify-center rounded-md border text-xl font-normal text-white hover:bg-gray-100/10"
           >
             <GrRevert />
           </button>
@@ -340,29 +404,26 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
             type="button"
             title="Save Image"
             onClick={handleSave}
-            className="text-black flex 
-          hover:bg-sky-200 active:scale-105
-          items-center justify-center gap-1 w-28 h-10 rounded-lg border  bg-white"
+            className="flex h-10 w-28 items-center justify-center gap-1 rounded-lg border bg-white text-black hover:bg-sky-200 active:scale-105"
           >
             <BiSave />
             SAVE
           </button>
         </div>
         <div className="flex items-center justify-center gap-5">
-          <h1 className="text-white text-lg font-medium text-right max-w-96 overflow-auto hideScrollBar ">
+          <h1 className="hideScrollBar max-w-96 overflow-auto text-right text-lg font-medium text-white">
             {name}
           </h1>
           <button
             onClick={() => onClose()}
-            className="text-lg text-white hover:text-black  hover:bg-white w-6  border border-white  h-6 
-                rounded flex items-center justify-center"
+            className="flex h-6 w-6 items-center justify-center rounded border border-white text-lg text-white hover:bg-white hover:text-black"
           >
             <IoMdClose />
           </button>
         </div>
       </div>
 
-      <div className="flex space-x-2 bg-white px-2 py-1 rounded-lg drop-shadow-lg items-center  mt-4">
+      <div className="fixed top-20 z-20 flex items-center space-x-2 rounded-lg bg-white px-2 py-1 drop-shadow-lg">
         {mode !== "text-edit" && (
           <>
             {" "}
@@ -386,11 +447,11 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
             <button
               title="Draw Mode"
               type="button"
-              className={`
-            ${mode === "draw" ? "bg-sky-200" : "bg-gray-100 "}
-            text-black w-7 h-7 rounded-lg border active:scale-105
-           flex items-center justify-center hover:bg-sky-200`}
-              onClick={() => setMode("draw")}
+              className={` ${mode === "draw" ? "bg-sky-200" : "bg-gray-100"} flex h-7 w-7 items-center justify-center rounded-lg border text-black hover:bg-sky-200 active:scale-105`}
+              onClick={() => {
+                setScale(1);
+                setMode("draw");
+              }}
             >
               <BiSolidPencil />
             </button>
@@ -398,10 +459,7 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
               title="Mouse Mode"
               type="button"
               onClick={() => setMode("mouse")}
-              className={`
-            ${mode === "mouse" ? "bg-sky-200" : "bg-gray-100 "}
-            text-black w-7 h-7 rounded-lg border active:scale-105
-           flex items-center justify-center hover:bg-sky-200`}
+              className={` ${mode === "mouse" ? "bg-sky-200" : "bg-gray-100"} flex h-7 w-7 items-center justify-center rounded-lg border text-black hover:bg-sky-200 active:scale-105`}
             >
               <BiSolidHand />
             </button>
@@ -409,10 +467,7 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
               title="Eraser Mode"
               type="button"
               onClick={() => setMode("eraser")}
-              className={`
-            ${mode === "eraser" ? "bg-sky-200" : "bg-gray-100 "}
-            text-black w-7 h-7 rounded-lg border active:scale-105
-           flex items-center justify-center hover:bg-sky-200`}
+              className={` ${mode === "eraser" ? "bg-sky-200" : "bg-gray-100"} flex h-7 w-7 items-center justify-center rounded-lg border text-black hover:bg-sky-200 active:scale-105`}
             >
               <BiSolidEraser />
             </button>
@@ -420,10 +475,7 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
               title="Add Text"
               type="button"
               onClick={handleAddText}
-              className={`
-           bg-gray-100
-            text-black w-7 h-7 rounded-lg border active:scale-105
-           flex items-center justify-center hover:bg-sky-200`}
+              className={`flex h-7 w-7 items-center justify-center rounded-lg border bg-gray-100 text-black hover:bg-sky-200 active:scale-105`}
             >
               <MdTextFields />
             </button>
@@ -431,10 +483,7 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
               title="Clear All Text"
               type="button"
               onClick={handleClearAllText}
-              className={`
-          bg-gray-100
-            text-black w-7 h-7 rounded-lg border active:scale-105
-           flex items-center justify-center hover:bg-sky-200`}
+              className={`flex h-7 w-7 items-center justify-center rounded-lg border bg-gray-100 text-black hover:bg-sky-200 active:scale-105`}
             >
               <MdOutlineFormatClear />
             </button>
@@ -442,12 +491,9 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
               title="Clear All Drawing"
               type="button"
               onClick={() => canvasRef.current?.clear()}
-              className={`
-          bg-gray-100
-            text-black w-7 relative h-7 rounded-lg border active:scale-105
-           flex items-center justify-center hover:bg-sky-200`}
+              className={`relative flex h-7 w-7 items-center justify-center rounded-lg border bg-gray-100 text-black hover:bg-sky-200 active:scale-105`}
             >
-              <div className="h-5 w-[1.5px] bg-black absolute -rotate-45" />
+              <div className="absolute h-5 w-[1.5px] -rotate-45 bg-black" />
               <BiSolidPencil />
             </button>
           </>
@@ -469,8 +515,8 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
                           ...obj,
                           color: color,
                         }
-                      : obj
-                  )
+                      : obj,
+                  ),
                 );
               }}
               className="ml-2"
@@ -493,24 +539,24 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
                             ...obj,
                             fontSize: size,
                           }
-                        : obj
-                    )
+                        : obj,
+                    ),
                   );
                 }}
-                className="ml-2 border w-16"
+                className="ml-2 w-16 border"
               />
             </label>
             <button
               type="button"
               onClick={handleFinishEditing}
-              className="p-2 bg-blue-500 text-white"
+              className="bg-blue-500 p-2 text-white"
             >
               Done Editing
             </button>
             <button
               type="button"
               onClick={handleDeleteCurrentText}
-              className="p-2 bg-red-500 text-white"
+              className="bg-red-500 p-2 text-white"
             >
               Delete This Text
             </button>{" "}
@@ -518,12 +564,34 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
         )}
       </div>
 
-      <div className="w-9/12  bg-slate-50  overflow-auto">
-        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+      <div
+        ref={containerRef}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        style={{
+          width: "100vw",
+          height: "100vh",
+          overflow: "hidden",
+        }}
+      >
+        <DndContext
+          sensors={sensors}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
           {/* Container สำหรับซ้อนรูปพื้นหลัง + CanvasDraw (โปร่งใส) */}
           <div
             className="relative"
-            style={{ width: canvasWidth, height: canvasHeight }}
+            style={{
+              transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
+              transformOrigin: "0 0",
+              width: canvasWidth,
+              height: canvasHeight,
+              background: "#fff",
+              border: "1px solid #ccc",
+            }}
           >
             {mode === "text-edit" && (
               <div
@@ -558,12 +626,11 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
                               ...obj,
                               text: text,
                             }
-                          : obj
-                      )
+                          : obj,
+                      ),
                     );
                   }}
-                  className=" border border-dashed bg-white/40 p-1 
-                   appearance-none active:outline-none resize-none focus:outline-none "
+                  className="resize-none appearance-none border border-dashed bg-white/40 p-1 focus:outline-none active:outline-none"
                   rows={3}
                   cols={40}
                 />
@@ -575,10 +642,9 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
                 ref={imageRef}
                 src={image}
                 alt="Selected"
-                className="absolute top-0 left-0 w-full h-full"
+                className="absolute left-0 top-0 h-full w-full"
               />
             )}
-
             {/* CanvasDraw โปร่งใส วางข้างบน */}
             <CanvasDraw
               ref={canvasRef}
@@ -586,13 +652,10 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
               canvasHeight={canvasHeight}
               brushColor={brushColor}
               brushRadius={brushRadius}
-              className="border"
               hideGrid={true}
               lazyRadius={0}
-              backgroundColor="rgba(0,0,0,0)"
               disabled={isCanvasDisabled}
             />
-
             {/* ข้อความที่ลากได้ */}
             {textObjects
               .filter((text) => text.id !== currentTextId)
