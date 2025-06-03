@@ -116,6 +116,11 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
 
   const [canvasWidth, setCanvasWidth] = useState<number>(1000);
   const [canvasHeight, setCanvasHeight] = useState<number>(1000);
+  const [preDrawView, setPreDrawView] = useState<{
+    scale: number;
+    x: number;
+    y: number;
+  } | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
@@ -133,6 +138,50 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
 
   const MIN_SCALE = 0.1;
   const MAX_SCALE = 3;
+
+  const switchToDrawMode = (newMode: "draw" | "eraser") => {
+    if (
+      mode !== "draw" &&
+      mode !== "eraser" &&
+      (newMode === "draw" || newMode === "eraser")
+    ) {
+      // Store current view if not already in a drawing mode
+      setPreDrawView({ scale, x: position.x, y: position.y });
+
+      // Calculate the new position to center the view after resetting scale
+      if (containerRef.current) {
+        const viewportWidth = containerRef.current.offsetWidth;
+        const viewportHeight = containerRef.current.offsetHeight;
+
+        // Point in content that was at the center of the viewport
+        const contentCenterX = (viewportWidth / 2 - position.x) / scale;
+        const contentCenterY = (viewportHeight / 2 - position.y) / scale;
+
+        // New position to keep that point at the center when scale is 1
+        const newPosX = viewportWidth / 2 - contentCenterX;
+        const newPosY = viewportHeight / 2 - contentCenterY;
+
+        setPosition({ x: newPosX, y: newPosY });
+        setScale(1);
+      } else {
+        // Fallback if ref not ready, though unlikely here
+        setPosition({ x: 0, y: 0 });
+        setScale(1);
+      }
+    }
+    setMode(newMode);
+  };
+
+  const switchToMouseMode = () => {
+    if ((mode === "draw" || mode === "eraser") && preDrawView) {
+      // Restore previous view
+      setScale(preDrawView.scale);
+      setPosition({ x: preDrawView.x, y: preDrawView.y });
+      setPreDrawView(null); // Clear the stored view
+    }
+    setMode("mouse");
+    // also handle switching to text-edit if that's a path
+  };
 
   const handleWheel = useCallback(
     (e: WheelEvent) => {
@@ -650,9 +699,7 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
               type="button"
               className={` ${mode === "draw" ? "bg-sky-200" : "bg-gray-100"} flex h-7 w-7 items-center justify-center rounded-lg border text-black hover:bg-sky-200 active:scale-105`}
               onClick={() => {
-                setScale(1); // Optional: reset zoom when switching to draw
-                // setPosition({ x: 0, y: 0 }); // Optional: reset pan
-                setMode("draw");
+                switchToDrawMode("draw");
               }}
             >
               <BiSolidPencil />
@@ -660,7 +707,7 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
             <button
               title="Mouse Mode (Pan/Zoom/Select Text)"
               type="button"
-              onClick={() => setMode("mouse")}
+              onClick={() => switchToMouseMode()}
               className={` ${mode === "mouse" ? "bg-sky-200" : "bg-gray-100"} flex h-7 w-7 items-center justify-center rounded-lg border text-black hover:bg-sky-200 active:scale-105`}
             >
               <BiSolidHand />
@@ -668,7 +715,7 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
             <button
               title="Eraser Mode"
               type="button"
-              onClick={() => setMode("eraser")}
+              onClick={() => switchToDrawMode("eraser")}
               className={` ${mode === "eraser" ? "bg-sky-200" : "bg-gray-100"} flex h-7 w-7 items-center justify-center rounded-lg border text-black hover:bg-sky-200 active:scale-105`}
             >
               <BiSolidEraser />
