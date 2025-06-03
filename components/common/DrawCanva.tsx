@@ -2,6 +2,7 @@ import {
   DndContext,
   DragEndEvent,
   MouseSensor,
+  TouchSensor,
   useDraggable,
   useSensor,
   useSensors,
@@ -100,13 +101,13 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
   const [mode, setMode] = useState<ModeType>("mouse");
   const [brushColor, setBrushColor] = useState<string>("#000000");
   const [brushRadius, setBrushRadius] = useState<number>(5);
-
+  const [loadingImage, setLoadingImage] = useState(false);
   const [textObjects, setTextObjects] = useState<ITextObject[]>([]);
   const [textObjectsHistory, setTextObjectsHistory] = useState<ITextObject[][]>(
     [],
   );
   const [isDraggingText, setIsDraggingText] = useState<boolean>(false);
-  const [loadingImage, setLoadingImage] = useState(false);
+
   const [currentText, setCurrentText] = useState<string>("");
   const [currentTextId, setCurrentTextId] = useState<number | null>(null);
 
@@ -120,7 +121,11 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
-  const [startPan, setStartPan] = useState({ x: 0, y: 0 });
+  const [startPanMouse, setStartPanMouse] = useState({ x: 0, y: 0 }); // For mouse panning
+  const [startPanTouch, setStartPanTouch] = useState<{
+    x: number;
+    y: number;
+  } | null>(null); // For touch panning
 
   // Refs for pinch-to-zoom
   const pinchStartScaleRef = useRef<number>(1);
@@ -155,38 +160,94 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
     [scale, position, MIN_SCALE, MAX_SCALE],
   ); // containerRef.current is not a reactive dependency here
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+  // --- Mouse Panning Handlers ---
+  const handleMouseDownContainer = (e: React.MouseEvent<HTMLDivElement>) => {
     if (
       mode !== "mouse" ||
-      isDraggingText === true ||
-      initialPinchDistanceRef.current > 0
+      isDraggingText ||
+      initialPinchDistanceRef.current > 0 ||
+      e.button !== 0
     ) {
-      // Do not pan if pinching
+      // e.button !== 0 for main mouse button
       return;
     }
     setIsPanning(true);
-    setStartPan({ x: e.clientX - position.x, y: e.clientY - position.y });
+    setStartPanMouse({ x: e.clientX - position.x, y: e.clientY - position.y });
+    setStartPanTouch(null); // Clear touch pan state
   };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+  const handleMouseMoveContainer = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (
+      isPanning &&
+      (startPanMouse.x !== 0 || startPanMouse.y !== 0) &&
+      !startPanTouch &&
+      mode === "mouse" &&
+      !isDraggingText
+    ) {
+      // Only pan if mouse pan was initiated (startPanMouse is set) and not touch pan active
+      setPosition({
+        x: e.clientX - startPanMouse.x,
+        y: e.clientY - startPanMouse.y,
+      });
+    }
+  };
+
+  const handleMouseUpContainer = () => {
+    if (
+      isPanning &&
+      (startPanMouse.x !== 0 || startPanMouse.y !== 0) &&
+      !startPanTouch
+    ) {
+      // Was a mouse pan
+      setIsPanning(false);
+      // setStartPanMouse({x:0, y:0}); // Optionally reset, or rely on isPanning
+    }
+  };
+
+  // --- Touch Panning Handlers (React Synthetic Events) ---
+  const handleTouchStartContainer = (e: React.TouchEvent<HTMLDivElement>) => {
     if (
       mode !== "mouse" ||
-      isDraggingText === true ||
+      isDraggingText ||
+      e.touches.length !== 1 ||
       initialPinchDistanceRef.current > 0
     ) {
+      // Not mouse mode, dragging text, not single touch, or already pinching
       return;
     }
-    if (!isPanning) return;
-    setPosition({
-      x: e.clientX - startPan.x,
-      y: e.clientY - startPan.y,
+    const touch = e.touches[0];
+    setStartPanTouch({
+      x: touch.clientX - position.x,
+      y: touch.clientY - position.y,
     });
+    setIsPanning(true);
+    setStartPanMouse({ x: 0, y: 0 }); // Clear mouse pan state
   };
 
-  const handleMouseUp = () => {
-    setIsPanning(false);
+  const handleTouchMoveContainer = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (
+      isPanning &&
+      startPanTouch &&
+      e.touches.length === 1 &&
+      mode === "mouse" &&
+      !isDraggingText
+    ) {
+      const touch = e.touches[0];
+      setPosition({
+        x: touch.clientX - startPanTouch.x,
+        y: touch.clientY - startPanTouch.y,
+      });
+    }
   };
 
+  const handleTouchEndContainer = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (isPanning && startPanTouch) {
+      // Was a touch-initiated pan
+      // Check e.touches.length if needed, but startPanTouch implies it was a single touch pan
+      setIsPanning(false);
+      setStartPanTouch(null);
+    }
+  };
   useEffect(() => {
     const currentContainer = containerRef.current;
     if (!currentContainer) return;
@@ -316,8 +377,8 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
   }, []); // imageURL is a prop, if it can change, add it to dependency array. Assuming it's initial.
 
   const handleShowImage = async () => {
-    // Consider aborting if component unmounts or imageURL changes rapidly
     setLoadingImage(true);
+    // Consider aborting if component unmounts or imageURL changes rapidly
     const file = await urlToFile(imageURL);
     if (file) {
       const reader = new FileReader();
@@ -486,7 +547,7 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
   const mouseSensor = useSensor(MouseSensor, {
     activationConstraint: { distance: 5 }, // Small distance to allow clicks on text without starting drag
   });
-  const sensors = useSensors(mouseSensor);
+  const sensors = useSensors(mouseSensor, useSensor(TouchSensor));
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, delta } = event;
@@ -513,8 +574,8 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
   return (
     <div className="flex h-full w-full flex-col items-center bg-gray-200">
       {loadingImage && (
-        <div className="fixed bottom-0 left-0 right-0 top-0 z-20 flex h-full w-full items-center justify-center bg-white/80 backdrop-blur-sm">
-          Loading..
+        <div className="fixed top-0 z-20 flex h-full w-full items-center justify-center bg-white/80 backdrop-blur-sm">
+          Loading...
         </div>
       )}
       {/* Top Bar */}
@@ -590,6 +651,7 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
               className={` ${mode === "draw" ? "bg-sky-200" : "bg-gray-100"} flex h-7 w-7 items-center justify-center rounded-lg border text-black hover:bg-sky-200 active:scale-105`}
               onClick={() => {
                 setScale(1); // Optional: reset zoom when switching to draw
+                // setPosition({ x: 0, y: 0 }); // Optional: reset pan
                 setMode("draw");
               }}
             >
@@ -704,10 +766,14 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
       {/* Canvas Area */}
       <div
         ref={containerRef}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp} // Important to stop panning if mouse leaves container
+        onMouseDown={handleMouseDownContainer}
+        onMouseMove={handleMouseMoveContainer}
+        onMouseUp={handleMouseUpContainer}
+        onMouseLeave={handleMouseUpContainer} // Ends mouse pan if mouse leaves area
+        onTouchStart={handleTouchStartContainer}
+        onTouchMove={handleTouchMoveContainer}
+        onTouchEnd={handleTouchEndContainer}
+        onTouchCancel={handleTouchEndContainer} // Treat cancel like end for panning state
         style={{
           width: "100vw",
           height: "calc(100vh - 5rem)", // Adjust based on your top bar and toolbar height
@@ -779,7 +845,7 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
                           ),
                         );
                       }}
-                      onBlur={handleFinishEditing} // Optionally finish editing on blur
+                      // onBlur={handleFinishEditing} // Optionally finish editing on blur
                       className="p-1" // Removed resize-none, appearance-none
                       rows={Math.max(3, currentText.split("\n").length)} // Auto adjust rows
                       cols={40} // Default cols
@@ -805,7 +871,6 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
               brushRadius={brushRadius}
               hideGrid={true}
               lazyRadius={0}
-              backgroundColor="#00"
               disabled={isCanvasDisabled}
               className={mode === "mouse" ? "cursor-grab" : ""} // visual cue for mouse mode
             />
