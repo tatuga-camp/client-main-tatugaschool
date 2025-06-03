@@ -8,7 +8,7 @@ import {
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import ImageNextJs from "next/image";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react"; // Added useCallback
 import CanvasDraw from "react-canvas-draw";
 import {
   BiSave,
@@ -23,6 +23,7 @@ import { defaultCanvas } from "../../data";
 import { useEnterKey } from "../../hook";
 import { urlToFile } from "../../utils";
 import prase from "html-react-parser";
+
 interface ITextObject {
   id: number;
   text: string;
@@ -58,14 +59,20 @@ function DraggableText({
     color: obj.color,
     fontSize: `${obj.fontSize}px`,
     cursor: mode === "mouse" ? "move" : "default",
-    pointerEvents: currentTextId === obj.id ? "none" : "auto",
+    // When editing, text should not intercept clicks for dragging itself.
+    // Allow interaction if not current text or if mode is not mouse (e.g. to click and start editing)
+    pointerEvents:
+      currentTextId === obj.id && mode === "text-edit" ? "none" : "auto",
   };
   return (
     <p
       ref={setNodeRef}
       style={style}
       onDoubleClick={() => {
-        handleTextClick(obj.id);
+        // Allow double click to edit only in mouse or draw mode for non-active text
+        if (mode === "mouse" || mode === "draw") {
+          handleTextClick(obj.id);
+        }
       }}
       {...attributes}
       {...listeners}
@@ -99,7 +106,7 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
     [],
   );
   const [isDraggingText, setIsDraggingText] = useState<boolean>(false);
-
+  const [loadingImage, setLoadingImage] = useState(false);
   const [currentText, setCurrentText] = useState<string>("");
   const [currentTextId, setCurrentTextId] = useState<number | null>(null);
 
@@ -115,31 +122,46 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
   const [isPanning, setIsPanning] = useState(false);
   const [startPan, setStartPan] = useState({ x: 0, y: 0 });
 
+  // Refs for pinch-to-zoom
+  const pinchStartScaleRef = useRef<number>(1);
+  const initialPinchDistanceRef = useRef<number>(0);
+
   const MIN_SCALE = 0.1;
   const MAX_SCALE = 3;
 
-  const handleWheel = (e: WheelEvent) => {
-    e.preventDefault();
+  const handleWheel = useCallback(
+    (e: WheelEvent) => {
+      e.preventDefault();
 
-    const delta = e.deltaY > 0 ? -0.06 : 0.06;
-    const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale + delta));
+      const delta = e.deltaY > 0 ? -0.06 : 0.06;
+      const newScaleValue = Math.min(
+        MAX_SCALE,
+        Math.max(MIN_SCALE, scale + delta),
+      );
 
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
 
-    const scaleFactor = newScale / scale;
+      const scaleFactor = newScaleValue / scale;
 
-    const newX = mouseX - scaleFactor * (mouseX - position.x);
-    const newY = mouseY - scaleFactor * (mouseY - position.y);
+      const newX = mouseX - scaleFactor * (mouseX - position.x);
+      const newY = mouseY - scaleFactor * (mouseY - position.y);
 
-    setScale(newScale);
-    setPosition({ x: newX, y: newY });
-  };
+      setScale(newScaleValue);
+      setPosition({ x: newX, y: newY });
+    },
+    [scale, position, MIN_SCALE, MAX_SCALE],
+  ); // containerRef.current is not a reactive dependency here
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    if (mode !== "mouse" || isDraggingText === true) {
+    if (
+      mode !== "mouse" ||
+      isDraggingText === true ||
+      initialPinchDistanceRef.current > 0
+    ) {
+      // Do not pan if pinching
       return;
     }
     setIsPanning(true);
@@ -147,7 +169,11 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    if (mode !== "mouse" || isDraggingText === true) {
+    if (
+      mode !== "mouse" ||
+      isDraggingText === true ||
+      initialPinchDistanceRef.current > 0
+    ) {
       return;
     }
     if (!isPanning) return;
@@ -162,45 +188,136 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
   };
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    const currentContainer = containerRef.current;
+    if (!currentContainer) return;
 
-    container.addEventListener("wheel", handleWheel, { passive: false });
+    // Wheel listener
+    currentContainer.addEventListener("wheel", handleWheel, { passive: false });
+
+    // Touch listeners for pinch-zoom
+    const onTouchStart = (ev: TouchEvent) => {
+      if (isDraggingText) return; // Don't interfere with dnd-kit dragging
+
+      if (ev.touches.length === 2 && mode === "mouse") {
+        ev.preventDefault();
+        const touch1 = ev.touches[0];
+        const touch2 = ev.touches[1];
+        const distance = Math.hypot(
+          touch1.clientX - touch2.clientX,
+          touch1.clientY - touch2.clientY,
+        );
+        initialPinchDistanceRef.current = distance;
+        pinchStartScaleRef.current = scale;
+        setIsPanning(false); // Prevent mouse-based panning when pinch starts
+      }
+    };
+
+    const onTouchMove = (ev: TouchEvent) => {
+      if (isDraggingText) return;
+
+      if (
+        ev.touches.length === 2 &&
+        mode === "mouse" &&
+        initialPinchDistanceRef.current > 0
+      ) {
+        ev.preventDefault();
+        const touch1 = ev.touches[0];
+        const touch2 = ev.touches[1];
+        const currentDistance = Math.hypot(
+          touch1.clientX - touch2.clientX,
+          touch1.clientY - touch2.clientY,
+        );
+
+        const rect = currentContainer.getBoundingClientRect();
+        if (!rect) return;
+
+        const midpointClientX = (touch1.clientX + touch2.clientX) / 2;
+        const midpointClientY = (touch1.clientY + touch2.clientY) / 2;
+        const pointerX = midpointClientX - rect.left;
+        const pointerY = midpointClientY - rect.top;
+
+        let newScaleTarget =
+          pinchStartScaleRef.current *
+          (currentDistance / initialPinchDistanceRef.current);
+        const newClampedScale = Math.min(
+          MAX_SCALE,
+          Math.max(MIN_SCALE, newScaleTarget),
+        );
+
+        const scaleFactor = newClampedScale / scale; // `scale` is current state scale
+
+        const newX = pointerX - scaleFactor * (pointerX - position.x);
+        const newY = pointerY - scaleFactor * (pointerY - position.y);
+
+        setScale(newClampedScale);
+        setPosition({ x: newX, y: newY });
+      }
+    };
+
+    const onTouchEnd = (ev: TouchEvent) => {
+      if (initialPinchDistanceRef.current > 0 && ev.touches.length < 2) {
+        initialPinchDistanceRef.current = 0; // Reset pinch state
+      }
+      // If isPanning was true due to single touch emulating mouse,
+      // browser's emulated mouseup should call handleMouseUp.
+    };
+
+    currentContainer.addEventListener("touchstart", onTouchStart, {
+      passive: false,
+    });
+    currentContainer.addEventListener("touchmove", onTouchMove, {
+      passive: false,
+    });
+    currentContainer.addEventListener("touchend", onTouchEnd, {
+      passive: false,
+    });
+    currentContainer.addEventListener("touchcancel", onTouchEnd, {
+      passive: false,
+    });
 
     return () => {
-      container.removeEventListener("wheel", handleWheel);
+      currentContainer.removeEventListener("wheel", handleWheel);
+      currentContainer.removeEventListener("touchstart", onTouchStart);
+      currentContainer.removeEventListener("touchmove", onTouchMove);
+      currentContainer.removeEventListener("touchend", onTouchEnd);
+      currentContainer.removeEventListener("touchcancel", onTouchEnd);
     };
-  }, [scale, position]);
+  }, [
+    handleWheel,
+    mode,
+    isDraggingText,
+    scale,
+    position,
+    MIN_SCALE,
+    MAX_SCALE,
+  ]);
 
   const handleDragStart = () => {
     setIsDraggingText(true);
   };
 
-  // สำคัญ: ให้ effect นี้รันซ้ำทั้งตอน mode เปลี่ยน และ image เปลี่ยน (เช่นหลังอัปโหลดรูป)
   useEffect(() => {
     const canvasDraw = canvasRef.current;
     if (!canvasDraw) return;
-
     const drawingCanvas = canvasDraw.canvas.drawing;
     if (!drawingCanvas) return;
-
     const ctx = drawingCanvas.getContext("2d");
     if (!ctx) return;
 
     if (mode === "eraser") {
-      // ลบเส้นด้วย destination-out
       ctx.globalCompositeOperation = "destination-out";
     } else {
-      // วาดปกติ
       ctx.globalCompositeOperation = "source-over";
     }
   }, [mode, image]);
 
   useEffect(() => {
     handleShowImage();
-  }, []);
+  }, []); // imageURL is a prop, if it can change, add it to dependency array. Assuming it's initial.
 
   const handleShowImage = async () => {
+    // Consider aborting if component unmounts or imageURL changes rapidly
+    setLoadingImage(true);
     const file = await urlToFile(imageURL);
     if (file) {
       const reader = new FileReader();
@@ -210,27 +327,29 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
         img.onload = () => {
           setCanvasWidth(img.width);
           setCanvasHeight(img.height);
-          setImage(imageUrl);
+          setImage(imageUrl); // This will trigger the other useEffect for eraser mode if image changes
         };
         img.src = imageUrl;
       };
       reader.readAsDataURL(file);
     }
+    setLoadingImage(false);
   };
 
   const handleAddText = () => {
     setMode("text-edit");
     const newTextId = Date.now();
     setCurrentTextId(newTextId);
-    setCurrentText("Add Your Text Here");
-    saveTextObjectsToHistory();
+    const initialText = "Add Your Text Here";
+    setCurrentText(initialText);
+    saveTextObjectsToHistory(); // Save state before adding new text for undo
     setTextObjects((prev) => [
       ...prev,
       {
         id: newTextId,
-        text: "Add Your Text Here",
-        x: canvasWidth / 2,
-        y: canvasHeight / 2,
+        text: initialText,
+        x: canvasWidth / 2 - position.x / scale, // Adjust for current view
+        y: canvasHeight / 2 - position.y / scale, // Adjust for current view
         color: textColor,
         fontSize: textSize,
       },
@@ -238,11 +357,12 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
 
     setTimeout(() => {
       textAreaRef.current?.focus();
-    }, 250);
+      textAreaRef.current?.select();
+    }, 100); // Shorter timeout might work
   };
 
   const handleFinishEditing = () => {
-    saveTextObjectsToHistory();
+    saveTextObjectsToHistory(); // Save before finishing edit
     setTextObjects((prev) =>
       prev.map((obj) =>
         obj.id === currentTextId
@@ -256,21 +376,26 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
   };
 
   const handleTextClick = (id: number) => {
-    // ให้แก้ไขข้อความได้หากเป็น draw/mouse
     if (mode === "draw" || mode === "mouse") {
-      setMode("text-edit");
-      setCurrentTextId(id);
       const textObj = textObjects.find((obj) => obj.id === id);
       if (textObj) {
+        saveTextObjectsToHistory(); // Save state before starting edit for undo
+        setMode("text-edit");
+        setCurrentTextId(id);
         setCurrentText(textObj.text);
         setTextColor(textObj.color);
         setTextSize(textObj.fontSize);
+        setTimeout(() => {
+          // Ensure textarea is rendered and then focus
+          textAreaRef.current?.focus();
+          textAreaRef.current?.select();
+        }, 0);
       }
     }
   };
 
   const saveTextObjectsToHistory = () => {
-    setTextObjectsHistory((prev) => [...prev, [...textObjects]]);
+    setTextObjectsHistory((prev) => [...prev, textObjects]); // textObjects directly
   };
 
   const handleUndo = () => {
@@ -279,6 +404,7 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
       setTextObjects(lastState);
       setTextObjectsHistory(textObjectsHistory.slice(0, -1));
     } else {
+      // Only undo drawing if no text history to undo
       canvasRef.current?.undo();
     }
   };
@@ -287,7 +413,7 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
     if (currentTextId !== null) {
       saveTextObjectsToHistory();
       setTextObjects((prev) => prev.filter((obj) => obj.id !== currentTextId));
-      setMode("draw");
+      setMode("mouse"); // Or "draw", depending on desired state after delete
       setCurrentTextId(null);
       setCurrentText("");
     }
@@ -303,61 +429,69 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
   const handleSave = () => {
     if (!canvasRef.current) return;
 
-    const canvas = document.createElement("canvas");
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
-    const context = canvas.getContext("2d");
-    if (!context) return;
+    const finalCanvas = document.createElement("canvas");
+    finalCanvas.width = canvasWidth;
+    finalCanvas.height = canvasHeight;
+    const ctx = finalCanvas.getContext("2d");
+    if (!ctx) return;
 
-    // วาดรูปพื้นหลัง
+    const processSave = () => {
+      // Draw drawing from react-canvas-draw
+      const drawingImage = new Image();
+      drawingImage.onload = () => {
+        ctx.drawImage(drawingImage, 0, 0);
+
+        // Draw text objects
+        textObjects.forEach((obj) => {
+          ctx.fillStyle = obj.color;
+          ctx.font = `${obj.fontSize}px Arial`; // Consider making font family configurable
+          // Handle multiline text
+          const lines = obj.text.split("\n");
+          lines.forEach((line, index) => {
+            ctx.fillText(line, obj.x, obj.y + index * obj.fontSize); // Adjust y for multiline
+          });
+        });
+
+        finalCanvas.toBlob(async (blob) => {
+          if (blob) {
+            const file = new File([blob], name || "canvas-image.png", {
+              type: "image/png",
+            });
+            onSave({ file, id: name || "canvas-image" }); // Ensure `name` prop is a valid filename part or provide default
+          }
+        }, "image/png");
+      };
+      drawingImage.onerror = () =>
+        console.error("Error loading drawing image for saving.");
+      drawingImage.src = canvasRef.current?.getDataURL() || "";
+    };
+
+    // Draw background image first if it exists
     if (image) {
-      const img = new Image();
-      img.src = image;
-      img.onload = () => {
-        context.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-        // วาดลายเส้น (canvasRef)
-        const drawing = new Image();
-        drawing.src = canvasRef.current?.getDataURL() || "";
-        drawing.onload = () => {
-          context.drawImage(drawing, 0, 0);
-          // วาด text
-          drawTexts(context);
-        };
+      const backgroundImage = new Image();
+      backgroundImage.onload = () => {
+        ctx.drawImage(backgroundImage, 0, 0, canvasWidth, canvasHeight);
+        processSave(); // Proceed to draw drawings and text
       };
+      backgroundImage.onerror = () => {
+        console.error("Error loading background image for saving.");
+        processSave(); // Proceed without background if it fails
+      };
+      backgroundImage.src = image;
     } else {
-      // ถ้าไม่มีภาพ ก็วาดแค่ลายเส้นกับข้อความ
-      const drawing = new Image();
-      drawing.src = canvasRef.current?.getDataURL() || "";
-      drawing.onload = () => {
-        context.drawImage(drawing, 0, 0);
-        drawTexts(context);
-      };
-    }
-  };
-
-  const drawTexts = async (context: CanvasRenderingContext2D) => {
-    textObjects.forEach((obj) => {
-      context.fillStyle = obj.color;
-      context.font = `${obj.fontSize}px Arial`;
-      context.fillText(obj.text, obj.x, obj.y);
-    });
-    // แปลงเป็นรูปแล้วดาวน์โหลด
-    const newImage = context.canvas.toDataURL("image/png");
-    const file = await urlToFile(newImage, name);
-    if (file) {
-      onSave({ file, id: name });
+      processSave(); // No background image, just draw drawings and text
     }
   };
 
   const mouseSensor = useSensor(MouseSensor, {
-    activationConstraint: { distance: 5 },
+    activationConstraint: { distance: 5 }, // Small distance to allow clicks on text without starting drag
   });
   const sensors = useSensors(mouseSensor);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, delta } = event;
     const activeId = Number(active.id);
+    saveTextObjectsToHistory(); // Save state before drag for undo
     setTextObjects((prev) =>
       prev.map((obj) =>
         obj.id === activeId
@@ -368,7 +502,6 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
     setIsDraggingText(false);
   };
 
-  // ถ้าไม่ใช่ draw/eraser => disable canvas
   const isCanvasDisabled = mode !== "draw" && mode !== "eraser";
 
   useEnterKey(() => {
@@ -379,11 +512,17 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
 
   return (
     <div className="flex h-full w-full flex-col items-center bg-gray-200">
+      {loadingImage && (
+        <div className="fixed bottom-0 left-0 right-0 top-0 z-20 flex h-full w-full items-center justify-center bg-white/80 backdrop-blur-sm">
+          Loading..
+        </div>
+      )}
+      {/* Top Bar */}
       <div className="gradient-bg flex w-full items-center justify-between gap-2 border-b px-5 py-2 pl-10">
         <div className="flex h-full items-center justify-center gap-2">
           <div className="relative h-10 w-10 overflow-hidden rounded-md ring-1 ring-white transition duration-150 hover:scale-105 active:scale-110">
             <ImageNextJs
-              src="/favicon.ico"
+              src="/favicon.ico" // Replace with your actual logo
               placeholder="blur"
               blurDataURL={defaultCanvas}
               fill
@@ -423,25 +562,26 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
         </div>
       </div>
 
+      {/* Controls Toolbar */}
       <div className="fixed top-20 z-20 flex items-center space-x-2 rounded-lg bg-white px-2 py-1 drop-shadow-lg">
         {mode !== "text-edit" && (
           <>
-            {" "}
             <input
               type="color"
               value={brushColor}
               onChange={(e) => setBrushColor(e.target.value)}
-              className="ml-2"
+              className="ml-2 h-7 w-7 cursor-pointer appearance-none border-none bg-transparent p-0 [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:rounded-full [&::-webkit-color-swatch]:border-none"
+              title="Brush Color"
             />
-            <label>
-              Brush Size:
+            <label className="flex items-center">
               <input
                 type="range"
                 min="1"
                 max="50"
                 value={brushRadius}
                 onChange={(e) => setBrushRadius(Number(e.target.value))}
-                className="ml-2"
+                className="ml-1 w-20 cursor-pointer"
+                title={`Brush Size: ${brushRadius}`}
               />
             </label>
             <button
@@ -449,14 +589,14 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
               type="button"
               className={` ${mode === "draw" ? "bg-sky-200" : "bg-gray-100"} flex h-7 w-7 items-center justify-center rounded-lg border text-black hover:bg-sky-200 active:scale-105`}
               onClick={() => {
-                setScale(1);
+                setScale(1); // Optional: reset zoom when switching to draw
                 setMode("draw");
               }}
             >
               <BiSolidPencil />
             </button>
             <button
-              title="Mouse Mode"
+              title="Mouse Mode (Pan/Zoom/Select Text)"
               type="button"
               onClick={() => setMode("mouse")}
               className={` ${mode === "mouse" ? "bg-sky-200" : "bg-gray-100"} flex h-7 w-7 items-center justify-center rounded-lg border text-black hover:bg-sky-200 active:scale-105`}
@@ -499,153 +639,164 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
           </>
         )}
 
-        {mode === "text-edit" && (
+        {mode === "text-edit" && currentTextId !== null && (
           <>
             <input
               type="color"
               value={textColor}
               onChange={(e) => {
-                const color = e.target.value;
-                setTextColor(color);
-                saveTextObjectsToHistory();
+                const newColor = e.target.value;
+                setTextColor(newColor);
+                // Update live without needing full history save yet, or save on change
                 setTextObjects((prev) =>
                   prev.map((obj) =>
                     obj.id === currentTextId
-                      ? {
-                          ...obj,
-                          color: color,
-                        }
+                      ? { ...obj, color: newColor }
                       : obj,
                   ),
                 );
               }}
-              className="ml-2"
+              className="ml-2 h-7 w-7 cursor-pointer appearance-none border-none bg-transparent p-0 [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:rounded-full [&::-webkit-color-swatch]:border-none"
+              title="Text Color"
             />
-            <label>
+            <label className="flex items-center">
               Text Size:
               <input
-                type="number"
+                type="number" // Changed to number for easier input
                 min="10"
-                max="100"
+                max="100" // Reasonable max
                 value={textSize}
                 onChange={(e) => {
-                  const size = Number(e.target.value);
-                  setTextSize(size);
-                  saveTextObjectsToHistory();
-                  setTextObjects((prev) =>
-                    prev.map((obj) =>
-                      obj.id === currentTextId
-                        ? {
-                            ...obj,
-                            fontSize: size,
-                          }
-                        : obj,
-                    ),
-                  );
+                  const newSize = Number(e.target.value);
+                  if (newSize >= 10 && newSize <= 100) {
+                    // Basic validation
+                    setTextSize(newSize);
+                    setTextObjects((prev) =>
+                      prev.map((obj) =>
+                        obj.id === currentTextId
+                          ? { ...obj, fontSize: newSize }
+                          : obj,
+                      ),
+                    );
+                  }
                 }}
-                className="ml-2 w-16 border"
+                className="ml-1 w-16 rounded border px-1 text-center"
               />
             </label>
             <button
               type="button"
               onClick={handleFinishEditing}
-              className="bg-blue-500 p-2 text-white"
+              className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:bg-blue-600"
             >
-              Done Editing
+              Done
             </button>
             <button
               type="button"
               onClick={handleDeleteCurrentText}
-              className="bg-red-500 p-2 text-white"
+              className="rounded bg-red-500 px-3 py-1 text-sm text-white hover:bg-red-600"
             >
-              Delete This Text
-            </button>{" "}
+              Delete
+            </button>
           </>
         )}
       </div>
 
+      {/* Canvas Area */}
       <div
         ref={containerRef}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+        onMouseLeave={handleMouseUp} // Important to stop panning if mouse leaves container
         style={{
           width: "100vw",
-          height: "100vh",
+          height: "calc(100vh - 5rem)", // Adjust based on your top bar and toolbar height
           overflow: "hidden",
+          cursor:
+            mode === "mouse" && !isDraggingText
+              ? isPanning
+                ? "grabbing"
+                : "grab"
+              : "default",
+          touchAction: "none", // Essential for preventing browser default touch actions like scroll/zoom on this element
         }}
+        className="mt-16" // Adjust if toolbar height changes
       >
         <DndContext
           sensors={sensors}
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >
-          {/* Container สำหรับซ้อนรูปพื้นหลัง + CanvasDraw (โปร่งใส) */}
           <div
-            className="relative"
+            className="relative" // Removed explicit background color to let CanvasDraw or image show
             style={{
               transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
               transformOrigin: "0 0",
               width: canvasWidth,
               height: canvasHeight,
-              background: "#fff",
-              border: "1px solid #ccc",
+              border: "1px solid #ccc", // Border for visual aid of canvas boundary
+              background: "#fff", // Add white background to ensure it's not transparent when no image
             }}
           >
-            {mode === "text-edit" && (
-              <div
-                style={{
-                  left: textObjects.find((text) => text.id === currentTextId)
-                    ?.x,
-                  top: textObjects.find((text) => text.id === currentTextId)?.y,
-                }}
-                className="absolute z-50"
-              >
-                <textarea
-                  ref={textAreaRef}
-                  value={currentText}
-                  style={{
-                    fontSize: `${
-                      textObjects.find((text) => text.id === currentTextId)
-                        ?.fontSize
-                    }px`,
-                    color: `${
-                      textObjects.find((text) => text.id === currentTextId)
-                        ?.color
-                    }`,
-                  }}
-                  onChange={(e) => {
-                    const text = e.target.value;
-                    setCurrentText(text);
-                    saveTextObjectsToHistory();
-                    setTextObjects((prev) =>
-                      prev.map((obj) =>
-                        obj.id === currentTextId
-                          ? {
-                              ...obj,
-                              text: text,
-                            }
-                          : obj,
-                      ),
-                    );
-                  }}
-                  className="resize-none appearance-none border border-dashed bg-white/40 p-1 focus:outline-none active:outline-none"
-                  rows={3}
-                  cols={40}
-                />
-              </div>
-            )}
-            {/* รูปพื้นหลัง */}
+            {mode === "text-edit" &&
+              currentTextId !== null &&
+              (() => {
+                const currentTextObj = textObjects.find(
+                  (t) => t.id === currentTextId,
+                );
+                if (!currentTextObj) return null;
+                return (
+                  <div
+                    style={{
+                      position: "absolute",
+                      left: currentTextObj.x,
+                      top: currentTextObj.y,
+                      // transform: `scale(${1 / scale})`, // Counter-scale if needed, or style textarea directly
+                      // transformOrigin: "0 0",
+                      zIndex: 50,
+                    }}
+                  >
+                    <textarea
+                      ref={textAreaRef}
+                      value={currentText}
+                      style={{
+                        fontSize: `${currentTextObj.fontSize}px`, // Use actual object's size for consistency
+                        color: currentTextObj.color,
+                        lineHeight: `${currentTextObj.fontSize * 1.2}px`, // Adjust line height
+                        border: "1px dashed blue", // Visual cue for editing
+                        background: "rgba(255, 255, 255, 0.8)",
+                        resize: "none", // Or allow resize if desired
+                        outline: "none",
+                      }}
+                      onChange={(e) => {
+                        const newText = e.target.value;
+                        setCurrentText(newText);
+                        setTextObjects((prev) =>
+                          prev.map((obj) =>
+                            obj.id === currentTextId
+                              ? { ...obj, text: newText }
+                              : obj,
+                          ),
+                        );
+                      }}
+                      onBlur={handleFinishEditing} // Optionally finish editing on blur
+                      className="p-1" // Removed resize-none, appearance-none
+                      rows={Math.max(3, currentText.split("\n").length)} // Auto adjust rows
+                      cols={40} // Default cols
+                    />
+                  </div>
+                );
+              })()}
+
             {image && (
               <img
                 ref={imageRef}
                 src={image}
-                alt="Selected"
+                alt="Canvas background"
                 className="absolute left-0 top-0 h-full w-full"
+                style={{ pointerEvents: "none" }} // Image should not intercept mouse events
               />
             )}
-            {/* CanvasDraw โปร่งใส วางข้างบน */}
             <CanvasDraw
               ref={canvasRef}
               canvasWidth={canvasWidth}
@@ -654,11 +805,12 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
               brushRadius={brushRadius}
               hideGrid={true}
               lazyRadius={0}
+              backgroundColor="#00"
               disabled={isCanvasDisabled}
+              className={mode === "mouse" ? "cursor-grab" : ""} // visual cue for mouse mode
             />
-            {/* ข้อความที่ลากได้ */}
             {textObjects
-              .filter((text) => text.id !== currentTextId)
+              .filter((text) => text.id !== currentTextId) // Don't render active text as DraggableText, it's in textarea
               .map((obj) => (
                 <DraggableText
                   key={obj.id}
