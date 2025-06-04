@@ -1,33 +1,32 @@
-import React, { useEffect } from "react";
+import React, { RefObject } from "react";
 import { IoMdClose } from "react-icons/io";
-import InputWithIcon from "../common/InputWithIcon";
-import { MdOutlineSubtitles, MdTitle } from "react-icons/md";
-import InputEducationYear from "../common/InputEducationYear";
-import { FiPlus } from "react-icons/fi";
-import { EducationYear, ErrorMessages } from "../../interfaces";
 import {
-  useCreateSubject,
+  useDuplicateSubject,
   useGetClassrooms,
   useGetLanguage,
 } from "../../react-query";
-import Swal from "sweetalert2";
-import { Toast } from "primereact/toast";
-import { useSound } from "../../hook";
 import LoadingBar from "../common/LoadingBar";
+import { EducationYear, ErrorMessages, Subject } from "../../interfaces";
 import { subjectsDataLanguage } from "../../data/languages";
+import InputEducationYear from "../common/InputEducationYear";
+import InputWithIcon from "../common/InputWithIcon";
+import { useSound } from "../../hook";
+import { MdOutlineSubtitles } from "react-icons/md";
+import { IoDuplicate } from "react-icons/io5";
+import { Toast } from "primereact/toast";
+import Swal from "sweetalert2";
 
 type Props = {
   onClose: () => void;
-  schoolId: string;
-  educationYear: EducationYear;
-  toast: React.RefObject<Toast>;
+  subject: Subject;
+  toast: RefObject<Toast>;
 };
-function SubjectCreate({ onClose, schoolId, educationYear, toast }: Props) {
+function DuplicateSubject({ onClose, subject, toast }: Props) {
   const sound = useSound("/sounds/ding.mp3") as HTMLAudioElement;
-  const create = useCreateSubject();
+  const duplicate = useDuplicateSubject();
   const language = useGetLanguage();
   const classrooms = useGetClassrooms({
-    schoolId: schoolId,
+    schoolId: subject.schoolId,
     isAchieved: false,
   });
   const [data, setData] = React.useState<{
@@ -36,27 +35,27 @@ function SubjectCreate({ onClose, schoolId, educationYear, toast }: Props) {
     educationYear: EducationYear;
     classId?: string;
   }>({
-    educationYear: educationYear,
+    title: `Duplicate of ${subject.title}`,
+    description: subject.description,
+    classId: subject.classId,
+    educationYear: subject.educationYear as EducationYear,
   });
 
-  useEffect(() => {
-    if (classrooms.data && classrooms.data?.length > 0) {
-      setData((prev) => ({ ...prev, classId: classrooms.data[0].id }));
-    }
-  }, [classrooms.data]);
-
-  const handleCreateSubject = async (e: React.FormEvent) => {
+  const handleDuplicateSubject = async (e: React.FormEvent) => {
     try {
       e.preventDefault();
       if (!data.title || !data.description || !data.classId) {
         throw new Error("Please fill all the fields");
       }
-      await create.mutateAsync({
+      await duplicate.mutateAsync({
         title: data.title,
         description: data.description,
         educationYear: data.educationYear,
-        classId: data.classId,
-        schoolId: schoolId,
+        classroomId: data.classId,
+        subjectId: subject.id,
+        ...(subject.backgroundImage && {
+          backgroundImage: subject.backgroundImage,
+        }),
       });
 
       sound.play();
@@ -80,15 +79,14 @@ function SubjectCreate({ onClose, schoolId, educationYear, toast }: Props) {
       });
     }
   };
+
   return (
     <form
-      onSubmit={handleCreateSubject}
+      onSubmit={handleDuplicateSubject}
       className="flex h-max flex-col gap-2 rounded-md bg-white p-3 xl:w-5/12 2xl:w-4/12"
     >
       <header className="flex w-full justify-between border-b">
-        <h1 className="text-lg font-semibold">
-          {subjectsDataLanguage.create(language.data ?? "en")}
-        </h1>
+        <h1 className="text-lg font-semibold">Duplicate Subject</h1>
         <button
           type="button"
           onClick={() => onClose()}
@@ -97,7 +95,7 @@ function SubjectCreate({ onClose, schoolId, educationYear, toast }: Props) {
           <IoMdClose />
         </button>
       </header>
-      {create.isPending && <LoadingBar />}
+      {duplicate.isPending && <LoadingBar />}
       <div className="flex h-96 flex-col gap-5 overflow-auto p-2 pt-5">
         <div className="flex flex-col">
           <span>
@@ -188,11 +186,12 @@ function SubjectCreate({ onClose, schoolId, educationYear, toast }: Props) {
             Cancel
           </button>
           <button
-            disabled={create.isPending}
+            disabled={duplicate.isPending}
             type="submit"
             className="main-button flex items-center justify-center gap-1"
           >
-            <FiPlus /> {subjectsDataLanguage.create(language.data ?? "en")}
+            <IoDuplicate />{" "}
+            {subjectsDataLanguage.duplicate(language.data ?? "en")}
           </button>
         </div>
       </div>
@@ -200,4 +199,4 @@ function SubjectCreate({ onClose, schoolId, educationYear, toast }: Props) {
   );
 }
 
-export default SubjectCreate;
+export default DuplicateSubject;

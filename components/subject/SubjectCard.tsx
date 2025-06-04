@@ -1,22 +1,29 @@
-import React, { CSSProperties } from "react";
-import { Classroom, Subject, TeacherOnSubject } from "../../interfaces";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import Link from "next/link";
-import { MdDragIndicator } from "react-icons/md";
-import { FaUsers } from "react-icons/fa6";
-import ListMemberCircle from "../member/ListMemberCircle";
 import Image from "next/image";
-import { decodeBlurhashToCanvas } from "../../utils";
+import Link from "next/link";
+import { CSSProperties } from "react";
+import { IoDuplicate } from "react-icons/io5";
+import { MdDragIndicator } from "react-icons/md";
 import { defaultBlurHash } from "../../data";
+import { Classroom, Subject, TeacherOnSubject } from "../../interfaces";
+import { decodeBlurhashToCanvas } from "../../utils";
+import ListMemberCircle from "../member/ListMemberCircle";
 
 type Props = {
   subject: Subject;
   teachers: TeacherOnSubject[];
   classroom: Classroom;
   onClick?: () => void;
+  onDuplicate?: () => void;
 };
-function SubjectCard({ subject, teachers, classroom, onClick }: Props) {
+function SubjectCard({
+  subject,
+  teachers,
+  classroom,
+  onClick,
+  onDuplicate,
+}: Props) {
   const {
     isDragging,
     attributes,
@@ -45,66 +52,66 @@ function SubjectCard({ subject, teachers, classroom, onClick }: Props) {
       style={inlineStyles}
       {...attributes}
       onClick={() => onClick?.()}
-      className="w-full h-64 cursor-pointer active:scale-105 flex flex-col rounded-lg overflow-hidden border"
+      className="flex h-64 w-full flex-col overflow-hidden rounded-lg border active:scale-105"
     >
+      <div
+        className={`relative h-24 w-full shadow-inner ${
+          subject.backgroundImage ? "" : "gradient-bg"
+        } flex items-end p-5`}
+      >
+        {subject.backgroundImage && (
+          <div className="gradient-shadow absolute bottom-0 left-0 right-0 top-0 z-10 m-auto h-full w-full"></div>
+        )}
+        {subject.backgroundImage && (
+          <Image
+            src={subject.backgroundImage}
+            fill
+            sizes="(max-width: 768px) 100vw, 33vw"
+            placeholder="blur"
+            blurDataURL={decodeBlurhashToCanvas(
+              subject.blurHash ?? defaultBlurHash,
+            )}
+            alt="background"
+            className="object-cover"
+          />
+        )}
+        <div className="absolute left-2 top-2 z-20 m-auto flex w-max items-center justify-center gap-1 rounded-full border border-white bg-white px-2 py-1 text-xs text-black">
+          SUBJECT
+        </div>
+        <h1 className="z-20 w-48 truncate text-lg font-semibold text-white">
+          {subject.title}
+        </h1>
+        <button
+          onClick={() => onDuplicate?.()}
+          title="Duplicate Subject"
+          className="absolute right-8 top-2 z-20 flex h-6 w-6 items-center justify-center rounded-md text-white hover:bg-gray-300/50"
+        >
+          <IoDuplicate />
+        </button>
+        <div
+          {...listeners}
+          style={{ cursor: isDragging ? "grabbing" : "grab" }}
+          className="absolute right-2 top-2 z-20 flex h-6 w-6 items-center justify-center rounded-md text-white hover:bg-gray-300/50"
+        >
+          <MdDragIndicator />
+        </div>
+      </div>
       <Link
         style={{
           pointerEvents: isDragging || onClick ? "none" : "auto",
         }}
         href={`/subject/${subject.id}`}
       >
-        <div
-          className={`w-full h-24 relative shadow-inner ${
-            subject.backgroundImage ? "" : "gradient-bg"
-          }  flex items-end p-5`}
-        >
-          {subject.backgroundImage && (
-            <div className="gradient-shadow z-10 absolute w-full h-full top-0 bottom-0 right-0 left-0 m-auto"></div>
-          )}
-          {subject.backgroundImage && (
-            <Image
-              src={subject.backgroundImage}
-              fill
-              sizes="(max-width: 768px) 100vw, 33vw"
-              placeholder="blur"
-              blurDataURL={decodeBlurhashToCanvas(
-                subject.blurHash ?? defaultBlurHash
-              )}
-              alt="background"
-              className="object-cover "
-            />
-          )}
-          <div
-            className="flex w-max text-xs  z-20 
-         items-center absolute top-2 left-2 m-auto bg-white text-black  border-white gap-1 border rounded-full px-2 py-1 justify-center"
-          >
-            SUBJECT
-          </div>
-          <h1 className="text-white z-20 truncate w-48  text-lg font-semibold">
-            {subject.title}
-          </h1>
-          <div
-            {...listeners}
-            style={{ cursor: isDragging ? "grabbing" : "grab" }}
-            className="w-6 h-10 z-20 rounded-md text-white hover:bg-gray-300/50 flex 
-items-center justify-center absolute top-2 right-2 "
-          >
-            <MdDragIndicator />
-          </div>
-        </div>
-        <div className="p-5 pb-2 flex grow flex-col justify-between">
+        <div className="flex grow flex-col justify-between p-5 pb-2">
           <div className="flex flex-col gap-2">
             <div className="flex flex-col gap-1">
               <span
                 title="Class's Level"
-                className="font-semibold text-xl border-b"
+                className="border-b text-xl font-semibold"
               >
                 ปีการศึกษา {subject.educationYear}
               </span>
-              <p
-                title="Class Begin Year"
-                className="text-sm h-10  line-clamp-2"
-              >
+              <p title="Class Begin Year" className="line-clamp-2 h-10 text-sm">
                 {subject.description}
               </p>
             </div>
@@ -113,14 +120,14 @@ items-center justify-center absolute top-2 right-2 "
           </div>
         </div>
       </Link>
-      <div className="bg-white text-gray-400 text-xs px-5">
+      <div className="bg-white px-5 text-xs text-gray-400">
         Classroom:{" "}
         <Link
           target="_blank"
           className="text-blue-600 underline"
           href={`/classroom/${classroom.id}`}
         >
-          {classroom.level}
+          {classroom.title} : {classroom.level}
         </Link>
       </div>
     </li>

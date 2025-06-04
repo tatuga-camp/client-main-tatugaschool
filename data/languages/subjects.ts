@@ -71,6 +71,16 @@ export const subjectsDataLanguage = {
         return "Create Subject";
     }
   },
+  duplicate: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Duplicate Subject";
+      case "th":
+        return "คัดลอกรายวิชา";
+      default:
+        return "Duplicate Subject";
+    }
+  },
   selectClass: (language: Language) => {
     switch (language) {
       case "en":

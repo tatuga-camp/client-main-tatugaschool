@@ -5,19 +5,12 @@ import {
   useQueryClient,
   UseQueryResult,
 } from "@tanstack/react-query";
-import {
-  EducationYear,
-  ScoreOnStudent,
-  StudentOnSubject,
-  Subject,
-  TeacherOnSubject,
-} from "../interfaces";
+import { EducationYear, Subject, TeacherOnSubject } from "../interfaces";
 import {
   CreateSubjectService,
   DeleteSubjectService,
   DeleteTeacherOnSubjectService,
-  GetScoresByStudentOnSubjectIdService,
-  GetStudentOnSubjectBySubjectService,
+  DuplicateSubjectService,
   GetSubjectByIdService,
   GetSubjectBySchoolsBySchoolIdService,
   GetTeacherOnSubjectBySubjectService,
@@ -25,12 +18,11 @@ import {
   RequestCreateSubjectService,
   RequestDeleteSubjectService,
   RequestDeleteTeacherOnSubjectService,
+  RequestDuplicateSubjectService,
   RequestGetSubjectBySchoolsService,
   RequestReorderSubjectsService,
-  RequestUpdateStudentOnSubjectService,
   RequestUpdateSubjectService,
   ResponseGetSubjectBySchoolsService,
-  UpdateStudentOnSubjectService,
   UpdateSubjectService,
 } from "../services";
 
@@ -122,6 +114,24 @@ export function useCreateSubject() {
     mutationKey: ["create-subject"],
     mutationFn: (request: RequestCreateSubjectService) =>
       CreateSubjectService(request),
+
+    onSuccess(data, variables, context) {
+      queryClient.invalidateQueries({
+        queryKey: [
+          "subjects",
+          { schoolId: data.schoolId, educationYear: data.educationYear },
+        ],
+      });
+    },
+  });
+}
+
+export function useDuplicateSubject() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["duplicate-subject"],
+    mutationFn: (request: RequestDuplicateSubjectService) =>
+      DuplicateSubjectService(request),
 
     onSuccess(data, variables, context) {
       queryClient.invalidateQueries({

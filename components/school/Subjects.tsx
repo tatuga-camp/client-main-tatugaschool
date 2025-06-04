@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { SortByOption, sortByOptions } from "../../data";
 import {
   useGetLanguage,
@@ -39,6 +39,7 @@ import {
   subjectsDataLanguage,
 } from "../../data/languages";
 import LoadingSpinner from "../common/LoadingSpinner";
+import DuplicateSubject from "../subject/DuplicateSubject";
 
 type Props = {
   schoolId: string;
@@ -57,6 +58,7 @@ function Subjects({ schoolId }: Props) {
     string | "show-all"
   >(user.data?.id ?? "show-all");
   const language = useGetLanguage();
+  const [selectDuplicate, setSelectDuplicate] = useState<Subject | null>(null);
   const [triggerCreateSubject, setTriggerCreateSubject] = React.useState(false);
   const [sortBy, setSortBy] = React.useState<SortByOption>("Default");
   const [search, setSearch] = React.useState("");
@@ -203,6 +205,7 @@ function Subjects({ schoolId }: Props) {
       }
     });
   };
+  console.log(selectDuplicate);
   return (
     <>
       <Toast ref={toast} />
@@ -223,6 +226,23 @@ function Subjects({ schoolId }: Props) {
               }}
             />
           )}
+        </PopupLayout>
+      )}
+
+      {selectDuplicate !== null && (
+        <PopupLayout
+          onClose={() => {
+            setSelectDuplicate(null);
+          }}
+        >
+          <DuplicateSubject
+            subject={selectDuplicate}
+            toast={toast}
+            onClose={() => {
+              document.body.style.overflow = "auto";
+              setSelectDuplicate(null);
+            }}
+          />
         </PopupLayout>
       )}
       <div className="flex w-full flex-col justify-center bg-white">
@@ -336,6 +356,7 @@ function Subjects({ schoolId }: Props) {
                 {subjectData.map((subject) => {
                   return (
                     <SubjectCard
+                      onDuplicate={() => setSelectDuplicate(subject)}
                       key={subject.id}
                       subject={subject}
                       teachers={subject.teachers}

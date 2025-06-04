@@ -62,6 +62,33 @@ export async function GetSubjectBySchoolsBySchoolIdService(
   }
 }
 
+export type RequestDuplicateSubjectService = {
+  title: string;
+  educationYear: string;
+  description: string;
+  classroomId: string;
+  subjectId: string;
+  backgroundImage?: string;
+};
+
+export type ResponseDuplicateSubjectService = Subject;
+
+export async function DuplicateSubjectService(
+  input: RequestDuplicateSubjectService,
+): Promise<ResponseDuplicateSubjectService> {
+  try {
+    const response = await axiosInstance({
+      method: "POST",
+      url: `/v1/subjects/duplicate`,
+      data: input,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Get Subjects request failed:", error.response.data);
+    throw error?.response?.data;
+  }
+}
+
 type RequestGetSubjectByIdService = {
   subjectId: string;
 };
