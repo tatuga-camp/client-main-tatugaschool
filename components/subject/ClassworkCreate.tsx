@@ -104,7 +104,7 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
     weight?: number | null;
     allowWeight?: boolean;
     beginDate?: string;
-    deadline?: string;
+    dueDate?: string;
   }>({
     type: "Assignment",
     beginDate: convertToDateTimeLocalString(new Date()),
@@ -141,14 +141,16 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
         throw new Error("Description is required");
       }
       setLoading(true);
+
       const assignment = await create.mutateAsync({
         title: classwork?.title,
         description: classwork?.description,
         type: classwork?.type,
         maxScore: classwork?.maxScore,
         weight: classwork?.weight,
-        dueDate:
-          classwork?.deadline && new Date(classwork.deadline).toISOString(),
+        ...(classwork.dueDate && {
+          dueDate: new Date(classwork.dueDate).toISOString(),
+        }),
         beginDate: new Date(classwork.beginDate).toISOString(),
         subjectId: subjectId,
         status: submitter.value as AssignmentStatus,

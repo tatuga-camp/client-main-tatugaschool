@@ -138,7 +138,7 @@ export type MenuClassroom =
   | "GradesSummary"
   | "OverViewClassroom"
   | "School"
-  | "Subjects";
+  | "Classes";
 export const menuClassroomList = ({
   schoolId,
 }: {
@@ -162,7 +162,7 @@ export const menuClassroomList = ({
       icon: <CiSettings />,
     },
     {
-      title: "Subjects",
+      title: "Classes",
       icon: <MdGridView />,
       url: `/school/${schoolId}?menu=Classes`,
     },
