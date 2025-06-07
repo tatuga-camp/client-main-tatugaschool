@@ -256,7 +256,12 @@ function AvatarSetting({
               } h-24 w-24 cursor-pointer overflow-hidden rounded-md bg-white hover:scale-105`}
               onClick={() => setSelectAvatar(url)}
             >
-              <Image src={url} fill alt="student avatar" />
+              <Image
+                src={url}
+                fill
+                alt="student avatar"
+                sizes="(max-width: 768px) 100vw, 33vw"
+              />
             </li>
           );
         })}
