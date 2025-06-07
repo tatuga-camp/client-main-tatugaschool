@@ -123,7 +123,7 @@ function PopUpStudent({ student, setSelectStudent, toast }: Props) {
             alt="Student"
             fill
             sizes="(max-width: 768px) 100vw, 33vw"
-            className="rounded-full"
+            className="rounded-full object-cover"
           />
         </div>
         <div className="flex h-16 w-full flex-col items-center justify-center md:w-40">
