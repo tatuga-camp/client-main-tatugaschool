@@ -105,11 +105,11 @@ export async function GetStudentOnSubjectReportService(
   }
 }
 
-type RequestSortStudentOnSubjectService = {
+export type RequestSortStudentOnSubjectService = {
   studentOnSubjectIds: string[];
 };
 
-type ResponseSortStudentOnSubjectService = StudentOnSubject;
+type ResponseSortStudentOnSubjectService = StudentOnSubject[];
 
 export async function SortStudentOnSubjectService(
   input: RequestSortStudentOnSubjectService,
@@ -235,6 +235,8 @@ export type RequestUpdateStudentOnSubjectService = {
   };
   data: {
     isActive?: boolean;
+    photo?: string;
+    blurHash?: string;
   };
 };
 export async function UpdateStudentOnSubjectService(

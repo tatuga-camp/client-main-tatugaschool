@@ -1,9 +1,12 @@
-import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import { Toast } from "primereact/toast";
-import React, { memo, useState } from "react";
+import React, { memo, RefObject, useEffect, useRef, useState } from "react";
+import { CgSelect } from "react-icons/cg";
 import { IoMdClose } from "react-icons/io";
+import { MdImage } from "react-icons/md";
+import { RxAvatar } from "react-icons/rx";
 import Swal from "sweetalert2";
+import { studentAvatars } from "../../data";
 import { useSound } from "../../hook";
 import {
   ErrorMessages,
@@ -12,8 +15,10 @@ import {
 } from "../../interfaces";
 import {
   useCreateScoreOnStudent,
-  useGetScoreOnSubject,
+  useUpdateStudentOnSubject,
 } from "../../react-query";
+import { generateBlurHash, urlToFile } from "../../utils";
+import LoadingSpinner from "../common/LoadingSpinner";
 import ScorePanel from "./ScorePanel";
 
 type Props = {
@@ -27,13 +32,12 @@ function PopUpStudent({ student, setSelectStudent, toast }: Props) {
   const [isModalOpen, setIsModalOpen] = useState(true);
   const successSound = useSound("/sounds/ding.mp3");
   const failSound = useSound("/sounds/fail.mp3");
-
+  const [triggerAvartar, setSetTriggerAvatar] = useState<boolean>(false);
   const createScoreOnStudent = useCreateScoreOnStudent();
-  const scoreOnSubjects = useGetScoreOnSubject({
-    subjectId: student.subjectId,
-  });
+  const [image, setImage] = useState<string>(student.photo);
+
   const [totalScore, setTotalScore] = React.useState<number>(
-    student.totalSpeicalScore
+    student.totalSpeicalScore,
   );
 
   const [selectScore, setSelectScore] = React.useState<
@@ -102,51 +106,186 @@ function PopUpStudent({ student, setSelectStudent, toast }: Props) {
   if (!isModalOpen) return null;
 
   return (
-    <section
-      className="w-full md:w-10/12 xl:w-7/12 border p-5 items-center 
-    flex flex-col md:flex-row gap-5 relative bg-background-color rounded-md"
-    >
+    <section className="relative flex w-full flex-col items-center gap-5 rounded-md border bg-white p-5 pb-0 md:w-10/12 md:flex-row xl:w-7/12">
       <button
         onClick={handleCloseModal}
-        className="text-lg absolute top-2 right-2  hover:bg-gray-300/50 w-6  h-6  rounded
-         flex items-center justify-center font-semibold"
+        className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded text-lg font-semibold hover:bg-gray-300/50"
       >
         <IoMdClose />
       </button>
-      <div className="w-full md:w-40 h-max border bg-white rounded-md flex flex-col gap-1 items-center justify-center">
-        <div className="w-full md:w-40 h-10 gradient-bg rounded-t-md flex items-center justify-center">
-          <span className="text-white font-semibold text-lg">{totalScore}</span>
+      <div className="flex h-max w-full flex-col items-center justify-center gap-1 rounded-md border bg-white pb-1 md:w-40">
+        <div className="gradient-bg flex h-10 w-full items-center justify-center rounded-t-md md:w-40">
+          <span className="text-lg font-semibold text-white">{totalScore}</span>
         </div>
-        <div className="w-20 h-20 relative">
+        <div className="relative h-20 w-20">
           <Image
-            src={student.photo}
+            src={image}
             alt="Student"
             fill
             sizes="(max-width: 768px) 100vw, 33vw"
             className="rounded-full"
           />
         </div>
-        <div className="w-full md:w-40 h-16 flex flex-col items-center justify-center">
-          <span className="text-gray-800 font-semibold text-sm">
+        <div className="flex h-16 w-full flex-col items-center justify-center md:w-40">
+          <span className="text-sm font-semibold text-gray-800">
             {student.firstName} {student.lastName}
           </span>
-          <span className="text-gray-500 text-xs">Number {student.number}</span>
+          <span className="text-xs text-gray-500">Number {student.number}</span>
         </div>
+        <button
+          onClick={() => setSetTriggerAvatar((prev) => !prev)}
+          className="second-button ga-2 flex items-center justify-center border text-sm"
+        >
+          <MdImage /> Change Avatar
+        </button>
       </div>
-      <ScorePanel
-        subjectId={student.subjectId}
-        onSelectScore={({ inputScore, score }) => {
-          setSelectScore({ inputScore, score });
-        }}
-        selectScore={{
-          score: selectScore?.score,
-          inputScore: selectScore?.inputScore,
-        }}
-        isLoading={createScoreOnStudent.isPending}
-        onCreateScore={handleCreateScore}
-      />
+      {triggerAvartar === false && (
+        <ScorePanel
+          subjectId={student.subjectId}
+          onSelectScore={({ inputScore, score }) => {
+            setSelectScore({ inputScore, score });
+          }}
+          selectScore={{
+            score: selectScore?.score,
+            inputScore: selectScore?.inputScore,
+          }}
+          isLoading={createScoreOnStudent.isPending}
+          onCreateScore={handleCreateScore}
+        />
+      )}
+      {triggerAvartar === true && (
+        <AvatarSetting
+          onUpdatePhoto={(url) => setImage(url)}
+          toast={toast}
+          studentOnSubject={student}
+        />
+      )}
     </section>
   );
 }
 
 export default memo(PopUpStudent);
+
+type AvatarSettingProps = {
+  studentOnSubject: StudentOnSubject;
+  toast: RefObject<Toast>;
+  onUpdatePhoto: (url: string) => void;
+};
+function AvatarSetting({
+  studentOnSubject,
+  toast,
+  onUpdatePhoto,
+}: AvatarSettingProps) {
+  const [selectAvatar, setSelectAvatar] = useState<string>(
+    studentOnSubject.photo,
+  );
+  const updateStudentOnSubject = useUpdateStudentOnSubject();
+  const selectedAvatarRef = useRef<HTMLLIElement>(null);
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    if (selectedAvatarRef.current) {
+      selectedAvatarRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
+    }
+  }, [selectAvatar]);
+
+  const handleUpdateAvatar = async () => {
+    try {
+      setLoading(true);
+      const file = await urlToFile(selectAvatar);
+      if (!file) {
+        setLoading(false);
+        return;
+      }
+      const blurHash = await generateBlurHash(file);
+      const update = await updateStudentOnSubject.mutateAsync({
+        query: {
+          id: studentOnSubject.id,
+        },
+        data: {
+          photo: selectAvatar,
+          blurHash: blurHash,
+        },
+      });
+      toast.current?.show({
+        severity: "success",
+        summary: "Success",
+        detail: "Update Success",
+        life: 3000,
+      });
+      onUpdatePhoto(update.photo);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.log(error);
+      let result = error as ErrorMessages;
+      Swal.fire({
+        title: result.error ? result.error : "Something Went Wrong",
+        text: result.message.toString(),
+        footer: result.statusCode
+          ? "Code Error: " + result.statusCode?.toString()
+          : "",
+        icon: "error",
+      });
+    }
+  };
+
+  return (
+    <section className="flex h-96 w-full flex-col font-Anuphan">
+      <header className="flex w-full flex-col gap-1 border-b pb-1">
+        <div className="flex items-center justify-start gap-2 text-xl font-semibold">
+          <RxAvatar /> Avatar Setting
+        </div>
+        <span className="text-sm font-normal text-gray-500">
+          You can change avatar or upload avatar here
+        </span>
+      </header>
+
+      <ul className="grid h-full w-full grid-cols-5 place-items-center gap-2 overflow-auto bg-gray-100 p-3">
+        {studentAvatars.map((url, index) => {
+          const isSelected = selectAvatar === url;
+
+          return (
+            <li
+              key={index}
+              ref={isSelected ? selectedAvatarRef : null}
+              className={`relative ${
+                isSelected && "ring-2"
+              } h-24 w-24 cursor-pointer overflow-hidden rounded-md bg-white hover:scale-105`}
+              onClick={() => setSelectAvatar(url)}
+            >
+              <Image src={url} fill alt="student avatar" />
+            </li>
+          );
+        })}
+      </ul>
+
+      <footer className="flex h-20 w-full items-center justify-end gap-2 border-t">
+        <div className="flex items-center justify-center gap-3">
+          <button
+            onClick={() => {}}
+            type="button"
+            className="second-button flex w-40 items-center justify-center gap-1 border"
+          >
+            Cancel
+          </button>
+          <button
+            disabled={loading}
+            onClick={handleUpdateAvatar}
+            className="main-button flex w-40 items-center justify-center gap-1"
+          >
+            {loading ? (
+              <LoadingSpinner />
+            ) : (
+              <>
+                <CgSelect /> Select
+              </>
+            )}
+          </button>
+        </div>
+      </footer>
+    </section>
+  );
+}

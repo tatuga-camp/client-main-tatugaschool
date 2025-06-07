@@ -31,6 +31,7 @@ import {
   useCreateScoreOnStudent,
   useGetScoreOnStudent,
   useGetStudentOnSubject,
+  useReorderStudentOnSubject,
 } from "../../react-query";
 import { SortStudentOnSubjectService } from "../../services";
 import Calendar from "../common/Calendar";
@@ -60,7 +61,7 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
   >({
     inputScore: 0,
   });
-
+  const studentReorder = useReorderStudentOnSubject(subjectId);
   const [triggerChooseScore, setTriggerChooseScore] = useState<boolean>(false);
   const chooseScoreRef = useRef<HTMLDivElement>(null);
 
@@ -83,31 +84,33 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
 
   const handleDragEnd = useCallback(async (event: DragEndEvent) => {
-    const { active, over } = event;
-    let newSort: StudentOnSubject[] = [];
-    if (!over) {
-      return;
-    }
-    if (active.id !== over?.id) {
-      setStudents((prevs) => {
-        const oldIndex = prevs.findIndex((item) => item.id === active.id);
-        const newIndex = prevs.findIndex((item) => item.id === over!.id);
-        newSort = arrayMove(prevs, oldIndex, newIndex);
+    try {
+      const { active, over } = event;
+      let newSort: StudentOnSubject[] = [];
+      if (!over) {
+        return;
+      }
+      if (active.id !== over?.id) {
+        setStudents((prevs) => {
+          const oldIndex = prevs.findIndex((item) => item.id === active.id);
+          const newIndex = prevs.findIndex((item) => item.id === over!.id);
+          newSort = arrayMove(prevs, oldIndex, newIndex);
 
-        return newSort.map((s, index) => {
-          return {
-            ...s,
-            order: index,
-          };
+          return newSort.map((s, index) => {
+            return {
+              ...s,
+              order: index,
+            };
+          });
         });
-      });
-      await SortStudentOnSubjectService({
-        studentOnSubjectIds: newSort.map((item) => item.id),
-      });
-      queryClient.setQueryData<StudentOnSubject[]>(
-        ["studentOnSubjects", { subjectId }],
-        newSort,
-      );
+        if (newSort.length > 0) {
+          await studentReorder.mutateAsync({
+            studentOnSubjectIds: newSort.map((item) => item.id),
+          });
+        }
+      }
+    } catch (error) {
+      console.error(error);
     }
   }, []);
 
@@ -115,7 +118,7 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
     if (studentOnSubjects.data) {
       setStudents(studentOnSubjects.data.filter((item) => item.isActive));
     }
-  }, [studentOnSubjects.isSuccess]);
+  }, [studentOnSubjects.data]);
 
   // sort by date
   useEffect(() => {
@@ -346,7 +349,9 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
                           ? false
                           : triggerSelectMultipleStudent
                             ? false
-                            : true
+                            : studentReorder.isPending
+                              ? false
+                              : true
                       }
                       setSelectStudent={(data) => {
                         if (triggerSelectMultipleStudent) {

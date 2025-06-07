@@ -52,10 +52,10 @@ function ScorePanel({
   const [selectScoreOnSubject, setSelectScoreOnSubject] =
     React.useState<ScoreOnSubject | null>(selectScore?.score ?? null);
   const [inputScore, setInputScore] = useState<number | null>(
-    selectScore?.inputScore ?? null
+    selectScore?.inputScore ?? null,
   );
   return (
-    <div className="flex flex-col bg-white gap-3 p-4 sm:p-6 md:p-8 lg:p-10">
+    <div className="flex h-96 flex-col gap-3 bg-white p-4 sm:p-6 md:p-8 lg:p-10">
       {triggerFormScoreOnSubject ? (
         <ScoreOnSubjectForm
           onClose={() => {
@@ -67,19 +67,16 @@ function ScorePanel({
         />
       ) : (
         <>
-          <div className="text-lg font-semibold border-b">
+          <div className="border-b text-lg font-semibold">
             Give Your Student A Score!
           </div>
-          <ul
-            className="grid  max-h-48 p-2 overflow-auto grid-cols-2 sm:grid-cols-3
-           md:grid-cols-4 lg:grid-cols-4 gap-3"
-          >
+          <ul className="grid max-h-48 grid-cols-2 gap-3 overflow-auto p-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4">
             <button
               onClick={() => {
                 setSelectScoreOnSubject(null);
                 setTriggerFormScoreOnSubject(true);
               }}
-              className="w-full p-2 rounded-md text-gray-500 second-button border flex items-center justify-center flex-col gap-1"
+              className="second-button flex w-full flex-col items-center justify-center gap-1 rounded-md border p-2 text-gray-500"
             >
               <CiSquarePlus size={50} />
             </button>
@@ -88,7 +85,7 @@ function ScorePanel({
                   return (
                     <div
                       key={index}
-                      className="w-20 h-20 bg-gray-200 rounded-2xl animate-pulse"
+                      className="h-20 w-20 animate-pulse rounded-2xl bg-gray-200"
                     ></div>
                   );
                 })
@@ -107,12 +104,11 @@ function ScorePanel({
                       key={score.id}
                       className={` ${
                         selectScoreOnSubject?.id === score.id
-                          ? "gradient-bg "
-                          : "bg-white "
-                      } p-2  w-32 active:gradient-bg transition rounded-md group hover:bg-secondary-color 
-                    flex flex-col items-center relative justify-center gap-2`}
+                          ? "gradient-bg"
+                          : "bg-white"
+                      } active:gradient-bg group relative flex w-32 flex-col items-center justify-center gap-2 rounded-md p-2 transition hover:bg-secondary-color`}
                     >
-                      <div className="w-10 h-10 rounded-lg relative">
+                      <div className="relative h-10 w-10 rounded-lg">
                         <Image
                           src={score.icon}
                           alt={score.title}
@@ -123,7 +119,7 @@ function ScorePanel({
                           className="object-contain"
                         />
                         <div
-                          className={`min-w-5 max-w-10 truncate -top-2 -right-2 flex items-center justify-center z-20 absolute text-white h-5 rounded-full ${
+                          className={`absolute -right-2 -top-2 z-20 flex h-5 min-w-5 max-w-10 items-center justify-center truncate rounded-full text-white ${
                             score.score >= 0 ? "bg-green-400" : "bg-red-500"
                           } `}
                         >
@@ -131,10 +127,9 @@ function ScorePanel({
                         </div>
                       </div>
                       <span
-                        className={`text-xs w-20 break-words line-clamp-2
-                group-hover:text-white text-gray-500 ${
-                  selectScoreOnSubject?.id === score.id && "text-white"
-                }`}
+                        className={`line-clamp-2 w-20 break-words text-xs text-gray-500 group-hover:text-white ${
+                          selectScoreOnSubject?.id === score.id && "text-white"
+                        }`}
                       >
                         {score.title}
                       </span>
@@ -142,7 +137,7 @@ function ScorePanel({
                   );
                 })}
           </ul>
-          <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <InputNumber
               pt={{
                 input: {
@@ -166,7 +161,7 @@ function ScorePanel({
                 if (!selectScoreOnSubject) {
                   scoreRef.current?.style.setProperty(
                     "border",
-                    "1px solid red"
+                    "1px solid red",
                   );
                   scoreRef.current?.classList.add("scale-110");
                   setTimeout(() => {
@@ -180,13 +175,13 @@ function ScorePanel({
                   score: selectScoreOnSubject,
                 });
               }}
-              className="main-button w-full sm:w-56 flex items-center justify-center"
+              className="main-button flex w-full items-center justify-center sm:w-56"
             >
               {isLoading ? (
                 <ProgressSpinner
                   animationDuration="1s"
                   style={{ width: "20px" }}
-                  className="w-5 h-5"
+                  className="h-5 w-5"
                   strokeWidth="8"
                 />
               ) : (
@@ -198,7 +193,7 @@ function ScorePanel({
             {selectScoreOnSubject && (
               <button
                 onClick={() => setTriggerFormScoreOnSubject(true)}
-                className="second-button border w-20 flex items-center justify-center"
+                className="second-button flex w-20 items-center justify-center border"
               >
                 <BiEdit />
                 Edit
@@ -331,12 +326,12 @@ function ScoreOnSubjectForm({
   return (
     <>
       <Toast ref={toast} />
-      <form onSubmit={handleSummit} className="w-96 h-72 flex flex-col gap-2">
-        <h1 className="text-lg font-semibold text-center flex items-center justify-center gap-2">
+      <form onSubmit={handleSummit} className="flex h-72 w-96 flex-col gap-2">
+        <h1 className="flex items-center justify-center gap-2 text-center text-lg font-semibold">
           {scoreOnSubject?.id ? "Update" : "Create"} Score
           <IoStar />
         </h1>
-        <ul className="w-full grid grid-cols-5 p-2 gap-2 max-h-60 overflow-auto">
+        <ul className="grid max-h-60 w-full grid-cols-5 gap-2 overflow-auto p-2">
           {scoreOnSubjectTitlesDefault.map((icon, index) => {
             return (
               <li
@@ -344,9 +339,7 @@ function ScoreOnSubjectForm({
                   setData({ ...data, icon: icon.icon, blurHash: icon.blurHash })
                 }
                 key={index}
-                className={`w-full h-16
-              ${data?.icon === icon.icon && "ring-1 ring-black"}
-              second-button border relative`}
+                className={`h-16 w-full ${data?.icon === icon.icon && "ring-1 ring-black"} second-button relative border`}
               >
                 <Image
                   src={icon.icon}
@@ -390,13 +383,13 @@ function ScoreOnSubjectForm({
             onClick={() => {
               onClose();
             }}
-            className="second-button border w-full"
+            className="second-button w-full border"
           >
             Cancel
           </button>
           <button
             disabled={create.isPending || update.isPending}
-            className="main-button w-full flex items-center justify-center"
+            className="main-button flex w-full items-center justify-center"
           >
             {create.isPending || update.isPending ? (
               <LoadingSpinner />
@@ -419,7 +412,7 @@ function ScoreOnSubjectForm({
                   });
                 }
               }}
-              className="reject-button w-full flex items-center justify-center"
+              className="reject-button flex w-full items-center justify-center"
             >
               Delete
             </button>

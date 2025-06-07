@@ -2,7 +2,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   GetStudentOnSubjectBySubjectService,
   GetStudentOnSubjectReportService,
+  RequestSortStudentOnSubjectService,
   RequestUpdateStudentOnSubjectService,
+  SortStudentOnSubjectService,
   UpdateStudentOnSubjectService,
 } from "../services";
 import { StudentOnSubject } from "../interfaces";
@@ -20,6 +22,7 @@ const keyStudentOnSubject = {
     "report",
   ],
   update: ["update-student-on-subject"],
+  reorder: ["reorder-student-on-subject"],
 } as const;
 
 export function useGetStudentOnSubject({ subjectId }: { subjectId: string }) {
@@ -62,6 +65,21 @@ export function useUpdateStudentOnSubject() {
             return student;
           });
         },
+      );
+    },
+  });
+}
+
+export function useReorderStudentOnSubject(subjectId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: keyStudentOnSubject.reorder,
+    mutationFn: (request: RequestSortStudentOnSubjectService) =>
+      SortStudentOnSubjectService(request),
+    onSuccess(data, variables, context) {
+      queryClient.setQueryData<StudentOnSubject[]>(
+        ["studentOnSubjects", { subjectId }],
+        () => data,
       );
     },
   });
