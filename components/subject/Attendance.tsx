@@ -410,6 +410,16 @@ function DisplayAttendanceTable({
                         </th>
                       );
                     })}
+              {selectMenu === "Summary" && (
+                <th className="text-sm font-semibold">
+                  <button className="relative flex w-40 flex-col items-start p-2 hover:bg-gray-100 hover:ring-1 active:bg-gray-200">
+                    <span>Total Presents</span>
+                    <span className="text-xs text-gray-500">
+                      Number of Presents
+                    </span>
+                  </button>
+                </th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -418,6 +428,32 @@ function DisplayAttendanceTable({
               ?.sort((a, b) => Number(a.number) - Number(b.number))
               ?.map((student, index) => {
                 const odd = index % 2 === 0;
+
+                const attendances = rows.data
+                  ?.map((row) => {
+                    const attendances = row.attendances.filter(
+                      (a) => a.studentOnSubjectId === student.id,
+                    );
+                    return attendances;
+                  })
+                  .flat();
+                const attendanceWithStatusLists = attendances?.map((a) => {
+                  return {
+                    ...a,
+                    statusList: selectTable.statusLists.find(
+                      (s) => s.title === a.status,
+                    ),
+                  };
+                });
+
+                const totalPresents = attendanceWithStatusLists?.reduce(
+                  (prev, current) => {
+                    return (prev += current.statusList?.value ?? 0);
+                  },
+                  0,
+                );
+
+                console.log(attendanceWithStatusLists);
                 return (
                   <tr
                     className={` ${
@@ -521,15 +557,6 @@ function DisplayAttendanceTable({
                             );
                           })
                         : selectTable.statusLists.map((status) => {
-                            const attendances = rows.data
-                              ?.map((row) => {
-                                const attendances = row.attendances.filter(
-                                  (a) => a.studentOnSubjectId === student.id,
-                                );
-                                return attendances;
-                              })
-                              .flat();
-
                             const total = attendances?.reduce((acc, curr) => {
                               if (curr.status === status.title) {
                                 return acc + 1;
@@ -538,18 +565,27 @@ function DisplayAttendanceTable({
                               }
                             }, 0);
                             return (
-                              <td key={status.id}>
-                                <div
-                                  style={{
-                                    backgroundColor: `${status.color}`,
-                                  }}
-                                  className="relative flex h-14 w-full cursor-pointer flex-col items-center justify-center ring-black transition hover:ring-1 hover:drop-shadow-md"
-                                >
-                                  <span>{total}</span>
-                                </div>
-                              </td>
+                              <>
+                                <td key={status.id}>
+                                  <div
+                                    style={{
+                                      backgroundColor: `${status.color}`,
+                                    }}
+                                    className="relative flex h-14 w-full cursor-pointer flex-col items-center justify-center ring-black transition hover:ring-1 hover:drop-shadow-md"
+                                  >
+                                    <span>{total}</span>
+                                  </div>
+                                </td>
+                              </>
                             );
                           })}
+                    {selectMenu === "Summary" && (
+                      <td>
+                        <div className="relative flex h-14 w-full cursor-pointer flex-col items-center justify-center ring-black transition hover:ring-1 hover:drop-shadow-md">
+                          <span>{totalPresents}</span>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 );
               })}

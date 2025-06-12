@@ -490,7 +490,6 @@ const AttendanceStatusRow = memo(
                 name="value"
                 required
                 disabled={updateStatus.isPending}
-                min={-1}
                 onValueChange={() => {}}
                 onChange={(data) =>
                   handleChange({ name: "value", value: data })
@@ -549,6 +548,12 @@ const CreateAttendanceStatus = memo(
             attendanceTableId: attendanceTableId,
           },
           queryClient,
+        });
+        setCreateData(() => {
+          return {
+            value: 1,
+            color: "#e2eee2",
+          };
         });
         show();
       } catch (error) {
@@ -625,7 +630,6 @@ const CreateAttendanceStatus = memo(
                 required
                 value={createData.value}
                 max={10}
-                min={-1}
                 onValueChange={(data) => {
                   setCreateData((prev) => ({ ...prev, value: data }));
                 }}
