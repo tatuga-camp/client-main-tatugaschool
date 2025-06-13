@@ -5,6 +5,7 @@ import {
   useUpdateStudentOnAssignments,
 } from "../../react-query";
 import {
+  ErrorMessages,
   FileOnStudentOnAssignment,
   StudentOnAssignment,
 } from "../../interfaces";
@@ -12,6 +13,7 @@ import { HiUsers } from "react-icons/hi";
 import Image from "next/image";
 import { decodeBlurhashToCanvas } from "../../utils";
 import { defaultBlurHash } from "../../data";
+import Swal from "sweetalert2";
 
 function ClassStudentAssignWork({
   assignmentId,
@@ -44,8 +46,8 @@ function ClassStudentAssignWork({
           ?.filter(
             (studentOnAssignment) =>
               studentOnSubjects.data?.find(
-                (s) => s.id === studentOnAssignment.studentOnSubjectId
-              )?.isActive
+                (s) => s.id === studentOnAssignment.studentOnSubjectId,
+              )?.isActive,
           );
 
         const isAllAssigned = data.every((student) => student.isAssigned);
@@ -57,53 +59,66 @@ function ClassStudentAssignWork({
   }, [studentOnAssignments.status, studentOnSubjects.status]);
 
   const handleAssignAll = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLoading(true);
-    setStudentData((prev) => {
-      return prev.map((student) => {
-        return {
-          ...student,
-          isAssigned: e.target.checked,
-        };
-      });
-    });
-    setAssignAll(e.target.checked);
-
-    await Promise.allSettled(
-      studentData.map((student) => {
-        return update.mutateAsync({
-          query: {
-            studentOnAssignmentId: student.id,
-          },
-          body: {
+    try {
+      setLoading(true);
+      setStudentData((prev) => {
+        return prev.map((student) => {
+          return {
+            ...student,
             isAssigned: e.target.checked,
-          },
+          };
         });
-      })
-    );
-    setLoading(false);
+      });
+      setAssignAll(e.target.checked);
+
+      await Promise.allSettled(
+        studentData.map((student) => {
+          return update.mutateAsync({
+            query: {
+              studentOnAssignmentId: student.id,
+            },
+            body: {
+              isAssigned: e.target.checked,
+            },
+          });
+        }),
+      );
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.log(error);
+      let result = error as ErrorMessages;
+      Swal.fire({
+        title: result.error ? result.error : "Something Went Wrong",
+        text: result.message.toString(),
+        footer: result.statusCode
+          ? "Code Error: " + result.statusCode?.toString()
+          : "",
+        icon: "error",
+      });
+    }
   };
   return (
-    <main className="w-full h-max mb-40 flex justify-center ">
+    <main className="mb-40 flex h-max w-full justify-center">
       <section
-        className={` w-8/12 transition-width p-5 
-   flex flex-col gap-2 bg-white  h-full border`}
+        className={`flex h-full w-8/12 flex-col gap-2 border bg-white p-5 transition-width`}
       >
-        <div className="text-xl w-full justify-between flex gap-2 items-center "></div>
+        <div className="flex w-full items-center justify-between gap-2 text-xl"></div>
         <table className="w-full table-auto">
           <thead>
             <tr>
               <th>
-                <div className="text-start font-normal ">Name</div>
+                <div className="text-start font-normal">Name</div>
               </th>
               <th>
-                <div className="text-base font-normal flex gap-2 items-center justify-center ">
-                  <div className="w-8 h-8 flex items-center justify-center active:bg-primary-color/60 hover:bg-primary-color/50  focus-within:bg-primary-color/50 rounded-full">
+                <div className="flex items-center justify-center gap-2 text-base font-normal">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full focus-within:bg-primary-color/50 hover:bg-primary-color/50 active:bg-primary-color/60">
                     <input
                       disabled={loading}
                       type="checkbox"
                       checked={assignAll}
                       onChange={handleAssignAll}
-                      className="w-5 h-5 accent-primary-color  "
+                      className="h-5 w-5 accent-primary-color"
                     />
                   </div>
                   <HiUsers />
@@ -124,19 +139,19 @@ function ClassStudentAssignWork({
                       className={` ${odd && "bg-gray-200/20"} gap-2`}
                     >
                       <th>
-                        <div className="flex gap-2 h-14 items-center">
-                          <div className="w-10 h-10 relative rounded-md ring-1  overflow-hidden">
-                            <div className="w-full h-full bg-gray-200 animate-pulse"></div>
+                        <div className="flex h-14 items-center gap-2">
+                          <div className="relative h-10 w-10 overflow-hidden rounded-md ring-1">
+                            <div className="h-full w-full animate-pulse bg-gray-200"></div>
                           </div>
-                          <div className="flex flex-col  items-start">
-                            <div className="w-20 h-4 bg-gray-200 animate-pulse"></div>
-                            <div className="w-10 h-3 bg-gray-200 animate-pulse"></div>
+                          <div className="flex flex-col items-start">
+                            <div className="h-4 w-20 animate-pulse bg-gray-200"></div>
+                            <div className="h-3 w-10 animate-pulse bg-gray-200"></div>
                           </div>
                         </div>
                       </th>
                       <th>
-                        <div className="flex  justify-center">
-                          <div className="w-5 h-5 bg-gray-400 animate-pulse"></div>
+                        <div className="flex justify-center">
+                          <div className="h-5 w-5 animate-pulse bg-gray-400"></div>
                         </div>
                       </th>
                     </tr>
@@ -146,8 +161,8 @@ function ClassStudentAssignWork({
                   ?.filter(
                     (studentOnAssignment) =>
                       studentOnSubjects.data?.find(
-                        (s) => s.id === studentOnAssignment.studentOnSubjectId
-                      )?.isActive
+                        (s) => s.id === studentOnAssignment.studentOnSubjectId,
+                      )?.isActive,
                   )
                   .sort((a, b) => Number(a.number) - Number(b.number))
                   .map((student, index) => {
@@ -174,7 +189,7 @@ type StudentListProps = {
   setStudentData: (
     value: React.SetStateAction<
       (StudentOnAssignment & { files: FileOnStudentOnAssignment[] })[]
-    >
+    >,
   ) => void;
   odd: boolean;
 };
@@ -187,34 +202,47 @@ const StudentList = React.memo(function StudentList({
   const update = useUpdateStudentOnAssignments();
   const handleChangeCheck = React.useCallback(
     async ({ studentId, checked }: { studentId: string; checked: boolean }) => {
-      setStudentData((prev) => {
-        return prev.map((student) => {
-          if (student.id === studentId) {
-            return {
-              ...student,
-              isAssigned: checked,
-            };
-          }
-          return student;
+      try {
+        setStudentData((prev) => {
+          return prev.map((student) => {
+            if (student.id === studentId) {
+              return {
+                ...student,
+                isAssigned: checked,
+              };
+            }
+            return student;
+          });
         });
-      });
-      await update.mutateAsync({
-        query: {
-          studentOnAssignmentId: studentId,
-        },
-        body: {
-          isAssigned: checked,
-        },
-      });
+        await update.mutateAsync({
+          query: {
+            studentOnAssignmentId: studentId,
+          },
+          body: {
+            isAssigned: checked,
+          },
+        });
+      } catch (error) {
+        console.log(error);
+        let result = error as ErrorMessages;
+        Swal.fire({
+          title: result.error ? result.error : "Something Went Wrong",
+          text: result.message.toString(),
+          footer: result.statusCode
+            ? "Code Error: " + result.statusCode?.toString()
+            : "",
+          icon: "error",
+        });
+      }
     },
-    []
+    [],
   );
 
   return (
-    <tr className={` ${odd && "bg-gray-200/20"} hover:bg-sky-100  gap-2`}>
+    <tr className={` ${odd && "bg-gray-200/20"} gap-2 hover:bg-sky-100`}>
       <th className="">
-        <div className="flex gap-2 pl-2 h-14 items-center">
-          <div className="w-10 h-10 relative rounded-md ring-1  overflow-hidden">
+        <div className="flex h-14 items-center gap-2 pl-2">
+          <div className="relative h-10 w-10 overflow-hidden rounded-md ring-1">
             <Image
               src={student.photo}
               alt={student.firstName}
@@ -222,12 +250,12 @@ const StudentList = React.memo(function StudentList({
               placeholder="blur"
               sizes="(max-width: 768px) 100vw, 33vw"
               blurDataURL={decodeBlurhashToCanvas(
-                student.blurHash ?? defaultBlurHash
+                student.blurHash ?? defaultBlurHash,
               )}
               className="object-cover"
             />
           </div>
-          <div className="flex flex-col  items-start">
+          <div className="flex flex-col items-start">
             <h1 className="text-sm font-semibold">
               {student.firstName} {student.lastName}{" "}
             </h1>
@@ -249,7 +277,7 @@ const StudentList = React.memo(function StudentList({
               })
             }
             type="checkbox"
-            className="w-5 h-5 accent-primary-color"
+            className="h-5 w-5 accent-primary-color"
           />
         </div>
       </th>

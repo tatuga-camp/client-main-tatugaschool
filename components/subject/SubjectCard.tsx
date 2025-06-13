@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { CSSProperties } from "react";
 import { IoDuplicate } from "react-icons/io5";
-import { MdDragIndicator } from "react-icons/md";
+import { MdDragIndicator, MdLock } from "react-icons/md";
 import { defaultBlurHash } from "../../data";
 import { Classroom, Subject, TeacherOnSubject } from "../../interfaces";
 import { decodeBlurhashToCanvas } from "../../utils";
@@ -56,11 +56,17 @@ function SubjectCard({
     >
       <div
         className={`relative h-24 w-full shadow-inner ${
-          subject.backgroundImage ? "" : "gradient-bg"
+          subject.backgroundImage
+            ? ""
+            : subject.isLocked === true
+              ? "bg-gray-400/90"
+              : "gradient-bg"
         } flex items-end p-5`}
       >
         {subject.backgroundImage && (
-          <div className="gradient-shadow absolute bottom-0 left-0 right-0 top-0 z-10 m-auto h-full w-full"></div>
+          <div
+            className={`${subject.isLocked === true ? "bg-gray-400/90" : "gradient-shadow"} absolute bottom-0 left-0 right-0 top-0 z-10 m-auto h-full w-full`}
+          ></div>
         )}
         {subject.backgroundImage && (
           <Image
@@ -81,6 +87,14 @@ function SubjectCard({
         <h1 className="z-20 w-48 truncate text-lg font-semibold text-white">
           {subject.title}
         </h1>
+        {subject.isLocked === true && (
+          <div
+            title="This Subject is being locked"
+            className="absolute right-14 top-2 z-20 flex h-6 w-max items-center justify-center rounded-md px-1 text-white hover:bg-gray-300/50"
+          >
+            <span className="text-sm">Subject is locked</span> <MdLock />
+          </div>
+        )}
         <button
           onClick={() => onDuplicate?.()}
           title="Duplicate Subject"

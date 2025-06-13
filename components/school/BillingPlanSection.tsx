@@ -46,7 +46,7 @@ const BillingPlanSection = (props: { schoolId: string }) => {
   useEffect(() => {
     if (members.data && school.data) {
       const currentBillingManager = members.data.find(
-        (m) => m.userId === school.data.billingManagerId
+        (m) => m.userId === school.data.billingManagerId,
       );
       setSelectBillingManager(() => currentBillingManager);
     }
@@ -160,14 +160,14 @@ const BillingPlanSection = (props: { schoolId: string }) => {
       <Toast ref={toast} />
       {createSubscription.isPending && (
         <PopupLayout onClose={() => {}}>
-          <div className="w-screen h-screen flex items-center justify-center bg-white/80">
+          <div className="flex h-screen w-screen items-center justify-center bg-white/80">
             <LoadingSpinner />
           </div>
         </PopupLayout>
       )}
       {clientSecret && school.data && selectProduct && (
         <PopupLayout onClose={() => setClientSecret(null)}>
-          <div id="checkout" className="bg-white p-5 rounded-md">
+          <div id="checkout" className="rounded-md bg-white p-5">
             <CheckoutForm
               product={selectProduct}
               clientSecret={clientSecret}
@@ -176,18 +176,18 @@ const BillingPlanSection = (props: { schoolId: string }) => {
           </div>
         </PopupLayout>
       )}
-      <div className="w-full rounded-md bg-white border 2xl:p-10">
-        <h1 className="text-lg sm:text-xl font-medium">
+      <div className="w-full rounded-md border bg-white p-5 2xl:p-10">
+        <h1 className="text-lg font-medium sm:text-xl">
           {schoolDataLanguage.manageSubTitle(language.data ?? "en")}
         </h1>
-        <h4 className="text-xs sm:text-sm text-gray-500">
+        <h4 className="text-xs text-gray-500 sm:text-sm">
           {schoolDataLanguage.manageSubDescription(language.data ?? "en")}
         </h4>
         <div className="mt-5">
           <button
             disabled={managesubscription.isPending}
             onClick={() => hanldeManageSubscription()}
-            className="second-button w-60 flex items-center justify-center border"
+            className="second-button flex w-60 items-center justify-center border"
           >
             {managesubscription.isPending ? (
               <LoadingSpinner />
@@ -199,10 +199,10 @@ const BillingPlanSection = (props: { schoolId: string }) => {
             )}
           </button>
         </div>
-        <h1 className="text-lg mt-10 sm:text-xl font-medium">
+        <h1 className="mt-10 text-lg font-medium sm:text-xl">
           {schoolDataLanguage.billingManagerTitle(language.data ?? "en")}
         </h1>
-        <h4 className="text-xs  sm:text-sm text-gray-500">
+        <h4 className="text-xs text-gray-500 sm:text-sm">
           {schoolDataLanguage.billingManagerDescription(language.data ?? "en")}
         </h4>
         <div className="w-96">
