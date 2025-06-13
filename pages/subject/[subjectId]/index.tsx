@@ -8,7 +8,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { CiCircleInfo } from "react-icons/ci";
 import { IoMdClose } from "react-icons/io";
 import { IoQrCode } from "react-icons/io5";
-import { MdFullscreen, MdFullscreenExit, MdMenu } from "react-icons/md";
+import { MdFullscreen, MdFullscreenExit, MdLock, MdMenu } from "react-icons/md";
 import { SlPicture } from "react-icons/sl";
 import Swal from "sweetalert2";
 import DefaultLayout from "../../../components/layout/DefaultLayout";
@@ -324,11 +324,15 @@ function Index({ subjectId }: Props) {
                 ? "animate-pulse bg-gray-500/50"
                 : subject.data?.backgroundImage
                   ? ""
-                  : "gradient-bg"
+                  : subject.data?.isLocked === true
+                    ? "bg-gray-400/90"
+                    : "gradient-bg"
             } lg:rounded-md`}
           >
             {subject.data?.backgroundImage && (
-              <div className="gradient-shadow absolute bottom-0 left-0 right-0 top-0 -z-10 m-auto h-full w-full"></div>
+              <div
+                className={`${subject.data.isLocked === true ? "bg-gray-400/90" : "gradient-shadow"} absolute bottom-0 left-0 right-0 top-0 -z-10 m-auto h-full w-full`}
+              ></div>
             )}
             {subject.data?.backgroundImage && (
               <Image
@@ -383,6 +387,13 @@ function Index({ subjectId }: Props) {
                 } md:flex`}
               >
                 <div className="flex gap-2">
+                  <div
+                    title="This Subject is being locked"
+                    className="flex w-max items-center justify-center rounded-md px-2 py-1 text-white hover:bg-gray-300/50"
+                  >
+                    <span className="text-sm">Subject is locked</span>{" "}
+                    <MdLock />
+                  </div>
                   <button
                     onClick={() => setSelectMenu("SettingSubject")}
                     className="flex w-max items-center justify-center gap-1 rounded-md bg-white px-2 py-1 text-primary-color hover:bg-primary-color hover:text-white active:scale-110"

@@ -313,7 +313,7 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
       {triggerShowGroup ? (
         <ShowGroups subjectId={subjectId} />
       ) : (
-        <section className="grid w-80 grid-cols-2 place-items-center gap-5 sm:grid-cols-3 md:w-10/12 md:grid-cols-4 lg:w-9/12 xl:grid-cols-5">
+        <section className="grid w-80 grid-cols-2 place-items-center gap-5 sm:w-10/12 sm:grid-cols-3 md:w-10/12 md:grid-cols-4 lg:w-9/12 xl:grid-cols-5">
           <div
             onClick={() => setTriggerSelectMultipleStudent((prev) => !prev)}
             onDragStart={(e) => e.preventDefault()}

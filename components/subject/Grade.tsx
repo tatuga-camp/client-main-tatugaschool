@@ -15,7 +15,12 @@ import {
 } from "../../utils";
 import Image from "next/image";
 import { defaultBlurHash } from "../../data";
-import { Assignment, GradeRule, StudentOnAssignment } from "../../interfaces";
+import {
+  Assignment,
+  ErrorMessages,
+  GradeRule,
+  StudentOnAssignment,
+} from "../../interfaces";
 import GradePopup from "./GradePopup";
 import { Toast } from "primereact/toast";
 import { ExportAssignmentService } from "@/services";
@@ -57,11 +62,13 @@ function Grade({
       setLoading(false);
     } catch (error) {
       setLoading(false);
+      let result = error as ErrorMessages;
+
       console.error("Failed to download the file", error);
       toast.current?.show({
         severity: "error",
         summary: "Error",
-        detail: "Failed to download the file",
+        detail: result.message,
         life: 3000,
       });
     }
