@@ -39,6 +39,7 @@ import Filter, { FilterTitle } from "../common/Filter";
 import StudentCard from "../student/StudentCard";
 import ShowGroups from "./groupOnSubject/ShowGroups";
 import ScorePanel from "./ScorePanel";
+import PopupLayout from "../layout/PopupLayout";
 
 type Props = {
   subjectId: string;
@@ -48,7 +49,6 @@ type Props = {
   toast: React.RefObject<Toast>;
 };
 function Subject({ subjectId, setSelectStudent, toast }: Props) {
-  const queryClient = useQueryClient();
   const successSound = useSound("/sounds/ding.mp3");
   const failSound = useSound("/sounds/fail.mp3");
   const [triggerShowGroup, setTriggerShowGroup] = useState<boolean>(false);
@@ -194,6 +194,9 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
         showSuccess();
         setTriggerSelectMultipleStudent(false);
         setTriggerChooseScore(false);
+        setSelectScore(() => {
+          return { inputScore: 0 };
+        });
         setStudents((prev) => {
           return prev.map((item) => {
             return { ...item, select: false };
@@ -204,6 +207,9 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
       console.log(error);
       setTriggerSelectMultipleStudent(false);
       setTriggerChooseScore(false);
+      setSelectScore(() => {
+        return { inputScore: 0, score: undefined };
+      });
       setStudents((prev) => {
         return prev.map((item) => {
           return { ...item, select: false };
@@ -233,27 +239,33 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
   };
   return (
     <div className="flex w-full flex-col items-center gap-5">
-      <div
-        className={`fixed ${
-          triggerChooseScore ? "flex" : "hidden"
-        } bottom-0 left-0 right-0 top-0 z-40 m-auto flex items-center justify-center`}
-      >
-        <div ref={chooseScoreRef} className="rounded-md border bg-white p-2">
-          <ScorePanel
-            subjectId={subjectId}
-            onSelectScore={({ score, inputScore }) => {
-              setSelectScore({ score, inputScore });
-            }}
-            selectScore={{
-              score: selectScore.score,
-              inputScore: selectScore.inputScore,
-            }}
-            isLoading={createStudentScore.isPending}
-            onCreateScore={() => handleCreateMultipleScore()}
-          />
-        </div>
-        <footer className="fixed bottom-0 left-0 right-0 top-0 -z-10 m-auto h-screen w-screen bg-white/50 backdrop-blur"></footer>
-      </div>
+      {triggerChooseScore && (
+        <PopupLayout
+          onClose={() => {
+            setTriggerChooseScore(false);
+          }}
+        >
+          <div ref={chooseScoreRef} className="rounded-md border bg-white p-2">
+            <ScorePanel
+              subjectId={subjectId}
+              onSelectScore={({ score, inputScore }) => {
+                setSelectScore({ score, inputScore });
+              }}
+              selectScore={{
+                score: selectScore.score,
+                inputScore: selectScore.inputScore,
+              }}
+              isLoading={createStudentScore.isPending}
+              onCreateScore={() => {
+                document.body.style.overflow = "auto";
+                handleCreateMultipleScore();
+              }}
+            />
+          </div>
+        </PopupLayout>
+      )}
+      <footer className="fixed bottom-0 left-0 right-0 top-0 -z-10 m-auto h-screen w-screen bg-white/50 backdrop-blur"></footer>
+
       <header className="hidden h-16 w-full items-end justify-end gap-5 border-b pb-5 md:flex md:w-10/12 lg:w-9/12">
         <button
           onClick={() => setTriggerShowGroup((prev) => !prev)}
