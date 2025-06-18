@@ -28,6 +28,7 @@
     "next": "15.1.6",
     "next-nprogress-bar": "^2.3.13",
     "nookies": "^2.5.2",
+    "pdfjs-dist": "^5.3.31",
     "primereact": "^10.8.3",
     "qrcode": "^1.5.4",
     "react": "^18",
