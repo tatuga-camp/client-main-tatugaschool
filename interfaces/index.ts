@@ -31,3 +31,5 @@ export * from "./User";
 export * from "./Exception";
 export * from "./Grade";
 export * from "./GroupOnSubject";
+export * from "./TeachingMaterial";
+export * from "./FileOnTeachingMaterial";

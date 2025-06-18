@@ -10,7 +10,11 @@ import {
   MdSettings,
   MdSubscriptions,
 } from "react-icons/md";
-import { SiGoogleclassroom } from "react-icons/si";
+import {
+  SiGoogleclassroom,
+  SiMaterialdesign,
+  SiMaterialdesignicons,
+} from "react-icons/si";
 import { TbReportAnalytics } from "react-icons/tb";
 import { MemberRole } from "../interfaces";
 
@@ -97,7 +101,8 @@ export type MenuSchool =
   | "Homepage"
   | "Subjects"
   | "Setting"
-  | "Subscription";
+  | "Subscription"
+  | "TeachingMaterial";
 export const menuSchoolList = (): {
   title: MenuSchool;
   icon: ReactNode;
@@ -123,6 +128,10 @@ export const menuSchoolList = (): {
     {
       title: "Subscription",
       icon: <MdSubscriptions />,
+    },
+    {
+      title: "TeachingMaterial",
+      icon: <SiMaterialdesignicons />,
     },
     {
       title: "Homepage",
