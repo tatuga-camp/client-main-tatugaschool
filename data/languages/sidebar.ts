@@ -141,4 +141,14 @@ export const sidebarDataLanguage = {
         return "Setting Classroom";
     }
   },
+  teachingmaterial: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Teaching Material";
+      case "th":
+        return "สื่อการสอน";
+      default:
+        return "Teaching Material";
+    }
+  },
 } as const;

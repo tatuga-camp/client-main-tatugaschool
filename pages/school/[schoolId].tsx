@@ -11,6 +11,7 @@ import { validateMongodbId } from "../../utils";
 import Subjects from "../../components/school/Subjects";
 import DefaultLayout from "../../components/layout/DefaultLayout";
 import Head from "next/head";
+import TeachingMaterial from "../../components/school/TeachingMaterials";
 
 const SchoolPage = ({ schoolId }: { schoolId: string }) => {
   const router = useRouter();
@@ -84,6 +85,9 @@ const SchoolPage = ({ schoolId }: { schoolId: string }) => {
           selectMenu === "Subscription") && <Dashboard school={school.data} />}
         {selectMenu === "Classes" && <Classes schoolId={schoolId} />}
         {selectMenu === "Subjects" && <Subjects schoolId={schoolId} />}
+        {selectMenu === "TeachingMaterial" && (
+          <TeachingMaterial schoolId={schoolId} />
+        )}
       </SchoolLayout>
     </>
   );
