@@ -8,5 +8,7 @@ export type TeachingMaterial = {
   title: string;
   tags: string[];
   accessLevel: Plan;
+  thumbnail?: string;
+  blurHash?: string;
   vector: number[];
 };

@@ -1,43 +1,14 @@
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
-import { FileOnTeachingMaterial, TeachingMaterial } from "../../interfaces";
-import { MdDownload } from "react-icons/md";
 import { IoMdEye } from "react-icons/io";
-import { generatePdfThumbnail } from "../../utils";
+import { FileOnTeachingMaterial, TeachingMaterial } from "../../interfaces";
+import { decodeBlurhashToCanvas } from "../../utils";
+import { defaultBlurHash, defaultCanvas } from "../../data";
 
 type Props = {
   teachingMaterial: TeachingMaterial & { files: FileOnTeachingMaterial[] };
   onClick: () => void;
 };
 function TeachingMaterialCard({ teachingMaterial, onClick }: Props) {
-  const [thumnail, setThumnail] = useState<string>();
-  const handleGenerateThumnail = async (url: string) => {
-    try {
-      const image = await generatePdfThumbnail(url);
-      console.log(image);
-      if (image) {
-        setThumnail(image);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  useEffect(() => {
-    const pdf = teachingMaterial.files.find(
-      (f) => f.type === "application/pdf",
-    );
-    const image = teachingMaterial.files.find((f) => f.type.includes("image"));
-    if (pdf) {
-      handleGenerateThumnail(pdf.url);
-      return;
-    }
-
-    if (image) {
-      setThumnail(image.url);
-    }
-  }, []);
-
   return (
     <div className="group relative h-max w-80 overflow-hidden rounded-md border bg-white font-Anuphan">
       <div className="absolute bottom-0 left-0 right-0 top-0 z-30 m-auto hidden h-full w-full flex-col items-center justify-center gap-2 group-hover:flex">
@@ -54,9 +25,19 @@ function TeachingMaterialCard({ teachingMaterial, onClick }: Props) {
 
       <div className="relative h-60 w-full">
         <Image
-          src={thumnail ? thumnail : "/favicon.ico"}
+          src={
+            teachingMaterial.thumbnail
+              ? teachingMaterial.thumbnail
+              : "/favicon.ico"
+          }
           alt="backgroud image of file"
           fill
+          blurDataURL={
+            teachingMaterial.blurHash
+              ? decodeBlurhashToCanvas(teachingMaterial.blurHash)
+              : defaultCanvas
+          }
+          placeholder="blur"
           className="object-contain"
         />
       </div>
