@@ -31,6 +31,27 @@ export async function GetDescriptionSuggestionTeachingMaterialService(
   }
 }
 
+export type RequestUpdateThumnailTeachingMaterialService = {
+  teachingMaterialId: string;
+};
+
+type ResponseUpdateThumnailTeachingMaterialService = TeachingMaterial;
+
+export async function UpdateThumnailTeachingMaterialService(
+  input: RequestUpdateThumnailTeachingMaterialService,
+): Promise<ResponseUpdateThumnailTeachingMaterialService> {
+  try {
+    const response = await axiosInstance({
+      method: "PATCH",
+      url: `/v1/teaching-materials/thumnail/${input.teachingMaterialId}`,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("request failed:", error.response.data);
+    throw error?.response?.data;
+  }
+}
+
 export type RequestCreateTeachingMaterialService = {
   title: string;
   description: string;

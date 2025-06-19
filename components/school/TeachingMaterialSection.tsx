@@ -28,6 +28,7 @@ import {
   useGetSuggestionTeachingMaterial,
   useGetUser,
   useUpdateTeachingMaterial,
+  useUpdateThumnailTeachingMaterial,
 } from "../../react-query";
 import {
   getSignedURLTeacherService,
@@ -68,6 +69,7 @@ function TeachingMaterialSection({ onClose, teachingMaterial }: Props) {
   const update = useUpdateTeachingMaterial();
   const createFile = useCreateFileTeachingMareial();
   const deleteFile = useDeleteFileTeachingMareial();
+  const updateThumnail = useUpdateThumnailTeachingMaterial();
   const [selectPlan, setSelectPlan] = useState<Plan>(
     teachingMaterial?.accessLevel ?? "PREMIUM",
   );
@@ -87,7 +89,6 @@ function TeachingMaterialSection({ onClose, teachingMaterial }: Props) {
   );
   const [tags, setTags] = useState<string[]>(teachingMaterial?.tags ?? []);
   const [loadingAi, setLoadingAi] = useState(false);
-
   const [customTag, setCustomTag] = useState<string | null>(null);
   const [suggestedTagColors] = useState(() => {
     const colorMap: { [key: string]: string } = {};
@@ -239,6 +240,11 @@ function TeachingMaterialSection({ onClose, teachingMaterial }: Props) {
           ),
         );
       }
+
+      await updateThumnail.mutateAsync({
+        teachingMaterialId: teachingMaterial.id,
+      });
+
       Swal.fire({
         title: "Successfully",
         text: "Teaching Material Created",
@@ -297,6 +303,10 @@ function TeachingMaterialSection({ onClose, teachingMaterial }: Props) {
           ),
         );
       }
+
+      await updateThumnail.mutateAsync({
+        teachingMaterialId: teachingMaterial.id,
+      });
       Swal.fire({
         title: "Successfully",
         text: "Teaching Material Created",

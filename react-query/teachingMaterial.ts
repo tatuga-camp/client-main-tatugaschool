@@ -7,7 +7,9 @@ import {
   RequestGetDescriptionSuggestionTeachingMaterialService,
   RequestGetTeachingMaterialByAiService,
   RequestUpdateTeachingMaterialService,
+  RequestUpdateThumnailTeachingMaterialService,
   UpdateTeachingMaterialService,
+  UpdateThumnailTeachingMaterialService,
 } from "../services";
 import {
   CreateFileOnTeachingMaterialService,
@@ -22,6 +24,7 @@ export const keyTeachingMaterial = {
     keyTeachingMaterial.get[0],
     { ...request },
   ],
+  thumnail: ["update-thumnail-teaching-material"],
   suggestion: ["get-suggestion"],
   create: ["create-teaching-material"],
   update: ["update-teaching-material"],
@@ -42,6 +45,14 @@ export function useGetSuggestionTeachingMaterial() {
     mutationFn: (
       request: RequestGetDescriptionSuggestionTeachingMaterialService,
     ) => GetDescriptionSuggestionTeachingMaterialService(request),
+  });
+}
+
+export function useUpdateThumnailTeachingMaterial() {
+  return useMutation({
+    mutationKey: keyTeachingMaterial.thumnail,
+    mutationFn: (request: RequestUpdateThumnailTeachingMaterialService) =>
+      UpdateThumnailTeachingMaterialService(request),
   });
 }
 
