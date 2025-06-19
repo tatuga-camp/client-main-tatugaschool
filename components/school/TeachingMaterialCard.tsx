@@ -24,21 +24,13 @@ function TeachingMaterialCard({ teachingMaterial, onClick }: Props) {
       <div className="absolute bottom-0 left-0 right-0 top-0 z-20 m-auto hidden h-full w-full gap-2 bg-sky-600/50 backdrop-blur-sm group-hover:flex"></div>
 
       <div className="relative h-60 w-full">
-        <Image
+        <img
           src={
             teachingMaterial.thumbnail
               ? teachingMaterial.thumbnail
               : "/favicon.ico"
           }
-          alt="backgroud image of file"
-          fill
-          blurDataURL={
-            teachingMaterial.blurHash
-              ? decodeBlurhashToCanvas(teachingMaterial.blurHash)
-              : defaultCanvas
-          }
-          placeholder="blur"
-          className="object-contain"
+          className="h-full w-full object-contain"
         />
       </div>
       <section className="mt-3 flex w-full grow flex-col justify-between gap-2 px-2 pb-2">

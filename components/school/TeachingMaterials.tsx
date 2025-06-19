@@ -60,12 +60,6 @@ function TeachingMaterials({ schoolId }: Props) {
     }
   }, [getTeachingMaterials.data]);
 
-  // Debounce effect for search query
-  useEffect(() => {
-    const timeOutId = setTimeout(() => setSearch(query), 2000);
-    return () => clearTimeout(timeOutId);
-  }, [query]);
-
   const handleSuggestionClick = (suggestion: string) => {
     setQuery(suggestion);
     setSearch(suggestion); // Immediately trigger search on suggestion click
@@ -115,7 +109,13 @@ function TeachingMaterials({ schoolId }: Props) {
           </p>
 
           <section className="mb-4 mt-10 w-full max-w-3xl rounded-xl bg-white/10 p-2 shadow-lg backdrop-blur-sm">
-            <div className="relative flex items-center rounded-xl bg-white">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                setSearch(query);
+              }}
+              className="relative flex items-center rounded-xl bg-white"
+            >
               <input
                 value={query}
                 onChange={(event) => {
@@ -124,7 +124,7 @@ function TeachingMaterials({ schoolId }: Props) {
                 }}
                 type="text"
                 placeholder="Describe what you're looking for... e.g., 'Interactive math games for 5th grade'"
-                className="w-full bg-transparent py-3 pl-6 pr-36 text-black placeholder-gray-400 outline-none"
+                className="w-full bg-transparent py-3 pl-6 pr-60 text-black placeholder-gray-400 outline-none"
               />
               <button
                 onClick={() => {
@@ -137,21 +137,7 @@ function TeachingMaterials({ schoolId }: Props) {
                 />
                 <span>AI Search</span>
               </button>
-            </div>
-
-            {/* Running text suggestion */}
-            {query === "" && ( // Only show running text if query is empty
-              <div className="mt-4 text-center text-sm text-white">
-                <span className="font-semibold text-gray-200">Try this: </span>
-                <span
-                  className="cursor-pointer hover:underline"
-                  onClick={() => handleSuggestionClick(displayedSuggestion)}
-                >
-                  {displayedSuggestion}
-                  <span className="animate-blink">|</span>
-                </span>
-              </div>
-            )}
+            </form>
 
             <div className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-white">
               <span className="font-semibold text-gray-200">Quick Search:</span>
@@ -182,7 +168,7 @@ function TeachingMaterials({ schoolId }: Props) {
             </button>
           )}
         </header>
-        <main className="flex w-full max-w-7xl flex-col gap-2 pb-10">
+        <main className="flex w-full max-w-7xl flex-col gap-2 px-10 pb-10">
           <section className="mt-5">
             <div className="flex w-max items-center justify-center gap-2">
               <h3 className="text-3xl font-semibold text-black">
@@ -194,7 +180,14 @@ function TeachingMaterials({ schoolId }: Props) {
             </div>
           </section>
 
-          <ul className="mt-10 grid w-full grid-cols-3 gap-5">
+          <ul className="mt-10 grid w-full grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {getTeachingMaterials.isLoading &&
+              [...Array(10)].map((_, index) => (
+                <div
+                  key={index}
+                  className="h-80 w-80 animate-pulse rounded-lg bg-gray-200"
+                />
+              ))}
             {teachingMaterials.flat().map((teachingMaterial) => {
               return (
                 <TeachingMaterialCard
