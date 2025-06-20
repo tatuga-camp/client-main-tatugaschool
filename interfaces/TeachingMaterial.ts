@@ -11,4 +11,5 @@ export type TeachingMaterial = {
   thumbnail?: string;
   blurHash?: string;
   vector: number[];
+  score: number;
 };

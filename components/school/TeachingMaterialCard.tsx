@@ -1,11 +1,10 @@
-import Image from "next/image";
 import { IoMdEye } from "react-icons/io";
 import { FileOnTeachingMaterial, TeachingMaterial } from "../../interfaces";
-import { decodeBlurhashToCanvas } from "../../utils";
-import { defaultBlurHash, defaultCanvas } from "../../data";
 
 type Props = {
-  teachingMaterial: TeachingMaterial & { files: FileOnTeachingMaterial[] };
+  teachingMaterial: TeachingMaterial & {
+    files: FileOnTeachingMaterial[];
+  };
   onClick: () => void;
 };
 function TeachingMaterialCard({ teachingMaterial, onClick }: Props) {
@@ -20,9 +19,10 @@ function TeachingMaterialCard({ teachingMaterial, onClick }: Props) {
         </button>
         <span className="text-sm text-white">click to view detail</span>
       </div>
-
+      <div className="absolute right-2 top-2 z-20 rounded-md border bg-green-100 px-3 text-sm text-green-800">
+        AI Match: {(teachingMaterial.score * 100).toFixed(0)}%
+      </div>
       <div className="absolute bottom-0 left-0 right-0 top-0 z-20 m-auto hidden h-full w-full gap-2 bg-sky-600/50 backdrop-blur-sm group-hover:flex"></div>
-
       <div className="relative h-60 w-full">
         <img
           src={
