@@ -40,6 +40,8 @@ import LoadingSpinner from "../common/LoadingSpinner";
 const suggestedTags = [
   "Math",
   "English",
+  "Thai Subject",
+  "Classroom Decoration",
   "Elementry Student",
   "High School Student",
   "Worksheet",
