@@ -23,6 +23,10 @@ const suggestionsSearch = [
     th: "ใบงานภาษาอังกฤษของ ป.2 น่ารักๆ ให้รักเรียนวาดรูป",
   },
   {
+    en: "Thai literature worksheets for primary school",
+    th: "ใบงานวรรณกรรมไทย สำหรับประถม",
+  },
+  {
     en: "A cute teaching Schedule table",
     th: "ตารางสอนน่ารัก ๆ",
   },

@@ -586,7 +586,7 @@ function TeachingMaterialSection({ onClose, teachingMaterial }: Props) {
               );
             })}
           </ul>
-          <div className="flex items-center justify-start gap-2">
+          <div className="flex flex-wrap items-center justify-start gap-2">
             <span>Suggested tags: </span>
             {suggestedTags.map((tag, index) => {
               return (
