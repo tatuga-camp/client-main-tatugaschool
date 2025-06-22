@@ -7,16 +7,19 @@ import { FaFileAlt } from "react-icons/fa";
 import { BsEye } from "react-icons/bs";
 import { MdDownload, MdEdit } from "react-icons/md";
 import TeachingMaterialSection from "./TeachingMaterialSection";
-import { useGetUser } from "../../react-query";
+import { useGetTeachingMaterial, useGetUser } from "../../react-query";
+import LoadingBar from "../common/LoadingBar";
+import LinkPreview from "../common/LinkPreview";
 
 type Props = {
-  teachingMaterial: TeachingMaterial & { files: FileOnTeachingMaterial[] };
+  id: string;
   onClose: () => void;
 };
 const getFileType = (fileName: string): string => {
   return fileName.split(".").pop()?.toUpperCase() || "UNKNOWN";
 };
-function TeachingMaterialShow({ teachingMaterial, onClose }: Props) {
+function TeachingMaterialShow({ id, onClose }: Props) {
+  const teachingMaterial = useGetTeachingMaterial({ teachingMaterialId: id });
   const user = useGetUser();
   const [triggerEdit, setTriggerEdit] = useState(false);
   return (
@@ -24,17 +27,18 @@ function TeachingMaterialShow({ teachingMaterial, onClose }: Props) {
       {triggerEdit ? (
         <TeachingMaterialSection
           onClose={onClose}
-          teachingMaterial={teachingMaterial}
+          teachingMaterial={teachingMaterial.data}
         />
       ) : (
         <div className="flex h-[90%] w-10/12 flex-col rounded-md bg-white font-Anuphan">
+          {teachingMaterial.isLoading && <LoadingBar />}
           <header className="flex h-max w-full items-center justify-between border-b px-5 py-3">
             <section className="flex flex-col gap-3">
               <h1 className="text-lg font-semibold">Teaching Material</h1>
-              <div className="flex gap-2 text-sm text-gray-600">
-                {teachingMaterial.title}{" "}
+              <div className="flex flex-col gap-2 text-sm text-gray-600">
+                {teachingMaterial.data?.title}{" "}
                 <ul className="flex flex-wrap gap-2">
-                  {teachingMaterial.tags.map((tag, index) => {
+                  {teachingMaterial.data?.tags.map((tag, index) => {
                     return (
                       <li
                         className="flex w-max items-center rounded-md bg-blue-100 px-2 text-xs text-blue-700"
@@ -47,6 +51,12 @@ function TeachingMaterialShow({ teachingMaterial, onClose }: Props) {
                 </ul>
               </div>
             </section>
+            {teachingMaterial.data && (
+              <LinkPreview
+                {...teachingMaterial.data?.createor}
+                url={teachingMaterial.data?.creatorURL}
+              />
+            )}
             <div className="flex items-center justify-center gap-2">
               {user.data?.role === "ADMIN" && (
                 <button
@@ -66,8 +76,9 @@ function TeachingMaterialShow({ teachingMaterial, onClose }: Props) {
               </button>
             </div>
           </header>
+
           <main className="flex grow flex-col gap-2 overflow-auto p-5">
-            {teachingMaterial.files.map((file) => {
+            {teachingMaterial.data?.files.map((file) => {
               const fileExtension = getFileType(file.type);
               const isPDF = fileExtension === "APPLICATION/PDF";
               const isImage = fileExtension.includes("IMAGE");

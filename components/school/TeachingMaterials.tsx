@@ -3,7 +3,7 @@ import { SiGooglegemini } from "react-icons/si";
 import {
   useGetLanguage,
   useGetSchool,
-  useGetTeachingMaterialCursor,
+  useGetTeachingMaterialByAI,
   useGetUser,
 } from "../../react-query";
 import PopupLayout from "../layout/PopupLayout";
@@ -39,16 +39,15 @@ function TeachingMaterials({ schoolId }: Props) {
     language.data === "th" ? suggestionsSearch[0].th : suggestionsSearch[0].en,
   );
   const [teachingMaterials, setTeachingMaterials] = useState<
-    (TeachingMaterial & { files: FileOnTeachingMaterial[] })[]
+    TeachingMaterial[]
   >([]);
   const [triggerCreate, setTriggerCreate] = useState(false);
   const [totalFound, setTotalFound] = useState(0);
-  const [selectTeachingMaterial, setSelectTeachingMaterial] = useState<
-    (TeachingMaterial & { files: FileOnTeachingMaterial[] }) | null
-  >(null);
+  const [selectTeachingMaterial, setSelectTeachingMaterial] =
+    useState<TeachingMaterial | null>(null);
   const [displayedSuggestion, setDisplayedSuggestion] = useState("");
 
-  const getTeachingMaterials = useGetTeachingMaterialCursor({
+  const getTeachingMaterials = useGetTeachingMaterialByAI({
     ...(search !== "" && { search: search }),
   });
 
@@ -88,7 +87,7 @@ function TeachingMaterials({ schoolId }: Props) {
           }}
         >
           <TeachingMaterialShow
-            teachingMaterial={selectTeachingMaterial}
+            id={selectTeachingMaterial.id}
             onClose={() => {
               document.body.style.overflow = "auto";
               setSelectTeachingMaterial(null);

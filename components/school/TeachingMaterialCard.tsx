@@ -1,10 +1,8 @@
 import { IoMdEye } from "react-icons/io";
-import { FileOnTeachingMaterial, TeachingMaterial } from "../../interfaces";
+import { TeachingMaterial } from "../../interfaces";
 
 type Props = {
-  teachingMaterial: TeachingMaterial & {
-    files: FileOnTeachingMaterial[];
-  };
+  teachingMaterial: TeachingMaterial;
   onClick: () => void;
 };
 function TeachingMaterialCard({ teachingMaterial, onClick }: Props) {

@@ -3,9 +3,11 @@ import {
   CreateTeachingMaterialService,
   GetDescriptionSuggestionTeachingMaterialService,
   GetTeachingMaterialByAiService,
+  GetTeachingMaterialService,
   RequestCreateTeachingMaterialService,
   RequestGetDescriptionSuggestionTeachingMaterialService,
   RequestGetTeachingMaterialByAiService,
+  RequestGetTeachingMaterialService,
   RequestUpdateTeachingMaterialService,
   RequestUpdateThumnailTeachingMaterialService,
   UpdateTeachingMaterialService,
@@ -20,6 +22,10 @@ import {
 
 export const keyTeachingMaterial = {
   get: ["teaching-materials"],
+  getById: (request: { id: string }) => [
+    keyTeachingMaterial.get,
+    { id: request.id },
+  ],
   getByAI: (request: { search?: string }) => [
     keyTeachingMaterial.get[0],
     { ...request },
@@ -30,12 +36,21 @@ export const keyTeachingMaterial = {
   update: ["update-teaching-material"],
 } as const;
 
-export function useGetTeachingMaterialCursor(
+export function useGetTeachingMaterialByAI(
   request: RequestGetTeachingMaterialByAiService,
 ) {
   return useQuery({
     queryKey: keyTeachingMaterial.getByAI(request),
     queryFn: () => GetTeachingMaterialByAiService(request),
+  });
+}
+
+export function useGetTeachingMaterial(
+  request: RequestGetTeachingMaterialService,
+) {
+  return useQuery({
+    queryKey: keyTeachingMaterial.getById({ id: request.teachingMaterialId }),
+    queryFn: () => GetTeachingMaterialService(request),
   });
 }
 

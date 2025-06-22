@@ -57,6 +57,7 @@ export type RequestCreateTeachingMaterialService = {
   description: string;
   tags: string[];
   accessLevel: Plan;
+  creatorURL: string;
 };
 
 type ResponseCreateTeachingMaterialService = TeachingMaterial;
@@ -86,6 +87,7 @@ export type RequestUpdateTeachingMaterialService = {
     description?: string;
     tags?: string[];
     accessLevel?: Plan;
+    creatorURL?: string;
   };
 };
 
@@ -111,9 +113,7 @@ export type RequestGetTeachingMaterialByAiService = {
   search?: string;
 };
 
-type ResponseGetTeachingMaterialByAiService = (TeachingMaterial & {
-  files: FileOnTeachingMaterial[];
-})[];
+type ResponseGetTeachingMaterialByAiService = TeachingMaterial[];
 
 export async function GetTeachingMaterialByAiService(
   input: RequestGetTeachingMaterialByAiService,
@@ -123,6 +123,30 @@ export async function GetTeachingMaterialByAiService(
       method: "GET",
       url: `/v1/teaching-materials`,
       params: { ...input },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("request failed:", error.response.data);
+    throw error?.response?.data;
+  }
+}
+
+export type RequestGetTeachingMaterialService = {
+  teachingMaterialId: string;
+};
+
+type ResponseGetTeachingMaterialService = TeachingMaterial & {
+  files: FileOnTeachingMaterial[];
+  createor: { image: string; title: string; description: string };
+};
+
+export async function GetTeachingMaterialService(
+  input: RequestGetTeachingMaterialService,
+): Promise<ResponseGetTeachingMaterialService> {
+  try {
+    const response = await axiosInstance({
+      method: "GET",
+      url: `/v1/teaching-materials/${input.teachingMaterialId}`,
     });
     return response.data;
   } catch (error: any) {

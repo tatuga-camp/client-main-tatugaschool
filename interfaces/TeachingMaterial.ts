@@ -10,6 +10,7 @@ export type TeachingMaterial = {
   accessLevel: Plan;
   thumbnail?: string;
   blurHash?: string;
+  creatorURL: string;
   vector: number[];
   score: number;
 };

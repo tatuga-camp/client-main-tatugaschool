@@ -8,6 +8,7 @@ import {
   MdCloudUpload,
   MdFileOpen,
   MdFolder,
+  MdLink,
   MdOutlineFormatAlignLeft,
   MdSubscriptions,
   MdTag,
@@ -80,9 +81,11 @@ function TeachingMaterialSection({ onClose, teachingMaterial }: Props) {
   const [teachingMaterialData, setTeachingMaterialData] = useState<{
     title: string;
     description: string;
+    creatorURL: string;
   }>({
     title: teachingMaterial?.title ?? "",
     description: teachingMaterial?.description ?? "",
+    creatorURL: teachingMaterial?.creatorURL ?? "",
   });
   const [selectFiles, setSelectFles] = useState<{ file: File; url?: string }[]>(
     [],
@@ -225,6 +228,7 @@ function TeachingMaterialSection({ onClose, teachingMaterial }: Props) {
         title: teachingMaterialData.title,
         description: teachingMaterialData.description,
         tags: tags,
+        creatorURL: teachingMaterialData.creatorURL,
         accessLevel: selectPlan,
       });
 
@@ -288,6 +292,7 @@ function TeachingMaterialSection({ onClose, teachingMaterial }: Props) {
           description: teachingMaterialData.description,
           tags: tags,
           accessLevel: selectPlan,
+          creatorURL: teachingMaterialData.creatorURL,
         },
       });
 
@@ -515,6 +520,26 @@ function TeachingMaterialSection({ onClose, teachingMaterial }: Props) {
             }
             className="main-input"
             placeholder="Enter a descriptive title for your teaching material"
+          />
+        </section>
+        <section className="flex flex-col gap-2">
+          <div className="flex w-max items-center justify-center gap-2 text-sm font-semibold">
+            <MdLink className="text-blue-700" /> Creator URL
+          </div>
+          <input
+            type="url"
+            required
+            value={teachingMaterialData.creatorURL}
+            onChange={(e) =>
+              setTeachingMaterialData((prev) => {
+                return {
+                  ...prev,
+                  creatorURL: e.target.value,
+                };
+              })
+            }
+            className="main-input"
+            placeholder="Enter creator url"
           />
         </section>
         <section className="flex flex-col gap-2">
