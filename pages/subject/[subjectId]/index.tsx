@@ -387,13 +387,15 @@ function Index({ subjectId }: Props) {
                 } md:flex`}
               >
                 <div className="flex gap-2">
-                  <div
-                    title="This Subject is being locked"
-                    className="flex w-max items-center justify-center rounded-md px-2 py-1 text-white hover:bg-gray-300/50"
-                  >
-                    <span className="text-sm">Subject is locked</span>{" "}
-                    <MdLock />
-                  </div>
+                  {subject.data?.isLocked === true && (
+                    <div
+                      title="This Subject is being locked"
+                      className="flex w-max items-center justify-center rounded-md px-2 py-1 text-white hover:bg-gray-300/50"
+                    >
+                      <span className="text-sm">Subject is locked</span>{" "}
+                      <MdLock />
+                    </div>
+                  )}
                   <button
                     onClick={() => setSelectMenu("SettingSubject")}
                     className="flex w-max items-center justify-center gap-1 rounded-md bg-white px-2 py-1 text-primary-color hover:bg-primary-color hover:text-white active:scale-110"
