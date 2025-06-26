@@ -205,7 +205,6 @@ function Subjects({ schoolId }: Props) {
       }
     });
   };
-  console.log(selectDuplicate);
   return (
     <>
       <Toast ref={toast} />

@@ -15,7 +15,7 @@ type Props = {
       description?: string;
       code?: string;
       educationYear?: string;
-    }
+    },
   ) => void;
   subjectId: string;
   isPending?: boolean;
@@ -46,8 +46,6 @@ function SubjectInfomation({ onSummit, subjectId, isPending = false }: Props) {
     }
   }, [subject.data]);
 
-  console.log(subjectBasicInfo);
-
   return (
     <form
       onSubmit={(e) => {
@@ -60,55 +58,55 @@ function SubjectInfomation({ onSummit, subjectId, isPending = false }: Props) {
           });
         }
       }}
-      className="flex flex-col p-4 min-h-80 bg-white rounded-md border gap-5 mt-5"
+      className="mt-5 flex min-h-80 flex-col gap-5 rounded-md border bg-white p-4"
     >
-      <h2 className="border-b text-lg font-medium py-3">
+      <h2 className="border-b py-3 text-lg font-medium">
         {settingOnSubjectDataLanguage.info(language.data ?? "en")}
       </h2>
-      <div className="grid grid-cols-1 w-full">
-        <div className="grid grid-cols-1  bg-gray-200/20 gap-5  p-2 py-4">
-          <label className="w-full grid md:grid-cols-2 md:gap-10">
+      <div className="grid w-full grid-cols-1">
+        <div className="grid grid-cols-1 gap-5 bg-gray-200/20 p-2 py-4">
+          <label className="grid w-full md:grid-cols-2 md:gap-10">
             <span className="text-base text-black">
               {settingOnSubjectDataLanguage.subjectId(language.data ?? "en")}:
             </span>
             <Link
               target="_blank"
               href={`/subject/${subject.data?.id}`}
-              className="text-base font-semibold underline  text-blue-600"
+              className="text-base font-semibold text-blue-600 underline"
             >
               {subject.data?.id}
             </Link>
           </label>
         </div>
-        <div className="grid grid-cols-1  gap-5  p-2 py-4">
-          <label className="w-full grid md:grid-cols-2 md:gap-10">
+        <div className="grid grid-cols-1 gap-5 p-2 py-4">
+          <label className="grid w-full md:grid-cols-2 md:gap-10">
             <span className="text-base text-black">
               {settingOnSubjectDataLanguage.connectClassId(
-                language.data ?? "en"
+                language.data ?? "en",
               )}
               :
             </span>
             <Link
               target="_blank"
               href={`/classroom/${subject.data?.classId}`}
-              className="text-base font-semibold underline  text-blue-600"
+              className="text-base font-semibold text-blue-600 underline"
             >
               {subject.data?.classId}
             </Link>
           </label>
         </div>
-        <div className="grid grid-cols-1  gap-5 bg-gray-200/20  p-2 py-4">
-          <label className="w-full grid md:grid-cols-2 md:gap-10">
+        <div className="grid grid-cols-1 gap-5 bg-gray-200/20 p-2 py-4">
+          <label className="grid w-full md:grid-cols-2 md:gap-10">
             <span className="text-base text-black">
               {settingOnSubjectDataLanguage.code(language.data ?? "en")}:
             </span>
-            <span className="text-base font-semibold  text-black">
+            <span className="text-base font-semibold text-black">
               {subject.data?.code}
             </span>
           </label>
         </div>
-        <div className="grid grid-cols-1   gap-5  p-2 py-4">
-          <label className="w-full items-center grid md:grid-cols-2 md:gap-10">
+        <div className="grid grid-cols-1 gap-5 p-2 py-4">
+          <label className="grid w-full items-center md:grid-cols-2 md:gap-10">
             <span className="text-base text-black">
               {settingOnSubjectDataLanguage.name(language.data ?? "en")}:
             </span>
@@ -123,14 +121,14 @@ function SubjectInfomation({ onSummit, subjectId, isPending = false }: Props) {
                 });
               }}
               placeholder={settingOnSubjectDataLanguage.name(
-                language.data ?? "en"
+                language.data ?? "en",
               )}
               className="main-input"
             />
           </label>
         </div>
-        <div className="grid grid-cols-1 bg-gray-200/20   gap-5  p-2 py-4">
-          <label className="w-full items-center grid md:grid-cols-2 md:gap-10">
+        <div className="grid grid-cols-1 gap-5 bg-gray-200/20 p-2 py-4">
+          <label className="grid w-full items-center md:grid-cols-2 md:gap-10">
             <span className="text-base text-black">
               {settingOnSubjectDataLanguage.description(language.data ?? "en")}:
             </span>
@@ -145,17 +143,17 @@ function SubjectInfomation({ onSummit, subjectId, isPending = false }: Props) {
                 });
               }}
               placeholder={settingOnSubjectDataLanguage.description(
-                language.data ?? "en"
+                language.data ?? "en",
               )}
               className="main-input"
             />
           </label>
         </div>
-        <div className="grid grid-cols-1  gap-5  p-2 py-4">
-          <label className="w-1/2 md:w-full items-center grid md:grid-cols-2 md:gap-10">
+        <div className="grid grid-cols-1 gap-5 p-2 py-4">
+          <label className="grid w-1/2 items-center md:w-full md:grid-cols-2 md:gap-10">
             <span className="text-base text-black">
               {settingOnSubjectDataLanguage.educationYear(
-                language.data ?? "en"
+                language.data ?? "en",
               )}
               :
             </span>
@@ -182,13 +180,13 @@ function SubjectInfomation({ onSummit, subjectId, isPending = false }: Props) {
       </div>
       <button
         disabled={isPending}
-        className="main-button flex justify-center items-center  w-60 mt-5"
+        className="main-button mt-5 flex w-60 items-center justify-center"
       >
         {isPending ? (
           <ProgressSpinner
             animationDuration="1s"
             style={{ width: "20px" }}
-            className="w-5 h-5"
+            className="h-5 w-5"
             strokeWidth="8"
           />
         ) : (

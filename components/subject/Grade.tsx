@@ -1,6 +1,21 @@
-import React, { useEffect, useState } from "react";
+import { ExportAssignmentService } from "@/services";
+import Image from "next/image";
+import Link from "next/link";
+import { Toast } from "primereact/toast";
+import React, { useState } from "react";
+import { FaCheckSquare } from "react-icons/fa";
 import { FaUser } from "react-icons/fa6";
+import { IoMdSettings } from "react-icons/io";
+import { MdFileDownload, MdMoodBad } from "react-icons/md";
 import { SiMicrosoftexcel } from "react-icons/si";
+import { defaultBlurHash } from "../../data";
+import { gradeData } from "../../data/languages";
+import {
+  Assignment,
+  ErrorMessages,
+  ScoreOnSubject,
+  StudentOnAssignment,
+} from "../../interfaces";
 import {
   useGetAssignmentOverview,
   useGetLanguage,
@@ -13,25 +28,11 @@ import {
   getRandomSlateShade,
   getSlateColorStyle,
 } from "../../utils";
-import Image from "next/image";
-import { defaultBlurHash } from "../../data";
-import {
-  Assignment,
-  ErrorMessages,
-  GradeRule,
-  StudentOnAssignment,
-} from "../../interfaces";
-import GradePopup from "./GradePopup";
-import { Toast } from "primereact/toast";
-import { ExportAssignmentService } from "@/services";
 import LoadingSpinner from "../common/LoadingSpinner";
-import { IoMdSettings } from "react-icons/io";
 import PopupLayout from "../layout/PopupLayout";
+import GradePopup from "./GradePopup";
 import GradeSetting from "./GradeSetting";
-import { MdFileDownload, MdMoodBad, MdReport } from "react-icons/md";
-import { FaCheckSquare } from "react-icons/fa";
-import { gradeData } from "../../data/languages";
-import Link from "next/link";
+import GradeSettingScoreOnSubject from "./GradeSettingScoreOnSubject";
 
 function Grade({
   subjectId,
@@ -48,6 +49,8 @@ function Grade({
   const studentOnSubjects = useGetStudentOnSubject({
     subjectId,
   });
+  const [selectScoreOnSubject, setSelectScoreOnSubject] =
+    useState<ScoreOnSubject | null>(null);
   const [triggerGradeSetting, setTriggerGradeSetting] = useState(false);
   const handleExportExcel = async () => {
     try {
@@ -112,7 +115,25 @@ function Grade({
             subjectId={subjectId}
             grade={assignmentsOverview.data?.grade}
             onClose={() => {
+              document.body.style.overflow = "auto";
               setTriggerGradeSetting(false);
+            }}
+          />
+        </PopupLayout>
+      )}
+
+      {selectScoreOnSubject && (
+        <PopupLayout
+          onClose={() => {
+            setSelectScoreOnSubject(null);
+          }}
+        >
+          <GradeSettingScoreOnSubject
+            scoreOnSubject={selectScoreOnSubject}
+            toast={toast}
+            onClose={() => {
+              document.body.style.overflow = "auto";
+              setSelectScoreOnSubject(null);
             }}
           />
         </PopupLayout>
@@ -217,13 +238,28 @@ function Grade({
                       assignmentsOverview.data?.scoreOnSubjects.map((data) => {
                         return (
                           <th
+                            onClick={() => {
+                              setSelectScoreOnSubject(data.scoreOnSubject);
+                            }}
                             key={data.scoreOnSubject.id}
                             className="group text-sm font-semibold"
                           >
-                            <button className="relative flex w-40 min-w-40 flex-col items-start p-2 hover:bg-gray-100 hover:ring-1 active:bg-gray-200 group-hover:w-max">
+                            <button className="relative flex w-max min-w-40 flex-col items-start p-2 hover:bg-gray-100 hover:ring-1 active:bg-gray-200 group-hover:w-max">
                               <span className="w-max max-w-40 truncate group-hover:max-w-none">
                                 {data.scoreOnSubject.title}
                               </span>
+                              {data.scoreOnSubject.maxScore !== null && (
+                                <span className="text-xs text-gray-500">
+                                  {data.scoreOnSubject.maxScore !== null &&
+                                    `${data.scoreOnSubject.maxScore} ${gradeData.score(language.data ?? "en")} `}{" "}
+                                  /{" "}
+                                  {data.scoreOnSubject.weight !== null &&
+                                    ` ${
+                                      data.scoreOnSubject.weight
+                                    }% ${gradeData.weight(language.data ?? "en")}`}
+                                </span>
+                              )}
+
                               <div className="gradient-bg rounded-md px-2 text-xs text-white">
                                 {gradeData.speical_score(
                                   language.data ?? "en",
@@ -283,7 +319,7 @@ function Grade({
                   totalScore =
                     assignmentsOverview.data?.scoreOnSubjects.reduce(
                       (prev, scoreOnSubject) => {
-                        const summaryScore = scoreOnSubject.students.reduce(
+                        const sumRawScore = scoreOnSubject.students.reduce(
                           (prev, studentOnScore) => {
                             if (
                               studentOnScore.studentOnSubjectId === student.id
@@ -295,7 +331,19 @@ function Grade({
                           0,
                         );
 
-                        return (prev += summaryScore);
+                        let score = sumRawScore;
+                        const maxScore =
+                          scoreOnSubject.scoreOnSubject.maxScore ?? 100;
+                        if (scoreOnSubject.scoreOnSubject.weight !== null) {
+                          const originalScore =
+                            (sumRawScore > maxScore ? maxScore : sumRawScore) /
+                            maxScore;
+                          score =
+                            originalScore *
+                            scoreOnSubject.scoreOnSubject.weight;
+                        }
+
+                        return (prev += score);
                       },
                       totalScore,
                     ) ?? 0;
@@ -428,25 +476,36 @@ function Grade({
                                     >
                                       {score === "No Work" ? (
                                         <div className="relative flex h-14 w-full cursor-pointer select-none flex-col items-center justify-center bg-red-500 text-white ring-red-500 transition hover:ring-1 hover:drop-shadow-md">
+                                          <MdMoodBad />
                                           <span>
                                             {gradeData.no_work(
                                               language.data ?? "en",
                                             )}
                                           </span>
-                                          <MdMoodBad />
                                         </div>
                                       ) : score === "Not Graded" ? (
                                         <div className="relative flex h-14 w-full cursor-pointer select-none flex-col items-center justify-center bg-orange-500 text-white ring-orange-500 transition hover:ring-1 hover:drop-shadow-md">
+                                          <FaCheckSquare />
                                           <span>
                                             {gradeData.wait_reviewed(
                                               language.data ?? "en",
                                             )}
                                           </span>
-                                          <FaCheckSquare />
                                         </div>
                                       ) : (
                                         <div className="relative flex h-14 w-full cursor-pointer flex-col items-center justify-center ring-black transition hover:ring-1 hover:drop-shadow-md">
-                                          <span>{score}</span>
+                                          <span className="text-lg">
+                                            {score}
+                                          </span>
+                                          {data.assignment.weight !== null && (
+                                            <span className="text-xs text-gray-500">
+                                              (
+                                              {studentOnAssignment.score.toFixed(
+                                                2,
+                                              )}
+                                              )
+                                            </span>
+                                          )}
                                         </div>
                                       )}
                                     </button>
@@ -471,12 +530,25 @@ function Grade({
                                   );
                                 }
 
-                                const totalScore = scoreOnStudents.reduce(
+                                const sumRawScore = scoreOnStudents.reduce(
                                   (previousValue, current) => {
                                     return (previousValue += current.score);
                                   },
                                   0,
                                 );
+
+                                let score = sumRawScore;
+                                const maxScore =
+                                  data.scoreOnSubject.maxScore ?? 100;
+                                if (data.scoreOnSubject.weight !== null) {
+                                  const originalScore =
+                                    (sumRawScore > maxScore
+                                      ? maxScore
+                                      : sumRawScore) / maxScore;
+                                  score =
+                                    originalScore * data.scoreOnSubject.weight;
+                                }
+
                                 return (
                                   <td
                                     key={
@@ -486,7 +558,14 @@ function Grade({
                                     className="text-sm font-semibold"
                                   >
                                     <button className="relative flex h-14 w-full cursor-pointer flex-col items-center justify-center ring-black transition hover:ring-1 hover:drop-shadow-md">
-                                      <span>{totalScore}</span>
+                                      <span className="text-lg">
+                                        {score.toFixed(2)}
+                                      </span>
+                                      {data.scoreOnSubject.weight !== null && (
+                                        <span className="text-xs text-gray-500">
+                                          ({sumRawScore.toFixed(2)})
+                                        </span>
+                                      )}
                                     </button>
                                   </td>
                                 );

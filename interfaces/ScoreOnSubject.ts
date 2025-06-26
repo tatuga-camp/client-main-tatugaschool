@@ -9,4 +9,6 @@ export interface ScoreOnSubject {
   schoolId: string;
   blurHash: string;
   subjectId: string;
+  weight: number | null;
+  maxScore: number | null;
 }

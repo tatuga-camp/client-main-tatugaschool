@@ -31,7 +31,6 @@ const AccountComponent = () => {
     if (router.isReady) {
       setSelectMenu(() => {
         if (!menuItems.includes(router.query.menu as any)) {
-          console.log(router.query.menu);
           return "General";
         } else {
           return router.query.menu as MenuItems;
@@ -81,23 +80,23 @@ const AccountComponent = () => {
   };
   return (
     <div className="flex items-center justify-center">
-      <div className="w-full max-w-5xl bg-white rounded-lg p-8">
-        <h2 className="text-3xl font-semibold text-[#6f47dd] mb-4">
+      <div className="w-full max-w-5xl rounded-lg bg-white p-8">
+        <h2 className="mb-4 text-3xl font-semibold text-[#6f47dd]">
           {accountDataLanguage.title(language.data ?? "en")}
         </h2>
-        <p className="text-gray-600 mb-8">
+        <p className="mb-8 text-gray-600">
           {accountDataLanguage.description(language.data ?? "en")}{" "}
         </p>
 
-        <div className="border-b mb-6 overflow-auto">
+        <div className="mb-6 overflow-auto border-b">
           <ul className="flex space-x-8 text-[#6f47dd]">
             {menuItems.map((item, index) => (
               <li
                 onClick={() => setSelectMenu(item)}
                 key={item}
-                className={`border-b-2 cursor-pointer ${
-                  selectMenu === item && "border-b-primary-color "
-                }  pb-2`}
+                className={`cursor-pointer border-b-2 ${
+                  selectMenu === item && "border-b-primary-color"
+                } pb-2`}
               >
                 {accountDataLanguage[
                   item.toLocaleLowerCase() as keyof typeof accountDataLanguage
@@ -108,7 +107,7 @@ const AccountComponent = () => {
         </div>
 
         {selectMenu === "General" && (
-          <div className="flex flex-col md:flex-row gap-8">
+          <div className="flex flex-col gap-8 md:flex-row">
             {user.data && (
               <UploadPhoto updateUser={updateUser} user={user.data} />
             )}
@@ -116,7 +115,7 @@ const AccountComponent = () => {
               onSubmit={handleSubmit}
               className="flex flex-col gap-4 md:w-2/3"
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <InputField
                   placeholder="First Name"
                   name="firstName"
@@ -147,16 +146,16 @@ const AccountComponent = () => {
                 />
               </div>
               {updateUser.isPending ? (
-                <div className="w-60 flex items-center">
+                <div className="flex w-60 items-center">
                   <ProgressSpinner
                     animationDuration="1s"
                     style={{ width: "20px" }}
-                    className="w-5 h-5"
+                    className="h-5 w-5"
                     strokeWidth="8"
                   />
                 </div>
               ) : (
-                <button type="submit" className="w-60 main-button">
+                <button type="submit" className="main-button w-60">
                   {accountDataLanguage.save(language.data ?? "en")}
                 </button>
               )}

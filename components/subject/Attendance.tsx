@@ -453,7 +453,6 @@ function DisplayAttendanceTable({
                   0,
                 );
 
-                console.log(attendanceWithStatusLists);
                 return (
                   <tr
                     className={` ${

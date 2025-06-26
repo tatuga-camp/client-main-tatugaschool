@@ -83,8 +83,6 @@ function TeachingMaterialShow({ id, onClose }: Props) {
               const isPDF = fileExtension === "APPLICATION/PDF";
               const isImage = fileExtension.includes("IMAGE");
 
-              console.log(isImage);
-
               const fileName =
                 file.url.split("/")[file.url.split("/").length - 1];
               return (

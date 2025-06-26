@@ -220,8 +220,7 @@ function ShowSelectGroup({
       if (over !== null && active.id !== over?.id) {
         const activeId = JSON.parse(active.id as string) as SortableIdType;
         const overId = JSON.parse(over.id as string) as SortableIdType;
-        console.log("activeId", activeId);
-        console.log("overId", overId);
+
         if (activeId.type === "unitOnGroup") {
           let newSort: (UnitOnGroup & { students: StudentOnGroup[] })[] = [];
 

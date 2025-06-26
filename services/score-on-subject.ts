@@ -61,6 +61,8 @@ export type RequestUpdateScoreOnSubjectService = {
     title?: string;
     icon?: string;
     blurHash?: string;
+    weight?: number | null;
+    maxScore?: number | null;
   };
 };
 

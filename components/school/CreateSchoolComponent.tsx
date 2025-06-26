@@ -85,7 +85,6 @@ const CreateSchoolComponent = () => {
       });
 
       const blurHash = await generateBlurHash(file);
-      console.log(blurHash);
       await UploadSignURLService({
         file: file,
         signURL: signURL.signURL,

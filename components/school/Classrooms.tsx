@@ -76,7 +76,6 @@ function Classrooms({ schoolId }: Props) {
         const oldIndex = prevs.findIndex((item) => item.id === active.id);
         const newIndex = prevs.findIndex((item) => item.id === over!.id);
         newSort = arrayMove(prevs, oldIndex, newIndex);
-        console.log(newSort);
         return newSort;
       });
     }

@@ -32,7 +32,7 @@ function GradeSetting({ onClose, grade, subjectId, toast }: Props) {
       ...defaultGradeRule.map((g) => {
         return { ...g, id: crypto.randomUUID() };
       }),
-    ]
+    ],
   );
 
   const handleAddRow = () => {
@@ -82,7 +82,6 @@ function GradeSetting({ onClose, grade, subjectId, toast }: Props) {
         detail: "Changes has been saved",
         life: 3000,
       });
-      document.body.style.overflow = "auto";
       onClose();
     } catch (error) {
       console.log(error);
@@ -101,9 +100,9 @@ function GradeSetting({ onClose, grade, subjectId, toast }: Props) {
   return (
     <form
       onSubmit={handleUpdate}
-      className="w-96 h-max  bg-gray-100 rounded-md border  p-3 flex flex-col gap-1"
+      className="flex h-max w-96 flex-col gap-1 rounded-md border bg-gray-100 p-3"
     >
-      <header className="w-full flex items-center justify-between border-b">
+      <header className="flex w-full items-center justify-between border-b">
         <h1>Grade Setting</h1>
         <button
           type="button"
@@ -111,13 +110,13 @@ function GradeSetting({ onClose, grade, subjectId, toast }: Props) {
             document.body.style.overflow = "auto";
             onClose();
           }}
-          className="text-lg hover:bg-gray-300/50 w-6 h-6 rounded flex items-center justify-center font-semibold"
+          className="flex h-6 w-6 items-center justify-center rounded text-lg font-semibold hover:bg-gray-300/50"
         >
           <IoMdClose />
         </button>
       </header>
       <main>
-        <ul className="w-full p-2 max-h-80 overflow-auto gap-2 grid">
+        <ul className="grid max-h-80 w-full gap-2 overflow-auto p-2">
           <li className="grid grid-cols-4 gap-2">
             <span>Max</span>
             <span>Min</span>
@@ -138,14 +137,13 @@ function GradeSetting({ onClose, grade, subjectId, toast }: Props) {
           })}
         </ul>
       </main>
-      <footer className="w-full pt-3 border-t  justify-end gap-3 flex">
+      <footer className="flex w-full justify-end gap-3 border-t pt-3">
         <button
           type="button"
           onClick={() => {
-            document.body.style.overflow = "auto";
             onClose();
           }}
-          className="second-button border flex items-center justify-center gap-1"
+          className="second-button flex items-center justify-center gap-1 border"
         >
           Cancel
         </button>
@@ -184,7 +182,7 @@ function GradeRuleItem({
   onRemove,
 }: GradeRuleItemProps) {
   return (
-    <li className="w-72 h-10 grid grid-cols-4 gap-2">
+    <li className="grid h-10 w-72 grid-cols-4 gap-2">
       <InputNumber
         required
         value={data.max}
@@ -232,15 +230,15 @@ function GradeRuleItem({
             });
           })
         }
-        className="main-input w-full h-10"
+        className="main-input h-10 w-full"
       />
 
-      <div className="flex items-center gap-2 justify-start px-5">
+      <div className="flex items-center justify-start gap-2 px-5">
         <button
           onClick={() => onRemove(data.id)}
           title="Delete Row"
           type="button"
-          className="text-red-500 bg-red-100 p-1 rounded"
+          className="rounded bg-red-100 p-1 text-red-500"
         >
           <IoMdClose />
         </button>
@@ -249,7 +247,7 @@ function GradeRuleItem({
             onClick={() => onAdd()}
             title="Add Row"
             type="button"
-            className="text-green-500 bg-green-100 p-1 rounded"
+            className="rounded bg-green-100 p-1 text-green-500"
           >
             <FiPlus />
           </button>
