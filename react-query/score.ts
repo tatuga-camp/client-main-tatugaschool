@@ -16,6 +16,7 @@ import {
   RequestDeleteScoreOnSubjectService,
   RequestGetScoresOnStudentBySubjectIdService,
   RequestUpdateScoreOnSubjectService,
+  ResponseGetOverviewAssignmentService,
   UpdateScoreOnSubjectService,
 } from "../services";
 
@@ -24,6 +25,7 @@ import {
   ScoreOnSubject,
   StudentOnSubject,
 } from "../interfaces";
+import { gradeKey } from "./grade";
 
 export const scoretKey = {
   getScoreOnSubjectBySubjectId: (subjectId: string) => [
@@ -62,7 +64,7 @@ export function useCreateScoreOnSubject() {
         ["scoreOnSubjects", { subjectId: variables.subjectId }],
         (prev: ScoreOnSubject[]) => {
           return [...prev, data];
-        }
+        },
       );
     },
   });
@@ -75,23 +77,55 @@ export function useUpdateScoreOnSubject() {
     mutationFn: (request: RequestUpdateScoreOnSubjectService) =>
       UpdateScoreOnSubjectService(request),
     onSuccess(data, variables, context) {
-      queryClient.setQueryData(
-        scoretKey.getScoreOnSubjectBySubjectId(data.subjectId),
-        (prev: ScoreOnSubject[]) => {
-          return prev.map((score) => {
-            if (score.id === data.id) {
-              return data;
-            }
-            return score;
-          });
-        }
-      );
+      if (
+        queryClient.getQueryData(
+          gradeKey.overview({ subjectId: data.subjectId }),
+        )
+      ) {
+        queryClient.setQueryData(
+          gradeKey.overview({ subjectId: data.subjectId }),
+          (
+            prev: ResponseGetOverviewAssignmentService,
+          ): ResponseGetOverviewAssignmentService => {
+            return {
+              ...prev,
+              scoreOnSubjects: prev.scoreOnSubjects.map((score) => {
+                if (score.scoreOnSubject.id === data.id) {
+                  return {
+                    ...score,
+                    scoreOnSubject: data,
+                  };
+                }
+                return score;
+              }),
+            };
+          },
+        );
+      }
+
+      if (
+        queryClient.getQueryData(
+          scoretKey.getScoreOnSubjectBySubjectId(data.subjectId),
+        )
+      ) {
+        queryClient.setQueryData(
+          scoretKey.getScoreOnSubjectBySubjectId(data.subjectId),
+          (prev: ScoreOnSubject[]) => {
+            return prev.map((score) => {
+              if (score.id === data.id) {
+                return data;
+              }
+              return score;
+            });
+          },
+        );
+      }
     },
   });
 }
 
 export function useGetScoreOnStudent(
-  request: RequestGetScoresOnStudentBySubjectIdService
+  request: RequestGetScoresOnStudentBySubjectIdService,
 ): UseQueryResult<ScoreOnStudent[], Error> {
   const scores = useQuery({
     queryKey: scoretKey.getScoreOnStudentBySubjectId(request.subjectId),
@@ -111,7 +145,7 @@ export function useCreateScoreOnStudent() {
         scoretKey.getScoreOnStudentBySubjectId(data.subjectId),
         (prev: ScoreOnStudent[]) => {
           return [...prev, data];
-        }
+        },
       );
     },
   });
@@ -130,7 +164,7 @@ export function useDeleteScoreOnSubject() {
         ["scoreOnSubjects", { subjectId: data.subjectId }],
         (prev: ScoreOnSubject[]) => {
           return prev.filter((p) => p.id !== data.id);
-        }
+        },
       );
       queryClient.refetchQueries({
         queryKey: scoretKey.getScoreOnStudentBySubjectId(data.subjectId),

@@ -2,25 +2,23 @@ import { School } from "@/interfaces";
 import Image from "next/image";
 
 const SchoolCard: React.FC<{ school: School }> = ({ school }) => {
-  console.log(school, "school");
-
   return (
-    <div className="flex items-center bg-gray-100 rounded-xl p-4 w-full mb-10 z-10">
-      <div className="mr-4 w-20 h-20 rounded-full overflow-hidden flex-shrink-0">
+    <div className="z-10 mb-10 flex w-full items-center rounded-xl bg-gray-100 p-4">
+      <div className="mr-4 h-20 w-20 flex-shrink-0 overflow-hidden rounded-full">
         <Image
           src={school.logo}
           alt={school.title}
           width={80}
           height={80}
-          className="w-full h-full object-cover"
+          className="h-full w-full object-cover"
         />
       </div>
       <div>
-        <h2 className="flex-1 text-xl font-bold text-gray-800 truncate w-11/12">
+        <h2 className="w-11/12 flex-1 truncate text-xl font-bold text-gray-800">
           {school.title}
-          <span className="block border-b-2 border-purple-500 w-1/2 mt-1"></span>
+          <span className="mt-1 block w-1/2 border-b-2 border-purple-500"></span>
         </h2>
-        <p className="text-gray-500 text-lg">{school.city}</p>
+        <p className="text-lg text-gray-500">{school.city}</p>
       </div>
     </div>
   );
