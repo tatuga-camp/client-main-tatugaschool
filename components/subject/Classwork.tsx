@@ -62,12 +62,14 @@ function Classwork({ toast, subjectId, schoolId }: Props) {
       });
     }
 
-    await reorderAssignment.mutateAsync({
-      request: {
-        assignmentIds: newSort.map((item) => item.id),
-      },
-      subjectId: subjectId,
-    });
+    if (newSort.length > 0) {
+      await reorderAssignment.mutateAsync({
+        request: {
+          assignmentIds: newSort.map((item) => item.id),
+        },
+        subjectId: subjectId,
+      });
+    }
   }, []);
 
   useEffect(() => {

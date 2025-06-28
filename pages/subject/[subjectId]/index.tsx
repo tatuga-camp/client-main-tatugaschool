@@ -285,7 +285,10 @@ function Index({ subjectId }: Props) {
             <AttendanceChecker
               toast={toast}
               subjectId={subjectId}
-              onClose={() => setSelectFooter("EMTY")}
+              onClose={() => {
+                document.body.style.overflow = "auto";
+                setSelectFooter("EMTY");
+              }}
             />
           </PopupLayout>
         )}
