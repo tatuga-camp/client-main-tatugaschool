@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { School } from "../../interfaces";
-import { useGetListSubscription } from "../../react-query";
+import { useGetLanguage, useGetListSubscription } from "../../react-query";
 import LoadingBar from "../common/LoadingBar";
 import InputNumber from "../common/InputNumber";
+import { SubscriptionDataLanguage } from "../../data/languages/subscription";
 const pricingData = [
   {
     mainTitle: "",
+    mainTitle_th: "",
     price: {
       month: null,
       year: null,
@@ -14,35 +16,76 @@ const pricingData = [
     popular: false,
     product: false,
     infoNote: "",
+    infoNote_th: "",
     "Basic Feature": "Basic Feature",
+    "Basic Feature_th": "ฟีเจอร์พื้นฐาน",
     Users: "Members in a school",
+    Users_th: "สมาชิกในโรงเรียน",
     "Total Storage Size": "Total Storage Size",
+    "Total Storage Size_th": "ขนาดพื้นที่จัดเก็บข้อมูล",
     Support: "Direct Chat Support",
+    Support_th: "แชทกับผู้พัฒนา",
     Classroom_Limit: "Classroom Limit",
+    Classroom_Limit_th: "จำกัดห้องเรียน",
     Subject_Limit: "Subject Limit",
+    Subject_Limit_th: "จำกัดวิชา",
   },
   {
     mainTitle: "FREE",
+    mainTitle_th: "ฟรี",
     popular: false,
     product: false,
     price: {
       month: "Free",
+      month_th: "ฟรี",
       year: "Free",
+      year_th: "ฟรี",
       monthValue: 0,
       yearValue: 0,
       permember: false,
     },
     infoNote: "Free plan is good for 1 teacher in a school.",
+    infoNote_th: "แผนฟรีเหมาะสำหรับครู 1 คนในโรงเรียน",
     "Basic Feature": true,
     Users: 2,
+    Users_th: 2,
     "Total Storage Size": "15GB",
-    Support: false,
+    Support: true,
     Classroom_Limit: "3 classrooms",
+    Classroom_Limit_th: "3 ห้องเรียน",
     Subject_Limit: "3 subjects",
+    Subject_Limit_th: "3 วิชา",
+  },
+  {
+    mainTitle: "BASIC",
+    mainTitle_th: "พื้นฐาน",
+    popular: false,
+    product: "Tatuga School Basic",
+    product_th: "โรงเรียนทาทูก้า พื้นฐาน",
+    price: {
+      month: "190฿",
+      year: "1,390฿",
+      monthValue: 190,
+      yearValue: 1390,
+      permember: false,
+    },
+    infoNote: "Basic plan is good for 1 - 2 teachers in a school",
+    infoNote_th: "แผนพื้นฐานเหมาะสำหรับครู 1 - 2 คนในโรงเรียน",
+    "Basic Feature": true,
+    Users: 2,
+    Users_th: 2,
+    "Total Storage Size": "15GB",
+    Support: true,
+    Classroom_Limit: "10 classrooms",
+    Classroom_Limit_th: "10 ห้องเรียน",
+    Subject_Limit: "10 subjects",
+    Subject_Limit_th: "10 วิชา",
   },
   {
     mainTitle: "PREMIUM",
+    mainTitle_th: "พรีเมียม",
     product: "Tatuga School Premium",
+    product_th: "โรงเรียนทาทูก้า พรีเมียม",
     popular: true,
     price: {
       month: "290฿",
@@ -52,17 +95,24 @@ const pricingData = [
       permember: false,
     },
     infoNote: "Premium plan is good for 1 - 3 teachers in a school",
+    infoNote_th: "แผนพรีเมียมเหมาะสำหรับครู 1 - 3 คนในโรงเรียน",
     "Basic Feature": true,
     Users: 3,
+    Users_th: 3,
+
     "Total Storage Size": "100GB",
     Support: true,
     Classroom_Limit: "20 classrooms",
+    Classroom_Limit_th: "20 ห้องเรียน",
     Subject_Limit: "30 subjects",
+    Subject_Limit_th: "30 วิชา",
   },
   {
     popular: false,
     mainTitle: "ENTERPRISE",
+    mainTitle_th: "องค์กร",
     product: "Tatuga School Enterprise",
+    product_th: "โรงเรียนทาทูก้า องค์กร",
     price: {
       month: "150฿",
       monthValue: 150,
@@ -72,19 +122,23 @@ const pricingData = [
     },
     infoNote:
       "Enterprise plan is good for a school that has more than 5 teachers",
+    infoNote_th: "แผนองค์กรเหมาะสำหรับโรงเรียนที่มีครูมากกว่า 5 คน",
     "Basic Feature": true,
     Users: "custom",
+    Users_th: "กำหนดเอง",
     "Total Storage Size": "9.77 TB",
     Support: true,
     Classroom_Limit: "Unlimited",
+    Classroom_Limit_th: "ไม่จำกัด",
     Subject_Limit: "Unlimited",
+    Subject_Limit_th: "ไม่จำกัด",
   },
 ] as const;
 
 const RightIcon = ({ bgcolor }: { bgcolor: string }) => {
   return (
     <svg
-      className="w-5 h-5 mt-1"
+      className="mt-1 h-5 w-5"
       width="56"
       height="56"
       viewBox="0 0 56 56"
@@ -108,14 +162,15 @@ type Props = {
   onSelectPlan: (
     priceId: string,
     product: { price: string; title: string; time: string },
-    members: number
+    members: number,
   ) => void;
 };
 const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
   const subscriptions = useGetListSubscription();
   const [monthprice, setMonthPrice] = useState(true);
+  const language = useGetLanguage();
   const [members, setMembers] = useState(
-    school.limitSchoolMember < 4 ? 4 : school.limitSchoolMember
+    school.limitSchoolMember < 4 ? 4 : school.limitSchoolMember,
   );
   if (subscriptions.isLoading || !subscriptions.data) {
     return (
@@ -126,55 +181,56 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
   }
 
   return (
-    <div className="min-h-[100vh] w-full flex items-center justify-center">
+    <div className="flex min-h-dvh w-full items-center justify-center">
       <div className="w-full pb-10">
-        <div className="py-8 lg:py-14 flex flex-col items-center">
-          <span className="text-primary-color text-base">Pricing</span>
-          <span className="font-semibold text-center text-4xl sm:text-5xl mt-3 mb-6">
-            Compare our plans and find yours
+        <div className="flex flex-col items-center py-8 lg:py-14">
+          <span className="text-base text-primary-color">
+            {SubscriptionDataLanguage.pricing(language.data ?? "en")}
           </span>
-          <span className="sm:text-xl text-center text-lg font-light">
-            Select a plan that match to your needs!
+          <span className="mb-6 mt-3 text-center text-4xl font-semibold sm:text-5xl">
+            {SubscriptionDataLanguage.title(language.data ?? "en")}
+          </span>
+          <span className="text-center text-lg font-light sm:text-xl">
+            {SubscriptionDataLanguage.description(language.data ?? "en")}
           </span>
           {/* billing type div */}
-          <div className="px-2 py-2  m-auto mt-5 md:mt-10 space-x-1 flex justify-center items-center rounded-lg">
+          <div className="m-auto mt-5 flex items-center justify-center space-x-1 rounded-lg px-2 py-2 md:mt-10">
             <button
               onClick={() => setMonthPrice(true)}
-              className={`py-2 px-2 md:px-1.5 sm:px-3.5 drop-shadow-md hover:bg-white text-[#667085] hover:text-black rounded-md
-                ${
-                  monthprice && "bg-white border-[#94a3b8] border text-black "
-                }`}
+              className={`w-60 rounded-md px-2 py-2 text-[#667085] drop-shadow-md hover:bg-white hover:text-black sm:px-3.5 md:px-1.5 ${
+                monthprice && "border border-[#94a3b8] bg-white text-black"
+              }`}
             >
-              Monthly billing
+              {SubscriptionDataLanguage.monthly(language.data ?? "en")}
             </button>
             <button
               onClick={() => setMonthPrice(false)}
-              className={`ml-1 py-2 px-2 md:px-1.5 sm:px-3.5 border-[#94a3b8] drop-shadow-md hover:bg-white text-[#667085]  hover:text-black rounded-md
-                ${!monthprice && "bg-white border-[#94a3b8] border text-black"}
-              `}
+              className={`ml-1 w-60 rounded-md border-[#94a3b8] px-2 py-2 text-[#667085] drop-shadow-md hover:bg-white hover:text-black sm:px-3.5 md:px-1.5 ${!monthprice && "border border-[#94a3b8] bg-white text-black"} `}
             >
-              Annual billing
+              {SubscriptionDataLanguage.annual(language.data ?? "en")}
             </button>
           </div>
         </div>
-        <div className="w-full  mx-auto  rounded-xl">
-          <table className="w-full text-start border-spacing-5 border-separate flex flex-col lg:flex-row p-5 lg:p-0">
+        <div className="mx-auto w-full overflow-auto rounded-xl">
+          <table className="flex w-max min-w-full border-separate border-spacing-5 flex-col p-5 text-start lg:flex-row lg:p-0">
             {pricingData.map((data, index) => (
               <tbody
                 key={index}
                 className={
                   index === 0
                     ? "hidden lg:block"
-                    : "border-2 lg:border-none mb-10 lg:mb-0 rounded-lg"
+                    : "mb-10 rounded-lg border-2 lg:mb-0 lg:border-none"
                 }
               >
                 <tr>
                   <td>
-                    <div className="font-semibold text-xl text-[#101828] h-7">
+                    <div className="h-7 text-xl font-semibold text-[#101828]">
                       {data.mainTitle}
                       {data.popular && (
-                        <span className="text-sm font-medium text-primary-color px-2.5 py-0.5 bg-[#F9F5FF] rounded-2xl ml-2">
-                          Popular
+                        <span className="ml-2 rounded-2xl bg-[#F9F5FF] px-2.5 py-0.5 text-sm font-medium text-primary-color">
+                          {SubscriptionDataLanguage.popular(
+                            language.data ?? "en",
+                          )}
                         </span>
                       )}
                     </div>
@@ -184,13 +240,14 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
                   <td className="h-[50px]">
                     <div className="w-max">
                       {(data.mainTitle === "FREE" ||
-                        data.mainTitle === "PREMIUM") && (
-                        <span className="font-semibold text-5xl">
+                        data.mainTitle === "PREMIUM" ||
+                        data.mainTitle === "BASIC") && (
+                        <span className="text-5xl font-semibold">
                           {monthprice ? data.price?.month : data.price?.year}
                         </span>
                       )}
                       {data.mainTitle === "ENTERPRISE" && (
-                        <span className="font-semibold text-5xl">
+                        <span className="text-5xl font-semibold">
                           {monthprice
                             ? (
                                 data.price?.monthValue * members
@@ -202,22 +259,30 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
                         </span>
                       )}
                       {data.price && (
-                        <span className="text-[#475467] font-normal ml-1">
+                        <span className="ml-1 font-normal text-[#475467]">
                           {data.price.permember
                             ? monthprice
-                              ? "Per member/month"
-                              : "Per member/year"
+                              ? SubscriptionDataLanguage.per_member_month(
+                                  language.data ?? "en",
+                                )
+                              : SubscriptionDataLanguage.per_member_year(
+                                  language.data ?? "en",
+                                )
                             : monthprice
-                            ? "per month"
-                            : "per year"}
+                              ? SubscriptionDataLanguage.monthly(
+                                  language.data ?? "en",
+                                )
+                              : SubscriptionDataLanguage.annual(
+                                  language.data ?? "en",
+                                )}
                         </span>
                       )}
                     </div>
                   </td>
                 </tr>
                 <tr>
-                  <td className="h-[50px]  lg:h-[70px] xl:h-[50px]">
-                    <span className="text-[#475467] text-sm font-normal">
+                  <td className="h-[50px] lg:h-[70px] xl:h-[50px]">
+                    <span className="text-sm font-normal text-[#475467]">
                       {data.infoNote}
                     </span>
                   </td>
@@ -228,7 +293,7 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
                   ) : (
                     <td>
                       {data.price.permember ? (
-                        <div className="w-full flex items-center justify-center gap-2">
+                        <div className="flex w-full items-center justify-center gap-2">
                           <InputNumber
                             placeholder="Enter number of members"
                             min={4}
@@ -248,12 +313,12 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
                           <button
                             onClick={() => {
                               const prices = subscriptions.data.filter(
-                                (s) => s.title === data.product
+                                (s) => s.title === data.product,
                               );
                               const price = prices.find((p) =>
                                 monthprice
                                   ? p.time === "month"
-                                  : p.time === "year"
+                                  : p.time === "year",
                               );
 
                               if (price?.priceId) {
@@ -266,15 +331,15 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
                                       ? (data.price.month as string)
                                       : (data.price.year as string),
                                   },
-                                  members
+                                  members,
                                 );
                               }
                             }}
                             className={`w-full ${
                               school.plan === data.mainTitle
-                                ? "second-button text-black border"
+                                ? "second-button border text-black"
                                 : "main-button text-white"
-                            }  rounded-lg py-3 font-semibold`}
+                            } rounded-lg py-3 font-semibold`}
                           >
                             {school.plan === data.mainTitle
                               ? "Update Members"
@@ -285,12 +350,12 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
                         <button
                           onClick={() => {
                             const prices = subscriptions.data.filter(
-                              (s) => s.title === data.product
+                              (s) => s.title === data.product,
                             );
                             const price = prices.find((p) =>
                               monthprice
                                 ? p.time === "month"
-                                : p.time === "year"
+                                : p.time === "year",
                             );
 
                             if (price?.priceId) {
@@ -303,16 +368,16 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
                                     ? (data.price.month as string)
                                     : (data.price.year as string),
                                 },
-                                1
+                                1,
                               );
                             }
                           }}
                           disabled={school.plan === data.mainTitle}
                           className={`w-full ${
                             school.plan === data.mainTitle
-                              ? "second-button text-black border"
+                              ? "second-button border text-black"
                               : "main-button text-white"
-                          }  rounded-lg py-3 font-semibold`}
+                          } rounded-lg py-3 font-semibold`}
                         >
                           {school.plan === data.mainTitle
                             ? "You are on this plan"
@@ -329,7 +394,7 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
                     className={
                       index === 0
                         ? "w-40"
-                        : "h-7 flex justify-between lg:justify-center flex-row-reverse"
+                        : "flex h-7 flex-row-reverse justify-between lg:justify-center"
                     }
                   >
                     <span className="text-sm font-semibold text-[#60a5fa]">
@@ -338,7 +403,7 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
                           <RightIcon bgcolor={`#365CCE`} />
                         </>
                       ) : (
-                        <span className="font-medium text-sm text-[#101828] ">
+                        <span className="text-sm font-medium text-[#101828]">
                           Basic Feature
                         </span>
                       )}
@@ -353,11 +418,11 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
                     className={
                       index === 0
                         ? "h-5 lg:w-60"
-                        : "h-6 text-center flex justify-between lg:justify-center flex-row-reverse"
+                        : "flex h-6 flex-row-reverse justify-between text-center lg:justify-center"
                     }
                   >
-                    <span className="font-medium text-sm text-[#101828]">
-                      {data.Users}
+                    <span className="text-sm font-medium text-[#101828]">
+                      {language.data === "en" ? data.Users : data.Users_th}
                     </span>
                     <span className="lg:hidden">{pricingData[0]["Users"]}</span>
                   </td>
@@ -367,11 +432,15 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
                     className={
                       index === 0
                         ? "h-5"
-                        : "h-7 text-center flex justify-between lg:justify-center flex-row-reverse"
+                        : "flex h-7 flex-row-reverse justify-between text-center lg:justify-center"
                     }
                   >
-                    <span className="font-medium text-sm text-[#101828]">
-                      {data["Total Storage Size"]}
+                    <span className="text-sm font-medium text-[#101828]">
+                      {index === 0 && language.data === "en"
+                        ? data["Total Storage Size"]
+                        : index === 0 && language.data === "th"
+                          ? pricingData[0]["Total Storage Size_th"]
+                          : data["Total Storage Size"]}
                     </span>
                     <span className="lg:hidden">
                       {pricingData[0]["Total Storage Size"]}
@@ -383,7 +452,7 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
                     className={
                       index === 0
                         ? "h-7"
-                        : "h-7 flex justify-between lg:justify-center flex-row-reverse"
+                        : "flex h-7 flex-row-reverse justify-between lg:justify-center"
                     }
                   >
                     {data.Support === true ? (
@@ -391,8 +460,10 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
                         <RightIcon bgcolor={`#365CCE`} />
                       </>
                     ) : (
-                      <span className="font-medium text-sm text-[#101828]">
-                        {data.Support}
+                      <span className="text-sm font-medium text-[#101828]">
+                        {language.data === "en"
+                          ? data.Support
+                          : data.Support_th}
                       </span>
                     )}
                     <span className="lg:hidden">
@@ -406,11 +477,13 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
                     className={
                       index === 0
                         ? "h-5"
-                        : "h-7 text-center flex justify-between lg:justify-center flex-row-reverse"
+                        : "flex h-7 flex-row-reverse justify-between text-center lg:justify-center"
                     }
                   >
-                    <span className="font-medium text-sm text-[#101828]">
-                      {data.Classroom_Limit}
+                    <span className="text-sm font-medium text-[#101828]">
+                      {language.data === "en"
+                        ? data.Classroom_Limit
+                        : data.Classroom_Limit_th}
                     </span>
                     <span className="lg:hidden">
                       {pricingData[0]["Classroom_Limit"]}
@@ -422,11 +495,13 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
                     className={
                       index === 0
                         ? "h-5"
-                        : "h-7 text-center flex justify-between lg:justify-center flex-row-reverse"
+                        : "flex h-7 flex-row-reverse justify-between text-center lg:justify-center"
                     }
                   >
-                    <span className="font-medium text-sm text-[#101828]">
-                      {data.Subject_Limit}
+                    <span className="text-sm font-medium text-[#101828]">
+                      {language.data === "en"
+                        ? data.Subject_Limit
+                        : data.Subject_Limit_th}
                     </span>
                     <span className="lg:hidden">
                       {pricingData[0]["Subject_Limit"]}

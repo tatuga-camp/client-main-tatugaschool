@@ -62,3 +62,86 @@ export const subjectIsLockedDataLanguage = {
     }
   },
 } as const;
+
+export const SubscriptionDataLanguage = {
+  pricing: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Pricing";
+      case "th":
+        return "ราคา";
+      default:
+        return "Pricing";
+    }
+  },
+  title: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Compare our plans and find yours";
+      case "th":
+        return "เปรียบเทียบระดับสมาชิกต่างๆ ";
+      default:
+        return "Compare our plans and find yours";
+    }
+  },
+  description: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Select a plan that match to your needs!";
+      case "th":
+        return "เลือกแผนที่เหมาะกับความต้องการ";
+      default:
+        return "Select a plan that match to your needs!";
+    }
+  },
+  monthly: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Monthly billing";
+      case "th":
+        return "รายเดือน";
+      default:
+        return "Monthly billing";
+    }
+  },
+  annual: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Annual billing";
+      case "th":
+        return "รายปี";
+      default:
+        return "Annual billing";
+    }
+  },
+  popular: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Popular";
+      case "th":
+        return "ได้รับความนิยม";
+      default:
+        return "Popular";
+    }
+  },
+  per_member_month: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Per member/month";
+      case "th":
+        return "ราคาต่ออคนต่อเดือน";
+      default:
+        return "Per member/month";
+    }
+  },
+  per_member_year: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Per member/year";
+      case "th":
+        return "ราคาต่ออคนต่อปี";
+      default:
+        return "Per member/year";
+    }
+  },
+} as const;
