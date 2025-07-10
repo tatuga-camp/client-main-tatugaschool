@@ -22,6 +22,7 @@ import {
 import {
   useGetAttendanceRowByTableId,
   useGetAttendancesTable,
+  useGetLanguage,
   useGetStudentOnSubject,
 } from "../../react-query";
 import {
@@ -35,6 +36,7 @@ import AttendanceChecker from "./AttendanceChecker";
 import AttendanceTableCreate from "./AttendanceTableCreate";
 import AttendanceTableSetting from "./AttendanceTableSetting";
 import AttendanceView from "./AttendanceView";
+import { attendanceLanguageData } from "../../data/languages";
 
 const menuAttendances = [
   {
@@ -62,11 +64,9 @@ function Attendance({
   subjectId: string;
   toast: React.RefObject<Toast>;
 }) {
+  const language = useGetLanguage();
   const [triggerCreateAttendanceTable, setTriggerCreateAttendanceTable] =
     React.useState(false);
-  const studentOnSubjects = useGetStudentOnSubject({
-    subjectId,
-  });
   const [triggerSetting, setTriggerSetting] = React.useState(false);
   const tables = useGetAttendancesTable({
     subjectId,
@@ -164,10 +164,10 @@ function Attendance({
       <header className="mx-auto flex w-full flex-col justify-between gap-4 p-3 md:max-w-screen-md md:flex-row md:gap-0 md:px-5 xl:max-w-screen-lg">
         <section className="text-center md:text-left">
           <h1 className="text-2xl font-semibold md:text-3xl">
-            Attendance Data
+            {attendanceLanguageData.title(language.data ?? "en")}
           </h1>
           <span className="text-sm text-gray-400 md:text-base">
-            You can view the attendance data of this subject here.
+            {attendanceLanguageData.description(language.data ?? "en")}
           </span>
         </section>
         <section className="flex flex-col items-center gap-2 md:gap-1 xl:flex-row">
@@ -176,19 +176,19 @@ function Attendance({
             className="main-button flex h-8 w-full items-center justify-center gap-1 py-1 ring-1 ring-blue-600 xl:w-auto"
           >
             <CiViewTable />
-            Create Table
+            {attendanceLanguageData.create(language.data ?? "en")}
           </button>
           <button
             disabled={loading}
             onClick={handleDolwnloadExcel}
-            className="main-button flex h-8 w-28 items-center justify-center gap-1 py-1 ring-1 ring-blue-600"
+            className="main-button flex h-8 w-40 items-center justify-center gap-1 py-1 ring-1 ring-blue-600"
           >
             {loading ? (
               <LoadingSpinner />
             ) : (
               <>
                 <SiMicrosoftexcel />
-                Export
+                {attendanceLanguageData.export(language.data ?? "en")}
               </>
             )}
           </button>
@@ -200,12 +200,12 @@ function Attendance({
             {triggerSetting ? (
               <div className="flex items-center justify-center gap-1">
                 <CiViewTable />
-                View Table
+                {attendanceLanguageData.view(language.data ?? "en")}
               </div>
             ) : (
               <div className="flex items-center justify-center gap-1">
                 <BiCustomize />
-                Customize / Edit
+                {attendanceLanguageData.edit(language.data ?? "en")}
               </div>
             )}
           </button>
