@@ -15,3 +15,4 @@ export * from "./subject";
 export * from "./subjects";
 export * from "./classwork";
 export * from "./grade";
+export * from "./attendance";

@@ -25,6 +25,12 @@ import {
   ResponseGetSubjectBySchoolsService,
   UpdateSubjectService,
 } from "../services";
+import {
+  getSortStudentLocaStorage,
+  removeSortStudentLocalStorage,
+  setSortStudentLocaStorage,
+} from "../utils";
+import { FilterTitle } from "../components/common/Filter";
 
 export function useGetSubject({
   subjectId,
@@ -208,4 +214,72 @@ export function useDeleteSubject() {
     },
   });
   return deleteSubject;
+}
+
+export function useGetSortConfigOnSubject(input: { subjectId: string }) {
+  return useQuery({
+    queryKey: ["sort-config", { subject: input.subjectId }],
+    queryFn: () => {
+      const response = getSortStudentLocaStorage({
+        subjectId: input.subjectId,
+      });
+
+      console.log(response);
+
+      return response;
+    },
+  });
+}
+
+export function useDeleteSortConfigOnSubject() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["delete-sort-config"],
+    mutationFn: (request: { subjectId: string }) => {
+      removeSortStudentLocalStorage({
+        subjectId: request.subjectId,
+      });
+      queryClient.setQueryData(
+        ["sort-config", { subject: request.subjectId }],
+        ():
+          | {
+              title: FilterTitle;
+              orderBy: "asc" | "desc";
+            }
+          | { title: "default" } => {
+          return { title: "default" };
+        },
+      );
+      return Promise.resolve(request);
+    },
+  });
+}
+
+export function useUpdateSortConfigOnSubject() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["update-sort-config"],
+    mutationFn: (request: {
+      subjectId: string;
+      sort: {
+        title: FilterTitle;
+        orderBy: "asc" | "desc";
+      };
+    }) => {
+      setSortStudentLocaStorage({
+        subjectId: request.subjectId,
+        sort: request.sort,
+      });
+      queryClient.setQueryData(
+        ["sort-config", { subject: request.subjectId }],
+        (): {
+          title: FilterTitle;
+          orderBy: "asc" | "desc";
+        } => {
+          return request.sort;
+        },
+      );
+      return Promise.resolve(request);
+    },
+  });
 }

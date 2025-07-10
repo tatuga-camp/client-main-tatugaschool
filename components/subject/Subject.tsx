@@ -12,7 +12,6 @@ import {
   rectSortingStrategy,
   SortableContext,
 } from "@dnd-kit/sortable";
-import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import { Toast } from "primereact/toast";
 import { Nullable } from "primereact/ts-helpers";
@@ -29,17 +28,19 @@ import {
 } from "../../interfaces";
 import {
   useCreateScoreOnStudent,
+  useDeleteSortConfigOnSubject,
   useGetScoreOnStudent,
+  useGetSortConfigOnSubject,
   useGetStudentOnSubject,
   useReorderStudentOnSubject,
+  useUpdateSortConfigOnSubject,
 } from "../../react-query";
-import { SortStudentOnSubjectService } from "../../services";
 import Calendar from "../common/Calendar";
 import Filter, { FilterTitle } from "../common/Filter";
+import PopupLayout from "../layout/PopupLayout";
 import StudentCard from "../student/StudentCard";
 import ShowGroups from "./groupOnSubject/ShowGroups";
 import ScorePanel from "./ScorePanel";
-import PopupLayout from "../layout/PopupLayout";
 
 type Props = {
   subjectId: string;
@@ -55,6 +56,11 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
   const studentOnSubjects = useGetStudentOnSubject({
     subjectId: subjectId,
   });
+  const sortConfig = useGetSortConfigOnSubject({
+    subjectId: subjectId,
+  });
+  const updateSortConfig = useUpdateSortConfigOnSubject();
+  const removeSortConfig = useDeleteSortConfigOnSubject();
   const createStudentScore = useCreateScoreOnStudent();
   const [selectScore, setSelectScore] = React.useState<
     { score?: ScoreOnSubject } & { inputScore: number }
@@ -82,6 +88,20 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
     subjectId: subjectId,
   });
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
+
+  useEffect(() => {
+    if (students.length === 0) {
+      return;
+    }
+
+    if (sortConfig.data?.title === "default") {
+      setSelectFilter(() => undefined);
+      handleSortStudent();
+    } else {
+      setSelectFilter(() => sortConfig.data as any);
+      handleSortStudent(sortConfig.data);
+    }
+  }, [sortConfig.data, students]);
 
   const handleDragEnd = useCallback(async (event: DragEndEvent) => {
     try {
@@ -237,6 +257,54 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
       life: 3000,
     });
   };
+
+  const handleSortStudent = (
+    input?:
+      | {
+          title: FilterTitle;
+          orderBy: "asc" | "desc";
+        }
+      | undefined,
+  ) => {
+    if (input?.title === "Sort by Score") {
+      setStudents((prev) => {
+        return prev.sort((a, b) => {
+          if (input.orderBy === "desc") {
+            return b.totalSpeicalScore - a.totalSpeicalScore;
+          } else {
+            return a.totalSpeicalScore - b.totalSpeicalScore;
+          }
+        });
+      });
+    } else if (input?.title === "Sort by Name") {
+      setStudents((prev) => {
+        return prev.sort((a, b) => {
+          if (input.orderBy === "desc") {
+            return b.firstName.localeCompare(a.firstName);
+          } else {
+            return a.firstName.localeCompare(b.firstName);
+          }
+        });
+      });
+    } else if (input?.title === "Sort By Number") {
+      setStudents((prev) => {
+        return prev.sort((a, b) => {
+          if (input.orderBy === "desc") {
+            return Number(b.number) - Number(a.number);
+          } else {
+            return Number(a.number) - Number(b.number);
+          }
+        });
+      });
+    } else {
+      setStudents((prev) => {
+        return prev.sort((a, b) => {
+          return a.order - b.order;
+        });
+      });
+    }
+  };
+
   return (
     <div className="flex w-full flex-col items-center gap-5">
       {triggerChooseScore && (
@@ -280,45 +348,21 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
           <Calendar onValue={(value) => setDates(value)} value={dates} />
         </div>
         <Filter
-          onValue={(event) => {
-            if (event?.title === "Sort by Score") {
-              setStudents((prev) => {
-                return prev.sort((a, b) => {
-                  if (event.orderBy === "desc") {
-                    return b.totalSpeicalScore - a.totalSpeicalScore;
-                  } else {
-                    return a.totalSpeicalScore - b.totalSpeicalScore;
-                  }
-                });
+          value={selectFilter}
+          onClick={(value) => {
+            setSelectFilter(value);
+            if (value) {
+              updateSortConfig.mutate({
+                subjectId: subjectId,
+                sort: {
+                  title: value.title,
+                  orderBy: value.orderBy,
+                },
               });
-            } else if (event?.title === "Sort by Name") {
-              setStudents((prev) => {
-                return prev.sort((a, b) => {
-                  if (event.orderBy === "desc") {
-                    return b.firstName.localeCompare(a.firstName);
-                  } else {
-                    return a.firstName.localeCompare(b.firstName);
-                  }
-                });
-              });
-            } else if (event?.title === "Sort By Number") {
-              setStudents((prev) => {
-                return prev.sort((a, b) => {
-                  if (event.orderBy === "desc") {
-                    return Number(b.number) - Number(a.number);
-                  } else {
-                    return Number(a.number) - Number(b.number);
-                  }
-                });
-              });
-            } else if (!event) {
-              setStudents((prev) => {
-                return prev.sort((a, b) => {
-                  return a.order - b.order;
-                });
-              });
+            } else {
+              handleSortStudent();
+              removeSortConfig.mutate({ subjectId });
             }
-            setSelectFilter(event);
           }}
         />
       </header>
