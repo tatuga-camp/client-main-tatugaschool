@@ -1,9 +1,5 @@
-import React, { memo, ReactNode, use, useEffect, useRef } from "react";
-import {
-  FaSortAmountDown,
-  FaSortAmountDownAlt,
-  FaSortAmountUp,
-} from "react-icons/fa";
+import React, { memo, useEffect, useRef } from "react";
+import { FaSortAmountDown, FaSortAmountUp } from "react-icons/fa";
 import { IoFilterSharp } from "react-icons/io5";
 import useClickOutside from "../../hook/useClickOutside";
 
@@ -26,11 +22,12 @@ const menuFilter: {
 ];
 export type FilterTitle = "Sort by Score" | "Sort by Name" | "Sort By Number";
 type Props = {
-  onValue: (
-    value: { title: FilterTitle; orderBy: "asc" | "desc" } | undefined
+  onClick: (
+    value: { title: FilterTitle; orderBy: "asc" | "desc" } | undefined,
   ) => void;
+  value: { title: FilterTitle; orderBy: "asc" | "desc" } | undefined;
 };
-function Filter({ onValue }: Props) {
+function Filter({ value, onClick }: Props) {
   const [filter, setFilter] = React.useState<
     {
       title: FilterTitle;
@@ -41,32 +38,45 @@ function Filter({ onValue }: Props) {
 
   const [activeShow, setActiveShow] = React.useState(false);
 
-  const [selectFilter, setSelectFilter] = React.useState<{
-    title: FilterTitle;
-    orderBy: "asc" | "desc";
-  }>();
+  const [selectFilter, setSelectFilter] = React.useState<
+    | {
+        title: FilterTitle;
+        orderBy: "asc" | "desc";
+      }
+    | undefined
+  >(value);
 
   useEffect(() => {
-    onValue(selectFilter);
-  }, [selectFilter]);
+    setSelectFilter(value);
+    if (value) {
+      setFilter((prev) => {
+        return prev.map((f) => {
+          if (f.title === value.title) {
+            return {
+              ...f,
+              orderBy: value.orderBy,
+            };
+          }
+          return f;
+        });
+      });
+    }
+  }, [value]);
 
   useClickOutside(filterRef, () => {
     setActiveShow(false);
   });
 
   return (
-    <div ref={filterRef} className="h-full relative">
+    <div ref={filterRef} className="relative h-full">
       <button
         onClick={() => setActiveShow((prev) => !prev)}
-        className="flex items-center h-full active:bg-gray-300/70 transition
-       justify-center gap-1 px-5 py-1 rounded-md  hover:bg-gray-300/50"
+        className="flex h-full items-center justify-center gap-1 rounded-md px-5 py-1 transition hover:bg-gray-300/50 active:bg-gray-300/70"
       >
         <IoFilterSharp /> Filter
       </button>
       <div
-        className={`   bg-white drop-shadow-md  transition-height
-        ${activeShow ? "w-40 h-40" : " w-40 h-0"} overflow-clip
-            absolute rounded-md pb-0  top-14 z-10 flex flex-col `}
+        className={`bg-white drop-shadow-md transition-height ${activeShow ? "h-40 w-40" : "h-0 w-40"} absolute top-14 z-10 flex flex-col overflow-clip rounded-md pb-0`}
       >
         {filter.map((menu, index) => (
           <button
@@ -83,6 +93,10 @@ function Filter({ onValue }: Props) {
                   }
                 });
               });
+              onClick({
+                title: menu.title,
+                orderBy: menu.orderBy === "asc" ? "desc" : "asc",
+              });
               setSelectFilter(() => {
                 return {
                   ...menu,
@@ -93,9 +107,9 @@ function Filter({ onValue }: Props) {
             key={index}
             className={`flex ${
               menu.title === selectFilter?.title
-                ? " gradient-bg text-white"
+                ? "gradient-bg text-white"
                 : "bg-white hover:bg-gray-300/50"
-            }  py-2 px-2 items-center text-sm justify-between  gap-1 `}
+            } items-center justify-between gap-1 px-2 py-2 text-sm`}
           >
             {menu.title}
             {menu?.orderBy === "desc" ? (
@@ -107,10 +121,11 @@ function Filter({ onValue }: Props) {
         ))}
         <button
           onClick={() => {
+            onClick(undefined);
             setSelectFilter(undefined);
           }}
-          className={`flex py-2 px-2  items-center ${
-            !selectFilter ? "g gradient-bg text-white" : " hover:bg-gray-300/50"
+          className={`flex items-center px-2 py-2 ${
+            !selectFilter ? "g gradient-bg text-white" : "hover:bg-gray-300/50"
           } gap-1`}
         >
           Clear Filter
