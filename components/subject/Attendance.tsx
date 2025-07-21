@@ -100,7 +100,6 @@ function Attendance({
       const response = await ExportAttendanceService({ subjectId });
       const link = document.createElement("a");
       link.href = response;
-      link.download = `attendance.xlsx`;
       link.click();
       setLoading(false);
     } catch (error) {

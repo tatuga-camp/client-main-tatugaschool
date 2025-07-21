@@ -55,13 +55,10 @@ function Grade({
   const handleExportExcel = async () => {
     try {
       setLoading(true);
-
       const response = await ExportAssignmentService({ subjectId });
       const link = document.createElement("a");
       link.href = response;
-      link.download = `grade.xlsx`;
       link.click();
-
       setLoading(false);
     } catch (error) {
       setLoading(false);
