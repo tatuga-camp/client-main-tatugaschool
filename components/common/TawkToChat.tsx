@@ -41,7 +41,7 @@ const TawkToChat = ({ school, user }: TawkToChatProps) => {
             },
             function (error) {
               console.error("Tawk setAttributes Error:", error);
-            }
+            },
           );
           window.Tawk_API.addTags([`School: ${school.id}`], function (error) {
             console.error("Tawk tag error:", error);

@@ -28,6 +28,7 @@ export const LoginForm = () => {
         },
       });
       const response = await SignInService({ email, password });
+      // server already set cookie
       // setAccessToken({ access_token: response.accessToken });
       // setRefreshToken({ refresh_token: response.refreshToken });
       router.push(response.redirectUrl);
@@ -79,30 +80,29 @@ export const LoginForm = () => {
 
   return (
     <form
-      className="bg-white p-10 w-96 
-      rounded-lg shadow-[0_12px_24px_rgba(145,158,171,0.12)] text-center"
+      className="w-96 rounded-lg bg-white p-10 text-center shadow-[0_12px_24px_rgba(145,158,171,0.12)]"
       onSubmit={handleLogin}
     >
-      <h2 className="text-[24px] font-bold mb-[40px]">
+      <h2 className="mb-[40px] text-[24px] font-bold">
         {signInData.title(language.data ?? "en")}
       </h2>
       {router.query?.error && (
-        <span className="text-red-700 text-sm">
+        <span className="text-sm text-red-700">
           Error: {router.query?.error}
         </span>
       )}
-      <span className="text-gray-500 text-sm">
+      <span className="text-sm text-gray-500">
         ({signInData.teacherOnly(language.data ?? "en")})
       </span>
 
-      <div className="flex flex-col gap-3  w-full">
+      <div className="flex w-full flex-col gap-3">
         <input
           type="email"
           placeholder={signInData.inputEmail(language.data ?? "en")}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="main-input w-full h-10"
+          className="main-input h-10 w-full"
         />
         <Password
           feedback={false}
@@ -114,18 +114,18 @@ export const LoginForm = () => {
       </div>
       <Link
         href={"/auth/forget-password"}
-        className="block text-left mt-2 hover:underline text-[14px] text-[#6E6E6E] mb-[40px]"
+        className="mb-[40px] mt-2 block text-left text-[14px] text-[#6E6E6E] hover:underline"
       >
         {signInData.forgetPassword(language.data ?? "en")}
       </Link>
 
       <div className="flex flex-col gap-3">
-        <button type="submit" className="w-full main-button p-2">
+        <button type="submit" className="main-button w-full p-2">
           {signInData.loginButton(language.data ?? "en")}
         </button>
         <button
           onClick={handleGoogleLogin}
-          className="second-button border gap-2 flex items-center justify-center"
+          className="second-button flex items-center justify-center gap-2 border"
         >
           <FcGoogle />
           {signInData.googleButton(language.data ?? "en")}

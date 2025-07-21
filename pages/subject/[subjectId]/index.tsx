@@ -6,9 +6,8 @@ import { useRouter } from "next/router";
 import { Toast } from "primereact/toast";
 import React, { useCallback, useEffect, useState } from "react";
 import { CiCircleInfo } from "react-icons/ci";
-import { IoMdClose } from "react-icons/io";
 import { IoQrCode } from "react-icons/io5";
-import { MdFullscreen, MdFullscreenExit, MdLock, MdMenu } from "react-icons/md";
+import { MdLock, MdMenu } from "react-icons/md";
 import { SlPicture } from "react-icons/sl";
 import Swal from "sweetalert2";
 import DefaultLayout from "../../../components/layout/DefaultLayout";
@@ -29,6 +28,7 @@ import SilderPicker from "../../../components/subject/SilderPicker";
 import StopWatch from "../../../components/subject/StopWatch";
 import Subject from "../../../components/subject/Subject";
 import { defaultBlurHash, MenuSubject } from "../../../data";
+import { subjectDataLanguage } from "../../../data/languages";
 import { useSound } from "../../../hook";
 import useClickOutside from "../../../hook/useClickOutside";
 import { ErrorMessages, StudentOnSubject } from "../../../interfaces";
@@ -52,7 +52,6 @@ import {
   getRefetchtoken,
   localStorageGetRemoveRandomStudents,
 } from "../../../utils";
-import { subjectDataLanguage } from "../../../data/languages";
 type Props = {
   subjectId: string;
 };
@@ -301,10 +300,11 @@ function Index({ subjectId }: Props) {
             />
           </PopupLayout>
         )}
-        {triggerInviteTeacher && (
+        {triggerInviteTeacher && subject.data && (
           <PopupLayout onClose={() => setTriggerInviteTeacher(false)}>
             <div className="rounded-md border">
               <InviteTeacher
+                schoolId={subject.data?.schoolId}
                 setTrigger={setTriggerInviteTeacher}
                 subjectId={subjectId}
               />

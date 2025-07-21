@@ -56,20 +56,20 @@ const VerifyEmailPage = ({ token }: { token: string | null }) => {
       <Head>
         <title>Verify Email</title>
       </Head>
-      <div className="flex flex-col items-center justify-center min-h-screen bg-[#F7F7F9] px-4 py-10">
+      <div className="flex min-h-screen flex-col items-center justify-center bg-[#F7F7F9] px-4 py-10">
         <AuthHeader />
         <div className="flex flex-col items-center text-center">
           {verificationStatus === "success" && (
             <>
-              <h2 className="text-5xl font-bold text-green-600 mb-4">
+              <h2 className="mb-4 text-5xl font-bold text-green-600">
                 Your Email Has Been Verified
               </h2>
-              <p className="text-[#6E6E6E] mb-8 text-lg">
+              <p className="mb-8 text-lg text-[#6E6E6E]">
                 Please click the button below to sign in again.
               </p>
               <Link
                 href={"/auth/sign-in"}
-                className="p-4 bg-[#5F3DC4] text-white rounded-lg font-semibold hover:bg-[#482ab4] transition duration-300"
+                className="rounded-lg bg-[#5F3DC4] p-4 font-semibold text-white transition duration-300 hover:bg-[#482ab4]"
               >
                 Sign In
               </Link>
@@ -77,20 +77,20 @@ const VerifyEmailPage = ({ token }: { token: string | null }) => {
           )}
           {verificationStatus === "pending" && (
             <>
-              <h2 className="text-5xl animate-pulse font-bold text-blue-600 mb-4">
+              <h2 className="mb-4 animate-pulse text-5xl font-bold text-blue-600">
                 Verifying Your Email..
               </h2>
-              <p className="text-[#6E6E6E] mb-8 text-lg">
+              <p className="mb-8 text-lg text-[#6E6E6E]">
                 Please wait while we verify your email.
               </p>
             </>
           )}
           {verificationStatus === "no-token" && (
             <>
-              <h2 className="text-5xl font-bold flex items-center justify-center gap-1 text-red-600 mb-4">
+              <h2 className="mb-4 flex items-center justify-center gap-1 text-5xl font-bold text-red-600">
                 No Token Found <FiXCircle />
               </h2>
-              <p className="text-[#6E6E6E] mb-8 text-lg">
+              <p className="mb-8 text-lg text-[#6E6E6E]">
                 Please resend the email again or contact admin.
               </p>
             </>
@@ -98,10 +98,10 @@ const VerifyEmailPage = ({ token }: { token: string | null }) => {
 
           {verificationStatus === "fail" && (
             <>
-              <h2 className="text-5xl font-bold text-red-500 mb-4">
+              <h2 className="mb-4 text-5xl font-bold text-red-500">
                 Email Validation Fail
               </h2>
-              <p className="text-[#6E6E6E] mb-8 text-lg">
+              <p className="mb-8 text-lg text-[#6E6E6E]">
                 Please resend the email again or contact admin.
               </p>
             </>

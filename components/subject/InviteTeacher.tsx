@@ -1,29 +1,33 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { ProgressSpinner } from "primereact/progressspinner";
 import React, { useEffect } from "react";
 import { IoMdClose } from "react-icons/io";
-import { useGetTeacherOnSubject, useGetUser } from "../../react-query";
-import ListMemberCircle from "../member/ListMemberCircle";
-import ListMembers from "../member/ListMembers";
-import { GoChevronDown } from "react-icons/go";
-import useClickOutside from "../../hook/useClickOutside";
-import { ErrorMessages, MemberRole, TeacherOnSubject } from "../../interfaces";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { defaultBlurHash, ListSubjectRoles } from "../../data";
+import { MemberOnSchool, MemberRole, TeacherOnSubject } from "../../interfaces";
+import {
+  useGetMemberOnSchoolBySchool,
+  useGetTeacherOnSubject,
+  useGetUser,
+} from "../../react-query";
 import {
   CreateTeacherOnSubjectService,
   RequestCreateTeacherOnSubjectService,
   RequestUpdateTeacherOnSubjectService,
   UpdateTeacherOnSubjectService,
 } from "../../services";
-import Swal from "sweetalert2";
-import { ProgressSpinner } from "primereact/progressspinner";
 import DropdownRole from "../common/DropdownRole";
-import { ListSubjectRoles } from "../../data";
+import ListMemberCircle from "../member/ListMemberCircle";
+import ListMembers from "../member/ListMembers";
+import { decodeBlurhashToCanvas, levenshteinDistance } from "../../utils";
+import Image from "next/image";
 
 type Props = {
   subjectId: string;
+  schoolId: string;
   setTrigger?: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-function InviteTeacher({ subjectId, setTrigger }: Props) {
+function InviteTeacher({ subjectId, setTrigger, schoolId }: Props) {
   const user = useGetUser();
   const teacherOnSubjects = useGetTeacherOnSubject({
     subjectId,
@@ -31,6 +35,12 @@ function InviteTeacher({ subjectId, setTrigger }: Props) {
   const queryClient = useQueryClient();
   const [triggerChangeRole, setTriggerChangeRole] = React.useState(false);
   const [selectRole, setSelectRole] = React.useState<MemberRole>("ADMIN");
+  const [suggestMembers, setSuggestMembers] = React.useState<MemberOnSchool[]>(
+    [],
+  );
+  const memberOnSchools = useGetMemberOnSchoolBySchool({
+    schoolId: schoolId,
+  });
   const [email, setEmail] = React.useState<string>("");
   const createTeacherOnSubject = useMutation({
     mutationKey: ["create-teacher-on-subject"],
@@ -41,7 +51,7 @@ function InviteTeacher({ subjectId, setTrigger }: Props) {
         ["teacherOnSubject", { subjectId: subjectId }],
         (oldData: TeacherOnSubject[]) => {
           return [...oldData, data];
-        }
+        },
       );
     },
   });
@@ -60,7 +70,7 @@ function InviteTeacher({ subjectId, setTrigger }: Props) {
             }
             return teacher;
           });
-        }
+        },
       );
     },
   });
@@ -94,7 +104,7 @@ function InviteTeacher({ subjectId, setTrigger }: Props) {
             role: teacher.role,
             userId: teacher.userId,
           };
-        })
+        }),
       );
     }
   }, [teacherOnSubjects.data]);
@@ -133,15 +143,18 @@ function InviteTeacher({ subjectId, setTrigger }: Props) {
       console.error(error);
     }
   };
+
   return (
-    <div className="w-full sm:w-max h-[30rem] flex flex-col items-center rounded-md justify-start bg-white">
-      <header className="w-full p-3 sm:p-5 flex justify-between border-b pb-2 sm:pb-3">
+    <div
+      className={`flex h-[30rem] w-full flex-col items-center justify-start rounded-md ${suggestMembers.length > 0 ? "bg-gray-200" : "bg-white"} sm:w-max`}
+    >
+      <header className="flex w-full justify-between border-b p-3 pb-2 sm:p-5 sm:pb-3">
         <div className="flex items-center gap-1">
-          <h1 className="text-base sm:text-lg font-semibold">
+          <h1 className="text-base font-semibold sm:text-lg">
             Invite Co-Teacher
           </h1>
           {teacherOnSubjects.isLoading ? (
-            <div className="w-8 sm:w-10 h-2 sm:h-3 rounded-md bg-gray-300/50 animate-pulse"></div>
+            <div className="h-2 w-8 animate-pulse rounded-md bg-gray-300/50 sm:h-3 sm:w-10"></div>
           ) : (
             teacherOnSubjects.data && (
               <div>
@@ -156,29 +169,54 @@ function InviteTeacher({ subjectId, setTrigger }: Props) {
               document.body.style.overflow = "auto";
               setTrigger(false);
             }}
-            className="text-base sm:text-lg hover:bg-gray-300/50 w-5 sm:w-6 h-5 sm:h-6 rounded flex items-center justify-center font-semibold"
+            className="flex h-5 w-5 items-center justify-center rounded text-base font-semibold hover:bg-gray-300/50 sm:h-6 sm:w-6 sm:text-lg"
           >
             <IoMdClose />
           </button>
         )}
       </header>
-      <main className="w-full flex flex-col items-center justify-center gap-3 sm:gap-5 p-3 sm:p-5">
+      <main className="flex w-full flex-col items-center justify-center gap-3 p-3 sm:gap-5 sm:p-5">
         <form
           onSubmit={handleSummit}
-          className="w-full flex flex-col items-center justify-center gap-1"
+          className="flex w-full flex-col items-center justify-center gap-1"
         >
-          <label className="w-full flex flex-col items-start justify-start gap-1">
+          <label className="flex w-full flex-col items-start justify-start gap-1">
             <span className="text-sm font-semibold">Invite With Email</span>
-            <div className="w-full flex gap-2">
+            <div className="flex w-full gap-2">
               <div className="relative w-full sm:w-96">
                 <input
+                  disabled={memberOnSchools.isLoading}
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    if (!memberOnSchools.data) {
+                      return;
+                    }
+                    setEmail(e.target.value);
+                    if (e.target.value === "") {
+                      setSuggestMembers([]);
+                    } else {
+                      setSuggestMembers(() =>
+                        memberOnSchools.data
+                          .map((member) => ({
+                            ...member,
+                            distance: levenshteinDistance(
+                              e.target.value,
+                              member.email,
+                            ),
+                          }))
+                          .sort((a, b) => a.distance - b.distance)
+                          .slice(0, 3),
+                      );
+                    }
+                  }}
                   required
                   type="email"
-                  className="main-input w-full sm:w-96 pr-28"
+                  placeholder={
+                    memberOnSchools.isLoading ? "Loading.." : "Enter Email"
+                  }
+                  className="main-input w-full pr-28 sm:w-96"
                 />
-                <div className="absolute top-2 right-1 m-auto">
+                <div className="absolute right-1 top-2 m-auto">
                   <DropdownRole
                     setSelectRole={setSelectRole}
                     selectRole={selectRole}
@@ -187,16 +225,52 @@ function InviteTeacher({ subjectId, setTrigger }: Props) {
                     listRoles={ListSubjectRoles}
                   />
                 </div>
+                {suggestMembers.length > 0 && (
+                  <ul className="absolute top-12 z-40 h-max w-96 overflow-hidden rounded-xl border bg-white hover:ring-1">
+                    {suggestMembers.map((member, index) => (
+                      <li
+                        key={index}
+                        onClick={() => {
+                          setEmail(member.email);
+                          setSuggestMembers([]);
+                        }}
+                        className="flex h-14 items-center justify-start gap-3 border-b p-3 hover:cursor-pointer hover:bg-gray-200"
+                      >
+                        <div className="relative h-10 w-10 overflow-hidden rounded-md ring-1 ring-black">
+                          <Image
+                            src={member.photo}
+                            fill
+                            sizes="(max-width: 768px) 100vw, 33vw"
+                            placeholder="blur"
+                            blurDataURL={decodeBlurhashToCanvas(
+                              member.blurHash ?? defaultBlurHash,
+                            )}
+                            alt="logo tatuga school"
+                            className="object-cover"
+                          />
+                        </div>
+                        <div className="flex flex-col">
+                          <h1 className="text-sm font-semibold">
+                            {member.email}
+                          </h1>
+                          <span className="text-xs">
+                            {member.firstName} {member.lastName}
+                          </span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
               <button
                 disabled={createTeacherOnSubject.isPending}
-                className="main-button items-center flex justify-center w-16 sm:w-20 text-sm"
+                className="main-button flex w-16 items-center justify-center text-sm sm:w-20"
               >
                 {createTeacherOnSubject.isPending ? (
                   <ProgressSpinner
                     animationDuration="1s"
                     style={{ width: "20px" }}
-                    className="w-5 h-5"
+                    className="h-5 w-5"
                     strokeWidth="8"
                   />
                 ) : (
@@ -205,16 +279,16 @@ function InviteTeacher({ subjectId, setTrigger }: Props) {
               </button>
             </div>
           </label>
-          <div className="w-full flex">
-            <div className="text-xs break-words max-w-full sm:max-w-96 max-h-10 text-red-600">
+          <div className="flex w-full">
+            <div className="max-h-10 max-w-full break-words text-xs text-red-600 sm:max-w-96">
               {createTeacherOnSubject.error &&
                 createTeacherOnSubject.error.message}
             </div>
           </div>
         </form>
 
-        <div className="w-full mt-3 sm:mt-5">
-          <h2 className="font-semibold text-sm">Current Co-Teachers</h2>
+        <div className="mt-3 w-full sm:mt-5">
+          <h2 className="text-sm font-semibold">Current Co-Teachers</h2>
           {user.data && teacherOnSubjects.data && members && (
             <ListMembers
               listRoles={ListSubjectRoles}
