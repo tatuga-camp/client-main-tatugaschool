@@ -109,12 +109,9 @@ function ScorePanel({
                       } active:gradient-bg group relative flex w-32 flex-col items-center justify-center gap-2 rounded-md p-2 transition hover:bg-secondary-color`}
                     >
                       <div className="relative h-10 w-10 rounded-lg">
-                        <Image
+                        <img
                           src={score.icon}
                           alt={score.title}
-                          placeholder="blur"
-                          blurDataURL={decodeBlurhashToCanvas(score.blurHash)}
-                          fill
                           sizes="(max-width: 768px) 100vw, 33vw"
                           className="object-contain"
                         />
