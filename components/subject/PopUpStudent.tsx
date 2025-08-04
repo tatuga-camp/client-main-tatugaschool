@@ -6,7 +6,7 @@ import { IoMdClose } from "react-icons/io";
 import { MdImage } from "react-icons/md";
 import { RxAvatar } from "react-icons/rx";
 import Swal from "sweetalert2";
-import { studentAvatars } from "../../data";
+import { defaultBlurHash, studentAvatars } from "../../data";
 import { useSound } from "../../hook";
 import {
   ErrorMessages,
@@ -70,6 +70,7 @@ function PopUpStudent({ student, setSelectStudent, toast }: Props) {
         failSound?.play();
       }
       showSuccess();
+      handleCloseModal();
     } catch (error) {
       console.log(error);
       let result = error as ErrorMessages;
@@ -158,6 +159,7 @@ function PopUpStudent({ student, setSelectStudent, toast }: Props) {
           onUpdatePhoto={(url) => setImage(url)}
           toast={toast}
           studentOnSubject={student}
+          onClose={() => setSetTriggerAvatar(false)}
         />
       )}
     </section>
@@ -170,11 +172,13 @@ type AvatarSettingProps = {
   studentOnSubject: StudentOnSubject;
   toast: RefObject<Toast>;
   onUpdatePhoto: (url: string) => void;
+  onClose: () => void;
 };
 function AvatarSetting({
   studentOnSubject,
   toast,
   onUpdatePhoto,
+  onClose,
 }: AvatarSettingProps) {
   const [selectAvatar, setSelectAvatar] = useState<string>(
     studentOnSubject.photo,
@@ -196,26 +200,36 @@ function AvatarSetting({
       setLoading(true);
       const file = await urlToFile(selectAvatar);
       if (!file) {
-        setLoading(false);
-        return;
+        const update = await updateStudentOnSubject.mutateAsync({
+          query: {
+            id: studentOnSubject.id,
+          },
+          data: {
+            photo: selectAvatar,
+            blurHash: defaultBlurHash,
+          },
+        });
+        onUpdatePhoto(update.photo);
+      } else {
+        const blurHash = await generateBlurHash(file);
+        const update = await updateStudentOnSubject.mutateAsync({
+          query: {
+            id: studentOnSubject.id,
+          },
+          data: {
+            photo: selectAvatar,
+            blurHash: blurHash,
+          },
+        });
+        onUpdatePhoto(update.photo);
       }
-      const blurHash = await generateBlurHash(file);
-      const update = await updateStudentOnSubject.mutateAsync({
-        query: {
-          id: studentOnSubject.id,
-        },
-        data: {
-          photo: selectAvatar,
-          blurHash: blurHash,
-        },
-      });
+
       toast.current?.show({
         severity: "success",
         summary: "Success",
         detail: "Update Success",
         life: 3000,
       });
-      onUpdatePhoto(update.photo);
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -270,7 +284,9 @@ function AvatarSetting({
       <footer className="flex h-20 w-full items-center justify-end gap-2 border-t">
         <div className="flex items-center justify-center gap-3">
           <button
-            onClick={() => {}}
+            onClick={() => {
+              onClose();
+            }}
             type="button"
             className="second-button flex w-40 items-center justify-center gap-1 border"
           >
