@@ -373,19 +373,30 @@ export const StudentReportHTML = React.forwardRef<
           </tr>
         </thead>
         <tbody>
-          {data.academicPerformance.assessments.map((a, i: number) => (
-            <tr
-              key={i}
-              style={{ background: i % 2 === 0 ? "#fff" : "#f5f6fa" }}
-            >
-              <td style={{ padding: "8px 12px" }}>
-                {i + 1}. {a.item}
-              </td>
-              <td style={{ padding: "8px 12px", textAlign: "right" }}>
-                {a.maxScore === "-" ? a.score : `${a.score} / ${a.maxScore}`}
-              </td>
-            </tr>
-          ))}
+          {data.academicPerformance.assessments.map((a, i: number) => {
+            let score = a.score;
+            const maxScore = Number(a.maxScore);
+            if (a.weight !== null) {
+              const originalScore =
+                (score > maxScore ? maxScore : score) / maxScore;
+              score = originalScore * a.weight;
+            }
+            return (
+              <tr
+                key={i}
+                style={{ background: i % 2 === 0 ? "#fff" : "#f5f6fa" }}
+              >
+                <td style={{ padding: "8px 12px" }}>
+                  {i + 1}. {a.item}
+                </td>
+                <td style={{ padding: "8px 12px", textAlign: "right" }}>
+                  {a.maxScore === "-"
+                    ? score
+                    : `${score} / ${a.weight === null ? a.maxScore : a.weight === 0 ? 0 : a.weight > 0 ? a.weight : a.maxScore}`}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
 

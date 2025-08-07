@@ -71,6 +71,7 @@ export type ResponseGetStudentOnSubjectReportService = {
       item: string;
       score: number;
       maxScore: string;
+      weight: number | null;
     }[];
   };
   skillAssessment: {
