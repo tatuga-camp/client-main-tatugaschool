@@ -258,7 +258,7 @@ function AssignmentLists({
     subjectId: subjectId,
   });
   const [selectClasswork, setSelectClasswork] = useState<
-    (Assignment & { files: FileOnAssignment[] }) | null
+    (Assignment & { files?: FileOnAssignment[] }) | null
   >(null);
   const [loading, setLoading] = useState(false);
 
@@ -279,7 +279,8 @@ function AssignmentLists({
         maxScore: selectClasswork.maxScore,
         beginDate: selectClasswork.beginDate,
       });
-      if (selectClasswork.files.length > 0) {
+
+      if (selectClasswork.files && selectClasswork.files?.length > 0) {
         await Promise.allSettled(
           selectClasswork.files.map((f) =>
             createFiles.mutateAsync({
