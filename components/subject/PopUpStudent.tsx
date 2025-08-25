@@ -3,7 +3,7 @@ import { Toast } from "primereact/toast";
 import React, { memo, RefObject, useEffect, useRef, useState } from "react";
 import { CgSelect } from "react-icons/cg";
 import { IoMdClose } from "react-icons/io";
-import { MdImage } from "react-icons/md";
+import { MdImage, MdPhoto, MdUpload } from "react-icons/md";
 import { RxAvatar } from "react-icons/rx";
 import Swal from "sweetalert2";
 import { defaultBlurHash, studentAvatars } from "../../data";
@@ -20,6 +20,10 @@ import {
 import { generateBlurHash, urlToFile } from "../../utils";
 import LoadingSpinner from "../common/LoadingSpinner";
 import ScorePanel from "./ScorePanel";
+import {
+  getSignedURLTeacherService,
+  UploadSignURLService,
+} from "../../services";
 
 type Props = {
   setSelectStudent: React.Dispatch<
@@ -246,6 +250,60 @@ function AvatarSetting({
     }
   };
 
+  const handleUploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      const file = e.target.files?.[0];
+
+      if (!file) throw new Error("No File Detect");
+      setLoading(true);
+
+      const signURL = await getSignedURLTeacherService({
+        schoolId: studentOnSubject.schoolId,
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+      });
+
+      await UploadSignURLService({
+        signURL: signURL.signURL,
+        file,
+        contentType: file.type,
+      });
+
+      const blurHash = await generateBlurHash(file);
+
+      const update = await updateStudentOnSubject.mutateAsync({
+        query: {
+          id: studentOnSubject.id,
+        },
+        data: {
+          photo: signURL.originalURL,
+          blurHash: blurHash,
+        },
+      });
+      onUpdatePhoto(signURL.originalURL);
+      toast.current?.show({
+        severity: "success",
+        summary: "Success",
+        detail: "Update Success",
+        life: 3000,
+      });
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.log(error);
+      let result = error as ErrorMessages;
+      Swal.fire({
+        title: result.error ? result.error : "Something Went Wrong",
+        text: result.message.toString(),
+        footer: result.statusCode
+          ? "Code Error: " + result.statusCode?.toString()
+          : "",
+        icon: "error",
+      });
+    }
+  };
+
   return (
     <section className="flex h-96 w-full flex-col font-Anuphan">
       <header className="flex w-full flex-col gap-1 border-b pb-1">
@@ -258,6 +316,22 @@ function AvatarSetting({
       </header>
 
       <ul className="grid h-full w-full grid-cols-5 place-items-center gap-2 overflow-auto bg-gray-100 p-3">
+        <label
+          htmlFor="imageUpload"
+          className={`relative flex h-24 w-24 cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-md bg-white hover:scale-105`}
+        >
+          <MdPhoto className="text-5xl" />
+          <span className="text-xs">Upload Photo</span>
+        </label>
+        <input
+          onChange={handleUploadImage}
+          type="file"
+          className="hidden"
+          id="imageUpload"
+          name="image"
+          accept="image/*"
+        />
+
         {studentAvatars.map((url, index) => {
           const isSelected = selectAvatar === url;
 
