@@ -2,7 +2,7 @@ import { ExportAttendanceService } from "@/services";
 import Image from "next/image";
 import { ProgressBar } from "primereact/progressbar";
 import { Toast } from "primereact/toast";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { BiCustomize } from "react-icons/bi";
 import { Bs123, BsQrCode } from "react-icons/bs";
 import { CiViewTable } from "react-icons/ci";
@@ -37,6 +37,7 @@ import AttendanceTableCreate from "./AttendanceTableCreate";
 import AttendanceTableSetting from "./AttendanceTableSetting";
 import AttendanceView from "./AttendanceView";
 import { attendanceLanguageData } from "../../data/languages";
+import AttendanceDowload from "./AttendanceDowload";
 
 const menuAttendances = [
   {
@@ -71,6 +72,8 @@ function Attendance({
   const tables = useGetAttendancesTable({
     subjectId,
   });
+  const [triggerAttendanceDowload, setTriggerAttendanceDowload] =
+    useState(false);
   const [selectAttendance, setSelectAttendance] =
     React.useState<SelectAttendance | null>(null);
   const [selectTable, setSelectTable] = React.useState<
@@ -94,25 +97,6 @@ function Attendance({
     }
   }, [tables.data]);
 
-  const handleDolwnloadExcel = async () => {
-    try {
-      setLoading(true);
-      const response = await ExportAttendanceService({ subjectId });
-      const link = document.createElement("a");
-      link.href = response;
-      link.click();
-      setLoading(false);
-    } catch (error) {
-      setLoading(false);
-      console.error("Failed to download the file", error);
-      toast.current?.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Failed to download the file",
-        life: 3000,
-      });
-    }
-  };
   return (
     <>
       {selectAttendance && selectTable && (
@@ -141,6 +125,18 @@ function Attendance({
             }}
             selectAttendanceRow={selectRow}
             toast={toast}
+          />
+        </PopupLayout>
+      )}
+      {triggerAttendanceDowload && (
+        <PopupLayout onClose={() => setTriggerAttendanceDowload(false)}>
+          <AttendanceDowload
+            toast={toast}
+            subjectId={subjectId}
+            onClose={() => {
+              document.body.style.overflow = "auto";
+              setTriggerAttendanceDowload(false);
+            }}
           />
         </PopupLayout>
       )}
@@ -179,7 +175,9 @@ function Attendance({
           </button>
           <button
             disabled={loading}
-            onClick={handleDolwnloadExcel}
+            onClick={() => {
+              setTriggerAttendanceDowload(true);
+            }}
             className="main-button flex h-8 w-40 items-center justify-center gap-1 py-1 ring-1 ring-blue-600"
           >
             {loading ? (

@@ -104,6 +104,8 @@ export async function CreateAttendanceService(
 
 export type RequestExportAttendanceService = {
   subjectId: string;
+  startDate?: string;
+  endDate?: string;
 };
 
 export async function ExportAttendanceService(
@@ -112,7 +114,8 @@ export async function ExportAttendanceService(
   try {
     const response = await axiosInstance({
       method: "GET",
-      url: `/v1/attendances/export-excel/?subjectId=${input.subjectId}`,
+      url: `/v1/attendances/export-excel/`,
+      params: input,
       responseType: "text",
     });
     return response.data;
