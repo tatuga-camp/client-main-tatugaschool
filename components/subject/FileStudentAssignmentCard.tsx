@@ -193,7 +193,7 @@ function FileCard({ file, onEditImage }: Props) {
             blurDataURL={defaultBlurHash}
             placeholder="blur"
             src={file.body}
-            className="object-cover"
+            className="object-contain"
             fill
             alt={fileName ?? "Image"}
           />
