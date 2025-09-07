@@ -954,7 +954,7 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
           })}
         </div>
         {selectMenu === "Works" && (
-          <ul className="flex h-max min-h-96 w-96 flex-col gap-2">
+          <ul className="grid h-max min-h-96 w-full min-w-96 grid-cols-1 gap-2 rounded-lg bg-gray-100 p-5 xl:grid-cols-2">
             {studentWork?.files?.map((file, index) => {
               return (
                 <FileStudentAssignmentCard

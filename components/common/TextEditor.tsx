@@ -13,12 +13,14 @@ type Props = {
   menubar?: boolean;
   toolbar?: boolean | string;
   schoolId: string;
+  disabled?: boolean;
 };
 function TextEditor({
   value,
   onChange,
   schoolId,
   menubar = true,
+  disabled = false,
   toolbar = "undo redo | formatselect | blocks | " +
     "bold italic backcolor | alignleft aligncenter " +
     "alignright alignjustify | bullist numlist outdent indent | " +
@@ -37,6 +39,7 @@ function TextEditor({
         onEditorChange={(content) => {
           onChange(content);
         }}
+        disabled={disabled}
         init={{
           object_resizing: true,
           link_context_toolbar: true,
@@ -58,14 +61,13 @@ function TextEditor({
 
             input.addEventListener("change", async (e: any) => {
               const file: File = e.target.files[0];
-              const blobUrl = URL.createObjectURL(file);
               const signURL = await getSignedURLTeacherService({
                 fileName: file.name,
                 fileType: file.type,
                 schoolId: schoolId,
                 fileSize: file.size,
               });
-              const upload = await UploadSignURLService({
+              await UploadSignURLService({
                 contentType: file.type,
                 file: file,
                 signURL: signURL.signURL,

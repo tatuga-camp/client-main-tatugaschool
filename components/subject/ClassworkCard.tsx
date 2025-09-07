@@ -9,6 +9,7 @@ import { MdAssignment, MdDragIndicator } from "react-icons/md";
 import { Assignment, FileOnAssignment } from "../../interfaces";
 import { useGetLanguage } from "../../react-query";
 import { classworkCardDataLanguage } from "../../data/languages";
+import TextEditor from "../common/TextEditor";
 
 type PropsClassworkCard = {
   classwork: Assignment & {
@@ -83,25 +84,19 @@ function AssignmentCard({
       ref={sortable.setNodeRef}
       style={inlineStyles}
       {...sortable.attributes}
-      className="w-full h-max flex flex-col transition-height "
+      className="flex h-max w-full flex-col transition-height"
       key={assignemnt.id}
     >
       <div
         onClick={() => onSelect(assignemnt)}
-        className={`flex items-stretch w-full h-40  relative justify-start gap-2
-       overflow-hidden hover:ring   bg-white  rounded-md 
-       ${
-         selectAssignment?.id === assignemnt.id &&
-         !sortable.isDragging &&
-         "rounded-b-none"
-       }
-       `}
+        className={`relative flex h-40 w-full items-stretch justify-start gap-2 overflow-hidden rounded-md bg-white hover:ring ${
+          selectAssignment?.id === assignemnt.id &&
+          !sortable.isDragging &&
+          "rounded-b-none"
+        } `}
       >
         <div
-          className={`p-2 w-24 flex flex-col gap-2 items-center justify-center 
-    h-full   text-2xl text-white
-    ${assignemnt.status === "Draft" ? "bg-gray-400" : "gradient-bg"}
-    `}
+          className={`flex h-full w-24 flex-col items-center justify-center gap-2 p-2 text-2xl text-white ${assignemnt.status === "Draft" ? "bg-gray-400" : "gradient-bg"} `}
         >
           <MdAssignment />
           <span className="text-xs">
@@ -110,11 +105,11 @@ function AssignmentCard({
             ](language.data ?? "en")}
           </span>
         </div>
-        <div className="flex grow  p-2  flex-col gap-2 w-9/12">
-          <div className="font-semibold text-start text-lg border-b max-w-[80%] truncate">
+        <div className="flex w-9/12 grow flex-col gap-2 p-2">
+          <div className="max-w-[80%] truncate border-b text-start text-lg font-semibold">
             {assignemnt.title}
           </div>
-          <div className="text-gray-500 text-xs flex gap-1">
+          <div className="flex gap-1 text-xs text-gray-500">
             {new Date(assignemnt.beginDate).toLocaleDateString(undefined, {
               year: "numeric",
               month: "long",
@@ -123,10 +118,10 @@ function AssignmentCard({
               hour: "numeric",
             })}
           </div>
-          <div className="w-full flex justify-between items-center">
-            <ul className="flex flex-wrap items-end gap-2 w-full">
-              <li className="w-max h-max bg-gray-50  border p-1 rounded-md flex flex-col items-center justify-start ga-2 ">
-                <span className="font-medium max-w-40 truncate text-primary-color text-base">
+          <div className="flex w-full items-center justify-between">
+            <ul className="flex w-full flex-wrap items-end gap-2">
+              <li className="ga-2 flex h-max w-max flex-col items-center justify-start rounded-md border bg-gray-50 p-1">
+                <span className="max-w-40 truncate text-base font-medium text-primary-color">
                   {assignemnt.maxScore.toLocaleString()}
                 </span>
                 <span className="text-xs">
@@ -134,8 +129,8 @@ function AssignmentCard({
                 </span>
               </li>
               {assignemnt.weight !== null && (
-                <li className="w-max h-max bg-gray-50  border p-1 rounded-md flex flex-col items-center justify-start ga-2 ">
-                  <span className="font-medium max-w-40 truncate text-primary-color text-base">
+                <li className="ga-2 flex h-max w-max flex-col items-center justify-start rounded-md border bg-gray-50 p-1">
+                  <span className="max-w-40 truncate text-base font-medium text-primary-color">
                     {assignemnt.weight}%
                   </span>
                   <span className="text-xs">
@@ -144,11 +139,8 @@ function AssignmentCard({
                 </li>
               )}
               {assignemnt.dueDate && (
-                <li
-                  className="w-max h-max bg-gray-50 gap-1  border p-1
-           rounded-md flex  items-center justify-start"
-                >
-                  <span className="font-medium  truncate text-red-700 text-sm">
+                <li className="flex h-max w-max items-center justify-start gap-1 rounded-md border bg-gray-50 p-1">
+                  <span className="truncate text-sm font-medium text-red-700">
                     {new Date(assignemnt.dueDate).toLocaleDateString(
                       undefined,
                       {
@@ -157,7 +149,7 @@ function AssignmentCard({
                         day: "numeric",
                         minute: "numeric",
                         hour: "numeric",
-                      }
+                      },
                     )}
                   </span>
                   <span className="text-xs">
@@ -166,11 +158,8 @@ function AssignmentCard({
                 </li>
               )}
             </ul>
-            <ul className="flex gap-2 ">
-              <li
-                className="lg:w-20 lg:h-20 md:w-16 md:h-16 border border-black
-              rounded-md flex flex-col gap-1 items-center justify-center "
-              >
+            <ul className="flex gap-2">
+              <li className="flex flex-col items-center justify-center gap-1 rounded-md border border-black md:h-16 md:w-16 lg:h-20 lg:w-20">
                 <span className="text-2xl font-semibold">
                   {assignemnt.penddingNumber}
                 </span>
@@ -178,10 +167,7 @@ function AssignmentCard({
                   {classworkCardDataLanguage.NoWork(language.data ?? "en")}
                 </span>
               </li>
-              <li
-                className="lg:w-20 lg:h-20 md:w-16 md:h-16 border border-yellow-400
-              rounded-md flex flex-col gap-1 items-center justify-center "
-              >
+              <li className="flex flex-col items-center justify-center gap-1 rounded-md border border-yellow-400 md:h-16 md:w-16 lg:h-20 lg:w-20">
                 <span className="text-2xl font-semibold">
                   {assignemnt.summitNumber}
                 </span>
@@ -189,10 +175,7 @@ function AssignmentCard({
                   {classworkCardDataLanguage.WaitReview(language.data ?? "en")}
                 </span>
               </li>
-              <li
-                className="lg:w-20 lg:h-20 md:w-16 md:h-16 bg-gradient-to-r text-white from-emerald-400 to-cyan-400
-              rounded-md flex flex-col gap-1 items-center justify-center "
-              >
+              <li className="flex flex-col items-center justify-center gap-1 rounded-md bg-gradient-to-r from-emerald-400 to-cyan-400 text-white md:h-16 md:w-16 lg:h-20 lg:w-20">
                 <span className="text-2xl font-semibold">
                   {assignemnt.reviewNumber}
                 </span>
@@ -207,7 +190,7 @@ function AssignmentCard({
         <div
           {...sortable.listeners}
           style={{ cursor: sortable.isDragging ? "grabbing" : "grab" }}
-          className="w-6 h-10 rounded-md hover:bg-gray-300/50 flex items-center justify-center absolute top-2 right-2 "
+          className="absolute right-2 top-2 flex h-10 w-6 items-center justify-center rounded-md hover:bg-gray-300/50"
         >
           <MdDragIndicator />
         </div>
@@ -215,47 +198,49 @@ function AssignmentCard({
       <div
         className={`${
           selectAssignment?.id === assignemnt.id && !sortable.isDragging
-            ? "h-80  border border-t-0"
+            ? "h-80 border border-t-0"
             : "h-0"
-        } bg-white rounded-md flex flex-col text-start rounded-t-none overflow-hidden w-full transition-height   `}
+        } flex w-full flex-col overflow-hidden rounded-md rounded-t-none bg-white text-start transition-height`}
       >
-        <ul className="flex flex-wrap h-20 p-3 overflow-auto gap-2 w-full">
-          {assignemnt.files?.map((file, index) => {
-            const isImage = file.type.includes("image");
-            const fileName = file.url.split("/").pop();
-            return (
-              <li
-                onClick={() => window.open(file.url, "_blank")}
-                key={index}
-                className="w-max pr-2 text-xs hover:cursor-pointer h-14 hover:bg-gray-100 transition
-                   flex overflow-hidden rounded-md items-center justify-between  bg-white border"
-              >
-                <div className="w-full h-full flex items-center justify-start gap-2">
-                  <div
-                    className="w-16 gradient-bg text-white text-lg flex items-center justify-center
-             border-r h-full"
+        <div className="h-64 overflow-auto p-2">
+          <div className="h-max w-full">
+            <ul className="flex w-full flex-wrap gap-2 p-3">
+              {assignemnt.files?.map((file, index) => {
+                const isImage = file.type.includes("image");
+                const fileName = file.url.split("/").pop();
+                return (
+                  <li
+                    onClick={() => window.open(file.url, "_blank")}
+                    key={index}
+                    className="flex h-14 w-max items-center justify-between overflow-hidden rounded-md border bg-white pr-2 text-xs transition hover:cursor-pointer hover:bg-gray-100"
                   >
-                    {isImage ? <FaRegFileImage /> : <FaRegFile />}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span>{fileName}</span>
-                  </div>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-        <p
-          className={`  overflow-auto
-        ${selectAssignment?.id === assignemnt.id ? "h-44 p-5" : "h-0"}
-        `}
-        >
-          {parse(assignemnt.description)}
-        </p>
-
+                    <div className="flex h-full w-full items-center justify-start gap-2">
+                      <div className="gradient-bg flex h-full w-16 items-center justify-center border-r text-lg text-white">
+                        {isImage ? <FaRegFileImage /> : <FaRegFile />}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span>{fileName}</span>
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+            <p className="h-96 w-full">
+              <TextEditor
+                schoolId={assignemnt.schoolId}
+                disabled={true}
+                toolbar={false}
+                onChange={() => {}}
+                value={assignemnt.description}
+                menubar={false}
+              />
+            </p>
+          </div>
+        </div>
         <Link
           href={`/subject/${subjectId}/assignment/${assignemnt.id}`}
-          className="flex gap-2 border-t  items-center p-2 h-14"
+          className="flex h-14 items-center gap-2 border-t p-2"
         >
           <button className="main-button w-40">View</button>
         </Link>
@@ -297,29 +282,23 @@ function MaterialCard({
       ref={sortable.setNodeRef}
       style={inlineStyles}
       {...sortable.attributes}
-      className="w-full h-full flex flex-col  transition-height"
+      className="flex h-full w-full flex-col transition-height"
       key={material.id}
     >
       <button
         onClick={() => onSelect(material)}
-        className={`flex items-stretch w-full h-40  relative justify-start gap-2
-      overflow-hidden hover:ring     rounded-md 
-      ${
-        selectMaterial?.id === material.id &&
-        !sortable.isDragging &&
-        "rounded-b-none"
-      }
-      `}
+        className={`relative flex h-40 w-full items-stretch justify-start gap-2 overflow-hidden rounded-md hover:ring ${
+          selectMaterial?.id === material.id &&
+          !sortable.isDragging &&
+          "rounded-b-none"
+        } `}
       >
         <div
-          className={`p-2 w-24 flex flex-col gap-2 items-center justify-center 
-      h-full   text-2xl text-white
-      ${
-        material.status === "Draft"
-          ? "bg-gray-400"
-          : "bg-gradient-to-r from-emerald-400 to-cyan-400"
-      }
-      `}
+          className={`flex h-full w-24 flex-col items-center justify-center gap-2 p-2 text-2xl text-white ${
+            material.status === "Draft"
+              ? "bg-gray-400"
+              : "bg-gradient-to-r from-emerald-400 to-cyan-400"
+          } `}
         >
           <BiBook />
 
@@ -330,11 +309,11 @@ function MaterialCard({
             ](language.data ?? "en")}
           </span>
         </div>
-        <div className="flex h-max p-2  flex-col gap-2 w-9/12">
-          <div className="font-semibold text-start text-lg border-b max-w-[80%] truncate">
+        <div className="flex h-max w-9/12 flex-col gap-2 p-2">
+          <div className="max-w-[80%] truncate border-b text-start text-lg font-semibold">
             {material.title}
           </div>
-          <div className="text-gray-500 text-xs flex gap-1">
+          <div className="flex gap-1 text-xs text-gray-500">
             {new Date(material.beginDate).toLocaleDateString(undefined, {
               year: "numeric",
               month: "long",
@@ -343,7 +322,7 @@ function MaterialCard({
               hour: "numeric",
             })}
           </div>
-          <ul className="flex flex-wrap  max-h-20 p-3 overflow-auto gap-2 w-full">
+          <ul className="flex max-h-20 w-full flex-wrap gap-2 overflow-auto p-3">
             {material.files?.map((file, index) => {
               const isImage = file.type.includes("image");
               const fileName = file.url.split("/").pop();
@@ -351,14 +330,10 @@ function MaterialCard({
                 <li
                   onClick={() => window.open(file.url, "_blank")}
                   key={index}
-                  className="w-max pr-2 text-xs hover:cursor-pointer h-14 hover:bg-gray-100 transition
-                   flex overflow-hidden rounded-md items-center justify-between  bg-white border"
+                  className="flex h-14 w-max items-center justify-between overflow-hidden rounded-md border bg-white pr-2 text-xs transition hover:cursor-pointer hover:bg-gray-100"
                 >
-                  <div className="w-full h-full flex items-center justify-start gap-2">
-                    <div
-                      className="w-16 gradient-bg text-white text-lg flex items-center justify-center
-             border-r h-full"
-                    >
+                  <div className="flex h-full w-full items-center justify-start gap-2">
+                    <div className="gradient-bg flex h-full w-16 items-center justify-center border-r text-lg text-white">
                       {isImage ? <FaRegFileImage /> : <FaRegFile />}
                     </div>
                     <div className="flex items-center gap-2">
@@ -373,8 +348,7 @@ function MaterialCard({
         <div
           {...sortable.listeners}
           style={{ cursor: sortable.isDragging ? "grabbing" : "grab" }}
-          className="w-6 h-10 rounded-md hover:bg-gray-300/50 
-      flex items-center justify-center absolute top-2 right-2 "
+          className="absolute right-2 top-2 flex h-10 w-6 items-center justify-center rounded-md hover:bg-gray-300/50"
         >
           <MdDragIndicator />
         </div>
@@ -382,20 +356,25 @@ function MaterialCard({
       <div
         className={`${
           selectMaterial?.id === material.id && !sortable.isDragging
-            ? "h-80  border border-t-0"
+            ? "h-80 border border-t-0"
             : "h-0"
-        } bg-white rounded-md text-start rounded-t-none overflow-hidden w-full transition-height   `}
+        } w-full overflow-hidden rounded-md rounded-t-none bg-white text-start transition-height`}
       >
-        <p
-          className={`  overflow-auto
-        ${selectMaterial?.id === material.id ? "h-60 p-5" : "h-0"}
-        `}
-        >
-          {parse(material.description)}
-        </p>
+        <div className="h-64 overflow-auto p-2">
+          <p className="h-96">
+            <TextEditor
+              schoolId={material.schoolId}
+              disabled={true}
+              toolbar={false}
+              onChange={() => {}}
+              value={material.description}
+              menubar={false}
+            />
+          </p>
+        </div>
         <Link
           href={`/subject/${subjectId}/assignment/${material.id}`}
-          className="flex gap-2 border-t  items-center p-2 h-20"
+          className="flex h-20 items-center gap-2 border-t p-2"
         >
           <button className="main-button w-40">View</button>
         </Link>
