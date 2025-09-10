@@ -2,11 +2,10 @@ import { GradeRule } from "../interfaces";
 
 export function calulateGrade(
   gradeRule: GradeRule[] | undefined,
-  totalScore: number
+  totalScore: number,
 ): string {
   const grade =
-    gradeRule?.find((rule) => totalScore >= rule.min && totalScore <= rule.max)
-      ?.grade || "N/A"; // Default grade if not found
+    gradeRule?.find((rule) => totalScore >= rule.min)?.grade || "N/A"; // Default grade if not found
 
   return grade;
 }
