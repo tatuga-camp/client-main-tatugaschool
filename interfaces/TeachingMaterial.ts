@@ -11,6 +11,7 @@ export type TeachingMaterial = {
   thumbnail?: string;
   blurHash?: string;
   creatorURL: string;
+  canvaURL?: string;
   vector: number[];
   score: number;
 };

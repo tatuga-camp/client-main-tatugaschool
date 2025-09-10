@@ -1,13 +1,11 @@
-import { useEffect, useState } from "react";
-import { FC } from "react";
 import { MemberOnSchool, School } from "@/interfaces";
-import BasicInformationSection from "./BasicInformationSection";
-import MemberSection from "./MemberSection";
-import BillingPlanSection from "./BillingPlanSection";
-import { useGetLanguage, useGetUser } from "../../react-query";
-import { schoolDataLanguage } from "../../data/languages";
 import { useRouter } from "next/router";
-import { MenuSchool } from "../../data";
+import { FC, useEffect, useState } from "react";
+import { schoolDataLanguage } from "../../data/languages";
+import { useGetLanguage, useGetUser } from "../../react-query";
+import BasicInformationSection from "./BasicInformationSection";
+import BillingPlanSection from "./BillingPlanSection";
+import MemberSection from "./MemberSection";
 
 export interface TabsMenuSectionProps {
   school: School;

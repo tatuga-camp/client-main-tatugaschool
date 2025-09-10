@@ -58,6 +58,7 @@ export type RequestCreateTeachingMaterialService = {
   tags: string[];
   accessLevel: Plan;
   creatorURL: string;
+  canvaURL?: string;
 };
 
 type ResponseCreateTeachingMaterialService = TeachingMaterial;
@@ -88,6 +89,7 @@ export type RequestUpdateTeachingMaterialService = {
     tags?: string[];
     accessLevel?: Plan;
     creatorURL?: string;
+    canvaURL?: string;
   };
 };
 

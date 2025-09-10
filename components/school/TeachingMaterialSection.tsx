@@ -14,7 +14,7 @@ import {
   MdTag,
   MdTitle,
 } from "react-icons/md";
-import { SiGooglegemini } from "react-icons/si";
+import { SiCanva, SiGooglegemini } from "react-icons/si";
 import Swal from "sweetalert2";
 import {
   ErrorMessages,
@@ -66,7 +66,6 @@ type Props = {
   teachingMaterial?: TeachingMaterial & { files: FileOnTeachingMaterial[] };
 };
 function TeachingMaterialSection({ onClose, teachingMaterial }: Props) {
-  const user = useGetUser();
   const suggestion = useGetSuggestionTeachingMaterial();
   const create = useCreateTeachingMaterial();
   const update = useUpdateTeachingMaterial();
@@ -84,10 +83,12 @@ function TeachingMaterialSection({ onClose, teachingMaterial }: Props) {
     title: string;
     description: string;
     creatorURL: string;
+    canvaURL: string;
   }>({
     title: teachingMaterial?.title ?? "",
     description: teachingMaterial?.description ?? "",
     creatorURL: teachingMaterial?.creatorURL ?? "",
+    canvaURL: teachingMaterial?.canvaURL ?? "",
   });
   const [selectFiles, setSelectFles] = useState<{ file: File; url?: string }[]>(
     [],
@@ -232,6 +233,9 @@ function TeachingMaterialSection({ onClose, teachingMaterial }: Props) {
         tags: tags,
         creatorURL: teachingMaterialData.creatorURL,
         accessLevel: selectPlan,
+        ...(teachingMaterialData.canvaURL !== "" && {
+          canvaURL: teachingMaterialData.canvaURL,
+        }),
       });
 
       if (selectFiles.length > 0) {
@@ -295,6 +299,9 @@ function TeachingMaterialSection({ onClose, teachingMaterial }: Props) {
           tags: tags,
           accessLevel: selectPlan,
           creatorURL: teachingMaterialData.creatorURL,
+          ...(teachingMaterialData.canvaURL !== "" && {
+            canvaURL: teachingMaterialData.canvaURL,
+          }),
         },
       });
 
@@ -311,6 +318,9 @@ function TeachingMaterialSection({ onClose, teachingMaterial }: Props) {
         );
       }
 
+      await updateThumnail.mutateAsync({
+        teachingMaterialId: teachingMaterial.id,
+      });
       await updateThumnail.mutateAsync({
         teachingMaterialId: teachingMaterial.id,
       });
@@ -537,6 +547,25 @@ function TeachingMaterialSection({ onClose, teachingMaterial }: Props) {
                 return {
                   ...prev,
                   creatorURL: e.target.value,
+                };
+              })
+            }
+            className="main-input"
+            placeholder="Enter creator url"
+          />
+        </section>
+        <section className="flex flex-col gap-2">
+          <div className="flex w-max items-center justify-center gap-2 text-sm font-semibold">
+            <SiCanva className="text-blue-700" /> Canva URL (READ ONLY)
+          </div>
+          <input
+            type="url"
+            value={teachingMaterialData.canvaURL}
+            onChange={(e) =>
+              setTeachingMaterialData((prev) => {
+                return {
+                  ...prev,
+                  canvaURL: e.target.value,
                 };
               })
             }

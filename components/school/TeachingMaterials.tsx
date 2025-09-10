@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { SiGooglegemini } from "react-icons/si";
+import { TeachingMaterial } from "../../interfaces";
 import {
   useGetLanguage,
   useGetSchool,
@@ -7,11 +8,9 @@ import {
   useGetUser,
 } from "../../react-query";
 import PopupLayout from "../layout/PopupLayout";
-import TeachingMaterialSection from "./TeachingMaterialSection";
 import TeachingMaterialCard from "./TeachingMaterialCard";
-import { FileOnTeachingMaterial, TeachingMaterial } from "../../interfaces";
+import TeachingMaterialSection from "./TeachingMaterialSection";
 import TeachingMaterialShow from "./TeachingMaterialShow";
-import LoadingSpinner from "../common/LoadingSpinner";
 
 type Props = {
   schoolId: string;
