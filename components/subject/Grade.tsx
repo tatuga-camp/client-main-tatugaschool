@@ -79,6 +79,29 @@ function Grade({
       studentOnAssignment?: StudentOnAssignment;
     } | null>(null);
 
+  const total_score = React.useMemo(() => {
+    if (!assignmentsOverview.data) return 0;
+
+    // Calculate total from regular assignments
+    const assignmentTotal = assignmentsOverview.data.assignments.reduce(
+      (acc, item) => {
+        // Prefer weight if it exists, otherwise use maxScore
+        return acc + (item.assignment.weight ?? item.assignment.maxScore);
+      },
+      0,
+    );
+
+    // Calculate total from special scores
+    const specialScoresTotal = assignmentsOverview.data.scoreOnSubjects.reduce(
+      (acc, item) => {
+        // Prefer weight if it exists, otherwise use maxScore
+        return acc + (item.scoreOnSubject.weight ?? 0);
+      },
+      0,
+    );
+
+    return assignmentTotal + specialScoresTotal;
+  }, [assignmentsOverview.data]); // Recalculate only when data changes
   return (
     <>
       {selectStudentOnAssignment && (
@@ -171,7 +194,7 @@ function Grade({
           </button>
         </section>
       </header>
-      <main className="mx-auto mt-5 flex w-full flex-col items-center md:max-w-screen-md md:px-0 xl:max-w-screen-lg">
+      <main className="mx-auto mt-5 flex w-full flex-col items-center md:max-w-screen-md md:px-0 lg:max-w-screen-lg">
         <div className="relative mt-5 h-[30rem] w-full overflow-auto rounded-md bg-white">
           <table className="table-fixed bg-white md:min-w-[640px]">
             <thead className="">
@@ -273,7 +296,7 @@ function Grade({
                       Total Score
                     </span>
                     <span className="text-xs text-gray-500">
-                      student total score
+                      ({total_score} {gradeData.score(language.data ?? "en")})
                     </span>
                   </div>
                 </th>
@@ -281,9 +304,6 @@ function Grade({
                   <div className="relative flex w-40 min-w-40 flex-col items-start p-2 hover:bg-gray-100 hover:ring-1 active:bg-gray-200 group-hover:w-max">
                     <span className="w-max max-w-40 truncate group-hover:max-w-none">
                       Grade
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      show student grade
                     </span>
                   </div>
                 </th>

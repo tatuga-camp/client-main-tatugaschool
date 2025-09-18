@@ -242,7 +242,7 @@ function Attendance({
         </ul>
       </div>
 
-      <main className="mx-auto mt-5 flex w-full flex-col items-center md:max-w-screen-md md:px-0 xl:max-w-screen-lg">
+      <main className="mx-auto mt-5 flex w-full flex-col items-center md:max-w-screen-md md:px-0 lg:max-w-screen-lg">
         <div className="w-full">
           {triggerSetting && selectTable ? (
             <div className="px-5">
