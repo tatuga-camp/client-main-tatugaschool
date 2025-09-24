@@ -412,7 +412,7 @@ export const studentWorkDataLanguage = {
       case "en":
         return "Not Graded";
       case "th":
-        return "ยังไม่ได้ให้คะแนนน";
+        return "ไม่ได้ให้คะแนนน";
       default:
         return "Not Graded";
     }

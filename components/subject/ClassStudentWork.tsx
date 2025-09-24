@@ -16,6 +16,7 @@ import {
   MdDelete,
   MdEditDocument,
   MdReviews,
+  MdSearch,
 } from "react-icons/md";
 import { RiEmotionHappyFill } from "react-icons/ri";
 import Swal from "sweetalert2";
@@ -74,6 +75,7 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
       select: boolean;
     })[]
   >();
+
   const [triggerHideStudentList, setTriggerHideStudentList] =
     React.useState(false);
 
@@ -84,6 +86,38 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
   const [selectStudentWork, setSelectStudentWork] = React.useState<
     (StudentOnAssignment & { files: FileOnStudentOnAssignment[] }) | null
   >(null);
+
+  const handleOnFilterStudent = (search: string) => {
+    if (!studentOnAssignments.data) {
+      return;
+    }
+    if (search === "") {
+      return setStudentData(() =>
+        studentOnAssignments.data.map((s) => {
+          return {
+            ...s,
+            select: false,
+          };
+        }),
+      );
+    }
+
+    setStudentData(() =>
+      studentOnAssignments.data
+        .filter(
+          (s) =>
+            s.title.toLowerCase().includes(search.toLowerCase()) ||
+            s.firstName.toLowerCase().includes(search.toLowerCase()) ||
+            s.lastName.toLowerCase().includes(search.toLowerCase()),
+        )
+        .map((s) => {
+          return {
+            ...s,
+            select: false,
+          };
+        }),
+    );
+  };
 
   // render for update
   useEffect(() => {
@@ -131,11 +165,16 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
         } sticky top-0 flex h-max max-h-screen min-h-screen flex-col gap-2 overflow-auto border-r bg-white p-5 pb-40 transition-width`}
       >
         <div className="flex w-full items-center justify-between gap-2 text-xl">
-          {triggerHideStudentList
-            ? ""
-            : studentOnAssignments.isFetching
-              ? "Student Loading.."
-              : studentWorkDataLanguage.student(language.data ?? "en")}
+          {!triggerHideStudentList && (
+            <label className="relative h-10 w-full">
+              <MdSearch className="absolute bottom-0 left-2 top-0 m-auto" />
+              <input
+                placeholder="Seach Student Name"
+                onChange={(e) => handleOnFilterStudent(e.target.value)}
+                className="main-input h-10 w-full pl-10 text-sm"
+              />
+            </label>
+          )}
           <button
             type="button"
             className={`${
@@ -327,7 +366,7 @@ const StudentList = React.memo(function StudentList({
       </th>
       <th>
         <div className="flex h-14 items-center gap-2 pl-2">
-          <div className="relative h-10 w-10 overflow-hidden rounded-md ring-1">
+          <div className="relative h-5 w-5 overflow-hidden rounded-md ring-1 xl:h-10 xl:w-10">
             <Image
               src={student.photo}
               alt={student.firstName}
@@ -341,10 +380,10 @@ const StudentList = React.memo(function StudentList({
             />
           </div>
           <div className="flex flex-col items-start">
-            <h1 className="text-sm font-semibold">
+            <h1 className="text-xs font-semibold xl:text-sm">
               {student.firstName} {student.lastName}{" "}
             </h1>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs font-normal text-gray-500">
               Number {student.number} {!student.isAssigned && "(NOT Assigned)"}
             </p>
           </div>
@@ -355,7 +394,7 @@ const StudentList = React.memo(function StudentList({
       </th>
       <th>
         <div
-          className={`flex justify-center text-sm font-normal ${
+          className={`flex justify-center px-2 text-xs font-normal xl:text-base ${
             student.score !== null
               ? "font-medium text-primary-color"
               : "text-gray-400"
@@ -378,7 +417,7 @@ const StudentList = React.memo(function StudentList({
               });
               onClick(student);
             }}
-            className={`flex items-center justify-center gap-1 font-normal transition ${student.id === student.id ? "main-button" : "second-button border"} `}
+            className={`flex items-center justify-center gap-1 text-xs font-normal transition xl:text-base ${student.id === student.id ? "main-button" : "second-button border"} `}
           >
             <BsEyeFill />
             {studentWorkDataLanguage.viewWork(language.data ?? "en")}
@@ -444,7 +483,8 @@ function MultipleReview({ selectStudents, maxScore }: MultipleReviewProps) {
         >
           <div className="w-40">
             <InputNumber
-              onValueChange={(value) => setScore(() => value)}
+              onChange={(value) => setScore(() => value)}
+              onValueChange={() => {}}
               maxFractionDigits={3}
               value={score}
               min={0}
@@ -740,13 +780,13 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
             <div className="w-40">
               <InputNumber
                 inputRef={scoreInputRef}
-                onValueChange={(value) => {
-                  console.log(value);
+                onChange={(value) =>
                   setStudentWork((prev) => ({
                     ...prev,
                     score: value,
-                  }));
-                }}
+                  }))
+                }
+                onValueChange={() => {}}
                 maxFractionDigits={3}
                 value={studentWork?.score ?? 0}
                 min={0}
