@@ -108,7 +108,7 @@ function Index({
         ...assignment.data,
         allowWeight: assignment.data.weight === null ? false : true,
         beginDate: convertToDateTimeLocalString(
-          new Date(assignment.data.beginDate)
+          new Date(assignment.data.beginDate),
         ),
         dueDate: assignment.data.dueDate
           ? convertToDateTimeLocalString(new Date(assignment.data.dueDate))
@@ -258,7 +258,7 @@ function Index({
         });
       });
 
-      await Promise.allSettled(uploadTasks);
+      await Promise.all(uploadTasks);
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -289,7 +289,7 @@ function Index({
         <nav
           className={`w-full px-5 ${
             classwork?.status === "Published" ? "bg-white" : "bg-gray-50"
-          }   border-b h-20 flex items-center justify-between`}
+          } flex h-20 items-center justify-between border-b`}
         >
           <section className="flex w-full items-center gap-4">
             <Link
@@ -297,19 +297,15 @@ function Index({
                 pathname: `/subject/${subjectId}`,
                 query: { menu: "Classwork" as MenuSubject },
               }}
-              className="w-10 h-10 text-3xl border rounded-full flex items-center justify-center
-       hover:bg-gray-300/50 transition active:scale-105"
+              className="flex h-10 w-10 items-center justify-center rounded-full border text-3xl transition hover:bg-gray-300/50 active:scale-105"
             >
               <IoClose />
             </Link>
 
-            <div
-              className="w-10 h-10 text-3xl border rounded-full flex items-center justify-center
-       bg-primary-color/30 text-primary-color"
-            >
+            <div className="flex h-10 w-10 items-center justify-center rounded-full border bg-primary-color/30 text-3xl text-primary-color">
               <MdAssignmentAdd />
             </div>
-            <h1 className="text-lg font-medium max-w-full truncate">
+            <h1 className="max-w-full truncate text-lg font-medium">
               {classwork?.title}
             </h1>
           </section>
@@ -319,30 +315,27 @@ function Index({
                 <button
                   type="submit"
                   value={"Published" as SummitValue}
-                  className="w-max min-w-40 p-2 h-10 opacity-85 hover:opacity-100 font-medium rounded-r-none rounded-md text-base text-white
-     gradient-bg"
+                  className="gradient-bg h-10 w-max min-w-40 rounded-md rounded-r-none p-2 text-base font-medium text-white opacity-85 hover:opacity-100"
                 >
                   {classworkHeadMenuBarDataLanguage.button.publish(
-                    language.data ?? "en"
+                    language.data ?? "en",
                   )}
                 </button>
               ) : (
                 <button
                   type="submit"
                   value={"Save Change" as SummitValue}
-                  className="w-max min-w-40 p-2 h-10 opacity-85 hover:opacity-100 font-medium rounded-r-none rounded-md text-base text-white
-     gradient-bg"
+                  className="gradient-bg h-10 w-max min-w-40 rounded-md rounded-r-none p-2 text-base font-medium text-white opacity-85 hover:opacity-100"
                 >
                   {classworkHeadMenuBarDataLanguage.button.saveChange(
-                    language.data ?? "en"
+                    language.data ?? "en",
                   )}
                 </button>
               )}
               <button
                 onClick={() => setTriggerOption((prev) => !prev)}
                 type="button"
-                className="w-max p-2 h-10  font-medium rounded-l-none rounded-md text-base text-white
-     gradient-bg"
+                className="gradient-bg h-10 w-max rounded-md rounded-l-none p-2 text-base font-medium text-white"
               >
                 <IoChevronDownSharp />
               </button>
@@ -355,7 +348,7 @@ function Index({
                   }}
                   ref={divRef}
                 >
-                  <div className="w-60 h-max z-40 p-1 -right-40  absolute top-8 rounded-md bg-white drop-shadow border">
+                  <div className="absolute -right-40 top-8 z-40 h-max w-60 rounded-md border bg-white p-1 drop-shadow">
                     {menuClassworkList.map((menu, index) => {
                       const disabled =
                         (menu.title === "Mark as Draft" &&
@@ -390,16 +383,13 @@ function Index({
                           }
                           value={summitValue}
                           key={index}
-                          className={`w-60 p-2 flex gap-10 items-center justify-start text-base
-             font-medium 
-             ${
-               menu.title === "Delete"
-                 ? "text-red-500 hover:bg-red-500 hover:text-white"
-                 : disabled
-                 ? "bg-gray-200 text-white"
-                 : "text-gray-500 hover:bg-primary-color hover:text-white"
-             }
-             `}
+                          className={`flex w-60 items-center justify-start gap-10 p-2 text-base font-medium ${
+                            menu.title === "Delete"
+                              ? "text-red-500 hover:bg-red-500 hover:text-white"
+                              : disabled
+                                ? "bg-gray-200 text-white"
+                                : "text-gray-500 hover:bg-primary-color hover:text-white"
+                          } `}
                         >
                           {menu.icon}
                           {classworkHeadMenuBarDataLanguage.button[
@@ -421,12 +411,12 @@ function Index({
           <ProgressBar mode="indeterminate" style={{ height: "6px" }} />
         )}
 
-        <div className="w-full h-14  bg-white flex border-b justify-start items-center px-10 ">
+        <div className="flex h-14 w-full items-center justify-start border-b bg-white px-10">
           {menuLists
             .filter((menu) =>
               assignment.data?.type === "Material"
                 ? menu.query !== "studentwork"
-                : true
+                : true,
             )
             .map((menu, index) => {
               return (
@@ -437,7 +427,7 @@ function Index({
                   }}
                   onClick={() => setSelectMenu(menu.query)}
                   key={index}
-                  className={`flex flex-col px-10  justify-center p-2 h-full gap-0 ${
+                  className={`flex h-full flex-col justify-center gap-0 p-2 px-10 ${
                     selectMenu === menu.query
                       ? "bg-primary-color text-white hover:bg-primary-color"
                       : "bg-white text-black hover:bg-gray-100"
@@ -450,9 +440,7 @@ function Index({
                   </h1>
                   <span
                     className={`text-xs ${
-                      selectMenu === menu.query
-                        ? " text-white"
-                        : "text-gray-400"
+                      selectMenu === menu.query ? "text-white" : "text-gray-400"
                     } `}
                   >
                     {classworkHeadMenuBarDataLanguage.description[
@@ -466,7 +454,7 @@ function Index({
       </form>
       <main
         ref={bodyRef}
-        className={`w-full h-full font-Anuphan max-h-screen overflow-auto`}
+        className={`h-full max-h-screen w-full overflow-auto font-Anuphan`}
       >
         {selectMenu === "classwork" && assignment?.data && (
           <ClasswordView
