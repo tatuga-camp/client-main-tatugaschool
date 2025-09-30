@@ -1,16 +1,17 @@
 import {
-  QueryClient,
   useMutation,
   useQuery,
   useQueryClient,
   UseQueryResult,
 } from "@tanstack/react-query";
 import {
+  CreateCustomScoreOnStudentService,
   CreateScoreOnStudentService,
   CreateScoreOnSubjectService,
   DeleteScoreOnSubjectService,
   GetScoresOnStudentBySubjectIdService,
   GetScoresOnSubjectBySubjectIdService,
+  RequestCreateCustomScoreOnStudentService,
   RequestCreateScoreOnStudentService,
   RequestCreateScoreOnSubjectService,
   RequestDeleteScoreOnSubjectService,
@@ -20,11 +21,7 @@ import {
   UpdateScoreOnSubjectService,
 } from "../services";
 
-import {
-  ScoreOnStudent,
-  ScoreOnSubject,
-  StudentOnSubject,
-} from "../interfaces";
+import { ScoreOnStudent, ScoreOnSubject } from "../interfaces";
 import { gradeKey } from "./grade";
 
 export const scoretKey = {
@@ -153,6 +150,52 @@ export function useCreateScoreOnStudent() {
   return createScoreOnStudent;
 }
 
+export function useCreateCustomScoreOnStudent() {
+  const queryClient = useQueryClient();
+  const createScoreOnStudent = useMutation({
+    mutationKey: ["createScoreOnStudent"],
+    mutationFn: (request: RequestCreateCustomScoreOnStudentService) =>
+      CreateCustomScoreOnStudentService(request),
+    onSuccess(data, variables, context) {
+      if (scoretKey.getScoreOnStudentBySubjectId(data.subjectId)) {
+        queryClient.setQueryData(
+          scoretKey.getScoreOnStudentBySubjectId(data.subjectId),
+          (prev: ScoreOnStudent[]) => {
+            return [...(prev ?? []), data];
+          },
+        );
+      }
+
+      if (
+        queryClient.getQueryData(
+          gradeKey.overview({ subjectId: data.subjectId }),
+        )
+      ) {
+        queryClient.setQueryData(
+          gradeKey.overview({ subjectId: data.subjectId }),
+          (
+            prev: ResponseGetOverviewAssignmentService,
+          ): ResponseGetOverviewAssignmentService => {
+            return {
+              ...prev,
+              scoreOnSubjects: prev.scoreOnSubjects.map((score) => {
+                if (score.scoreOnSubject.id === data.scoreOnSubjectId) {
+                  return {
+                    ...score,
+                    students: [...(score.students ?? []), data],
+                  };
+                }
+                return score;
+              }),
+            };
+          },
+        );
+      }
+    },
+  });
+
+  return createScoreOnStudent;
+}
 export function useDeleteScoreOnSubject() {
   const queryClient = useQueryClient();
   return useMutation({

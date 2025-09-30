@@ -28,6 +28,28 @@ export async function CreateScoreOnStudentService(
   }
 }
 
+export type RequestCreateCustomScoreOnStudentService = {
+  studentOnSubjectId: string;
+  scoreOnSubjectId: string;
+  score: number;
+};
+
+export async function CreateCustomScoreOnStudentService(
+  input: RequestCreateCustomScoreOnStudentService,
+): Promise<ResponseScoreOnStudentService> {
+  try {
+    const response = await axiosInstance({
+      method: "POST",
+      url: "/v1/score-on-students/custom",
+      data: { ...input },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Failed to create score on student:", error.response?.data);
+    throw error?.response?.data;
+  }
+}
+
 export type RequestGetScoresOnStudentBySubjectIdService = {
   subjectId: string;
   filter?: {

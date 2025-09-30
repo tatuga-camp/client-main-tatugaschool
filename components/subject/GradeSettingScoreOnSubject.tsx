@@ -28,7 +28,6 @@ function GradeSettingScoreOnSubject({ onClose, scoreOnSubject, toast }: Props) {
         ? 1
         : scoreOnSubject.maxScore,
   });
-  console.log(weight);
   const handleSaveChange = async (e: React.FormEvent) => {
     try {
       e.preventDefault();

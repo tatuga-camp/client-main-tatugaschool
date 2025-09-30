@@ -13,8 +13,10 @@ import { gradeData } from "../../data/languages";
 import {
   Assignment,
   ErrorMessages,
+  ScoreOnStudent,
   ScoreOnSubject,
   StudentOnAssignment,
+  StudentOnSubject,
 } from "../../interfaces";
 import {
   useGetAssignmentOverview,
@@ -33,6 +35,7 @@ import PopupLayout from "../layout/PopupLayout";
 import GradePopup from "./GradePopup";
 import GradeSetting from "./GradeSetting";
 import GradeSettingScoreOnSubject from "./GradeSettingScoreOnSubject";
+import GradeSpecialScoreSetting from "./GradeSpecialScoreSetting";
 
 function Grade({
   subjectId,
@@ -49,8 +52,10 @@ function Grade({
   const studentOnSubjects = useGetStudentOnSubject({
     subjectId,
   });
-  const [selectScoreOnSubject, setSelectScoreOnSubject] =
-    useState<ScoreOnSubject | null>(null);
+  const [selectScoreOnSubject, setSelectScoreOnSubject] = useState<
+    (ScoreOnSubject & { studentOnSubject?: StudentOnSubject }) | null
+  >(null);
+
   const [triggerGradeSetting, setTriggerGradeSetting] = useState(false);
   const handleExportExcel = async () => {
     try {
@@ -148,14 +153,26 @@ function Grade({
             setSelectScoreOnSubject(null);
           }}
         >
-          <GradeSettingScoreOnSubject
-            scoreOnSubject={selectScoreOnSubject}
-            toast={toast}
-            onClose={() => {
-              document.body.style.overflow = "auto";
-              setSelectScoreOnSubject(null);
-            }}
-          />
+          {selectScoreOnSubject.studentOnSubject ? (
+            <GradeSpecialScoreSetting
+              scoreOnSubject={selectScoreOnSubject}
+              studentSubject={selectScoreOnSubject.studentOnSubject}
+              onClose={() => {
+                document.body.style.overflow = "auto";
+                setSelectScoreOnSubject(null);
+              }}
+              toast={toast}
+            />
+          ) : (
+            <GradeSettingScoreOnSubject
+              scoreOnSubject={selectScoreOnSubject}
+              toast={toast}
+              onClose={() => {
+                document.body.style.overflow = "auto";
+                setSelectScoreOnSubject(null);
+              }}
+            />
+          )}
         </PopupLayout>
       )}
 
@@ -540,7 +557,15 @@ function Grade({
                                     <td
                                       key={data.scoreOnSubject.id + student.id}
                                     >
-                                      <button className="relative flex h-14 w-full cursor-pointer select-none flex-col items-center justify-center bg-black text-white ring-black transition hover:ring-1 hover:drop-shadow-md">
+                                      <button
+                                        onClick={() =>
+                                          setSelectScoreOnSubject({
+                                            ...data.scoreOnSubject,
+                                            studentOnSubject: student,
+                                          })
+                                        }
+                                        className="relative flex h-14 w-full cursor-pointer select-none flex-col items-center justify-center bg-black text-white ring-black transition hover:ring-1 hover:drop-shadow-md"
+                                      >
                                         NO DATA
                                       </button>
                                     </td>
@@ -574,7 +599,15 @@ function Grade({
                                     }
                                     className="text-sm font-semibold"
                                   >
-                                    <button className="relative flex h-14 w-full cursor-pointer flex-col items-center justify-center ring-black transition hover:ring-1 hover:drop-shadow-md">
+                                    <button
+                                      onClick={() =>
+                                        setSelectScoreOnSubject({
+                                          ...data.scoreOnSubject,
+                                          studentOnSubject: student,
+                                        })
+                                      }
+                                      className="relative flex h-14 w-full cursor-pointer flex-col items-center justify-center ring-black transition hover:ring-1 hover:drop-shadow-md"
+                                    >
                                       <span className="text-lg">
                                         {score.toFixed(2)}
                                       </span>
