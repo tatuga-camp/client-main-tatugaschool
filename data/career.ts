@@ -22,7 +22,7 @@ export const careerSectors = [
     ],
   },
   {
-    title: "Architecture and Construction careers",
+    title: "Architecture and Construction",
     picture:
       "https://storage.googleapis.com/public-tatugaschool/careers/Architecture.png",
     blurHash: "LLNK0Bt8~XNG%1oft6sm_4ad%Moz",
@@ -132,7 +132,7 @@ export const careerSectors = [
     ],
   },
   {
-    title: "Information technology careers",
+    title: "Information technology",
     picture:
       "https://storage.googleapis.com/public-tatugaschool/careers/technology.png",
     description:
@@ -175,7 +175,7 @@ export const careerSectors = [
     ],
   },
   {
-    title: "Science and engineering careers",
+    title: "Science and Engineering",
     picture:
       "https://storage.googleapis.com/public-tatugaschool/careers/Science.png",
     blurhash: "L6Efsa9EU^*0^-H=.89Y00%#On$6",
@@ -193,6 +193,62 @@ export const careerSectors = [
         description:
           "A biologist studies the environment. Their primary duties include performing tests and experiments, conducting research and collecting samples.",
         salary: "$90,710",
+      },
+    ],
+  },
+  {
+    title: "Travel and Services",
+    picture:
+      "https://storage.googleapis.com/public-tatugaschool/careers/Travel%20and%20Services.png",
+    blurhash: "L6Efsa9EU^*0^-H=.89Y00%#On$6",
+    description:
+      "Careers in travel and services include direct roles like flight attendant, tour guide, and cruise ship staff, as well as related fields such as travel agent, hotel manager, and corporate reservations. These jobs often involve customer service, hospitality, and a love for travel, with opportunities ranging from front-line positions to management and specialized roles. ",
+    careers: [
+      {
+        title: "Flight Attendant",
+        description:
+          "Manages passenger safety and comfort on aircraft, with the ability to travel to various destinations.",
+        salary: "$86,337",
+      },
+      {
+        title: "Tour Guide",
+        description:
+          "Leads groups of tourists, providing information about a specific location or attraction.",
+        salary: "$90,710",
+      },
+      {
+        title: "Hotel Staff",
+        description:
+          "Includes roles like housekeeper, front desk agent, and hotel manager. ",
+        salary: "$90,710",
+      },
+    ],
+  },
+  {
+    title: "Arts, marketing & communication",
+    picture:
+      "https://storage.googleapis.com/public-tatugaschool/careers/Arts%2C%20marketing%20%26%20communication.png",
+    blurhash: "L6Efsa9EU^*0^-H=.89Y00%#On$6",
+    description:
+      "Careers in arts, marketing, and communication focus on creativity, expression, and messaging. Roles can range from visual and performing arts, like graphic designer or musician, to strategic business roles in marketing, like brand manager or digital strategist, and communication fields like public relations or technical writing. These jobs involve creating content, connecting with audiences, and building brand identity.",
+    careers: [
+      {
+        title: "Graphic Designer",
+        description:
+          "Creates visual concepts, using computer software or by hand, to communicate ideas that inspire, inform, or captivate consumers.",
+        salary: "$59,840",
+      },
+      {
+        title: "Marketing Manager",
+        description:
+          "Develops and implements marketing strategies to promote a company's products or services by analyzing market trends and managing campaigns.",
+        salary: "$138,730",
+      },
+      {
+        title: "Public Relations Specialist",
+        description:
+          "Manages the public image of a client or organization, writing press releases and building relationships with media and the public.",
+        salary: "$67,440",
       },
     ],
   },

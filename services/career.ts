@@ -8,13 +8,19 @@ export type RequestGetSuggestCareerService = {
 };
 
 type ResponseGetSuggestCareerService = {
-  careers: Career;
-  skills: {
-    skill: Skill;
-    average: number;
-  }[];
+  student: {
+    skills: (Skill & { avg: number })[];
+  };
+  careers: (Career & {
+    careerMatchPoint: number;
+    skills: (Skill & {
+      avg: number;
+      above: number;
+      below: number;
+      matchPoint: number;
+    })[];
+  })[];
 };
-
 export async function GetSuggestCareerService(
   input: RequestGetSuggestCareerService,
 ): Promise<ResponseGetSuggestCareerService> {
