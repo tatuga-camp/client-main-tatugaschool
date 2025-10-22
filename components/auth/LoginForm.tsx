@@ -124,6 +124,7 @@ export const LoginForm = () => {
           {signInData.loginButton(language.data ?? "en")}
         </button>
         <button
+          type="button"
           onClick={handleGoogleLogin}
           className="second-button flex items-center justify-center gap-2 border"
         >

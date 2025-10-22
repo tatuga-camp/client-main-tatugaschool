@@ -34,7 +34,7 @@ const LoginPage = () => {
         <meta name="twitter:card" content="summary" />
       </Head>
       <AuthLayout>
-        <div className="w-full  flex-col  flex justify-center items-center gap-5">
+        <div className="flex w-full flex-col items-center justify-center gap-5">
           <AuthHeader />
           <LoginForm />
         </div>

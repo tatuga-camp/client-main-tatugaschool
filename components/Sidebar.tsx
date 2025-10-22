@@ -33,7 +33,7 @@ function Sidebar({
         active ? "w-screen p-5 md:w-60" : "w-0 p-0"
       } `}
     >
-      <header className="mt-16 flex h-40 w-full flex-col items-center justify-center gap-1 rounded-lg bg-background-color p-2">
+      <header className="mt-16 flex w-full flex-col items-center justify-center gap-1 rounded-lg bg-background-color p-2 md:h-32 2xl:h-40">
         <div className="relative h-12 w-12 overflow-hidden rounded-full bg-white">
           <Image
             fill
