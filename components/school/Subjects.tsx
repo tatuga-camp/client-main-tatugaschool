@@ -40,6 +40,7 @@ import {
 } from "../../data/languages";
 import LoadingSpinner from "../common/LoadingSpinner";
 import DuplicateSubject from "../subject/DuplicateSubject";
+import { getDefaultSubjectFilter, setDefaultSubjectFilter } from "../../utils";
 
 type Props = {
   schoolId: string;
@@ -61,6 +62,7 @@ function Subjects({ schoolId }: Props) {
   const [selectDuplicate, setSelectDuplicate] = useState<Subject | null>(null);
   const [triggerCreateSubject, setTriggerCreateSubject] = React.useState(false);
   const [sortBy, setSortBy] = React.useState<SortByOption>("Default");
+  const defaultFilter = getDefaultSubjectFilter({ schoolId: schoolId });
   const [search, setSearch] = React.useState("");
   const subjects = useGetSubjectFromSchool({
     schoolId: schoolId,
@@ -69,8 +71,13 @@ function Subjects({ schoolId }: Props) {
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
 
   useEffect(() => {
-    const year = new Date().getFullYear();
-    setEducationYear(() => `1/${year}`);
+    if (defaultFilter) {
+      setEducationYear(defaultFilter.educationYear);
+      setSelectFilterUserId(defaultFilter.userId);
+    } else {
+      const year = new Date().getFullYear();
+      setEducationYear(() => `1/${year}`);
+    }
   }, []);
 
   const [subjectData, setSubjectData] = React.useState<
@@ -286,7 +293,15 @@ function Subjects({ schoolId }: Props) {
                 </span>
                 <InputEducationYear
                   value={educationYear}
-                  onChange={(value) => setEducationYear(value as EducationYear)}
+                  onChange={(value) => {
+                    const education = value as EducationYear;
+                    setEducationYear(education);
+                    setDefaultSubjectFilter({
+                      schoolId,
+                      userId: selectFilterUserId,
+                      educationYear: education,
+                    });
+                  }}
                   required={true}
                 />
               </label>

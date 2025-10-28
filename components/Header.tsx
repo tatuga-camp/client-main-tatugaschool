@@ -26,7 +26,9 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-50 flex h-20 flex-row items-center justify-between gap-4 bg-white/50 text-white backdrop-blur md:p-4">
       <Link
-        href="/"
+        href={
+          user.data?.favoritSchool ? `/school/${user.data?.favoritSchool}` : "/"
+        }
         className="flex items-center justify-center gap-1 md:gap-3"
       >
         <div className="relative h-10 w-10 overflow-hidden rounded-md ring-1 ring-white transition duration-150 hover:scale-105 active:scale-110">

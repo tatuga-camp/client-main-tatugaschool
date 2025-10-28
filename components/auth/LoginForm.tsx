@@ -1,4 +1,4 @@
-import { SignInService } from "@/services";
+import { GetUserService, SignInService } from "@/services";
 import Link from "next/link";
 import React, { useState } from "react";
 import Swal from "sweetalert2";
@@ -28,10 +28,15 @@ export const LoginForm = () => {
         },
       });
       const response = await SignInService({ email, password });
+      const user = await GetUserService();
       // server already set cookie
       // setAccessToken({ access_token: response.accessToken });
       // setRefreshToken({ refresh_token: response.refreshToken });
-      router.push(response.redirectUrl);
+      router.push(
+        user.favoritSchool
+          ? `/school/${user.favoritSchool}`
+          : response.redirectUrl,
+      );
       Swal.fire({
         title: requestData.successTitle(language.data ?? "en"),
         text: requestData.successDesciption(language.data ?? "en"),

@@ -67,6 +67,7 @@ export type RequestUpdateUserService = {
   phone?: string;
   photo?: string;
   blurHash?: string;
+  favoritSchool?: string;
 };
 export async function UpdateUserService(
   input: RequestUpdateUserService,
@@ -77,7 +78,6 @@ export async function UpdateUserService(
       url: "/v1/users",
       data: { ...input },
     });
-    console.info("User updated successfully:", response?.data);
     return response.data;
   } catch (error: any) {
     console.error("User request failed:", error?.response?.data);
@@ -99,7 +99,6 @@ export async function UpdatePasswordService(
       data: { ...input },
     });
 
-    console.info("User updated successfully:", response?.data);
     return response.data;
   } catch (error: any) {
     console.error("User request failed:", error?.response?.data);

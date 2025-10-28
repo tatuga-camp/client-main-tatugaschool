@@ -58,7 +58,7 @@ const SchoolPage = ({ schoolId }: { schoolId: string }) => {
         <div className="flex h-screen flex-col items-center justify-center gap-3">
           <h1 className="text-4xl text-red-500">No School Found</h1>
           <button
-            onClick={() => router.back()}
+            onClick={() => router.push("/")}
             className="w-40 rounded-md bg-primary-color px-4 py-2 text-white"
           >
             Back
