@@ -22,6 +22,7 @@ export type User = {
   resetPasswordToken?: string;
   resetPasswordTokenExpiresAt?: Date;
   language: Language;
+  favoritSchool?: string;
 };
 
 export type Language = "en" | "th";

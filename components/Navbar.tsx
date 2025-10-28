@@ -40,7 +40,11 @@ function Navbar({
             <IoMenu />
           </button>
           <Link
-            href="/"
+            href={
+              user.data?.favoritSchool
+                ? `/school/${user.data?.favoritSchool}`
+                : "/"
+            }
             className="flex items-center justify-center gap-1 md:gap-3"
           >
             <div className="relative h-10 w-10 overflow-hidden rounded-md ring-1 ring-white transition duration-150 hover:scale-105 active:scale-110">

@@ -1,4 +1,5 @@
 import { FilterTitle } from "../components/common/Filter";
+import { EducationYear } from "../interfaces";
 
 export const localStorageGetRemoveRandomStudents = ({
   subjectId,
@@ -56,6 +57,33 @@ export const getSortStudentLocaStorage = (input: {
 export const removeSortStudentLocalStorage = (input: { subjectId: string }) => {
   localStorage.removeItem(`sort_${input.subjectId}`);
 };
+
+export function setDefaultSubjectFilter(input: {
+  educationYear: EducationYear;
+  userId: string;
+  schoolId: string;
+}) {
+  localStorage.setItem(
+    `defult_filter_subjects:${input.schoolId}`,
+    JSON.stringify(input),
+  );
+}
+export function getDefaultSubjectFilter(input: { schoolId: string }): {
+  educationYear: EducationYear;
+  userId: string;
+  schoolId: string;
+} | null {
+  const rawData = localStorage.getItem(
+    `defult_filter_subjects:${input.schoolId}`,
+  );
+  if (!rawData) return null;
+  const data = JSON.parse(rawData) as {
+    educationYear: EducationYear;
+    userId: string;
+    schoolId: string;
+  };
+  return data;
+}
 
 export type LocalStorageKeys = "language";
 

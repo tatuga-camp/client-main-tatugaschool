@@ -25,4 +25,4 @@ export interface School {
   limitTotalStorage: number;
 }
 
-export type Plan = "FREE" | "PREMIUM" | "ENTERPRISE";
+export type Plan = "FREE" | "BASIC" | "PREMIUM" | "ENTERPRISE";
