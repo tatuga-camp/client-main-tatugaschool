@@ -33,14 +33,14 @@ function ShowGroups({ subjectId }: Props) {
         </PopupLayout>
       )}
       <Toast ref={toast} />
-      <div className="w-full md:w-10/12 font-Anuphan lg:w-9/12  flex flex-col">
-        <header className="w-full flex items-center gap-2 justify-start border-b py-2">
+      <div className="flex w-full flex-col font-Anuphan md:w-10/12 lg:w-9/12">
+        <header className="flex w-full items-center justify-start gap-2 border-b py-2">
           <button
             onClick={() => {
               setSelectGroup(undefined);
               setTriggerCreateGroup(() => true);
             }}
-            className="main-button w-40 text-xs h-full flex-col flex items-center justify-center gap-1"
+            className="main-button flex h-full w-40 flex-col items-center justify-center gap-1 text-xs"
           >
             <CiCirclePlus className="text-4xl" />
             Create Group
@@ -48,25 +48,22 @@ function ShowGroups({ subjectId }: Props) {
           <div className="h-full w-[1px] bg-gray-500"></div>
           <div className="grow overflow-auto">
             <span className="text-sm">Select Group</span>
-            <ul className="min-w-max flex items-center justify-start gap-2 ">
+            <ul className="flex min-w-max items-center justify-start gap-2">
               {groups.data?.map((group, index) => {
                 return (
                   <li
                     onClick={() => setSelectGroup(() => group)}
                     key={index}
-                    className={`p-1
-                    ${
+                    className={`p-1 ${
                       group.id === selectGroup?.id
-                        ? "bg-gray-100 border text-primary-color"
+                        ? "border bg-gray-100 text-primary-color"
                         : "text-black"
-                    }
-                    hover:bg-gray-100 rounded-md 
-                    cursor-pointer transition-colors duration-150 ease-in-out`}
+                    } cursor-pointer rounded-2xl transition-colors duration-150 ease-in-out hover:bg-gray-100`}
                   >
-                    <h3 className="text-base font-semibold max-w-40 truncate">
+                    <h3 className="max-w-40 truncate text-base font-semibold">
                       {group.title}
                     </h3>
-                    <p className="text-gray-600 max-w-40 truncate text-sm">
+                    <p className="max-w-40 truncate text-sm text-gray-600">
                       {group.description}
                     </p>
                   </li>

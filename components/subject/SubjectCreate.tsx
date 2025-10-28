@@ -83,7 +83,7 @@ function SubjectCreate({ onClose, schoolId, educationYear, toast }: Props) {
   return (
     <form
       onSubmit={handleCreateSubject}
-      className="flex h-max flex-col gap-2 rounded-md bg-white p-3 xl:w-5/12 2xl:w-4/12"
+      className="flex h-max flex-col gap-2 rounded-2xl bg-white p-3 xl:w-5/12 2xl:w-4/12"
     >
       <header className="flex w-full justify-between border-b">
         <h1 className="text-lg font-semibold">

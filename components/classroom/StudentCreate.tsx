@@ -129,8 +129,8 @@ function StudentCreate({ onClose, classId, toast, schoolId }: Props) {
   };
 
   return (
-    <div className="w-full md:w-10/12 lg:w-7/12 2xl:w-4/12 h-[35rem] bg-white rounded-md p-4 border">
-      <div className="w-full pb-3 border-b items-center justify-between flex">
+    <div className="h-[35rem] w-full rounded-2xl border bg-white p-4 md:w-10/12 lg:w-7/12 2xl:w-4/12">
+      <div className="flex w-full items-center justify-between border-b pb-3">
         <h1 className="text-lg font-semibold">
           {studentOnClassDataLanguage.create(language.data ?? "en")}
         </h1>
@@ -142,13 +142,13 @@ function StudentCreate({ onClose, classId, toast, schoolId }: Props) {
           >
             {triggerExcel ? (
               studentOnClassDataLanguage.createStudent.cancel(
-                language.data ?? "en"
+                language.data ?? "en",
               )
             ) : (
               <div className="flex items-center justify-center gap-1">
                 <PiMicrosoftExcelLogoFill />
                 {studentOnClassDataLanguage.createStudent.excel(
-                  language.data ?? "en"
+                  language.data ?? "en",
                 )}
               </div>
             )}
@@ -156,7 +156,7 @@ function StudentCreate({ onClose, classId, toast, schoolId }: Props) {
           <button
             type="button"
             onClick={onClose}
-            className="text-lg hover:bg-gray-300/50 w-6 h-6 rounded flex items-center justify-center font-semibold"
+            className="flex h-6 w-6 items-center justify-center rounded text-lg font-semibold hover:bg-gray-300/50"
           >
             <IoMdClose />
           </button>
@@ -167,7 +167,7 @@ function StudentCreate({ onClose, classId, toast, schoolId }: Props) {
       ) : (
         <form onSubmit={handleCreate}>
           {(loading || create.isPending) && <LoadingBar />}
-          <div className="w-full h-96 overflow-auto p-3">
+          <div className="h-96 w-full overflow-auto p-3">
             <StudentSection
               data={data}
               setData={(data) => {
@@ -181,11 +181,11 @@ function StudentCreate({ onClose, classId, toast, schoolId }: Props) {
               handleUpload={handleUpload}
             />
           </div>
-          <div className="w-full pt-3 border-t  justify-end gap-3 flex">
+          <div className="flex w-full justify-end gap-3 border-t pt-3">
             <button
               type="button"
               onClick={onClose}
-              className="second-button border flex items-center justify-center gap-1"
+              className="second-button flex items-center justify-center gap-1 border"
             >
               Cancel
             </button>
@@ -285,34 +285,31 @@ function CreateByExcel({ classId, toast }: PropsCreateByExcel) {
   return (
     <form onSubmit={handleCreate} className="mt-5">
       {loading && <LoadingBar />}
-      <div className="w-full grid grid-cols-5 pr-8">
+      <div className="grid w-full grid-cols-5 pr-8">
         <div className="text-center">
           {studentOnClassDataLanguage.createStudent.number(
-            language.data ?? "en"
+            language.data ?? "en",
           )}
         </div>
         <div className="text-center">
           {studentOnClassDataLanguage.createStudent.title(
-            language.data ?? "en"
+            language.data ?? "en",
           )}
         </div>
         <div className="text-center">
           {studentOnClassDataLanguage.createStudent.firstName(
-            language.data ?? "en"
+            language.data ?? "en",
           )}
         </div>
         <div className="text-center">
           {studentOnClassDataLanguage.createStudent.lastName(
-            language.data ?? "en"
+            language.data ?? "en",
           )}
         </div>
         <div className="text-center">Action</div>
       </div>
       {dataStudents.length > 0 ? (
-        <ul
-          ref={tableRef}
-          className="w-full grid max-h-80 mt-2 overflow-auto  "
-        >
+        <ul ref={tableRef} className="mt-2 grid max-h-80 w-full overflow-auto">
           {dataStudents.map((item, index, array) => (
             <li className="grid grid-cols-5" key={item.id}>
               <input
@@ -403,12 +400,12 @@ function CreateByExcel({ classId, toast }: PropsCreateByExcel) {
                   });
                 }}
               />
-              <div className="flex items-center gap-2 justify-start px-5">
+              <div className="flex items-center justify-start gap-2 px-5">
                 <button
                   title="Delete Row"
                   type="button"
                   disabled={loading}
-                  className="text-red-500 bg-red-100 p-1 rounded"
+                  className="rounded bg-red-100 p-1 text-red-500"
                   onClick={() => {
                     setDataStudents((prev) => {
                       return prev.filter((data) => data.id !== item.id);
@@ -423,7 +420,7 @@ function CreateByExcel({ classId, toast }: PropsCreateByExcel) {
                     title="Add Row"
                     disabled={loading}
                     type="button"
-                    className="text-green-500 bg-green-100 p-1 rounded"
+                    className="rounded bg-green-100 p-1 text-green-500"
                     onClick={() => {
                       setDataStudents((prev) => {
                         return [
@@ -458,17 +455,17 @@ function CreateByExcel({ classId, toast }: PropsCreateByExcel) {
           <textarea
             value={textData}
             onChange={(e) => setTextData(e.target.value)}
-            className="w-full h-20 mt-2 main-input resize-none"
+            className="main-input mt-2 h-20 w-full resize-none"
             placeholder="Paste your excel data here"
           ></textarea>
           <span className="text-sm text-red-500">
             {studentOnClassDataLanguage.createStudent.excelDescription(
-              language.data ?? "en"
+              language.data ?? "en",
             )}
           </span>
         </div>
       )}
-      <div className="w-full pt-3 border-t  justify-end gap-3 flex">
+      <div className="flex w-full justify-end gap-3 border-t pt-3">
         {dataStudents.length > 0 && (
           <button
             disabled={loading}

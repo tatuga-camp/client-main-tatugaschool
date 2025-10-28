@@ -238,7 +238,7 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
             type="submit"
             value="Published"
             disabled={loading}
-            className="gradient-bg h-10 w-40 rounded-md rounded-r-none p-2 text-base font-medium text-white opacity-85 hover:opacity-100"
+            className="gradient-bg h-10 w-40 rounded-2xl rounded-r-none p-2 text-base font-medium text-white opacity-85 hover:opacity-100"
           >
             {classworkHeadMenuBarDataLanguage.button.publish(
               language.data ?? "en",
@@ -247,7 +247,7 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
           <button
             type="button"
             onClick={() => setTriggerOption((prev) => !prev)}
-            className="gradient-bg h-10 w-max rounded-md rounded-l-none p-2 text-base font-medium text-white"
+            className="gradient-bg h-10 w-max rounded-2xl rounded-l-none p-2 text-base font-medium text-white"
           >
             <IoChevronDownSharp />
           </button>
@@ -260,7 +260,7 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
               }}
               ref={divRef}
             >
-              <div className="absolute top-8 z-40 h-max w-52 rounded-md border bg-white p-1 drop-shadow">
+              <div className="absolute top-8 z-40 h-max w-52 rounded-2xl border bg-white p-1 drop-shadow">
                 {menuClassworkList
                   .filter(
                     (i) =>

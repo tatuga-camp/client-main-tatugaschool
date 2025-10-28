@@ -29,7 +29,7 @@ function Navbar({
   const user = useGetUser();
   return (
     <>
-      <div className="flex h-20 flex-row items-center justify-between gap-4 bg-white p-4 text-white">
+      <div className="flex h-20 flex-row items-center justify-between gap-4 border-b-2 border-black bg-white p-4 text-white">
         <div className="flex gap-2">
           <button
             onClick={() => setTrigger(!trigger)}
@@ -47,7 +47,7 @@ function Navbar({
             }
             className="flex items-center justify-center gap-1 md:gap-3"
           >
-            <div className="relative h-10 w-10 overflow-hidden rounded-md ring-1 ring-white transition duration-150 hover:scale-105 active:scale-110">
+            <div className="relative h-10 w-10 overflow-hidden rounded-2xl ring-1 ring-white transition duration-150 hover:scale-105 active:scale-110">
               <Image
                 src="/favicon.ico"
                 placeholder="blur"

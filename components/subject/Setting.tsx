@@ -222,7 +222,7 @@ function Setting({ subjectId, setSelectMenu, schoolId }: Props) {
           isPending={updateSubject.isPending}
         />
 
-        <div className="mt-5 flex min-h-80 flex-col gap-5 rounded-md border bg-white p-4">
+        <div className="mt-5 flex min-h-80 flex-col gap-5 rounded-2xl border bg-white p-4">
           <h2 className="border-b py-3 text-base font-medium sm:text-lg">
             {settingOnSubjectDataLanguage.coTeacher(language.data ?? "en")}
           </h2>
@@ -246,7 +246,7 @@ function Setting({ subjectId, setSelectMenu, schoolId }: Props) {
             language.data ?? "en",
           )}
         </h4>
-        <div className="mt-5 flex min-h-80 flex-col gap-5 rounded-md border bg-white p-4">
+        <div className="mt-5 flex min-h-80 flex-col gap-5 rounded-2xl border bg-white p-4">
           <h2 className="border-b py-3 text-base font-medium sm:text-lg">
             {settingOnSubjectDataLanguage.listOnStudent(language.data ?? "en")}
           </h2>
@@ -268,7 +268,7 @@ function Setting({ subjectId, setSelectMenu, schoolId }: Props) {
                     } gap-2`}
                   >
                     <div className="flex gap-2">
-                      <div className="relative h-10 w-10 overflow-hidden rounded-md ring-1">
+                      <div className="relative h-10 w-10 overflow-hidden rounded-2xl ring-1">
                         <Image
                           src={student.photo}
                           alt={student.firstName}
@@ -320,7 +320,7 @@ function Setting({ subjectId, setSelectMenu, schoolId }: Props) {
             language.data ?? "en",
           )}
         </h4>
-        <div className="mt-5 flex flex-col items-start gap-5 rounded-md border bg-white p-4">
+        <div className="mt-5 flex flex-col items-start gap-5 rounded-2xl border bg-white p-4">
           <h2 className="border-b py-3 text-base font-medium sm:text-lg">
             {settingOnSubjectDataLanguage.deleteSubject(language.data ?? "en")}
           </h2>

@@ -9,12 +9,12 @@ interface PlanProps {
 const PlanCard = ({ type, price, isCurrent }: PlanProps) => {
   return (
     <div
-      className={`flex-1 px-4 py-6 border border-gray-100 rounded-lg justify-start items-start relative ${
+      className={`relative flex-1 items-start justify-start rounded-2xl border border-gray-100 px-4 py-6 ${
         isCurrent ? "bg-gray-100" : ""
       }`}
     >
       {isCurrent && (
-        <span className="absolute top-2 right-2 bg-purple-200 text-purple-600 text-sm px-2 py-0.5 rounded">
+        <span className="absolute right-2 top-2 rounded bg-purple-200 px-2 py-0.5 text-sm text-purple-600">
           Current
         </span>
       )}

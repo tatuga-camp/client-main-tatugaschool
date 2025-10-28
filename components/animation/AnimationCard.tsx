@@ -16,24 +16,22 @@ interface AnimationCardProps<T> {
   speedUp: number;
 }
 
-
 const AnimationCard = <T extends AnimationImageItemProps>({
   randomImages,
   onPassPointer,
   onStart,
   onFinished,
   isStarted,
-  speedUp = 2
+  speedUp = 2,
 }: AnimationCardProps<T>) => {
-
-const IMAGE_WIDTH = 200;
-const GAP = 0.9 * 16; // Gap in pixels (0.9rem)
-const GAP_BETWEEN_IMAGE = 10;
-const INITIAL_SPEED = 1 / speedUp;
-const TIME_INITIAL = INITIAL_SPEED * 2 * 1000 / speedUp;
-const SLOWDOWN_SPEED = 3 / speedUp;
-const TIME_SLOWDOWN = SLOWDOWN_SPEED * 1000 + TIME_INITIAL / speedUp;
-const SLOWDOWN_STOP = 7 / speedUp;
+  const IMAGE_WIDTH = 200;
+  const GAP = 0.9 * 16; // Gap in pixels (0.9rem)
+  const GAP_BETWEEN_IMAGE = 10;
+  const INITIAL_SPEED = 1 / speedUp;
+  const TIME_INITIAL = (INITIAL_SPEED * 2 * 1000) / speedUp;
+  const SLOWDOWN_SPEED = 3 / speedUp;
+  const TIME_SLOWDOWN = SLOWDOWN_SPEED * 1000 + TIME_INITIAL / speedUp;
+  const SLOWDOWN_STOP = 7 / speedUp;
 
   const controls = useAnimationControls();
   const [onProgress, setOnProgress] = React.useState(false);
@@ -106,7 +104,7 @@ const SLOWDOWN_STOP = 7 / speedUp;
     const currentPosition = -latest;
     const index = Math.floor(
       (currentPosition + centerPosition) /
-        (IMAGE_WIDTH + GAP + GAP_BETWEEN_IMAGE)
+        (IMAGE_WIDTH + GAP + GAP_BETWEEN_IMAGE),
     );
 
     setCurrentIndex((prev) => {
@@ -118,10 +116,10 @@ const SLOWDOWN_STOP = 7 / speedUp;
   };
 
   return (
-    <div className="w-full flex justify-center items-center relative">
-      <div className="absolute h-full w-[3px] bg-black p-0 z-10  rounded-full" />
+    <div className="relative flex w-full items-center justify-center">
+      <div className="absolute z-10 h-full w-[3px] rounded-full bg-black p-0" />
 
-      <div className=" max-w-2xl min-w-[42rem] overflow-hidden ">
+      <div className="min-w-[42rem] max-w-2xl overflow-hidden">
         <motion.div
           style={{
             display: "flex",
@@ -145,11 +143,10 @@ const SLOWDOWN_STOP = 7 / speedUp;
           {randomImages.map((image, index) => (
             <div
               key={`${image.id}-${index}`}
-              className="bg-white flex flex-col items-center justify-start
-               rounded-md h-full ring-1 ring-black overflow-hidden"
+              className="flex h-full flex-col items-center justify-start overflow-hidden rounded-2xl bg-white ring-1 ring-black"
               style={{ width: `${IMAGE_WIDTH}px` }}
             >
-              <div className="w-full h-40 bg-gray-100 relative rounded overflow-hidden">
+              <div className="relative h-40 w-full overflow-hidden rounded bg-gray-100">
                 <Image
                   key={`${image.id}-${index}`}
                   src={image.photo}
@@ -159,10 +156,10 @@ const SLOWDOWN_STOP = 7 / speedUp;
                   className="object-cover"
                 />
               </div>
-              <h1 className="text-lg font-semibold text-balance break-words w-full text-center">
+              <h1 className="w-full text-balance break-words text-center text-lg font-semibold">
                 {image.firstName} {image.lastName}
               </h1>
-              <h1 className="text-md font-normal text-gray-500 break-words w-full text-center">
+              <h1 className="text-md w-full break-words text-center font-normal text-gray-500">
                 Number {image.number}
               </h1>
             </div>
@@ -170,11 +167,10 @@ const SLOWDOWN_STOP = 7 / speedUp;
           {randomImages.map((image, index) => (
             <div
               key={`${image.id}-${index}`}
-              className="bg-white flex flex-col items-center justify-start
-               rounded-md h-60 ring-1 ring-black overflow-hidden"
+              className="flex h-60 flex-col items-center justify-start overflow-hidden rounded-2xl bg-white ring-1 ring-black"
               style={{ width: `${IMAGE_WIDTH}px` }}
             >
-              <div className="w-full h-40 bg-gray-100 relative rounded overflow-hidden">
+              <div className="relative h-40 w-full overflow-hidden rounded bg-gray-100">
                 <Image
                   key={`${image.id}-${index}`}
                   src={image.photo}
@@ -185,10 +181,10 @@ const SLOWDOWN_STOP = 7 / speedUp;
                   className="object-cover"
                 />
               </div>
-              <h1 className="text-lg font-semibold text-balance break-words w-full text-center">
+              <h1 className="w-full text-balance break-words text-center text-lg font-semibold">
                 {image.firstName} {image.lastName}
               </h1>
-              <h1 className="text-md font-normal text-gray-500 break-words w-full text-center">
+              <h1 className="text-md w-full break-words text-center font-normal text-gray-500">
                 Number {image.number}
               </h1>
             </div>

@@ -116,10 +116,10 @@ function AttendanceDowload({ subjectId, toast, onClose }: Props) {
   return (
     <form
       onSubmit={handleDolwnloadExcel}
-      className="h-max w-96 overflow-hidden rounded-lg bg-white font-Anuphan"
+      className="h-max w-96 overflow-hidden rounded-2xl bg-white font-Anuphan"
     >
       <header className="flex w-full items-center justify-start gap-3 bg-blue-600 p-3">
-        <div className="flex items-center justify-center rounded-md bg-white/50 p-2 text-lg text-white">
+        <div className="flex items-center justify-center rounded-2xl bg-white/50 p-2 text-lg text-white">
           <MdDownload />
         </div>
         <h1 className="text-white">Dowload Excel</h1>
@@ -133,7 +133,7 @@ function AttendanceDowload({ subjectId, toast, onClose }: Props) {
           <select
             value={timePeriod}
             onChange={(e) => handleSwichDateRange(e.target.value as TimePeriod)}
-            className="h-10 w-full rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            className="h-10 w-full rounded-2xl border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
           >
             {timePeriods.map((time) => (
               <option key={time} value={time}>
@@ -147,7 +147,7 @@ function AttendanceDowload({ subjectId, toast, onClose }: Props) {
             <MdInfo className="text-gray-700" />
             <div>Custom Date</div>
           </div>
-          <div className="flex justify-between gap-2 rounded-lg bg-gray-100 p-2 text-sm">
+          <div className="flex justify-between gap-2 rounded-2xl bg-gray-100 p-2 text-sm">
             <label className="flex w-full flex-col">
               Start Date
               <input
@@ -156,7 +156,7 @@ function AttendanceDowload({ subjectId, toast, onClose }: Props) {
                 onChange={(e) => setFromDate(e.target.value)}
                 disabled={timePeriod !== "Custom Range"}
                 type="date"
-                className="h-10 w-full rounded-lg border border-gray-300 p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                className="h-10 w-full rounded-2xl border border-gray-300 p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
               />
             </label>
             <label className="flex w-full flex-col">
@@ -168,7 +168,7 @@ function AttendanceDowload({ subjectId, toast, onClose }: Props) {
                 onChange={(e) => setToDate(e.target.value)}
                 disabled={timePeriod !== "Custom Range"}
                 type="date"
-                className="h-10 w-full rounded-lg border border-gray-300 p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                className="h-10 w-full rounded-2xl border border-gray-300 p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
               />
             </label>
           </div>

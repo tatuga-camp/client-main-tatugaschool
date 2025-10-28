@@ -37,7 +37,7 @@ function Index({ classroomId }: { classroomId: string }) {
   }, [router.isReady]);
   if (classroom.isLoading || !classroom.data) {
     return (
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex h-screen items-center justify-center">
         <ProgressSpinner />
       </div>
     );
@@ -49,7 +49,7 @@ function Index({ classroomId }: { classroomId: string }) {
       day: "numeric",
       month: "long",
       year: "numeric",
-    }
+    },
   );
 
   return (
@@ -68,35 +68,29 @@ function Index({ classroomId }: { classroomId: string }) {
         schoolId={classroom.data?.schoolId}
       >
         <header
-          className={`p-12 pb-20 flex flex-col text-white ${
+          className={`flex flex-col p-12 pb-20 text-white ${
             classroom.data.isAchieved ? "gradient-bg-success" : "gradient-bg"
           } `}
         >
           {/* Top Section */}
           <div className="flex gap-2">
-            <div
-              className="flex w-max text-xs  
-             items-center mb-5  text-white  border-white gap-1 border rounded-full px-2 py-1 justify-center"
-            >
+            <div className="mb-5 flex w-max items-center justify-center gap-1 rounded-full border border-white px-2 py-1 text-xs text-white">
               {classroomDataLanguage.title(language.data ?? "en")}
             </div>
             {classroom.data.isAchieved && (
-              <div
-                className="flex w-max text-xs  
-             items-center mb-5  text-white  border-white gap-1 border rounded-full px-2 py-1 justify-center"
-              >
+              <div className="mb-5 flex w-max items-center justify-center gap-1 rounded-full border border-white px-2 py-1 text-xs text-white">
                 {classroomDataLanguage.achieved(language.data ?? "en")}
               </div>
             )}
           </div>
 
-          <div className="flex justify-between items-start w-full">
+          <div className="flex w-full items-start justify-between">
             <div className="w-max border-b border-b-white pb-2">
-              <h1 className="text-4xl font-bold max-w-[60rem] break-words">
+              <h1 className="max-w-[60rem] break-words text-4xl font-bold">
                 ชั้นเรียน - {classroom.data.title}{" "}
               </h1>
               <p className="text-xl">{classroom.data.level}</p>
-              <p className="text-gray-300  max-w-[60rem] break-words ">
+              <p className="max-w-[60rem] break-words text-gray-300">
                 {classroom.data.description}
               </p>
             </div>
@@ -111,34 +105,26 @@ function Index({ classroomId }: { classroomId: string }) {
                   });
                   setSelectMenu("SettingClassroom");
                 }}
-                className="flex items-center active:scale-110 justify-center gap-1
-                 hover:bg-primary-color hover:text-white
-                  text-primary-color bg-white w-max px-2 py-1 rounded-md"
+                className="flex w-max items-center justify-center gap-1 rounded-2xl bg-white px-2 py-1 text-primary-color hover:bg-primary-color hover:text-white active:scale-110"
               >
                 <CiCircleInfo />
                 {classroomDataLanguage.info(language.data ?? "en")}
               </button>
             </div>
           </div>
-          <div className="flex pt-5 gap-3">
-            <div className="flex w-max  bg-white items-center text-black gap-1 border rounded-full px-2 py-1 justify-center">
+          <div className="flex gap-3 pt-5">
+            <div className="flex w-max items-center justify-center gap-1 rounded-full border bg-white px-2 py-1 text-black">
               <FaUsers />
-              <span className=" text-xs">
+              <span className="text-xs">
                 {classroom.data.students.length}{" "}
                 {classroomDataLanguage.student(language.data ?? "en")}
               </span>
             </div>
-            <div
-              className="flex w-max text-xs  
-            bg-white items-center text-black gap-1 border rounded-full px-2 py-1 justify-center"
-            >
+            <div className="flex w-max items-center justify-center gap-1 rounded-full border bg-white px-2 py-1 text-xs text-black">
               {classroomDataLanguage.createAt(language.data ?? "en")}:{" "}
               {dateMonth}
             </div>
-            <div
-              className="flex w-max text-xs  
-            bg-white items-center text-black gap-1 border rounded-full px-2 py-1 justify-center"
-            >
+            <div className="flex w-max items-center justify-center gap-1 rounded-full border bg-white px-2 py-1 text-xs text-black">
               {classroomDataLanguage.updateAt(language.data ?? "en")}:{" "}
               {timeAgo({
                 pastTime: new Date(classroom.data.updateAt).toISOString(),
@@ -148,7 +134,7 @@ function Index({ classroomId }: { classroomId: string }) {
           </div>
         </header>
 
-        <main className="w-full flex flex-col pb-20 pt-20 items-center">
+        <main className="flex w-full flex-col items-center pb-20 pt-20">
           {selectMenu === "Classroom" && (
             <StudentSection
               students={classroom.data.students}

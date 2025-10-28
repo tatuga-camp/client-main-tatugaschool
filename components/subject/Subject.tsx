@@ -313,7 +313,7 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
             setTriggerChooseScore(false);
           }}
         >
-          <div ref={chooseScoreRef} className="rounded-md border bg-white p-2">
+          <div ref={chooseScoreRef} className="rounded-2xl border bg-white p-2">
             <ScorePanel
               subjectId={subjectId}
               onSelectScore={({ score, inputScore }) => {
@@ -337,7 +337,7 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
       <header className="hidden h-16 w-full items-end justify-end gap-5 border-b pb-5 md:flex md:w-10/12 lg:w-9/12">
         <button
           onClick={() => setTriggerShowGroup((prev) => !prev)}
-          className="flex h-12 w-40 items-center justify-center gap-2 rounded-md border border-primary-color text-primary-color transition duration-200 hover:bg-primary-color hover:text-white active:scale-105"
+          className="flex h-12 w-40 items-center justify-center gap-2 rounded-2xl border border-primary-color bg-white font-semibold text-primary-color transition duration-200 hover:bg-primary-color hover:text-white active:scale-105"
         >
           <BsPeople className="" />
           <span className="">
@@ -455,7 +455,7 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
             students.every((item) => item.select)
               ? "border-primary-color bg-primary-color text-white"
               : "border-gray-200 bg-white text-primary-color"
-          } flex h-8 w-28 items-center justify-between gap-2 rounded-md border-primary-color px-2 drop-shadow-md md:w-36`}
+          } flex h-8 w-28 items-center justify-between gap-2 rounded-2xl border-primary-color px-2 drop-shadow-md md:w-36`}
         >
           {students.every((item) => item.select) ? (
             <>

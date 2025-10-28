@@ -11,7 +11,7 @@ function StatusAssignmentButton({ studentOnAssignment }: Props) {
   return (
     <button
       type="button"
-      className={`flex h-full w-full items-center rounded-md px-2 py-2 text-white ${
+      className={`flex h-full w-full items-center rounded-2xl px-2 py-2 text-white ${
         studentOnAssignment.status === "SUBMITTED" &&
         "bg-gradient-to-r from-amber-200 to-yellow-400"
       } ${

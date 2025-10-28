@@ -118,7 +118,7 @@ function MyApp({ Component, pageProps }: AppProps) {
                 className: classNames("w-96", "opacity-90"),
               },
               message: (option: any) => ({
-                className: classNames("my-4 rounded-md w-full", {
+                className: classNames("my-4 rounded-2xl w-full", {
                   "bg-blue-100 border-solid border-0 border-l-4 border-blue-500 text-blue-700":
                     option?.state.messages[option?.index] &&
                     option?.state.messages[option?.index].message.severity ==
@@ -177,7 +177,7 @@ function MyApp({ Component, pageProps }: AppProps) {
               root: {
                 className: classNames(
                   "overflow-hidden relative",
-                  "border-0 h-6 bg-gray-200 rounded-md ",
+                  "border-0 h-6 bg-gray-200 rounded-2xl ",
                 ),
               },
               value: (option) => ({

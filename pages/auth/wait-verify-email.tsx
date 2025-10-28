@@ -71,12 +71,12 @@ function Index() {
       <AuthLayout>
         <div className="flex w-full grow flex-col items-center justify-center gap-5">
           <AuthHeader />
-          <div className="h-max w-full rounded-md bg-white p-3 text-center md:w-8/12 xl:w-4/12">
+          <div className="h-max w-full rounded-2xl bg-white p-3 text-center md:w-8/12 xl:w-4/12">
             Your Account Email has already been verified
           </div>
           <Link
             href={"/"}
-            className="rounded-lg bg-[#5F3DC4] p-4 font-semibold text-white transition duration-300 hover:bg-[#482ab4]"
+            className="rounded-2xl bg-[#5F3DC4] p-4 font-semibold text-white transition duration-300 hover:bg-[#482ab4]"
           >
             Enter Dashboard
           </Link>
@@ -89,7 +89,7 @@ function Index() {
     <AuthLayout>
       <div className="flex w-full grow flex-col items-center justify-center gap-5">
         <AuthHeader />
-        <div className="flex h-max w-full flex-col items-center justify-center rounded-md bg-white p-3 text-center md:w-8/12 xl:w-4/12">
+        <div className="flex h-max w-full flex-col items-center justify-center rounded-2xl bg-white p-3 text-center md:w-8/12 xl:w-4/12">
           <ButtonProfile user={user} />
 
           {triggerUpdate ? (

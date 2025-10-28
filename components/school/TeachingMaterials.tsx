@@ -176,7 +176,7 @@ function TeachingMaterials({ schoolId }: Props) {
               <h3 className="text-3xl font-semibold text-black">
                 Search Results
               </h3>
-              <span className="rounded-md bg-primary-color/5 px-3 text-lg text-primary-color">
+              <span className="rounded-2xl bg-primary-color/5 px-3 text-lg text-primary-color">
                 {totalFound} teaching materials found
               </span>
             </div>
@@ -187,7 +187,7 @@ function TeachingMaterials({ schoolId }: Props) {
               [...Array(10)].map((_, index) => (
                 <div
                   key={index}
-                  className="h-80 w-80 animate-pulse rounded-lg bg-gray-200"
+                  className="h-80 w-80 animate-pulse rounded-2xl bg-gray-200"
                 />
               ))}
             {teachingMaterials.flat().map((teachingMaterial) => {

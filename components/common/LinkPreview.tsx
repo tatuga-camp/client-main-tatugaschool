@@ -16,7 +16,7 @@ const LinkPreview = ({
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="mx-auto max-w-md overflow-hidden rounded-lg bg-white md:max-w-2xl"
+      className="mx-auto max-w-md overflow-hidden rounded-2xl bg-white md:max-w-2xl"
     >
       <div className="md:flex">
         <div className="md:flex-shrink-0">

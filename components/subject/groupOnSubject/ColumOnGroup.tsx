@@ -64,7 +64,7 @@ function Colum({ unit, type, students, toast }: ColumProps) {
   const updateUnitOnGroup = useUpdateUnitOnGroup();
   const createStudentScore = useCreateScoreOnStudent();
   const [triggerUnitGroupId, setTriggerUnitGroupId] = useState<string | null>(
-    null
+    null,
   );
   const scoreOnStudents = useGetScoreOnStudent({
     subjectId: unit?.subjectId ?? "",
@@ -87,17 +87,13 @@ function Colum({ unit, type, students, toast }: ColumProps) {
     return (
       <li
         ref={setNodeRef}
-        className="w-full h-max min-h-full flex flex-col   rounded-md  "
+        className="flex h-max min-h-full w-full flex-col rounded-2xl"
       >
-        <header
-          className="w-full flex relative rounded-md bg-gradient-to-r
-           from-rose-400 to-red-500 text-white font-semibold  gap-2 items-center
-     justify-between px-2 h-max py-2 "
-        >
+        <header className="relative flex h-max w-full items-center justify-between gap-2 rounded-2xl bg-gradient-to-r from-rose-400 to-red-500 px-2 py-2 font-semibold text-white">
           Ungroup Students
         </header>
 
-        <ul className="grid grid-cols-1 place-content-start min-h-40 bg-white">
+        <ul className="grid min-h-40 grid-cols-1 place-content-start bg-white">
           {students?.map((studentOnSubject) => {
             return (
               <StudentOnGroupMemo
@@ -116,7 +112,7 @@ function Colum({ unit, type, students, toast }: ColumProps) {
   }
 
   const handleOnSave = async (
-    e: React.FocusEvent<HTMLInputElement, Element>
+    e: React.FocusEvent<HTMLInputElement, Element>,
   ) => {
     if (formRef.current?.reportValidity()) {
       try {
@@ -191,8 +187,8 @@ function Colum({ unit, type, students, toast }: ColumProps) {
             score: data.points,
             scoreOnSubjectId: data.scoreOnSubjectId,
             studentOnSubjectId: id,
-          })
-        )
+          }),
+        ),
       );
       if (toast) {
         toast.current?.show({
@@ -242,15 +238,12 @@ function Colum({ unit, type, students, toast }: ColumProps) {
 
       <li
         ref={setNodeRef}
-        className="w-full h-max min-h-full flex flex-col   rounded-md  "
+        className="flex h-max min-h-full w-full flex-col rounded-2xl"
       >
         {(update.isPending || deleteColum.isPending || loadingScore) && (
           <LoadingBar />
         )}
-        <header
-          className="w-full flex relative rounded-md  gap-2 items-center
-       justify-between px-2 h-max py-2 gradient-bg"
-        >
+        <header className="gradient-bg relative flex h-max w-full items-center justify-between gap-2 rounded-2xl px-2 py-2">
           <form ref={formRef} className="flex flex-col">
             <input
               disabled={update.isPending}
@@ -265,7 +258,7 @@ function Colum({ unit, type, students, toast }: ColumProps) {
                 });
               }}
               required
-              className="font-semibold  focus:outline-none focus:border-b  text-white bg-transparent w-40 "
+              className="w-40 bg-transparent font-semibold text-white focus:border-b focus:outline-none"
             />
             <input
               disabled={update.isPending}
@@ -280,7 +273,7 @@ function Colum({ unit, type, students, toast }: ColumProps) {
                   };
                 });
               }}
-              className="font-normal text-xs  focus:outline-none focus:border-b  text-white bg-transparent w-52 "
+              className="w-52 bg-transparent text-xs font-normal text-white focus:border-b focus:outline-none"
             />
           </form>
           <section>
@@ -295,14 +288,14 @@ function Colum({ unit, type, students, toast }: ColumProps) {
                   });
                 }}
                 disabled={deleteColum.isPending}
-                className="w-6 h-6 z-20 rounded-md text-red-700 hover:bg-white flex items-center justify-center "
+                className="z-20 flex h-6 w-6 items-center justify-center rounded-2xl text-red-700 hover:bg-white"
               >
                 <MdDelete />
               </button>
               <button
                 {...listeners}
                 style={{ cursor: isDragging ? "grabbing" : "grab" }}
-                className="w-6 h-6 z-20 rounded-md text-gray-700 hover:bg-gray-300/50 flex items-center justify-center "
+                className="z-20 flex h-6 w-6 items-center justify-center rounded-2xl text-gray-700 hover:bg-gray-300/50"
               >
                 <MdDragIndicator />
               </button>
@@ -313,7 +306,7 @@ function Colum({ unit, type, students, toast }: ColumProps) {
               }}
               className="flex flex-col gap-1"
             >
-              <h1 className="font-semibold border-b text-center text-xl text-white ">
+              <h1 className="border-b text-center text-xl font-semibold text-white">
                 {unit.totalScore}{" "}
                 <span className="text-sm font-normal">score</span>
               </h1>
@@ -339,7 +332,7 @@ function Colum({ unit, type, students, toast }: ColumProps) {
                         ?.filter(
                           (s) =>
                             s.studentOnSubjectId ===
-                            studentOnGroup.studentOnSubjectId
+                            studentOnGroup.studentOnSubjectId,
                         )
                         .reduce((prev, current) => {
                           return (prev += current.score);
@@ -350,7 +343,7 @@ function Colum({ unit, type, students, toast }: ColumProps) {
               })}
           </ul>
         ) : (
-          <div className="w-full grow bg-white flex items-center justify-center">
+          <div className="flex w-full grow items-center justify-center bg-white">
             No Students
           </div>
         )}

@@ -630,7 +630,7 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
       {/* Top Bar */}
       <div className="gradient-bg flex w-full items-center justify-between gap-2 border-b px-5 py-2 pl-10">
         <div className="flex h-full items-center justify-center gap-2">
-          <div className="relative h-10 w-10 overflow-hidden rounded-md ring-1 ring-white transition duration-150 hover:scale-105 active:scale-110">
+          <div className="relative h-10 w-10 overflow-hidden rounded-2xl ring-1 ring-white transition duration-150 hover:scale-105 active:scale-110">
             <ImageNextJs
               src="/favicon.ico" // Replace with your actual logo
               placeholder="blur"
@@ -645,7 +645,7 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
             type="button"
             title="Undo"
             onClick={handleUndo}
-            className="flex h-10 w-20 items-center justify-center rounded-md border text-xl font-normal text-white hover:bg-gray-100/10"
+            className="flex h-10 w-20 items-center justify-center rounded-2xl border text-xl font-normal text-white hover:bg-gray-100/10"
           >
             <GrRevert />
           </button>
@@ -653,7 +653,7 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
             type="button"
             title="Save Image"
             onClick={handleSave}
-            className="flex h-10 w-28 items-center justify-center gap-1 rounded-lg border bg-white text-black hover:bg-sky-200 active:scale-105"
+            className="flex h-10 w-28 items-center justify-center gap-1 rounded-2xl border bg-white text-black hover:bg-sky-200 active:scale-105"
           >
             <BiSave />
             SAVE
@@ -673,7 +673,7 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
       </div>
 
       {/* Controls Toolbar */}
-      <div className="fixed top-20 z-20 flex items-center space-x-2 rounded-lg bg-white px-2 py-1 drop-shadow-lg">
+      <div className="fixed top-20 z-20 flex items-center space-x-2 rounded-2xl bg-white px-2 py-1 drop-shadow-lg">
         {mode !== "text-edit" && (
           <>
             <input
@@ -697,7 +697,7 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
             <button
               title="Draw Mode"
               type="button"
-              className={` ${mode === "draw" ? "bg-sky-200" : "bg-gray-100"} flex h-7 w-7 items-center justify-center rounded-lg border text-black hover:bg-sky-200 active:scale-105`}
+              className={` ${mode === "draw" ? "bg-sky-200" : "bg-gray-100"} flex h-7 w-7 items-center justify-center rounded-2xl border text-black hover:bg-sky-200 active:scale-105`}
               onClick={() => {
                 switchToDrawMode("draw");
               }}
@@ -708,7 +708,7 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
               title="Mouse Mode (Pan/Zoom/Select Text)"
               type="button"
               onClick={() => switchToMouseMode()}
-              className={` ${mode === "mouse" ? "bg-sky-200" : "bg-gray-100"} flex h-7 w-7 items-center justify-center rounded-lg border text-black hover:bg-sky-200 active:scale-105`}
+              className={` ${mode === "mouse" ? "bg-sky-200" : "bg-gray-100"} flex h-7 w-7 items-center justify-center rounded-2xl border text-black hover:bg-sky-200 active:scale-105`}
             >
               <BiSolidHand />
             </button>
@@ -716,7 +716,7 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
               title="Eraser Mode"
               type="button"
               onClick={() => switchToDrawMode("eraser")}
-              className={` ${mode === "eraser" ? "bg-sky-200" : "bg-gray-100"} flex h-7 w-7 items-center justify-center rounded-lg border text-black hover:bg-sky-200 active:scale-105`}
+              className={` ${mode === "eraser" ? "bg-sky-200" : "bg-gray-100"} flex h-7 w-7 items-center justify-center rounded-2xl border text-black hover:bg-sky-200 active:scale-105`}
             >
               <BiSolidEraser />
             </button>
@@ -724,7 +724,7 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
               title="Add Text"
               type="button"
               onClick={handleAddText}
-              className={`flex h-7 w-7 items-center justify-center rounded-lg border bg-gray-100 text-black hover:bg-sky-200 active:scale-105`}
+              className={`flex h-7 w-7 items-center justify-center rounded-2xl border bg-gray-100 text-black hover:bg-sky-200 active:scale-105`}
             >
               <MdTextFields />
             </button>
@@ -732,7 +732,7 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
               title="Clear All Text"
               type="button"
               onClick={handleClearAllText}
-              className={`flex h-7 w-7 items-center justify-center rounded-lg border bg-gray-100 text-black hover:bg-sky-200 active:scale-105`}
+              className={`flex h-7 w-7 items-center justify-center rounded-2xl border bg-gray-100 text-black hover:bg-sky-200 active:scale-105`}
             >
               <MdOutlineFormatClear />
             </button>
@@ -740,7 +740,7 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
               title="Clear All Drawing"
               type="button"
               onClick={() => canvasRef.current?.clear()}
-              className={`relative flex h-7 w-7 items-center justify-center rounded-lg border bg-gray-100 text-black hover:bg-sky-200 active:scale-105`}
+              className={`relative flex h-7 w-7 items-center justify-center rounded-2xl border bg-gray-100 text-black hover:bg-sky-200 active:scale-105`}
             >
               <div className="absolute h-5 w-[1.5px] -rotate-45 bg-black" />
               <BiSolidPencil />

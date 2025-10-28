@@ -146,7 +146,7 @@ function InviteTeacher({ subjectId, setTrigger, schoolId }: Props) {
 
   return (
     <div
-      className={`flex h-[30rem] w-full flex-col items-center justify-start rounded-md ${suggestMembers.length > 0 ? "bg-gray-200" : "bg-white"} sm:w-max`}
+      className={`flex h-[30rem] w-full flex-col items-center justify-start rounded-2xl ${suggestMembers.length > 0 ? "bg-gray-200" : "bg-white"} sm:w-max`}
     >
       <header className="flex w-full justify-between border-b p-3 pb-2 sm:p-5 sm:pb-3">
         <div className="flex items-center gap-1">
@@ -154,7 +154,7 @@ function InviteTeacher({ subjectId, setTrigger, schoolId }: Props) {
             Invite Co-Teacher
           </h1>
           {teacherOnSubjects.isLoading ? (
-            <div className="h-2 w-8 animate-pulse rounded-md bg-gray-300/50 sm:h-3 sm:w-10"></div>
+            <div className="h-2 w-8 animate-pulse rounded-2xl bg-gray-300/50 sm:h-3 sm:w-10"></div>
           ) : (
             teacherOnSubjects.data && (
               <div>
@@ -236,7 +236,7 @@ function InviteTeacher({ subjectId, setTrigger, schoolId }: Props) {
                         }}
                         className="flex h-14 items-center justify-start gap-3 border-b p-3 hover:cursor-pointer hover:bg-gray-200"
                       >
-                        <div className="relative h-10 w-10 overflow-hidden rounded-md ring-1 ring-black">
+                        <div className="relative h-10 w-10 overflow-hidden rounded-2xl ring-1 ring-black">
                           <Image
                             src={member.photo}
                             fill

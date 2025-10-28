@@ -354,11 +354,11 @@ function TeachingMaterialSection({ onClose, teachingMaterial }: Props) {
           ? handleUpdateTeachingMaterial
           : handleCreateTeachingMaterial
       }
-      className="flex h-[90%] w-7/12 flex-col rounded-lg bg-white"
+      className="flex h-[90%] w-7/12 flex-col rounded-2xl bg-white"
     >
       <header className="flex w-full items-center justify-between border-b p-5">
         <section className="flex items-center justify-center gap-2">
-          <div className="gradient-bg-success rounded-lg p-3 text-xl text-white">
+          <div className="gradient-bg-success rounded-2xl p-3 text-xl text-white">
             <MdCloudUpload />
           </div>
           <section className="flex flex-col">
@@ -403,7 +403,7 @@ function TeachingMaterialSection({ onClose, teachingMaterial }: Props) {
               </p>
 
               {/* Button */}
-              <div className="mt-6 flex items-center justify-center rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 px-6 py-3 text-base font-medium text-white shadow-md transition-all duration-300 hover:from-purple-600 hover:to-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2">
+              <div className="mt-6 flex items-center justify-center rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 px-6 py-3 text-base font-medium text-white shadow-md transition-all duration-300 hover:from-purple-600 hover:to-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2">
                 <MdFolder />
                 Choose Files
               </div>
@@ -432,7 +432,7 @@ function TeachingMaterialSection({ onClose, teachingMaterial }: Props) {
                 return (
                   <li
                     key={index}
-                    className="flex w-full items-center justify-between rounded-lg border bg-gray-100 p-1 px-3"
+                    className="flex w-full items-center justify-between rounded-2xl border bg-gray-100 p-1 px-3"
                   >
                     <a
                       href={fileToProcess.url}
@@ -467,7 +467,7 @@ function TeachingMaterialSection({ onClose, teachingMaterial }: Props) {
               return (
                 <li
                   key={index}
-                  className="flex w-full items-center justify-between rounded-lg border bg-gray-100 p-1 px-3"
+                  className="flex w-full items-center justify-between rounded-2xl border bg-gray-100 p-1 px-3"
                 >
                   <section className="flex items-center justify-center gap-2 text-gray-500">
                     <MdFileOpen className="mr-3" />
@@ -596,12 +596,12 @@ function TeachingMaterialSection({ onClose, teachingMaterial }: Props) {
               <MdAdd />
             </button>
           </div>
-          <ul className="flex h-max min-h-10 w-full flex-wrap items-center justify-start gap-2 rounded-lg border bg-gray-100 p-3">
+          <ul className="flex h-max min-h-10 w-full flex-wrap items-center justify-start gap-2 rounded-2xl border bg-gray-100 p-3">
             {tags.map((tag, index) => {
               return (
                 <li
                   key={index}
-                  className={`flex items-center justify-center rounded-md bg-blue-200 py-1 pl-3 pr-1 text-xs font-medium text-blue-700`}
+                  className={`flex items-center justify-center rounded-2xl bg-blue-200 py-1 pl-3 pr-1 text-xs font-medium text-blue-700`}
                 >
                   #{tag}
                   <button
@@ -623,7 +623,7 @@ function TeachingMaterialSection({ onClose, teachingMaterial }: Props) {
                   type="button"
                   onClick={() => handleAddTags(tag)}
                   key={index}
-                  className={`rounded-md px-3 py-1 text-xs font-medium transition-transform hover:scale-105 ${suggestedTagColors[tag]}`}
+                  className={`rounded-2xl px-3 py-1 text-xs font-medium transition-transform hover:scale-105 ${suggestedTagColors[tag]}`}
                 >
                   #{tag}
                 </button>
@@ -640,7 +640,7 @@ function TeachingMaterialSection({ onClose, teachingMaterial }: Props) {
               type="button"
               disabled={loadingAi}
               onClick={() => handleAiDescription()}
-              className="gradient-bg-success flex h-7 w-32 items-center justify-center rounded-lg border px-2 text-white hover:scale-105 active:scale-110"
+              className="gradient-bg-success flex h-7 w-32 items-center justify-center rounded-2xl border px-2 text-white hover:scale-105 active:scale-110"
             >
               {loadingAi ? (
                 <LoadingSpinner />

@@ -49,8 +49,8 @@ function AskNotification() {
             setIsNotification(true);
           }}
         >
-          <div className="w-96 h-96 font-Anuphan bg-white border rounded-md p-3 flex flex-col gap-2 items-center justify-center">
-            <div className="w-10 h-10 relative">
+          <div className="flex h-96 w-96 flex-col items-center justify-center gap-2 rounded-2xl border bg-white p-3 font-Anuphan">
+            <div className="relative h-10 w-10">
               <Image
                 fill
                 sizes="(max-width: 768px) 100vw, 33vw"
@@ -58,7 +58,7 @@ function AskNotification() {
                 alt="logo"
               />
             </div>
-            <h1 className="text-xl mt-5 font-semibold text-center">
+            <h1 className="mt-5 text-center text-xl font-semibold">
               You don&apos;t want to miss any updates from us.
             </h1>
             <span className="text-sm text-gray-500">
@@ -67,7 +67,7 @@ function AskNotification() {
             <button
               disabled={loading}
               onClick={requestNotificationPermission}
-              className="main-button w-60 rounded-full text-white px-4 py-1"
+              className="main-button w-60 rounded-full px-4 py-1 text-white"
             >
               {loading ? "Loading..." : "Yes, Allow!"}
             </button>
@@ -77,7 +77,7 @@ function AskNotification() {
                 document.body.style.overflow = "auto";
                 setIsNotification(true);
               }}
-              className="text-gray-500 text-xs mt-10 underline"
+              className="mt-10 text-xs text-gray-500 underline"
             >
               Maybe Later
             </button>

@@ -76,7 +76,7 @@ function ScorePanel({
                 setSelectScoreOnSubject(null);
                 setTriggerFormScoreOnSubject(true);
               }}
-              className="second-button flex w-full flex-col items-center justify-center gap-1 rounded-md border p-2 text-gray-500"
+              className="second-button flex w-full flex-col items-center justify-center gap-1 rounded-2xl border p-2 text-gray-500"
             >
               <CiSquarePlus size={50} />
             </button>
@@ -106,9 +106,9 @@ function ScorePanel({
                         selectScoreOnSubject?.id === score.id
                           ? "gradient-bg"
                           : "bg-white"
-                      } active:gradient-bg group relative flex w-32 flex-col items-center justify-center gap-2 rounded-md p-2 transition hover:bg-secondary-color`}
+                      } active:gradient-bg group relative flex w-32 flex-col items-center justify-center gap-2 rounded-2xl p-2 transition hover:bg-secondary-color`}
                     >
-                      <div className="relative h-10 w-10 rounded-lg">
+                      <div className="relative h-10 w-10 rounded-2xl">
                         <Image
                           src={score.icon}
                           alt={score.title}

@@ -52,20 +52,20 @@ const BasicInformationSection = ({ school }: { school: School }) => {
       <div className="col-span-2">
         <ProfileUpload school={school} updateSchool={updateSchool} />
       </div>
-      <div className="col-span-4 w-full p-6 bg-white rounded-xl space-y-4">
+      <div className="col-span-4 w-full space-y-4 rounded-xl bg-white p-6">
         <ProfileForm school={school} updateSchool={updateSchool} />
-        <h1 className="text-lg sm:text-xl font-medium mt-10">
+        <h1 className="mt-10 text-lg font-medium sm:text-xl">
           {schoolDataLanguage.dangerZoneTitle(language.data ?? "en")}
         </h1>
-        <h4 className="text-xs sm:text-sm text-gray-500">
+        <h4 className="text-xs text-gray-500 sm:text-sm">
           {schoolDataLanguage.dangerZoneDescription(language.data ?? "en")}
         </h4>
-        <div className="flex flex-col items-start p-4 bg-white rounded-md border gap-5 mt-5">
+        <div className="mt-5 flex flex-col items-start gap-5 rounded-2xl border bg-white p-4">
           {removeSchool.isPending && <LoadingBar />}
-          <h2 className="border-b text-base sm:text-lg font-medium py-3">
+          <h2 className="border-b py-3 text-base font-medium sm:text-lg">
             {schoolDataLanguage.deleteSchool(language.data ?? "en")}
           </h2>
-          <h4 className="text-xs sm:text-sm text-red-700">
+          <h4 className="text-xs text-red-700 sm:text-sm">
             {schoolDataLanguage.deleteSchoolDescription(language.data ?? "en")}
           </h4>
           <button
@@ -78,7 +78,7 @@ const BasicInformationSection = ({ school }: { school: School }) => {
                 },
               });
             }}
-            className="reject-button mt-5 w-40 flex items-center justify-center"
+            className="reject-button mt-5 flex w-40 items-center justify-center"
           >
             {removeSchool.isPending ? (
               <LoadingSpinner />

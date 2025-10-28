@@ -47,7 +47,7 @@ function TextCard({ file, onShowText }: Props) {
     }
   };
   return (
-    <li className="group flex h-14 w-full items-center justify-between overflow-hidden rounded-md border bg-white">
+    <li className="group flex h-14 w-full items-center justify-between overflow-hidden rounded-2xl border bg-white">
       <div className="flex h-full w-full items-center justify-start gap-2">
         <button
           onClick={() => onShowText?.(file)}
@@ -118,7 +118,7 @@ function FileCard({ file, onEditImage }: Props) {
     }
   };
   return (
-    <li className="h-max overflow-hidden rounded-md border bg-white">
+    <li className="h-max overflow-hidden rounded-2xl border bg-white">
       <section className="group flex h-14 w-full items-center justify-between">
         <div className="flex h-14 w-full items-center justify-start gap-2">
           <button

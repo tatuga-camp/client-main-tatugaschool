@@ -34,7 +34,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ school, updateSchool }) => {
   });
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { id, value } = e.target;
     setFormData((prevData) => ({
@@ -76,7 +76,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ school, updateSchool }) => {
   return (
     <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
       <div>
-        <label className="block text-gray-500 text-sm mb-1" htmlFor="title">
+        <label className="mb-1 block text-sm text-gray-500" htmlFor="title">
           Name
         </label>
         <input
@@ -90,7 +90,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ school, updateSchool }) => {
       </div>
 
       <div>
-        <label className="block text-gray-500 text-sm mb-1" htmlFor="phone">
+        <label className="mb-1 block text-sm text-gray-500" htmlFor="phone">
           Phone
         </label>
         <PhoneInput
@@ -108,7 +108,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ school, updateSchool }) => {
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-gray-500 text-sm mb-1" htmlFor="address">
+          <label className="mb-1 block text-sm text-gray-500" htmlFor="address">
             address
           </label>
           <input
@@ -122,7 +122,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ school, updateSchool }) => {
           />
         </div>
         <div>
-          <label className="block text-gray-500 text-sm mb-1" htmlFor="country">
+          <label className="mb-1 block text-sm text-gray-500" htmlFor="country">
             Country
           </label>
           <input
@@ -138,7 +138,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ school, updateSchool }) => {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-gray-500 text-sm mb-1" htmlFor="city">
+          <label className="mb-1 block text-sm text-gray-500" htmlFor="city">
             City
           </label>
           <input
@@ -151,7 +151,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ school, updateSchool }) => {
           />
         </div>
         <div>
-          <label className="block text-gray-500 text-sm mb-1" htmlFor="zip">
+          <label className="mb-1 block text-sm text-gray-500" htmlFor="zip">
             Zip/Code
           </label>
           <input
@@ -166,7 +166,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ school, updateSchool }) => {
       </div>
 
       <div>
-        <label className="block text-gray-500 text-sm mb-1" htmlFor="about">
+        <label className="mb-1 block text-sm text-gray-500" htmlFor="about">
           About
         </label>
         <textarea
@@ -182,9 +182,9 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ school, updateSchool }) => {
       <button
         type="submit"
         disabled={!isActive || role === "TEACHER"}
-        className={`w-40 py-2 text-white rounded-md flex items-center justify-center focus:outline-none ${
+        className={`flex w-40 items-center justify-center rounded-2xl py-2 text-white focus:outline-none ${
           !isActive
-            ? "bg-gray-400 cursor-not-allowed"
+            ? "cursor-not-allowed bg-gray-400"
             : "bg-primary-color hover:bg-primary-color-hover"
         }`}
       >

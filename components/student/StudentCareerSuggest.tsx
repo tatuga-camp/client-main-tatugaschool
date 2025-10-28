@@ -165,7 +165,7 @@ function StudentCareerSuggest({ studentId, onClose }: Props) {
         {/* --- Top Sector Info --- */}
         {topSector && (
           <div className="flex w-full max-w-lg flex-col items-center gap-3">
-            <div className="relative h-60 w-full overflow-hidden rounded-lg bg-white shadow-sm">
+            <div className="relative h-60 w-full overflow-hidden rounded-2xl bg-white shadow-sm">
               <Image
                 src={topSector.picture}
                 blurDataURL={decodeBlurhashToCanvas(
@@ -208,7 +208,7 @@ function StudentCareerSuggest({ studentId, onClose }: Props) {
             return (
               <section
                 key={career.id || index}
-                className="w-full rounded-lg border bg-white p-4 shadow-sm"
+                className="w-full rounded-2xl border bg-white p-4 shadow-sm"
               >
                 {/* Career Header */}
                 <div className="flex items-start justify-between">

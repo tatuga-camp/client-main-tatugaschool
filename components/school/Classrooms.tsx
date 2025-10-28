@@ -179,7 +179,7 @@ function Classrooms({ schoolId }: Props) {
           }}
         >
           <Toast ref={toast} />
-          <div className="h-max w-96 rounded-md border bg-white p-3">
+          <div className="h-max w-96 rounded-2xl border bg-white p-3">
             <div className="flex w-full justify-between border-b pb-1">
               <h1 className="text-lg font-semibold">
                 {classesDataLanguage.create(language.data ?? "en")}
@@ -227,7 +227,7 @@ function Classrooms({ schoolId }: Props) {
                 value={search}
                 onChange={(e) => handleSearch(e.target.value)}
                 type="text"
-                className="w-72 rounded-lg border border-gray-300 p-2"
+                className="w-72 rounded-2xl border border-gray-300 p-2"
                 placeholder={classesDataLanguage.searchPlaceholder(
                   language.data ?? "en",
                 )}

@@ -40,9 +40,6 @@ function SubjectCard({
   const inlineStyles: CSSProperties = {
     opacity: isDragging ? "0.5" : "1",
     transformOrigin: "50% 50%",
-    boxShadow: isDragging
-      ? "rgb(63 63 68 / 5%) 0px 2px 0px 2px, rgb(34 33 81 / 15%) 0px 2px 3px 2px"
-      : "rgb(63 63 68 / 5%) 0px 0px 0px 1px, rgb(34 33 81 / 15%) 0px 1px 3px 0px",
     ...style,
   };
 
@@ -52,7 +49,7 @@ function SubjectCard({
       style={inlineStyles}
       {...attributes}
       onClick={() => onClick?.()}
-      className="flex h-64 w-full flex-col overflow-hidden rounded-lg border active:scale-105"
+      className="flex h-64 w-full flex-col overflow-hidden rounded-2xl border-2 border-black active:scale-105"
     >
       <div
         className={`relative h-24 w-full shadow-inner ${
@@ -81,7 +78,7 @@ function SubjectCard({
             className="object-cover"
           />
         )}
-        <div className="absolute left-2 top-2 z-20 m-auto flex w-max items-center justify-center gap-1 rounded-full border border-white bg-white px-2 py-1 text-xs text-black">
+        <div className="absolute left-2 top-2 z-20 m-auto flex w-max items-center justify-center gap-1 rounded-full border border-black bg-orange-500 px-2 py-1 text-xs text-white">
           SUBJECT
         </div>
         <h1 className="z-20 w-48 truncate text-lg font-semibold text-white">
@@ -90,7 +87,7 @@ function SubjectCard({
         {subject.isLocked === true && (
           <div
             title="This Subject is being locked"
-            className="absolute right-14 top-2 z-20 flex h-6 w-max items-center justify-center rounded-md px-1 text-white hover:bg-gray-300/50"
+            className="absolute right-14 top-2 z-20 flex h-6 w-max items-center justify-center rounded-2xl px-1 text-white hover:bg-gray-300/50"
           >
             <span className="text-sm">Subject is locked</span> <MdLock />
           </div>
@@ -98,14 +95,14 @@ function SubjectCard({
         <button
           onClick={() => onDuplicate?.()}
           title="Duplicate Subject"
-          className="absolute right-8 top-2 z-20 flex h-6 w-6 items-center justify-center rounded-md text-white hover:bg-gray-300/50"
+          className="absolute right-8 top-2 z-20 flex h-6 w-6 items-center justify-center rounded-2xl text-white hover:bg-gray-300/50"
         >
           <IoDuplicate />
         </button>
         <div
           {...listeners}
           style={{ cursor: isDragging ? "grabbing" : "grab" }}
-          className="absolute right-2 top-2 z-20 flex h-6 w-6 items-center justify-center rounded-md text-white hover:bg-gray-300/50"
+          className="absolute right-2 top-2 z-20 flex h-6 w-6 items-center justify-center rounded-2xl text-white hover:bg-gray-300/50"
         >
           <MdDragIndicator />
         </div>

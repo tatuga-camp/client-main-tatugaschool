@@ -58,7 +58,7 @@ function SubjectInfomation({ onSummit, subjectId, isPending = false }: Props) {
           });
         }
       }}
-      className="mt-5 flex min-h-80 flex-col gap-5 rounded-md border bg-white p-4"
+      className="mt-5 flex min-h-80 flex-col gap-5 rounded-2xl border bg-white p-4"
     >
       <h2 className="border-b py-3 text-lg font-medium">
         {settingOnSubjectDataLanguage.info(language.data ?? "en")}

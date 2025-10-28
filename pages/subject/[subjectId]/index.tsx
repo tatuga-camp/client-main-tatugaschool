@@ -227,7 +227,7 @@ function Index({ subjectId }: Props) {
           </h1>
           <button
             onClick={() => router.back()}
-            className="w-40 rounded-md bg-primary-color px-4 py-2 text-white"
+            className="w-40 rounded-2xl bg-primary-color px-4 py-2 text-white"
           >
             Back
           </button>
@@ -264,7 +264,7 @@ function Index({ subjectId }: Props) {
 
         {selectFooter === "SlidePicker" && randomStudents && (
           <PopupLayout onClose={() => setSelectFooter("EMTY")}>
-            <div className="h-full w-full bg-white p-5 md:h-max md:w-max md:rounded-md md:border">
+            <div className="h-full w-full bg-white p-5 md:h-max md:w-max md:rounded-2xl md:border">
               <SilderPicker<StudentOnSubject>
                 images={randomStudents
                   .filter((s) => s.isActive)
@@ -302,7 +302,7 @@ function Index({ subjectId }: Props) {
         )}
         {triggerInviteTeacher && subject.data && (
           <PopupLayout onClose={() => setTriggerInviteTeacher(false)}>
-            <div className="rounded-md border">
+            <div className="rounded-2xl border">
               <InviteTeacher
                 schoolId={subject.data?.schoolId}
                 setTrigger={setTriggerInviteTeacher}
@@ -330,7 +330,7 @@ function Index({ subjectId }: Props) {
                   : subject.data?.isLocked === true
                     ? "bg-gray-400/90"
                     : "gradient-bg"
-            } lg:rounded-md`}
+            } lg:rounded-2xl`}
           >
             {subject.data?.backgroundImage && (
               <div
@@ -358,14 +358,14 @@ function Index({ subjectId }: Props) {
                 {subject.data ? subject.data?.description : "Loading..."}
               </p>
               <div className="flex flex-wrap gap-2">
-                <div className="w-max rounded-md bg-white px-2 py-1">
-                  <h2 className="text-xs text-primary-color">
+                <div className="w-max rounded-2xl bg-red-600 px-2 py-1">
+                  <h2 className="text-xs text-white">
                     {subjectDataLanguage.educationYear(language.data ?? "en")}:{" "}
                     {subject.data ? subject.data?.educationYear : "Loading..."}
                   </h2>
                 </div>
-                <div className="w-max rounded-md bg-white px-2 py-1">
-                  <h2 className="text-xs text-primary-color">
+                <div className="w-max rounded-2xl bg-orange-400 px-2 py-1">
+                  <h2 className="text-xs text-white">
                     {subjectDataLanguage.code(language.data ?? "en")}:{" "}
                     {subject.data ? subject.data?.code : "Loading..."}
                   </h2>
@@ -378,14 +378,14 @@ function Index({ subjectId }: Props) {
             >
               <button
                 onClick={() => setIsMenuVisible((prev) => !prev)}
-                className="flex w-max items-center justify-center gap-1 rounded-md bg-white px-2 py-1 text-primary-color hover:bg-primary-color hover:text-white active:scale-110 md:hidden"
+                className="flex w-max items-center justify-center gap-1 rounded-2xl bg-white px-2 py-1 text-primary-color hover:bg-primary-color hover:text-white active:scale-110 md:hidden"
               >
                 <MdMenu />
               </button>
               <div
                 className={`h-full flex-col items-end justify-between ${
                   isMenuVisible
-                    ? "animate-in fade-in-0 flex flex-col rounded-md bg-white/50 p-5"
+                    ? "animate-in fade-in-0 flex flex-col rounded-2xl bg-white/50 p-5"
                     : "hidden"
                 } md:flex`}
               >
@@ -393,7 +393,7 @@ function Index({ subjectId }: Props) {
                   {subject.data?.isLocked === true && (
                     <div
                       title="This Subject is being locked"
-                      className="flex w-max items-center justify-center rounded-md px-2 py-1 text-white hover:bg-gray-300/50"
+                      className="flex w-max items-center justify-center rounded-2xl px-2 py-1 text-white hover:bg-gray-300/50"
                     >
                       <span className="text-sm">Subject is locked</span>{" "}
                       <MdLock />
@@ -401,14 +401,14 @@ function Index({ subjectId }: Props) {
                   )}
                   <button
                     onClick={() => setSelectMenu("SettingSubject")}
-                    className="flex w-max items-center justify-center gap-1 rounded-md bg-white px-2 py-1 text-primary-color hover:bg-primary-color hover:text-white active:scale-110"
+                    className="flex w-max items-center justify-center gap-1 rounded-2xl bg-white px-2 py-1 text-primary-color hover:bg-primary-color hover:text-white active:scale-110"
                   >
                     <CiCircleInfo />
                     {subjectDataLanguage.moreInfo(language.data ?? "en")}
                   </button>
                   <label
                     title="Change Background Image"
-                    className="flex w-max cursor-pointer items-center justify-center gap-1 rounded-md bg-white px-2 py-1 text-primary-color hover:bg-primary-color hover:text-white active:scale-110"
+                    className="flex w-max cursor-pointer items-center justify-center gap-1 rounded-2xl bg-white px-2 py-1 text-primary-color hover:bg-primary-color hover:text-white active:scale-110"
                   >
                     <SlPicture />
                     <input
@@ -433,7 +433,7 @@ function Index({ subjectId }: Props) {
                   <button
                     onClick={() => setTriggerQRCode((prev) => !prev)}
                     aria-label="QR Code Subject"
-                    className="flex w-40 items-center justify-center gap-1 rounded-md bg-white px-2 py-1 text-xs text-primary-color hover:bg-primary-color hover:text-white active:scale-110"
+                    className="flex w-40 items-center justify-center gap-1 rounded-2xl bg-white px-2 py-1 text-xs text-primary-color hover:bg-primary-color hover:text-white active:scale-110"
                   >
                     {subjectDataLanguage.qrCode(language.data ?? "en")}
                     <IoQrCode />
@@ -474,7 +474,7 @@ function Index({ subjectId }: Props) {
             />
           )}
         </main>
-        <footer className="h-96"></footer>
+        <footer className="h-20"></footer>
       </SubjectLayout>
     </>
   );

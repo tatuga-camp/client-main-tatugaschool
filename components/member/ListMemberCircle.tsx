@@ -23,13 +23,13 @@ function ListMemberCircle({ members, setTrigger, maxShow }: Props) {
   const membersToShow = maxShow ? members.slice(0, maxShow) : members;
   const remainingMembersCount = maxShow ? members.length - maxShow : 0;
   return (
-    <div className="w-max flex items-end justify-center">
+    <div className="flex w-max items-end justify-center">
       {membersToShow.map((teacher, index) => {
         return (
           <div
             title={`${teacher.firstName} ${teacher.lastName} : ${teacher.email}`}
             style={{ left: `-${index * 5}px` }}
-            className={`w-6 h-6 ring-1  ring-white bg-white relative rounded-full overflow-hidden`}
+            className={`relative h-6 w-6 overflow-hidden rounded-full bg-white ring-1 ring-white`}
             key={teacher.id}
           >
             <Image
@@ -39,9 +39,9 @@ function ListMemberCircle({ members, setTrigger, maxShow }: Props) {
               sizes="(max-width: 768px) 100vw, 33vw"
               placeholder="blur"
               blurDataURL={decodeBlurhashToCanvas(
-                teacher.blurHash ?? defaultBlurHash
+                teacher.blurHash ?? defaultBlurHash,
               )}
-              className=" object-cover cursor-pointer"
+              className="cursor-pointer object-cover"
             />
           </div>
         );
@@ -50,7 +50,7 @@ function ListMemberCircle({ members, setTrigger, maxShow }: Props) {
       {/* Display count of remaining members if maxShow is used */}
       {remainingMembersCount > 0 && (
         <div
-          className="w-6 h-6 ring-1 ring-white bg-gray-300 relative rounded-full flex items-center justify-center text-xs font-bold text-gray-700"
+          className="relative flex h-6 w-6 items-center justify-center rounded-full bg-gray-300 text-xs font-bold text-gray-700 ring-1 ring-white"
           style={{ left: `-${membersToShow.length * 5}px` }}
           title={`${remainingMembersCount} more members`}
         >
@@ -61,14 +61,11 @@ function ListMemberCircle({ members, setTrigger, maxShow }: Props) {
         <button
           onClick={() => setTrigger(true)}
           aria-label="invite teacher to subject"
-          className={`flex items-center text-xs
-            ${
-              members.length === 0
-                ? "text-red-700"
-                : "text-primary-color hover:bg-primary-color hover:text-white"
-            }
-            active:scale-110 justify-center gap-1  
-                bg-white w-max px-2 py-1 rounded-md`}
+          className={`flex items-center text-xs ${
+            members.length === 0
+              ? "text-red-700"
+              : "text-primary-color hover:bg-primary-color hover:text-white"
+          } w-max justify-center gap-1 rounded-2xl bg-white px-2 py-1 active:scale-110`}
         >
           {members.length === 0 ? "No Member Please Invite" : "Invite"}
           <IoIosSend />

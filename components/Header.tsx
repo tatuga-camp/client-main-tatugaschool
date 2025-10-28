@@ -17,7 +17,7 @@ const Header = () => {
   const pathname = usePathname();
   const language = useGetLanguage();
   const classLinkActive =
-    "bg-blue-500/50 text-black px-4  py-2 rounded-md font-semibold";
+    "bg-blue-500/50 text-black px-4  py-2 rounded-2xl font-semibold";
   const classLinkInactive = "bg-transparent text-black";
   const isSchoolPage = pathname === "/";
   const isAccountPage = pathname.startsWith("/account");
@@ -31,7 +31,7 @@ const Header = () => {
         }
         className="flex items-center justify-center gap-1 md:gap-3"
       >
-        <div className="relative h-10 w-10 overflow-hidden rounded-md ring-1 ring-white transition duration-150 hover:scale-105 active:scale-110">
+        <div className="relative h-10 w-10 overflow-hidden rounded-2xl ring-1 ring-white transition duration-150 hover:scale-105 active:scale-110">
           <Image
             src="/favicon.ico"
             blurDataURL={defaultCanvas}
@@ -51,7 +51,7 @@ const Header = () => {
             href="/"
             className={`${isActiveClass(
               isSchoolPage,
-            )} flex h-10 items-center justify-center rounded-md border px-3`}
+            )} flex h-10 items-center justify-center rounded-2xl border px-3`}
           >
             {navbarLanguageData.school(language.data ?? "en")}
           </Link>
@@ -59,7 +59,7 @@ const Header = () => {
             href="/account"
             className={`${isActiveClass(
               isAccountPage,
-            )} flex h-10 items-center justify-center rounded-md border px-3`}
+            )} flex h-10 items-center justify-center rounded-2xl border px-3`}
           >
             {navbarLanguageData.account(language.data ?? "en")}
           </Link>

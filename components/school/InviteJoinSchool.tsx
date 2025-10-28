@@ -71,7 +71,7 @@ function InviteJoinSchool({ schoolId, hideFinishButton }: Props) {
             lastName: user.lastName,
             photo: user.photo,
             isInvite: memberOnSchools.data.some(
-              (member) => member.userId === user.id
+              (member) => member.userId === user.id,
             ),
             userId: user.id,
             isLoading: false,
@@ -80,7 +80,7 @@ function InviteJoinSchool({ schoolId, hideFinishButton }: Props) {
                 ?.role ?? "ADMIN",
             trigger: false,
           };
-        })
+        }),
       );
     }
   }, [getUsers.data, memberOnSchools.data]);
@@ -131,15 +131,15 @@ function InviteJoinSchool({ schoolId, hideFinishButton }: Props) {
   };
   return (
     <div>
-      <section className="flex flex-col  w-full gap-2">
-        <label className="pb-2 w-full border-b border-b-gray-300">
+      <section className="flex w-full flex-col gap-2">
+        <label className="w-full border-b border-b-gray-300 pb-2">
           {createSchoolDataLanguage.inviteTitle(language.data ?? "en")}{" "}
         </label>
-        <div className="flex w-full relative bg-slate-200 flex-col">
+        <div className="relative flex w-full flex-col bg-slate-200">
           <input
             type="email"
             value={query}
-            className="border rounded-md px-6 py-4"
+            className="rounded-2xl border px-6 py-4"
             placeholder="Enter Email"
             onChange={(e) => {
               setQuery(e.target.value);
@@ -149,7 +149,7 @@ function InviteJoinSchool({ schoolId, hideFinishButton }: Props) {
             <ProgressSpinner
               animationDuration="0.5s"
               style={{ width: "20px", position: "absolute" }}
-              className="w-5 h-5  right-5 top-0 bottom-0 m-auto"
+              className="bottom-0 right-5 top-0 m-auto h-5 w-5"
               strokeWidth="8"
             />
           )}
@@ -170,9 +170,9 @@ function InviteJoinSchool({ schoolId, hideFinishButton }: Props) {
           />
         )}
       </section>
-      <div className="w-full mt-5 flex justify-center">
+      <div className="mt-5 flex w-full justify-center">
         {!hideFinishButton && (
-          <Link href="/" className="main-button text-center w-40">
+          <Link href="/" className="main-button w-40 text-center">
             {createSchoolDataLanguage.inviteDone(language.data ?? "en")}
           </Link>
         )}

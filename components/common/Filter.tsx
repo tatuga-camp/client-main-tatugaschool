@@ -71,12 +71,12 @@ function Filter({ value, onClick }: Props) {
     <div ref={filterRef} className="relative h-full">
       <button
         onClick={() => setActiveShow((prev) => !prev)}
-        className="flex h-full items-center justify-center gap-1 rounded-md px-5 py-1 transition hover:bg-gray-300/50 active:bg-gray-300/70"
+        className="flex h-full items-center justify-center gap-1 rounded-2xl px-5 py-1 transition hover:bg-gray-300/50 active:bg-gray-300/70"
       >
         <IoFilterSharp /> Filter
       </button>
       <div
-        className={`bg-white drop-shadow-md transition-height ${activeShow ? "h-40 w-40" : "h-0 w-40"} absolute top-14 z-10 flex flex-col overflow-clip rounded-md pb-0`}
+        className={`bg-white drop-shadow-md transition-height ${activeShow ? "h-40 w-40" : "h-0 w-40"} absolute top-14 z-10 flex flex-col overflow-clip rounded-2xl pb-0`}
       >
         {filter.map((menu, index) => (
           <button

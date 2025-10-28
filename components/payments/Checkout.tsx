@@ -56,15 +56,12 @@ function PaymentForm(props: {
   return (
     <form
       id="payment-form"
-      className="flex flex-col md:flex-row gap-3 font-Anuphan"
+      className="flex flex-col gap-3 font-Anuphan md:flex-row"
       onSubmit={handleSubmit}
     >
-      <div className="w-max flex flex-col  items-center justify-center p-2">
-        <div className="flex items-center justify-center border-b px-3 py-1 gap-1 md:gap-2">
-          <div
-            className="w-6 h-6 rounded-md overflow-hidden ring-1 ring-white
-                 relative hover:scale-105 active:scale-110 transition duration-150"
-          >
+      <div className="flex w-max flex-col items-center justify-center p-2">
+        <div className="flex items-center justify-center gap-1 border-b px-3 py-1 md:gap-2">
+          <div className="relative h-6 w-6 overflow-hidden rounded-2xl ring-1 ring-white transition duration-150 hover:scale-105 active:scale-110">
             <Image
               src="/favicon.ico"
               placeholder="blur"
@@ -73,17 +70,17 @@ function PaymentForm(props: {
               alt="logo tatuga school"
             />
           </div>
-          <div className="font-bold uppercase  block text-lg md:text-base text-icon-color">
+          <div className="block text-lg font-bold uppercase text-icon-color md:text-base">
             Tatuga School Member
           </div>
         </div>
         <span className="font-semibold text-primary-color">
           {props.product.title}
         </span>
-        <div className="gradient-bg w-20 text-sm rounded-sm uppercase text-white font-semibold flex items-center justify-center">
+        <div className="gradient-bg flex w-20 items-center justify-center rounded-sm text-sm font-semibold uppercase text-white">
           {props.product.time}
         </div>
-        <span className="underline  font-bold">
+        <span className="font-bold underline">
           Price: {props.product.price}
         </span>
       </div>
@@ -100,7 +97,7 @@ function PaymentForm(props: {
           }}
         />
         <button
-          className="main-button w-full h-10 flex items-center justify-center"
+          className="main-button flex h-10 w-full items-center justify-center"
           disabled={isLoading || !stripe || !elements}
           id="submit"
         >

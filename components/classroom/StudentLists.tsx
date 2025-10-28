@@ -48,46 +48,46 @@ function StudentLists({ students, classroom }: Props) {
   const [loadingStudent, setLoadingStudent] = React.useState(false);
   const toast = React.useRef<Toast>(null);
   const [studentData, setStudentData] = React.useState<Student[]>(
-    students.sort((a, b) => Number(a.number) - Number(b.number))
+    students.sort((a, b) => Number(a.number) - Number(b.number)),
   );
 
   const sound = useSound("/sounds/ding.mp3") as HTMLAudioElement;
   const [sortBy, setSortBy] = React.useState<SortByOption>("Default");
   const [search, setSearch] = React.useState("");
   const [selectStudent, setSelectStudent] = React.useState<Student | null>(
-    null
+    null,
   );
   const handleSortBy = (sortBy: SortByOption) => {
     switch (sortBy) {
       case "Default":
         setStudentData((prev) =>
-          prev.sort((a, b) => Number(a.number) - Number(b.number))
+          prev.sort((a, b) => Number(a.number) - Number(b.number)),
         );
         break;
       case "Newest":
         setStudentData((prev) =>
           prev.sort(
             (a, b) =>
-              new Date(b.createAt).getTime() - new Date(a.createAt).getTime()
-          )
+              new Date(b.createAt).getTime() - new Date(a.createAt).getTime(),
+          ),
         );
         break;
       case "Oldest":
         setStudentData((prev) =>
           prev.sort(
             (a, b) =>
-              new Date(a.createAt).getTime() - new Date(b.createAt).getTime()
-          )
+              new Date(a.createAt).getTime() - new Date(b.createAt).getTime(),
+          ),
         );
         break;
       case "AZ":
         setStudentData((prev) =>
-          prev.sort((a, b) => a.firstName.localeCompare(b.firstName))
+          prev.sort((a, b) => a.firstName.localeCompare(b.firstName)),
         );
         break;
       case "ZA":
         setStudentData((prev) =>
-          prev.sort((a, b) => b.firstName.localeCompare(a.firstName))
+          prev.sort((a, b) => b.firstName.localeCompare(a.firstName)),
         );
         break;
       default:
@@ -99,7 +99,7 @@ function StudentLists({ students, classroom }: Props) {
     setSearch(search);
     if (search === "")
       return setStudentData(
-        students.sort((a, b) => Number(a.number) - Number(b.number))
+        students.sort((a, b) => Number(a.number) - Number(b.number)),
       );
     setStudentData(() =>
       students?.filter(
@@ -107,14 +107,14 @@ function StudentLists({ students, classroom }: Props) {
           student.firstName.toLowerCase().includes(search.toLowerCase()) ||
           student.title.toLowerCase().includes(search.toLowerCase()) ||
           student.lastName?.toLowerCase().includes(search.toLowerCase()) ||
-          student.number.toLowerCase().includes(search.toLowerCase())
-      )
+          student.number.toLowerCase().includes(search.toLowerCase()),
+      ),
     );
   };
 
   useEffect(() => {
     setStudentData(
-      students.sort((a, b) => Number(a.number) - Number(b.number))
+      students.sort((a, b) => Number(a.number) - Number(b.number)),
     );
   }, [students]);
 
@@ -288,11 +288,11 @@ function StudentLists({ students, classroom }: Props) {
             />
           ) : (
             <>
-              <header className="w-full px-3  pb-2 border-b justify-between flex">
+              <header className="flex w-full justify-between border-b px-3 pb-2">
                 <div className="flex items-center justify-start gap-2">
                   <button
                     onClick={() => setTriggerShowSuggestCareer(() => true)}
-                    className="flex items-center justify-center gap-1 second-button border"
+                    className="second-button flex items-center justify-center gap-1 border"
                   >
                     <SiGooglegemini />
                     Suggest Carrer Path (AI)
@@ -317,32 +317,32 @@ function StudentLists({ students, classroom }: Props) {
                   }}
                   handleUpload={handleUpload}
                 />
-                <div className="flex flex-col mt-5 gap-1">
-                  <span className=" text-sm">
+                <div className="mt-5 flex flex-col gap-1">
+                  <span className="text-sm">
                     {studentOnClassDataLanguage.studentData.password(
-                      language.data ?? "en"
+                      language.data ?? "en",
                     )}
                   </span>
                   <button
                     type="button"
                     disabled={loadingStudent}
                     onClick={handleResetPassword}
-                    className="second-button border w-max flex items-center justify-center gap-1"
+                    className="second-button flex w-max items-center justify-center gap-1 border"
                   >
                     <MdOutlinePassword />
                     {studentOnClassDataLanguage.studentData.resetPassword(
-                      language.data ?? "en"
+                      language.data ?? "en",
                     )}
                   </button>
                   <span className="text-sm text-red-500">
                     {studentOnClassDataLanguage.studentData.passwordDescription(
-                      language.data ?? "en"
+                      language.data ?? "en",
                     )}
                   </span>
                 </div>
               </main>
 
-              <footer className="w-full px-3  py-5  border-t justify-between gap-3 flex">
+              <footer className="flex w-full justify-between gap-3 border-t px-3 py-5">
                 <button
                   onClick={() => {
                     document.body.style.overflow = "auto";
@@ -367,7 +367,7 @@ function StudentLists({ students, classroom }: Props) {
                       setSelectStudent(null);
                     }}
                     type="button"
-                    className="second-button border flex items-center justify-center gap-1"
+                    className="second-button flex items-center justify-center gap-1 border"
                   >
                     Cancel
                   </button>
@@ -406,26 +406,23 @@ function StudentLists({ students, classroom }: Props) {
       )}
 
       <Toast ref={toast} />
-      <div className="w-full flex flex-col items-center gap-5">
-        <header
-          className="w-full flex flex-col md:flex-row justify-between p-3 md:px-5 
-      md:max-w-screen-md xl:max-w-screen-lg gap-4 md:gap-0 mx-auto"
-        >
+      <div className="flex w-full flex-col items-center gap-5">
+        <header className="mx-auto flex w-full flex-col justify-between gap-4 p-3 md:max-w-screen-md md:flex-row md:gap-0 md:px-5 xl:max-w-screen-lg">
           <section className="text-center md:text-left">
-            <h1 className="text-2xl md:text-3xl font-semibold">
+            <h1 className="text-2xl font-semibold md:text-3xl">
               {studentOnClassDataLanguage.title(language.data ?? "en")}
             </h1>
-            <p className="text-gray-400 max-w-96 break-words text-sm md:text-base">
+            <p className="max-w-96 break-words text-sm text-gray-400 md:text-base">
               {studentOnClassDataLanguage.description(language.data ?? "en")}
             </p>
           </section>
-          <section className="flex flex-col xl:flex-row items-center gap-2 md:gap-1">
+          <section className="flex flex-col items-center gap-2 md:gap-1 xl:flex-row">
             <button
               onClick={() => {
                 document.body.style.overflow = "hidden";
                 setTriggerCreateStudent(true);
               }}
-              className="main-button drop-shadow-md w-full xl:w-auto flex items-center justify-center gap-1 py-1 ring-1 ring-blue-600"
+              className="main-button flex w-full items-center justify-center gap-1 py-1 ring-1 ring-blue-600 drop-shadow-md xl:w-auto"
             >
               <FiPlus />
               {studentOnClassDataLanguage.create(language.data ?? "en")}
@@ -434,22 +431,22 @@ function StudentLists({ students, classroom }: Props) {
         </header>
         <div className="flex items-center justify-start gap-2">
           <label className="flex flex-col">
-            <span className="text-gray-400 text-sm">
+            <span className="text-sm text-gray-400">
               {studentOnClassDataLanguage.search(language.data ?? "en")}
             </span>
             <input
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
               type="text"
-              className="w-96 border border-gray-300 rounded-lg p-2"
+              className="w-96 rounded-2xl border border-gray-300 p-2"
               placeholder={studentOnClassDataLanguage.searchPlaceholder(
-                language.data ?? "en"
+                language.data ?? "en",
               )}
             />
           </label>
 
           <label className="flex flex-col">
-            <span className="text-gray-400 text-sm">
+            <span className="text-sm text-gray-400">
               {classesDataLanguage.sort(language.data ?? "en")}
             </span>
             <select
@@ -471,10 +468,7 @@ function StudentLists({ students, classroom }: Props) {
           </label>
         </div>
 
-        <section
-          className="w-80   md:w-10/12 lg:w-9/12 
-grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-5"
-        >
+        <section className="grid w-80 grid-cols-2 gap-5 sm:grid-cols-3 md:w-10/12 md:grid-cols-4 lg:w-9/12 lg:grid-cols-4 xl:grid-cols-5">
           {studentData.map((student) => {
             return (
               <StudentCard

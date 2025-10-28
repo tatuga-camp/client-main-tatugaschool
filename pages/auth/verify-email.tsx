@@ -69,7 +69,7 @@ const VerifyEmailPage = ({ token }: { token: string | null }) => {
               </p>
               <Link
                 href={"/auth/sign-in"}
-                className="rounded-lg bg-[#5F3DC4] p-4 font-semibold text-white transition duration-300 hover:bg-[#482ab4]"
+                className="rounded-2xl bg-[#5F3DC4] p-4 font-semibold text-white transition duration-300 hover:bg-[#482ab4]"
               >
                 Sign In
               </Link>

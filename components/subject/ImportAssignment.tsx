@@ -128,7 +128,7 @@ function ImportAssignment({
     });
   };
   return (
-    <div className="flex h-5/6 w-10/12 flex-col gap-3 rounded-md bg-white p-5 pb-0 font-Anuphan">
+    <div className="flex h-5/6 w-10/12 flex-col gap-3 rounded-2xl bg-white p-5 pb-0 font-Anuphan">
       <div className="flex w-full justify-end">
         <button
           onClick={() => {
@@ -336,7 +336,7 @@ function AssignmentLists({
             return (
               <div
                 key={classwork.id}
-                className={`w-full rounded-md ${selectClasswork && selectClasswork.id === classwork.id && "ring-2 ring-black"} md:w-9/12 xl:w-8/12`}
+                className={`w-full rounded-2xl ${selectClasswork && selectClasswork.id === classwork.id && "ring-2 ring-black"} md:w-9/12 xl:w-8/12`}
               >
                 <ClassworkCard
                   key={classwork.id}

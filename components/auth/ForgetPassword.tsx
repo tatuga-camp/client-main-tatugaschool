@@ -31,7 +31,7 @@ export const ForgetPasswordForm = () => {
       await Swal.fire({
         title: requestData.successTitle(language.data ?? "en"),
         text: requestData.successForgetPasswordDesciption(
-          language.data ?? "en"
+          language.data ?? "en",
         ),
         icon: "success",
       });
@@ -50,36 +50,34 @@ export const ForgetPasswordForm = () => {
   return (
     <>
       <form
-        className="bg-white w-full md:w-5/12
-                 p-[80px_40px] rounded-lg flex flex-col gap-5 
-                 shadow-[0_12px_24px_rgba(145,158,171,0.12)] text-center"
+        className="flex w-full flex-col gap-5 rounded-2xl bg-white p-[80px_40px] text-center shadow-[0_12px_24px_rgba(145,158,171,0.12)] md:w-5/12"
         onSubmit={handleForgetPassword}
       >
         <h2 className="text-[24px] font-bold">
           {forgetPasswordLanguageData.title(language.data ?? "en")}
         </h2>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
-        <p className="text-sm text-center">
+        {error && <p className="mb-4 text-red-500">{error}</p>}
+        <p className="text-center text-sm">
           {forgetPasswordLanguageData.description(language.data ?? "en")}
         </p>
         <input
           type="email"
           placeholder={forgetPasswordLanguageData.inputEmail(
-            language.data ?? "en"
+            language.data ?? "en",
           )}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full p-[16px]  border border-gray-300 rounded-lg"
+          className="w-full rounded-2xl border border-gray-300 p-[16px]"
         />
 
         {loading ? (
           <button
             type="submit"
-            className="w-full p-4 bg-[#5F3DC4] text-white rounded-lg font-semibold hover:bg-[#482ab4] transition duration-300 flex items-center justify-center space-x-2"
+            className="flex w-full items-center justify-center space-x-2 rounded-2xl bg-[#5F3DC4] p-4 font-semibold text-white transition duration-300 hover:bg-[#482ab4]"
           >
             <svg
-              className="animate-spin h-5 w-5 text-white"
+              className="h-5 w-5 animate-spin text-white"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
@@ -93,7 +91,7 @@ export const ForgetPasswordForm = () => {
             <span>Loading...</span>
           </button>
         ) : (
-          <button type="submit" className="w-full main-button">
+          <button type="submit" className="main-button w-full">
             {forgetPasswordLanguageData.button(language.data ?? "en")}
           </button>
         )}

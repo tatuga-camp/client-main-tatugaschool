@@ -8,7 +8,7 @@ type Props = {
 };
 function TeachingMaterialCard({ teachingMaterial, onClick }: Props) {
   return (
-    <div className="group relative h-max w-80 overflow-hidden rounded-md border bg-white font-Anuphan">
+    <div className="group relative h-max w-80 overflow-hidden rounded-2xl border-2 border-black bg-white font-Anuphan">
       <div className="absolute bottom-0 left-0 right-0 top-0 z-30 m-auto hidden h-full w-full flex-col items-center justify-center gap-2 group-hover:flex">
         <button
           onClick={() => onClick()}
@@ -18,7 +18,7 @@ function TeachingMaterialCard({ teachingMaterial, onClick }: Props) {
         </button>
         <span className="text-sm text-white">click to view detail</span>
       </div>
-      <div className="absolute right-2 top-2 z-20 rounded-md border bg-green-100 px-3 text-sm text-green-800">
+      <div className="absolute right-2 top-2 z-20 rounded-2xl border bg-green-100 px-3 text-sm text-green-800">
         AI Match: {(teachingMaterial.score * 100).toFixed(0)}%
       </div>
       {teachingMaterial.canvaURL && (
@@ -43,7 +43,7 @@ function TeachingMaterialCard({ teachingMaterial, onClick }: Props) {
           {teachingMaterial.tags.map((tag, index) => {
             return (
               <li
-                className="w-max rounded-md bg-blue-100 px-2 text-xs text-blue-700"
+                className="w-max rounded-2xl bg-blue-100 px-2 text-xs text-blue-700"
                 key={index}
               >
                 #{tag}

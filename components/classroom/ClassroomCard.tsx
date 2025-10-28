@@ -36,7 +36,7 @@ function ClassroomCard({ classroom }: Props) {
       classroom.userId !== undefined
     ) {
       const member = memberOnSchool.data.find(
-        (m) => m.userId === classroom.userId
+        (m) => m.userId === classroom.userId,
       );
 
       if (member) {
@@ -48,9 +48,7 @@ function ClassroomCard({ classroom }: Props) {
   const inlineStyles: CSSProperties = {
     opacity: isDragging ? "0.5" : "1",
     transformOrigin: "50% 50%",
-    boxShadow: isDragging
-      ? "rgb(63 63 68 / 5%) 0px 2px 0px 2px, rgb(34 33 81 / 15%) 0px 2px 3px 2px"
-      : "rgb(63 63 68 / 5%) 0px 0px 0px 1px, rgb(34 33 81 / 15%) 0px 1px 3px 0px",
+
     ...style,
   };
   const dateMonth = new Date(classroom.createAt).toLocaleDateString(undefined, {
@@ -69,67 +67,60 @@ function ClassroomCard({ classroom }: Props) {
         ref={setNodeRef}
         style={inlineStyles}
         {...attributes}
-        className="w-full h-64 cursor-pointer active:scale-105 flex flex-col rounded-lg overflow-hidden border"
+        className="flex h-64 w-full cursor-pointer flex-col overflow-hidden rounded-2xl border-2 border-black active:scale-105"
       >
         <div
-          className={`w-full h-24 relative ${
+          className={`relative h-24 w-full ${
             classroom.isAchieved ? "gradient-bg-success" : "gradient-bg"
-          }  flex items-end p-5`}
+          } flex items-end p-5`}
         >
-          <div
-            className="flex w-max text-xs  
-             items-center absolute top-2 left-2 m-auto bg-white text-black  border-white gap-1 border rounded-full px-2 py-1 justify-center"
-          >
+          <div className="absolute left-2 top-2 m-auto flex w-max items-center justify-center gap-1 rounded-full border border-black bg-yellow-300 px-2 py-1 text-xs text-black">
             CLASSROOM
           </div>
-          <h1 className="text-white truncate w-48  text-lg font-semibold">
+          <h1 className="w-48 truncate text-lg font-semibold text-white">
             {classroom.title}
           </h1>
           {classroom.isAchieved && (
-            <div
-              className="flex w-max text-xs  
-             items-center   text-white  border-white gap-1 border rounded-full px-2 py-1 justify-center"
-            >
+            <div className="flex w-max items-center justify-center gap-1 rounded-full border border-white px-2 py-1 text-xs text-white">
               ACHIEVED
             </div>
           )}
           <div
             {...listeners}
             style={{ cursor: isDragging ? "grabbing" : "grab" }}
-            className="w-6 h-10 rounded-md text-white hover:bg-gray-300/50 flex 
-items-center justify-center absolute top-2 right-2 "
+            className="absolute right-2 top-2 flex h-10 w-6 items-center justify-center rounded-2xl text-white hover:bg-gray-300/50"
           >
             <MdDragIndicator />
           </div>
         </div>
-        <div className="p-5 pb-2 flex grow flex-col justify-between">
+        <div className="flex grow flex-col justify-between p-5 pb-2">
           <div className="flex flex-col gap-2">
             <div className="flex flex-col gap-1">
               <span
                 title="Class's Level"
-                className="font-semibold text-xl border-b"
+                className="border-b text-xl font-semibold"
               >
                 {classroom.level}
               </span>
-              <p title="Class Begin Year" className="text-sm line-clamp-2">
+              <p title="Class Begin Year" className="line-clamp-2 text-sm">
                 {classroom.description}
               </p>
             </div>
 
-            <div className="flex w-max items-center gap-1 border rounded-full px-2 py-1 justify-center">
+            <div className="flex w-max items-center justify-center gap-1 rounded-full border px-2 py-1">
               <FaUsers />
-              <span className=" text-xs">
+              <span className="text-xs">
                 {classroom.studentNumbers} Students
               </span>
             </div>
           </div>
           {creator ? (
-            <div className="text-gray-400 text-xs flex items-center justify-start gap-2">
+            <div className="flex items-center justify-start gap-2 text-xs text-gray-400">
               Created By: <ListMemberCircle members={[creator]} />{" "}
               {creator.firstName} {creator.lastName}
             </div>
           ) : (
-            <div className="text-gray-400 text-xs">Created At: {dateMonth}</div>
+            <div className="text-xs text-gray-400">Created At: {dateMonth}</div>
           )}
         </div>
       </li>

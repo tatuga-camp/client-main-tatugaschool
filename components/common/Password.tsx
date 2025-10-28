@@ -49,7 +49,7 @@ function Password(props: Props) {
           },
         },
         panel: {
-          className: "p-5 bg-white  text-gray-700  shadow-md rounded-md",
+          className: "p-5 bg-white  text-gray-700  shadow-md rounded-2xl",
         },
         input: {
           className: "main-input w-full",
@@ -66,7 +66,7 @@ function Password(props: Props) {
                 "bg-orange-500": options?.state.meter?.strength == "medium",
                 "bg-green-500": options?.state.meter?.strength == "strong",
               },
-              { "pr-[2.5rem] ": options?.props.toggleMask }
+              { "pr-[2.5rem] ": options?.props.toggleMask },
             ),
           };
         },
@@ -74,7 +74,7 @@ function Password(props: Props) {
           return {
             className: classNames(
               "absolute top-1/2 -mt-2",
-              "right-3 text-gray-600 "
+              "right-3 text-gray-600 ",
             ),
           };
         },
@@ -82,7 +82,7 @@ function Password(props: Props) {
           return {
             className: classNames(
               "absolute top-1/2 -mt-2",
-              "right-3 text-gray-600 "
+              "right-3 text-gray-600 ",
             ),
           };
         },

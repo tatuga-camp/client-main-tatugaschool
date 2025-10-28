@@ -78,16 +78,16 @@ function ManageInvite() {
         {memberOnSchools.data
           ?.sort(
             (a, b) =>
-              new Date(b.createAt).getTime() - new Date(a.createAt).getTime()
+              new Date(b.createAt).getTime() - new Date(a.createAt).getTime(),
           )
           .map((member) => {
             return (
               <li
                 key={member.id}
-                className="flex items-center justify-between px-5 border-b  py-3 bg-white rounded-md"
+                className="flex items-center justify-between rounded-2xl border-b bg-white px-5 py-3"
               >
                 <div className="flex items-center gap-2">
-                  <div className="w-20 h-10 relative overflow-hidden ">
+                  <div className="relative h-10 w-20 overflow-hidden">
                     <Image
                       src={member.school.logo}
                       alt="logo of school"
@@ -103,16 +103,16 @@ function ManageInvite() {
                       <span className="font-semibold">School:</span>{" "}
                       {member.school.title}
                     </p>
-                    <p className="text-sm text-gray-400 flex gap-1 items-center">
+                    <p className="flex items-center gap-1 text-sm text-gray-400">
                       <MdHome />
                       {member.school.address} {member.school.city}{" "}
                       {member.school.country}
                     </p>
-                    <p className="text-sm text-gray-400 flex gap-1 items-center">
+                    <p className="flex items-center gap-1 text-sm text-gray-400">
                       <PiPhone />
                       {member.school.phoneNumber}
                     </p>
-                    <div className="text-sm mt-2 bg-sky-100 text-black w-max rounded-md px-2 flex gap-1 items-center">
+                    <div className="mt-2 flex w-max items-center gap-1 rounded-2xl bg-sky-100 px-2 text-sm text-black">
                       Invited{" "}
                       {timeAgo({
                         pastTime: new Date(member.createAt).toISOString(),
@@ -132,7 +132,7 @@ function ManageInvite() {
                           schoolId: member.school.id,
                         })
                       }
-                      className="reject-button w-32 gap-1 h-8 flex items-center justify-between"
+                      className="reject-button flex h-8 w-32 items-center justify-between gap-1"
                     >
                       <BiX />
                       {accountDataLanguage.reject(language.data ?? "en")}
@@ -146,7 +146,7 @@ function ManageInvite() {
                           schoolId: member.school.id,
                         })
                       }
-                      className="success-button hover:bg-green-700 w-32 gap-1 h-8 flex items-center justify-between"
+                      className="success-button flex h-8 w-32 items-center justify-between gap-1 hover:bg-green-700"
                     >
                       <BiCheck />
                       {accountDataLanguage.accpet(language.data ?? "en")}

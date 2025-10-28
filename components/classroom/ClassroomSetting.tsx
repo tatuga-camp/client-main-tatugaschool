@@ -111,51 +111,51 @@ function ClassroomSetting({ classroom, toast }: Props) {
     }
   };
   return (
-    <main className="flex flex-col items-center w-full gap-5 px-4 sm:px-6 lg:px-8">
+    <main className="flex w-full flex-col items-center gap-5 px-4 sm:px-6 lg:px-8">
       <section className="w-full sm:w-10/12 lg:w-8/12">
-        <h1 className="text-lg sm:text-xl font-medium">
+        <h1 className="text-lg font-medium sm:text-xl">
           {settingOnClassroomDataLangugae.general(lanague.data ?? "en")}
         </h1>
-        <h4 className="text-xs sm:text-sm text-gray-500">
+        <h4 className="text-xs text-gray-500 sm:text-sm">
           {settingOnClassroomDataLangugae.geernalDescription(
-            lanague.data ?? "en"
+            lanague.data ?? "en",
           )}
         </h4>
 
         <form
           onSubmit={handleUpdate}
-          className="flex flex-col p-4 min-h-80 bg-white rounded-md border gap-5 mt-5"
+          className="mt-5 flex min-h-80 flex-col gap-5 rounded-2xl border bg-white p-4"
         >
-          <h2 className="border-b text-lg font-medium py-3">
+          <h2 className="border-b py-3 text-lg font-medium">
             {settingOnClassroomDataLangugae.classroomInfo(lanague.data ?? "en")}
           </h2>
-          <div className="grid grid-cols-1 w-full">
-            <div className="grid grid-cols-1  bg-gray-200/20 gap-5  p-2 py-4">
-              <label className="w-full grid md:grid-cols-2 md:gap-10">
+          <div className="grid w-full grid-cols-1">
+            <div className="grid grid-cols-1 gap-5 bg-gray-200/20 p-2 py-4">
+              <label className="grid w-full md:grid-cols-2 md:gap-10">
                 <span className="text-base text-black">
                   {settingOnClassroomDataLangugae.classroomId(
-                    lanague.data ?? "en"
+                    lanague.data ?? "en",
                   )}
                   :
                 </span>
                 <Link
                   target="_blank"
                   href={`/classroom/${classroomData.id}`}
-                  className="text-base font-semibold underline  text-blue-600"
+                  className="text-base font-semibold text-blue-600 underline"
                 >
                   {classroomData.id}
                 </Link>
               </label>
             </div>
-            <div className="grid grid-cols-1  gap-5  p-2 py-4">
-              <label className="w-full items-center grid md:grid-cols-2 md:gap-10">
+            <div className="grid grid-cols-1 gap-5 p-2 py-4">
+              <label className="grid w-full items-center md:grid-cols-2 md:gap-10">
                 <span className="text-base text-black">
                   {settingOnClassroomDataLangugae.title(lanague.data ?? "en")}
                 </span>
                 <InputWithIcon
                   required
                   placeholder={settingOnClassroomDataLangugae.title(
-                    lanague.data ?? "en"
+                    lanague.data ?? "en",
                   )}
                   value={classroomData.title}
                   onChange={(value) => {
@@ -168,18 +168,18 @@ function ClassroomSetting({ classroom, toast }: Props) {
                 />
               </label>
             </div>
-            <div className="grid grid-cols-1  gap-5 bg-gray-200/20  p-2 py-4">
-              <label className="w-full grid items-center md:grid-cols-2 md:gap-10">
+            <div className="grid grid-cols-1 gap-5 bg-gray-200/20 p-2 py-4">
+              <label className="grid w-full items-center md:grid-cols-2 md:gap-10">
                 <span className="text-base text-black">
                   {settingOnClassroomDataLangugae.description(
-                    lanague.data ?? "en"
+                    lanague.data ?? "en",
                   )}
                   :
                 </span>
                 <InputWithIcon
                   required
                   placeholder={settingOnClassroomDataLangugae.description(
-                    lanague.data ?? "en"
+                    lanague.data ?? "en",
                   )}
                   value={classroomData.description ?? ""}
                   onChange={(value) => {
@@ -192,11 +192,11 @@ function ClassroomSetting({ classroom, toast }: Props) {
                 />
               </label>
             </div>
-            <div className="grid grid-cols-1   gap-5  p-2 py-4">
-              <label className="w-full items-center grid md:grid-cols-2 md:gap-10">
+            <div className="grid grid-cols-1 gap-5 p-2 py-4">
+              <label className="grid w-full items-center md:grid-cols-2 md:gap-10">
                 <span className="text-base text-black">
                   {settingOnClassroomDataLangugae.classLevel(
-                    lanague.data ?? "en"
+                    lanague.data ?? "en",
                   )}
                   :
                 </span>
@@ -214,12 +214,12 @@ function ClassroomSetting({ classroom, toast }: Props) {
             </div>
           </div>
 
-          <div className="grid grid-cols-1  gap-5 bg-gray-200/20  p-2 py-4">
-            <label className="w-full grid items-center md:grid-cols-2 md:gap-10">
+          <div className="grid grid-cols-1 gap-5 bg-gray-200/20 p-2 py-4">
+            <label className="grid w-full items-center md:grid-cols-2 md:gap-10">
               <span className="text-base text-black">
                 {settingOnClassroomDataLangugae.achieved(lanague.data ?? "en")}
               </span>
-              <div className="w-full flex justify-start">
+              <div className="flex w-full justify-start">
                 <Switch
                   checked={classroomData.isAchieved}
                   setChecked={(data) =>
@@ -233,15 +233,15 @@ function ClassroomSetting({ classroom, toast }: Props) {
                 />
               </div>
             </label>
-            <h4 className="text-xs sm:text-sm text-blue-600">
+            <h4 className="text-xs text-blue-600 sm:text-sm">
               {settingOnClassroomDataLangugae.acheveidDescription(
-                lanague.data ?? "en"
+                lanague.data ?? "en",
               )}
             </h4>
           </div>
           <button
             disabled={update.isPending}
-            className="main-button flex items-center justify-center mt-5 w-60"
+            className="main-button mt-5 flex w-60 items-center justify-center"
           >
             {update.isPending ? (
               <LoadingSpinner />
@@ -251,21 +251,21 @@ function ClassroomSetting({ classroom, toast }: Props) {
           </button>
         </form>
 
-        <h1 className="text-lg sm:text-xl font-medium mt-10">
+        <h1 className="mt-10 text-lg font-medium sm:text-xl">
           {settingOnClassroomDataLangugae.danger(lanague.data ?? "en")}
         </h1>
-        <h4 className="text-xs sm:text-sm text-gray-500">
+        <h4 className="text-xs text-gray-500 sm:text-sm">
           {settingOnClassroomDataLangugae.dangerDescription(
-            lanague.data ?? "en"
+            lanague.data ?? "en",
           )}
         </h4>
-        <div className="flex flex-col items-start p-4 bg-white rounded-md border gap-5 mt-5">
-          <h2 className="border-b text-base sm:text-lg font-medium py-3">
+        <div className="mt-5 flex flex-col items-start gap-5 rounded-2xl border bg-white p-4">
+          <h2 className="border-b py-3 text-base font-medium sm:text-lg">
             {settingOnClassroomDataLangugae.deleteTitle(lanague.data ?? "en")}
           </h2>
-          <h4 className="text-xs sm:text-sm text-red-700">
+          <h4 className="text-xs text-red-700 sm:text-sm">
             {settingOnClassroomDataLangugae.deleteDescription(
-              lanague.data ?? "en"
+              lanague.data ?? "en",
             )}
           </h4>
           <button
@@ -282,7 +282,7 @@ function ClassroomSetting({ classroom, toast }: Props) {
                 },
               });
             }}
-            className="reject-button w-60 mt-5"
+            className="reject-button mt-5 w-60"
           >
             {settingOnClassroomDataLangugae.deleteButton(lanague.data ?? "en")}
           </button>

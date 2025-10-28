@@ -32,7 +32,7 @@ const MemberSection: FC<MemberSectionProps> = ({
   const [searchTerm, setSearchTerm] = useState("");
   const updateMember = useUpdateMemberOnSchool();
   const [memberData, setMemberData] = useState<MemberOnSchool[]>(
-    members.data ?? []
+    members.data ?? [],
   );
   // Filter members based on search term
 
@@ -50,7 +50,7 @@ const MemberSection: FC<MemberSectionProps> = ({
     const filteredMembers = memberData.filter((member) =>
       `${member.email} ${member.firstName} ${member.lastName}`
         .toLowerCase()
-        .includes(searchTerm.toLowerCase())
+        .includes(searchTerm.toLowerCase()),
     );
     setMemberData(filteredMembers);
   };
@@ -115,10 +115,10 @@ const MemberSection: FC<MemberSectionProps> = ({
   };
 
   return (
-    <div className="bg-white h-max border max-w-4xl md:px-5 rounded-lg">
-      <div className="bg-white p-6 pb-0 mb-0 rounded-t-2xl">
+    <div className="h-max max-w-4xl rounded-2xl border bg-white md:px-5">
+      <div className="mb-0 rounded-t-2xl bg-white p-6 pb-0">
         {/* Header Section */}
-        <div className="flex justify-between items-center mb-4">
+        <div className="mb-4 flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold text-gray-800">
               Members ({members.data?.length})
@@ -127,7 +127,7 @@ const MemberSection: FC<MemberSectionProps> = ({
           </div>
           <button
             onClick={onInvite}
-            className="flex items-center space-x-1 bg-primary-color text-white px-6 py-2 rounded-lg hover:bg-opacity-90"
+            className="flex items-center space-x-1 rounded-2xl bg-primary-color px-6 py-2 text-white hover:bg-opacity-90"
           >
             <FaPlus />
             <span>
@@ -136,17 +136,17 @@ const MemberSection: FC<MemberSectionProps> = ({
           </button>
         </div>
       </div>{" "}
-      <div className="bg-white relative px-6 ">
+      <div className="relative bg-white px-6">
         <FaSearch className="absolute left-9 top-3 text-gray-400" />
         <input
           type="text"
           placeholder="Search..."
           value={searchTerm}
           onChange={(e) => handleFilter(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-color-focus"
+          className="w-full rounded-2xl border border-gray-300 py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-primary-color-focus"
         />
       </div>
-      <div className="pt-6 h-max overflow-auto bg-white rounded-b-lg">
+      <div className="h-max overflow-auto rounded-b-lg bg-white pt-6">
         <ListMembers
           listRoles={ListSchoolRoles}
           members={memberData.map((member) => {
@@ -160,7 +160,7 @@ const MemberSection: FC<MemberSectionProps> = ({
                   return { ...member, role: data.role };
                 }
                 return member;
-              })
+              }),
             );
             updateMember.mutateAsync({
               query: {

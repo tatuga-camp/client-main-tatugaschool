@@ -43,16 +43,16 @@ function TeachingMaterialShow({ id, onClose }: Props) {
           teachingMaterial={teachingMaterial.data}
         />
       ) : (
-        <div className="gradient-bg relative flex h-[90%] w-10/12 flex-col overflow-hidden rounded-lg font-Anuphan">
+        <div className="gradient-bg relative flex h-[90%] w-10/12 flex-col overflow-hidden rounded-2xl font-Anuphan">
           {teachingMaterial.isLoading && <LoadingBar />}
           <header className="flex h-max w-full items-center justify-between px-5 py-5">
             <section className="flex flex-col gap-1">
               <h1 className="flex items-center justify-center gap-3 border-b pb-2 text-lg font-semibold text-white">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/50 text-2xl text-white">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/50 text-2xl text-white">
                   <IoBookSharp />
                 </div>
                 Teaching Material
-                <div className="flex h-10 w-max items-center justify-center rounded-lg bg-white/50 px-2 text-lg font-medium text-white">
+                <div className="flex h-10 w-max items-center justify-center rounded-2xl bg-white/50 px-2 text-lg font-medium text-white">
                   {teachingMaterial.data?.accessLevel}
                 </div>
                 {teachingMaterial.data?.canvaURL && (
@@ -75,7 +75,7 @@ function TeachingMaterialShow({ id, onClose }: Props) {
                 <button
                   type="button"
                   onClick={() => setTriggerEdit(true)}
-                  className="flex h-8 w-20 items-center justify-center rounded-lg bg-white/50 text-lg text-white hover:bg-white hover:text-black"
+                  className="flex h-8 w-20 items-center justify-center rounded-2xl bg-white/50 text-lg text-white hover:bg-white hover:text-black"
                 >
                   <MdEdit /> Edit
                 </button>
@@ -83,7 +83,7 @@ function TeachingMaterialShow({ id, onClose }: Props) {
               <button
                 type="button"
                 onClick={() => onClose()}
-                className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/50 text-2xl font-semibold text-white hover:bg-white hover:text-black"
+                className="flex h-8 w-8 items-center justify-center rounded-2xl bg-white/50 text-2xl font-semibold text-white hover:bg-white hover:text-black"
               >
                 <IoMdClose />
               </button>
@@ -105,7 +105,7 @@ function TeachingMaterialShow({ id, onClose }: Props) {
                   const color = getRandomColorClass();
                   return (
                     <li
-                      className={`flex w-max items-center rounded-md px-2 text-xs ${color}`}
+                      className={`flex w-max items-center rounded-2xl px-2 text-xs ${color}`}
                       key={index}
                     >
                       #{tag}
@@ -143,7 +143,7 @@ function TeachingMaterialShow({ id, onClose }: Props) {
                             href={file.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center space-x-1 rounded-md bg-blue-500 px-4 py-2 text-white transition-colors hover:bg-blue-600"
+                            className="flex items-center space-x-1 rounded-2xl bg-blue-500 px-4 py-2 text-white transition-colors hover:bg-blue-600"
                           >
                             <BsEye />
                             <span>View</span>
@@ -153,7 +153,7 @@ function TeachingMaterialShow({ id, onClose }: Props) {
                           href={file.url}
                           target="_blank"
                           download={fileName}
-                          className="flex items-center space-x-1 rounded-md border border-gray-300 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-100"
+                          className="flex items-center space-x-1 rounded-2xl border border-gray-300 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-100"
                         >
                           <MdDownload />
                           <span>Download</span>
@@ -162,7 +162,7 @@ function TeachingMaterialShow({ id, onClose }: Props) {
                     </div>
 
                     {!isPDF && !isImage && (
-                      <div className="flex items-center space-x-2 rounded-md border border-yellow-200 bg-yellow-50 p-3 text-yellow-800">
+                      <div className="flex items-center space-x-2 rounded-2xl border border-yellow-200 bg-yellow-50 p-3 text-yellow-800">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           className="h-5 w-5 flex-shrink-0"
@@ -184,12 +184,12 @@ function TeachingMaterialShow({ id, onClose }: Props) {
 
                     {/* PDF and Image preview (simplified for demonstration) */}
                     {(isPDF || isImage) && file.url && (
-                      <div className="mt-4 grow overflow-auto rounded-md border border-gray-300 bg-gray-50 p-2">
+                      <div className="mt-4 grow overflow-auto rounded-2xl border border-gray-300 bg-gray-50 p-2">
                         <p className="mb-2 text-sm text-gray-600">
                           Example Preview:
                         </p>
                         {isPDF ? (
-                          <div className="flex h-max items-center justify-center rounded-md bg-gray-100 text-gray-500">
+                          <div className="flex h-max items-center justify-center rounded-2xl bg-gray-100 text-gray-500">
                             <embed src={file.url} width="100%" height="364" />
                           </div>
                         ) : (

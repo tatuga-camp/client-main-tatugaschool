@@ -140,7 +140,7 @@ function ClassStudentAssignWork({
                     >
                       <th>
                         <div className="flex h-14 items-center gap-2">
-                          <div className="relative h-10 w-10 overflow-hidden rounded-md ring-1">
+                          <div className="relative h-10 w-10 overflow-hidden rounded-2xl ring-1">
                             <div className="h-full w-full animate-pulse bg-gray-200"></div>
                           </div>
                           <div className="flex flex-col items-start">
@@ -242,7 +242,7 @@ const StudentList = React.memo(function StudentList({
     <tr className={` ${odd && "bg-gray-200/20"} gap-2 hover:bg-sky-100`}>
       <th className="">
         <div className="flex h-14 items-center gap-2 pl-2">
-          <div className="relative h-10 w-10 overflow-hidden rounded-md ring-1">
+          <div className="relative h-10 w-10 overflow-hidden rounded-2xl ring-1">
             <Image
               src={student.photo}
               alt={student.firstName}

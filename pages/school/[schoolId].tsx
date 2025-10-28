@@ -43,7 +43,7 @@ const SchoolPage = ({ schoolId }: { schoolId: string }) => {
           </h1>
           <button
             onClick={() => router.back()}
-            className="w-40 rounded-md bg-primary-color px-4 py-2 text-white"
+            className="w-40 rounded-2xl bg-primary-color px-4 py-2 text-white"
           >
             Back
           </button>
@@ -59,7 +59,7 @@ const SchoolPage = ({ schoolId }: { schoolId: string }) => {
           <h1 className="text-4xl text-red-500">No School Found</h1>
           <button
             onClick={() => router.push("/")}
-            className="w-40 rounded-md bg-primary-color px-4 py-2 text-white"
+            className="w-40 rounded-2xl bg-primary-color px-4 py-2 text-white"
           >
             Back
           </button>

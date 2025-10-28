@@ -22,7 +22,7 @@ function ResetPassword({ token }: { token: string }) {
       }
       if (formData?.newPassword !== formData?.confirmNewPassword) {
         throw new Error(
-          "New Password and Confirm New Password must be the same"
+          "New Password and Confirm New Password must be the same",
         );
       }
       await resetPassword.mutateAsync({
@@ -55,13 +55,13 @@ function ResetPassword({ token }: { token: string }) {
   };
 
   return (
-    <div className="w-96 md:w-5/12 h-60 bg-white rounded-lg items-center justify-start p-4 flex flex-col gap-2">
+    <div className="flex h-60 w-96 flex-col items-center justify-start gap-2 rounded-2xl bg-white p-4 md:w-5/12">
       <h2 className="text-xl font-semibold">Reset Password</h2>
 
-      <p className="text-sm text-center">
+      <p className="text-center text-sm">
         Enter New Password and Confirm Password
       </p>
-      <form onSubmit={handleSummit} className="flex flex-col w-96 gap-2">
+      <form onSubmit={handleSummit} className="flex w-96 flex-col gap-2">
         <Password
           feedback={false}
           toggleMask={true}
@@ -83,7 +83,7 @@ function ResetPassword({ token }: { token: string }) {
         <button
           type="submit"
           disabled={resetPassword.isPending}
-          className="w-full p-2 main-button"
+          className="main-button w-full p-2"
         >
           {resetPassword.isPending ? <LoadingSpinner /> : "Confirm"}
         </button>

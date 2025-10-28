@@ -45,7 +45,7 @@ const CreateSchoolComponent = () => {
   const [loading, setLoading] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const [activeIndex, setActiveIndex] = useState<number>(0);
-  const inputClasses = "border rounded-md px-6 py-4";
+  const inputClasses = "border rounded-2xl px-6 py-4";
   const [profile, setProfile] = useState<{
     school?: string;
     description?: string;
@@ -252,7 +252,7 @@ const CreateSchoolComponent = () => {
           <section className="flex flex-col gap-2">
             <div className="flex w-full items-center justify-center">
               <label
-                className={`flex h-64 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 ${loading && "animate-pulse"}`}
+                className={`flex h-64 w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 ${loading && "animate-pulse"}`}
               >
                 {profile?.logo ? (
                   <div className="relative h-full w-full p-5">
@@ -348,7 +348,7 @@ const CreateSchoolComponent = () => {
                   handleChangeActiveIndex(1);
                 }
               }}
-              className="flex h-10 w-full items-center justify-center rounded-lg bg-secondary-color py-2 font-semibold text-white transition duration-150 hover:bg-primary-color active:drop-shadow-md"
+              className="flex h-10 w-full items-center justify-center rounded-2xl bg-secondary-color py-2 font-semibold text-white transition duration-150 hover:bg-primary-color active:drop-shadow-md"
             >
               {createSchoolDataLanguage.button(language.data ?? "en")}
             </button>
@@ -424,7 +424,7 @@ const CreateSchoolComponent = () => {
                 createSchool.isPending
                   ? "bg-white ring-1 ring-primary-color"
                   : "bg-secondary-color"
-              } flex h-10 items-center justify-center rounded-lg py-2 font-semibold text-white transition duration-150 hover:bg-primary-color active:drop-shadow-md`}
+              } flex h-10 items-center justify-center rounded-2xl py-2 font-semibold text-white transition duration-150 hover:bg-primary-color active:drop-shadow-md`}
             >
               {createSchool.isPending ? (
                 <ProgressSpinner

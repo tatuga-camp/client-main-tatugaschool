@@ -30,33 +30,33 @@ function StudentSection({ data, setData, handleUpload }: Props) {
   const language = useGetLanguage();
   return (
     <>
-      <h1 className="text-lg py-5 font-medium">Student Information</h1>
+      <h1 className="py-5 text-lg font-medium">Student Information</h1>
       <div className="flex flex-col gap-5">
         <InputWithIcon
           required
           value={data?.title}
           title={studentOnClassDataLanguage.createStudent.title(
-            language.data ?? "en"
+            language.data ?? "en",
           )}
           minLength={1}
           placeholder={studentOnClassDataLanguage.createStudent.title(
-            language.data ?? "en"
+            language.data ?? "en",
           )}
           onChange={(value) => {
             setData({ title: value });
           }}
           icon={<MdOutlineSubtitles />}
         />
-        <div className="flex gap-1 w-full">
+        <div className="flex w-full gap-1">
           <InputWithIcon
             value={data?.firstName}
             required
             title={studentOnClassDataLanguage.createStudent.firstName(
-              language.data ?? "en"
+              language.data ?? "en",
             )}
             minLength={1}
             placeholder={studentOnClassDataLanguage.createStudent.firstName(
-              language.data ?? "en"
+              language.data ?? "en",
             )}
             onChange={(value) => {
               setData({ firstName: value });
@@ -67,11 +67,11 @@ function StudentSection({ data, setData, handleUpload }: Props) {
             value={data?.lastName}
             required
             title={studentOnClassDataLanguage.createStudent.lastName(
-              language.data ?? "en"
+              language.data ?? "en",
             )}
             minLength={1}
             placeholder={studentOnClassDataLanguage.createStudent.lastName(
-              language.data ?? "en"
+              language.data ?? "en",
             )}
             onChange={(value) => {
               setData({ lastName: value });
@@ -83,10 +83,10 @@ function StudentSection({ data, setData, handleUpload }: Props) {
           value={data?.number}
           required
           title={studentOnClassDataLanguage.createStudent.number(
-            language.data ?? "en"
+            language.data ?? "en",
           )}
           placeholder={studentOnClassDataLanguage.createStudent.number(
-            language.data ?? "en"
+            language.data ?? "en",
           )}
           minLength={1}
           onChange={(value) => {
@@ -95,17 +95,15 @@ function StudentSection({ data, setData, handleUpload }: Props) {
           icon={<TbNumber123 />}
         />
       </div>
-      <div className="text-sm mt-10 mb-2">
+      <div className="mb-2 mt-10 text-sm">
         {studentOnClassDataLanguage.createStudent.photo(language.data ?? "en")}
       </div>
       <label
         htmlFor="dropzone-file"
-        className={`flex flex-col relative items-center justify-center w-full h-64 border-2
-                 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50
-                `}
+        className={`relative flex h-64 w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50`}
       >
         {data.photo ? (
-          <div className="w-full h-full relative">
+          <div className="relative h-full w-full">
             <Image
               src={data.photo}
               alt="student"
@@ -115,9 +113,9 @@ function StudentSection({ data, setData, handleUpload }: Props) {
             />
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center pt-5 pb-6">
+          <div className="flex flex-col items-center justify-center pb-6 pt-5">
             <svg
-              className="w-8 h-8 mb-4 text-gray-500 "
+              className="mb-4 h-8 w-8 text-gray-500"
               aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -131,11 +129,11 @@ function StudentSection({ data, setData, handleUpload }: Props) {
                 d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
               />
             </svg>
-            <p className="mb-2 text-sm text-gray-500 ">
+            <p className="mb-2 text-sm text-gray-500">
               <span className="font-semibold">Click to upload</span> or drag and
               drop
             </p>
-            <p className="text-xs text-gray-500 ">
+            <p className="text-xs text-gray-500">
               PNG, JPG or GIF (MAX. 800x400px)
             </p>
           </div>

@@ -41,13 +41,10 @@ function ButtonProfile({ user }: Props) {
     router.push("/auth/sign-in");
   };
   return (
-    <div className="flex items-center flex-1 justify-end ">
-      <div
-        className="flex items-center justify-end w-max transition-width
-       md:hover:w-96 group bg-white rounded-lg px-4 py-2 gap-4"
-      >
+    <div className="flex flex-1 items-center justify-end">
+      <div className="group flex w-max items-center justify-end gap-4 rounded-2xl bg-white px-4 py-2 transition-width md:hover:w-96">
         <div className="flex gap-2">
-          <div className="w-10 h-10 relative rounded-full overflow-hidden ">
+          <div className="relative h-10 w-10 overflow-hidden rounded-full">
             <Image
               src={user.data?.photo || defaultCanvas}
               alt="User Avatar"
@@ -55,16 +52,16 @@ function ButtonProfile({ user }: Props) {
               sizes="(max-width: 768px) 100vw, 33vw"
               placeholder="blur"
               blurDataURL={decodeBlurhashToCanvas(
-                user.data?.blurHash ?? defaultBlurHash
+                user.data?.blurHash ?? defaultBlurHash,
               )}
-              className=" object-cover cursor-pointer"
+              className="cursor-pointer object-cover"
               onClick={() => {
                 router.push("/account");
               }}
             />
           </div>
-          <div className=" items-start w-0 h-0  overflow-hidden group-hover:w-max group-hover:h-max duration-300 transition-width flex-col justify-center gap-0 hidden md:flex">
-            <h2 className="font-semibold text-sm text-gray-800">
+          <div className="hidden h-0 w-0 flex-col items-start justify-center gap-0 overflow-hidden transition-width duration-300 group-hover:h-max group-hover:w-max md:flex">
+            <h2 className="text-sm font-semibold text-gray-800">
               {user.data?.email}
             </h2>
             <span className="text-xs text-gray-500">
@@ -75,12 +72,10 @@ function ButtonProfile({ user }: Props) {
         <button
           disabled={loading}
           onClick={handleLogout}
-          className="flex hover:bg-red-600 transition duration-150 hover:drop-shadow-md active:scale-105
-       items-center text-sm justify-center  gap-2 px-3
-     py-1 bg-red-500 text-white font-semibold rounded-md"
+          className="flex items-center justify-center gap-2 rounded-2xl bg-red-500 px-3 py-1 text-sm font-semibold text-white transition duration-150 hover:bg-red-600 hover:drop-shadow-md active:scale-105"
         >
           <AiOutlineLogout />
-          <span className="hidden md:block w-max">
+          <span className="hidden w-max md:block">
             {navbarLanguageData.logoutButton(language.data ?? "en")}
           </span>
         </button>

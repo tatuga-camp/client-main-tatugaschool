@@ -35,19 +35,16 @@ function GradeSummaryReport({
   });
   return (
     <>
-      <header
-        className="w-full flex flex-col md:flex-row justify-between p-3 md:px-5 
-        md:max-w-screen-md xl:max-w-screen-lg gap-4 md:gap-0 mx-auto"
-      >
+      <header className="mx-auto flex w-full flex-col justify-between gap-4 p-3 md:max-w-screen-md md:flex-row md:gap-0 md:px-5 xl:max-w-screen-lg">
         <section className="text-center md:text-left">
-          <h1 className="text-2xl md:text-3xl font-semibold">
+          <h1 className="text-2xl font-semibold md:text-3xl">
             {gradeOnClassroomDataLanguage.title(langugae.data ?? "en")}
           </h1>
-          <p className="text-gray-400 max-w-96 break-words text-sm md:text-base">
+          <p className="max-w-96 break-words text-sm text-gray-400 md:text-base">
             {gradeOnClassroomDataLanguage.description(langugae.data ?? "en")}
           </p>
         </section>
-        <section className="flex flex-col xl:flex-row items-center gap-2 md:gap-1">
+        <section className="flex flex-col items-center gap-2 md:gap-1 xl:flex-row">
           {/* <button className="main-button w-full xl:w-auto flex items-center justify-center gap-1 py-1 ring-1 ring-blue-600">
             <SiMicrosoftexcel />
             Export
@@ -65,16 +62,13 @@ function GradeSummaryReport({
         </section>
       </header>
       {grades.isLoading && <LoadingBar />}
-      <main
-        className="w-full flex flex-col md:flex-row justify-between p-3 bg-white rounded-md 
-        md:max-w-screen-md xl:max-w-screen-lg gap-4 md:gap-0 mx-auto"
-      >
-        <div className="w-full h-[30rem] overflow-auto relative rounded-md mt-5">
+      <main className="mx-auto flex w-full flex-col justify-between gap-4 rounded-2xl bg-white p-3 md:max-w-screen-md md:flex-row md:gap-0 xl:max-w-screen-lg">
+        <div className="relative mt-5 h-[30rem] w-full overflow-auto rounded-2xl">
           <table className="table-fixed bg-white md:min-w-[640px]">
             <thead className="">
-              <tr className="border-b  bg-white sticky top-0 z-40">
-                <th className="text-sm z-40 sticky left-0 bg-white font-semibold">
-                  <div className="w-48 md:w-96 flex justify-start items-center gap-2">
+              <tr className="sticky top-0 z-40 border-b bg-white">
+                <th className="sticky left-0 z-40 bg-white text-sm font-semibold">
+                  <div className="flex w-48 items-center justify-start gap-2 md:w-96">
                     <FaUser />
                     Name
                   </div>
@@ -82,14 +76,14 @@ function GradeSummaryReport({
                 {grades.data?.map((grade) => {
                   return (
                     <th key={grade.id}>
-                      <div className="flex items-start hover:w-max w-44  truncate flex-col gap-1">
+                      <div className="flex w-44 flex-col items-start gap-1 truncate hover:w-max">
                         <Link
                           href={`/subject/${grade.id}`}
-                          className="text-xs underline text-blue-700 md:text-sm truncate w-40 font-semibold text-start"
+                          className="w-40 truncate text-start text-xs font-semibold text-blue-700 underline md:text-sm"
                         >
                           {grade.title}
                         </Link>
-                        <p className="text-xs font-normal hover:line-clamp-none text-start line-clamp-2 text-gray-500">
+                        <p className="line-clamp-2 text-start text-xs font-normal text-gray-500 hover:line-clamp-none">
                           {grade.description}
                         </p>
                       </div>
@@ -107,16 +101,14 @@ function GradeSummaryReport({
                     <tr
                       className={` ${
                         odd ? "bg-gray-200/20" : "bg-white"
-                      } hover:bg-gray-200/40 group`}
+                      } group hover:bg-gray-200/40`}
                       key={student.id}
                     >
                       <td
-                        className={`text-sm sticky left-0 z-30 font-semibold
-                  ${odd ? "bg-gray-100" : "bg-white"} group-hover:bg-gray-200
-                  `}
+                        className={`sticky left-0 z-30 text-sm font-semibold ${odd ? "bg-gray-100" : "bg-white"} group-hover:bg-gray-200`}
                       >
-                        <div className="flex items-center h-14 gap-2">
-                          <div className="w-8 h-8 md:w-10 md:h-10 relative rounded-md ring-1 overflow-hidden">
+                        <div className="flex h-14 items-center gap-2">
+                          <div className="relative h-8 w-8 overflow-hidden rounded-2xl ring-1 md:h-10 md:w-10">
                             <Image
                               src={student.photo}
                               alt={student.firstName}
@@ -124,13 +116,13 @@ function GradeSummaryReport({
                               sizes="(max-width: 768px) 100vw, 33vw"
                               placeholder="blur"
                               blurDataURL={decodeBlurhashToCanvas(
-                                student.blurHash ?? defaultBlurHash
+                                student.blurHash ?? defaultBlurHash,
                               )}
                               className="object-cover"
                             />
                           </div>
                           <div>
-                            <h1 className="text-xs md:text-sm font-semibold">
+                            <h1 className="text-xs font-semibold md:text-sm">
                               {student.firstName} {student.lastName}
                             </h1>
                             <p className="text-xs text-gray-500">
@@ -141,14 +133,12 @@ function GradeSummaryReport({
                       </td>
                       {grades.data?.map((grades) => {
                         const studentGrade = grades.students.find(
-                          (s) => s.id === student.id
+                          (s) => s.id === student.id,
                         );
                         return (
                           <td
                             key={grades.id + student.id}
-                            className={`text-sm font-normal text-center group-hover:bg-gray-200
-                            ${odd ? "bg-gray-100" : "bg-white"}
-                            `}
+                            className={`text-center text-sm font-normal group-hover:bg-gray-200 ${odd ? "bg-gray-100" : "bg-white"} `}
                           >
                             <div className="w-44 text-center">
                               {studentGrade?.totalScore?.toFixed(2) ?? "-"}

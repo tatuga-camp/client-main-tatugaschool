@@ -33,7 +33,7 @@ export default function KanbanBoard({ data }: KanbanBoardProps) {
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   const [columns, setColumns] = useState<ColumnType[]>([
@@ -74,7 +74,7 @@ export default function KanbanBoard({ data }: KanbanBoardProps) {
           };
         }
         return col;
-      })
+      }),
     );
   };
 
@@ -142,7 +142,7 @@ export default function KanbanBoard({ data }: KanbanBoardProps) {
 
     setColumns((prevColumns) => {
       const activeColumnIndex = prevColumns.findIndex((col) =>
-        col.tasks.some((task) => task.id === activeId)
+        col.tasks.some((task) => task.id === activeId),
       );
 
       let overColumnIndex;
@@ -156,7 +156,7 @@ export default function KanbanBoard({ data }: KanbanBoardProps) {
       } else {
         // กรณีปล่อยลงบน task
         overColumnIndex = prevColumns.findIndex((col) =>
-          col.tasks.some((task) => task.id === overId)
+          col.tasks.some((task) => task.id === overId),
         );
       }
 
@@ -168,7 +168,7 @@ export default function KanbanBoard({ data }: KanbanBoardProps) {
 
       // หา task ที่กำลังลาก
       const draggedTask = newColumns[activeColumnIndex].tasks.find(
-        (task) => task.id === activeId
+        (task) => task.id === activeId,
       );
 
       if (!draggedTask) return prevColumns;
@@ -184,7 +184,7 @@ export default function KanbanBoard({ data }: KanbanBoardProps) {
       } else {
         // ถ้าปล่อยลงบน task ให้แทรกที่ตำแหน่งนั้น
         const overTaskIndex = newColumns[overColumnIndex].tasks.findIndex(
-          (task) => task.id === overId
+          (task) => task.id === overId,
         );
         newColumns[overColumnIndex].tasks.splice(overTaskIndex, 0, draggedTask);
       }
@@ -198,18 +198,18 @@ export default function KanbanBoard({ data }: KanbanBoardProps) {
   const handleEditColumnTitle = (columnId: string, newTitle: string) => {
     setColumns((prevColumns) =>
       prevColumns.map((col) =>
-        col.id === columnId ? { ...col, title: newTitle } : col
-      )
+        col.id === columnId ? { ...col, title: newTitle } : col,
+      ),
     );
   };
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
-      <div className="flex justify-between items-center mb-8">
+      <div className="mb-8 flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-900">Group Board</h1>
         <button
           onClick={handleAddColumn}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg"
+          className="rounded-2xl bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
         >
           Add Group
         </button>

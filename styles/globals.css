@@ -11,25 +11,25 @@
 }
 @layer components {
   .main-button {
-    @apply bg-secondary-color text-white  py-2 px-4 rounded-md active:scale-105 hover:bg-primary-color active:drop-shadow-md transition duration-150;
+    @apply rounded-2xl bg-secondary-color px-4 py-2 text-white transition duration-150 hover:bg-primary-color active:scale-105 active:drop-shadow-md;
   }
   .second-button {
-    @apply bg-white text-black  py-2 px-4 rounded-md active:scale-105 hover:bg-gray-100/50 active:drop-shadow-md transition duration-150;
+    @apply rounded-2xl bg-white px-4 py-2 text-black transition duration-150 hover:bg-gray-100/50 active:scale-105 active:drop-shadow-md;
   }
   .main-select {
-    @apply bg-white text-black  py-2 px-4 rounded-md;
+    @apply rounded-2xl bg-white px-4 py-2 text-black;
   }
   .success-button {
-    @apply bg-success-color text-white  py-2 px-4 rounded-md active:scale-105 hover:bg-success-color active:drop-shadow-md transition duration-150;
+    @apply rounded-2xl bg-success-color px-4 py-2 text-white transition duration-150 hover:bg-success-color active:scale-105 active:drop-shadow-md;
   }
   .reject-button {
-    @apply bg-red-500 text-white py-2 disabled:active:scale-100 px-4 rounded-md active:scale-105 hover:bg-red-700 active:drop-shadow-md transition duration-150 disabled:bg-red-300 disabled:cursor-not-allowed disabled:opacity-60;
+    @apply rounded-2xl bg-red-500 px-4 py-2 text-white transition duration-150 hover:bg-red-700 active:scale-105 active:drop-shadow-md disabled:cursor-not-allowed disabled:bg-red-300 disabled:opacity-60 disabled:active:scale-100;
   }
   .main-input {
-    @apply border rounded-md outline-none hover:border-blue-500  focus:shadow-[0_0_0_0.2rem_rgba(191,219,254,1)] px-4 py-2;
+    @apply rounded-2xl border px-4 py-2 outline-none hover:border-blue-500 focus:shadow-[0_0_0_0.2rem_rgba(191,219,254,1)];
   }
   .gradient-bg {
-    @apply bg-gradient-to-r to-secondary-color from-primary-color;
+    @apply bg-gradient-to-r from-blue-500 to-sky-400;
   }
   .gradient-bg-success {
     @apply bg-gradient-to-r from-emerald-400 to-cyan-400;

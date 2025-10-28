@@ -80,7 +80,7 @@ const AccountComponent = () => {
   };
   return (
     <div className="flex items-center justify-center">
-      <div className="w-full max-w-5xl rounded-lg bg-white p-8">
+      <div className="w-full max-w-5xl rounded-2xl bg-white p-8">
         <h2 className="mb-4 text-3xl font-semibold text-[#6f47dd]">
           {accountDataLanguage.title(language.data ?? "en")}
         </h2>

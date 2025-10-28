@@ -69,14 +69,14 @@ function StudentOnGroup({
       <div
         {...listeners}
         style={{ cursor: isDragging ? "grabbing" : "grab" }}
-        className="flex h-6 w-6 items-center justify-center rounded-md text-black hover:bg-gray-300/50"
+        className="flex h-6 w-6 items-center justify-center rounded-2xl text-black hover:bg-gray-300/50"
       >
         <MdDragIndicator />
       </div>
       <div className="flex h-14 w-full items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           {(isDragOver === undefined || isDragOver === false) && (
-            <div className="relative h-5 w-5 overflow-hidden rounded-md ring-1 md:h-6 md:w-6">
+            <div className="relative h-5 w-5 overflow-hidden rounded-2xl ring-1 md:h-6 md:w-6">
               <img
                 src={student.photo}
                 alt={student.firstName}

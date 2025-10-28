@@ -115,7 +115,7 @@ function Grade({
             setSelectStudentOnAssignment(null);
           }}
         >
-          <div className="h-max w-max rounded-md border bg-background-color p-2">
+          <div className="h-max w-max rounded-2xl border bg-background-color p-2">
             {selectStudentOnAssignment && (
               <GradePopup
                 studentOnAssignment={
@@ -211,8 +211,8 @@ function Grade({
           </button>
         </section>
       </header>
-      <main className="mx-auto mt-5 flex w-full flex-col items-center md:max-w-screen-md md:px-0 lg:max-w-screen-lg">
-        <div className="relative mt-5 h-[30rem] w-full overflow-auto rounded-md bg-white">
+      <main className="mx-auto mt-5 flex w-full flex-col items-center md:max-w-screen-md md:px-0 lg:max-w-screen-lg 2xl:max-w-screen-2xl">
+        <div className="relative mt-5 h-[30rem] w-full overflow-auto rounded-2xl bg-white 2xl:h-[40rem]">
           <table className="table-fixed bg-white md:min-w-[640px]">
             <thead className="">
               <tr className="sticky top-0 z-40 border-b bg-white">
@@ -263,7 +263,7 @@ function Grade({
                                     language.data ?? "en",
                                   )}`}
                               </span>
-                              <div className="rounded-md bg-gradient-to-r from-emerald-400 to-cyan-400 px-2 text-xs text-white">
+                              <div className="rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-2 text-xs text-white">
                                 {gradeData.assignment_score(
                                   language.data ?? "en",
                                 )}{" "}
@@ -297,7 +297,7 @@ function Grade({
                                 </span>
                               )}
 
-                              <div className="gradient-bg rounded-md px-2 text-xs text-white">
+                              <div className="gradient-bg rounded-2xl px-2 text-xs text-white">
                                 {gradeData.speical_score(
                                   language.data ?? "en",
                                 )}{" "}
@@ -401,7 +401,7 @@ function Grade({
                       >
                         <div className="flex h-14 w-96 items-center justify-between gap-2 px-4">
                           <div className="flex items-center gap-2">
-                            <div className="relative h-8 w-8 overflow-hidden rounded-md ring-1 md:h-10 md:w-10">
+                            <div className="relative h-8 w-8 overflow-hidden rounded-2xl ring-1 md:h-10 md:w-10">
                               <Image
                                 src={student.photo}
                                 alt={student.firstName}

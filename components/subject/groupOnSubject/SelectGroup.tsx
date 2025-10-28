@@ -528,7 +528,7 @@ function ShowSelectGroup({
 
             <button
               onClick={handleCreate}
-              className="flex h-full min-h-40 w-full flex-col items-center justify-center rounded-md border border-dashed bg-white text-xl text-gray-500 transition hover:bg-primary-color hover:text-white active:scale-105"
+              className="flex h-full min-h-40 w-full flex-col items-center justify-center rounded-2xl border border-dashed bg-white text-xl text-gray-500 transition hover:bg-primary-color hover:text-white active:scale-105"
             >
               {createColum.isPending ? (
                 <LoadingSpinner />

@@ -100,7 +100,7 @@ function GradeSetting({ onClose, grade, subjectId, toast }: Props) {
   return (
     <form
       onSubmit={handleUpdate}
-      className="flex h-max w-96 flex-col gap-1 rounded-md border bg-gray-100 p-3"
+      className="flex h-max w-96 flex-col gap-1 rounded-2xl border bg-gray-100 p-3"
     >
       <header className="flex w-full items-center justify-between border-b">
         <h1>Grade Setting</h1>

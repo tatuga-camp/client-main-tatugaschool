@@ -18,7 +18,7 @@ function ShowStatusPayment() {
       return;
     }
     const clientSecret = new URLSearchParams(window.location.search).get(
-      "payment_intent_client_secret"
+      "payment_intent_client_secret",
     );
     if (!clientSecret) {
       return;
@@ -44,19 +44,14 @@ function ShowStatusPayment() {
     <>
       {status === "succeeded" && <AnimationFireworkEffect />}
       <main
-        className={`
-    ${
-      status === "succeeded"
-        ? "gradient-bg"
-        : "bg-gradient-to-r from-rose-400 to-red-500 "
-    }
-    w-screen font-Anuphan h-screen flex flex-col gap-5 items-center   justify-center`}
+        className={` ${
+          status === "succeeded"
+            ? "gradient-bg"
+            : "bg-gradient-to-r from-rose-400 to-red-500"
+        } flex h-screen w-screen flex-col items-center justify-center gap-5 font-Anuphan`}
       >
-        <div className="flex items-center justify-center bg-white px-3 rounded-full py-1 gap-1 md:gap-2">
-          <div
-            className="w-6 h-6 rounded-md overflow-hidden ring-1 ring-white
-         relative hover:scale-105 active:scale-110 transition duration-150"
-          >
+        <div className="flex items-center justify-center gap-1 rounded-full bg-white px-3 py-1 md:gap-2">
+          <div className="relative h-6 w-6 overflow-hidden rounded-2xl ring-1 ring-white transition duration-150 hover:scale-105 active:scale-110">
             <Image
               src="/favicon.ico"
               placeholder="blur"
@@ -65,18 +60,15 @@ function ShowStatusPayment() {
               alt="logo tatuga school"
             />
           </div>
-          <div className="font-bold uppercase  block text-lg md:text-base text-icon-color">
+          <div className="block text-lg font-bold uppercase text-icon-color md:text-base">
             Tatuga School
           </div>
         </div>
-        <div
-          className="w-80 md:w-96  bg-white rounded-lg p-5 drop-shadow-md
-         border flex items-center justify-center flex-col gap-2"
-        >
-          <div className="border-b w-full text-center">{status}</div>
+        <div className="flex w-80 flex-col items-center justify-center gap-2 rounded-2xl border bg-white p-5 drop-shadow-md md:w-96">
+          <div className="w-full border-b text-center">{status}</div>
           <span className="text-gray-500">{message}</span>
 
-          <div className="w-full flex items-center justify-center gap-3">
+          <div className="flex w-full items-center justify-center gap-3">
             <button
               onClick={() => {
                 queryClient.refetchQueries({
@@ -84,7 +76,7 @@ function ShowStatusPayment() {
                 });
                 router.back();
               }}
-              className="second-button flex items-center justify-center border w-40"
+              className="second-button flex w-40 items-center justify-center border"
             >
               BACK
             </button>

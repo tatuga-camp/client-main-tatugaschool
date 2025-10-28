@@ -14,7 +14,7 @@ type Props = {
       allowStudentViewOverallScore?: boolean;
       allowStudentViewGrade?: boolean;
       allowStudentViewAttendance?: boolean;
-    }
+    },
   ) => void;
   isPending: boolean;
 };
@@ -45,15 +45,15 @@ function SubjectPermission({ subjectId, onSummit, isPending }: Props) {
           onSummit(e, permission);
         }
       }}
-      className="flex flex-col p-4 min-h-80 bg-white rounded-md border gap-5 mt-5"
+      className="mt-5 flex min-h-80 flex-col gap-5 rounded-2xl border bg-white p-4"
     >
-      <h2 className="border-b text-lg font-medium py-3">
+      <h2 className="border-b py-3 text-lg font-medium">
         {settingOnSubjectDataLanguage.subjectPermission(language.data ?? "en")}
       </h2>
-      <div className="flex flex-col sm:grid-cols-2 gap-4">
+      <div className="flex flex-col gap-4 sm:grid-cols-2">
         <div className="flex p-2 py-4">
-          <label className="w-full flex items-center">
-            <span className="text-base text-black flex-1">
+          <label className="flex w-full items-center">
+            <span className="flex-1 text-base text-black">
               {settingOnSubjectDataLanguage.allowDelete(language.data ?? "en")}:
             </span>
             <Switch
@@ -67,11 +67,11 @@ function SubjectPermission({ subjectId, onSummit, isPending }: Props) {
             />
           </label>
         </div>
-        <div className="flex bg-gray-200/20 gap-5 p-2 py-4">
-          <label className="w-full flex items-center">
-            <span className="text-base text-black flex-1">
+        <div className="flex gap-5 bg-gray-200/20 p-2 py-4">
+          <label className="flex w-full items-center">
+            <span className="flex-1 text-base text-black">
               {settingOnSubjectDataLanguage.allowViewScore(
-                language.data ?? "en"
+                language.data ?? "en",
               )}
               :
             </span>
@@ -87,10 +87,10 @@ function SubjectPermission({ subjectId, onSummit, isPending }: Props) {
           </label>
         </div>
         <div className="flex gap-5 p-2 py-4">
-          <label className="w-full flex items-center">
-            <span className="text-base text-black flex-1">
+          <label className="flex w-full items-center">
+            <span className="flex-1 text-base text-black">
               {settingOnSubjectDataLanguage.allowViewGrade(
-                language.data ?? "en"
+                language.data ?? "en",
               )}
               :
             </span>
@@ -105,11 +105,11 @@ function SubjectPermission({ subjectId, onSummit, isPending }: Props) {
             />
           </label>
         </div>
-        <div className="flex bg-gray-200/20 gap-5 p-2 py-4">
-          <label className="w-full flex items-center">
-            <span className="text-base text-black flex-1">
+        <div className="flex gap-5 bg-gray-200/20 p-2 py-4">
+          <label className="flex w-full items-center">
+            <span className="flex-1 text-base text-black">
               {settingOnSubjectDataLanguage.allowViewAttendance(
-                language.data ?? "en"
+                language.data ?? "en",
               )}
               :
             </span>
@@ -127,13 +127,13 @@ function SubjectPermission({ subjectId, onSummit, isPending }: Props) {
       </div>
       <button
         disabled={isPending}
-        className="main-button flex justify-center items-center w-full sm:w-60 mt-5"
+        className="main-button mt-5 flex w-full items-center justify-center sm:w-60"
       >
         {isPending ? (
           <ProgressSpinner
             animationDuration="1s"
             style={{ width: "20px" }}
-            className="w-5 h-5"
+            className="h-5 w-5"
             strokeWidth="8"
           />
         ) : (

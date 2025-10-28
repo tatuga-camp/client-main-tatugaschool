@@ -17,6 +17,6 @@ export const InputField = ({
     value={value}
     onChange={onChange}
     required={required}
-    className="w-full p-3 sm:p-4 mb-4 border border-gray-300 rounded-lg"
+    className="mb-4 w-full rounded-2xl border border-gray-300 p-3 sm:p-4"
   />
 );

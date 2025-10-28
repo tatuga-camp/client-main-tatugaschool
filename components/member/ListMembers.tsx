@@ -62,7 +62,7 @@ function ListMembers({
       ...member,
       trigger: false,
       userId: member.userId,
-    }))
+    })),
   );
 
   useEffect(() => {
@@ -72,34 +72,34 @@ function ListMembers({
           ...member,
           trigger: false,
           userId: member.userId,
-        }))
+        })),
       );
     }
   }, [members]);
 
   return (
-    <ul className="w-full    p-2 flex mt-5 flex-col gap-2">
+    <ul className="mt-5 flex w-full flex-col gap-2 p-2">
       {memberData.map((member, index) => (
         <li
           key={index}
-          className="flex justify-between py-2 border-b items-center gap-2"
+          className="flex items-center justify-between gap-2 border-b py-2"
         >
           <div className="flex gap-2">
-            <div className="w-10 h-10 relative rounded-md ring-1  overflow-hidden">
+            <div className="relative h-10 w-10 overflow-hidden rounded-2xl ring-1">
               <Image
                 src={member.photo}
                 fill
                 sizes="(max-width: 768px) 100vw, 33vw"
                 placeholder="blur"
                 blurDataURL={decodeBlurhashToCanvas(
-                  member.blurHash ?? defaultBlurHash
+                  member.blurHash ?? defaultBlurHash,
                 )}
                 alt="logo tatuga school"
                 className="object-cover"
               />
             </div>
             <div className="flex flex-col">
-              <h1 className="font-semibold text-sm">{member.email}</h1>
+              <h1 className="text-sm font-semibold">{member.email}</h1>
               <span className="text-xs">
                 {member.firstName} {member.lastName} (
                 {currentListMembers.find((m) => m.userId === member.id)?.role})
@@ -107,35 +107,23 @@ function ListMembers({
             </div>
           </div>
           {member.isInvite && member.id ? (
-            <div className="flex gap-1 relative">
+            <div className="relative flex gap-1">
               {user?.id === member.userId ? (
-                <div className="flex items-center gap-1 justify-center">
-                  <div
-                    className=" flex w-20 justify-center items-center 
-gap-1 transition text-sm  py-1 rounded-md  border"
-                  >
+                <div className="flex items-center justify-center gap-1">
+                  <div className="flex w-20 items-center justify-center gap-1 rounded-2xl border py-1 text-sm transition">
                     YOU
                   </div>
-                  <div
-                    className=" flex w-24 justify-center items-center 
-gap-1 transition text-sm  py-1 rounded-md bg-gray-200/50 border"
-                  >
+                  <div className="flex w-24 items-center justify-center gap-1 rounded-2xl border bg-gray-200/50 py-1 text-sm transition">
                     {member.role}
                   </div>
                 </div>
               ) : currentListMembers?.find((m) => m.id === member.id)
                   ?.status === "ACCEPT" ? (
-                <div
-                  className="bg-green-600 text-white rounded-md 
-                flex items-center justify-center w-20 text-center text-xs"
-                >
+                <div className="flex w-20 items-center justify-center rounded-2xl bg-green-600 text-center text-xs text-white">
                   Accepted
                 </div>
               ) : (
-                <div
-                  className="bg-yellow-300 text-black rounded-md 
-                flex items-center justify-center w-20 text-center text-xs"
-                >
+                <div className="flex w-20 items-center justify-center rounded-2xl bg-yellow-300 text-center text-xs text-black">
                   Pending
                 </div>
               )}
@@ -147,15 +135,17 @@ gap-1 transition text-sm  py-1 rounded-md bg-gray-200/50 border"
                   selectRole={member.role}
                   setSelectRole={(role: MemberRole) => {
                     setMemberData((prev) =>
-                      prev.map((m) => (m.id === member.id ? { ...m, role } : m))
+                      prev.map((m) =>
+                        m.id === member.id ? { ...m, role } : m,
+                      ),
                     );
                     if (member.id) onRoleChange({ memberId: member.id, role });
                   }}
                   setTrigger={() => {
                     setMemberData((prev) =>
                       prev.map((m) =>
-                        m.id === member.id ? { ...m, trigger: !m.trigger } : m
-                      )
+                        m.id === member.id ? { ...m, trigger: !m.trigger } : m,
+                      ),
                     );
                   }}
                   trigger={member.trigger}
@@ -169,19 +159,19 @@ gap-1 transition text-sm  py-1 rounded-md bg-gray-200/50 border"
                     onClick={() =>
                       member.id && onDelete({ memberId: member.id })
                     }
-                    className="reject-button text-lg px-2"
+                    className="reject-button px-2 text-lg"
                   >
                     <MdDelete />
                   </button>
                 )}
             </div>
           ) : (
-            <div className="w-20  flex items-center">
+            <div className="flex w-20 items-center">
               {member.isLoading ? (
                 <ProgressSpinner
                   animationDuration="0.5s"
                   style={{ width: "20px" }}
-                  className="w-5 h-5  "
+                  className="h-5 w-5"
                   strokeWidth="8"
                 />
               ) : (

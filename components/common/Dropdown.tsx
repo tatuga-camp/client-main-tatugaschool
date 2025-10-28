@@ -50,13 +50,13 @@ function Dropdown<T>({
           root: (options) => ({
             className: classNames(
               "cursor-pointer inline-flex relative select-none",
-              "bg-white border border-gray-400 transition-colors duration-200 ease-in-out rounded-md",
+              "bg-white border border-gray-400 transition-colors duration-200 ease-in-out rounded-2xl",
               "w-full md:w-56",
               "hover:border-blue-500 focus:outline-none focus:outline-offset-0 focus:shadow-[0_0_0_0.2rem_rgba(191,219,254,1)]",
               {
                 "opacity-60 select-none pointer-events-none cursor-default":
                   options?.props.disabled,
-              }
+              },
             ),
           }),
           input: (options) => ({
@@ -65,19 +65,19 @@ function Dropdown<T>({
               "bg-transparent border-0 text-gray-800",
               "p-3 transition duration-200 bg-transparent rounded appearance-none font-sans text-base",
               "focus:outline-none focus:shadow-none",
-              { "pr-7": options?.props.showClear }
+              { "pr-7": options?.props.showClear },
             ),
           }),
           trigger: {
             className: classNames(
               "flex items-center justify-center shrink-0",
-              "bg-transparent text-gray-500 w-12 rounded-tr-lg rounded-br-lg"
+              "bg-transparent text-gray-500 w-12 rounded-tr-lg rounded-br-lg",
             ),
           },
           wrapper: {
             className: classNames(
               "max-h-[200px] overflow-auto",
-              "bg-white text-gray-700 border-0 rounded-md shadow-lg"
+              "bg-white text-gray-700 border-0 rounded-2xl shadow-lg",
             ),
           },
           list: { className: "py-3 list-none m-0" },
@@ -99,19 +99,19 @@ function Dropdown<T>({
                     options?.context.focused && options?.context.selected,
                   "opacity-60 select-none pointer-events-none cursor-default":
                     options?.context.disabled,
-                }
+                },
               ),
             };
           },
           itemGroup(options) {
             className: classNames(
               "m-0 p-3 text-gray-800 bg-white font-bold",
-              "cursor-auto"
+              "cursor-auto",
             );
           },
           header: {
             className: classNames(
-              "p-3 border-b border-gray-300 text-gray-700 bg-gray-100 mt-0 rounded-tl-lg rounded-tr-lg"
+              "p-3 border-b border-gray-300 text-gray-700 bg-gray-100 mt-0 rounded-tl-lg rounded-tr-lg",
             ),
           },
           filterContainer(options) {
@@ -122,9 +122,9 @@ function Dropdown<T>({
               className: classNames(
                 "pr-7 -mr-7",
                 "w-full",
-                "font-sans text-base text-gray-700 bg-white py-3 px-3 border border-gray-300 transition duration-200 rounded-lg appearance-none",
+                "font-sans text-base text-gray-700 bg-white py-3 px-3 border border-gray-300 transition duration-200 rounded-2xl appearance-none",
 
-                "hover:border-blue-500 focus:outline-none focus:outline-offset-0 focus:shadow-[0_0_0_0.2rem_rgba(191,219,254,1)]"
+                "hover:border-blue-500 focus:outline-none focus:outline-offset-0 focus:shadow-[0_0_0_0.2rem_rgba(191,219,254,1)]",
               ),
             };
           },

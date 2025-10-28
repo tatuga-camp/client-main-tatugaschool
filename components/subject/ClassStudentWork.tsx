@@ -249,7 +249,7 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
                       >
                         <th>
                           <div className="flex h-14 items-center gap-2">
-                            <div className="relative h-10 w-10 overflow-hidden rounded-md ring-1">
+                            <div className="relative h-10 w-10 overflow-hidden rounded-2xl ring-1">
                               <div className="h-full w-full animate-pulse bg-gray-200"></div>
                             </div>
                             <div className="flex flex-col items-start">
@@ -366,7 +366,7 @@ const StudentList = React.memo(function StudentList({
       </th>
       <th>
         <div className="flex h-14 items-center gap-2 pl-2">
-          <div className="relative h-5 w-5 overflow-hidden rounded-md ring-1 xl:h-10 xl:w-10">
+          <div className="relative h-5 w-5 overflow-hidden rounded-2xl ring-1 xl:h-10 xl:w-10">
             <Image
               src={student.photo}
               alt={student.firstName}
@@ -727,7 +727,7 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
       )}
       {selectAssignmentText && (
         <div className="fixed bottom-0 left-0 right-0 top-0 z-50 m-auto flex h-screen w-screen items-center justify-center">
-          <div className="relative h-max w-full rounded-md bg-white p-3 md:h-5/6 md:w-10/12 lg:w-10/12">
+          <div className="relative h-max w-full rounded-2xl bg-white p-3 md:h-5/6 md:w-10/12 lg:w-10/12">
             <div className="flex w-full justify-end">
               <button
                 onClick={() => setSelectAssignmentText(null)}
@@ -750,7 +750,7 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
       <div className="flex w-full flex-col">
         <header className="flex h-max w-full items-center justify-between gap-5 bg-white p-2 px-4">
           <div className="flex h-14 w-max items-center gap-2 pl-2">
-            <div className="relative h-10 w-10 overflow-hidden rounded-md ring-1">
+            <div className="relative h-10 w-10 overflow-hidden rounded-2xl ring-1">
               <Image
                 src={studentOnAssignment.photo}
                 alt={studentOnAssignment.firstName}
@@ -799,7 +799,7 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
               <button
                 disabled={update.isPending}
                 onClick={() => handleSaveChange("REVIEWD")}
-                className="second-button h-10 w-40 grow rounded-md rounded-r-none border border-r-0 p-2 text-base font-medium text-black opacity-85 hover:opacity-100"
+                className="second-button h-10 w-40 grow rounded-2xl rounded-r-none border border-r-0 p-2 text-base font-medium text-black opacity-85 hover:opacity-100"
               >
                 {update.isPending ? (
                   <ProgressSpinner
@@ -817,14 +817,14 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
               <button
                 onClick={() => setTriggerDropdown((prev) => !prev)}
                 type="button"
-                className="second-button h-10 w-max rounded-md rounded-l-none border p-2 text-base font-medium text-black"
+                className="second-button h-10 w-max rounded-2xl rounded-l-none border p-2 text-base font-medium text-black"
               >
                 <IoChevronDownSharp />
               </button>
               {triggerDropdown && (
                 <div
                   ref={dropdownRef}
-                  className="absolute left-6 top-12 z-40 h-max w-60 rounded-md border bg-white p-1 drop-shadow"
+                  className="absolute left-6 top-12 z-40 h-max w-60 rounded-2xl border bg-white p-1 drop-shadow"
                 >
                   {menuDropdowns.map((menu) => {
                     let textColor = "text-gray-400";
@@ -994,7 +994,7 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
           })}
         </div>
         {selectMenu === "Works" && (
-          <ul className="grid h-max min-h-96 w-full min-w-96 grid-cols-1 gap-2 rounded-lg bg-gray-100 p-5 xl:grid-cols-2">
+          <ul className="grid h-max min-h-96 w-full min-w-96 grid-cols-1 gap-2 rounded-2xl bg-gray-100 p-5 xl:grid-cols-2">
             {studentWork?.files?.map((file, index) => {
               return (
                 <FileStudentAssignmentCard

@@ -28,21 +28,20 @@ const MemoizedCountdown = memo(() => {
         }
         return (
           <div
-            className={`
-  ${
-    props.total < 6
-      ? "bg-gradient-to-r from-pink-500 to-rose-500 "
-      : "gradient-bg "
-  }  pt-8 w-full h-full p-2 gap-2`}
+            className={` ${
+              props.total < 6
+                ? "bg-gradient-to-r from-pink-500 to-rose-500"
+                : "gradient-bg"
+            } h-full w-full gap-2 p-2 pt-8`}
           >
-            <main className="w-full mt-2 h-full grid">
-              <section className="flex justify-center items-center gap-2">
-                <div className="w-full h-full text-5xl sm:text-6xl md:text-7xl flex items-center justify-center rounded-md bg-white">
+            <main className="mt-2 grid h-full w-full">
+              <section className="flex items-center justify-center gap-2">
+                <div className="flex h-full w-full items-center justify-center rounded-2xl bg-white text-5xl sm:text-6xl md:text-7xl">
                   {props.hours}:{props.minutes}:{props.seconds}
                 </div>
               </section>
-              <section className="flex gap-2 justify-center items-center flex-col">
-                <div className="w-full flex items-center justify-center gap-2">
+              <section className="flex flex-col items-center justify-center gap-2">
+                <div className="flex w-full items-center justify-center gap-2">
                   {(props.api.isStopped() || props.api.isPaused()) && (
                     <button
                       onClick={() => {
@@ -76,7 +75,7 @@ const MemoizedCountdown = memo(() => {
                     <FaRedo />
                   </button>
                 </div>
-                <div className="w-full flex justify-center gap-2">
+                <div className="flex w-full justify-center gap-2">
                   <div className="w-24 sm:w-32 md:w-40">
                     <InputNumber
                       min={0}
@@ -118,14 +117,14 @@ function StopWatch({ onClose }: Props) {
     <div
       className={`${
         triggerFull
-          ? "w-10/12 h-5/6 top-0 right-0 left-0 bottom-0 m-auto"
-          : "w-72 sm:w-80 md:w-96 h-60 bottom-5 right-5 m-auto"
-      } transition-height fixed rounded-xl overflow-hidden z-50`}
+          ? "bottom-0 left-0 right-0 top-0 m-auto h-5/6 w-10/12"
+          : "bottom-5 right-5 m-auto h-60 w-72 sm:w-80 md:w-96"
+      } fixed z-50 overflow-hidden rounded-xl transition-height`}
     >
-      <div className="flex gap-2 top-2 right-2 m-auto absolute">
+      <div className="absolute right-2 top-2 m-auto flex gap-2">
         <button
           title="full screen"
-          className="flex items-center justify-center w-5 h-5 text-white rounded-md border border-white"
+          className="flex h-5 w-5 items-center justify-center rounded-2xl border border-white text-white"
           onClick={() => {
             setTriggerFull((prev) => !prev);
           }}
@@ -133,7 +132,7 @@ function StopWatch({ onClose }: Props) {
           {triggerFull ? <MdFullscreenExit /> : <MdFullscreen />}
         </button>
         <button
-          className="flex items-center justify-center w-5 h-5 text-white rounded-md border border-white"
+          className="flex h-5 w-5 items-center justify-center rounded-2xl border border-white text-white"
           onClick={onClose}
         >
           <IoMdClose />

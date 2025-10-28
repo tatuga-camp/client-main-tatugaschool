@@ -62,7 +62,7 @@ function GroupSetting({ subjectId, data, onClose, toast }: GroupSettingProps) {
 
   const handleUpdateGroup = async (
     e: React.FormEvent,
-    data: GroupOnSubject
+    data: GroupOnSubject,
   ) => {
     e.preventDefault();
     try {
@@ -105,14 +105,14 @@ function GroupSetting({ subjectId, data, onClose, toast }: GroupSettingProps) {
           handleCreateGroup(e);
         }
       }}
-      className="w-96 h-96 p-5 flex flex-col pb-2 rounded-md border bg-white"
+      className="flex h-96 w-96 flex-col rounded-2xl border bg-white p-5 pb-2"
     >
-      <header className="w-full  flex items-center justify-start text-lg text-black gap-1 border-b">
+      <header className="flex w-full items-center justify-start gap-1 border-b text-lg text-black">
         <MdGroup /> {data ? "Update Group" : "Create Group"}
       </header>
       {(create.isPending || update.isPending) && <LoadingBar />}
-      <main className="grow  flex pb-2 flex-col gap-2">
-        <label className="flex mt-2 flex-col w-full">
+      <main className="flex grow flex-col gap-2 pb-2">
+        <label className="mt-2 flex w-full flex-col">
           <span className="text-sm">title</span>
           <input
             required
@@ -129,7 +129,7 @@ function GroupSetting({ subjectId, data, onClose, toast }: GroupSettingProps) {
             className="main-input"
           />
         </label>
-        <label className="flex  flex-col w-full grow">
+        <label className="flex w-full grow flex-col">
           <span className="text-sm">description</span>
           <textarea
             required
@@ -142,16 +142,16 @@ function GroupSetting({ subjectId, data, onClose, toast }: GroupSettingProps) {
                 };
               });
             }}
-            className="main-input resize-none grow"
+            className="main-input grow resize-none"
           />
         </label>
       </main>
-      <footer className="flex items-center border-t pt-3 justify-end gap-2">
+      <footer className="flex items-center justify-end gap-2 border-t pt-3">
         <button
           onClick={() => onClose()}
           disabled={create.isPending || update.isPending}
           type="button"
-          className="second-button border flex items-center justify-center gap-1"
+          className="second-button flex items-center justify-center gap-1 border"
         >
           Cancel
         </button>

@@ -344,7 +344,7 @@ function AttendanceChecker({
           setTriggerQRCode={(vale) => onClose()}
         />
       ) : (
-        <div className="h-dvh w-screen rounded-md bg-white p-2 md:h-5/6 md:w-10/12">
+        <div className="h-dvh w-screen rounded-2xl bg-white p-2 md:h-5/6 md:w-10/12">
           <div className="flex h-full w-full flex-col gap-1 p-1">
             {selectAttendanceRow ? (
               <header className="flex w-full flex-col gap-2">
@@ -677,7 +677,7 @@ function AttendanceChecker({
                                   }
                                   style={{ backgroundColor: status.color }}
                                   name={status.title}
-                                  className={`flex w-24 cursor-pointer select-none items-center justify-center gap-1 rounded-md p-2 text-center text-sm font-medium transition hover:text-black hover:drop-shadow-md active:scale-105`}
+                                  className={`flex w-24 cursor-pointer select-none items-center justify-center gap-1 rounded-2xl p-2 text-center text-sm font-medium transition hover:text-black hover:drop-shadow-md active:scale-105`}
                                 >
                                   <span className="max-w-20 truncate">
                                     {status.title}
@@ -813,7 +813,7 @@ const StudentAttendanceItem = React.memo(
       >
         <td className={`sticky left-0 z-10 ${odd ? "bg-gray-50" : "bg-white"}`}>
           <div className="flex w-40 gap-2 truncate md:w-60">
-            <div className="relative hidden h-10 w-10 overflow-hidden rounded-md ring-1 md:block">
+            <div className="relative hidden h-10 w-10 overflow-hidden rounded-2xl ring-1 md:block">
               <Image
                 src={studentOnSubject.photo}
                 alt={studentOnSubject.firstName}

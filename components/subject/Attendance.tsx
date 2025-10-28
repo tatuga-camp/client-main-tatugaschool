@@ -101,7 +101,7 @@ function Attendance({
     <>
       {selectAttendance && selectTable && (
         <PopupLayout onClose={() => setSelectAttendance(null)}>
-          <div className="rounded-md border bg-white p-2">
+          <div className="rounded-2xl border bg-white p-2">
             <AttendanceView
               toast={toast}
               selectAttendance={selectAttendance}
@@ -143,7 +143,7 @@ function Attendance({
 
       {triggerCreateAttendanceTable && (
         <PopupLayout onClose={() => setTriggerCreateAttendanceTable(false)}>
-          <div className="w-96 rounded-md border bg-white p-2">
+          <div className="w-96 rounded-2xl border bg-white p-2">
             <AttendanceTableCreate
               toast={toast}
               subjectId={subjectId}
@@ -220,7 +220,7 @@ function Attendance({
               <li
                 onClick={() => setSelectTable(table)}
                 key={table.id}
-                className={`w-max min-w-40 shrink-0 cursor-pointer rounded-md p-3 ${
+                className={`w-max min-w-40 shrink-0 cursor-pointer rounded-2xl p-3 ${
                   table.id === selectTable?.id
                     ? "gradient-bg border-primary-color text-white"
                     : "border bg-white text-black"
@@ -242,7 +242,7 @@ function Attendance({
         </ul>
       </div>
 
-      <main className="mx-auto mt-5 flex w-full flex-col items-center md:max-w-screen-md md:px-0 lg:max-w-screen-lg">
+      <main className="mx-auto mt-5 flex w-full flex-col items-center md:max-w-screen-md md:px-0 lg:max-w-screen-lg 2xl:max-w-screen-2xl">
         <div className="w-full">
           {triggerSetting && selectTable ? (
             <div className="px-5">
@@ -307,12 +307,12 @@ function DisplayAttendanceTable({
 
   return (
     <div className="flex w-full flex-col items-center">
-      <ul className="flex w-full flex-col items-center justify-center gap-2 md:flex-row">
+      <ul className="flex w-full flex-col items-center justify-center gap-2 pb-5 md:flex-row">
         {menuAttendances.map((menu) => (
           <li key={menu.title} className="w-full md:w-auto">
             <button
               onClick={() => setSelectMenu(menu.title)}
-              className={`flex w-full items-center justify-start gap-1 rounded-md border-b p-2 transition md:w-52 ${
+              className={`flex w-full items-center justify-start gap-1 rounded-2xl border-b p-2 transition md:w-52 ${
                 menu.title === selectMenu
                   ? "border-primary-color bg-white text-primary-color drop-shadow"
                   : "border-gray-400"
@@ -325,7 +325,7 @@ function DisplayAttendanceTable({
       </ul>
       <div
         ref={scrollRef}
-        className="relative mt-5 h-[30rem] w-full overflow-auto rounded-md bg-white"
+        className="relative h-[30rem] w-full overflow-auto rounded-2xl bg-white 2xl:h-[40rem]"
       >
         <table className="table-fixed bg-white md:min-w-[640px]">
           <thead className="">
@@ -379,12 +379,12 @@ function DisplayAttendanceTable({
                             >
                               <div className="absolute right-1 top-1 m-auto flex items-center justify-end gap-1">
                                 {row?.note && (
-                                  <div className="flex h-5 w-5 items-center justify-center rounded-md border bg-white">
+                                  <div className="flex h-5 w-5 items-center justify-center rounded-2xl border bg-white">
                                     <MdOutlineSpeakerNotes />
                                   </div>
                                 )}
                                 {row.type === "SCAN" && (
-                                  <div className="flex h-5 w-5 items-center justify-center rounded-md border bg-white">
+                                  <div className="flex h-5 w-5 items-center justify-center rounded-2xl border bg-white">
                                     <BsQrCode />
                                   </div>
                                 )}
@@ -461,7 +461,7 @@ function DisplayAttendanceTable({
                       className={`sticky left-0 z-30 text-sm font-semibold ${odd ? "bg-gray-100" : "bg-white"} group-hover:bg-gray-200`}
                     >
                       <div className="flex h-14 items-center gap-2">
-                        <div className="relative h-8 w-8 overflow-hidden rounded-md ring-1 md:h-10 md:w-10">
+                        <div className="relative h-8 w-8 overflow-hidden rounded-2xl ring-1 md:h-10 md:w-10">
                           <Image
                             src={student.photo}
                             alt={student.firstName}

@@ -49,15 +49,15 @@ function StudentCard({
       onClick={() => {
         setSelectStudent(student);
       }}
-      className={`group relative flex w-full flex-col items-center justify-center gap-2 rounded-xl p-3 hover:drop-shadow-md active:scale-105 ${
+      className={`group relative flex w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-black p-3 hover:drop-shadow-md active:scale-105 ${
         student.select && showSelect ? "gradient-bg" : "bg-white"
-      } h-60 overflow-hidden bg-white hover:bg-primary-color sm:h-60 md:h-60 lg:h-60 xl:h-60`}
+      } h-60 overflow-hidden bg-white hover:bg-orange-500 sm:h-60 md:h-60 lg:h-60 xl:h-60`}
     >
       {isDragable && (
         <div
           {...listeners}
           style={{ cursor: isDragging ? "grabbing" : "grab" }}
-          className="absolute right-2 top-2 flex h-10 w-6 items-center justify-center rounded-md hover:bg-gray-300/50"
+          className="absolute right-2 top-2 flex h-10 w-6 items-center justify-center rounded-2xl hover:bg-gray-300/50"
         >
           <MdDragIndicator />
         </div>
@@ -91,7 +91,7 @@ function StudentCard({
           sizes="(max-width: 768px) 100vw, 33vw"
           src={student.photo}
           alt="Student"
-          className="h-full w-full object-cover"
+          className="h-full w-full object-cover transition group-hover:scale-150"
         />
       </div>
       <div className="flex w-full flex-col items-center justify-center gap-0 text-center">

@@ -55,10 +55,10 @@ export default function SortableColumn({
     <div
       ref={setSortableRef}
       style={style}
-      className="bg-white p-4 rounded-lg shadow min-w-80"
+      className="min-w-80 rounded-2xl bg-white p-4 shadow"
     >
-      <div className="flex justify-between items-center mb-4">
-        <div className="cursor-move flex-1" {...attributes} {...listeners}>
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex-1 cursor-move" {...attributes} {...listeners}>
           <h2 className="text-lg font-semibold">{title}</h2>
         </div>
         {id !== "no-group" && (
@@ -99,15 +99,15 @@ export default function SortableColumn({
       </div>
 
       {isEditModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h3 className="text-lg font-semibold mb-4">Edit Column Title</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="rounded-2xl bg-white p-6 shadow-lg">
+            <h3 className="mb-4 text-lg font-semibold">Edit Column Title</h3>
             <form onSubmit={handleSubmit}>
               <input
                 type="text"
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
-                className="border rounded px-2 py-1 mb-4 w-full"
+                className="mb-4 w-full rounded border px-2 py-1"
                 autoFocus
               />
               <div className="flex justify-end gap-2">
@@ -120,7 +120,7 @@ export default function SortableColumn({
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                  className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
                 >
                   Save
                 </button>
@@ -132,7 +132,7 @@ export default function SortableColumn({
 
       <div
         ref={setDroppableRef}
-        className="min-h-[200px] flex flex-col gap-2 p-2 rounded bg-gray-50"
+        className="flex min-h-[200px] flex-col gap-2 rounded bg-gray-50 p-2"
       >
         {tasks.map((task) => (
           <SortableTask
@@ -143,7 +143,7 @@ export default function SortableColumn({
           />
         ))}
         {tasks.length === 0 && (
-          <div className="text-gray-400 text-center py-4">Drop tasks here</div>
+          <div className="py-4 text-center text-gray-400">Drop tasks here</div>
         )}
       </div>
     </div>

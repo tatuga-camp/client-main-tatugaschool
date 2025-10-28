@@ -33,7 +33,7 @@ const ListsSchoolComponent = () => {
     user.data?.favoritSchool ?? null,
   );
   const tableHeaders = ["Name", "Plan", "Create At", "Description", "Action"];
-  const inputClasses = "border rounded-md px-4 py-2 w-full";
+  const inputClasses = "border rounded-2xl px-4 py-2 w-full";
   const schools = useGetSchools();
 
   useEffect(() => {
@@ -87,7 +87,7 @@ const ListsSchoolComponent = () => {
         </p>
       </header>
 
-      <div className="relative -top-28 w-full max-w-7xl rounded-lg bg-white p-4 shadow-lg md:w-11/12 md:p-6">
+      <div className="relative -top-28 w-full max-w-7xl rounded-2xl bg-white p-4 shadow-lg md:w-11/12 md:p-6">
         <h3 className="mb-4 text-xl font-semibold">
           {homepageDataLanguage.selectSchool(language.data ?? "en")}
         </h3>
@@ -105,7 +105,7 @@ const ListsSchoolComponent = () => {
             aria-label="Search schools"
           />
           <Link
-            className="w-full shrink-0 rounded-md bg-secondary-color px-6 py-2 text-center text-white transition duration-300 hover:bg-primary-color active:scale-105 md:w-auto"
+            className="w-full shrink-0 rounded-2xl bg-secondary-color px-6 py-2 text-center text-white transition duration-300 hover:bg-primary-color active:scale-105 md:w-auto"
             href="/school/create"
           >
             {homepageDataLanguage.create(language.data ?? "en")}
@@ -143,7 +143,7 @@ const ListsSchoolComponent = () => {
                       >
                         <td className="whitespace-nowrap px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-md">
+                            <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-2xl">
                               <Image
                                 src={school.logo}
                                 fill
@@ -217,12 +217,12 @@ const ListsSchoolComponent = () => {
                   return (
                     <div
                       key={school.id}
-                      className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+                      className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm"
                     >
                       {/* Card Header */}
                       <div className="flex items-start justify-between pb-3">
                         <div className="flex items-center gap-3">
-                          <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-md">
+                          <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-2xl">
                             <Image
                               src={school.logo}
                               fill

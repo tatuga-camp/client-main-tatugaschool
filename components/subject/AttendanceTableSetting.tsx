@@ -153,7 +153,7 @@ function AttendanceTableSetting({ table, toast, onDelete }: Props) {
 
       <form
         onSubmit={handleUpdate}
-        className="mt-3 flex min-h-80 flex-col gap-3 rounded-md border bg-white p-2 sm:mt-5 sm:gap-5 sm:p-4"
+        className="mt-3 flex min-h-80 flex-col gap-3 rounded-2xl border bg-white p-2 sm:mt-5 sm:gap-5 sm:p-4"
       >
         <div className="w-full justify-between border-b py-2 text-base font-medium sm:py-3 sm:text-lg">
           Subject Information
@@ -233,7 +233,7 @@ function AttendanceTableSetting({ table, toast, onDelete }: Props) {
         Customize your attendance status here
       </h4>
 
-      <div className="mt-5 flex min-h-80 flex-col gap-5 rounded-md border bg-white p-4">
+      <div className="mt-5 flex min-h-80 flex-col gap-5 rounded-2xl border bg-white p-4">
         <div className="flex w-full justify-between border-b py-3 text-lg font-medium">
           Attendance Status
           {updateStatus.isPending && (
@@ -305,7 +305,7 @@ function AttendanceTableSetting({ table, toast, onDelete }: Props) {
       <h4 className="text-sm text-gray-500">
         Irreversible and destructive actions
       </h4>
-      <div className="mt-5 flex flex-col items-start gap-5 rounded-md border bg-white p-4">
+      <div className="mt-5 flex flex-col items-start gap-5 rounded-2xl border bg-white p-4">
         <h2 className="border-b py-3 text-lg font-medium">
           Delete This Attendance Table
         </h2>
@@ -461,7 +461,7 @@ const AttendanceStatusRow = memo(
               style={{
                 backgroundColor: `${data.color}`,
               }}
-              className="w-max cursor-pointer rounded-md p-1.5 text-center text-xs transition active:scale-105 sm:p-2 sm:text-sm"
+              className="w-max cursor-pointer rounded-2xl p-1.5 text-center text-xs transition active:scale-105 sm:p-2 sm:text-sm"
             >
               {data.color}
             </label>
@@ -583,7 +583,7 @@ const CreateAttendanceStatus = memo(
         } relative border-spacing-2 gap-3 border-4 border-transparent p-1 py-2 sm:gap-5 sm:p-2 sm:py-4`}
       >
         <td>
-          <div className="w-full rounded-md p-1 text-center sm:p-2">
+          <div className="w-full rounded-2xl p-1 text-center sm:p-2">
             <input
               type="text"
               className="main-input w-full text-sm sm:text-base"
@@ -604,7 +604,7 @@ const CreateAttendanceStatus = memo(
             <label
               htmlFor="hs-color-input"
               style={{ backgroundColor: createData.color }}
-              className="w-max cursor-pointer rounded-md p-1 text-center text-xs transition active:scale-105 sm:p-2 sm:text-sm"
+              className="w-max cursor-pointer rounded-2xl p-1 text-center text-xs transition active:scale-105 sm:p-2 sm:text-sm"
             >
               {createData.color}
             </label>

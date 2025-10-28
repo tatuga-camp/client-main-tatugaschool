@@ -33,23 +33,19 @@ export default function SortableTask({
     <div
       ref={setNodeRef}
       style={style}
-      className={`
-        bg-white p-3 rounded-md shadow-sm 
-        hover:shadow-md transition-shadow
-        border border-gray-200 relative
-      `}
+      className={`relative rounded-2xl border border-gray-200 bg-white p-3 shadow-sm transition-shadow hover:shadow-md`}
       {...attributes}
     >
       {!isDragging && (
         <div
           {...listeners}
           style={{ cursor: isDragging ? "grabbing" : "grab" }}
-          className="w-6 h-10 rounded-md hover:bg-gray-300/50 flex items-center justify-center absolute top-2 right-2 "
+          className="absolute right-2 top-2 flex h-10 w-6 items-center justify-center rounded-2xl hover:bg-gray-300/50"
         >
           <MdDragIndicator />
         </div>
       )}
-      <h3 className="font-medium text-gray-800 mb-1">{title}</h3>
+      <h3 className="mb-1 font-medium text-gray-800">{title}</h3>
       <p className="text-sm text-gray-600">{description}</p>
     </div>
   );

@@ -315,7 +315,7 @@ function Index({
                 <button
                   type="submit"
                   value={"Published" as SummitValue}
-                  className="gradient-bg h-10 w-max min-w-40 rounded-md rounded-r-none p-2 text-base font-medium text-white opacity-85 hover:opacity-100"
+                  className="gradient-bg h-10 w-max min-w-40 rounded-2xl rounded-r-none p-2 text-base font-medium text-white opacity-85 hover:opacity-100"
                 >
                   {classworkHeadMenuBarDataLanguage.button.publish(
                     language.data ?? "en",
@@ -325,7 +325,7 @@ function Index({
                 <button
                   type="submit"
                   value={"Save Change" as SummitValue}
-                  className="gradient-bg h-10 w-max min-w-40 rounded-md rounded-r-none p-2 text-base font-medium text-white opacity-85 hover:opacity-100"
+                  className="gradient-bg h-10 w-max min-w-40 rounded-2xl rounded-r-none p-2 text-base font-medium text-white opacity-85 hover:opacity-100"
                 >
                   {classworkHeadMenuBarDataLanguage.button.saveChange(
                     language.data ?? "en",
@@ -335,7 +335,7 @@ function Index({
               <button
                 onClick={() => setTriggerOption((prev) => !prev)}
                 type="button"
-                className="gradient-bg h-10 w-max rounded-md rounded-l-none p-2 text-base font-medium text-white"
+                className="gradient-bg h-10 w-max rounded-2xl rounded-l-none p-2 text-base font-medium text-white"
               >
                 <IoChevronDownSharp />
               </button>
@@ -348,7 +348,7 @@ function Index({
                   }}
                   ref={divRef}
                 >
-                  <div className="absolute -right-40 top-8 z-40 h-max w-60 rounded-md border bg-white p-1 drop-shadow">
+                  <div className="absolute -right-40 top-8 z-40 h-max w-60 rounded-2xl border bg-white p-1 drop-shadow">
                     {menuClassworkList.map((menu, index) => {
                       const disabled =
                         (menu.title === "Mark as Draft" &&

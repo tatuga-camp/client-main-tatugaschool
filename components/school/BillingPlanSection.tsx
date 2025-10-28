@@ -167,7 +167,7 @@ const BillingPlanSection = (props: { schoolId: string }) => {
       )}
       {clientSecret && school.data && selectProduct && (
         <PopupLayout onClose={() => setClientSecret(null)}>
-          <div id="checkout" className="rounded-md bg-white p-5">
+          <div id="checkout" className="rounded-2xl bg-white p-5">
             <CheckoutForm
               product={selectProduct}
               clientSecret={clientSecret}
@@ -176,7 +176,7 @@ const BillingPlanSection = (props: { schoolId: string }) => {
           </div>
         </PopupLayout>
       )}
-      <div className="w-full rounded-md border bg-white p-5 2xl:p-10">
+      <div className="w-full rounded-2xl border bg-white p-5 2xl:p-10">
         <h1 className="text-lg font-medium sm:text-xl">
           {schoolDataLanguage.manageSubTitle(language.data ?? "en")}
         </h1>

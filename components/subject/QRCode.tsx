@@ -42,14 +42,14 @@ function QRCode({ url, code, setTriggerQRCode, expireAt }: Props) {
     <div
       className={`${
         triggerFullScreen
-          ? "w-screen h-screen flex items-center justify-center"
+          ? "flex h-screen w-screen items-center justify-center"
           : "w-7/12 md:h-4/6"
-      }  bg-white flex flex-col gap-2 p-4 relative  sm:p-6 md:p-8`}
+      } relative flex flex-col gap-2 bg-white p-4 sm:p-6 md:p-8`}
     >
-      <header className="w-full absolute z-20 top-10 right-10 flex justify-end gap-2 items-center">
+      <header className="absolute right-10 top-10 z-20 flex w-full items-center justify-end gap-2">
         <button
           onClick={() => setTriggerFullScreen((prev) => !prev)}
-          className="second-button text-2xl flex items-center w-6  h-6  justify-center gap-1 "
+          className="second-button flex h-6 w-6 items-center justify-center gap-1 text-2xl"
         >
           {triggerFullScreen ? (
             <div className="flex items-center justify-center gap-1">
@@ -62,7 +62,7 @@ function QRCode({ url, code, setTriggerQRCode, expireAt }: Props) {
           )}
         </button>
         <button
-          className=" text-red-500 text-2xl"
+          className="text-2xl text-red-500"
           onClick={() => {
             document.body.style.overflow = "auto";
             setTriggerQRCode(false);
@@ -71,23 +71,23 @@ function QRCode({ url, code, setTriggerQRCode, expireAt }: Props) {
           <IoMdClose />
         </button>
       </header>
-      <div className="w-full h-64 sm:h-80 md:h-96 relative">
+      <div className="relative h-64 w-full sm:h-80 md:h-96">
         {qrCode ? (
           <Image src={qrCode} alt="QR Code" layout="fill" objectFit="contain" />
         ) : (
-          <div className="w-full h-full bg-gray-400 animate-pulse"></div>
+          <div className="h-full w-full animate-pulse bg-gray-400"></div>
         )}
       </div>
       {expireAt && (
-        <div className="w-full flex flex-col items-center justify-center">
-          <h1 className="text-center text-xl sm:text-2xl md:text-2xl font-semibold">
+        <div className="flex w-full flex-col items-center justify-center">
+          <h1 className="text-center text-xl font-semibold sm:text-2xl md:text-2xl">
             Expire In
           </h1>
           <Countdown
             date={expireAt}
             renderer={(props) => {
               return (
-                <div className="bg-gradient-to-r from-rose-400 to-red-500 text-2xl px-2 rounded-md text-white">
+                <div className="rounded-2xl bg-gradient-to-r from-rose-400 to-red-500 px-2 text-2xl text-white">
                   {props.days}:{props.hours}:{props.minutes}:{props.seconds}
                 </div>
               );
@@ -97,10 +97,10 @@ function QRCode({ url, code, setTriggerQRCode, expireAt }: Props) {
       )}
       {code && (
         <div className="flex flex-col items-center justify-center gap-1">
-          <h1 className="text-center text-xl sm:text-2xl md:text-3xl font-semibold">
+          <h1 className="text-center text-xl font-semibold sm:text-2xl md:text-3xl">
             {code}
           </h1>
-          <p className="text-center text-xs sm:text-sm md:text-base text-gray-500">
+          <p className="text-center text-xs text-gray-500 sm:text-sm md:text-base">
             Subject code for student to join
           </p>
         </div>

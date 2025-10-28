@@ -31,7 +31,7 @@ export const SignUpForm = (props: Props) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [photo, setPhoto] = useState<string | undefined>(props.photo);
   const [providerId, setProvider] = useState<string | undefined>(
-    props.providerId
+    props.providerId,
   );
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -123,24 +123,23 @@ export const SignUpForm = (props: Props) => {
 
   return (
     <form
-      className="bg-white p-10   rounded-lg  flex flex-col
-       gap-4 w-96 md:w-5/12 items-center  shadow-[0_12px_24px_rgba(145,158,171,0.12)] text-center"
+      className="flex w-96 flex-col items-center gap-4 rounded-2xl bg-white p-10 text-center shadow-[0_12px_24px_rgba(145,158,171,0.12)] md:w-5/12"
       onSubmit={handleSignUp}
     >
       <h2 className="text-[24px] font-bold">
         {signUpLanguageData.title(language.data ?? "en")}
       </h2>
-      <span className="text-gray-500 text-sm">
+      <span className="text-sm text-gray-500">
         ({signUpLanguageData.teacherOnly(language.data ?? "en")})
       </span>
       {props.provider === "google" && (
-        <div className="second-button border gap-2 flex items-center justify-center">
+        <div className="second-button flex items-center justify-center gap-2 border">
           <FcGoogle />
           {signUpLanguageData.nowCreateAccountOnGoogle(language.data ?? "en")}
         </div>
       )}
       <div className="flex flex-col items-center gap-4">
-        <label className="h-max  flex flex-col relative items-start">
+        <label className="relative flex h-max flex-col items-start">
           <span className="text-sm">
             {signUpLanguageData.firstNameTitle(language.data ?? "en")}
           </span>
@@ -148,15 +147,15 @@ export const SignUpForm = (props: Props) => {
             type="text"
             disabled={props.provider === "google" && !!props.firstName}
             placeholder={signUpLanguageData.firstNamePlaceholder(
-              language.data ?? "en"
+              language.data ?? "en",
             )}
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
             required
-            className="  main-input w-80"
+            className="main-input w-80"
           />
         </label>
-        <label className="h-max  flex flex-col relative items-start">
+        <label className="relative flex h-max flex-col items-start">
           <span className="text-sm">
             {signUpLanguageData.lastNameTitle(language.data ?? "en")}
           </span>
@@ -164,15 +163,15 @@ export const SignUpForm = (props: Props) => {
             type="text"
             disabled={props.provider === "google" && !!props.lastName}
             placeholder={signUpLanguageData.lastNamePlaceholder(
-              language.data ?? "en"
+              language.data ?? "en",
             )}
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
             required
-            className="  main-input w-80"
+            className="main-input w-80"
           />
         </label>
-        <label className="h-max w-80  flex flex-col relative items-start">
+        <label className="relative flex h-max w-80 flex-col items-start">
           <span className="text-sm">
             {signUpLanguageData.phone(language.data ?? "en")}
           </span>
@@ -185,7 +184,7 @@ export const SignUpForm = (props: Props) => {
             }}
           />
         </label>
-        <label className="h-max  flex flex-col relative items-start">
+        <label className="relative flex h-max flex-col items-start">
           <span className="text-sm">
             {signUpLanguageData.email(language.data ?? "en")}
           </span>
@@ -193,22 +192,22 @@ export const SignUpForm = (props: Props) => {
             type="email"
             disabled={props.provider === "google"}
             placeholder={signUpLanguageData.emailPlaceholder(
-              language.data ?? "en"
+              language.data ?? "en",
             )}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="  main-input w-80"
+            className="main-input w-80"
           />
         </label>
         {props.provider !== "google" && (
-          <label className="h-max  flex flex-col  w-80 relative items-start">
+          <label className="relative flex h-max w-80 flex-col items-start">
             <span className="text-sm">
               {signUpLanguageData.password(language.data ?? "en")}
             </span>
             <Password
               placeholder={signUpLanguageData.passwordPlaceholder(
-                language.data ?? "en"
+                language.data ?? "en",
               )}
               value={password}
               feedback={true}
@@ -218,14 +217,14 @@ export const SignUpForm = (props: Props) => {
           </label>
         )}
         {props.provider !== "google" && (
-          <label className="h-max w-80  flex flex-col relative items-start">
+          <label className="relative flex h-max w-80 flex-col items-start">
             <span className="text-sm">
               {signUpLanguageData.confirmPassword(language.data ?? "en")}
             </span>
             <Password
               feedback={true}
               placeholder={signUpLanguageData.confirmPasswordPlaceholder(
-                language.data ?? "en"
+                language.data ?? "en",
               )}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
@@ -234,7 +233,7 @@ export const SignUpForm = (props: Props) => {
           </label>
         )}
       </div>
-      <div className="text-left mt-10 h-40 overflow-auto">
+      <div className="mt-10 h-40 overflow-auto text-left">
         <UserAgreement />
       </div>
       <label className="flex items-center gap-2">
@@ -253,8 +252,7 @@ export const SignUpForm = (props: Props) => {
         disabled={!isAgree}
         className={`p-5 ${
           isAgree ? "bg-secondary-color hover:bg-primary-color" : "bg-gray-400"
-        }  text-white rounded w-80 h-5 flex items-center justify-center
-            font-semibold  transition duration-300`}
+        } flex h-5 w-80 items-center justify-center rounded font-semibold text-white transition duration-300`}
       >
         {signUpLanguageData.createAccount(language.data ?? "en")}
       </button>
@@ -262,7 +260,7 @@ export const SignUpForm = (props: Props) => {
         <button
           type="button"
           onClick={handleGoogleLogin}
-          className="second-button w-80 border gap-2 flex items-center justify-center"
+          className="second-button flex w-80 items-center justify-center gap-2 border"
         >
           <FcGoogle />
           {signUpLanguageData.createAccountGoogle(language.data ?? "en")}

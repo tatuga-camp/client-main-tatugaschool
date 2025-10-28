@@ -280,7 +280,7 @@ function Subjects({ schoolId }: Props) {
                 value={search}
                 onChange={(e) => handleSearch(e.target.value)}
                 type="text"
-                className="w-96 rounded-lg border border-gray-300 p-2"
+                className="w-96 rounded-2xl border border-gray-300 p-2"
                 placeholder={subjectsDataLanguage.searchPlaceholder(
                   language.data ?? "en",
                 )}

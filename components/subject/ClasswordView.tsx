@@ -54,10 +54,10 @@ function ClasswordView({
   const refetchSkill = useUpdateSkillToAssignment();
   const language = useGetLanguage();
   return (
-    <main className="w-full h-max flex">
-      <section className="w-full flex-col h-max flex mb-40 items-center justify-start gap-5">
-        <div className="w-11/12  h-max max-h-max mt-10 p-5 bg-white flex flex-col gap-2 rounded-md border">
-          <label className="flex flex-col ">
+    <main className="flex h-max w-full">
+      <section className="mb-40 flex h-max w-full flex-col items-center justify-start gap-5">
+        <div className="mt-10 flex h-max max-h-max w-11/12 flex-col gap-2 rounded-2xl border bg-white p-5">
+          <label className="flex flex-col">
             <span className="text-base font-medium">
               {classworkViewDataLanguage.title(language.data ?? "en")}
             </span>
@@ -68,12 +68,12 @@ function ClasswordView({
               maxLength={999}
               className="main-input"
               placeholder={classworkViewDataLanguage.title(
-                language.data ?? "en"
+                language.data ?? "en",
               )}
             />
           </label>
           {classwork && (
-            <div className="w-full h-96 pb-5 ">
+            <div className="h-96 w-full pb-5">
               <span className="text-base font-medium">
                 {classworkViewDataLanguage.description(language.data ?? "en")}
               </span>
@@ -89,19 +89,16 @@ function ClasswordView({
             </div>
           )}
 
-          <ul className="w-full h-max flex flex-col gap-2">
+          <ul className="flex h-max w-full flex-col gap-2">
             {files?.map((file, index) => {
               const isImage = file.type.includes("image");
               return (
                 <li
                   key={index}
-                  className="w-full h-20 flex overflow-hidden rounded-md items-center justify-between  bg-white border"
+                  className="flex h-20 w-full items-center justify-between overflow-hidden rounded-2xl border bg-white"
                 >
-                  <div className="w-full h-full flex items-center justify-start gap-2">
-                    <div
-                      className="w-16 gradient-bg text-white text-lg flex items-center justify-center
-               border-r h-full"
-                    >
+                  <div className="flex h-full w-full items-center justify-start gap-2">
+                    <div className="gradient-bg flex h-full w-16 items-center justify-center border-r text-lg text-white">
                       {isImage ? <FaRegFileImage /> : <FaRegFile />}
                     </div>
                     <a
@@ -115,7 +112,7 @@ function ClasswordView({
                   <button
                     type="button"
                     onClick={() => onDeleteFile(file)}
-                    className="text-xl mr-5 hover:bg-red-300/50 p-2 rounded-full active:scale-105 text-red-500"
+                    className="mr-5 rounded-full p-2 text-xl text-red-500 hover:bg-red-300/50 active:scale-105"
                   >
                     <MdDelete />
                   </button>
@@ -125,17 +122,15 @@ function ClasswordView({
           </ul>
         </div>
 
-        <div className="w-11/12 h-max p-5 rounded-md bg-white border">
+        <div className="h-max w-11/12 rounded-2xl border bg-white p-5">
           <h1>{classworkViewDataLanguage.fileTilte(language.data ?? "en")}</h1>
           <span className="text-xs text-gray-400">
             {classworkViewDataLanguage.fileDescription(language.data ?? "en")}
           </span>
-          <div className="w-full  flex items-center justify-center h-20">
+          <div className="flex h-20 w-full items-center justify-center">
             <label
               htmlFor="upload"
-              className="text-white flex active:scale-105 transition
-           items-center justify-center gap-1
-         gradient-bg px-3 py-1 text-lg rounded-md"
+              className="gradient-bg flex items-center justify-center gap-1 rounded-2xl px-3 py-1 text-lg text-white transition active:scale-105"
             >
               <MdOutlineFileUpload />
               {classworkViewDataLanguage.uploadButton(language.data ?? "en")}
@@ -164,15 +159,15 @@ function ClasswordView({
         </div>
 
         {classwork?.id && classwork.type === "Assignment" && (
-          <div className="w-11/12 h-max p-5 rounded-md  text-white gradient-bg border">
-            <div className="w-full flex justify-between">
-              <h1 className="flex gap-2 items-center">
+          <div className="gradient-bg h-max w-11/12 rounded-2xl border p-5 text-white">
+            <div className="flex w-full justify-between">
+              <h1 className="flex items-center gap-2">
                 <SiGooglegemini />
                 Suggest Skills for Classwork by AI
               </h1>
               <a
                 href="#"
-                className="flex gap-2 second-button border items-center"
+                className="second-button flex items-center gap-2 border"
               >
                 <CgInfo />
                 Learn more
@@ -183,11 +178,11 @@ function ClasswordView({
               Suggest the skill that related to your classwork for evaluation
             </span>
 
-            <ul className="flex mt-2 flex-wrap gap-2">
+            <ul className="mt-2 flex flex-wrap gap-2">
               {skills?.map((skill, index) => (
                 <li
                   key={index}
-                  className="bg-white text-black p-2 text-sm rounded-md"
+                  className="rounded-2xl bg-white p-2 text-sm text-black"
                 >
                   #{skill.title}
                 </li>
@@ -206,37 +201,37 @@ function ClasswordView({
               }}
               disabled={refetchSkill.isPending}
               type="button"
-              className="second-button mt-5 border w-40 flex items-center justify-center"
+              className="second-button mt-5 flex w-40 items-center justify-center border"
             >
               {refetchSkill.isPending ? <LoadingSpinner /> : "Update skill"}
             </button>
           </div>
         )}
       </section>
-      <section className="w-4/12 min-h-screen max-h-max flex flex-col gap-2  bg-white  h-full">
-        <div className="w-full py-5 flex items-start flex-col px-5  border-b">
+      <section className="flex h-full max-h-max min-h-screen w-4/12 flex-col gap-2 bg-white">
+        <div className="flex w-full flex-col items-start border-b px-5 py-5">
           <h1 className="text-lg font-medium">
             {classworkViewDataLanguage.settingTitle(language.data ?? "en")}
           </h1>
           <span className="text-xs text-gray-400">
             {classworkViewDataLanguage.settingDescription(
-              language.data ?? "en"
+              language.data ?? "en",
             )}
           </span>
           {classwork?.status === "Draft" && (
-            <div className="mt-5 bg-gray-500 text-white px-5 py-1 rounded-md">
+            <div className="mt-5 rounded-2xl bg-gray-500 px-5 py-1 text-white">
               {classworkViewDataLanguage.draft(language.data ?? "en")}
             </div>
           )}
           {classwork?.status === "Published" && (
-            <div className="mt-5  text-white px-5 py-1 rounded-md gradient-bg ">
+            <div className="gradient-bg mt-5 rounded-2xl px-5 py-1 text-white">
               {classworkViewDataLanguage.published(language.data ?? "en")}
             </div>
           )}
         </div>
 
-        <section className="flex flex-col gap-3 mt-5 px-5 w-10/12">
-          <label className="flex border-b pb-2 flex-col  w-full">
+        <section className="mt-5 flex w-10/12 flex-col gap-3 px-5">
+          <label className="flex w-full flex-col border-b pb-2">
             <span className="text-base font-medium">
               {classworkViewDataLanguage.type(language.data ?? "en")}
             </span>
@@ -264,7 +259,7 @@ function ClasswordView({
               optionLabel="title"
             />
           </label>
-          <label className="flex flex-col bg-gray-50  w-full">
+          <label className="flex w-full flex-col bg-gray-50">
             <span className="text-base font-medium">
               {classworkViewDataLanguage.assignAt(language.data ?? "en")}
             </span>
@@ -281,7 +276,7 @@ function ClasswordView({
             />
           </label>
           {classwork?.type === "Assignment" && (
-            <label className="flex flex-col  w-full  border-b pb-2">
+            <label className="flex w-full flex-col border-b pb-2">
               <span className="text-base font-medium">
                 {classworkViewDataLanguage.deadLine(language.data ?? "en")}
               </span>
@@ -299,7 +294,7 @@ function ClasswordView({
           )}
 
           {classwork?.type === "Assignment" && (
-            <label className="flex flex-col  w-full border-b pb-2">
+            <label className="flex w-full flex-col border-b pb-2">
               <span className="text-base font-medium">
                 {classworkViewDataLanguage.maxScore(language.data ?? "en")}
               </span>
@@ -317,7 +312,7 @@ function ClasswordView({
             </label>
           )}
           {classwork?.type === "Assignment" && (
-            <label className="flex gap-2 items-center justify-between   w-full">
+            <label className="flex w-full items-center justify-between gap-2">
               <span className="text-base font-medium">
                 {classworkViewDataLanguage.allowWeight(language.data ?? "en")}
               </span>
@@ -338,7 +333,7 @@ function ClasswordView({
             </label>
           )}
           {classwork?.allowWeight && classwork.type === "Assignment" && (
-            <label className="flex flex-col  w-full">
+            <label className="flex w-full flex-col">
               <span className="text-base font-medium">
                 {classworkViewDataLanguage.weight(language.data ?? "en")}
               </span>

@@ -89,7 +89,7 @@ function AttendanceQRcode({ onClose, subjectId, toast }: Props) {
         isAllowScanManyTime: false,
       }));
       setQrcodeURL(
-        `${process.env.NEXT_PUBLIC_STUDENT_CLIENT_URL}/qr-code-attendance/${create.id}`
+        `${process.env.NEXT_PUBLIC_STUDENT_CLIENT_URL}/qr-code-attendance/${create.id}`,
       );
     } catch (error) {
       console.log(error);
@@ -119,14 +119,14 @@ function AttendanceQRcode({ onClose, subjectId, toast }: Props) {
       ) : (
         <form
           onSubmit={handleCreate}
-          className="w-full md:w-10/12 lg:w-9/12 xl:w-6/12 h-max md:h-max bg-white rounded-md p-3"
+          className="h-max w-full rounded-2xl bg-white p-3 md:h-max md:w-10/12 lg:w-9/12 xl:w-6/12"
         >
-          <header className="w-full flex border-b pb-2 justify-between">
+          <header className="flex w-full justify-between border-b pb-2">
             <div className="text-center sm:text-left">
-              <h1 className="text-2xl sm:text-xl font-medium">
+              <h1 className="text-2xl font-medium sm:text-xl">
                 {attendanceQRCodeDatLanguage.title(language.data ?? "en")}
               </h1>
-              <span className="text-sm text-gray-500 block mt-1">
+              <span className="mt-1 block text-sm text-gray-500">
                 {attendanceQRCodeDatLanguage.description(language.data ?? "en")}
               </span>
             </div>
@@ -136,26 +136,25 @@ function AttendanceQRcode({ onClose, subjectId, toast }: Props) {
                 document.body.style.overflow = "auto";
                 onClose();
               }}
-              className="text-lg hover:bg-gray-300/50 w-6  h-6  rounded
-                 flex items-center justify-center font-semibold"
+              className="flex h-6 w-6 items-center justify-center rounded text-lg font-semibold hover:bg-gray-300/50"
             >
               <IoMdClose />
             </button>
           </header>
           {createRow.isPending && <LoadingBar />}
-          <main className="py-3 w-96 md:w-full overflow-auto">
-            <section className="w-full flex flex-col gap-4 mt-5">
+          <main className="w-96 overflow-auto py-3 md:w-full">
+            <section className="mt-5 flex w-full flex-col gap-4">
               {/* Table Selection */}
               <div className="w-full overflow-x-auto">
-                <div className="flex flex-nowrap min-w-0">
+                <div className="flex min-w-0 flex-nowrap">
                   {attendanceTables.data?.map((table, index) => (
                     <button
                       type="button"
                       key={index}
                       onClick={() => setSelectTable(table)}
-                      className={`px-3 py-1 whitespace-nowrap ${
+                      className={`whitespace-nowrap px-3 py-1 ${
                         selectTable?.id === table.id
-                          ? "font-semibold border-b-2 border-b-black"
+                          ? "border-b-2 border-b-black font-semibold"
                           : ""
                       }`}
                     >
@@ -166,12 +165,12 @@ function AttendanceQRcode({ onClose, subjectId, toast }: Props) {
               </div>
 
               {/* Date & Note Controls */}
-              <div className="flex flex-col sm:flex-row gap-3 w-full">
-                <div className="flex-1 flex  gap-2">
-                  <label className=" flex flex-col">
-                    <span className="text-gray-400 text-xs">
+              <div className="flex w-full flex-col gap-3 sm:flex-row">
+                <div className="flex flex-1 gap-2">
+                  <label className="flex flex-col">
+                    <span className="text-xs text-gray-400">
                       {attendanceCheckerDataLanugae.startDate(
-                        language.data ?? "en"
+                        language.data ?? "en",
                       )}
                     </span>
                     <input
@@ -209,9 +208,9 @@ function AttendanceQRcode({ onClose, subjectId, toast }: Props) {
                     />
                   </label>
                   <label className="flex flex-col">
-                    <span className="text-gray-400 text-xs">
+                    <span className="text-xs text-gray-400">
                       {attendanceCheckerDataLanugae.endDate(
-                        language.data ?? "en"
+                        language.data ?? "en",
                       )}
                     </span>
                     <input
@@ -231,20 +230,20 @@ function AttendanceQRcode({ onClose, subjectId, toast }: Props) {
               </div>
             </section>
             <section className="mt-5">
-              <h1 className="text-base sm:text-base font-medium">
+              <h1 className="text-base font-medium sm:text-base">
                 {attendanceQRCodeDatLanguage.qrSetting(language.data ?? "en")}
               </h1>
-              <h4 className="text-xs sm:text-sm text-gray-500">
+              <h4 className="text-xs text-gray-500 sm:text-sm">
                 {attendanceQRCodeDatLanguage.qrSettingDescription(
-                  language.data ?? "en"
+                  language.data ?? "en",
                 )}
               </h4>
             </section>
-            <section className="flex flex-wrap  gap-2 mt-5">
+            <section className="mt-5 flex flex-wrap gap-2">
               <label className="flex flex-col">
-                <span className="text-gray-400 text-xs">
+                <span className="text-xs text-gray-400">
                   {attendanceQRCodeDatLanguage.qrAllowToScan(
-                    language.data ?? "en"
+                    language.data ?? "en",
                   )}
                 </span>
                 <input
@@ -262,12 +261,12 @@ function AttendanceQRcode({ onClose, subjectId, toast }: Props) {
                 />
               </label>
               <label className="flex flex-col">
-                <span className="text-gray-400 text-xs">
+                <span className="text-xs text-gray-400">
                   {attendanceQRCodeDatLanguage.qrExpire(language.data ?? "en")}
                   {attendanceData.expireAt &&
                     timeLeft({
                       targetTime: new Date(
-                        attendanceData?.expireAt
+                        attendanceData?.expireAt,
                       ).toISOString(),
                     })}
                 </span>
@@ -290,10 +289,10 @@ function AttendanceQRcode({ onClose, subjectId, toast }: Props) {
                   className="main-input h-8 w-60"
                 />
               </label>
-              <label className="flex flex-col ">
-                <span className="text-gray-400 text-xs">
+              <label className="flex flex-col">
+                <span className="text-xs text-gray-400">
                   {attendanceQRCodeDatLanguage.qrAllowStudent(
-                    language.data ?? "en"
+                    language.data ?? "en",
                   )}
                 </span>
                 <Switch
@@ -308,7 +307,7 @@ function AttendanceQRcode({ onClose, subjectId, toast }: Props) {
               </label>
             </section>
           </main>
-          <footer className="w-full flex justify-end p-1 border-t">
+          <footer className="flex w-full justify-end border-t p-1">
             <div className="flex items-center justify-center gap-3">
               <button
                 onClick={() => {
@@ -316,7 +315,7 @@ function AttendanceQRcode({ onClose, subjectId, toast }: Props) {
                   onClose();
                 }}
                 type="button"
-                className="second-button border flex items-center justify-center gap-1"
+                className="second-button flex items-center justify-center gap-1 border"
               >
                 Cancel
               </button>

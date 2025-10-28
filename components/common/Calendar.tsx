@@ -26,9 +26,9 @@ function Calendar({ value, onValue }: Props) {
   const [data, setData] = useState<Nullable<(Date | null)[]>>(value);
 
   return (
-    <div className="flex flex-col w-full h-full ">
+    <div className="flex h-full w-full flex-col">
       <label className="text-xs text-gray-500">Select Date</label>
-      <div className="relative w-max ">
+      <div className="relative w-max">
         <CalendarPrimereact
           dateFormat="dd/mm/yy"
           value={data}
@@ -51,30 +51,30 @@ function Calendar({ value, onValue }: Props) {
                   "font-sans text-base text-gray-600 w-60  bg-white  p-3 border border-gray-300  transition-colors duration-200 appearance-none",
                   "hover:border-blue-500",
                   {
-                    "rounded-lg": !option?.props.showIcon,
+                    "rounded-2xl": !option?.props.showIcon,
                     "border-r-0 rounded-l-lg": option?.props.showIcon,
-                  }
+                  },
                 ),
               },
             }),
             panel: (option) => ({
               className: classNames("bg-white", "min-w-96", {
                 "shadow-md border-0 absolute": !option?.props.inline,
-                "inline-block overflow-x-auto border border-gray-300  p-2 rounded-lg":
+                "inline-block overflow-x-auto border border-gray-300  p-2 rounded-2xl":
                   option?.props.inline,
               }),
             }),
             header: {
               className: classNames(
                 "flex items-center justify-between",
-                "p-2 text-gray-700  bg-white  font-semibold m-0 border-b border-gray-300  rounded-t-lg"
+                "p-2 text-gray-700  bg-white  font-semibold m-0 border-b border-gray-300  rounded-t-lg",
               ),
             },
             previousButton: {
               className: classNames(
                 "flex items-center justify-center cursor-pointer overflow-hidden relative",
                 "w-8 h-8 text-gray-600  border-0 bg-transparent rounded-full transition-colors duration-200 ease-in-out",
-                "hover:text-gray-700  hover:border-transparent hover:bg-gray-200  "
+                "hover:text-gray-700  hover:border-transparent hover:bg-gray-200  ",
               ),
             },
             title: { className: "leading-8 mx-auto" },
@@ -82,20 +82,20 @@ function Calendar({ value, onValue }: Props) {
               className: classNames(
                 "text-gray-700  transition duration-200 font-semibold p-2",
                 "mr-2",
-                "hover:text-blue-500"
+                "hover:text-blue-500",
               ),
             },
             yearTitle: {
               className: classNames(
                 "text-gray-700  transition duration-200 font-semibold p-2",
-                "hover:text-blue-500"
+                "hover:text-blue-500",
               ),
             },
             nextButton: {
               className: classNames(
                 "flex items-center justify-center cursor-pointer overflow-hidden relative",
                 "w-8 h-8 text-gray-600  border-0 bg-transparent rounded-full transition-colors duration-200 ease-in-out",
-                "hover:text-gray-700  hover:border-transparent hover:bg-gray-200  "
+                "hover:text-gray-700  hover:border-transparent hover:bg-gray-200  ",
               ),
             },
             table: {
@@ -122,21 +122,21 @@ function Calendar({ value, onValue }: Props) {
                     !option?.context.selected && !option?.context.disabled,
                   "text-blue-700 bg-blue-100 hover:bg-blue-200":
                     option?.context.selected && !option?.context.disabled,
-                }
+                },
               ),
             }),
             monthPicker: { className: "my-2" },
             month: (option) => ({
               className: classNames(
                 "w-1/3 inline-flex items-center justify-center cursor-pointer overflow-hidden relative",
-                "p-2 transition-shadow duration-200 rounded-lg",
+                "p-2 transition-shadow duration-200 rounded-2xl",
                 "focus:outline-none focus:outline-offset-0 focus:shadow-[0_0_0_0.2rem_rgba(191,219,254,1)] ",
                 {
                   "text-gray-600  bg-transprent hover:bg-gray-200 ":
                     !option?.context.selected && !option?.context.disabled,
                   "text-blue-700 bg-blue-100 hover:bg-blue-200":
                     option?.context.selected && !option?.context.disabled,
-                }
+                },
               ),
             }),
             yearPicker: {
@@ -145,20 +145,20 @@ function Calendar({ value, onValue }: Props) {
             year: (option) => ({
               className: classNames(
                 "w-1/2 inline-flex items-center justify-center cursor-pointer overflow-hidden relative",
-                "p-2 transition-shadow duration-200 rounded-lg",
+                "p-2 transition-shadow duration-200 rounded-2xl",
                 "focus:outline-none focus:outline-offset-0 focus:shadow-[0_0_0_0.2rem_rgba(191,219,254,1)] ",
                 {
                   "text-gray-600  bg-transprent hover:bg-gray-200 ":
                     !option?.context.selected && !option?.context.disabled,
                   "text-blue-700 bg-blue-100 hover:bg-blue-200":
                     option?.context.selected && !option?.context.disabled,
-                }
+                },
               ),
             }),
             timePicker: {
               className: classNames(
                 "flex justify-center items-center",
-                "border-t-1 border-solid border-gray-300 p-2"
+                "border-t-1 border-solid border-gray-300 p-2",
               ),
             },
             separatorContainer: {
@@ -172,14 +172,14 @@ function Calendar({ value, onValue }: Props) {
               className: classNames(
                 "flex items-center justify-center cursor-pointer overflow-hidden relative",
                 "w-8 h-8 text-gray-600  border-0 bg-transparent rounded-full transition-colors duration-200 ease-in-out",
-                "hover:text-gray-700  hover:border-transparent hover:bg-gray-200  "
+                "hover:text-gray-700  hover:border-transparent hover:bg-gray-200  ",
               ),
             },
             decrementButton: {
               className: classNames(
                 "flex items-center justify-center cursor-pointer overflow-hidden relative",
                 "w-8 h-8 text-gray-600  border-0 bg-transparent rounded-full transition-colors duration-200 ease-in-out",
-                "hover:text-gray-700  hover:border-transparent hover:bg-gray-200  "
+                "hover:text-gray-700  hover:border-transparent hover:bg-gray-200  ",
               ),
             },
             groupContainer: { className: "flex" },
@@ -187,7 +187,7 @@ function Calendar({ value, onValue }: Props) {
               className: classNames(
                 "flex-1",
                 "border-l border-gray-300 pr-0.5 pl-0.5 pt-0 pb-0",
-                "first:pl-0 first:border-l-0"
+                "first:pl-0 first:border-l-0",
               ),
             },
             transition: TRANSITIONS.overlay,
@@ -198,8 +198,7 @@ function Calendar({ value, onValue }: Props) {
             setData(null);
             onValue(null);
           }}
-          className="absolute hover:bg-gray-300/50 w-6 h-6 right-2 z-20 top-0 bottom-0 m-auto rounded-md active:bg-gray-400  flex 
-    items-center justify-center  text-gray-600"
+          className="absolute bottom-0 right-2 top-0 z-20 m-auto flex h-6 w-6 items-center justify-center rounded-2xl text-gray-600 hover:bg-gray-300/50 active:bg-gray-400"
         >
           <CgClose />
         </button>

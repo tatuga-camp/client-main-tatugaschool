@@ -194,10 +194,10 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
             {SubscriptionDataLanguage.description(language.data ?? "en")}
           </span>
           {/* billing type div */}
-          <div className="m-auto mt-5 flex items-center justify-center space-x-1 rounded-lg px-2 py-2 md:mt-10">
+          <div className="m-auto mt-5 flex items-center justify-center space-x-1 rounded-2xl px-2 py-2 md:mt-10">
             <button
               onClick={() => setMonthPrice(true)}
-              className={`w-60 rounded-md px-2 py-2 text-[#667085] drop-shadow-md hover:bg-white hover:text-black sm:px-3.5 md:px-1.5 ${
+              className={`w-60 rounded-2xl px-2 py-2 text-[#667085] drop-shadow-md hover:bg-white hover:text-black sm:px-3.5 md:px-1.5 ${
                 monthprice && "border border-[#94a3b8] bg-white text-black"
               }`}
             >
@@ -205,7 +205,7 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
             </button>
             <button
               onClick={() => setMonthPrice(false)}
-              className={`ml-1 w-60 rounded-md border-[#94a3b8] px-2 py-2 text-[#667085] drop-shadow-md hover:bg-white hover:text-black sm:px-3.5 md:px-1.5 ${!monthprice && "border border-[#94a3b8] bg-white text-black"} `}
+              className={`ml-1 w-60 rounded-2xl border-[#94a3b8] px-2 py-2 text-[#667085] drop-shadow-md hover:bg-white hover:text-black sm:px-3.5 md:px-1.5 ${!monthprice && "border border-[#94a3b8] bg-white text-black"} `}
             >
               {SubscriptionDataLanguage.annual(language.data ?? "en")}
             </button>
@@ -219,7 +219,7 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
                 className={
                   index === 0
                     ? "hidden lg:block"
-                    : "mb-10 rounded-lg border-2 lg:mb-0 lg:border-none"
+                    : "mb-10 rounded-2xl border-2 lg:mb-0 lg:border-none"
                 }
               >
                 <tr>
@@ -339,7 +339,7 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
                               school.plan === data.mainTitle
                                 ? "second-button border text-black"
                                 : "main-button text-white"
-                            } rounded-lg py-3 font-semibold`}
+                            } rounded-2xl py-3 font-semibold`}
                           >
                             {school.plan === data.mainTitle
                               ? "Update Members"
@@ -377,7 +377,7 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
                             school.plan === data.mainTitle
                               ? "second-button border text-black"
                               : "main-button text-white"
-                          } rounded-lg py-3 font-semibold`}
+                          } rounded-2xl py-3 font-semibold`}
                         >
                           {school.plan === data.mainTitle
                             ? "You are on this plan"

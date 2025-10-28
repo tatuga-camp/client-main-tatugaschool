@@ -111,14 +111,14 @@ function PopUpStudent({ student, setSelectStudent, toast }: Props) {
   if (!isModalOpen) return null;
 
   return (
-    <section className="relative flex w-full flex-col items-center gap-5 rounded-md border bg-white p-5 pb-0 md:w-10/12 md:flex-row xl:w-7/12">
+    <section className="relative flex w-full flex-col items-center gap-5 rounded-2xl border-2 border-black bg-white p-5 pb-0 md:w-10/12 md:flex-row xl:w-7/12">
       <button
         onClick={handleCloseModal}
         className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded text-lg font-semibold hover:bg-gray-300/50"
       >
         <IoMdClose />
       </button>
-      <div className="flex h-max w-full flex-col items-center justify-center gap-1 rounded-md border bg-white pb-1 md:w-40">
+      <div className="flex h-max w-full flex-col items-center justify-center gap-1 rounded-2xl border bg-white pb-1 md:w-40">
         <div className="gradient-bg flex h-10 w-full items-center justify-center rounded-t-md md:w-40">
           <span className="text-lg font-semibold text-white">{totalScore}</span>
         </div>
@@ -318,7 +318,7 @@ function AvatarSetting({
       <ul className="grid h-full w-full grid-cols-5 place-items-center gap-2 overflow-auto bg-gray-100 p-3">
         <label
           htmlFor="imageUpload"
-          className={`relative flex h-24 w-24 cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-md bg-white hover:scale-105`}
+          className={`relative flex h-24 w-24 cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl bg-white hover:scale-105`}
         >
           <MdPhoto className="text-5xl" />
           <span className="text-xs">Upload Photo</span>
@@ -341,7 +341,7 @@ function AvatarSetting({
               ref={isSelected ? selectedAvatarRef : null}
               className={`relative ${
                 isSelected && "ring-2"
-              } h-24 w-24 cursor-pointer overflow-hidden rounded-md bg-white hover:scale-105`}
+              } h-24 w-24 cursor-pointer overflow-hidden rounded-2xl bg-white hover:scale-105`}
               onClick={() => setSelectAvatar(url)}
             >
               <Image

@@ -65,7 +65,7 @@ function SubjectLayout({
       </div>
       {triggerShowLock === true && (
         <div className="fixed bottom-0 left-0 right-0 top-0 z-50 flex h-dvh w-screen items-center justify-center bg-gray-400/90">
-          <div className="flex max-w-lg flex-col items-center justify-center gap-2 rounded-lg bg-white p-8 text-center shadow-lg">
+          <div className="flex max-w-lg flex-col items-center justify-center gap-2 rounded-2xl bg-white p-8 text-center shadow-lg">
             <MdLock />
             <h2 className="text-2xl font-bold text-gray-800">
               {subjectIsLockedDataLanguage.title(language.data ?? "en")}

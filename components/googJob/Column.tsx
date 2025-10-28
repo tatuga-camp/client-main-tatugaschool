@@ -20,13 +20,13 @@ export default function Column({ id, title, tasks, onAddTask }: ColumnProps) {
   return (
     <div
       ref={setNodeRef}
-      className="bg-gray-200 p-4 rounded-lg w-80 flex flex-col"
+      className="flex w-80 flex-col rounded-2xl bg-gray-200 p-4"
     >
-      <div className="flex justify-between items-center mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <h2 className="font-semibold text-gray-700">{title}</h2>
         {/* <button 
           onClick={onAddTask}
-          className="inline-flex items-center gap-1 bg-white hover:bg-gray-50 text-gray-700 px-3 py-2 rounded-md text-sm font-medium shadow-sm border border-gray-300"
+          className="inline-flex items-center gap-1 bg-white hover:bg-gray-50 text-gray-700 px-3 py-2 rounded-2xl text-sm font-medium shadow-sm border border-gray-300"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
