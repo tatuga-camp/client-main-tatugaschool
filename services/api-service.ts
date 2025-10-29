@@ -1,6 +1,11 @@
 import axios from "axios";
 import { RefreshTokenService } from "./auth";
-import { getRefetchtoken, getAccessToken } from "../utils";
+import {
+  getRefetchtoken,
+  getAccessToken,
+  removeAccessToken,
+  removeRefreshToken,
+} from "../utils";
 
 const createAxiosInstance = () => {
   const instance = axios.create({
@@ -21,6 +26,7 @@ const createAxiosInstance = () => {
       ) {
         console.log("redirect to login 1");
         window.location.href = "/auth/sign-in";
+        return config;
       }
 
       // Redirect to login if access token is expired and the request is not sign-in
@@ -32,6 +38,7 @@ const createAxiosInstance = () => {
       ) {
         console.log("redirect to login 1");
         window.location.href = "/auth/sign-in";
+        return config;
       }
 
       // Add access token to the header if it is found and not expired
@@ -41,7 +48,7 @@ const createAxiosInstance = () => {
 
       return config;
     },
-    (error) => Promise.reject(error)
+    (error) => Promise.reject(error),
   );
 
   instance.interceptors.response.use(
@@ -59,19 +66,20 @@ const createAxiosInstance = () => {
           const { accessToken } = await RefreshTokenService({
             refreshToken: refresh_token,
           });
-          instance.defaults.headers.common[
-            "Authorization"
-          ] = `Bearer ${accessToken}`;
+          instance.defaults.headers.common["Authorization"] =
+            `Bearer ${accessToken}`;
           return instance(originalRequest);
         } catch (refreshError) {
           console.log("refreshError", refreshError);
+          removeAccessToken();
+          removeRefreshToken();
           if (typeof window !== "undefined") {
             window.location.href = "/auth/sign-in";
           }
         }
       }
       return Promise.reject(error);
-    }
+    },
   );
 
   return instance;

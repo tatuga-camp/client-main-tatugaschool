@@ -32,8 +32,7 @@ function DropdownRole({
         onClick={() => {
           setTrigger(true);
         }}
-        className=" flex w-24 justify-center items-center 
-gap-1 transition text-sm  py-1 rounded-md bg-gray-200/50 hover:bg-gray-300/50 "
+        className="rounded-2xll flex w-24 items-center justify-center gap-1 bg-gray-200/50 py-1 text-sm transition hover:bg-gray-300/50"
       >
         {selectRole}
         {!disabled && <GoChevronDown />}
@@ -41,8 +40,7 @@ gap-1 transition text-sm  py-1 rounded-md bg-gray-200/50 hover:bg-gray-300/50 "
       {trigger && (
         <div
           ref={devRef}
-          className="w-60 h-max rounded-md border absolute 
-top-12 z-10 right-10 bg-white drop-shadow"
+          className="absolute right-10 top-12 z-10 h-max w-60 rounded-2xl border bg-white drop-shadow"
         >
           {listRoles.map((role) => (
             <div
@@ -51,7 +49,7 @@ top-12 z-10 right-10 bg-white drop-shadow"
                 setTrigger(false);
               }}
               key={role.title}
-              className="w-full p-2 hover:bg-gray-300/50 cursor-pointer border-b text-sm"
+              className="w-full cursor-pointer border-b p-2 text-sm hover:bg-gray-300/50"
             >
               <h1 className="font-semibold">{role.title}</h1>
               <p className="text-xs text-gray-500">{role.describe}</p>
