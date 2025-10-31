@@ -478,7 +478,7 @@ function StudentLists({ students, classroom }: Props) {
                 showSelect={false}
                 setSelectStudent={(data) => {
                   setTriggerShowSuggestCareer(() => false);
-                  setSelectStudent(data);
+                  setSelectStudent(data as Student);
                 }}
               />
             );

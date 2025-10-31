@@ -266,14 +266,15 @@ function Index({ subjectId }: Props) {
         {selectFooter === "SlidePicker" && randomStudents && (
           <PopupLayout onClose={() => setSelectFooter("EMTY")}>
             <div className="h-full w-full bg-white p-5 md:h-max md:w-max md:rounded-2xl md:border">
-              <SilderPicker<StudentOnSubject>
-                images={randomStudents
+              <SilderPicker
+                students={randomStudents
                   .filter((s) => s.isActive)
                   .map((student, index) => {
                     return {
                       ...student,
                     };
                   })}
+                toast={toast}
                 subjectId={subjectId}
                 setSelectFooter={setSelectFooter}
               />
@@ -283,11 +284,9 @@ function Index({ subjectId }: Props) {
         {selectFooter === "CardPicker" && randomStudents && (
           <PopupLayout onClose={() => setSelectFooter("EMTY")}>
             <StudentCardPicker
-              students={randomStudents.filter((s) => s.isActive)}
-              onNominate={(student) => {
-                console.log("nominated student:", student);
-                setSelectFooter("EMTY");
-              }}
+              toast={toast}
+              onNominate={() => {}}
+              students={studentOnSubjects.data ?? []}
               onClose={() => {
                 setSelectFooter("EMTY");
               }}
@@ -331,7 +330,7 @@ function Index({ subjectId }: Props) {
           <PopupLayout onClose={() => setSelectStudent(null)}>
             <PopUpStudent
               student={selectStudent}
-              setSelectStudent={setSelectStudent}
+              onClose={() => setSelectStudent(null)}
               toast={toast}
             />
           </PopupLayout>

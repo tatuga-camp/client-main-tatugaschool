@@ -26,13 +26,11 @@ import {
 } from "../../services";
 
 type Props = {
-  setSelectStudent: React.Dispatch<
-    React.SetStateAction<StudentOnSubject | null>
-  >;
+  onClose: () => void;
   student: StudentOnSubject;
   toast: React.RefObject<Toast>;
 };
-function PopUpStudent({ student, setSelectStudent, toast }: Props) {
+function PopUpStudent({ student, onClose, toast }: Props) {
   const [isModalOpen, setIsModalOpen] = useState(true);
   const successSound = useSound("/sounds/ding.mp3");
   const failSound = useSound("/sounds/fail.mp3");
@@ -104,7 +102,7 @@ function PopUpStudent({ student, setSelectStudent, toast }: Props) {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setSelectStudent(null);
+    onClose();
     document.body.style.overflow = "auto";
   };
 
