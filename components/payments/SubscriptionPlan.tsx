@@ -50,6 +50,7 @@ const pricingData = [
     Users: 2,
     Users_th: 2,
     "Total Storage Size": "15GB",
+    "Total Storage Size_th": "15GB",
     Support: true,
     Classroom_Limit: "3 classrooms",
     Classroom_Limit_th: "3 ห้องเรียน",
@@ -64,7 +65,9 @@ const pricingData = [
     product_th: "โรงเรียนทาทูก้า พื้นฐาน",
     price: {
       month: "190฿",
+      month_th: "190฿",
       year: "1,390฿",
+      year_th: "1,390฿",
       monthValue: 190,
       yearValue: 1390,
       permember: false,
@@ -75,6 +78,7 @@ const pricingData = [
     Users: 2,
     Users_th: 2,
     "Total Storage Size": "15GB",
+    "Total Storage Size_th": "15GB",
     Support: true,
     Classroom_Limit: "10 classrooms",
     Classroom_Limit_th: "10 ห้องเรียน",
@@ -89,8 +93,10 @@ const pricingData = [
     popular: true,
     price: {
       month: "290฿",
+      month_th: "290฿",
       monthValue: 290,
       year: "2,490฿",
+      year_th: "2,490฿",
       yearValue: 2490,
       permember: false,
     },
@@ -101,6 +107,7 @@ const pricingData = [
     Users_th: 3,
 
     "Total Storage Size": "100GB",
+    "Total Storage Size_th": "100GB",
     Support: true,
     Classroom_Limit: "20 classrooms",
     Classroom_Limit_th: "20 ห้องเรียน",
@@ -115,8 +122,10 @@ const pricingData = [
     product_th: "โรงเรียนทาทูก้า องค์กร",
     price: {
       month: "150฿",
+      month_th: "150฿",
       monthValue: 150,
       year: "1,100฿",
+      year_th: "1,100฿",
       yearValue: 1100,
       permember: true,
     },
@@ -127,6 +136,7 @@ const pricingData = [
     Users: "custom",
     Users_th: "กำหนดเอง",
     "Total Storage Size": "9.77 TB",
+    "Total Storage Size_th": "9.77 TB",
     Support: true,
     Classroom_Limit: "Unlimited",
     Classroom_Limit_th: "ไม่จำกัด",
@@ -135,24 +145,23 @@ const pricingData = [
   },
 ] as const;
 
-const RightIcon = ({ bgcolor }: { bgcolor: string }) => {
+const RightIcon = ({ className }: { className: string }) => {
   return (
     <svg
-      className="mt-1 h-5 w-5"
-      width="56"
-      height="56"
-      viewBox="0 0 56 56"
+      className={className}
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
-        d="M15.8267 26.817L24.3485 36.3763L42.6482 18.1795"
-        stroke={bgcolor}
-        strokeWidth="4"
+        d="M5 13L9 17L19 7"
+        stroke="currentColor"
+        strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <circle cx="28" cy="28" r="26" stroke={bgcolor} strokeWidth="4" />
     </svg>
   );
 };
@@ -165,6 +174,51 @@ type Props = {
     members: number,
   ) => void;
 };
+
+const planColors: {
+  [key: string]: {
+    bg: string;
+    text: string;
+    button: string;
+    popular: string;
+    border: string;
+    rightIcon: string;
+  };
+} = {
+  FREE: {
+    bg: "bg-green-50",
+    text: "text-green-800",
+    button: "bg-green-500 text-white",
+    popular: "bg-green-200",
+    border: "border-green-300",
+    rightIcon: "text-green-500",
+  },
+  BASIC: {
+    bg: "bg-blue-50",
+    text: "text-blue-800",
+    button: "bg-blue-500 text-white",
+    popular: "bg-blue-200",
+    border: "border-blue-300",
+    rightIcon: "text-blue-500",
+  },
+  PREMIUM: {
+    bg: "bg-purple-50",
+    text: "text-purple-800",
+    button: "bg-purple-500 text-white",
+    popular: "bg-purple-200",
+    border: "border-purple-300",
+    rightIcon: "text-purple-500",
+  },
+  ENTERPRISE: {
+    bg: "bg-yellow-50",
+    text: "text-yellow-800",
+    button: "bg-yellow-400 text-black",
+    popular: "bg-yellow-200",
+    border: "border-yellow-300",
+    rightIcon: "text-yellow-500",
+  },
+};
+
 const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
   const subscriptions = useGetListSubscription();
   const [monthprice, setMonthPrice] = useState(true);
@@ -180,9 +234,33 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
     );
   }
 
+  const features = [
+    "Basic Feature",
+    "Users",
+    "Total Storage Size",
+    "Support",
+    "Classroom_Limit",
+    "Subject_Limit",
+  ] as const;
+
+  const calculateMaxSavings = () => {
+    let maxSavings = 0;
+    pricingData.slice(1).forEach((plan) => {
+      const price = plan.price as any;
+      if (price.monthValue > 0 && price.yearValue) {
+        const monthlyTotal = price.monthValue * 12;
+        const savings = ((monthlyTotal - price.yearValue) / monthlyTotal) * 100;
+        if (savings > maxSavings) {
+          maxSavings = savings;
+        }
+      }
+    });
+    return Math.round(maxSavings);
+  };
+
   return (
-    <div className="flex min-h-dvh w-full items-center justify-center">
-      <div className="w-full pb-10">
+    <div className="flex min-h-dvh w-full items-center justify-center font-sans">
+      <div className="mx-auto w-full max-w-7xl px-4 pb-10">
         <div className="flex flex-col items-center py-8 lg:py-14">
           <span className="text-base text-primary-color">
             {SubscriptionDataLanguage.pricing(language.data ?? "en")}
@@ -194,323 +272,252 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
             {SubscriptionDataLanguage.description(language.data ?? "en")}
           </span>
           {/* billing type div */}
-          <div className="m-auto mt-5 flex items-center justify-center space-x-1 rounded-2xl px-2 py-2 md:mt-10">
+          <div className="m-auto mt-5 flex items-center justify-center space-x-1 rounded-2xl bg-gray-200 p-2 md:mt-10">
             <button
               onClick={() => setMonthPrice(true)}
-              className={`w-60 rounded-2xl px-2 py-2 text-[#667085] drop-shadow-md hover:bg-white hover:text-black sm:px-3.5 md:px-1.5 ${
-                monthprice && "border border-[#94a3b8] bg-white text-black"
+              className={`w-40 rounded-2xl px-2 py-2 text-gray-600 transition-colors duration-300 sm:w-60 ${
+                monthprice
+                  ? "bg-white text-black shadow-md"
+                  : "hover:bg-gray-300"
               }`}
             >
               {SubscriptionDataLanguage.monthly(language.data ?? "en")}
             </button>
             <button
               onClick={() => setMonthPrice(false)}
-              className={`ml-1 w-60 rounded-2xl border-[#94a3b8] px-2 py-2 text-[#667085] drop-shadow-md hover:bg-white hover:text-black sm:px-3.5 md:px-1.5 ${!monthprice && "border border-[#94a3b8] bg-white text-black"} `}
+              className={`w-40 rounded-2xl px-2 py-2 text-gray-600 transition-colors duration-300 sm:w-60 ${
+                !monthprice
+                  ? "bg-white text-black shadow-md"
+                  : "hover:bg-gray-300"
+              }`}
             >
               {SubscriptionDataLanguage.annual(language.data ?? "en")}
             </button>
           </div>
+          {!monthprice && (
+            <div className="mt-4 text-center">
+              <span className="rounded-full bg-red-100 px-4 py-2 text-sm font-semibold text-red-600">
+                Save up to {calculateMaxSavings()}%
+              </span>
+            </div>
+          )}
         </div>
-        <div className="mx-auto w-full overflow-auto rounded-xl">
-          <table className="flex w-max min-w-full border-separate border-spacing-5 flex-col p-5 text-start lg:flex-row lg:p-0">
-            {pricingData.map((data, index) => (
-              <tbody
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+          {pricingData.slice(1).map((data, index) => {
+            const colorScheme =
+              planColors[data.mainTitle as keyof typeof planColors] ||
+              planColors.FREE;
+            return (
+              <div
                 key={index}
-                className={
-                  index === 0
-                    ? "hidden lg:block"
-                    : "mb-10 rounded-2xl border-2 lg:mb-0 lg:border-none"
-                }
+                className={`flex transform flex-col rounded-3xl p-6 transition-transform hover:scale-105 ${
+                  colorScheme.bg
+                } ${
+                  data.popular
+                    ? `border-4 ${colorScheme.border}`
+                    : `border-2 ${colorScheme.border}`
+                }`}
               >
-                <tr>
-                  <td>
-                    <div className="h-7 text-xl font-semibold text-[#101828]">
-                      {data.mainTitle}
-                      {data.popular && (
-                        <span className="ml-2 rounded-2xl bg-[#F9F5FF] px-2.5 py-0.5 text-sm font-medium text-primary-color">
-                          {SubscriptionDataLanguage.popular(
-                            language.data ?? "en",
-                          )}
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="h-[50px]">
-                    <div className="w-max">
-                      {(data.mainTitle === "FREE" ||
-                        data.mainTitle === "PREMIUM" ||
-                        data.mainTitle === "BASIC") && (
-                        <span className="text-5xl font-semibold">
-                          {monthprice ? data.price?.month : data.price?.year}
-                        </span>
-                      )}
+                {data.popular && (
+                  <div className={`mb-4 text-center`}>
+                    <span
+                      className={`rounded-full px-4 py-1 text-sm font-semibold ${colorScheme.popular} ${colorScheme.text}`}
+                    >
+                      {SubscriptionDataLanguage.popular(language.data ?? "en")}
+                    </span>
+                  </div>
+                )}
+                <div
+                  className={`text-center text-2xl font-bold ${colorScheme.text}`}
+                >
+                  {language.data === "en" ? data.mainTitle : data.mainTitle_th}
+                </div>
+                <div className="my-4 text-center">
+                  <div className="flex items-baseline justify-center gap-x-2">
+                    <span
+                      className={`text-5xl font-extrabold ${colorScheme.text}`}
+                    >
+                      {data.mainTitle === "FREE" ||
+                      data.mainTitle === "PREMIUM" ||
+                      data.mainTitle === "BASIC"
+                        ? monthprice
+                          ? language.data === "en"
+                            ? data.price?.month
+                            : (data.price as any)?.month_th
+                          : language.data === "en"
+                            ? data.price?.year
+                            : (data.price as any)?.year_th
+                        : null}
                       {data.mainTitle === "ENTERPRISE" && (
-                        <span className="text-5xl font-semibold">
+                        <>
                           {monthprice
                             ? (
-                                data.price?.monthValue * members
+                                (data.price as any)?.monthValue * members
                               ).toLocaleString()
                             : (
-                                data.price?.yearValue * members
+                                (data.price as any)?.yearValue * members
                               ).toLocaleString()}
                           ฿
-                        </span>
-                      )}
-                      {data.price && (
-                        <span className="ml-1 font-normal text-[#475467]">
-                          {data.price.permember
-                            ? monthprice
-                              ? SubscriptionDataLanguage.per_member_month(
-                                  language.data ?? "en",
-                                )
-                              : SubscriptionDataLanguage.per_member_year(
-                                  language.data ?? "en",
-                                )
-                            : monthprice
-                              ? SubscriptionDataLanguage.monthly(
-                                  language.data ?? "en",
-                                )
-                              : SubscriptionDataLanguage.annual(
-                                  language.data ?? "en",
-                                )}
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="h-[50px] lg:h-[70px] xl:h-[50px]">
-                    <span className="text-sm font-normal text-[#475467]">
-                      {data.infoNote}
-                    </span>
-                  </td>
-                </tr>
-                <tr>
-                  {index === 0 ? (
-                    <td className="h-[50px]"></td>
-                  ) : (
-                    <td>
-                      {data.price.permember ? (
-                        <div className="flex w-full items-center justify-center gap-2">
-                          <InputNumber
-                            placeholder="Enter number of members"
-                            min={4}
-                            max={500}
-                            value={members}
-                            onValueChange={(data) => {}}
-                            onChange={(value) => {
-                              if (value > 3 && value <= 500) {
-                                setMembers(value);
-                              } else if (value < 4) {
-                                setMembers(4);
-                              } else if (value > 500) {
-                                setMembers(500);
-                              }
-                            }}
-                          />
-                          <button
-                            onClick={() => {
-                              const prices = subscriptions.data.filter(
-                                (s) => s.title === data.product,
-                              );
-                              const price = prices.find((p) =>
-                                monthprice
-                                  ? p.time === "month"
-                                  : p.time === "year",
-                              );
-
-                              if (price?.priceId) {
-                                onSelectPlan(
-                                  price?.priceId,
-                                  {
-                                    time: monthprice ? "month" : "year",
-                                    title: data.product as string,
-                                    price: monthprice
-                                      ? (data.price.month as string)
-                                      : (data.price.year as string),
-                                  },
-                                  members,
-                                );
-                              }
-                            }}
-                            className={`w-full ${
-                              school.plan === data.mainTitle
-                                ? "second-button border text-black"
-                                : "main-button text-white"
-                            } rounded-2xl py-3 font-semibold`}
-                          >
-                            {school.plan === data.mainTitle
-                              ? "Update Members"
-                              : "Get Started"}
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => {
-                            const prices = subscriptions.data.filter(
-                              (s) => s.title === data.product,
-                            );
-                            const price = prices.find((p) =>
-                              monthprice
-                                ? p.time === "month"
-                                : p.time === "year",
-                            );
-
-                            if (price?.priceId) {
-                              onSelectPlan(
-                                price?.priceId,
-                                {
-                                  time: monthprice ? "month" : "year",
-                                  title: data.product as string,
-                                  price: monthprice
-                                    ? (data.price.month as string)
-                                    : (data.price.year as string),
-                                },
-                                1,
-                              );
-                            }
-                          }}
-                          disabled={school.plan === data.mainTitle}
-                          className={`w-full ${
-                            school.plan === data.mainTitle
-                              ? "second-button border text-black"
-                              : "main-button text-white"
-                          } rounded-2xl py-3 font-semibold`}
-                        >
-                          {school.plan === data.mainTitle
-                            ? "You are on this plan"
-                            : "Get Started"}
-                        </button>
-                      )}
-                    </td>
-                  )}
-                </tr>
-                {/* portion after first title */}
-
-                <tr>
-                  <td
-                    className={
-                      index === 0
-                        ? "w-40"
-                        : "flex h-7 flex-row-reverse justify-between lg:justify-center"
-                    }
-                  >
-                    <span className="text-sm font-semibold text-[#60a5fa]">
-                      {data["Basic Feature"] === true ? (
-                        <>
-                          <RightIcon bgcolor={`#365CCE`} />
                         </>
-                      ) : (
-                        <span className="text-sm font-medium text-[#101828]">
-                          Basic Feature
-                        </span>
                       )}
                     </span>
-                    <span className="lg:hidden">
-                      {pricingData[0]["Basic Feature"]}
-                    </span>
-                  </td>
-                </tr>
-                <tr>
-                  <td
-                    className={
-                      index === 0
-                        ? "h-5 lg:w-60"
-                        : "flex h-6 flex-row-reverse justify-between text-center lg:justify-center"
-                    }
-                  >
-                    <span className="text-sm font-medium text-[#101828]">
-                      {language.data === "en" ? data.Users : data.Users_th}
-                    </span>
-                    <span className="lg:hidden">{pricingData[0]["Users"]}</span>
-                  </td>
-                </tr>
-                <tr>
-                  <td
-                    className={
-                      index === 0
-                        ? "h-5"
-                        : "flex h-7 flex-row-reverse justify-between text-center lg:justify-center"
-                    }
-                  >
-                    <span className="text-sm font-medium text-[#101828]">
-                      {index === 0 && language.data === "en"
-                        ? data["Total Storage Size"]
-                        : index === 0 && language.data === "th"
-                          ? pricingData[0]["Total Storage Size_th"]
-                          : data["Total Storage Size"]}
-                    </span>
-                    <span className="lg:hidden">
-                      {pricingData[0]["Total Storage Size"]}
-                    </span>
-                  </td>
-                </tr>
-                <tr>
-                  <td
-                    className={
-                      index === 0
-                        ? "h-7"
-                        : "flex h-7 flex-row-reverse justify-between lg:justify-center"
-                    }
-                  >
-                    {data.Support === true ? (
-                      <>
-                        <RightIcon bgcolor={`#365CCE`} />
-                      </>
-                    ) : (
-                      <span className="text-sm font-medium text-[#101828]">
-                        {language.data === "en"
-                          ? data.Support
-                          : data.Support_th}
+                    {!monthprice && (data.price as any).monthValue > 0 && (
+                      <span className="text-2xl text-gray-500 line-through">
+                        {data.mainTitle === "ENTERPRISE"
+                          ? (
+                              (data.price as any).monthValue *
+                              members *
+                              12
+                            ).toLocaleString()
+                          : (
+                              (data.price as any).monthValue * 12
+                            ).toLocaleString()}
+                        ฿
                       </span>
                     )}
-                    <span className="lg:hidden">
-                      {pricingData[0]["Support"]}
-                    </span>
-                  </td>
-                </tr>
+                  </div>
+                  <div
+                    className={`text-sm font-medium text-gray-500 ${colorScheme.text}`}
+                  >
+                    {data.price.permember
+                      ? monthprice
+                        ? SubscriptionDataLanguage.per_member_month(
+                            language.data ?? "en",
+                          )
+                        : SubscriptionDataLanguage.per_member_year(
+                            language.data ?? "en",
+                          )
+                      : monthprice
+                        ? SubscriptionDataLanguage.monthly(
+                            language.data ?? "en",
+                          )
+                        : SubscriptionDataLanguage.annual(
+                            language.data ?? "en",
+                          )}
+                  </div>
+                </div>
+                <p className="h-16 text-center text-sm text-gray-600">
+                  {language.data === "en" ? data.infoNote : data.infoNote_th}
+                </p>
 
-                <tr>
-                  <td
-                    className={
-                      index === 0
-                        ? "h-5"
-                        : "flex h-7 flex-row-reverse justify-between text-center lg:justify-center"
-                    }
-                  >
-                    <span className="text-sm font-medium text-[#101828]">
-                      {language.data === "en"
-                        ? data.Classroom_Limit
-                        : data.Classroom_Limit_th}
-                    </span>
-                    <span className="lg:hidden">
-                      {pricingData[0]["Classroom_Limit"]}
-                    </span>
-                  </td>
-                </tr>
-                <tr>
-                  <td
-                    className={
-                      index === 0
-                        ? "h-5"
-                        : "flex h-7 flex-row-reverse justify-between text-center lg:justify-center"
-                    }
-                  >
-                    <span className="text-sm font-medium text-[#101828]">
-                      {language.data === "en"
-                        ? data.Subject_Limit
-                        : data.Subject_Limit_th}
-                    </span>
-                    <span className="lg:hidden">
-                      {pricingData[0]["Subject_Limit"]}
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            ))}
-          </table>
+                <div className="flex-grow">
+                  <ul className="my-6 space-y-3">
+                    {features.map((feature, i) => (
+                      <li key={i} className="flex items-start">
+                        <RightIcon
+                          className={`mr-2 h-6 w-6 flex-shrink-0 ${colorScheme.rightIcon}`}
+                        />
+                        <span className="text-sm text-gray-700">
+                          <strong>
+                            {language.data === "en"
+                              ? pricingData[0][feature]
+                              : (pricingData[0] as any)[`${feature}_th`]}
+                            :
+                          </strong>{" "}
+                          {typeof (data as any)[feature] === "boolean"
+                            ? "Available"
+                            : language.data === "en"
+                              ? (data as any)[feature]
+                              : (data as any)[`${feature}_th`]}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="mt-auto">
+                  {data.price.permember ? (
+                    <div className="flex flex-col gap-2">
+                      <InputNumber
+                        placeholder="Enter number of members"
+                        min={4}
+                        max={500}
+                        value={members}
+                        onValueChange={() => {}}
+                        onChange={(value) => {
+                          if (value > 3 && value <= 500) {
+                            setMembers(value);
+                          } else if (value < 4) {
+                            setMembers(4);
+                          } else if (value > 500) {
+                            setMembers(500);
+                          }
+                        }}
+                      />
+                      <button
+                        onClick={() => {
+                          const prices = subscriptions.data.filter(
+                            (s) => s.title === data.product,
+                          );
+                          const price = prices.find((p) =>
+                            monthprice ? p.time === "month" : p.time === "year",
+                          );
+
+                          if (price?.priceId) {
+                            onSelectPlan(
+                              price?.priceId,
+                              {
+                                time: monthprice ? "month" : "year",
+                                title: data.product as string,
+                                price: monthprice
+                                  ? (data.price.month as string)
+                                  : (data.price.year as string),
+                              },
+                              members,
+                            );
+                          }
+                        }}
+                        className={`w-full transform rounded-2xl border-2 border-black py-3 font-semibold transition-transform hover:scale-105 ${
+                          school.plan === data.mainTitle
+                            ? "bg-white text-black"
+                            : colorScheme.button
+                        }`}
+                      >
+                        {school.plan === data.mainTitle
+                          ? "Update Members"
+                          : "Get Started"}
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        const prices = subscriptions.data.filter(
+                          (s) => s.title === data.product,
+                        );
+                        const price = prices.find((p) =>
+                          monthprice ? p.time === "month" : p.time === "year",
+                        );
+
+                        if (price?.priceId) {
+                          onSelectPlan(
+                            price?.priceId,
+                            {
+                              time: monthprice ? "month" : "year",
+                              title: data.product as string,
+                              price: monthprice
+                                ? (data.price.month as string)
+                                : (data.price.year as string),
+                            },
+                            1,
+                          );
+                        }
+                      }}
+                      disabled={school.plan === data.mainTitle}
+                      className={`w-full transform rounded-2xl border-2 border-black py-3 font-semibold transition-transform hover:scale-105 ${
+                        school.plan === data.mainTitle
+                          ? "cursor-not-allowed bg-gray-300 text-gray-500"
+                          : colorScheme.button
+                      }`}
+                    >
+                      {school.plan === data.mainTitle
+                        ? "You are on this plan"
+                        : "Get Started"}
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
