@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { memo, useEffect, useState } from "react";
+import { memo, RefObject, useEffect, useState } from "react";
 import { AnimationImageItemProps } from "../animation/types/AnimationImageItemProps";
 import AnimationCard from "../animation/AnimationCard";
 import { ProgressSpinner } from "primereact/progressspinner";
@@ -17,27 +17,32 @@ import { ListMenuFooter } from "./FooterSubject";
 import { IoCloseOutline, IoPersonAdd, IoPersonRemove } from "react-icons/io5";
 import { UseQueryResult } from "@tanstack/react-query";
 import { StudentOnSubject } from "../../interfaces";
-interface SilderPickerProps<T> {
-  images: T[];
+import PopupLayout from "../layout/PopupLayout";
+import PopUpStudent from "./PopUpStudent";
+import { Toast } from "primereact/toast";
+interface SilderPickerProps {
+  students: StudentOnSubject[];
   subjectId: string;
   setSelectFooter: React.Dispatch<React.SetStateAction<ListMenuFooter>>;
+  toast: RefObject<Toast>;
 }
 
-const SilderPicker = <T extends AnimationImageItemProps>({
-  images,
+const SilderPicker = ({
+  students,
   subjectId,
   setSelectFooter,
-}: SilderPickerProps<T>) => {
-  const [selectItem, setSelectItem] = useState<T | null>(null);
-  const [speedUp, SetSpeedUp] = useState(1)
+  toast,
+}: SilderPickerProps) => {
+  const [selectItem, setSelectItem] = useState<StudentOnSubject | null>(null);
+  const [speedUp, SetSpeedUp] = useState(1);
   const cheering = useSound("/sounds/cheering.mp3");
   const ding = useSound("/sounds/ding.mp3");
   const studentOnSubjects = useGetStudentOnSubject({
     subjectId: subjectId,
   });
-
+  const [triggerScore, setTriggerScore] = useState(false);
   const [studentRemoveList, setStudentRemoveList] = useState<{ id: string }[]>(
-    localStorageGetRemoveRandomStudents({ subjectId: subjectId }) ?? []
+    localStorageGetRemoveRandomStudents({ subjectId: subjectId }) ?? [],
   );
   const shuffleWithNoAdjacentDuplicates = (arr: any[], count: number) => {
     let selectedImages = arr.slice(0, count);
@@ -64,44 +69,44 @@ const SilderPicker = <T extends AnimationImageItemProps>({
   };
   const [isStarted, setIsStarted] = useState(false);
   const [finsih, setFinsh] = useState(false);
-  const [randomImages, setRandomImages] = useState<T[]>(
-    images.length >= 30
-      ? shuffleWithNoAdjacentDuplicates(images, 30)
+  const [randomImages, setRandomImages] = useState<StudentOnSubject[]>(
+    students.length >= 30
+      ? shuffleWithNoAdjacentDuplicates(students, 30)
       : shuffleWithNoAdjacentDuplicates(
           [
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
+            ...students,
+            ...students,
+            ...students,
+            ...students,
+            ...students,
+            ...students,
+            ...students,
+            ...students,
+            ...students,
+            ...students,
+            ...students,
+            ...students,
+            ...students,
+            ...students,
+            ...students,
+            ...students,
+            ...students,
+            ...students,
+            ...students,
+            ...students,
+            ...students,
+            ...students,
+            ...students,
+            ...students,
+            ...students,
+            ...students,
+            ...students,
+            ...students,
+            ...students,
+            ...students,
           ],
-          30
-        )
+          30,
+        ),
   );
 
   useEffect(() => {
@@ -146,7 +151,7 @@ const SilderPicker = <T extends AnimationImageItemProps>({
                 ...prev,
                 ...prev,
               ],
-              30
+              30,
             );
       setSelectItem(newRandoms[1]);
       return newRandoms;
@@ -234,7 +239,7 @@ const SilderPicker = <T extends AnimationImageItemProps>({
                 ...students,
                 ...students,
               ],
-              30
+              30,
             );
       setSelectItem(newRandoms[1]);
       return newRandoms;
@@ -249,7 +254,8 @@ const SilderPicker = <T extends AnimationImageItemProps>({
 
   const handleRestart = () => {
     const students =
-      studentOnSubjects.data?.filter((s) => s.isActive) ?? ([] as T[]);
+      studentOnSubjects.data?.filter((s) => s.isActive) ??
+      ([] as StudentOnSubject[]);
     if (!students) {
       return;
     }
@@ -257,40 +263,40 @@ const SilderPicker = <T extends AnimationImageItemProps>({
     setRandomImages(() => {
       const newRandoms =
         students.length >= 30
-          ? shuffleWithNoAdjacentDuplicates(students as T[], 30)
+          ? shuffleWithNoAdjacentDuplicates(students as StudentOnSubject[], 30)
           : shuffleWithNoAdjacentDuplicates(
               [
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
-                ...(students as T[]),
+                ...(students as StudentOnSubject[]),
+                ...(students as StudentOnSubject[]),
+                ...(students as StudentOnSubject[]),
+                ...(students as StudentOnSubject[]),
+                ...(students as StudentOnSubject[]),
+                ...(students as StudentOnSubject[]),
+                ...(students as StudentOnSubject[]),
+                ...(students as StudentOnSubject[]),
+                ...(students as StudentOnSubject[]),
+                ...(students as StudentOnSubject[]),
+                ...(students as StudentOnSubject[]),
+                ...(students as StudentOnSubject[]),
+                ...(students as StudentOnSubject[]),
+                ...(students as StudentOnSubject[]),
+                ...(students as StudentOnSubject[]),
+                ...(students as StudentOnSubject[]),
+                ...(students as StudentOnSubject[]),
+                ...(students as StudentOnSubject[]),
+                ...(students as StudentOnSubject[]),
+                ...(students as StudentOnSubject[]),
+                ...(students as StudentOnSubject[]),
+                ...(students as StudentOnSubject[]),
+                ...(students as StudentOnSubject[]),
+                ...(students as StudentOnSubject[]),
+                ...(students as StudentOnSubject[]),
+                ...(students as StudentOnSubject[]),
+                ...(students as StudentOnSubject[]),
+                ...(students as StudentOnSubject[]),
+                ...(students as StudentOnSubject[]),
               ],
-              30
+              30,
             );
       setSelectItem(newRandoms[1]);
       return newRandoms;
@@ -309,162 +315,183 @@ const SilderPicker = <T extends AnimationImageItemProps>({
     setSelectFooter("EMTY");
   };
 
-  const handleFast = () => SetSpeedUp(3)
-  const handleSlow = () => SetSpeedUp(1)
+  const handleFast = () => SetSpeedUp(3);
+  const handleSlow = () => SetSpeedUp(1);
 
   return (
-    <div
-      className="relative w-full h-full flex flex-col lg:flex-row 
-    lg:max-w-none lg:w-full "
-    >
-      <button
-        onClick={handleCloseModal}
-        className="absolute top-0 right-0 p-1 hover:bg-gray-100 rounded-full z-10"
-      >
-        <IoCloseOutline size={24} />
-      </button>
-      <div className="flex flex-col gap-2 w-full lg:w-3/4 pt-10">
-        {finsih && !isStarted && <AnimationFireworkEffect />}
-        {finsih && selectItem ? (
-          <div className="max-w-full lg:max-w-2xl min-w-full lg:min-w-[42rem] flex flex-col items-center justify-center gap-2 h-80 bg-white relative">
-            <h1 className="text-2xl font-bold">Congratulations!</h1>
-            <div className="w-40 h-40 bg-gray-100 relative rounded overflow-hidden">
-              <Image
-                key={`${selectItem?.id}`}
-                src={selectItem?.photo}
-                placeholder="blur"
-                blurDataURL={decodeBlurhashToCanvas(
-                  selectItem?.blurHash ?? defaultBlurHash
-                )}
-                alt={`Scroll item`}
-                fill
-                sizes="(max-width: 768px) 100vw, 33vw"
-                className="object-contain"
-              />
-            </div>
-            <h1 className="text-lg font-semibold">
-              {selectItem?.firstName} {selectItem?.lastName}
-            </h1>
-            <h1 className="text-lg font-normal text-gray-500">
-              Number {selectItem?.number}
-            </h1>
-            <div className="w-full flex justify-center gap-2">
-              <button
-                onClick={() => {
-                  setFinsh(false);
-                  setIsStarted(false);
-                }}
-                className="second-button border flex items-center w-40 h-10 justify-center"
-              >
-                BACK
-              </button>
-              <button
-                onClick={() => handleRemoveAndStartAgain()}
-                className="reject-button flex items-center w-40 h-10 justify-center"
-              >
-                REMOVE
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="h-80 flex flex-col gap-2">
-            {randomImages.length === 0 && (
-              <div className="min-w-full lg:min-w-[42rem] h-full bg-gray-100 relative flex items-center justify-center rounded overflow-hidden">
-                No student found
+    <>
+      {selectItem && triggerScore && (
+        <PopupLayout
+          onClose={() => {
+            setTriggerScore(false);
+          }}
+        >
+          <PopUpStudent
+            student={selectItem}
+            toast={toast}
+            onClose={() => {
+              setTriggerScore(false);
+            }}
+          />
+        </PopupLayout>
+      )}
+      <div className="relative flex h-full w-full flex-col lg:w-full lg:max-w-none lg:flex-row">
+        <button
+          onClick={handleCloseModal}
+          className="absolute right-0 top-0 z-10 rounded-full p-1 hover:bg-gray-100"
+        >
+          <IoCloseOutline size={24} />
+        </button>
+        <div className="flex w-full flex-col gap-2 pt-10 lg:w-3/4">
+          {finsih && selectItem ? (
+            <div className="relative flex h-80 min-w-full max-w-full flex-col items-center justify-center gap-2 bg-white lg:min-w-[42rem] lg:max-w-2xl">
+              <h1 className="text-2xl font-bold">Congratulations!</h1>
+              <div className="relative h-40 w-40 overflow-hidden rounded bg-gray-100">
+                <Image
+                  key={`${selectItem?.id}`}
+                  src={selectItem?.photo}
+                  placeholder="blur"
+                  blurDataURL={decodeBlurhashToCanvas(
+                    selectItem?.blurHash ?? defaultBlurHash,
+                  )}
+                  alt={`Scroll item`}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  className="object-contain"
+                />
               </div>
-            )}
-            {randomImages.length > 0 && (
-              <AnimationCard<T>
-                randomImages={randomImages}
-                onPassPointer={() => {
-                  if (ding) {
-                    if (!ding.paused) {
-                      ding.pause(); // Stop the current audio if it's playing
-                      ding.currentTime = 1; // Reset to the beginning
-                    }
-                    ding
-                      .play()
-                      .catch((error) =>
-                        console.error("Playback error:", error)
-                      );
-                  }
-                }}
-                onStart={(start) => {}}
-                onFinished={() => {
-                  setIsStarted(false);
-                  cheering?.play();
-                  setTimeout(() => {
-                    setFinsh(true);
-                  }, 1000);
-                }}
-                isStarted={isStarted}
-                speedUp={speedUp}
-              />
-            )}
-            <div className="w-full flex gap-2 justify-center z-10">
-              <button
-                disabled={isStarted || randomImages.length === 0}
-                onClick={handleOpenModal}
-                onMouseOver={handleFast}
-                className="main-button flex items-center w-40 h-10 justify-center"
-              >
-                {isStarted ? (
-                  <ProgressSpinner
-                    animationDuration="1s"
-                    style={{ width: "20px" }}
-                    className="w-5 h-5"
-                    strokeWidth="8"
-                  />
-                ) : (
-                  "FAST"
-                )}
-              </button>
-              <button
-                disabled={isStarted || randomImages.length === 0}
-                onClick={handleOpenModal}
-                onMouseOver={handleSlow}
-                className="main-button flex items-center w-40 h-10 justify-center"
-              >
-                {isStarted ? (
-                  <ProgressSpinner
-                    animationDuration="1s"
-                    style={{ width: "20px" }}
-                    className="w-5 h-5"
-                    strokeWidth="8"
-                  />
-                ) : (
-                  "SLOW"
-                )}
-              </button>
-              <button
-                disabled={isStarted}
-                onClick={handleRestart}
-                className="second-button flex border items-center w-40 h-10 justify-center"
-              >
-                {isStarted ? (
-                  <ProgressSpinner
-                    animationDuration="1s"
-                    style={{ width: "20px" }}
-                    className="w-5 h-5"
-                    strokeWidth="8"
-                  />
-                ) : (
-                  "RESTART"
-                )}
-              </button>
+              <h1 className="text-lg font-semibold">
+                {selectItem?.firstName} {selectItem?.lastName}
+              </h1>
+              <h1 className="text-lg font-normal text-gray-500">
+                Number {selectItem?.number}
+              </h1>
+              <div className="flex w-full justify-center gap-2">
+                <button
+                  onClick={() => {
+                    setFinsh(false);
+                    setIsStarted(false);
+                  }}
+                  className="second-button flex h-10 w-40 items-center justify-center border"
+                >
+                  BACK
+                </button>
+                <button
+                  onClick={() => {
+                    setTriggerScore(true);
+                  }}
+                  className="flex h-10 w-40 items-center justify-center rounded-2xl border bg-green-400 text-black"
+                >
+                  SCORE
+                </button>
+                <button
+                  onClick={() => handleRemoveAndStartAgain()}
+                  className="reject-button flex h-10 w-40 items-center justify-center"
+                >
+                  REMOVE
+                </button>
+              </div>
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="flex h-80 flex-col gap-2">
+              {randomImages.length === 0 && (
+                <div className="relative flex h-full min-w-full items-center justify-center overflow-hidden rounded bg-gray-100 lg:min-w-[42rem]">
+                  No student found
+                </div>
+              )}
+              {randomImages.length > 0 && (
+                <AnimationCard<StudentOnSubject>
+                  randomImages={randomImages}
+                  onPassPointer={() => {
+                    if (ding) {
+                      if (!ding.paused) {
+                        ding.pause(); // Stop the current audio if it's playing
+                        ding.currentTime = 1; // Reset to the beginning
+                      }
+                      ding
+                        .play()
+                        .catch((error) =>
+                          console.error("Playback error:", error),
+                        );
+                    }
+                  }}
+                  onStart={(start) => {}}
+                  onFinished={() => {
+                    setIsStarted(false);
+                    cheering?.play();
+                    setTimeout(() => {
+                      setFinsh(true);
+                    }, 1000);
+                  }}
+                  isStarted={isStarted}
+                  speedUp={speedUp}
+                />
+              )}
+              <div className="z-10 flex w-full justify-center gap-2">
+                <button
+                  disabled={isStarted || randomImages.length === 0}
+                  onClick={handleOpenModal}
+                  onMouseOver={handleFast}
+                  className="main-button flex h-10 w-40 items-center justify-center"
+                >
+                  {isStarted ? (
+                    <ProgressSpinner
+                      animationDuration="1s"
+                      style={{ width: "20px" }}
+                      className="h-5 w-5"
+                      strokeWidth="8"
+                    />
+                  ) : (
+                    "FAST"
+                  )}
+                </button>
+                <button
+                  disabled={isStarted || randomImages.length === 0}
+                  onClick={handleOpenModal}
+                  onMouseOver={handleSlow}
+                  className="main-button flex h-10 w-40 items-center justify-center"
+                >
+                  {isStarted ? (
+                    <ProgressSpinner
+                      animationDuration="1s"
+                      style={{ width: "20px" }}
+                      className="h-5 w-5"
+                      strokeWidth="8"
+                    />
+                  ) : (
+                    "SLOW"
+                  )}
+                </button>
+                <button
+                  disabled={isStarted}
+                  onClick={handleRestart}
+                  className="second-button flex h-10 w-40 items-center justify-center border"
+                >
+                  {isStarted ? (
+                    <ProgressSpinner
+                      animationDuration="1s"
+                      style={{ width: "20px" }}
+                      className="h-5 w-5"
+                      strokeWidth="8"
+                    />
+                  ) : (
+                    "RESTART"
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+        <ManageList
+          onClickAdd={(id) => {
+            handleAddStudent(id);
+          }}
+          onClickRemove={(id) => handleRemoveStudent(id)}
+          studentRemoveList={studentRemoveList}
+          studentOnSubjects={studentOnSubjects}
+        />
       </div>
-      <ManageList
-        onClickAdd={(id) => {
-          handleAddStudent(id);
-        }}
-        onClickRemove={(id) => handleRemoveStudent(id)}
-        studentRemoveList={studentRemoveList}
-        studentOnSubjects={studentOnSubjects}
-      />
-    </div>
+    </>
   );
 };
 
@@ -486,12 +513,12 @@ const ManageList = memo(
     onClickAdd,
   }: ManageListProps) => {
     const [selectMenu, setSelectMenu] = useState<"available" | "remove">(
-      "remove"
+      "remove",
     );
     return (
-      <div className="flex items-center w-80 justify-center lg:justify-start">
-        <div className="w-full h-80 lg:border-l pl-5 mt-5 lg:mt-0 max-w-xs sm:max-w-full lg:max-w-none lg:w-full">
-          <div className="w-full h-7 flex border-b border-collapse items-center justify-center gap-1">
+      <div className="flex w-80 items-center justify-center lg:justify-start">
+        <div className="mt-5 h-80 w-full max-w-xs pl-5 sm:max-w-full lg:mt-0 lg:w-full lg:max-w-none lg:border-l">
+          <div className="flex h-7 w-full border-collapse items-center justify-center gap-1 border-b">
             <button
               onClick={() => setSelectMenu("available")}
               className={`text-base ${
@@ -510,11 +537,11 @@ const ManageList = memo(
               Remove List
             </button>
           </div>
-          <ul className="h-72  overflow-y-auto">
+          <ul className="h-72 overflow-y-auto">
             {selectMenu === "remove" &&
               studentRemoveList.map((student, index) => {
                 const image = studentOnSubjects.data?.find(
-                  (img) => img.id === student.id
+                  (img) => img.id === student.id,
                 );
                 if (!image) {
                   return <></>;
@@ -525,8 +552,7 @@ const ManageList = memo(
                     button={
                       <button
                         onClick={() => onClickAdd(student.id)}
-                        className="flex items-center p-1
-                      justify-center success-button"
+                        className="success-button flex items-center justify-center p-1"
                       >
                         <IoPersonAdd />
                       </button>
@@ -550,8 +576,7 @@ const ManageList = memo(
                       button={
                         <button
                           onClick={() => onClickRemove(student.id)}
-                          className="flex items-center p-1
-                         justify-center reject-button"
+                          className="reject-button flex items-center justify-center p-1"
                         >
                           <IoPersonRemove />
                         </button>
@@ -567,17 +592,17 @@ const ManageList = memo(
         </div>
       </div>
     );
-  }
+  },
 );
 
 const StudentCard = memo(
-  <T extends AnimationImageItemProps>({
+  <StudentOnSubject extends AnimationImageItemProps>({
     image,
     index,
     odd,
     button,
   }: {
-    image: T;
+    image: StudentOnSubject;
     index: number;
     odd: boolean;
     button: React.ReactNode;
@@ -585,19 +610,19 @@ const StudentCard = memo(
     return (
       <li
         key={`${image.id}-${index}`}
-        className={`flex justify-between items-center gap-2 p-2 ${
+        className={`flex items-center justify-between gap-2 p-2 ${
           odd ? "bg-white" : "bg-gray-100"
         } `}
       >
         <div className="flex items-center justify-center gap-2">
           {index + 1}
-          <div className="w-10 h-10 relative">
+          <div className="relative h-10 w-10">
             <Image
               src={image.photo}
               alt={`Scroll item ${index}`}
               fill
               sizes="(max-width: 768px) 100vw, 33vw"
-              className="object-cover rounded-full"
+              className="rounded-full object-cover"
             />
           </div>
           <div className="flex flex-col">
@@ -612,7 +637,7 @@ const StudentCard = memo(
         {button}
       </li>
     );
-  }
+  },
 );
 
 StudentCard.displayName = "StudentCard";

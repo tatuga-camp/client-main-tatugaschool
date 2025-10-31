@@ -52,6 +52,7 @@ import {
   getRefetchtoken,
   localStorageGetRemoveRandomStudents,
 } from "../../../utils";
+import StudentCardPicker from "../../../components/subject/StudentCardPicker";
 type Props = {
   subjectId: string;
 };
@@ -265,18 +266,32 @@ function Index({ subjectId }: Props) {
         {selectFooter === "SlidePicker" && randomStudents && (
           <PopupLayout onClose={() => setSelectFooter("EMTY")}>
             <div className="h-full w-full bg-white p-5 md:h-max md:w-max md:rounded-2xl md:border">
-              <SilderPicker<StudentOnSubject>
-                images={randomStudents
+              <SilderPicker
+                students={randomStudents
                   .filter((s) => s.isActive)
                   .map((student, index) => {
                     return {
                       ...student,
                     };
                   })}
+                toast={toast}
                 subjectId={subjectId}
                 setSelectFooter={setSelectFooter}
               />
             </div>
+          </PopupLayout>
+        )}
+        {selectFooter === "CardPicker" && randomStudents && (
+          <PopupLayout onClose={() => setSelectFooter("EMTY")}>
+            <StudentCardPicker
+              toast={toast}
+              onNominate={() => {}}
+              students={studentOnSubjects.data ?? []}
+              onClose={() => {
+                setSelectFooter("EMTY");
+              }}
+              subjectId={subjectId}
+            />
           </PopupLayout>
         )}
         {selectFooter === "Attendance" && (
@@ -315,7 +330,7 @@ function Index({ subjectId }: Props) {
           <PopupLayout onClose={() => setSelectStudent(null)}>
             <PopUpStudent
               student={selectStudent}
-              setSelectStudent={setSelectStudent}
+              onClose={() => setSelectStudent(null)}
               toast={toast}
             />
           </PopupLayout>
@@ -420,6 +435,20 @@ function Index({ subjectId }: Props) {
                       className="hidden"
                     />
                   </label>
+                  <button
+                    onClick={() =>
+                      router.push(
+                        `/subject/${subjectId}/student-picker`,
+                        undefined,
+                        {
+                          shallow: true,
+                        },
+                      )
+                    }
+                    className="flex w-max items-center justify-center gap-1 rounded-2xl bg-white px-2 py-1 text-primary-color hover:bg-primary-color hover:text-white active:scale-110"
+                  >
+                    Student Picker
+                  </button>
                 </div>
                 <div className="mt-2 flex gap-3">
                   {teacherOnSubjects.data ? (

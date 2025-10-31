@@ -327,6 +327,16 @@ export const footerOnSubjectDataLangugae = {
         return "Slide Picker";
     }
   },
+  CardPicker: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Card Picker";
+      case "th":
+        return "การ์ดสุ่มชื่อ";
+      default:
+        return "Card Picker";
+    }
+  },
 };
 
 export const attendanceCheckerDataLanugae = {
