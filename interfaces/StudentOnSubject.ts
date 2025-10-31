@@ -1,7 +1,7 @@
 export interface StudentOnSubject {
   id: string;
-  createAt: Date;
-  updateAt: Date;
+  createAt: string;
+  updateAt: string;
   title: string;
   firstName: string;
   lastName: string;

@@ -52,6 +52,7 @@ import {
   getRefetchtoken,
   localStorageGetRemoveRandomStudents,
 } from "../../../utils";
+import StudentCardPicker from "../../../components/subject/StudentCardPicker";
 type Props = {
   subjectId: string;
 };
@@ -279,6 +280,21 @@ function Index({ subjectId }: Props) {
             </div>
           </PopupLayout>
         )}
+        {selectFooter === "CardPicker" && randomStudents && (
+          <PopupLayout onClose={() => setSelectFooter("EMTY")}>
+            <StudentCardPicker
+              students={randomStudents.filter((s) => s.isActive)}
+              onNominate={(student) => {
+                console.log("nominated student:", student);
+                setSelectFooter("EMTY");
+              }}
+              onClose={() => {
+                setSelectFooter("EMTY");
+              }}
+              subjectId={subjectId}
+            />
+          </PopupLayout>
+        )}
         {selectFooter === "Attendance" && (
           <PopupLayout onClose={() => setSelectFooter("EMTY")}>
             <AttendanceChecker
@@ -420,6 +436,20 @@ function Index({ subjectId }: Props) {
                       className="hidden"
                     />
                   </label>
+                  <button
+                    onClick={() =>
+                      router.push(
+                        `/subject/${subjectId}/student-picker`,
+                        undefined,
+                        {
+                          shallow: true,
+                        },
+                      )
+                    }
+                    className="flex w-max items-center justify-center gap-1 rounded-2xl bg-white px-2 py-1 text-primary-color hover:bg-primary-color hover:text-white active:scale-110"
+                  >
+                    Student Picker
+                  </button>
                 </div>
                 <div className="mt-2 flex gap-3">
                   {teacherOnSubjects.data ? (

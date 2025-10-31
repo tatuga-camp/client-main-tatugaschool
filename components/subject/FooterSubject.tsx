@@ -4,6 +4,7 @@ import { FaRandom, FaStopwatch20, FaWpforms } from "react-icons/fa";
 import { TbArrowsRandom } from "react-icons/tb";
 import { footerOnSubjectDataLangugae } from "../../data/languages";
 import { useGetLanguage } from "../../react-query";
+import { GiCardPick } from "react-icons/gi";
 
 const menuFooters = [
   {
@@ -45,6 +46,13 @@ const menuFooters = [
     inactiveClasses:
       "bg-indigo-100 text-indigo-700 hover:bg-indigo-200 active:bg-indigo-500 active:text-white",
     activeClasses: "bg-indigo-500 text-white",
+  },
+  {
+    title: "CardPicker",
+    icon: <GiCardPick />,
+    inactiveClasses:
+      "bg-red-100 text-red-700 hover:bg-red-200 active:bg-red-500 active:text-white",
+    activeClasses: "bg-red-500 text-white",
   },
 ] as const;
 
