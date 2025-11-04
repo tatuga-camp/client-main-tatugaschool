@@ -192,7 +192,7 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
           </button>
         </div>
         <div
-          className={`${triggerHideStudentList ? "hidden" : "w-full"} overflow-auto`}
+          className={`${triggerHideStudentList ? "hidden" : "w-full"} overflow-auto pb-40`}
         >
           <table className="w-max min-w-full">
             <thead>
