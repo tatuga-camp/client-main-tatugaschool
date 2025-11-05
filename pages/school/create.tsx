@@ -7,7 +7,7 @@ import { getRefetchtoken } from "../../utils";
 const CreateSchoolPage = () => {
   return (
     <DefaultLayout>
-      <div className=" flex items-center mt-20">
+      <div className="mt-20 flex items-center">
         <CreateSchoolComponent />
       </div>
     </DefaultLayout>
@@ -15,25 +15,3 @@ const CreateSchoolPage = () => {
 };
 
 export default CreateSchoolPage;
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  try {
-    const { refresh_token } = getRefetchtoken(ctx);
-    if (!refresh_token) {
-      throw new Error("Token not found");
-    }
-    const accessToken = await RefreshTokenService({
-      refreshToken: refresh_token,
-    });
-
-    return {
-      props: {},
-    };
-  } catch (error) {
-    return {
-      redirect: {
-        destination: "/auth/sign-in",
-        permanent: false,
-      },
-    };
-  }
-};

@@ -494,34 +494,22 @@ function Index({
 
 export default Index;
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  try {
-    const params = ctx.params;
+  const params = ctx.params;
 
-    if (!params?.subjectId || !params?.assignmentId) {
-      return {
-        notFound: true,
-      };
-    }
-    const { refresh_token } = getRefetchtoken(ctx);
-    if (!refresh_token) {
-      throw new Error("Token not found");
-    }
-    const accessToken = await RefreshTokenService({
-      refreshToken: refresh_token,
-    });
-
+  if (!params?.subjectId || !params?.assignmentId) {
     return {
-      props: {
-        subjectId: params.subjectId,
-        assignmentId: params.assignmentId,
-      },
-    };
-  } catch (error) {
-    return {
-      redirect: {
-        destination: "/auth/sign-in",
-        permanent: false,
-      },
+      notFound: true,
     };
   }
+  const { refresh_token } = getRefetchtoken(ctx);
+  if (!refresh_token) {
+    throw new Error("Token not found");
+  }
+
+  return {
+    props: {
+      subjectId: params.subjectId,
+      assignmentId: params.assignmentId,
+    },
+  };
 };

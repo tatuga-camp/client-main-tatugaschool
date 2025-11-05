@@ -1,24 +1,19 @@
 import { GetServerSideProps } from "next";
-import React from "react";
-import { getRefetchtoken, timeAgo, validateMongodbId } from "../../utils";
-import {
-  GetClassByIdService,
-  RefreshTokenService,
-  ResponseGetClassByIdService,
-} from "../../services";
-import { useGetClassroom, useGetLanguage } from "../../react-query";
 import Head from "next/head";
-import ClassroomLayout from "../../components/layout/ClassroomLayout";
-import { ProgressSpinner } from "primereact/progressspinner";
-import { MenuClassroom } from "../../data";
 import { useRouter } from "next/router";
-import { FaUsers } from "react-icons/fa6";
-import { CiCircleInfo } from "react-icons/ci";
-import StudentSection from "../../components/classroom/StudentLists";
-import ClassroomSetting from "../../components/classroom/ClassroomSetting";
+import { ProgressSpinner } from "primereact/progressspinner";
 import { Toast } from "primereact/toast";
+import React from "react";
+import { CiCircleInfo } from "react-icons/ci";
+import { FaUsers } from "react-icons/fa6";
+import ClassroomSetting from "../../components/classroom/ClassroomSetting";
 import GradeSummaryReport from "../../components/classroom/GradeSummaryReport";
+import StudentSection from "../../components/classroom/StudentLists";
+import ClassroomLayout from "../../components/layout/ClassroomLayout";
+import { MenuClassroom } from "../../data";
 import { classroomDataLanguage } from "../../data/languages";
+import { useGetClassroom, useGetLanguage } from "../../react-query";
+import { getRefetchtoken, timeAgo, validateMongodbId } from "../../utils";
 
 function Index({ classroomId }: { classroomId: string }) {
   const toast = React.useRef<Toast>(null);
@@ -158,39 +153,26 @@ function Index({ classroomId }: { classroomId: string }) {
 
 export default Index;
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  try {
-    const params = ctx.params;
+  const params = ctx.params;
 
-    if (!params?.classroomId) {
-      return {
-        notFound: true,
-      };
-    }
-    if (!validateMongodbId(params.classroomId as string)) {
-      return {
-        notFound: true,
-      };
-    }
-    const { refresh_token } = getRefetchtoken(ctx);
-    if (!refresh_token) {
-      throw new Error("Token not found");
-    }
-    const accessToken = await RefreshTokenService({
-      refreshToken: refresh_token,
-    });
-
+  if (!params?.classroomId) {
     return {
-      props: {
-        classroomId: params.classroomId,
-      },
-    };
-  } catch (error) {
-    console.log("error", error);
-    return {
-      redirect: {
-        destination: "/auth/sign-in",
-        permanent: false,
-      },
+      notFound: true,
     };
   }
+  if (!validateMongodbId(params.classroomId as string)) {
+    return {
+      notFound: true,
+    };
+  }
+  const { refresh_token } = getRefetchtoken(ctx);
+  if (!refresh_token) {
+    throw new Error("Token not found");
+  }
+
+  return {
+    props: {
+      classroomId: params.classroomId,
+    },
+  };
 };

@@ -498,33 +498,21 @@ function Index({ subjectId }: Props) {
 export default Index;
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  try {
-    const params = ctx.params;
+  const params = ctx.params;
 
-    if (!params?.subjectId) {
-      return {
-        notFound: true,
-      };
-    }
-    const { refresh_token } = getRefetchtoken(ctx);
-    if (!refresh_token) {
-      throw new Error("Token not found");
-    }
-    const accessToken = await RefreshTokenService({
-      refreshToken: refresh_token,
-    });
-
+  if (!params?.subjectId) {
     return {
-      props: {
-        subjectId: params.subjectId,
-      },
-    };
-  } catch (error) {
-    return {
-      redirect: {
-        destination: "/auth/sign-in",
-        permanent: false,
-      },
+      notFound: true,
     };
   }
+  const { refresh_token } = getRefetchtoken(ctx);
+  if (!refresh_token) {
+    throw new Error("Token not found");
+  }
+
+  return {
+    props: {
+      subjectId: params.subjectId,
+    },
+  };
 };

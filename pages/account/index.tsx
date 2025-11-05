@@ -23,26 +23,3 @@ const AccountPage = () => {
 };
 
 export default AccountPage;
-
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  try {
-    const { refresh_token } = getRefetchtoken(ctx);
-    if (!refresh_token) {
-      throw new Error("Token not found");
-    }
-    const accessToken = await RefreshTokenService({
-      refreshToken: refresh_token,
-    });
-
-    return {
-      props: {},
-    };
-  } catch (error) {
-    return {
-      redirect: {
-        destination: "/auth/sign-in",
-        permanent: false,
-      },
-    };
-  }
-};
