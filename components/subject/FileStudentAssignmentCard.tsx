@@ -13,6 +13,7 @@ import { LuLink } from "react-icons/lu";
 import { useDeleteFileStudentOnAssignment } from "../../react-query";
 import Image from "next/image";
 import { defaultBlurHash } from "../../data";
+import { decodeBlurhashToCanvas } from "../../utils";
 
 type Props = {
   file: FileOnStudentOnAssignment;
@@ -190,9 +191,11 @@ function FileCard({ file, onEditImage }: Props) {
       {fileType === "image" && (
         <div className="relative h-96 w-full">
           <Image
-            blurDataURL={defaultBlurHash}
+            blurDataURL={decodeBlurhashToCanvas(defaultBlurHash)}
             placeholder="blur"
             src={file.body}
+            quality={60}
+            sizes="(max-width: 768px) 100vw, 33vw"
             className="object-contain"
             fill
             alt={fileName ?? "Image"}

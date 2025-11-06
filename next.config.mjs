@@ -17,15 +17,35 @@ const nextConfig = {
             to: path.join(__dirname, "public/assets/libs/tinymce"),
           },
         ],
-      })
+      }),
     );
 
     return config;
   },
   images: {
     remotePatterns: [
-      { protocol: "http", hostname: "*" },
-      { protocol: "https", hostname: "*" },
+      {
+        protocol: "https",
+        hostname: "cdn.sanity.io",
+      },
+      {
+        protocol: "https",
+        hostname: "n14jpqkv.api.sanity.io",
+      },
+      {
+        protocol: "https",
+        hostname: "storage.googleapis.com",
+      },
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "storage.tatugaschool.com",
+        port: "",
+        pathname: "/**",
+      },
     ],
   },
 };
