@@ -22,9 +22,11 @@ function GroupSetting({ subjectId, data, onClose, toast }: GroupSettingProps) {
   const [groupOnSubjectData, setGroupOnSubjectData] = useState<{
     title?: string | undefined;
     description?: string | undefined;
+    numberOfGroups: number;
   }>({
     title: data?.title,
     description: data?.description,
+    numberOfGroups: 4,
   });
 
   const handleCreateGroup = async (e: React.FormEvent) => {
@@ -37,6 +39,7 @@ function GroupSetting({ subjectId, data, onClose, toast }: GroupSettingProps) {
         title: groupOnSubjectData.title,
         description: groupOnSubjectData.description,
         subjectId: subjectId,
+        numberOfGroups: groupOnSubjectData.numberOfGroups,
       });
 
       toast.current?.show({
@@ -145,6 +148,27 @@ function GroupSetting({ subjectId, data, onClose, toast }: GroupSettingProps) {
             className="main-input grow resize-none"
           />
         </label>
+        {!data && (
+          <label className="flex w-full grow flex-col">
+            <span className="text-sm">numbers of groups</span>
+            <input
+              required
+              type="number"
+              min={1}
+              max={20}
+              value={groupOnSubjectData.numberOfGroups}
+              onChange={(e) => {
+                setGroupOnSubjectData((prev) => {
+                  return {
+                    ...prev,
+                    numberOfGroups: Number(e.target.value),
+                  };
+                });
+              }}
+              className="main-input grow resize-none"
+            />
+          </label>
+        )}
       </main>
       <footer className="flex items-center justify-end gap-2 border-t pt-3">
         <button

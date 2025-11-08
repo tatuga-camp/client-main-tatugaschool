@@ -53,6 +53,7 @@ export type RequestCreateGroupOnSubjectService = {
   subjectId: string;
   title: string;
   description: string;
+  numberOfGroups: number;
 };
 
 export async function CreateGroupOnSubjectService(
