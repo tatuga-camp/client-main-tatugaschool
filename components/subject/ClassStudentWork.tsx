@@ -57,6 +57,7 @@ import AssignmentText from "./AssignmentText";
 import CommentSection from "./CommentSection";
 import FileStudentAssignmentCard from "./FileStudentAssignmentCard";
 import StatusAssignmentButton from "./StatusAssignmentButton";
+import { useRouter } from "next/router";
 
 type Props = {
   assignmentId: string;
@@ -65,6 +66,7 @@ type Props = {
 
 function ClassStudentWork({ assignmentId, onScroll }: Props) {
   const language = useGetLanguage();
+  const { studentOnAssignmentId } = useRouter().query;
   const studentOnAssignments = useGetStudentOnAssignments({
     assignmentId,
     refetchInterval: 5000,
@@ -157,6 +159,16 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
     },
     [],
   );
+
+  useEffect(() => {
+    if (studentOnAssignmentId && studentOnAssignments.data) {
+      const targetStudent = studentOnAssignments.data.find(
+        (s) => s.id === studentOnAssignmentId,
+      );
+      if (!targetStudent) return;
+      handleSelectStudentWork(targetStudent);
+    }
+  }, [studentOnAssignments.isSuccess]);
   return (
     <main className="flex h-max w-full">
       <section

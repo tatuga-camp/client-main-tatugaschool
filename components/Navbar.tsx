@@ -1,6 +1,6 @@
-import React, { ReactNode, useRef } from "react";
+import React, { ReactNode, useEffect, useRef, useState } from "react";
 import ButtonProfile from "./button/ButtonProfile";
-import { useGetUser } from "../react-query";
+import { useGetNotifications, useGetUser } from "../react-query";
 import { QueryClient, UseQueryResult } from "@tanstack/react-query";
 import { IoMenu } from "react-icons/io5";
 import Link from "next/link";
@@ -9,6 +9,9 @@ import { defaultCanvas, menuSubjectList } from "../data";
 import Sidebar from "./Sidebar";
 import LanguageSelect from "./LanguageSelect";
 import { MdHelp } from "react-icons/md";
+import useClickOutside from "../hook/useClickOutside";
+import { IoMdNotifications } from "react-icons/io";
+import Notification from "./common/Notification";
 
 type Props = {
   schoolId: string;
@@ -27,6 +30,29 @@ function Navbar({
   menuLists,
 }: Props) {
   const user = useGetUser();
+
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [animateBell, setAnimateBell] = useState(false);
+  const notificationRef = useRef<HTMLDivElement>(null);
+  const prevUnreadCountRef = useRef<number>(0);
+
+  // Fetch notifications for badge and animation
+  const { data: notifications } = useGetNotifications();
+
+  const unreadCount = notifications?.filter((n) => !n.isRead).length || 0;
+
+  // Effect for animation
+  useEffect(() => {
+    if (unreadCount > prevUnreadCountRef.current) {
+      setAnimateBell(true);
+      setTimeout(() => setAnimateBell(false), 500); // Duration of shake animation
+    }
+    prevUnreadCountRef.current = unreadCount;
+  }, [unreadCount]);
+
+  useClickOutside(notificationRef, () => {
+    setIsNotificationOpen(false);
+  });
   return (
     <>
       <div className="flex h-20 flex-row items-center justify-between gap-4 border-b-2 border-black bg-white p-4 text-white">
@@ -72,6 +98,26 @@ function Navbar({
             >
               <MdHelp className="text-3xl" />
             </a>
+            {/* --- Notification Button --- */}
+            <div className="relative" ref={notificationRef}>
+              <button
+                onClick={() => setIsNotificationOpen((prev) => !prev)}
+                className={`rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-800 ${
+                  animateBell ? "animate-shake" : ""
+                }`}
+              >
+                <IoMdNotifications size={28} />
+                {unreadCount > 0 && (
+                  <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-xs font-bold text-white">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+              {isNotificationOpen && (
+                <Notification onClose={() => setIsNotificationOpen(false)} />
+              )}
+            </div>
+            {/* --- End Notification Button --- */}
             <LanguageSelect />
             <ButtonProfile user={user} />
           </div>

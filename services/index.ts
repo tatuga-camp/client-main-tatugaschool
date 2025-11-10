@@ -28,3 +28,4 @@ export * from "./group-on-subject";
 export * from "./unit-on-group";
 export * from "./student-on-group";
 export * from "./teaching-material";
+export * from "./notification";

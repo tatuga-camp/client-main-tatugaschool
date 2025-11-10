@@ -16,3 +16,4 @@ export * from "./language";
 export * from "./groupOnSubject";
 export * from "./studentOnSubject";
 export * from "./teachingMaterial";
+export * from "./notification";
