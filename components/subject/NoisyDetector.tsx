@@ -76,12 +76,28 @@ const NoisyDetector = ({ onClose }: NoisyDetectorProps) => {
 
   const startListening = async () => {
     try {
+      // Check support
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert("Your browser does not support microphone access.");
+        return;
+      }
+
+      // 1. Create AudioContext immediately within the user gesture (important for iOS)
+      const AudioContextClass =
+        window.AudioContext || (window as any).webkitAudioContext;
+      const audioCtx = new AudioContextClass();
+      audioContextRef.current = audioCtx;
+
+      // 2. Resume context if suspended (iOS Safari often starts suspended)
+      if (audioCtx.state === "suspended") {
+        await audioCtx.resume();
+      }
+
+      // 3. Request permission explicitly via getUserMedia
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      audioContextRef.current = new (window.AudioContext ||
-        (window as any).webkitAudioContext)();
-      analyserRef.current = audioContextRef.current.createAnalyser();
-      sourceRef.current =
-        audioContextRef.current.createMediaStreamSource(stream);
+
+      analyserRef.current = audioCtx.createAnalyser();
+      sourceRef.current = audioCtx.createMediaStreamSource(stream);
 
       // Configure analyser for frequency data
       analyserRef.current.fftSize = 256; // Results in 128 frequency bins
@@ -96,6 +112,12 @@ const NoisyDetector = ({ onClose }: NoisyDetectorProps) => {
     } catch (err) {
       console.error("Error accessing microphone:", err);
       alert("Could not access microphone. Please allow permissions.");
+
+      // Clean up if permission denied or error occurred
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+        audioContextRef.current = null;
+      }
     }
   };
 
@@ -159,7 +181,7 @@ const NoisyDetector = ({ onClose }: NoisyDetectorProps) => {
         // Only re-trigger if not currently frozen/alerting
         const peakPercent = Math.round((maxVal / 255) * 100);
         triggerAlert(peakPercent);
-        frozenUntil.current = now + 1000 * 5; // Freeze for 2 seconds
+        frozenUntil.current = now + 1000 * 5; // Freeze for 5 seconds
       }
       setIsAlerting(true);
     } else if (now > frozenUntil.current) {
