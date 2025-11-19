@@ -5,6 +5,7 @@ import { TbArrowsRandom } from "react-icons/tb";
 import { footerOnSubjectDataLangugae } from "../../data/languages";
 import { useGetLanguage } from "../../react-query";
 import { GiCardPick } from "react-icons/gi";
+import { MdHeadphones } from "react-icons/md";
 
 const menuFooters = [
   {
@@ -53,6 +54,14 @@ const menuFooters = [
     inactiveClasses:
       "bg-red-100 text-red-700 hover:bg-red-200 active:bg-red-500 active:text-white",
     activeClasses: "bg-red-500 text-white",
+  },
+  {
+    title: "NoisyDetector",
+    icon: <MdHeadphones />,
+    // Blue
+    inactiveClasses:
+      "bg-blue-100 text-blue-700 hover:bg-blue-200 active:bg-blue-500 active:text-white",
+    activeClasses: "bg-blue-500 text-white",
   },
 ] as const;
 

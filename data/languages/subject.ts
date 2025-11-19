@@ -287,6 +287,16 @@ export const footerOnSubjectDataLangugae = {
         return "Stop Watch";
     }
   },
+  NoisyDetector: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Noisy Detector";
+      case "th":
+        return "ตรวจจับเสียงดัง";
+      default:
+        return "Noisy Detector";
+    }
+  },
   Attendance: (language: Language) => {
     switch (language) {
       case "en":

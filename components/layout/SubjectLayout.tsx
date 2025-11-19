@@ -51,7 +51,7 @@ function SubjectLayout({
   }, [subject.isSuccess]);
   return (
     <section className="min-h-screen bg-background-color font-Anuphan">
-      <div ref={navbarRef} className="sticky top-0 z-50">
+      <div ref={navbarRef} className="sticky top-0 z-40">
         {subject.data && (
           <Navbar
             menuLists={menuSubjectList({ schoolId: subject.data.schoolId })}
