@@ -58,6 +58,7 @@ const NoisyDetector = ({ onClose }: NoisyDetectorProps) => {
   const analyserRef = useRef<AnalyserNode | null>(null);
   const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
   const animationRef = useRef<number | null>(null);
+  const updateRef = useRef<() => void>();
 
   // Using more bins for "many bars" effect
   const [audioData, setAudioData] = useState<number[]>(new Array(64).fill(0));
@@ -90,7 +91,8 @@ const NoisyDetector = ({ onClose }: NoisyDetectorProps) => {
       sourceRef.current.connect(analyserRef.current);
 
       setIsListening(true);
-      update();
+      // Start the loop
+      requestAnimationFrame(() => updateRef.current?.());
     } catch (err) {
       console.error("Error accessing microphone:", err);
       alert("Could not access microphone. Please allow permissions.");
@@ -155,8 +157,9 @@ const NoisyDetector = ({ onClose }: NoisyDetectorProps) => {
       // Trigger Alert
       if (now > frozenUntil.current) {
         // Only re-trigger if not currently frozen/alerting
-        triggerAlert(maxVal);
-        frozenUntil.current = now + 2000; // Freeze for 2 seconds
+        const peakPercent = Math.round((maxVal / 255) * 100);
+        triggerAlert(peakPercent);
+        frozenUntil.current = now + 1000 * 5; // Freeze for 2 seconds
       }
       setIsAlerting(true);
     } else if (now > frozenUntil.current) {
@@ -169,14 +172,18 @@ const NoisyDetector = ({ onClose }: NoisyDetectorProps) => {
       setCurrentVolume(volume);
 
       // Prepare chart data
-      // We might want to ignore the very high frequencies which are often empty for voice
-      // Just taking the first 64 bins is usually enough for a good visualization of speech
       const relevantData = Array.from(dataArray).slice(0, 64);
       setAudioData(relevantData);
     }
 
-    animationRef.current = requestAnimationFrame(update);
+    // Schedule next frame using the ref to ensure fresh closure
+    animationRef.current = requestAnimationFrame(() => updateRef.current?.());
   };
+
+  // Keep updateRef current
+  useEffect(() => {
+    updateRef.current = update;
+  });
 
   const triggerAlert = (volume: number) => {
     const now = Date.now();
@@ -191,7 +198,7 @@ const NoisyDetector = ({ onClose }: NoisyDetectorProps) => {
         volume: volume,
         limit: noiseLimit,
       };
-      setAlerts((prev) => [newAlert, ...prev]);
+      setAlerts((prev) => [newAlert, ...prev].slice(0, 50)); // Limit history to 50 items
     }
   };
 
@@ -244,7 +251,7 @@ const NoisyDetector = ({ onClose }: NoisyDetectorProps) => {
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex h-screen w-screen flex-col items-center justify-between p-6 transition-colors duration-300 ${isAlerting ? "bg-red-100" : "bg-white"}`}
+      className={`fixed inset-0 z-50 flex h-screen w-screen flex-col items-center justify-between p-6 transition-colors duration-300 ${isAlerting ? "bg-red-400" : "bg-white"}`}
     >
       {/* Header */}
       <div className="flex w-full items-center justify-between px-4">
