@@ -506,10 +506,6 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
       notFound: true,
     };
   }
-  const { refresh_token } = getRefetchtoken(ctx);
-  if (!refresh_token) {
-    throw new Error("Token not found");
-  }
 
   return {
     props: {

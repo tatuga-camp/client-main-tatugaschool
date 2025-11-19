@@ -8,9 +8,9 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import ImageNextJs from "next/image";
-import React, { useEffect, useRef, useState, useCallback } from "react"; // Added useCallback
-import CanvasDraw from "react-canvas-draw";
+import prase from "html-react-parser";
+import { getStroke } from "perfect-freehand";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   BiSave,
   BiSolidEraser,
@@ -20,10 +20,8 @@ import {
 import { GrRevert } from "react-icons/gr";
 import { IoMdClose } from "react-icons/io";
 import { MdOutlineFormatClear, MdTextFields } from "react-icons/md";
-import { defaultCanvas } from "../../data";
 import { useEnterKey } from "../../hook";
 import { urlToFile } from "../../utils";
-import prase from "html-react-parser";
 
 interface ITextObject {
   id: number;
@@ -32,6 +30,13 @@ interface ITextObject {
   y: number;
   color: string;
   fontSize: number;
+}
+
+interface Stroke {
+  points: number[][];
+  color: string;
+  size: number;
+  isEraser: boolean;
 }
 
 type ModeType = "draw" | "mouse" | "text-edit" | "eraser";
@@ -91,9 +96,7 @@ type Props = {
   onSave: (data: { file: File; id: string }) => void;
 };
 const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
-  const canvasRef = useRef<
-    CanvasDraw & { getDataURL: () => string } & { canvas: { drawing: any } }
-  >(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const [image, setImage] = useState<string | null>(null);
   const imageRef = useRef<HTMLImageElement>(null);
@@ -138,6 +141,10 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
 
   const MIN_SCALE = 0.1;
   const MAX_SCALE = 3;
+
+  // State for perfect-freehand drawing
+  const [strokes, setStrokes] = useState<Stroke[]>([]);
+  const [currentStroke, setCurrentStroke] = useState<Stroke | null>(null);
 
   const switchToDrawMode = (newMode: "draw" | "eraser") => {
     if (
@@ -407,21 +414,6 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
   };
 
   useEffect(() => {
-    const canvasDraw = canvasRef.current;
-    if (!canvasDraw) return;
-    const drawingCanvas = canvasDraw.canvas.drawing;
-    if (!drawingCanvas) return;
-    const ctx = drawingCanvas.getContext("2d");
-    if (!ctx) return;
-
-    if (mode === "eraser") {
-      ctx.globalCompositeOperation = "destination-out";
-    } else {
-      ctx.globalCompositeOperation = "source-over";
-    }
-  }, [mode, image]);
-
-  useEffect(() => {
     handleShowImage();
   }, []); // imageURL is a prop, if it can change, add it to dependency array. Assuming it's initial.
 
@@ -437,7 +429,7 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
         img.onload = () => {
           setCanvasWidth(img.width);
           setCanvasHeight(img.height);
-          setImage(imageUrl); // This will trigger the other useEffect for eraser mode if image changes
+          setImage(imageUrl);
         };
         img.src = imageUrl;
       };
@@ -514,8 +506,8 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
       setTextObjects(lastState);
       setTextObjectsHistory(textObjectsHistory.slice(0, -1));
     } else {
-      // Only undo drawing if no text history to undo
-      canvasRef.current?.undo();
+      // Undo drawing
+      setStrokes((prev) => prev.slice(0, -1));
     }
   };
 
@@ -546,7 +538,7 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
     if (!ctx) return;
 
     const processSave = () => {
-      // Draw drawing from react-canvas-draw
+      // Draw drawing from canvas
       const drawingImage = new Image();
       drawingImage.onload = () => {
         ctx.drawImage(drawingImage, 0, 0);
@@ -573,7 +565,7 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
       };
       drawingImage.onerror = () =>
         console.error("Error loading drawing image for saving.");
-      drawingImage.src = canvasRef.current?.getDataURL() || "";
+      drawingImage.src = canvasRef.current?.toDataURL() || "";
     };
 
     // Draw background image first if it exists
@@ -620,6 +612,81 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
     }
   });
 
+  // Handle pointer events for drawing
+  const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (isCanvasDisabled) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    const point = [e.nativeEvent.offsetX, e.nativeEvent.offsetY, e.pressure];
+    setCurrentStroke({
+      points: [point],
+      color: brushColor,
+      size: brushRadius * 2,
+      isEraser: mode === "eraser",
+    });
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (isCanvasDisabled || !currentStroke) return;
+
+    const point = [e.nativeEvent.offsetX, e.nativeEvent.offsetY, e.pressure];
+    setCurrentStroke((prev) => {
+      if (!prev) return null;
+      return { ...prev, points: [...prev.points, point] };
+    });
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (currentStroke) {
+      setStrokes((prev) => [...prev, currentStroke]);
+      setCurrentStroke(null);
+    }
+  };
+
+  // Render strokes to canvas
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const renderStroke = (stroke: Stroke) => {
+      const outlinePoints = getStroke(stroke.points, {
+        size: stroke.size,
+        thinning: 0.5,
+        smoothing: 0.5,
+        streamline: 0.5,
+      });
+
+      ctx.beginPath();
+      if (outlinePoints.length > 0) {
+        ctx.moveTo(outlinePoints[0][0], outlinePoints[0][1]);
+        for (let i = 1; i < outlinePoints.length; i++) {
+          ctx.lineTo(outlinePoints[i][0], outlinePoints[i][1]);
+        }
+        ctx.closePath();
+      }
+
+      if (stroke.isEraser) {
+        ctx.globalCompositeOperation = "destination-out";
+      } else {
+        ctx.globalCompositeOperation = "source-over";
+        ctx.fillStyle = stroke.color;
+      }
+      ctx.fill();
+    };
+
+    strokes.forEach(renderStroke);
+    if (currentStroke) {
+      renderStroke(currentStroke);
+    }
+
+    ctx.globalCompositeOperation = "source-over";
+  }, [strokes, currentStroke, canvasWidth, canvasHeight]);
+
   return (
     <div className="flex h-full w-full flex-col items-center bg-gray-200">
       {loadingImage && (
@@ -630,16 +697,6 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
       {/* Top Bar */}
       <div className="gradient-bg flex w-full items-center justify-between gap-2 border-b px-5 py-2 pl-10">
         <div className="flex h-full items-center justify-center gap-2">
-          <div className="relative h-10 w-10 overflow-hidden rounded-2xl ring-1 ring-white transition duration-150 hover:scale-105 active:scale-110">
-            <ImageNextJs
-              src="/favicon.ico" // Replace with your actual logo
-              placeholder="blur"
-              blurDataURL={defaultCanvas}
-              fill
-              sizes="(max-width: 768px) 100vw, 33vw"
-              alt="logo tatuga school"
-            />
-          </div>
           <div className="h-5/6 w-[0.5px] bg-white" />
           <button
             type="button"
@@ -739,7 +796,7 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
             <button
               title="Clear All Drawing"
               type="button"
-              onClick={() => canvasRef.current?.clear()}
+              onClick={() => setStrokes([])}
               className={`relative flex h-7 w-7 items-center justify-center rounded-2xl border bg-gray-100 text-black hover:bg-sky-200 active:scale-105`}
             >
               <div className="absolute h-5 w-[1.5px] -rotate-45 bg-black" />
@@ -910,17 +967,21 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
                 style={{ pointerEvents: "none" }} // Image should not intercept mouse events
               />
             )}
-            <CanvasDraw
+
+            <canvas
               ref={canvasRef}
-              canvasWidth={canvasWidth}
-              canvasHeight={canvasHeight}
-              brushColor={brushColor}
-              brushRadius={brushRadius}
-              hideGrid={true}
-              lazyRadius={0}
-              disabled={isCanvasDisabled}
-              className={mode === "mouse" ? "cursor-grab" : ""} // visual cue for mouse mode
+              width={canvasWidth}
+              height={canvasHeight}
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              onPointerLeave={handlePointerUp}
+              className={`${mode === "mouse" ? "cursor-grab" : ""} absolute left-0 top-0 touch-none`}
+              style={{
+                pointerEvents: isCanvasDisabled ? "none" : "auto",
+              }}
             />
+
             {textObjects
               .filter((text) => text.id !== currentTextId) // Don't render active text as DraggableText, it's in textarea
               .map((obj) => (

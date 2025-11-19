@@ -259,7 +259,7 @@ function ClasswordView({
               optionLabel="title"
             />
           </label>
-          <label className="flex w-full flex-col bg-gray-50">
+          <label className="flex w-full flex-col">
             <span className="text-base font-medium">
               {classworkViewDataLanguage.assignAt(language.data ?? "en")}
             </span>
