@@ -29,7 +29,6 @@ const createAxiosInstance = () => {
         return config;
       }
 
-      // Redirect to login if access token is expired and the request is not sign-in
       if (
         refresh_token &&
         isTokenExpired(refresh_token) &&
@@ -65,7 +64,6 @@ const createAxiosInstance = () => {
           const { accessToken } = await RefreshTokenService({
             refreshToken: refresh_token,
           });
-          originalRequest.headers["Authorization"] = `Bearer ${accessToken}`;
 
           instance.defaults.headers.common["Authorization"] =
             `Bearer ${accessToken}`;
