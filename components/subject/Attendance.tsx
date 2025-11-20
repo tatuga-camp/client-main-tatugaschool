@@ -329,8 +329,8 @@ function DisplayAttendanceTable({
       >
         <table className="table-fixed bg-white md:min-w-[640px]">
           <thead className="">
-            <tr className="sticky top-0 z-40 border-b bg-white">
-              <th className="sticky left-0 z-40 bg-white text-sm font-semibold">
+            <tr className="sticky top-0 z-30 border-b bg-white">
+              <th className="sticky left-0 z-30 bg-white text-sm font-semibold">
                 <div className="flex w-48 items-center justify-start gap-2 md:w-96">
                   <FaUser />
                   Name
@@ -458,7 +458,7 @@ function DisplayAttendanceTable({
                     key={student.id}
                   >
                     <td
-                      className={`sticky left-0 z-30 text-sm font-semibold ${odd ? "bg-gray-100" : "bg-white"} group-hover:bg-gray-200`}
+                      className={`sticky left-0 z-20 text-sm font-semibold ${odd ? "bg-gray-100" : "bg-white"} group-hover:bg-gray-200`}
                     >
                       <div className="flex h-14 items-center gap-2">
                         <div className="relative h-8 w-8 overflow-hidden rounded-2xl ring-1 md:h-10 md:w-10">

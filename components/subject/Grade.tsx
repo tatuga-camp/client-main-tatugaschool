@@ -215,8 +215,8 @@ function Grade({
         <div className="relative mt-5 h-[30rem] w-full overflow-auto rounded-2xl bg-white 2xl:h-[40rem]">
           <table className="table-fixed bg-white md:min-w-[640px]">
             <thead className="">
-              <tr className="sticky top-0 z-40 border-b bg-white">
-                <th className="sticky left-0 z-40 bg-white text-sm font-semibold">
+              <tr className="sticky top-0 z-30 border-b bg-white">
+                <th className="sticky left-0 z-30 bg-white text-sm font-semibold">
                   <div className="flex w-48 items-center justify-start gap-2 pl-4 md:w-96">
                     <FaUser />
                     Name
@@ -395,7 +395,7 @@ function Grade({
                       key={student.id}
                     >
                       <td
-                        className={`sticky left-0 z-30 text-sm font-semibold ${
+                        className={`sticky left-0 z-20 text-sm font-semibold ${
                           odd ? "bg-gray-100" : "bg-white"
                         } group-hover:bg-gray-200`}
                       >
