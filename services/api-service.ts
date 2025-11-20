@@ -41,11 +41,10 @@ const createAxiosInstance = () => {
         return config;
       }
 
-      // Add access token to the header if it is found and not expired
-      if (access_token && !isTokenExpired(access_token)) {
+      // Add access token to the header
+      if (access_token) {
         config.headers["Authorization"] = `Bearer ${access_token}`;
       }
-
       return config;
     },
     (error) => Promise.reject(error),
@@ -66,6 +65,8 @@ const createAxiosInstance = () => {
           const { accessToken } = await RefreshTokenService({
             refreshToken: refresh_token,
           });
+          originalRequest.headers["Authorization"] = `Bearer ${accessToken}`;
+
           instance.defaults.headers.common["Authorization"] =
             `Bearer ${accessToken}`;
           return instance(originalRequest);
@@ -86,15 +87,24 @@ const createAxiosInstance = () => {
 };
 
 const isTokenExpired = (token: string) => {
+  if (!token) return true;
   try {
-    if (!token) return true;
     const [, payload] = token.split(".");
-    const decodedPayload = JSON.parse(window.atob(payload));
+    // Use Buffer for server-side or window.atob for client-side
+    const decodedString =
+      typeof window !== "undefined"
+        ? window.atob(payload)
+        : Buffer.from(payload, "base64").toString();
+
+    const decodedPayload = JSON.parse(decodedString);
     const exp = decodedPayload.exp;
+
+    // Optional: Add a 10-second buffer to prevent clock skew issues
+    // if you really want to keep the client-side check.
     return Math.floor(Date.now() / 1000) >= exp;
   } catch (error) {
-    console.log("error", error);
+    console.log("error decoding token", error);
+    return true; // Assume expired if we can't decode
   }
 };
-
 export default createAxiosInstance;
