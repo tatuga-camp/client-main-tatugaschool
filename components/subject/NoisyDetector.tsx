@@ -82,19 +82,21 @@ const NoisyDetector = ({ onClose }: NoisyDetectorProps) => {
         return;
       }
 
-      // 1. Create AudioContext immediately within the user gesture (important for iOS)
+      // 1. Request permission explicitly via getUserMedia
+      // We do this FIRST to ensure we are as close as possible to the user gesture
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+      // 2. Create AudioContext immediately
       const AudioContextClass =
         window.AudioContext || (window as any).webkitAudioContext;
       const audioCtx = new AudioContextClass();
       audioContextRef.current = audioCtx;
 
-      // 2. Resume context if suspended (iOS Safari often starts suspended)
+      // 3. Resume context if suspended (iOS Safari often starts suspended)
+      // Note: If the user just granted permission in step 1, that interaction counts as a gesture.
       if (audioCtx.state === "suspended") {
         await audioCtx.resume();
       }
-
-      // 3. Request permission explicitly via getUserMedia
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
       analyserRef.current = audioCtx.createAnalyser();
       sourceRef.current = audioCtx.createMediaStreamSource(stream);
