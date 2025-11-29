@@ -53,6 +53,7 @@ import {
   localStorageGetRemoveRandomStudents,
 } from "../../../utils";
 import StudentCardPicker from "../../../components/subject/StudentCardPicker";
+import NoisyDetector from "../../../components/subject/NoisyDetector";
 type Props = {
   subjectId: string;
 };
@@ -241,6 +242,95 @@ function Index({ subjectId }: Props) {
       <Head>
         <title>{title}</title>
       </Head>
+      <Toast ref={toast} />
+      {triggerStopWatch && <StopWatch onClose={handleCloseStopWatch} />}
+
+      {selectFooter === "AttendanceQRCode" && (
+        <PopupLayout onClose={() => setSelectFooter("EMTY")}>
+          <AttendanceQRcode
+            toast={toast}
+            onClose={() => setSelectFooter("EMTY")}
+            subjectId={subjectId}
+          />
+        </PopupLayout>
+      )}
+      {selectFooter === "NoisyDetector" && (
+        <PopupLayout onClose={() => setSelectFooter("EMTY")}>
+          <NoisyDetector onClose={() => setSelectFooter("EMTY")} />
+        </PopupLayout>
+      )}
+      {selectFooter === "SlidePicker" && randomStudents && (
+        <PopupLayout onClose={() => setSelectFooter("EMTY")}>
+          <div className="h-full w-full bg-white p-5 md:h-max md:w-max md:rounded-2xl md:border">
+            <SilderPicker
+              students={randomStudents
+                .filter((s) => s.isActive)
+                .map((student, index) => {
+                  return {
+                    ...student,
+                  };
+                })}
+              toast={toast}
+              subjectId={subjectId}
+              setSelectFooter={setSelectFooter}
+            />
+          </div>
+        </PopupLayout>
+      )}
+      {selectFooter === "CardPicker" && randomStudents && (
+        <PopupLayout onClose={() => setSelectFooter("EMTY")}>
+          <StudentCardPicker
+            toast={toast}
+            onNominate={() => {}}
+            students={studentOnSubjects.data ?? []}
+            onClose={() => {
+              setSelectFooter("EMTY");
+            }}
+            subjectId={subjectId}
+          />
+        </PopupLayout>
+      )}
+      {selectFooter === "Attendance" && (
+        <PopupLayout onClose={() => setSelectFooter("EMTY")}>
+          <AttendanceChecker
+            toast={toast}
+            subjectId={subjectId}
+            onClose={() => {
+              document.body.style.overflow = "auto";
+              setSelectFooter("EMTY");
+            }}
+          />
+        </PopupLayout>
+      )}
+      {subject.data && triggerQRCode && (
+        <PopupLayout onClose={() => setTriggerQRCode(false)}>
+          <QRCode
+            url={`${process.env.NEXT_PUBLIC_STUDENT_CLIENT_URL}/?subject_code=${subject.data?.code}`}
+            code={subject.data?.code}
+            setTriggerQRCode={setTriggerQRCode}
+          />
+        </PopupLayout>
+      )}
+      {triggerInviteTeacher && subject.data && (
+        <PopupLayout onClose={() => setTriggerInviteTeacher(false)}>
+          <div className="rounded-2xl border">
+            <InviteTeacher
+              schoolId={subject.data?.schoolId}
+              setTrigger={setTriggerInviteTeacher}
+              subjectId={subjectId}
+            />
+          </div>
+        </PopupLayout>
+      )}
+      {selectStudent && (
+        <PopupLayout onClose={() => setSelectStudent(null)}>
+          <PopUpStudent
+            student={selectStudent}
+            onClose={() => setSelectStudent(null)}
+            toast={toast}
+          />
+        </PopupLayout>
+      )}
       <SubjectLayout
         setSelectFooter={setSelectFooter}
         selectFooter={selectFooter}
@@ -250,91 +340,6 @@ function Index({ subjectId }: Props) {
         }
         selectMenu={selectMenu}
       >
-        <Toast ref={toast} />
-        {triggerStopWatch && <StopWatch onClose={handleCloseStopWatch} />}
-
-        {selectFooter === "AttendanceQRCode" && (
-          <PopupLayout onClose={() => setSelectFooter("EMTY")}>
-            <AttendanceQRcode
-              toast={toast}
-              onClose={() => setSelectFooter("EMTY")}
-              subjectId={subjectId}
-            />
-          </PopupLayout>
-        )}
-
-        {selectFooter === "SlidePicker" && randomStudents && (
-          <PopupLayout onClose={() => setSelectFooter("EMTY")}>
-            <div className="h-full w-full bg-white p-5 md:h-max md:w-max md:rounded-2xl md:border">
-              <SilderPicker
-                students={randomStudents
-                  .filter((s) => s.isActive)
-                  .map((student, index) => {
-                    return {
-                      ...student,
-                    };
-                  })}
-                toast={toast}
-                subjectId={subjectId}
-                setSelectFooter={setSelectFooter}
-              />
-            </div>
-          </PopupLayout>
-        )}
-        {selectFooter === "CardPicker" && randomStudents && (
-          <PopupLayout onClose={() => setSelectFooter("EMTY")}>
-            <StudentCardPicker
-              toast={toast}
-              onNominate={() => {}}
-              students={studentOnSubjects.data ?? []}
-              onClose={() => {
-                setSelectFooter("EMTY");
-              }}
-              subjectId={subjectId}
-            />
-          </PopupLayout>
-        )}
-        {selectFooter === "Attendance" && (
-          <PopupLayout onClose={() => setSelectFooter("EMTY")}>
-            <AttendanceChecker
-              toast={toast}
-              subjectId={subjectId}
-              onClose={() => {
-                document.body.style.overflow = "auto";
-                setSelectFooter("EMTY");
-              }}
-            />
-          </PopupLayout>
-        )}
-        {subject.data && triggerQRCode && (
-          <PopupLayout onClose={() => setTriggerQRCode(false)}>
-            <QRCode
-              url={`${process.env.NEXT_PUBLIC_STUDENT_CLIENT_URL}/?subject_code=${subject.data?.code}`}
-              code={subject.data?.code}
-              setTriggerQRCode={setTriggerQRCode}
-            />
-          </PopupLayout>
-        )}
-        {triggerInviteTeacher && subject.data && (
-          <PopupLayout onClose={() => setTriggerInviteTeacher(false)}>
-            <div className="rounded-2xl border">
-              <InviteTeacher
-                schoolId={subject.data?.schoolId}
-                setTrigger={setTriggerInviteTeacher}
-                subjectId={subjectId}
-              />
-            </div>
-          </PopupLayout>
-        )}
-        {selectStudent && (
-          <PopupLayout onClose={() => setSelectStudent(null)}>
-            <PopUpStudent
-              student={selectStudent}
-              onClose={() => setSelectStudent(null)}
-              toast={toast}
-            />
-          </PopupLayout>
-        )}
         <header className="mx-auto flex w-full items-center justify-center p-5 pb-10 md:max-w-screen-md lg:py-10 xl:max-w-screen-lg">
           <section
             className={`relative z-30 flex h-60 w-full flex-col-reverse justify-between overflow-hidden p-5 shadow-inner md:flex-row ${

@@ -5,6 +5,7 @@ import {
   getAccessToken,
   removeAccessToken,
   removeRefreshToken,
+  setAccessToken,
 } from "../utils";
 
 const createAxiosInstance = () => {
@@ -13,39 +14,59 @@ const createAxiosInstance = () => {
     timeout: 1000 * 60 * 10,
     withCredentials: true,
   });
+
   instance.interceptors.request.use(
-    (config) => {
-      const { access_token } = getAccessToken();
-      const { refresh_token } = getRefetchtoken();
+    async (config) => {
       const request = config.url;
-      // Redirect to login if access token is not found and the request is not sign-in
-      if (
-        (!access_token || !refresh_token) &&
-        typeof window !== "undefined" &&
-        !request?.startsWith("/v1/auth/")
-      ) {
-        console.log("redirect to login 1");
-        window.location.href = "/auth/sign-in";
+
+      // Bypass auth service endpoints
+      if (request?.startsWith("/v1/auth/")) {
         return config;
       }
 
-      // Redirect to login if access token is expired and the request is not sign-in
+      const { refresh_token } = getRefetchtoken();
+
+      // Check if refresh token is missing or expired
       if (
-        refresh_token &&
-        isTokenExpired(refresh_token) &&
-        typeof window !== "undefined" &&
-        !request?.startsWith("/v1/auth/")
+        !refresh_token ||
+        (typeof window !== "undefined" && isTokenExpired(refresh_token))
       ) {
-        console.log("redirect to login 1");
-        window.location.href = "/auth/sign-in";
-        return config;
+        console.log("Redirect to login: Refresh token missing or expired");
+        removeAccessToken();
+        removeRefreshToken();
+        if (typeof window !== "undefined") {
+          window.location.href = "/auth/sign-in";
+        }
+        throw new axios.Cancel("Session expired");
       }
 
-      // Add access token to the header if it is found and not expired
-      if (access_token && !isTokenExpired(access_token)) {
+      let { access_token } = getAccessToken();
+
+      // Check if access token is missing or expired
+      if (!access_token || isTokenExpired(access_token)) {
+        try {
+          const { accessToken } = await RefreshTokenService({
+            refreshToken: refresh_token,
+          });
+
+          // Set the new access token in cookie
+          setAccessToken({ access_token: accessToken });
+          access_token = accessToken;
+        } catch (error) {
+          console.log("Refresh token failed", error);
+          removeAccessToken();
+          removeRefreshToken();
+          if (typeof window !== "undefined") {
+            window.location.href = "/auth/sign-in";
+          }
+          throw error;
+        }
+      }
+
+      // Add access token to the header
+      if (access_token) {
         config.headers["Authorization"] = `Bearer ${access_token}`;
       }
-
       return config;
     },
     (error) => Promise.reject(error),
@@ -55,19 +76,23 @@ const createAxiosInstance = () => {
     (response) => response,
     async (error) => {
       const originalRequest = error.config;
-      if (error.response.status === 401 && !originalRequest._retry) {
+      if (error.response?.status === 401 && !originalRequest._retry) {
         originalRequest._retry = true;
         const { refresh_token } = getRefetchtoken();
         if (!refresh_token) {
-          // redirect to login
           throw new Error("Token not found");
         }
         try {
           const { accessToken } = await RefreshTokenService({
             refreshToken: refresh_token,
           });
+
+          setAccessToken({ access_token: accessToken });
+
           instance.defaults.headers.common["Authorization"] =
             `Bearer ${accessToken}`;
+          originalRequest.headers["Authorization"] = `Bearer ${accessToken}`;
+
           return instance(originalRequest);
         } catch (refreshError) {
           console.log("refreshError", refreshError);
@@ -86,15 +111,24 @@ const createAxiosInstance = () => {
 };
 
 const isTokenExpired = (token: string) => {
+  if (!token) return true;
   try {
-    if (!token) return true;
     const [, payload] = token.split(".");
-    const decodedPayload = JSON.parse(window.atob(payload));
+    // Use Buffer for server-side or window.atob for client-side
+    const decodedString =
+      typeof window !== "undefined"
+        ? window.atob(payload)
+        : Buffer.from(payload, "base64").toString();
+
+    const decodedPayload = JSON.parse(decodedString);
     const exp = decodedPayload.exp;
+
+    // Optional: Add a 10-second buffer to prevent clock skew issues
+    // if you really want to keep the client-side check.
     return Math.floor(Date.now() / 1000) >= exp;
   } catch (error) {
-    console.log("error", error);
+    console.log("error decoding token", error);
+    return true; // Assume expired if we can't decode
   }
 };
-
 export default createAxiosInstance;

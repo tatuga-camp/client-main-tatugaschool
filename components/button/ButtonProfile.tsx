@@ -20,23 +20,30 @@ function ButtonProfile({ user }: Props) {
   const handleLogout = () => {
     setLoading(true);
     queryClient.clear();
-    destroyCookie({}, "access_token", {
-      path: "/",
-      secure: true,
-      sameSite: "None",
-      domain:
-        process.env.NEXT_PUBLIC_COOKIE === "production"
-          ? ".tatugaschool.com"
-          : "localhost",
-    });
-    destroyCookie({}, "refresh_token", {
-      path: "/",
-      secure: true,
-      sameSite: "None",
-      domain:
-        process.env.NEXT_PUBLIC_COOKIE === "production"
-          ? ".tatugaschool.com"
-          : "localhost",
+    // 1. Get all cookies as a raw string
+    const cookies = document.cookie.split(";");
+
+    // 2. Define the specific domains causing the duplication
+    const possibleDomains = [
+      undefined, // 1. Default (current domain/host)
+      "app.tatugaschool.com", // 2. The subdomain
+      ".tatugaschool.com", // 3. The wildcard parent (The likely duplicate)
+      "tatugaschool.com", // 4. The root without dot (just in case)
+    ];
+
+    // 3. Loop through EVERY cookie found
+    cookies.forEach((cookie) => {
+      const eqPos = cookie.indexOf("=");
+      const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+
+      // 4. Try to delete that cookie name on EVERY possible domain
+      possibleDomains.forEach((domain) => {
+        // Construct the domain string if a domain is provided
+        const domainString = domain ? `; domain=${domain}` : "";
+
+        // Force expire
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/${domainString}`;
+      });
     });
     router.push("/auth/sign-in");
   };

@@ -29,8 +29,13 @@ function MyApp({ Component, pageProps }: AppProps) {
             refetchOnWindowFocus: false, // Disables automatic refetching when browser window is focused.
             retry: (failureCount, error) => {
               let errorResponse = error as unknown as ErrorMessages;
+              const errorObj = error as any;
               // Don't retry for certain error responses
-              if (errorResponse?.statusCode === 401) {
+              if (
+                errorResponse?.statusCode === 401 ||
+                errorObj?.message === "Session expired" ||
+                errorObj?.message === "Token not found"
+              ) {
                 return false;
               }
               // Retry others just once
