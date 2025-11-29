@@ -43,8 +43,6 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "storage.tatugaschool.com",
-        port: "",
-        pathname: "/**",
       },
       {
         protocol: "https",
