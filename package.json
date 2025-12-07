@@ -29,7 +29,7 @@
     "html-react-parser": "^5.1.18",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.1",
-    "next": "16.0.5",
+    "next": "16.0.7",
     "next-nprogress-bar": "^2.3.13",
     "nookies": "^2.5.2",
     "pdfjs-dist": "^5.3.31",
