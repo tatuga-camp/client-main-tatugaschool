@@ -108,3 +108,23 @@ export async function DeleteFileOnStudentAssignmentService(
     throw error?.response?.data;
   }
 }
+
+export type RequestDownloadAllFileOnStudentAssignmentService = {
+  assignmentId: string;
+};
+
+export async function DownloadAllFileOnStudentAssignmentService(
+  input: RequestDownloadAllFileOnStudentAssignmentService,
+): Promise<Blob> {
+  try {
+    const response = await axiosInstance({
+      method: "POST",
+      url: `/v1/file-on-student-assignments/download-all`,
+      data: { ...input },
+      responseType: "blob",
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data;
+  }
+}

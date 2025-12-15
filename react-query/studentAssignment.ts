@@ -8,7 +8,17 @@ import {
   ResponseGetStudentOnAssignmentsService,
   UpdateFileOnStudentAssignmentService,
   UpdateStudentOnAssignmentService,
+  DownloadAllFileOnStudentAssignmentService,
+  RequestDownloadAllFileOnStudentAssignmentService,
 } from "../services";
+
+export function useDownloadAllFileOnStudentAssignment() {
+  return useMutation({
+    mutationKey: ["download-all-file-student-assignments"],
+    mutationFn: (input: RequestDownloadAllFileOnStudentAssignmentService) =>
+      DownloadAllFileOnStudentAssignmentService(input),
+  });
+}
 
 export function useGetStudentOnAssignments({
   assignmentId,
@@ -37,7 +47,7 @@ export function useUpdateStudentOnAssignments() {
       queryClient.setQueryData(
         ["student-assignments", { assignmentId: data.assignmentId }],
         (
-          oldData: ResponseGetStudentOnAssignmentsService
+          oldData: ResponseGetStudentOnAssignmentsService,
         ): ResponseGetStudentOnAssignmentsService => {
           return oldData?.map((prevStudentAssignment) => {
             if (prevStudentAssignment.id === data.id) {
@@ -46,7 +56,7 @@ export function useUpdateStudentOnAssignments() {
               return prevStudentAssignment;
             }
           });
-        }
+        },
       );
     },
   });
@@ -65,7 +75,7 @@ export function useUpdateFileStudentOnAssignment() {
           return oldData?.map((prevStudentAssignment) => {
             if (prevStudentAssignment.id === data.studentOnAssignmentId) {
               const filterOutUpdate = prevStudentAssignment.files.map((f) =>
-                f.id === data.id ? data : f
+                f.id === data.id ? data : f,
               );
               return {
                 ...prevStudentAssignment,
@@ -75,7 +85,7 @@ export function useUpdateFileStudentOnAssignment() {
               return prevStudentAssignment;
             }
           });
-        }
+        },
       );
     },
   });
@@ -94,7 +104,7 @@ export function useDeleteFileStudentOnAssignment() {
           return oldData?.map((prevStudentAssignment) => {
             if (prevStudentAssignment.id === data.studentOnAssignmentId) {
               const filterOutDelete = prevStudentAssignment.files.filter(
-                (f) => f.id !== data.id
+                (f) => f.id !== data.id,
               );
               return {
                 ...prevStudentAssignment,
@@ -104,7 +114,7 @@ export function useDeleteFileStudentOnAssignment() {
               return prevStudentAssignment;
             }
           });
-        }
+        },
       );
     },
   });

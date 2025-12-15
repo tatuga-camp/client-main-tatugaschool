@@ -2,7 +2,7 @@ import Image from "next/image";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { Toast } from "primereact/toast";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { BiBookOpen, BiComment } from "react-icons/bi";
+import { BiBookOpen, BiComment, BiDownload } from "react-icons/bi";
 import {
   BsEyeFill,
   BsLayoutSidebarInset,
@@ -37,6 +37,7 @@ import {
 } from "../../interfaces";
 import {
   useDeleteFileStudentOnAssignment,
+  useDownloadAllFileOnStudentAssignment,
   useGetAssignment,
   useGetLanguage,
   useGetStudentOnAssignments,
@@ -84,6 +85,33 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
   const assignment = useGetAssignment({
     id: assignmentId,
   });
+  const downloadAllFiles = useDownloadAllFileOnStudentAssignment();
+
+  const handleDownloadAllFiles = async () => {
+    try {
+      const archive = await downloadAllFiles.mutateAsync({
+        assignmentId: assignmentId,
+      });
+      const url = window.URL.createObjectURL(archive);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "assignments.zip");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.log(error);
+      let result = error as ErrorMessages;
+      Swal.fire({
+        title: result.error ? result.error : "Something Went Wrong",
+        text: result.message.toString(),
+        footer: result.statusCode
+          ? "Code Error: " + result.statusCode?.toString()
+          : "",
+        icon: "error",
+      });
+    }
+  };
 
   const [selectStudentWork, setSelectStudentWork] = React.useState<
     (StudentOnAssignment & { files: FileOnStudentOnAssignment[] }) | null
@@ -178,14 +206,34 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
       >
         <div className="flex w-full items-center justify-between gap-2 text-xl">
           {!triggerHideStudentList && (
-            <label className="relative h-10 w-full">
-              <MdSearch className="absolute bottom-0 left-2 top-0 m-auto" />
-              <input
-                placeholder="Seach Student Name"
-                onChange={(e) => handleOnFilterStudent(e.target.value)}
-                className="main-input h-10 w-full pl-10 text-sm"
-              />
-            </label>
+            <div className="flex w-full items-center gap-2">
+              <label className="relative h-10 w-full">
+                <MdSearch className="absolute bottom-0 left-2 top-0 m-auto" />
+                <input
+                  placeholder="Seach Student Name"
+                  onChange={(e) => handleOnFilterStudent(e.target.value)}
+                  className="main-input h-10 w-full pl-10 text-sm"
+                />
+              </label>
+              <button
+                title="Download All Files"
+                onClick={handleDownloadAllFiles}
+                disabled={downloadAllFiles.isPending}
+                className="second-button flex h-10 w-10 items-center justify-center overflow-hidden rounded-full p-2 text-xl hover:bg-gray-200"
+                type="button"
+              >
+                {downloadAllFiles.isPending ? (
+                  <ProgressSpinner
+                    animationDuration="1s"
+                    style={{ width: "20px" }}
+                    className="h-5 w-5"
+                    strokeWidth="8"
+                  />
+                ) : (
+                  <BiDownload />
+                )}
+              </button>
+            </div>
           )}
           <button
             type="button"
