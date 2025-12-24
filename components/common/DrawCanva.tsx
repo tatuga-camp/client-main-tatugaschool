@@ -97,6 +97,7 @@ type Props = {
 };
 const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const tempCanvasRef = useRef<HTMLCanvasElement>(null);
 
   const [image, setImage] = useState<string | null>(null);
   const imageRef = useRef<HTMLImageElement>(null);
@@ -119,6 +120,11 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
 
   const [canvasWidth, setCanvasWidth] = useState<number>(1000);
   const [canvasHeight, setCanvasHeight] = useState<number>(1000);
+  const [renderScale, setRenderScale] = useState<number>(1);
+  const [originalSize, setOriginalSize] = useState<{
+    width: number;
+    height: number;
+  }>({ width: 1000, height: 1000 });
   const [preDrawView, setPreDrawView] = useState<{
     scale: number;
     x: number;
@@ -304,6 +310,7 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
       setStartPanTouch(null);
     }
   };
+
   useEffect(() => {
     const currentContainer = containerRef.current;
     if (!currentContainer) return;
@@ -427,8 +434,18 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
         const imageUrl = e.target?.result as string;
         const img = new Image();
         img.onload = () => {
-          setCanvasWidth(img.width);
-          setCanvasHeight(img.height);
+          const MAX_DIMENSION = 1500;
+          let scale = 1;
+          if (img.width > MAX_DIMENSION || img.height > MAX_DIMENSION) {
+            scale = Math.min(
+              MAX_DIMENSION / img.width,
+              MAX_DIMENSION / img.height,
+            );
+          }
+          setRenderScale(scale);
+          setOriginalSize({ width: img.width, height: img.height });
+          setCanvasWidth(img.width * scale);
+          setCanvasHeight(img.height * scale);
           setImage(imageUrl);
         };
         img.src = imageUrl;
@@ -529,59 +546,62 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
   };
 
   const handleSave = () => {
-    if (!canvasRef.current) return;
-
     const finalCanvas = document.createElement("canvas");
-    finalCanvas.width = canvasWidth;
-    finalCanvas.height = canvasHeight;
+    finalCanvas.width = originalSize.width;
+    finalCanvas.height = originalSize.height;
     const ctx = finalCanvas.getContext("2d");
     if (!ctx) return;
 
     const processSave = () => {
-      // Draw drawing from canvas
-      const drawingImage = new Image();
-      drawingImage.onload = () => {
-        ctx.drawImage(drawingImage, 0, 0);
+      ctx.save();
+      const scaleFactor = 1 / renderScale;
+      ctx.scale(scaleFactor, scaleFactor);
 
-        // Draw text objects
-        textObjects.forEach((obj) => {
-          ctx.fillStyle = obj.color;
-          ctx.font = `${obj.fontSize}px Arial`; // Consider making font family configurable
-          // Handle multiline text
-          const lines = obj.text.split("\n");
-          lines.forEach((line, index) => {
-            ctx.fillText(line, obj.x, obj.y + index * obj.fontSize); // Adjust y for multiline
-          });
+      // Re-draw all strokes
+      strokes.forEach((stroke) => drawStroke(ctx, stroke));
+
+      // Draw text objects
+      textObjects.forEach((obj) => {
+        ctx.fillStyle = obj.color;
+        ctx.font = `${obj.fontSize}px Arial`;
+        const lines = obj.text.split("\n");
+        lines.forEach((line, index) => {
+          ctx.fillText(line, obj.x, obj.y + index * obj.fontSize);
         });
+      });
 
-        finalCanvas.toBlob(async (blob) => {
-          if (blob) {
-            const file = new File([blob], name || "canvas-image.png", {
-              type: "image/png",
-            });
-            onSave({ file, id: name || "canvas-image" }); // Ensure `name` prop is a valid filename part or provide default
-          }
-        }, "image/png");
-      };
-      drawingImage.onerror = () =>
-        console.error("Error loading drawing image for saving.");
-      drawingImage.src = canvasRef.current?.toDataURL() || "";
+      ctx.restore();
+
+      finalCanvas.toBlob(async (blob) => {
+        if (blob) {
+          const file = new File([blob], name || "canvas-image.png", {
+            type: "image/png",
+          });
+          onSave({ file, id: name || "canvas-image" });
+        }
+      }, "image/png");
     };
 
     // Draw background image first if it exists
     if (image) {
       const backgroundImage = new Image();
       backgroundImage.onload = () => {
-        ctx.drawImage(backgroundImage, 0, 0, canvasWidth, canvasHeight);
-        processSave(); // Proceed to draw drawings and text
+        ctx.drawImage(
+          backgroundImage,
+          0,
+          0,
+          finalCanvas.width,
+          finalCanvas.height,
+        );
+        processSave();
       };
       backgroundImage.onerror = () => {
         console.error("Error loading background image for saving.");
-        processSave(); // Proceed without background if it fails
+        processSave();
       };
       backgroundImage.src = image;
     } else {
-      processSave(); // No background image, just draw drawings and text
+      processSave();
     }
   };
 
@@ -642,7 +662,33 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
     }
   };
 
-  // Render strokes to canvas
+  const drawStroke = (ctx: CanvasRenderingContext2D, stroke: Stroke) => {
+    const outlinePoints = getStroke(stroke.points, {
+      size: stroke.size,
+      thinning: 0.5,
+      smoothing: 0.5,
+      streamline: 0.5,
+    });
+
+    ctx.beginPath();
+    if (outlinePoints.length > 0) {
+      ctx.moveTo(outlinePoints[0][0], outlinePoints[0][1]);
+      for (let i = 1; i < outlinePoints.length; i++) {
+        ctx.lineTo(outlinePoints[i][0], outlinePoints[i][1]);
+      }
+      ctx.closePath();
+    }
+
+    if (stroke.isEraser) {
+      ctx.globalCompositeOperation = "destination-out";
+    } else {
+      ctx.globalCompositeOperation = "source-over";
+      ctx.fillStyle = stroke.color;
+    }
+    ctx.fill();
+  };
+
+  // Render strokes to main canvas (history)
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -653,39 +699,26 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
     ctx.lineJoin = "round";
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const renderStroke = (stroke: Stroke) => {
-      const outlinePoints = getStroke(stroke.points, {
-        size: stroke.size,
-        thinning: 0.5,
-        smoothing: 0.5,
-        streamline: 0.5,
-      });
-
-      ctx.beginPath();
-      if (outlinePoints.length > 0) {
-        ctx.moveTo(outlinePoints[0][0], outlinePoints[0][1]);
-        for (let i = 1; i < outlinePoints.length; i++) {
-          ctx.lineTo(outlinePoints[i][0], outlinePoints[i][1]);
-        }
-        ctx.closePath();
-      }
-
-      if (stroke.isEraser) {
-        ctx.globalCompositeOperation = "destination-out";
-      } else {
-        ctx.globalCompositeOperation = "source-over";
-        ctx.fillStyle = stroke.color;
-      }
-      ctx.fill();
-    };
-
-    strokes.forEach(renderStroke);
-    if (currentStroke) {
-      renderStroke(currentStroke);
-    }
+    strokes.forEach((stroke) => drawStroke(ctx, stroke));
 
     ctx.globalCompositeOperation = "source-over";
-  }, [strokes, currentStroke, canvasWidth, canvasHeight]);
+  }, [strokes, canvasWidth, canvasHeight]);
+
+  // Render current stroke to temp canvas
+  useEffect(() => {
+    const canvas = tempCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (currentStroke) {
+      drawStroke(ctx, currentStroke);
+    }
+  }, [currentStroke, canvasWidth, canvasHeight]);
 
   return (
     <div className="flex h-full w-full flex-col items-center bg-gray-200">
@@ -970,6 +1003,15 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
 
             <canvas
               ref={canvasRef}
+              width={canvasWidth}
+              height={canvasHeight}
+              className="absolute left-0 top-0 touch-none"
+              style={{
+                pointerEvents: "none",
+              }}
+            />
+            <canvas
+              ref={tempCanvasRef}
               width={canvasWidth}
               height={canvasHeight}
               onPointerDown={handlePointerDown}
