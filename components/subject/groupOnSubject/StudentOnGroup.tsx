@@ -77,9 +77,11 @@ function StudentOnGroup({
         <div className="flex items-center gap-2">
           {(isDragOver === undefined || isDragOver === false) && (
             <div className="relative h-5 w-5 overflow-hidden rounded-2xl ring-1 md:h-6 md:w-6">
-              <img
+              <Image
                 src={student.photo}
                 alt={student.firstName}
+                quality={50}
+                fill
                 sizes="(max-width: 768px) 100vw, 33vw"
                 className="object-cover"
               />

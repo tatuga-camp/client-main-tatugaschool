@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Toast } from "primereact/toast";
 import React, { useState } from "react";
-import { FaCheckSquare } from "react-icons/fa";
+import { FaCheckSquare, FaExclamationTriangle } from "react-icons/fa";
 import { FaUser } from "react-icons/fa6";
 import { IoMdSettings } from "react-icons/io";
 import { MdFileDownload, MdMoodBad } from "react-icons/md";
@@ -479,6 +479,9 @@ function Grade({
                                 ) {
                                   score = "Not Graded";
                                 }
+                                if (studentOnAssignment.status === "IMPROVED") {
+                                  score = "Need Improvement";
+                                }
 
                                 if (
                                   data.assignment.weight !== null &&
@@ -522,6 +525,15 @@ function Grade({
                                           <FaCheckSquare />
                                           <span>
                                             {gradeData.wait_reviewed(
+                                              language.data ?? "en",
+                                            )}
+                                          </span>
+                                        </div>
+                                      ) : score === "Need Improvement" ? (
+                                        <div className="relative flex h-14 w-full cursor-pointer select-none flex-col items-center justify-center bg-yellow-500 text-white ring-yellow-500 transition hover:ring-1 hover:drop-shadow-md">
+                                          <FaExclamationTriangle />
+                                          <span>
+                                            {gradeData.need_improvement(
                                               language.data ?? "en",
                                             )}
                                           </span>
