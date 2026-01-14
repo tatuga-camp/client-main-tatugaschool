@@ -187,11 +187,15 @@ export function useCreateFileOnAssignment() {
           },
         );
       }
-
+      const cacheAssignments = queryClient.getQueryData([
+        "assignments",
+        { subjectId: data.subjectId },
+      ]);
+      if (!cacheAssignments) return;
       queryClient.setQueryData(
         ["assignments", { subjectId: data.subjectId }],
         (oldData: ResponseGetAssignmentsService) => {
-          return oldData?.map((prevAssignment) => {
+          return oldData.map((prevAssignment) => {
             if (prevAssignment.id === data.assignmentId) {
               return {
                 ...prevAssignment,
@@ -215,20 +219,32 @@ export function useDeleteFileOnAssignment() {
     mutationFn: (request: RequestDeleteFileAssignmentService) =>
       DeleteFileAssignmentService(request),
     onSuccess(data, variables, context) {
-      queryClient.setQueryData(
-        ["assignment", { id: data.assignmentId }],
-        (oldData: ResponseGetAssignmentByIdService) => {
-          return {
-            ...oldData,
-            files: oldData.files.filter((file) => file.id !== data.id),
-          };
-        },
-      );
+      const cacheAssignment = queryClient.getQueryData([
+        "assignment",
+        { id: data.assignmentId },
+      ]);
 
+      if (cacheAssignment) {
+        queryClient.setQueryData(
+          ["assignment", { id: data.assignmentId }],
+          (oldData: ResponseGetAssignmentByIdService) => {
+            return {
+              ...oldData,
+              files: oldData.files.filter((file) => file.id !== data.id),
+            };
+          },
+        );
+      }
+
+      const cacheAssignments = queryClient.getQueryData([
+        "assignments",
+        { subjectId: data.subjectId },
+      ]);
+      if (!cacheAssignments) return;
       queryClient.setQueryData(
         ["assignments", { subjectId: data.subjectId }],
         (oldData: ResponseGetAssignmentsService) => {
-          return oldData?.map((prevAssignment) => {
+          return oldData.map((prevAssignment) => {
             if (prevAssignment.id === data.assignmentId) {
               return {
                 ...prevAssignment,

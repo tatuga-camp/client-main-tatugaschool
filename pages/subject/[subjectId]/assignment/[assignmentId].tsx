@@ -10,7 +10,7 @@ import ClassStudentAssignWork from "../../../../components/subject/ClassStudentA
 import ClassStudentWork from "../../../../components/subject/ClassStudentWork";
 import ClasswordView, {
   FileClasswork,
-} from "../../../../components/subject/ClasswordView";
+} from "../../../../components/subject/ClassworkView";
 import { menuClassworkList } from "../../../../components/subject/ClassworkCreate";
 import { MenuSubject } from "../../../../data";
 import useClickOutside from "../../../../hook/useClickOutside";
@@ -228,34 +228,44 @@ function Index({
     try {
       setLoading(true);
       const uploadTasks = files.map(async (file) => {
-        if (!file.file) return;
-        const isImage = file.type.includes("image");
-        let blurHashData: string | undefined = undefined;
+        if (file.type !== "LINK" && file.file) {
+          const isImage = file.type.includes("image");
+          let blurHashData: string | undefined = undefined;
 
-        if (isImage) {
-          blurHashData = await generateBlurHash(file.file);
+          if (isImage) {
+            blurHashData = await generateBlurHash(file.file);
+          }
+
+          const signURL = await getSignedURLTeacherService({
+            fileName: file.file.name,
+            fileType: file.file.type,
+            schoolId: classwork?.schoolId,
+            fileSize: file.file.size,
+          });
+
+          await UploadSignURLService({
+            contentType: file.file.type,
+            file: file.file,
+            signURL: signURL.signURL,
+          });
+
+          await createFileAssignment.mutateAsync({
+            assignmentId: assignmentId,
+            url: signURL.originalURL,
+            type: file.file.type,
+            size: file.file.size,
+            blurHash: blurHashData,
+          });
         }
 
-        const signURL = await getSignedURLTeacherService({
-          fileName: file.file.name,
-          fileType: file.file.type,
-          schoolId: classwork?.schoolId,
-          fileSize: file.file.size,
-        });
-
-        await UploadSignURLService({
-          contentType: file.file.type,
-          file: file.file,
-          signURL: signURL.signURL,
-        });
-
-        await createFileAssignment.mutateAsync({
-          assignmentId: assignmentId,
-          url: signURL.originalURL,
-          type: file.file.type,
-          size: file.file.size,
-          blurHash: blurHashData,
-        });
+        if (file.type === "LINK") {
+          await createFileAssignment.mutateAsync({
+            assignmentId: assignmentId,
+            url: file.url,
+            type: file.type,
+            size: 1,
+          });
+        }
       });
 
       await Promise.all(uploadTasks);

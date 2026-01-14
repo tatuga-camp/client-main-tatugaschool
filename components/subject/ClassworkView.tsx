@@ -7,7 +7,7 @@ import {
 } from "../../interfaces";
 import TextEditor from "../common/TextEditor";
 import { FaRegFile, FaRegFileImage } from "react-icons/fa6";
-import { MdDelete, MdOutlineFileUpload } from "react-icons/md";
+import { MdDelete, MdLink, MdOutlineFileUpload } from "react-icons/md";
 import Dropdown from "../common/Dropdown";
 import { classworkLists } from "./ClassworkCreate";
 import InputNumber from "../common/InputNumber";
@@ -43,7 +43,7 @@ type Props = {
   onDeleteFile: (file: FileClasswork) => void;
   onUploadFile: (file: FileClasswork[]) => void;
 };
-function ClasswordView({
+function ClassworkView({
   classwork,
   skills,
   onChange,
@@ -53,8 +53,58 @@ function ClasswordView({
 }: Props) {
   const refetchSkill = useUpdateSkillToAssignment();
   const language = useGetLanguage();
+  const [triggerLink, setTriggerLink] = React.useState(false);
+  const [linkValue, setLinkValue] = React.useState("");
+
   return (
     <main className="flex h-max w-full">
+      {triggerLink && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="flex w-96 flex-col gap-5 rounded-2xl bg-white p-5">
+            <h1 className="text-xl font-semibold">Add Link</h1>
+            <input
+              value={linkValue}
+              onChange={(e) => setLinkValue(e.target.value)}
+              placeholder="Enter link URL"
+              className="main-input"
+              type="url"
+            />
+            <div className="flex items-center justify-end gap-2">
+              <button
+                onClick={() => {
+                  setTriggerLink(false);
+                  setLinkValue("");
+                }}
+                type="button"
+                className="rounded-2xl border px-4 py-1 hover:bg-gray-100"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  console.log(linkValue);
+                  if (!linkValue) return;
+                  onUploadFile([
+                    {
+                      file: null,
+                      data: null,
+                      type: "LINK",
+                      name: linkValue,
+                      url: linkValue,
+                    },
+                  ]);
+                  setTriggerLink(false);
+                  setLinkValue("");
+                }}
+                type="button"
+                className="gradient-bg rounded-2xl px-4 py-1 text-white"
+              >
+                Upload
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <section className="mb-40 flex h-max w-full flex-col items-center justify-start gap-5">
         <div className="mt-10 flex h-max max-h-max w-11/12 flex-col gap-2 rounded-2xl border bg-white p-5">
           <label className="flex flex-col">
@@ -92,6 +142,7 @@ function ClasswordView({
           <ul className="flex h-max w-full flex-col gap-2">
             {files?.map((file, index) => {
               const isImage = file.type.includes("image");
+              const isLink = file.type === "LINK" || file.type === "url";
               return (
                 <li
                   key={index}
@@ -99,14 +150,22 @@ function ClasswordView({
                 >
                   <div className="flex h-full w-full items-center justify-start gap-2">
                     <div className="gradient-bg flex h-full w-16 items-center justify-center border-r text-lg text-white">
-                      {isImage ? <FaRegFileImage /> : <FaRegFile />}
+                      {isLink ? (
+                        <MdLink />
+                      ) : isImage ? (
+                        <FaRegFileImage />
+                      ) : (
+                        <FaRegFile />
+                      )}
                     </div>
                     <a
                       href={file.url}
                       target="_blank"
-                      className="flex items-center gap-2"
+                      className="flex w-10/12 items-center gap-2 truncate"
                     >
-                      <span>{file.name}</span>
+                      <span className="truncate">
+                        {file.type === "LINK" ? file.url : file.name}
+                      </span>
                     </a>
                   </div>
                   <button
@@ -127,10 +186,10 @@ function ClasswordView({
           <span className="text-xs text-gray-400">
             {classworkViewDataLanguage.fileDescription(language.data ?? "en")}
           </span>
-          <div className="flex h-20 w-full items-center justify-center">
+          <div className="flex h-20 w-full items-center justify-center gap-3">
             <label
               htmlFor="upload"
-              className="gradient-bg flex items-center justify-center gap-1 rounded-2xl px-3 py-1 text-lg text-white transition active:scale-105"
+              className="gradient-bg flex w-40 items-center justify-center gap-1 rounded-2xl px-3 py-1 text-lg text-white transition active:scale-105"
             >
               <MdOutlineFileUpload />
               {classworkViewDataLanguage.uploadButton(language.data ?? "en")}
@@ -155,6 +214,13 @@ function ClasswordView({
                 className="hidden"
               />
             </label>
+            <button
+              onClick={() => setTriggerLink(true)}
+              type="button"
+              className="gradient-bg flex w-40 items-center justify-center gap-1 rounded-2xl px-3 py-1 text-lg text-white transition active:scale-105"
+            >
+              <MdLink /> Link
+            </button>
           </div>
         </div>
 
@@ -357,4 +423,4 @@ function ClasswordView({
   );
 }
 
-export default ClasswordView;
+export default ClassworkView;

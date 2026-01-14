@@ -30,7 +30,7 @@ import {
   UploadSignURLService,
 } from "../../services";
 import { convertToDateTimeLocalString, generateBlurHash } from "../../utils";
-import ClasswordView, { FileClasswork } from "./ClasswordView";
+import ClasswordView, { FileClasswork } from "./ClassworkView";
 
 type Props = {
   onClose: () => void;
@@ -158,34 +158,44 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
 
       if (files?.length > 0) {
         const uploadTasks = files.map(async (file) => {
-          if (!file.file) return;
-          const isImage = file.type.includes("image");
-          let blurHashData: string | undefined = undefined;
+          if (file.type !== "LINK" && file.file) {
+            const isImage = file.type.includes("image");
+            let blurHashData: string | undefined = undefined;
 
-          if (isImage) {
-            blurHashData = await generateBlurHash(file.file);
+            if (isImage) {
+              blurHashData = await generateBlurHash(file.file);
+            }
+
+            const signURL = await getSignedURLTeacherService({
+              fileName: file.file.name,
+              fileType: file.file.type,
+              schoolId: schoolId,
+              fileSize: file.file.size,
+            });
+
+            await UploadSignURLService({
+              contentType: file.file.type,
+              file: file.file,
+              signURL: signURL.signURL,
+            });
+
+            return CreateFileAssignmentService({
+              assignmentId: assignment.id,
+              url: signURL.originalURL,
+              type: file.file.type,
+              size: file.file.size,
+              blurHash: blurHashData,
+            });
           }
 
-          const signURL = await getSignedURLTeacherService({
-            fileName: file.file.name,
-            fileType: file.file.type,
-            schoolId: schoolId,
-            fileSize: file.file.size,
-          });
-
-          await UploadSignURLService({
-            contentType: file.file.type,
-            file: file.file,
-            signURL: signURL.signURL,
-          });
-
-          return CreateFileAssignmentService({
-            assignmentId: assignment.id,
-            url: signURL.originalURL,
-            type: file.file.type,
-            size: file.file.size,
-            blurHash: blurHashData,
-          });
+          if (file.type === "LINK") {
+            return CreateFileAssignmentService({
+              assignmentId: assignment.id,
+              url: file.url,
+              type: file.type,
+              size: 1,
+            });
+          }
         });
 
         await Promise.allSettled(uploadTasks);

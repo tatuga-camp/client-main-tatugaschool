@@ -17,7 +17,7 @@ import ListMemberCircle from "../../../components/member/ListMemberCircle";
 import Attendance from "../../../components/subject/Attendance";
 import AttendanceChecker from "../../../components/subject/AttendanceChecker";
 import AttendanceQRcode from "../../../components/subject/AttendanceQRcode";
-import Classwork from "../../../components/subject/Classwork";
+import Classwork from "../../../components/subject/Classworks";
 import { ListMenuFooter } from "../../../components/subject/FooterSubject";
 import Grade from "../../../components/subject/Grade";
 import InviteTeacher from "../../../components/subject/InviteTeacher";

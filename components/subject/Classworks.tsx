@@ -34,7 +34,7 @@ type Props = {
   subjectId: string;
   schoolId: string;
 };
-function Classwork({ toast, subjectId, schoolId }: Props) {
+function Classworks({ toast, subjectId, schoolId }: Props) {
   const language = useGetLanguage();
   const [triggerCreate, setTriggerCreate] = React.useState(false);
   const classworks = useGetAssignments({ subjectId: subjectId });
@@ -180,4 +180,4 @@ function Classwork({ toast, subjectId, schoolId }: Props) {
   );
 }
 
-export default Classwork;
+export default Classworks;

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { CSSProperties } from "react";
 import { BiBook } from "react-icons/bi";
 import { FaRegFile, FaRegFileImage } from "react-icons/fa6";
-import { MdAssignment, MdDragIndicator } from "react-icons/md";
+import { MdAssignment, MdDragIndicator, MdLink } from "react-icons/md";
 import { Assignment, FileOnAssignment } from "../../interfaces";
 import { useGetLanguage } from "../../react-query";
 import { classworkCardDataLanguage } from "../../data/languages";
@@ -206,6 +206,7 @@ function AssignmentCard({
               {assignemnt.files?.map((file, index) => {
                 const isImage = file.type.includes("image");
                 const fileName = file.url.split("/").pop();
+                const isLink = file.type === "LINK";
                 return (
                   <li
                     onClick={() => window.open(file.url, "_blank")}
@@ -214,10 +215,16 @@ function AssignmentCard({
                   >
                     <div className="flex h-full w-full items-center justify-start gap-2">
                       <div className="gradient-bg flex h-full w-16 items-center justify-center border-r text-lg text-white">
-                        {isImage ? <FaRegFileImage /> : <FaRegFile />}
+                        {isLink ? (
+                          <MdLink />
+                        ) : isImage ? (
+                          <FaRegFileImage />
+                        ) : (
+                          <FaRegFile />
+                        )}
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span>{fileName}</span>
+                      <div className="flex max-w-40 items-center gap-2 truncate">
+                        <span>{isLink ? file.url : fileName}</span>
                       </div>
                     </div>
                   </li>
