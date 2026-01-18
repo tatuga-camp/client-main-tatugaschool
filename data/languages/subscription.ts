@@ -144,4 +144,24 @@ export const SubscriptionDataLanguage = {
         return "Per member/year";
     }
   },
+  only: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Only";
+      case "th":
+        return "ตกเดือนละ";
+      default:
+        return "Only";
+    }
+  },
+  month_unit: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "/mo";
+      case "th":
+        return "/เดือน";
+      default:
+        return "/mo";
+    }
+  },
 } as const;

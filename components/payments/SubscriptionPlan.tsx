@@ -64,12 +64,12 @@ const pricingData = [
     product: "Tatuga School Basic",
     product_th: "โรงเรียนทาทูก้า พื้นฐาน",
     price: {
-      month: "190฿",
-      month_th: "190฿",
-      year: "1,390฿",
-      year_th: "1,390฿",
-      monthValue: 190,
-      yearValue: 1390,
+      month: "ไม่มี",
+      month_th: "ไม่มี",
+      year: "590฿",
+      year_th: "590฿",
+      monthValue: 0,
+      yearValue: 590,
       permember: false,
     },
     infoNote: "Basic plan is good for 1 - 2 teachers in a school",
@@ -95,9 +95,9 @@ const pricingData = [
       month: "290฿",
       month_th: "290฿",
       monthValue: 290,
-      year: "2,490฿",
-      year_th: "2,490฿",
-      yearValue: 2490,
+      year: "1,490฿",
+      year_th: "1,490฿",
+      yearValue: 1490,
       permember: false,
     },
     infoNote: "Premium plan is good for 1 - 3 teachers in a school",
@@ -221,7 +221,7 @@ const planColors: {
 
 const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
   const subscriptions = useGetListSubscription();
-  const [monthprice, setMonthPrice] = useState(true);
+  const [monthprice, setMonthPrice] = useState(false);
   const language = useGetLanguage();
   const [members, setMembers] = useState(
     school.limitSchoolMember < 4 ? 4 : school.limitSchoolMember,
@@ -395,6 +395,21 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
                             language.data ?? "en",
                           )}
                   </div>
+                  {!monthprice && (data.price as any).yearValue > 0 && (
+                    <div className="mt-2 flex justify-center">
+                      <span className="rounded-lg bg-red-100 px-3 py-1 text-sm font-semibold text-red-600">
+                        {SubscriptionDataLanguage.only(language.data ?? "en")}{" "}
+                        {Math.round(
+                          data.mainTitle === "ENTERPRISE"
+                            ? ((data.price as any).yearValue * members) / 12
+                            : (data.price as any).yearValue / 12,
+                        ).toLocaleString()}
+                        {SubscriptionDataLanguage.month_unit(
+                          language.data ?? "en",
+                        )}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <p className="h-16 text-center text-sm text-gray-600">
                   {language.data === "en" ? data.infoNote : data.infoNote_th}
@@ -477,6 +492,12 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
                           ? "Update Members"
                           : "Get Started"}
                       </button>
+                    </div>
+                  ) : data.price.month === "ไม่มี" && monthprice === true ? (
+                    <div
+                      className={`flex w-full transform cursor-not-allowed items-center justify-center rounded-2xl border-2 border-black bg-gray-300 py-3 font-semibold text-gray-500 transition-transform hover:scale-105`}
+                    >
+                      Not Available
                     </div>
                   ) : (
                     <button
