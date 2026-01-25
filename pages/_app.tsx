@@ -11,7 +11,6 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 import { ErrorMessages } from "../interfaces";
 import { classNames } from "primereact/utils";
-import ErrorBoundary from "../components/ErrorBoundary";
 
 const prompt = Prompt({
   subsets: ["latin", "thai"],
@@ -222,9 +221,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           shallowRouting
         />
         <div className={prompt.className}>
-          <ErrorBoundary>
-            <Component {...pageProps} />
-          </ErrorBoundary>
+          <Component {...pageProps} />
         </div>
       </PrimeReactProvider>
     </QueryClientProvider>
