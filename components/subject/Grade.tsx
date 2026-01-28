@@ -424,7 +424,7 @@ function Grade({
                             </div>
                           </div>
                           <Link
-                            href={`/subject/${subjectId}/studentOnSubject/${student.id}`}
+                            href={`/subject/${subjectId}/reports/${student.id}`}
                             target="_blank"
                             className="second-button hidden items-center justify-center border text-sm md:flex"
                           >

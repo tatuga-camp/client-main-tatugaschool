@@ -1,6 +1,23 @@
 import React from "react";
 import { ResponseGetStudentOnSubjectReportService } from "../services";
 
+const colors = {
+  primary: "#2C7CD1",
+  primaryHover: "#2d6fb5",
+  primaryFocus: "#275d96",
+  secondary: "#569DF8",
+  background: "#F7F8FA",
+  icon: "#383767",
+  info: "#2E90FA",
+  success: "#27AE60",
+  warning: "#FFCD1B",
+  error: "#F04438",
+  text: "#383767",
+  white: "#FFFFFF",
+  gray: "#E0E0E0",
+  lightGray: "#F5F5F5",
+};
+
 export const StudentReportHTML = React.forwardRef<
   HTMLDivElement,
   { data: ResponseGetStudentOnSubjectReportService }
@@ -11,588 +28,742 @@ export const StudentReportHTML = React.forwardRef<
       background: "#fff",
       width: 800,
       margin: "0 auto",
-      fontFamily: "Anuphan, sans-serif",
-      color: "#222",
+      fontFamily: "'Anuphan', sans-serif",
+      color: colors.text,
       padding: 0,
-      boxShadow: "0 2px 8px #0001",
       position: "relative",
+      boxSizing: "border-box",
       overflow: "hidden",
     }}
   >
-    {/* Google Fonts for Anuphan */}
+    {/* Fonts */}
     <link
-      href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    {/* Book spine bar */}
+
+    {/* Header */}
     <div
       style={{
-        position: "absolute",
-        left: 0,
-        top: 0,
-        width: 50,
-        height: "100%",
-        background: "#454365",
-        zIndex: 1,
-        marginTop: 102,
-        overflow: "hidden",
-      }}
-    />
-    {/* Main content with left margin */}
-    <div
-      style={{
-        marginLeft: 50,
-        padding: 32,
-        position: "relative",
-        zIndex: 2,
+        padding: "24px 40px",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        borderBottom: `2px solid ${colors.background}`,
       }}
     >
-      {/* PDF Header */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 24,
-          background: "#fff",
-          borderTopRightRadius: 16,
-          borderTopLeftRadius: 0,
-          borderBottomRightRadius: 0,
-          borderBottomLeftRadius: 0,
-          padding: "0 0 0 0",
-        }}
-      >
-        <div
+      <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+        <img
+          src="/favicon.ico"
+          alt="logo"
           style={{
-            fontSize: 28,
-            fontWeight: 700,
-            color: "#7B67A8",
-            marginLeft: 8,
+            width: 28,
+            height: 28,
           }}
-        >
+        />
+        <div style={{ fontSize: 22, fontWeight: 700, color: colors.primary }}>
           {data.schoolName}
         </div>
+      </div>
+      <div style={{ textAlign: "right" }}>
         <div
           style={{
-            width: 48,
-            height: 48,
-            background: "#383767",
-            borderRadius: 8,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            marginRight: 8,
+            fontSize: 12,
+            color: colors.icon,
+            opacity: 0.7,
+            fontWeight: 500,
+            textTransform: "uppercase",
+            marginBottom: 2,
           }}
         >
-          <img
-            src="/favicon.ico"
-            alt="logo"
-            style={{ width: 36, height: 36 }}
-          />
+          Issue Date
+        </div>
+        <div style={{ fontSize: 14, fontWeight: 600, color: colors.text }}>
+          {new Date().toLocaleDateString("th-TH", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })}
         </div>
       </div>
-      {/* Report Header Section - new layout */}
+    </div>
+
+    {/* Hero / Student Info */}
+    <div
+      style={{
+        margin: "24px 40px",
+        background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
+        borderRadius: 20,
+        padding: "24px 32px",
+        color: "#fff",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        boxShadow: `0 10px 20px ${colors.primary}26`,
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      {/* Decorative Circle */}
       <div
         style={{
-          display: "flex",
-          background: "#9291DE",
-          padding: 32,
-          alignItems: "center",
-          marginBottom: 24,
+          position: "absolute",
+          top: -20,
+          right: -20,
+          width: 150,
+          height: 150,
+          background: "rgba(255,255,255,0.1)",
+          borderRadius: "50%",
         }}
-      >
-        {/* Left: Student Report/date box */}
-        <div>
-          <div
-            style={{
-              fontSize: 30,
-              fontWeight: 700,
-              color: "#fff",
-              fontFamily: "Anuphan, sans-serif",
-              lineHeight: 1,
-            }}
-          >
-            Student
-          </div>
-          <div
-            style={{
-              fontSize: 20,
-              fontWeight: 700,
-              color: "#222",
-              fontFamily: "Anuphan, sans-serif",
-              lineHeight: 1,
-              marginTop: -8,
-            }}
-          >
-            Report{" "}
-            <span
-              style={{
-                fontSize: 10,
-                fontWeight: 400,
-                color: "#fff",
-                marginLeft: 12,
-              }}
-            >
-              {new Date().toLocaleDateString(undefined, {
-                month: "2-digit",
-                year: "numeric",
-                day: "2-digit",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </span>
-          </div>
-        </div>
-        {/* Right: Student info and profile image */}
+      />
+
+      <div style={{ position: "relative", zIndex: 1, flex: 1 }}>
         <div
           style={{
-            display: "flex",
-            flex: 1,
-            alignItems: "center",
-            justifyContent: "flex-end",
+            fontSize: 13,
+            fontWeight: 500,
+            opacity: 0.9,
+            marginBottom: 4,
+            letterSpacing: "0.5px",
           }}
         >
-          <div style={{ textAlign: "right", marginRight: 32 }}>
+          STUDENT REPORT CARD
+        </div>
+        <div
+          style={{
+            fontSize: 32,
+            fontWeight: 700,
+            marginBottom: 20,
+            lineHeight: 1.2,
+          }}
+        >
+          {data.courseInfo.educationYear}
+        </div>
+
+        <div style={{ display: "flex", gap: 40 }}>
+          <div>
             <div
-              style={{
-                fontSize: 20,
-                fontWeight: 700,
-                color: "#222",
-                fontFamily: "Anuphan, sans-serif",
-              }}
+              style={{ fontSize: 11, opacity: 0.8, textTransform: "uppercase" }}
             >
+              Student Name
+            </div>
+            <div style={{ fontSize: 18, fontWeight: 600 }}>
               {data.studentInfo.name}
             </div>
+          </div>
+          <div>
             <div
-              style={{
-                fontSize: 12,
-                fontWeight: 700,
-                color: "#454365",
-                marginTop: 8,
-                fontFamily: "Anuphan, sans-serif",
-              }}
+              style={{ fontSize: 11, opacity: 0.8, textTransform: "uppercase" }}
             >
-              <span style={{ color: "#fff", fontWeight: 900 }}>ชั้น</span>{" "}
-              <span style={{ color: "#fff" }}>{data.studentInfo.class}</span>
-              <span style={{ marginLeft: 24, color: "#fff", fontWeight: 900 }}>
-                ปีการศึกษา
-              </span>{" "}
-              <span style={{ color: "#fff" }}>
-                {data.courseInfo.educationYear}
-              </span>
+              Class
             </div>
-            <div
-              style={{
-                fontSize: 12,
-                fontWeight: 700,
-                color: "#fff",
-                marginTop: 8,
-                fontFamily: "Anuphan, sans-serif",
-              }}
-            >
-              <span style={{ color: "#fff" }}>รายวิชา</span>{" "}
-              <span style={{ fontWeight: 400 }}>{data.courseInfo.subject}</span>
-            </div>
-            <div
-              style={{
-                fontSize: 12,
-                fontWeight: 700,
-                color: "#fff",
-                marginTop: 8,
-                fontFamily: "Anuphan, sans-serif",
-              }}
-            >
-              <span style={{ color: "#fff" }}>คำอธิบาย</span>{" "}
-              <span style={{ fontWeight: 400 }}>
-                {data.courseInfo.description}
-              </span>
+            <div style={{ fontSize: 18, fontWeight: 600 }}>
+              {data.studentInfo.class}
             </div>
           </div>
+        </div>
+        <div style={{ marginTop: 16 }}>
           <div
-            style={{
-              width: 120,
-              height: 120,
-              borderRadius: "50%",
-              border: "8px solid #7B67A8",
-              overflow: "hidden",
-              background: "#bcb8f8",
-            }}
+            style={{ fontSize: 11, opacity: 0.8, textTransform: "uppercase" }}
           >
-            <img
-              src={data.studentInfo.imageURL}
-              alt="profile"
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-            />
+            Subject
+          </div>
+          <div style={{ fontSize: 16, fontWeight: 500 }}>
+            {data.courseInfo.subject}
+            {data.courseInfo.description && (
+              <span style={{ fontSize: 14, opacity: 0.9, fontWeight: 400 }}>
+                {" "}
+                - {data.courseInfo.description}
+              </span>
+            )}
           </div>
         </div>
       </div>
-      {/* ครูประจำชั้น/ครูผู้สอน */}
-      <div className="flex flex-col">
-        {/* ครูประจำชั้น */}
-        <div>
-          <div
+
+      <div
+        style={{
+          width: 100,
+          height: 100,
+          borderRadius: "50%",
+          border: "4px solid rgba(255,255,255,0.3)",
+          overflow: "hidden",
+          background: "#fff",
+          position: "relative",
+          zIndex: 1,
+          flexShrink: 0,
+        }}
+      >
+        <img
+          src={data.studentInfo.imageURL}
+          alt="student"
+          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+        />
+      </div>
+    </div>
+
+    {/* Main Content Grid */}
+    <div style={{ padding: "0 40px", display: "flex", gap: 32 }}>
+      {/* Left Column */}
+      <div style={{ flex: 1 }}>
+        {/* Instructors */}
+        <div style={{ marginBottom: 24 }}>
+          <h3
             style={{
-              fontWeight: 700,
               fontSize: 16,
-              color: "#222",
-              fontFamily: "Anuphan, sans-serif",
+              fontWeight: 700,
+              color: colors.primary,
+              marginBottom: 12,
+              borderBottom: `1px solid ${colors.gray}`,
+              paddingBottom: 8,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
             }}
           >
-            ครูประจำชั้น
+            <span
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: colors.secondary,
+              }}
+            ></span>
+            Instructors
+          </h3>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 12,
+              paddingLeft: 8,
+            }}
+          >
+            {data.teachers.homeroom && (
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: "50%",
+                    background: colors.background,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 10,
+                    fontWeight: 700,
+                    color: colors.icon,
+                    border: `1px solid ${colors.gray}`,
+                  }}
+                >
+                  HR
+                </div>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600 }}>
+                    {data.teachers.homeroom}
+                  </div>
+                  <div style={{ fontSize: 12, color: "#888" }}>
+                    Homeroom Teacher
+                  </div>
+                </div>
+              </div>
+            )}
+            {data.teachers.instructor.map((t, i) => (
+              <div
+                key={i}
+                style={{ display: "flex", alignItems: "center", gap: 12 }}
+              >
+                <img
+                  src={t.imageURL}
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    border: `1px solid ${colors.gray}`,
+                  }}
+                />
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600 }}>{t.name}</div>
+                  <div style={{ fontSize: 12, color: "#888" }}>
+                    Subject Instructor ({t.email})
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Attendance & Grade Summary */}
+        <div
+          style={{
+            background: colors.background,
+            borderRadius: 16,
+            padding: 20,
+            border: `1px solid ${colors.gray}`,
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 16,
+            }}
+          >
+            <div style={{ fontSize: 14, fontWeight: 700, color: colors.icon }}>
+              Attendance
+            </div>
+            <div
+              style={{
+                fontSize: 13,
+                color: colors.primary,
+                fontWeight: 700,
+                background: "#fff",
+                padding: "4px 12px",
+                borderRadius: 20,
+                boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+              }}
+            >
+              {data.attendance.status}
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+            {data.attendance.summary.map((s, i) => (
+              <div
+                key={i}
+                style={{
+                  background: "#fff",
+                  borderRadius: 10,
+                  padding: "10px 8px",
+                  flex: 1,
+                  textAlign: "center",
+                  border: `1px solid ${colors.gray}`,
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 11,
+                    color: "#888",
+                    marginBottom: 4,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {s.status}
+                </div>
+                <div
+                  style={{
+                    fontSize: 16,
+                    fontWeight: 700,
+                    color: colors.primary,
+                  }}
+                >
+                  {s.value}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div
+            style={{
+              fontSize: 12,
+              color: "#666",
+              textAlign: "right",
+              marginTop: -10,
+              marginBottom: 10,
+            }}
+          >
+            Total Hours: {data.attendance.totalHours}
           </div>
 
           <div
             style={{
-              fontWeight: 400,
-              fontSize: 16,
-              color: "#222",
-              fontFamily: "Anuphan, sans-serif",
+              borderTop: `1px dashed ${colors.primary}40`,
+              paddingTop: 16,
             }}
           >
-            {data.teachers.homeroom}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <div>
+                <div
+                  style={{ fontSize: 14, fontWeight: 700, color: colors.icon }}
+                >
+                  Overall Grade
+                </div>
+                <div style={{ fontSize: 12, color: "#888" }}>
+                  Score: {data.academicPerformance.overallScore} /{" "}
+                  {data.academicPerformance.maxScore}
+                </div>
+              </div>
+              <div
+                style={{
+                  fontSize: 36,
+                  fontWeight: 800,
+                  color: colors.success,
+                  lineHeight: 1,
+                }}
+              >
+                {data.academicPerformance.overallGrade}
+              </div>
+            </div>
           </div>
         </div>
-        {/* ครูผู้สอน */}
-        <ul className="mb-2 flex flex-wrap gap-5 border-b pb-5">
-          {data.teachers.instructor.map((teacher) => {
+      </div>
+
+      {/* Right Column: Skills Pie Chart */}
+      <div style={{ width: 280 }}>
+        <h3
+          style={{
+            fontSize: 16,
+            fontWeight: 700,
+            color: colors.primary,
+            marginBottom: 12,
+            borderBottom: `1px solid ${colors.gray}`,
+            paddingBottom: 8,
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+          }}
+        >
+          <span
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: "50%",
+              background: colors.secondary,
+            }}
+          ></span>
+          {data.skillAssessment.title || "Skills Assessment"}
+        </h3>
+        <div
+          style={{
+            position: "relative",
+            height: 220,
+            display: "flex",
+            justifyContent: "center",
+            marginBottom: 16,
+          }}
+        >
+          {/* SVG Pie Chart Implementation */}
+          <svg width="220" height="220" viewBox="0 0 220 220">
+            {(() => {
+              const chartColors = [
+                colors.primary,
+                colors.secondary,
+                colors.info,
+                colors.success,
+                colors.warning,
+                colors.icon,
+                "#A0A0A0",
+              ];
+              const skills = data.skillAssessment.skills;
+              const total =
+                skills.reduce((acc, item) => (acc += item.percentage), 0) || 1;
+              let startAngle = 0;
+              const cx = 110,
+                cy = 110,
+                rOuter = 100,
+                rInner = 60;
+
+              return skills.map((s, i) => {
+                const angle = (s.percentage / total) * 360;
+                if (angle <= 0) return null;
+                const endAngle = startAngle + angle;
+                const rad = (d: number) => (Math.PI / 180) * d;
+                const x1 = cx + rOuter * Math.cos(rad(startAngle - 90));
+                const y1 = cy + rOuter * Math.sin(rad(startAngle - 90));
+                const x2 = cx + rOuter * Math.cos(rad(endAngle - 90));
+                const y2 = cy + rOuter * Math.sin(rad(endAngle - 90));
+                const x3 = cx + rInner * Math.cos(rad(endAngle - 90));
+                const y3 = cy + rInner * Math.sin(rad(endAngle - 90));
+                const x4 = cx + rInner * Math.cos(rad(startAngle - 90));
+                const y4 = cy + rInner * Math.sin(rad(startAngle - 90));
+
+                const largeArc = angle > 180 ? 1 : 0;
+
+                const pathData = [
+                  `M ${x1} ${y1}`,
+                  `A ${rOuter} ${rOuter} 0 ${largeArc} 1 ${x2} ${y2}`,
+                  `L ${x3} ${y3}`,
+                  `A ${rInner} ${rInner} 0 ${largeArc} 0 ${x4} ${y4}`,
+                  "Z",
+                ].join(" ");
+                const fill = chartColors[i % chartColors.length];
+                startAngle += angle;
+                return (
+                  <path
+                    key={i}
+                    d={pathData}
+                    fill={fill}
+                    stroke="#fff"
+                    strokeWidth="2"
+                  />
+                );
+              });
+            })()}
+            {/* Center Text */}
+            <circle cx="110" cy="110" r="55" fill="#fff" />
+            <text
+              x="110"
+              y="110"
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fontSize="14"
+              fill={colors.text}
+              fontWeight="700"
+            >
+              SKILLS
+            </text>
+          </svg>
+        </div>
+        {/* Legend */}
+        <div>
+          {data.skillAssessment.skills.map((s, i) => {
+            const chartColors = [
+              colors.primary,
+              colors.secondary,
+              colors.info,
+              colors.success,
+              colors.warning,
+              colors.icon,
+              "#A0A0A0",
+            ];
             return (
               <div
-                key={teacher.email}
-                style={{ display: "flex", alignItems: "center", gap: 24 }}
+                key={i}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  marginBottom: 8,
+                  fontSize: 12,
+                  paddingBottom: 4,
+                  borderBottom: `1px solid ${colors.background}`,
+                }}
               >
-                <img
-                  src={teacher.imageURL}
-                  alt="instructor"
-                  className="rounded-full border"
-                  style={{
-                    width: "40px",
-                    height: "40px",
-                    objectFit: "cover",
-                  }}
-                />
-                <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <div
                     style={{
-                      fontWeight: 700,
-                      fontSize: 16,
-                      color: "#222",
-                      fontFamily: "Anuphan, sans-serif",
+                      width: 10,
+                      height: 10,
+                      borderRadius: 3,
+                      background: chartColors[i % chartColors.length],
                     }}
-                  >
-                    ครูผู้สอน
-                  </div>
+                  ></div>
                   <div
                     style={{
-                      fontWeight: 400,
-                      fontSize: 16,
-                      color: "#222",
-                      fontFamily: "Anuphan, sans-serif",
+                      color: colors.text,
+                      fontWeight: 500,
+                      maxWidth: 180,
                     }}
                   >
-                    {teacher.name}
+                    {s.skill}
                   </div>
-                  <div
-                    style={{
-                      fontWeight: 400,
-                      fontSize: 16,
-                      color: "#222",
-                      fontFamily: "Anuphan, sans-serif",
-                    }}
-                  >
-                    E-mail: {teacher.email}
-                  </div>
+                </div>
+                <div style={{ fontWeight: 700, color: colors.primary }}>
+                  {s.percentage.toFixed(2)}%
                 </div>
               </div>
             );
           })}
-        </ul>
-      </div>
-      {/* สรุปเวลาเรียน */}
-      <div
-        style={{
-          background: "#e6e6fa",
-          borderRadius: 8,
-          padding: "12px 24px",
-          marginBottom: 16,
-          display: "flex",
-          justifyContent: "space-between",
-        }}
-      >
-        <div>
-          <b>สรุปเวลาเรียน :</b> {data.attendance.status}
-        </div>
-        <div>เวลาเรียน: {data.attendance.totalHours} ชม.</div>
-      </div>
-      <div
-        style={{
-          display: "flex",
-          gap: 32,
-          marginBottom: 16,
-          justifyContent: "space-between",
-          paddingInline: 16,
-        }}
-      >
-        {data.attendance.summary.map((s, i: number) => (
-          <div key={i} className="">
-            {s.status}: {s.value}
-          </div>
-        ))}
-      </div>
-      {/* สรุปผลการเรียน */}
-      <div
-        style={{
-          background: "#e6e6fa",
-          borderRadius: 8,
-          padding: "12px 24px",
-          marginBottom: 0,
-          display: "flex",
-          justifyContent: "space-between",
-        }}
-      >
-        <div>
-          <b>สรุปผลการเรียน : เกรด {data.academicPerformance.overallGrade}</b>
-        </div>
-        <div>
-          {data.academicPerformance.overallScore}/
-          {data.academicPerformance.maxScore}
         </div>
       </div>
-      {/* ตารางคะแนน */}
+    </div>
+
+    {/* Assessments Table */}
+    <div style={{ padding: "0 40px", marginTop: 24 }}>
+      <h3
+        style={{
+          fontSize: 16,
+          fontWeight: 700,
+          color: colors.primary,
+          marginBottom: 12,
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+        }}
+      >
+        <span
+          style={{
+            width: 6,
+            height: 6,
+            borderRadius: "50%",
+            background: colors.secondary,
+          }}
+        ></span>
+        Academic Performance
+      </h3>
       <table
-        style={{
-          width: "100%",
-          margin: "12px 0 24px 0",
-          borderCollapse: "collapse",
-          fontSize: 15,
-        }}
+        style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}
       >
         <thead>
-          <tr style={{ background: "#f5f6fa" }}>
-            <th style={{ textAlign: "left", padding: "8px 12px" }}>รายการ</th>
-            <th style={{ textAlign: "right", padding: "8px 12px" }}>คะแนน</th>
+          <tr style={{ background: colors.background }}>
+            <th
+              style={{
+                textAlign: "left",
+                padding: "12px 16px",
+                borderRadius: "8px 0 0 8px",
+                color: colors.text,
+                fontWeight: 600,
+                width: "60%",
+              }}
+            >
+              Assessment Item
+            </th>
+            <th
+              style={{
+                textAlign: "right",
+                padding: "12px 16px",
+                borderRadius: "0 8px 8px 0",
+                color: colors.text,
+                fontWeight: 600,
+              }}
+            >
+              Score
+            </th>
           </tr>
         </thead>
         <tbody>
-          {data.academicPerformance.assessments.map((a, i: number) => {
-            let score = a.score;
-            const maxScore = Number(a.maxScore);
-            if (a.weight !== null) {
-              const originalScore =
-                (score > maxScore ? maxScore : score) / maxScore;
-              score = originalScore * a.weight;
+          {data.academicPerformance.assessments.map((a, i) => {
+            let displayScore = `${a.score}`;
+            if (a.maxScore !== "-") {
+              let score = a.score;
+              const maxScore = Number(a.maxScore);
+              if (a.weight !== null && a.weight !== undefined) {
+                const w = a.weight ?? 0;
+                const weightVal = w > 0 ? w : a.maxScore;
+                const ratio =
+                  maxScore > 0
+                    ? (score > maxScore ? maxScore : score) / maxScore
+                    : 0;
+                const weightedScore = ratio * Number(weightVal);
+
+                displayScore = `${parseFloat(weightedScore.toFixed(2))} / ${weightVal}`;
+              } else {
+                displayScore = `${score} / ${a.maxScore}`;
+              }
             }
+
             return (
               <tr
                 key={i}
-                style={{ background: i % 2 === 0 ? "#fff" : "#f5f6fa" }}
+                style={{
+                  borderBottom: `1px solid ${colors.background}`,
+                  background: i % 2 === 0 ? "#fff" : "#fafafa",
+                }}
               >
-                <td style={{ padding: "8px 12px" }}>
+                <td style={{ padding: "12px 16px", color: colors.text }}>
                   {i + 1}. {a.item}
                 </td>
-                <td style={{ padding: "8px 12px", textAlign: "right" }}>
-                  {a.maxScore === "-"
-                    ? score
-                    : `${score} / ${a.weight === null ? a.maxScore : a.weight === 0 ? 0 : a.weight > 0 ? a.weight : a.maxScore}`}
+                <td
+                  style={{
+                    padding: "12px 16px",
+                    textAlign: "right",
+                    fontWeight: 600,
+                    color: colors.primary,
+                  }}
+                >
+                  {displayScore}
                 </td>
               </tr>
             );
           })}
         </tbody>
       </table>
+    </div>
 
-      {/* ทักษะ: Pie Chart + Skill Table side by side */}
-      <div
-        style={{
-          display: "flex",
-          gap: 32,
-          alignItems: "flex-start",
-          marginBottom: 24,
-        }}
-      >
-        {/* Pie Chart */}
+    {/* Footer: Recommendations & Signature */}
+    <div
+      style={{
+        padding: "32px 40px",
+        marginTop: 10,
+        display: "flex",
+        gap: 48,
+        alignItems: "flex-end",
+        pageBreakInside: "avoid",
+      }}
+    >
+      <div style={{ flex: 1 }}>
         <div
           style={{
-            flex: 1,
-            minWidth: 0,
-            display: "flex",
-            justifyContent: "center",
+            fontSize: 14,
+            fontWeight: 700,
+            color: colors.primary,
+            marginBottom: 8,
           }}
         >
-          <div style={{ width: 350, height: 350, borderRadius: 16 }}>
-            <svg width={350} height={350} style={{ overflow: "visible" }}>
-              {(() => {
-                const skills = data.skillAssessment.skills;
-                const total = skills.reduce(
-                  (acc, item) => (acc += item.percentage),
-                  0,
-                );
-                let startAngle = 0;
-                const cx = 160,
-                  cy = 160,
-                  rOuter = 60,
-                  rInner = 25;
-                const pieColors = [
-                  "#bcb8f8",
-                  "#7B67A8",
-                  "#454365",
-                  "#222",
-                  "#3A86FF",
-                  "#40C9A2",
-                  "#FFB830",
-                ];
-                return skills.map((s, i: number) => {
-                  const angle = (s.percentage / total) * 360;
-                  const endAngle = startAngle + angle;
-                  const largeArc = angle > 180 ? 1 : 0;
-                  const rad = (d: number) => (Math.PI / 180) * d;
-                  const x1 = cx + rOuter * Math.cos(rad(startAngle - 90));
-                  const y1 = cy + rOuter * Math.sin(rad(startAngle - 90));
-                  const x2 = cx + rOuter * Math.cos(rad(endAngle - 90));
-                  const y2 = cy + rOuter * Math.sin(rad(endAngle - 90));
-                  const x3 = cx + rInner * Math.cos(rad(endAngle - 90));
-                  const y3 = cy + rInner * Math.sin(rad(endAngle - 90));
-                  const x4 = cx + rInner * Math.cos(rad(startAngle - 90));
-                  const y4 = cy + rInner * Math.sin(rad(startAngle - 90));
-                  const pathData = [
-                    `M ${x1} ${y1}`,
-                    `A ${rOuter} ${rOuter} 0 ${largeArc} 1 ${x2} ${y2}`,
-                    `L ${x3} ${y3}`,
-                    `A ${rInner} ${rInner} 0 ${largeArc} 0 ${x4} ${y4}`,
-                    "Z",
-                  ].join(" ");
-                  const midAngle = startAngle + angle / 2;
-                  const labelR = rOuter + 24;
-                  const lx = cx + labelR * Math.cos(rad(midAngle - 90));
-                  const ly = cy + labelR * Math.sin(rad(midAngle - 90));
-                  const label = `${s.skill} ${s.percentage}%`;
-                  startAngle += angle;
-                  return (
-                    <g key={i}>
-                      <path
-                        d={pathData}
-                        fill={pieColors[i % pieColors.length]}
-                      />
-                      <text
-                        x={lx}
-                        y={ly}
-                        fontSize={16}
-                        fontFamily="Anuphan, sans-serif"
-                        fill="#222"
-                        textAnchor={lx > cx ? "start" : "end"}
-                        alignmentBaseline="middle"
-                        style={{ fontWeight: 500 }}
-                      >
-                        {label}
-                      </text>
-                    </g>
-                  );
-                });
-              })()}
-            </svg>
-          </div>
+          Teachers' Comments
         </div>
-        {/* Skill Table */}
-        <div style={{ minWidth: 0 }}>
-          <div style={{ fontWeight: "bold", marginBottom: 8 }}>
-            {data.skillAssessment.title}
-          </div>
-          <table
-            style={{ borderCollapse: "collapse", fontSize: 15, width: "100%" }}
-          >
-            <thead>
-              <tr style={{ background: "#f5f6fa" }}>
-                <th style={{ textAlign: "left", padding: "6px 12px" }}>
-                  ทักษะ
-                </th>
-                <th style={{ textAlign: "right", padding: "6px 12px" }}>
-                  percent
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.skillAssessment.skills.map((s: any, i: number) => (
-                <tr
-                  key={i}
-                  style={{ background: i % 2 === 0 ? "#fff" : "#f5f6fa" }}
-                >
-                  <td style={{ padding: "6px 12px" }}>
-                    {i + 1}. {s.skill}
-                  </td>
-                  <td style={{ padding: "6px 12px", textAlign: "right" }}>
-                    {s.percentage}%
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      {/* ข้อเสนอแนะ */}
-      <div
-        style={{
-          background: "#e6e6fa",
-          borderRadius: 8,
-          padding: "20px 32px",
-          marginBottom: 32,
-          fontFamily: "Anuphan, sans-serif",
-          fontSize: 18,
-          display: "flex",
-          gap: 32,
-          alignItems: "flex-start",
-        }}
-      >
-        {/* ซ้าย: เส้นกรอก 6 บรรทัด (พื้นหลังขาว) */}
         <div
           style={{
-            flex: 1,
-            background: "#fff",
-            borderRadius: 6,
-            padding: "16px 20px",
-            minHeight: 180,
-            boxShadow: "0 1px 4px #bcb8f822",
-            border: "1.5px solid #bcb8f8",
+            border: `1px solid ${colors.secondary}66`,
+            background: `${colors.background}66`,
+            borderRadius: 12,
+            height: 100,
+            padding: 16,
+            position: "relative",
           }}
         >
-          <b style={{ display: "block", marginBottom: 12 }}>ข้อเสนอแนะ:</b>
-          <div>
-            {[...Array(3)].map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  borderBottom: "1.5px dashed #bcb8f8",
-                  minHeight: 28,
-                  marginBottom: 8,
-                  background: "transparent",
-                }}
-              />
-            ))}
-          </div>
+          <div
+            style={{
+              position: "absolute",
+              top: 35,
+              left: 16,
+              right: 16,
+              height: 1,
+              borderTop: `1px dashed ${colors.primary}33`,
+            }}
+          ></div>
+          <div
+            style={{
+              position: "absolute",
+              top: 70,
+              left: 16,
+              right: 16,
+              height: 1,
+              borderTop: `1px dashed ${colors.primary}33`,
+            }}
+          ></div>
+          {/* <div style={{ fontSize: 13, color: colors.text }}>
+             {data.recommendations}
+          </div> */}
         </div>
-        {/* ขวา: ข้อเสนอแนะจากระบบ */}
-        {/* <div
-          style={{
-            flex: 1,
-            background: "#fff",
-            borderRadius: 6,
-            padding: "16px 20px",
-            fontSize: 16,
-            color: "#222",
-            minHeight: 180,
-            boxShadow: "0 1px 4px #bcb8f822",
-            border: "1.5px solid #bcb8f8",
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
-          {data.recommendations}
-        </div> */}
       </div>
-      {/* ลายเซ็น */}
-      <div style={{ textAlign: "right", marginTop: 48 }}>
-        <div>......................................................</div>
-        <div>{data.teachers.instructor[0].name}</div>
+      <div style={{ width: 220, textAlign: "center" }}>
+        <div
+          style={{
+            borderBottom: `1px solid ${colors.icon}`,
+            marginBottom: 8,
+            height: 40,
+          }}
+        ></div>
+        <div style={{ fontSize: 14, fontWeight: 600, color: colors.text }}>
+          {data.signatureFields?.name ||
+            data.teachers.instructor[0]?.name ||
+            "Instructor"}
+        </div>
+        <div style={{ fontSize: 12, color: "#888", marginTop: 2 }}>
+          {data.signatureFields?.position || "Instructor"}
+        </div>
       </div>
     </div>
+
+    {/* Decorative bottom bar */}
+    <div
+      style={{
+        height: 12,
+        background: `linear-gradient(90deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
+        marginTop: 0,
+        width: "100%",
+        position: "absolute",
+        bottom: 0,
+      }}
+    ></div>
   </div>
 ));
 StudentReportHTML.displayName = "StudentReportHTML";
