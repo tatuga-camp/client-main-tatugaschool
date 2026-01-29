@@ -1,6 +1,10 @@
 import React, { ReactNode, useEffect, useRef, useState } from "react";
 import ButtonProfile from "./button/ButtonProfile";
-import { useGetNotifications, useGetUser } from "../react-query";
+import {
+  useGetLanguage,
+  useGetNotifications,
+  useGetUser,
+} from "../react-query";
 import { QueryClient, UseQueryResult } from "@tanstack/react-query";
 import { IoMenu } from "react-icons/io5";
 import Link from "next/link";
@@ -12,25 +16,25 @@ import { MdHelp } from "react-icons/md";
 import useClickOutside from "../hook/useClickOutside";
 import { IoMdNotifications } from "react-icons/io";
 import Notification from "./common/Notification";
+import { navbarLanguageData } from "../data/languages";
+import Breadcrumbs from "./common/Breadcrumbs";
 
 type Props = {
-  schoolId: string;
-  setSelectMenu: React.Dispatch<React.SetStateAction<string>>;
-  selectMenu: string;
+  schoolId?: string;
   setTrigger: React.Dispatch<React.SetStateAction<boolean>>;
   trigger: boolean;
+  breadcrumbs?: { label: string; href: string }[];
   menuLists: { title: string; icon: ReactNode; url?: string }[];
 };
 function Navbar({
   schoolId,
-  setSelectMenu,
-  selectMenu,
   setTrigger,
   trigger,
   menuLists,
+  breadcrumbs,
 }: Props) {
   const user = useGetUser();
-
+  const language = useGetLanguage();
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [animateBell, setAnimateBell] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
@@ -57,14 +61,16 @@ function Navbar({
     <>
       <div className="flex h-20 flex-row items-center justify-between gap-4 border-b-2 border-black bg-white p-4 text-white">
         <div className="flex gap-2">
-          <button
-            onClick={() => setTrigger(!trigger)}
-            className={`flex text-black ${
-              trigger ? "rotate-90" : "rotate-0"
-            } items-center justify-center rounded-full border-2 border-gray-200 bg-white p-2 text-xl transition duration-150 hover:bg-primary-color hover:text-white`}
-          >
-            <IoMenu />
-          </button>
+          {menuLists.length > 0 && (
+            <button
+              onClick={() => setTrigger(!trigger)}
+              className={`flex text-black ${
+                trigger ? "rotate-90" : "rotate-0"
+              } items-center justify-center rounded-full border-2 border-gray-200 bg-white p-2 text-xl transition duration-150 hover:bg-primary-color hover:text-white`}
+            >
+              <IoMenu />
+            </button>
+          )}
           <Link
             href={
               user.data?.favoritSchool
@@ -88,6 +94,25 @@ function Navbar({
             </div>
           </Link>
         </div>
+        {!schoolId && (
+          <div className="w-40 overflow-auto md:w-max">
+            <nav className="flex w-max items-center justify-center gap-2 text-black md:gap-5">
+              <Link
+                href="/"
+                className={`flex h-10 items-center justify-center rounded-2xl border px-3`}
+              >
+                {navbarLanguageData.school(language.data ?? "en")}
+              </Link>
+              <Link
+                href="/account"
+                className={`flex h-10 items-center justify-center rounded-2xl border px-3 text-black`}
+              >
+                {navbarLanguageData.account(language.data ?? "en")}
+              </Link>
+            </nav>
+          </div>
+        )}
+        {breadcrumbs && <Breadcrumbs breadcrumbs={breadcrumbs} />}
         <div className="w-60 overflow-auto md:w-max">
           <div className="flex w-max items-center justify-center gap-2">
             <a
@@ -122,15 +147,15 @@ function Navbar({
             <ButtonProfile user={user} />
           </div>
         </div>
-        <div className="fixed left-0 top-0 -z-10">
-          <Sidebar
-            menuList={menuLists}
-            setSelectMenu={setSelectMenu}
-            active={trigger}
-            selectMenu={selectMenu}
-            schoolId={schoolId}
-          />
-        </div>
+        {menuLists.length > 0 && schoolId && (
+          <div className="fixed left-0 top-0 -z-10">
+            <Sidebar
+              menuList={menuLists}
+              active={trigger}
+              schoolId={schoolId}
+            />
+          </div>
+        )}
       </div>
     </>
   );

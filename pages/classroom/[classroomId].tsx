@@ -19,17 +19,12 @@ function Index({ classroomId }: { classroomId: string }) {
   const toast = React.useRef<Toast>(null);
   const language = useGetLanguage();
   const router = useRouter();
-  const [selectMenu, setSelectMenu] =
-    React.useState<MenuClassroom>("Classroom");
+  const selectMenu = (router.query.menu as MenuClassroom) || "Classroom";
 
   const classroom = useGetClassroom({
     classId: classroomId,
   });
-  React.useEffect(() => {
-    if (router.isReady) {
-      setSelectMenu((router.query.menu as MenuClassroom) ?? "Classroom");
-    }
-  }, [router.isReady]);
+
   if (classroom.isLoading || !classroom.data) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -56,9 +51,6 @@ function Index({ classroomId }: { classroomId: string }) {
 
       <ClassroomLayout
         selectMenu={selectMenu}
-        setSelectMenu={
-          setSelectMenu as React.Dispatch<React.SetStateAction<string>>
-        }
         classroomId={classroomId}
         schoolId={classroom.data?.schoolId}
       >
@@ -98,7 +90,6 @@ function Index({ classroomId }: { classroomId: string }) {
                       menu: "SettingClassroom",
                     },
                   });
-                  setSelectMenu("SettingClassroom");
                 }}
                 className="flex w-max items-center justify-center gap-1 rounded-2xl bg-white px-2 py-1 text-primary-color hover:bg-primary-color hover:text-white active:scale-110"
               >

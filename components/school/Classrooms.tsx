@@ -34,6 +34,7 @@ import ClassesCreate from "../classroom/ClassroomCreate";
 import LoadingBar from "../common/LoadingBar";
 import PopupLayout from "../layout/PopupLayout";
 import LoadingSpinner from "../common/LoadingSpinner";
+import Link from "next/link";
 
 type Props = {
   schoolId: string;
@@ -207,6 +208,17 @@ function Classrooms({ schoolId }: Props) {
             <p className="max-w-96 break-words text-sm text-gray-400 md:text-base">
               {classesDataLanguage.description(language.data ?? "en")}
             </p>
+            <Link
+              href={`/school/${schoolId}?menu=Subjects`}
+              className="max-w group mt-4 flex items-start gap-3 rounded-xl border border-indigo-100 bg-white/80 p-3 shadow-sm backdrop-blur-sm hover:bg-primary-color hover:text-white md:items-center"
+            >
+              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xl">
+                💡
+              </div>
+              <span className="text-sm font-medium text-indigo-900 group-hover:text-white">
+                {classesDataLanguage.notify(language.data ?? "en")}
+              </span>
+            </Link>
           </section>
           <section className="flex flex-col items-center gap-2 md:gap-1 xl:flex-row">
             <button

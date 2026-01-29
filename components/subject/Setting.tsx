@@ -5,6 +5,12 @@ import { Toast } from "primereact/toast";
 import React, { useEffect } from "react";
 import Swal from "sweetalert2";
 import { defaultBlurHash, ListSubjectRoles } from "../../data";
+import {
+  settingOnClassroomDataLangugae,
+  settingOnSubjectDataLanguage,
+} from "../../data/languages";
+import useGetRoleOnSchool from "../../hook/useGetRoleOnSchool";
+import useGetRoleOnSubject from "../../hook/useGetRoleOnSubject";
 import { ErrorMessages, MemberRole } from "../../interfaces";
 import {
   useDeleteSubject,
@@ -18,24 +24,17 @@ import {
   useUpdateSubject,
 } from "../../react-query";
 import { decodeBlurhashToCanvas } from "../../utils";
+import ConfirmDeleteMessage from "../common/ConfirmDeleteMessage";
 import Switch from "../common/Switch";
 import ListMembers from "../member/ListMembers";
 import SubjectInfomation from "./SubjectInfomation";
 import SubjectPermission from "./SubjectPermission";
-import {
-  settingOnClassroomDataLangugae,
-  settingOnSubjectDataLanguage,
-} from "../../data/languages";
-import ConfirmDeleteMessage from "../common/ConfirmDeleteMessage";
-import useGetRoleOnSubject from "../../hook/useGetRoleOnSubject";
-import useGetRoleOnSchool from "../../hook/useGetRoleOnSchool";
 
 type Props = {
   subjectId: string;
   schoolId: string;
-  setSelectMenu: (menu: string) => void;
 };
-function Setting({ subjectId, setSelectMenu, schoolId }: Props) {
+function Setting({ subjectId, schoolId }: Props) {
   const teacherOnSubjects = useGetTeacherOnSubject({
     subjectId: subjectId,
   });

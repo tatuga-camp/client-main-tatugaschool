@@ -8,17 +8,11 @@ import TawkToChat from "../common/TawkToChat";
 
 type LayoutProps = {
   children: ReactNode;
-  setSelectMenu: React.Dispatch<React.SetStateAction<string>>;
   selectMenu: string;
   schoolId: string;
 };
 
-function SchoolLayout({
-  children,
-  setSelectMenu,
-  selectMenu,
-  schoolId,
-}: LayoutProps) {
+function SchoolLayout({ children, selectMenu, schoolId }: LayoutProps) {
   const navbarRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = React.useState(false);
   const school = useGetSchool({ schoolId });
@@ -26,16 +20,25 @@ function SchoolLayout({
   useClickOutside(navbarRef, () => {
     setActive(() => false); // Close the SubjectNavbar when clicking outside
   });
+
   return (
     <section className="min-h-screen bg-background-color font-Anuphan">
       <div ref={navbarRef} className="sticky top-0 z-50">
         <Navbar
           menuLists={menuSchoolList()}
           schoolId={schoolId}
+          breadcrumbs={[
+            {
+              label: "Home",
+              href: `/`,
+            },
+            {
+              label: "School",
+              href: `/school/${schoolId}`,
+            },
+          ]}
           setTrigger={setActive}
           trigger={active}
-          setSelectMenu={setSelectMenu}
-          selectMenu={selectMenu}
         />
       </div>
       {children}

@@ -1,22 +1,17 @@
-import type { ReactNode } from "react";
-import Header from "../Header";
-import { UseQueryResult } from "@tanstack/react-query";
-import { Subject } from "../../interfaces";
-import FooterSubject, { ListMenuFooter } from "../subject/FooterSubject";
-import React, { useEffect, useRef, useState } from "react";
-import useClickOutside from "../../hook/useClickOutside";
-import Navbar from "../Navbar";
-import { menuSubjectList } from "../../data";
-import { useGetLanguage, useGetSubject } from "../../react-query";
-import { MdLock } from "react-icons/md";
 import Link from "next/link";
+import type { ReactNode } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { MdLock } from "react-icons/md";
+import { menuSubjectList } from "../../data";
 import { subjectIsLockedDataLanguage } from "../../data/languages/subscription";
+import useClickOutside from "../../hook/useClickOutside";
+import { useGetLanguage, useGetSubject } from "../../react-query";
+import Navbar from "../Navbar";
+import FooterSubject, { ListMenuFooter } from "../subject/FooterSubject";
 
 type LayoutProps = {
   children: ReactNode;
   subjectId: string;
-  setSelectMenu: React.Dispatch<React.SetStateAction<string>>;
-  selectMenu: string;
   setSelectFooter: React.Dispatch<React.SetStateAction<ListMenuFooter>>;
   selectFooter: ListMenuFooter;
 };
@@ -24,8 +19,6 @@ type LayoutProps = {
 function SubjectLayout({
   children,
   subjectId,
-  setSelectMenu,
-  selectMenu,
   setSelectFooter,
   selectFooter,
 }: LayoutProps) {
@@ -56,9 +49,21 @@ function SubjectLayout({
           <Navbar
             menuLists={menuSubjectList({ schoolId: subject.data.schoolId })}
             trigger={active}
+            breadcrumbs={[
+              {
+                label: "Home",
+                href: `/`,
+              },
+              {
+                label: "School",
+                href: `/school/${subject.data.schoolId}?menu=Subjects`,
+              },
+              {
+                label: "Subject",
+                href: `/school/${subject.data.schoolId}/subject/${subject.data.id}`,
+              },
+            ]}
             setTrigger={setActive}
-            setSelectMenu={setSelectMenu}
-            selectMenu={selectMenu}
             schoolId={subject.data?.schoolId}
           />
         )}

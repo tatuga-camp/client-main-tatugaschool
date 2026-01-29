@@ -21,11 +21,13 @@ import Classwork from "../../../components/subject/Classworks";
 import { ListMenuFooter } from "../../../components/subject/FooterSubject";
 import Grade from "../../../components/subject/Grade";
 import InviteTeacher from "../../../components/subject/InviteTeacher";
+import NoisyDetector from "../../../components/subject/NoisyDetector";
 import PopUpStudent from "../../../components/subject/PopUpStudent";
 import QRCode from "../../../components/subject/QRCode";
 import Setting from "../../../components/subject/Setting";
 import SilderPicker from "../../../components/subject/SilderPicker";
 import StopWatch from "../../../components/subject/StopWatch";
+import StudentCardPicker from "../../../components/subject/StudentCardPicker";
 import Subject from "../../../components/subject/Subject";
 import { defaultBlurHash, MenuSubject } from "../../../data";
 import { subjectDataLanguage } from "../../../data/languages";
@@ -41,7 +43,6 @@ import {
 } from "../../../react-query";
 import {
   getSignedURLTeacherService,
-  RefreshTokenService,
   RequestUpdateSubjectService,
   UpdateSubjectService,
   UploadSignURLService,
@@ -49,11 +50,8 @@ import {
 import {
   decodeBlurhashToCanvas,
   generateBlurHash,
-  getRefetchtoken,
   localStorageGetRemoveRandomStudents,
 } from "../../../utils";
-import StudentCardPicker from "../../../components/subject/StudentCardPicker";
-import NoisyDetector from "../../../components/subject/NoisyDetector";
 type Props = {
   subjectId: string;
 };
@@ -81,7 +79,7 @@ function Index({ subjectId }: Props) {
     StudentOnSubject[]
   >([]);
 
-  const [selectMenu, setSelectMenu] = React.useState<MenuSubject>("Subject");
+  const selectMenu = (router.query.menu as MenuSubject) || "Subject";
   const [selectFooter, setSelectFooter] =
     React.useState<ListMenuFooter>("EMTY");
   const [selectStudent, setSelectStudent] =
@@ -90,7 +88,6 @@ function Index({ subjectId }: Props) {
   const [loading, setLoading] = React.useState(false);
   const [triggerQRCode, setTriggerQRCode] = React.useState(false);
   const [triggerStopWatch, setTriggerStopWatch] = React.useState(false);
-  const [triggerFullScreen, setTriggerFullScreen] = React.useState(false);
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   useClickOutside(divRef, () => {
     setSelectStudent(null);
@@ -211,15 +208,6 @@ function Index({ subjectId }: Props) {
     }
   }, [studentOnSubjects.data, selectFooter]);
 
-  useEffect(() => {
-    if (router.isReady) {
-      const menu = router.query.menu as MenuSubject;
-      if (menu) {
-        setSelectMenu(menu);
-      }
-    }
-  }, [router.isReady]);
-
   if (subject.error) {
     return (
       <DefaultLayout>
@@ -335,10 +323,6 @@ function Index({ subjectId }: Props) {
         setSelectFooter={setSelectFooter}
         selectFooter={selectFooter}
         subjectId={subjectId}
-        setSelectMenu={
-          setSelectMenu as React.Dispatch<React.SetStateAction<string>>
-        }
-        selectMenu={selectMenu}
       >
         <header className="mx-auto flex w-full items-center justify-center p-5 pb-10 md:max-w-screen-md lg:py-10 xl:max-w-screen-lg">
           <section
@@ -421,7 +405,11 @@ function Index({ subjectId }: Props) {
                     </div>
                   )}
                   <button
-                    onClick={() => setSelectMenu("SettingSubject")}
+                    onClick={() => {
+                      router.replace({
+                        query: { ...router.query, menu: "SettingSubject" },
+                      });
+                    }}
                     className="flex w-max items-center justify-center gap-1 rounded-2xl bg-white px-2 py-1 text-primary-color hover:bg-primary-color hover:text-white active:scale-110"
                   >
                     <CiCircleInfo />
@@ -486,13 +474,7 @@ function Index({ subjectId }: Props) {
             <Attendance toast={toast} subjectId={subjectId} />
           )}
           {selectMenu === "SettingSubject" && school.data && (
-            <Setting
-              subjectId={subjectId}
-              schoolId={school.data.id}
-              setSelectMenu={(menu: string) =>
-                setSelectMenu(menu as MenuSubject)
-              }
-            />
+            <Setting subjectId={subjectId} schoolId={school.data.id} />
           )}
         </main>
         <footer className="h-20"></footer>

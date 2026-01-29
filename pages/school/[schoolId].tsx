@@ -18,13 +18,7 @@ const SchoolPage = ({ schoolId }: { schoolId: string }) => {
   const school = useGetSchool({
     schoolId: schoolId,
   });
-  const [selectMenu, setSelectMenu] = React.useState<MenuSchool>("School");
-
-  useEffect(() => {
-    if (router.isReady) {
-      setSelectMenu((router.query.menu as MenuSchool) ?? "School");
-    }
-  }, [router.isReady]);
+  const selectMenu = (router.query.menu as MenuSchool) || "School";
 
   if (school.isLoading) {
     return (
@@ -73,13 +67,7 @@ const SchoolPage = ({ schoolId }: { schoolId: string }) => {
       <Head>
         <title>{title}</title>
       </Head>
-      <SchoolLayout
-        setSelectMenu={
-          setSelectMenu as React.Dispatch<React.SetStateAction<string>>
-        }
-        selectMenu={selectMenu}
-        schoolId={schoolId}
-      >
+      <SchoolLayout selectMenu={selectMenu} schoolId={schoolId}>
         {(selectMenu === "School" ||
           selectMenu === "Setting" ||
           selectMenu === "Subscription") && <Dashboard school={school.data} />}

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { useRouter } from "next/router";
 import React, { memo, ReactNode } from "react";
-import { defaultBlurHash } from "../data";
+import { defaultBlurHash, MenuSchool } from "../data";
 import { sidebarDataLanguage } from "../data/languages/sidebar";
 import { useGetLanguage, useGetSchool } from "../react-query";
 import { decodeBlurhashToCanvas } from "../utils";
@@ -10,20 +10,14 @@ import PlanBadge from "./common/PlanBadge";
 type Props = {
   active: boolean;
   schoolId: string;
-  setSelectMenu: React.Dispatch<React.SetStateAction<string>>;
-  selectMenu: string;
   menuList: { title: string; icon: ReactNode; url?: string }[];
 };
 
-function Sidebar({
-  active,
-  schoolId,
-  menuList,
-  setSelectMenu,
-  selectMenu,
-}: Props) {
+function Sidebar({ active, schoolId, menuList }: Props) {
   const language = useGetLanguage();
   const router = useRouter();
+  const selectMenu = router.query.menu;
+
   const school = useGetSchool({
     schoolId: schoolId,
   });
@@ -65,7 +59,6 @@ function Sidebar({
                   router.replace({
                     query: { ...router.query, menu: menu.title },
                   });
-                  setSelectMenu(menu.title);
                 }
               }}
               key={index}

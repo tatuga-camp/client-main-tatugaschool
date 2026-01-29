@@ -21,6 +21,16 @@ export const classesDataLanguage = {
         return "This section is for managing classes. You can create, edit, and delete classes here.";
     }
   },
+  notify: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "After creating a classroom, you need to create subjects inside it to start teaching.";
+      case "th":
+        return "หลังจากที่สร้างห้องเรียน คุณครูต้องสร้างรายวิชาเพื่อทำการสอนต่อไป";
+      default:
+        return "After creating a classroom, you need to create subjects inside it to start teaching.";
+    }
+  },
   create: (language: Language) => {
     switch (language) {
       case "en":
