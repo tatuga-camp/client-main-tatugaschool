@@ -327,7 +327,7 @@ export const StudentReportHTML = React.forwardRef<
               {data.attendance.status}
             </div>
           </div>
-          <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+          <div className="flex flex-wrap" style={{ gap: 8, marginBottom: 20 }}>
             {data.attendance.summary.map((s, i) => (
               <div
                 key={i}
@@ -344,11 +344,12 @@ export const StudentReportHTML = React.forwardRef<
                   style={{
                     fontSize: 11,
                     color: "#888",
-                    marginBottom: 4,
+                    marginBottom: 1,
                     whiteSpace: "nowrap",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                   }}
+                  className="h-5"
                 >
                   {s.status}
                 </div>
