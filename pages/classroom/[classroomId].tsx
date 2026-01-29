@@ -50,7 +50,6 @@ function Index({ classroomId }: { classroomId: string }) {
       <Toast ref={toast} />
 
       <ClassroomLayout
-        selectMenu={selectMenu}
         classroomId={classroomId}
         schoolId={classroom.data?.schoolId}
       >
