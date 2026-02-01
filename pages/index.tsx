@@ -1,6 +1,9 @@
 import DefaultLayout from "@/components/layout/DefaultLayout";
 import ListsSchoolComponent from "@/components/school/ListsSchoolComponent";
 import Head from "next/head";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
+import { useGetUser } from "@/react-query";
 
 export default function Home() {
   return (

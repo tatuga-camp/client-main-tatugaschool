@@ -4,13 +4,14 @@ import "@/styles/input-phone.css";
 import type { AppProps } from "next/app";
 import { Prompt } from "next/font/google";
 import { PrimeReactProvider } from "primereact/api";
-import { PagesProgressBar } from "next-nprogress-bar";
-import { useState } from "react";
+import { PagesProgressBar, useRouter } from "next-nprogress-bar";
+import { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 import { ErrorMessages } from "../interfaces";
 import { classNames } from "primereact/utils";
+import { useGetUser } from "../react-query";
 
 const prompt = Prompt({
   subsets: ["latin", "thai"],
@@ -44,6 +45,15 @@ function MyApp({ Component, pageProps }: AppProps) {
         },
       }),
   );
+  const router = useRouter();
+
+  useEffect(() => {
+    const returnUrl = localStorage.getItem("returnUrl");
+    if (returnUrl) {
+      localStorage.removeItem("returnUrl");
+      router.push(returnUrl);
+    }
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

@@ -32,10 +32,13 @@ export const LoginForm = () => {
       // server already set cookie
       // setAccessToken({ access_token: response.accessToken });
       // setRefreshToken({ refresh_token: response.refreshToken });
+      const returnUrl = router.query.returnUrl as string;
       router.push(
-        user.favoritSchool
-          ? `/school/${user.favoritSchool}`
-          : response.redirectUrl,
+        returnUrl
+          ? returnUrl
+          : user.favoritSchool
+            ? `/school/${user.favoritSchool}`
+            : response.redirectUrl,
       );
       Swal.fire({
         title: requestData.successTitle(language.data ?? "en"),
@@ -68,6 +71,11 @@ export const LoginForm = () => {
           Swal.showLoading();
         },
       });
+
+      if (router.query.returnUrl) {
+        localStorage.setItem("returnUrl", router.query.returnUrl as string);
+      }
+
       router.push(`${process.env.NEXT_PUBLIC_SERVER_URL}/v1/auth/google`);
     } catch (error) {
       console.log(error);

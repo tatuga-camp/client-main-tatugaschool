@@ -35,7 +35,10 @@ const createAxiosInstance = () => {
         removeAccessToken();
         removeRefreshToken();
         if (typeof window !== "undefined") {
-          window.location.href = "/auth/sign-in";
+          const returnUrl = encodeURIComponent(
+            window.location.pathname + window.location.search,
+          );
+          window.location.href = `/auth/sign-in?returnUrl=${returnUrl}`;
         }
         throw new axios.Cancel("Session expired");
       }
@@ -57,7 +60,10 @@ const createAxiosInstance = () => {
           removeAccessToken();
           removeRefreshToken();
           if (typeof window !== "undefined") {
-            window.location.href = "/auth/sign-in";
+            const returnUrl = encodeURIComponent(
+              window.location.pathname + window.location.search,
+            );
+            window.location.href = `/auth/sign-in?returnUrl=${returnUrl}`;
           }
           throw error;
         }
@@ -99,7 +105,10 @@ const createAxiosInstance = () => {
           removeAccessToken();
           removeRefreshToken();
           if (typeof window !== "undefined") {
-            window.location.href = "/auth/sign-in";
+            const returnUrl = encodeURIComponent(
+              window.location.pathname + window.location.search,
+            );
+            window.location.href = `/auth/sign-in?returnUrl=${returnUrl}`;
           }
         }
       }
