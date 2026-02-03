@@ -34,3 +34,4 @@ export * from "./GroupOnSubject";
 export * from "./TeachingMaterial";
 export * from "./FileOnTeachingMaterial";
 export * from "./Notification";
+export * from "./VideoConfig";

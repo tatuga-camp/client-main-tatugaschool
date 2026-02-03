@@ -1,4 +1,4 @@
-import { FileOnAssignment } from "@/interfaces";
+import { FileOnAssignment, VideoConfig } from "@/interfaces";
 
 import createAxiosInstance from "./api-service";
 
@@ -32,6 +32,28 @@ export async function CreateFileAssignmentService(
   try {
     const response = await axiosInstance({
       method: "POST",
+      url: "/v1/file-assignments",
+      data: { ...input },
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data;
+  }
+}
+
+export type RequestUpdateFileAssignmentService = {
+  id: string;
+  preventFastForward?: boolean;
+};
+
+type ResponseUpdateFileAssignmentService = FileOnAssignment;
+
+export async function UpdateFileAssignmentService(
+  input: RequestUpdateFileAssignmentService,
+): Promise<ResponseUpdateFileAssignmentService> {
+  try {
+    const response = await axiosInstance({
+      method: "PATCH",
       url: "/v1/file-assignments",
       data: { ...input },
     });

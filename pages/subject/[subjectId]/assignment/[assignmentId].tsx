@@ -120,6 +120,7 @@ function Index({
             file: null,
             type: file.type,
             data: file,
+            fileOnAssignment: file,
             name: file.url.split("/").pop() as string,
             url: file.url,
           };

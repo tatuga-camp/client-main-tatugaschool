@@ -9,4 +9,5 @@ export interface FileOnAssignment {
   schoolId: string;
   blurHash?: string | null | undefined;
   assignmentId: string;
+  preventFastForward?: boolean;
 }

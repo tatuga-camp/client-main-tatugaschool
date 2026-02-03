@@ -6,15 +6,26 @@ import {
   Skill,
 } from "../../interfaces";
 import TextEditor from "../common/TextEditor";
-import { FaRegFile, FaRegFileImage } from "react-icons/fa6";
-import { MdDelete, MdLink, MdOutlineFileUpload } from "react-icons/md";
+import { FaRegFile, FaRegFileImage, FaRegFileVideo } from "react-icons/fa6";
+import {
+  MdDelete,
+  MdLink,
+  MdOutlineFileUpload,
+  MdSettings,
+} from "react-icons/md";
 import Dropdown from "../common/Dropdown";
+import VideoConfigurator from "../common/VideoConfigurator";
+import { VideoConfig } from "../../interfaces/VideoConfig";
 import { classworkLists } from "./ClassworkCreate";
 import InputNumber from "../common/InputNumber";
 import Switch from "../common/Switch";
 import { SiGooglegemini } from "react-icons/si";
 import { CgInfo } from "react-icons/cg";
-import { useGetLanguage, useUpdateSkillToAssignment } from "../../react-query";
+import {
+  useGetLanguage,
+  useUpdateFileOnAssignment,
+  useUpdateSkillToAssignment,
+} from "../../react-query";
 import LoadingSpinner from "../common/LoadingSpinner";
 import { classworkViewDataLanguage } from "../../data/languages";
 
@@ -24,6 +35,8 @@ export type FileClasswork = {
   type: string;
   name: string;
   url: string;
+  fileOnAssignment: FileOnAssignment | null;
+  videoConfig?: VideoConfig;
 };
 
 type Props = {
@@ -42,6 +55,7 @@ type Props = {
   }) => void;
   onDeleteFile: (file: FileClasswork) => void;
   onUploadFile: (file: FileClasswork[]) => void;
+  onUpdateFile?: (file: FileClasswork) => void;
 };
 function ClassworkView({
   classwork,
@@ -50,14 +64,36 @@ function ClassworkView({
   files,
   onDeleteFile,
   onUploadFile,
+  onUpdateFile,
 }: Props) {
   const refetchSkill = useUpdateSkillToAssignment();
   const language = useGetLanguage();
   const [triggerLink, setTriggerLink] = React.useState(false);
   const [linkValue, setLinkValue] = React.useState("");
-
+  const [configuringVideo, setConfiguringVideo] =
+    React.useState<FileClasswork | null>(null);
+  const updateFile = useUpdateFileOnAssignment();
   return (
     <main className="flex h-max w-full">
+      {configuringVideo && (
+        <VideoConfigurator
+          fileUrl={configuringVideo.url}
+          initialConfig={{
+            preventFastForward:
+              configuringVideo.fileOnAssignment?.preventFastForward ?? false,
+            questions: [],
+          }}
+          onClose={() => setConfiguringVideo(null)}
+          onSave={async (config) => {
+            console.log(config);
+            if (configuringVideo.fileOnAssignment?.id)
+              await updateFile.mutateAsync({
+                id: configuringVideo.fileOnAssignment.id,
+                preventFastForward: config.preventFastForward,
+              });
+          }}
+        />
+      )}
       {triggerLink && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="flex w-96 flex-col gap-5 rounded-2xl bg-white p-5">
@@ -91,6 +127,7 @@ function ClassworkView({
                       type: "LINK",
                       name: linkValue,
                       url: linkValue,
+                      fileOnAssignment: null,
                     },
                   ]);
                   setTriggerLink(false);
@@ -139,10 +176,11 @@ function ClassworkView({
             </div>
           )}
 
-          <ul className="flex h-max w-full flex-col gap-2">
+          <ul className="mt-10 flex h-max w-full flex-col gap-2">
             {files?.map((file, index) => {
               const isImage = file.type.includes("image");
               const isLink = file.type === "LINK" || file.type === "url";
+              const isVideo = file.type.includes("video");
               return (
                 <li
                   key={index}
@@ -154,6 +192,8 @@ function ClassworkView({
                         <MdLink />
                       ) : isImage ? (
                         <FaRegFileImage />
+                      ) : isVideo ? (
+                        <FaRegFileVideo />
                       ) : (
                         <FaRegFile />
                       )}
@@ -168,13 +208,27 @@ function ClassworkView({
                       </span>
                     </a>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => onDeleteFile(file)}
-                    className="mr-5 rounded-full p-2 text-xl text-red-500 hover:bg-red-300/50 active:scale-105"
-                  >
-                    <MdDelete />
-                  </button>
+                  <div className="mr-5 flex items-center">
+                    {isVideo && (
+                      <button
+                        type="button"
+                        onClick={() => setConfiguringVideo(file)}
+                        className="rounded-full p-2 text-xl text-gray-500 hover:bg-gray-200 active:scale-105"
+                      >
+                        <MdSettings />
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (confirm("Do you want to delete?"))
+                          onDeleteFile(file);
+                      }}
+                      className="rounded-full p-2 text-xl text-red-500 hover:bg-red-300/50 active:scale-105"
+                    >
+                      <MdDelete />
+                    </button>
+                  </div>
                 </li>
               );
             })}
@@ -201,6 +255,8 @@ function ClassworkView({
                     return {
                       file,
                       data: null,
+                      id: null,
+                      fileOnAssignment: null,
                       type: file.type,
                       name: file.name,
                       url: URL.createObjectURL(file),

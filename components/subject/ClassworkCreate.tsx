@@ -127,6 +127,12 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
     }
   };
 
+  const handleUpdateFile = (file: FileClasswork) => {
+    setFiles((prev) => {
+      return prev.map((f) => (f.url === file.url ? file : f));
+    });
+  };
+
   const handleCreateClasswork = async (e: React.FormEvent) => {
     try {
       e.preventDefault();
@@ -315,6 +321,7 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
           files={files}
           onDeleteFile={handleDeleteFile}
           onUploadFile={(file) => handleFileChange(file)}
+          onUpdateFile={handleUpdateFile}
         />
       </main>
     </form>

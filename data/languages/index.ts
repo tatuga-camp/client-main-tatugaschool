@@ -17,3 +17,4 @@ export * from "./classwork";
 export * from "./grade";
 export * from "./attendance";
 export * from "./card-picker";
+export * from "./video-config";

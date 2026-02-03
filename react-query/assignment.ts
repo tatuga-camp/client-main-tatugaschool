@@ -13,10 +13,12 @@ import {
   RequestDeleteFileAssignmentService,
   RequestReorderAssignmentService,
   RequestUpdateAssignmentService,
+  RequestUpdateFileAssignmentService,
   RequestUpdateSkillToAssignmentService,
   ResponseGetAssignmentByIdService,
   ResponseGetAssignmentsService,
   UpdateAssignmentService,
+  UpdateFileAssignmentService,
   UpdateSkillToAssignmentService,
 } from "../services";
 
@@ -200,6 +202,60 @@ export function useCreateFileOnAssignment() {
               return {
                 ...prevAssignment,
                 files: [...prevAssignment.files, data],
+              };
+            } else {
+              return prevAssignment;
+            }
+          });
+        },
+      );
+    },
+  });
+}
+export function useUpdateFileOnAssignment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["update-file-assignment"],
+    mutationFn: (request: RequestUpdateFileAssignmentService) =>
+      UpdateFileAssignmentService(request),
+    onSuccess(data, variables, context) {
+      const cacheAssignment = queryClient.getQueryData([
+        "assignment",
+        { id: data.assignmentId },
+      ]);
+
+      if (cacheAssignment) {
+        queryClient.setQueryData(
+          ["assignment", { id: data.assignmentId }],
+          (oldData: ResponseGetAssignmentByIdService) => {
+            return {
+              ...oldData,
+              files: oldData.files.map((old) => {
+                return old.id === data.id ? data : old;
+              }),
+            };
+          },
+        );
+      }
+
+      const cacheAssignments = queryClient.getQueryData([
+        "assignments",
+        { subjectId: data.subjectId },
+      ]);
+
+      if (!cacheAssignments) return;
+
+      queryClient.setQueryData(
+        ["assignments", { subjectId: data.subjectId }],
+        (oldData: ResponseGetAssignmentsService) => {
+          return oldData.map((prevAssignment) => {
+            if (prevAssignment.id === data.assignmentId) {
+              return {
+                ...prevAssignment,
+                files: prevAssignment.files.filter((old) =>
+                  old.id === data.id ? data : old,
+                ),
               };
             } else {
               return prevAssignment;
