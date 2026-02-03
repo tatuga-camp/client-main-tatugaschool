@@ -59,6 +59,10 @@ function SubjectLayout({
                 href: `/school/${subject.data.schoolId}?menu=Subjects`,
               },
               {
+                label: "Classroom",
+                href: `/school/${subject.data.schoolId}/classroom/${subject.data.classId}`,
+              },
+              {
                 label: "Subject",
                 href: `/school/${subject.data.schoolId}/subject/${subject.data.id}`,
               },
