@@ -60,11 +60,11 @@ function SubjectLayout({
               },
               {
                 label: "Classroom",
-                href: `/school/${subject.data.schoolId}/classroom/${subject.data.classId}`,
+                href: `/classroom/${subject.data.classId}`,
               },
               {
                 label: "Subject",
-                href: `/school/${subject.data.schoolId}/subject/${subject.data.id}`,
+                href: `/subject/${subject.data.id}`,
               },
             ]}
             setTrigger={setActive}

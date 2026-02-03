@@ -39,7 +39,7 @@ function ClassroomLayout({ children, classroomId, schoolId }: LayoutProps) {
               },
               {
                 label: "Classroom",
-                href: `/school/${classroom.data.schoolId}/classroom/${classroom.data.id}`,
+                href: `/classroom/${classroom.data.id}`,
               },
             ]}
             setTrigger={setActive}
