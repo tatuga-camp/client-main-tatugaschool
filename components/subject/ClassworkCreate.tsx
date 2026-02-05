@@ -11,6 +11,7 @@ import {
   MdOutlineDataSaverOn,
   MdPublish,
   MdUnpublished,
+  MdVideoLibrary,
 } from "react-icons/md";
 import Swal from "sweetalert2";
 import { classworkHeadMenuBarDataLanguage } from "../../data/languages";
@@ -73,17 +74,6 @@ export const menuClassworkList: {
   },
 ];
 
-export const classworkLists: { title: AssignmentType; icon: ReactNode }[] = [
-  {
-    title: "Assignment",
-    icon: <MdAssignment />,
-  },
-  {
-    title: "Material",
-    icon: <FaRegFile />,
-  },
-];
-
 function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -96,7 +86,8 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
   const [loading, setLoading] = React.useState(false);
   const adjustedStyle = useAdjustPosition(divRef, 20); // 20px padding
   const create = useCreateAssignment();
-  const [classwork, setClasswork] = React.useState<{
+
+  const [classworkData, setClassworkData] = React.useState<{
     title?: string;
     description?: string;
     type?: AssignmentType;
@@ -105,6 +96,7 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
     allowWeight?: boolean;
     beginDate?: string;
     dueDate?: string;
+    classwork?: Assignment;
   }>({
     type: "Assignment",
     beginDate: convertToDateTimeLocalString(new Date()),
@@ -139,25 +131,24 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
       const submitter = (e.nativeEvent as SubmitEvent)
         .submitter as HTMLButtonElement;
       if (
-        !classwork?.title ||
-        !classwork?.description ||
-        !classwork?.type ||
-        !classwork?.beginDate
+        !classworkData?.title ||
+        !classworkData?.type ||
+        !classworkData?.beginDate
       ) {
         throw new Error("Description is required");
       }
       setLoading(true);
 
       const assignment = await create.mutateAsync({
-        title: classwork?.title,
-        description: classwork?.description,
-        type: classwork?.type,
-        maxScore: classwork?.maxScore,
-        weight: classwork?.weight,
-        ...(classwork.dueDate && {
-          dueDate: new Date(classwork.dueDate).toISOString(),
+        title: classworkData?.title,
+        description: classworkData?.description,
+        type: classworkData?.type,
+        maxScore: classworkData?.maxScore,
+        weight: classworkData?.weight,
+        ...(classworkData.dueDate && {
+          dueDate: new Date(classworkData.dueDate).toISOString(),
         }),
-        beginDate: new Date(classwork.beginDate).toISOString(),
+        beginDate: new Date(classworkData.beginDate).toISOString(),
         subjectId: subjectId,
         status: submitter.value as AssignmentStatus,
       });
@@ -232,8 +223,45 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
     }
   };
 
+  const handleCreateClassworkForVideoQuiz = async (): Promise<
+    Assignment | undefined
+  > => {
+    try {
+      const response = await create.mutateAsync({
+        title: "Draft Video Quize",
+        description: "Draft Video Quize",
+        beginDate: new Date().toISOString(),
+        type: "VideoQuiz",
+        status: "Draft",
+        subjectId: subjectId,
+      });
+      setClassworkData(() => {
+        return {
+          classwork: response,
+        };
+      });
+      router.push({
+        pathname: `/subject/${subjectId}/assignment/${response.id}`,
+        query: { menu: "classwork" as MenuAssignmentQuery },
+      });
+      return response;
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+      let result = error as ErrorMessages;
+      Swal.fire({
+        title: result.error ? result.error : "Something Went Wrong",
+        text: result.message.toString(),
+        footer: result.statusCode
+          ? "Code Error: " + result.statusCode?.toString()
+          : "",
+        icon: "error",
+      });
+    }
+  };
+
   return (
-    <form onSubmit={handleCreateClasswork} className="flex flex-col">
+    <form onSubmit={handleCreateClasswork} className="flex h-full flex-col">
       <nav className="flex h-20 w-full items-center justify-between border-b bg-white px-5">
         <section className="flex items-center gap-4">
           <button
@@ -243,11 +271,25 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
           >
             <IoClose />
           </button>
-
           <div className="flex h-10 w-10 items-center justify-center rounded-full border bg-primary-color/30 text-3xl text-primary-color">
             <MdAssignmentAdd />
           </div>
-          <h1 className="text-lg font-medium">Classwork</h1>
+          <h1 className="max-w-full truncate text-lg font-medium">
+            <input
+              required
+              placeholder="Type your title here."
+              className="border-b outline-none"
+              value={classworkData.title}
+              onChange={(e) => {
+                setClassworkData((prev) => {
+                  return {
+                    ...prev,
+                    title: e.target.value,
+                  };
+                });
+              }}
+            />
+          </h1>{" "}
         </section>
         <section className="flex items-center gap-[2px]">
           <button
@@ -314,10 +356,17 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
       {loading && (
         <ProgressBar mode="indeterminate" style={{ height: "6px" }} />
       )}
-      <main className="flex h-max max-h-screen w-full overflow-auto">
+      <main className="h-full w-full overflow-auto">
         <ClasswordView
-          classwork={classwork as Assignment}
-          onChange={(d) => setClasswork((prev) => ({ ...prev, ...d }))}
+          subjectId={subjectId}
+          schoolId={schoolId}
+          onChange={async (d) => {
+            if (d.type === "VideoQuiz") {
+              await handleCreateClassworkForVideoQuiz();
+              return;
+            }
+            setClassworkData((prev) => ({ ...prev, ...d }));
+          }}
           files={files}
           onDeleteFile={handleDeleteFile}
           onUploadFile={(file) => handleFileChange(file)}

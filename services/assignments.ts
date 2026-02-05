@@ -15,7 +15,7 @@ const axiosInstance = createAxiosInstance();
 
 export type RequestCreateAssignmentService = {
   title: string;
-  description: string;
+  description?: string;
   maxScore?: number;
   weight?: number | null;
   beginDate: string;
@@ -129,6 +129,8 @@ export type RequestUpdateAssignmentService = {
     beginDate?: string;
     dueDate?: string | null;
     status?: AssignmentStatus;
+    videoURL?: string;
+    preventFastForward?: boolean;
   };
 };
 

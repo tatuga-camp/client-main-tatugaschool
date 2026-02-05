@@ -2,7 +2,7 @@ import { GetServerSideProps } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ProgressBar } from "primereact/progressbar";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { IoChevronDownSharp, IoClose } from "react-icons/io5";
 import { MdAssignmentAdd } from "react-icons/md";
 import Swal from "sweetalert2";
@@ -26,6 +26,8 @@ import {
   useDeleteFileOnAssignment,
   useGetAssignment,
   useGetLanguage,
+  useGetSchool,
+  useGetSubject,
   useUpdateAssignment,
 } from "../../../../react-query";
 import {
@@ -70,6 +72,9 @@ function Index({
   assignmentId: string;
 }) {
   const router = useRouter();
+  const subject = useGetSubject({
+    subjectId,
+  });
   const language = useGetLanguage();
   const [triggerOption, setTriggerOption] = React.useState(false);
   const [files, setFiles] = React.useState<FileClasswork[]>([]);
@@ -81,6 +86,9 @@ function Index({
   const createFileAssignment = useCreateFileOnAssignment();
   const deleteAssignment = useDeleteAssignment();
   const adjustedStyle = useAdjustPosition(divRef, 20); // 20px padding
+  const [assignmentTitle, setAssignmentTitle] = useState(
+    assignment.data?.title,
+  );
   const title = assignment.data?.title;
   const [classwork, setClasswork] = React.useState<
     Assignment & { allowWeight: boolean }
@@ -114,6 +122,7 @@ function Index({
           ? convertToDateTimeLocalString(new Date(assignment.data.dueDate))
           : undefined,
       });
+      setAssignmentTitle(assignment.data.title);
       setFiles(() => {
         return assignment.data.files?.map((file) => {
           return {
@@ -154,7 +163,7 @@ function Index({
           assignmentId: assignmentId,
         },
         data: {
-          title: classwork?.title,
+          title: assignmentTitle,
           description: classwork?.description,
           maxScore: classwork?.maxScore,
           weight: classwork?.weight,
@@ -317,7 +326,13 @@ function Index({
               <MdAssignmentAdd />
             </div>
             <h1 className="max-w-full truncate text-lg font-medium">
-              {classwork?.title}
+              <input
+                className="border-b outline-none"
+                value={assignmentTitle}
+                onChange={(e) => {
+                  setAssignmentTitle(e.target.value);
+                }}
+              />
             </h1>
           </section>
           {selectMenu === "classwork" && (
@@ -467,16 +482,18 @@ function Index({
         ref={bodyRef}
         className={`h-full max-h-screen w-full overflow-auto font-Anuphan`}
       >
-        {selectMenu === "classwork" && assignment?.data && (
+        {selectMenu === "classwork" && assignment.data && classwork && (
           <ClasswordView
             skills={assignment?.data?.skills}
-            classwork={classwork as Assignment}
+            classwork={classwork}
             onChange={(d) =>
               setClasswork((prev) => {
                 if (!prev) return;
                 return { ...prev, ...d };
               })
             }
+            subjectId={subjectId}
+            schoolId={assignment.data?.schoolId}
             files={files}
             onDeleteFile={(file) => handleDeleteFile(file)}
             onUploadFile={(file) => handleUploadFile(file)}

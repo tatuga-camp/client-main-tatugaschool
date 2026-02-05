@@ -92,12 +92,9 @@ export function useCreateAssignment() {
     mutationFn: (request: RequestCreateAssignmentService) =>
       CreateAssignmentService(request),
     onSuccess(data, variables, context) {
-      queryClient.setQueryData(
-        ["assignments", { subjectId: data.subjectId }],
-        (oldData: ResponseGetAssignmentsService) => {
-          return [...(oldData ?? []), data];
-        },
-      );
+      queryClient.refetchQueries({
+        queryKey: ["assignments", { subjectId: data.subjectId }],
+      });
 
       if (data.type === "Assignment") {
         updateSkill.mutate({

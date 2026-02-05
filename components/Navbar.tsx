@@ -89,7 +89,7 @@ function Navbar({
                 alt="logo tatuga school"
               />
             </div>
-            <div className="hidden text-xs font-bold uppercase text-icon-color md:block md:text-base">
+            <div className="hidden text-xs font-bold uppercase text-icon-color md:text-base xl:block">
               Tatuga School
             </div>
           </Link>
@@ -115,14 +115,6 @@ function Navbar({
         {breadcrumbs && <Breadcrumbs breadcrumbs={breadcrumbs} />}
         <div className="w-60 overflow-auto md:w-max">
           <div className="flex w-max items-center justify-center gap-2">
-            <a
-              target="_blank"
-              title="Help"
-              className="text-gray-200 hover:text-gray-500"
-              href="https://document-tatugaschool.my.canva.site"
-            >
-              <MdHelp className="text-3xl" />
-            </a>
             {/* --- Notification Button --- */}
             <div className="relative" ref={notificationRef}>
               <button

@@ -452,7 +452,7 @@ function Index({ subjectId }: Props) {
             </div>
           </section>
         </header>
-        <main className="flex w-full flex-col items-center">
+        <main>
           {selectMenu === "Subject" && (
             <Subject
               toast={toast}

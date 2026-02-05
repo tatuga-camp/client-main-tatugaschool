@@ -64,11 +64,11 @@ export const videoConfigLanguage = {
   popupQuestions: (language: Language) => {
     switch (language) {
       case "en":
-        return "Popup Questions (comming soon)";
+        return "Popup Questions";
       case "th":
-        return "คำถามป๊อปอัพ (เร็วๆ นี้)";
+        return "คำถามป๊อปอัพ";
       default:
-        return "Popup Questions (comming soon)";
+        return "Popup Questions";
     }
   },
   newQuestionAt: (language: Language) => {
