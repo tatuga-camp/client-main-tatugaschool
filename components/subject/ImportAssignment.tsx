@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
   useCreateAssignment,
   useCreateFileOnAssignment,
+  useCreateQuestionOnVideo,
   useGetAssignments,
   useGetLanguage,
   useGetMemberOnSchoolBySchool,
@@ -17,6 +18,7 @@ import {
   EducationYear,
   ErrorMessages,
   FileOnAssignment,
+  QuestionOnVideo,
   Subject,
   TeacherOnSubject,
 } from "../../interfaces";
@@ -257,8 +259,13 @@ function AssignmentLists({
   const classworks = useGetAssignments({
     subjectId: subjectId,
   });
+  const createQuestions = useCreateQuestionOnVideo();
   const [selectClasswork, setSelectClasswork] = useState<
-    (Assignment & { files?: FileOnAssignment[] }) | null
+    | (Assignment & {
+        files?: FileOnAssignment[];
+        questions: QuestionOnVideo[];
+      })
+    | null
   >(null);
   const [loading, setLoading] = useState(false);
 
@@ -291,6 +298,19 @@ function AssignmentLists({
               url: f.url,
               size: f.size,
               ...(f.blurHash && { blurHash: f.blurHash }),
+            }),
+          ),
+        );
+      }
+      if (selectClasswork.questions && selectClasswork.questions.length > 0) {
+        await Promise.allSettled(
+          selectClasswork.questions.map((f) =>
+            createQuestions.mutateAsync({
+              assignmentId: classwork.id,
+              question: f.question,
+              correctOptions: f.correctOptions,
+              timestamp: f.timestamp,
+              options: f.options,
             }),
           ),
         );

@@ -4,6 +4,7 @@ import {
   AssignmentType,
   FileOnAssignment,
   Grade,
+  QuestionOnVideo,
   ScoreOnStudent,
   ScoreOnSubject,
   Skill,
@@ -52,6 +53,7 @@ export type ResponseGetAssignmentsService = (Assignment & {
   summitNumber: number;
   penddingNumber: number;
   files: FileOnAssignment[];
+  questions: QuestionOnVideo[];
 })[];
 
 export async function GetAssignmentsBySubjectIdService(input: {
