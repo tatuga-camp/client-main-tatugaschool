@@ -278,6 +278,8 @@ function AssignmentLists({
         status: selectClasswork.status,
         maxScore: selectClasswork.maxScore,
         beginDate: selectClasswork.beginDate,
+        videoURL: selectClasswork.videoURL,
+        preventFastForward: selectClasswork.preventFastForward,
       });
 
       if (selectClasswork.files && selectClasswork.files?.length > 0) {

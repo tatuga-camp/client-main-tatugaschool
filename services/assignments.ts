@@ -23,6 +23,8 @@ export type RequestCreateAssignmentService = {
   subjectId: string;
   type: AssignmentType;
   status: AssignmentStatus;
+  videoURL?: string;
+  preventFastForward?: boolean;
 };
 
 type ResponseCreateAssignmentService = Assignment;
