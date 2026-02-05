@@ -1,4 +1,4 @@
-import { FileOnAssignment, VideoConfig } from "@/interfaces";
+import { FileOnAssignment } from "@/interfaces";
 
 import createAxiosInstance from "./api-service";
 
