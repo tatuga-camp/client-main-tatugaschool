@@ -115,6 +115,16 @@ export const classworkHeadMenuBarDataLanguage = {
           return "Assign Student";
       }
     },
+    exportclasswork: (language: Language) => {
+      switch (language) {
+        case "en":
+          return "Export Classwork";
+        case "th":
+          return "มอบหมายงานให้รายวิชาอื่น";
+        default:
+          return "Export Classwork";
+      }
+    },
   },
   description: {
     classwork: (language: Language) => {
@@ -145,6 +155,16 @@ export const classworkHeadMenuBarDataLanguage = {
           return "จัดการการมอบหมายงานให้นักเรียนในรายวิชา";
         default:
           return "Manage the assigning of student work here";
+      }
+    },
+    exportclasswork: (language: Language) => {
+      switch (language) {
+        case "en":
+          return "You can export this classwork to other subject here.";
+        case "th":
+          return "คุณสามารถมอบหมายงานชิ้นนี้ ให้กับรายวิชาอื่น";
+        default:
+          return "You can export this classwork to other subject here.";
       }
     },
   },

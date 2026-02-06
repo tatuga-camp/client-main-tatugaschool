@@ -7,6 +7,7 @@ import { IoChevronDownSharp, IoClose } from "react-icons/io5";
 import { MdAssignmentAdd } from "react-icons/md";
 import Swal from "sweetalert2";
 import ClassStudentAssignWork from "../../../../components/subject/ClassStudentAssignWork";
+import ClassworkExport from "../../../../components/subject/ClassworkExport";
 import ClassStudentWork from "../../../../components/subject/ClassStudentWork";
 import ClasswordView, {
   FileClasswork,
@@ -60,6 +61,11 @@ const menuLists = [
     title: "Manage Assigning",
     query: "manageassigning",
     description: "Manage the assigning of student work here",
+  },
+  {
+    title: "Export Classwork",
+    query: "exportclasswork",
+    description: "You can export this classwork to other subject here.",
   },
 ] as const;
 export type MenuAssignmentQuery = (typeof menuLists)[number]["query"];
@@ -453,7 +459,7 @@ function Index({
                   }}
                   onClick={() => setSelectMenu(menu.query)}
                   key={index}
-                  className={`flex h-full flex-col justify-center gap-0 p-2 px-10 ${
+                  className={`flex h-full flex-col justify-center gap-0 p-2 xl:px-10 ${
                     selectMenu === menu.query
                       ? "bg-primary-color text-white hover:bg-primary-color"
                       : "bg-white text-black hover:bg-gray-100"
@@ -513,6 +519,14 @@ function Index({
           <ClassStudentAssignWork
             assignmentId={assignmentId}
             subjectId={subjectId}
+          />
+        )}
+        {selectMenu === "exportclasswork" && assignment.data && (
+          <ClassworkExport
+            assignment={assignment.data}
+            files={assignment.data.files}
+            schoolId={assignment.data.schoolId}
+            currentSubjectId={subjectId}
           />
         )}
       </main>
