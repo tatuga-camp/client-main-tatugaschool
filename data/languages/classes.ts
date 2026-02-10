@@ -26,7 +26,7 @@ export const classesDataLanguage = {
       case "en":
         return "After creating a classroom, you need to create subjects inside it to start teaching.";
       case "th":
-        return "หลังจากที่สร้างห้องเรียน คุณครูต้องสร้างรายวิชาเพื่อทำการสอนต่อไป";
+        return "หลังจากที่สร้างชั้นเรียน คุณครูต้องสร้างรายวิชาเพื่อทำการสอนต่อไป";
       default:
         return "After creating a classroom, you need to create subjects inside it to start teaching.";
     }

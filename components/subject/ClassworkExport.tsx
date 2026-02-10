@@ -76,11 +76,6 @@ function ClassworkExport({
   const createQuestions = useCreateQuestionOnVideo();
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const year = new Date().getFullYear();
-    setEducationYear(() => `1/${year}`);
-  }, []);
-
   React.useEffect(() => {
     if (subjects.data && user.data) {
       setSelectFilterUserId(user.data.id);

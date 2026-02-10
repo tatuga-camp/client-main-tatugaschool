@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SiMicrosoftexcel } from "react-icons/si";
 import { Classroom, EducationYear, Student } from "../../interfaces";
 import { FaUser } from "react-icons/fa6";
 import Image from "next/image";
-import { decodeBlurhashToCanvas } from "../../utils";
+import { decodeBlurhashToCanvas, getDefaultSubjectFilter } from "../../utils";
 import { defaultBlurHash } from "../../data";
 import {
   useGetGradeSummaryReportOnClassroom,
@@ -24,15 +24,28 @@ function GradeSummaryReport({
   students: Student[];
   classroom: Classroom;
 }) {
-  const langugae = useGetLanguage();
-  const [educationYear, setEducationYear] = useState<EducationYear>(() => {
-    const year = new Date().getFullYear();
-    return `1/${year}`;
+  const defaultFilter = getDefaultSubjectFilter({
+    schoolId: classroom.schoolId,
   });
+
+  const langugae = useGetLanguage();
+  const [educationYear, setEducationYear] = useState<
+    EducationYear | undefined
+  >();
   const grades = useGetGradeSummaryReportOnClassroom({
     classId: classroom.id,
-    educationYear: educationYear,
+    educationYear: educationYear as EducationYear,
   });
+
+  useEffect(() => {
+    if (defaultFilter) {
+      setEducationYear(defaultFilter.educationYear);
+    } else {
+      const year = new Date().getFullYear();
+      setEducationYear(() => `1/${year}`);
+    }
+  }, []);
+
   return (
     <>
       <header className="mx-auto flex w-full flex-col justify-between gap-4 p-3 md:max-w-screen-md md:flex-row md:gap-0 md:px-5 xl:max-w-screen-lg">
@@ -53,11 +66,13 @@ function GradeSummaryReport({
             <span>
               {subjectsDataLanguage.educationYear(langugae.data ?? "en")}
             </span>
-            <InputEducationYear
-              value={educationYear}
-              onChange={(v) => setEducationYear(v as EducationYear)}
-              required
-            />
+            {educationYear && (
+              <InputEducationYear
+                value={educationYear}
+                onChange={(v) => setEducationYear(v as EducationYear)}
+                required
+              />
+            )}
           </div>
         </section>
       </header>
