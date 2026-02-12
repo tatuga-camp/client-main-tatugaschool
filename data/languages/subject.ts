@@ -332,7 +332,7 @@ export const footerOnSubjectDataLangugae = {
       case "en":
         return "Slide Picker";
       case "th":
-        return "ไลท์สุ่มชื่อ";
+        return "สไลด์สุ่มชื่อ";
       default:
         return "Slide Picker";
     }
