@@ -245,16 +245,18 @@ function Attendance({
       <main className="mx-auto mt-5 flex w-full flex-col items-center md:max-w-screen-md md:px-0 lg:max-w-screen-lg 2xl:max-w-screen-2xl">
         <div className="w-full">
           {triggerSetting && selectTable ? (
-            <div className="px-5">
-              <AttendanceTableSetting
-                table={selectTable}
-                toast={toast}
-                onDelete={() => setSelectTable(null)}
-              />
+            <div className="flex justify-center">
+              <div className="w-10/12">
+                <AttendanceTableSetting
+                  table={selectTable}
+                  toast={toast}
+                  onDelete={() => setSelectTable(null)}
+                />
+              </div>
             </div>
           ) : (
             selectTable && (
-              <div className="w-full">
+              <div className="w-full px-5">
                 <DisplayAttendanceTable
                   selectTable={selectTable}
                   setSelectRow={setSelectRow}

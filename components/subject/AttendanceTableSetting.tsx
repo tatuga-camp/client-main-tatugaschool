@@ -8,6 +8,7 @@ import {
   useCreateAttendanceStatus,
   useDeleteAttendanceStatus,
   useDeleteAttendanceTable,
+  useGetLanguage,
   useUpdateAttendanceStatus,
   useUpdateAttendanceTable,
 } from "../../react-query";
@@ -27,6 +28,7 @@ import { GrStatusCriticalSmall } from "react-icons/gr";
 import InputNumber from "../common/InputNumber";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
 import { RequestUpdateAttendanceStatusListService } from "../../services";
+import { attendanceTableSettingLanguage } from "../../data/languages";
 
 type Props = {
   table: AttendanceTable & { statusLists: AttendanceStatusList[] };
@@ -34,6 +36,7 @@ type Props = {
   onDelete: () => void;
 };
 function AttendanceTableSetting({ table, toast, onDelete }: Props) {
+  const { data: language = "en" } = useGetLanguage();
   const queryClient = useQueryClient();
   const [tableData, setTableData] = React.useState<
     (AttendanceTable & { statusLists: AttendanceStatusList[] }) | undefined
@@ -63,14 +66,16 @@ function AttendanceTableSetting({ table, toast, onDelete }: Props) {
       });
       toast.current?.show({
         severity: "success",
-        summary: "Updated",
-        detail: "Attendance Table Updated",
+        summary: attendanceTableSettingLanguage.updated(language),
+        detail: attendanceTableSettingLanguage.attendanceTableUpdated(language),
       });
     } catch (error) {
       console.log(error);
       let result = error as ErrorMessages;
       Swal.fire({
-        title: result.error ? result.error : "Something Went Wrong",
+        title: result.error
+          ? result.error
+          : attendanceTableSettingLanguage.somethingWentWrong(language),
         text: result.message.toString(),
         footer: result.statusCode
           ? "Code Error: " + result.statusCode?.toString()
@@ -85,30 +90,34 @@ function AttendanceTableSetting({ table, toast, onDelete }: Props) {
   }: {
     attendanceTableId: string;
   }) => {
-    const replacedText = "DELETE";
+    const replacedText = attendanceTableSettingLanguage.delete(language);
     let content = document.createElement("div");
     content.innerHTML =
-      "<div>To confirm, type <strong>" +
+      "<div>" +
+      attendanceTableSettingLanguage.deleteConfirm(language) +
+      " <strong>" +
       replacedText +
-      "</strong> in the box below </div>";
+      "</strong> " +
+      attendanceTableSettingLanguage.inTheBoxBelow(language) +
+      " </div>";
     const { value } = await Swal.fire({
-      title: "Are you sure?",
+      title: attendanceTableSettingLanguage.areYouSure(language),
       input: "text",
       icon: "warning",
-      footer: "This action is irreversible and destructive. Please be careful.",
+      footer: attendanceTableSettingLanguage.actionIrreversible(language),
       html: content,
       showCancelButton: true,
       inputValidator: (value) => {
         if (value !== replacedText) {
-          return "Please Type Correctly";
+          return attendanceTableSettingLanguage.typeCorrectly(language);
         }
       },
     });
     if (value) {
       try {
         Swal.fire({
-          title: "Deleting...",
-          html: "Loading....",
+          title: attendanceTableSettingLanguage.deleting(language),
+          html: attendanceTableSettingLanguage.loading(language),
           allowEscapeKey: false,
           allowOutsideClick: false,
           didOpen: () => {
@@ -126,14 +135,17 @@ function AttendanceTableSetting({ table, toast, onDelete }: Props) {
         Swal.close();
         toast.current?.show({
           severity: "success",
-          summary: "Deleted",
-          detail: "Attendance Table Deleted",
+          summary: attendanceTableSettingLanguage.deleted(language),
+          detail:
+            attendanceTableSettingLanguage.attendanceTableDeleted(language),
         });
       } catch (error) {
         console.log(error);
         let result = error as ErrorMessages;
         Swal.fire({
-          title: result.error ? result.error : "Something Went Wrong",
+          title: result.error
+            ? result.error
+            : attendanceTableSettingLanguage.somethingWentWrong(language),
           text: result.message.toString(),
           footer: result.statusCode
             ? "Code Error: " + result.statusCode?.toString()
@@ -146,9 +158,11 @@ function AttendanceTableSetting({ table, toast, onDelete }: Props) {
 
   return (
     <div className="">
-      <h1 className="text-lg font-medium sm:text-xl">General Settings</h1>
+      <h1 className="text-lg font-medium sm:text-xl">
+        {attendanceTableSettingLanguage.generalSettings(language)}
+      </h1>
       <h4 className="text-xs text-gray-500 sm:text-sm">
-        Manage your general settings
+        {attendanceTableSettingLanguage.manageGeneralSettings(language)}
       </h4>
 
       <form
@@ -156,13 +170,13 @@ function AttendanceTableSetting({ table, toast, onDelete }: Props) {
         className="mt-3 flex min-h-80 flex-col gap-3 rounded-2xl border bg-white p-2 sm:mt-5 sm:gap-5 sm:p-4"
       >
         <div className="w-full justify-between border-b py-2 text-base font-medium sm:py-3 sm:text-lg">
-          Subject Information
+          {attendanceTableSettingLanguage.subjectInformation(language)}
         </div>
         <div className="grid w-full grid-cols-1">
           <div className="grid grid-cols-1 gap-3 p-2 py-3 sm:gap-5 sm:py-4">
             <label className="grid w-full grid-cols-1 items-start gap-2 sm:grid-cols-2 sm:items-center sm:gap-10">
               <span className="text-sm text-black sm:text-base">
-                Table Name:
+                {attendanceTableSettingLanguage.tableName(language)}
               </span>
               <input
                 required
@@ -178,7 +192,9 @@ function AttendanceTableSetting({ table, toast, onDelete }: Props) {
                     };
                   });
                 }}
-                placeholder="Table Name"
+                placeholder={attendanceTableSettingLanguage.tableNamePlaceholder(
+                  language,
+                )}
                 className="main-input text-sm sm:text-base"
               />
             </label>
@@ -186,7 +202,7 @@ function AttendanceTableSetting({ table, toast, onDelete }: Props) {
           <div className="grid grid-cols-1 gap-3 bg-gray-200/20 p-2 py-3 sm:gap-5 sm:py-4">
             <label className="grid w-full grid-cols-1 items-start gap-2 sm:grid-cols-2 sm:items-center sm:gap-10">
               <span className="text-sm text-black sm:text-base">
-                Description:
+                {attendanceTableSettingLanguage.description(language)}
               </span>
               <input
                 required
@@ -202,7 +218,9 @@ function AttendanceTableSetting({ table, toast, onDelete }: Props) {
                     };
                   });
                 }}
-                placeholder="Description"
+                placeholder={attendanceTableSettingLanguage.descriptionPlaceholder(
+                  language,
+                )}
                 className="main-input text-sm sm:text-base"
               />
             </label>
@@ -222,20 +240,22 @@ function AttendanceTableSetting({ table, toast, onDelete }: Props) {
           ) : (
             <div className="flex items-center justify-center gap-1">
               <CiSaveDown2 />
-              Save Changes
+              {attendanceTableSettingLanguage.saveChanges(language)}
             </div>
           )}
         </button>
       </form>
 
-      <h1 className="mt-10 text-xl font-medium">Attendance Status</h1>
+      <h1 className="mt-10 text-xl font-medium">
+        {attendanceTableSettingLanguage.attendanceStatus(language)}
+      </h1>
       <h4 className="text-sm text-gray-500">
-        Customize your attendance status here
+        {attendanceTableSettingLanguage.customizeStatus(language)}
       </h4>
 
       <div className="mt-5 flex min-h-80 flex-col gap-5 rounded-2xl border bg-white p-4">
         <div className="flex w-full justify-between border-b py-3 text-lg font-medium">
-          Attendance Status
+          {attendanceTableSettingLanguage.attendanceStatus(language)}
           {updateStatus.isPending && (
             <div>
               <ProgressSpinner
@@ -253,25 +273,26 @@ function AttendanceTableSetting({ table, toast, onDelete }: Props) {
               <tr>
                 <th>
                   <div className="flex items-center justify-center gap-1">
-                    <BiUserPin /> Name
+                    <BiUserPin />{" "}
+                    {attendanceTableSettingLanguage.name(language)}
                   </div>
                 </th>
                 <th>
                   <div className="flex items-center justify-center gap-1">
                     <IoMdColorFilter />
-                    Color
+                    {attendanceTableSettingLanguage.color(language)}
                   </div>
                 </th>
                 <th>
                   <div className="flex items-center justify-center gap-1">
                     <RxValue />
-                    Value
+                    {attendanceTableSettingLanguage.value(language)}
                   </div>
                 </th>
                 <th>
                   <div className="flex items-center justify-center gap-1">
                     <GrStatusCriticalSmall />
-                    Status
+                    {attendanceTableSettingLanguage.status(language)}
                   </div>
                 </th>
               </tr>
@@ -301,17 +322,18 @@ function AttendanceTableSetting({ table, toast, onDelete }: Props) {
         </div>
       </div>
 
-      <h1 className="mt-10 text-xl font-medium">Danger zone</h1>
+      <h1 className="mt-10 text-xl font-medium">
+        {attendanceTableSettingLanguage.dangerZone(language)}
+      </h1>
       <h4 className="text-sm text-gray-500">
-        Irreversible and destructive actions
+        {attendanceTableSettingLanguage.irreversibleAction(language)}
       </h4>
       <div className="mt-5 flex flex-col items-start gap-5 rounded-2xl border bg-white p-4">
         <h2 className="border-b py-3 text-lg font-medium">
-          Delete This Attendance Table
+          {attendanceTableSettingLanguage.deleteTable(language)}
         </h2>
         <h4 className="text-sm text-red-700">
-          This action is irreversible and will delete all attendance data
-          associated with this table. Cannot be undone.
+          {attendanceTableSettingLanguage.deleteTableWarning(language)}
         </h4>
         <button
           onClick={() =>
@@ -319,7 +341,7 @@ function AttendanceTableSetting({ table, toast, onDelete }: Props) {
           }
           className="reject-button mt-5"
         >
-          Delete This Table
+          {attendanceTableSettingLanguage.deleteTableButton(language)}
         </button>
       </div>
     </div>
@@ -348,6 +370,7 @@ const AttendanceStatusRow = memo(
       unknown
     >;
   }) => {
+    const { data: language = "en" } = useGetLanguage();
     const [data, setData] = React.useState<AttendanceStatusList>(status);
     const queryClient = useQueryClient();
     const deleteStatus = useDeleteAttendanceStatus();
@@ -398,7 +421,9 @@ const AttendanceStatusRow = memo(
         console.log(error);
         let result = error as ErrorMessages;
         Swal.fire({
-          title: result.error ? result.error : "Something Went Wrong",
+          title: result.error
+            ? result.error
+            : attendanceTableSettingLanguage.somethingWentWrong(language),
           text: result.message.toString(),
           footer: result.statusCode
             ? "Code Error: " + result.statusCode?.toString()
@@ -418,14 +443,17 @@ const AttendanceStatusRow = memo(
         });
         toast.current?.show({
           severity: "success",
-          summary: "Deleted",
-          detail: "Attendance Status Deleted",
+          summary: attendanceTableSettingLanguage.deleted(language),
+          detail:
+            attendanceTableSettingLanguage.attendanceStatusDeleted(language),
         });
       } catch (error) {
         console.log(error);
         let result = error as ErrorMessages;
         Swal.fire({
-          title: result.error ? result.error : "Something Went Wrong",
+          title: result.error
+            ? result.error
+            : attendanceTableSettingLanguage.somethingWentWrong(language),
           text: result.message.toString(),
           footer: result.statusCode
             ? "Code Error: " + result.statusCode?.toString()
@@ -504,7 +532,7 @@ const AttendanceStatusRow = memo(
               onClick={handleDelete}
               className="reject-button flex items-center justify-center px-2 py-1 text-xs sm:px-3 sm:py-1.5 sm:text-sm"
             >
-              DELETE
+              {attendanceTableSettingLanguage.delete(language)}
             </button>
           </div>
         </td>
@@ -524,6 +552,7 @@ const CreateAttendanceStatus = memo(
     toast: React.RefObject<Toast>;
     attendanceTableId: string;
   }) => {
+    const { data: language = "en" } = useGetLanguage();
     const queryClient = useQueryClient();
     const create = useCreateAttendanceStatus();
     const [createData, setCreateData] = React.useState<{
@@ -538,7 +567,9 @@ const CreateAttendanceStatus = memo(
     const handleCreate = async () => {
       try {
         if (!createData.title || !createData.color || !createData.value) {
-          throw new Error("Title, Color and Value is required");
+          throw new Error(
+            attendanceTableSettingLanguage.requiredFields(language),
+          );
         }
         await create.mutateAsync({
           request: {
@@ -560,7 +591,9 @@ const CreateAttendanceStatus = memo(
         console.log(error);
         let result = error as ErrorMessages;
         Swal.fire({
-          title: result.error ? result.error : "Something Went Wrong",
+          title: result.error
+            ? result.error
+            : attendanceTableSettingLanguage.somethingWentWrong(language),
           text: result.message.toString(),
           footer: result.statusCode
             ? "Code Error: " + result.statusCode?.toString()
@@ -572,8 +605,9 @@ const CreateAttendanceStatus = memo(
     const show = () => {
       toast.current?.show({
         severity: "success",
-        summary: "Created",
-        detail: "Attendance Status Created",
+        summary: attendanceTableSettingLanguage.created(language),
+        detail:
+          attendanceTableSettingLanguage.attendanceStatusCreated(language),
       });
     };
     return (
@@ -654,7 +688,7 @@ const CreateAttendanceStatus = memo(
               ) : (
                 <div className="flex items-center justify-center gap-1">
                   <CiSaveDown2 className="text-sm sm:text-base" />
-                  <span>Create</span>
+                  <span>{attendanceTableSettingLanguage.create(language)}</span>
                 </div>
               )}
             </button>
