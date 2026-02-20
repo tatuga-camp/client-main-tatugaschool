@@ -5,6 +5,9 @@ import useClickOutside from "../../hook/useClickOutside";
 import { menuSchoolList } from "../../data";
 import { useGetSchool, useGetUser } from "../../react-query";
 import TawkToChat from "../common/TawkToChat";
+import { FeedbackTag } from "@/services/feedback";
+import FormFeedback from "../feedback/FormFeedback";
+import { useCreateFeedback } from "@/react-query/feedback";
 
 type LayoutProps = {
   children: ReactNode;
@@ -17,6 +20,8 @@ function SchoolLayout({ children, selectMenu, schoolId }: LayoutProps) {
   const [active, setActive] = React.useState(false);
   const school = useGetSchool({ schoolId });
   const user = useGetUser();
+  const createFeedback = useCreateFeedback();
+
   useClickOutside(navbarRef, () => {
     setActive(() => false); // Close the SubjectNavbar when clicking outside
   });
@@ -42,6 +47,17 @@ function SchoolLayout({ children, selectMenu, schoolId }: LayoutProps) {
         />
       </div>
       {children}
+      <FormFeedback
+        onSubmit={(feedback) => {
+          createFeedback.mutate({
+            title: "User Feedback",
+            body: feedback,
+            tag: FeedbackTag.COMPLIMENT,
+          });
+        }}
+        onClose={() => {}}
+        schoolId="123"
+      />
       {school.data && user.data && (
         <TawkToChat school={school.data} user={user.data} />
       )}
