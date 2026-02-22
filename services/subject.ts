@@ -122,6 +122,7 @@ export type RequestUpdateSubjectService = {
     allowStudentViewOverallScore?: boolean;
     allowStudentViewGrade?: boolean;
     allowStudentViewAttendance?: boolean;
+    allowStudentViewScoreOnAssignment?: boolean;
   };
 };
 

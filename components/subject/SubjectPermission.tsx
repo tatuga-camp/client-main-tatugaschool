@@ -26,6 +26,7 @@ function SubjectPermission({ subjectId, onSummit, isPending }: Props) {
     allowStudentViewOverallScore?: boolean;
     allowStudentViewGrade?: boolean;
     allowStudentViewAttendance?: boolean;
+    allowStudentViewScoreOnAssignment?: boolean;
   }>();
 
   React.useEffect(() => {
@@ -35,6 +36,8 @@ function SubjectPermission({ subjectId, onSummit, isPending }: Props) {
         allowStudentViewOverallScore: subject.data.allowStudentViewOverallScore,
         allowStudentViewGrade: subject.data.allowStudentViewGrade,
         allowStudentViewAttendance: subject.data.allowStudentViewAttendance,
+        allowStudentViewScoreOnAssignment:
+          subject.data.allowStudentViewScoreOnAssignment,
       });
     }
   }, [subject.status]);
@@ -119,6 +122,25 @@ function SubjectPermission({ subjectId, onSummit, isPending }: Props) {
                 setPermission((prev) => ({
                   ...prev,
                   allowStudentViewAttendance: data,
+                }));
+              }}
+            />
+          </label>
+        </div>
+        <div className="flex gap-5 bg-gray-200/20 p-2 py-4">
+          <label className="flex w-full items-center">
+            <span className="flex-1 text-base text-black">
+              {settingOnSubjectDataLanguage.allowStudentViewScoreOnAssignment(
+                language.data ?? "en",
+              )}
+              :
+            </span>
+            <Switch
+              checked={permission?.allowStudentViewScoreOnAssignment}
+              setChecked={(data) => {
+                setPermission((prev) => ({
+                  ...prev,
+                  allowStudentViewScoreOnAssignment: data,
                 }));
               }}
             />

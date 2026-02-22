@@ -204,6 +204,16 @@ export const settingOnSubjectDataLanguage = {
         return "Allow Student To View Attendance Record";
     }
   },
+  allowStudentViewScoreOnAssignment: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Allow Student To View Assignment Score";
+      case "th":
+        return "อนุญาตให้นักเรียนดูคะแนนของชิ้นงานที่มอบหมาย";
+      default:
+        return "Allow Student To View Assignment Score";
+    }
+  },
   coTeacher: (language: Language) => {
     switch (language) {
       case "en":
