@@ -49,63 +49,21 @@ function SubjectCard({
       style={inlineStyles}
       {...attributes}
       onClick={() => onClick?.()}
-      className="flex h-64 w-full flex-col overflow-hidden rounded-2xl border-2 border-black active:scale-105"
+      className="relative flex h-64 w-full flex-col overflow-hidden rounded-2xl border-2 border-black"
     >
-      <div
-        className={`relative h-24 w-full shadow-inner ${
-          subject.backgroundImage
-            ? ""
-            : subject.isLocked === true
-              ? "bg-gray-400/90"
-              : "gradient-bg"
-        } flex items-end p-5`}
+      <button
+        onClick={() => onDuplicate?.()}
+        title="Duplicate Subject"
+        className="absolute right-8 top-2 z-20 flex h-6 w-6 items-center justify-center rounded-2xl text-white hover:bg-gray-300/50"
       >
-        {subject.backgroundImage && (
-          <div
-            className={`${subject.isLocked === true ? "bg-gray-400/90" : "gradient-shadow"} absolute bottom-0 left-0 right-0 top-0 z-10 m-auto h-full w-full`}
-          ></div>
-        )}
-        {subject.backgroundImage && (
-          <Image
-            src={subject.backgroundImage}
-            fill
-            sizes="(max-width: 768px) 100vw, 33vw"
-            placeholder="blur"
-            blurDataURL={decodeBlurhashToCanvas(
-              subject.blurHash ?? defaultBlurHash,
-            )}
-            alt="background"
-            className="object-cover"
-          />
-        )}
-        <div className="absolute left-2 top-2 z-20 m-auto flex w-max items-center justify-center gap-1 rounded-full border border-black bg-orange-500 px-2 py-1 text-xs text-white">
-          SUBJECT
-        </div>
-        <h1 className="z-20 w-48 truncate text-lg font-semibold text-white">
-          {subject.title}
-        </h1>
-        {subject.isLocked === true && (
-          <div
-            title="This Subject is being locked"
-            className="absolute right-14 top-2 z-20 flex h-6 w-max items-center justify-center rounded-2xl px-1 text-white hover:bg-gray-300/50"
-          >
-            <span className="text-sm">Subject is locked</span> <MdLock />
-          </div>
-        )}
-        <button
-          onClick={() => onDuplicate?.()}
-          title="Duplicate Subject"
-          className="absolute right-8 top-2 z-20 flex h-6 w-6 items-center justify-center rounded-2xl text-white hover:bg-gray-300/50"
-        >
-          <IoDuplicate />
-        </button>
-        <div
-          {...listeners}
-          style={{ cursor: isDragging ? "grabbing" : "grab" }}
-          className="absolute right-2 top-2 z-20 flex h-6 w-6 items-center justify-center rounded-2xl text-white hover:bg-gray-300/50"
-        >
-          <MdDragIndicator />
-        </div>
+        <IoDuplicate />
+      </button>
+      <div
+        {...listeners}
+        style={{ cursor: isDragging ? "grabbing" : "grab" }}
+        className="absolute right-2 top-2 z-20 flex h-6 w-6 items-center justify-center rounded-2xl text-white hover:bg-gray-300/50"
+      >
+        <MdDragIndicator />
       </div>
       <Link
         style={{
@@ -113,6 +71,49 @@ function SubjectCard({
         }}
         href={`/subject/${subject.id}`}
       >
+        <div
+          className={`relative h-24 w-full shadow-inner ${
+            subject.backgroundImage
+              ? ""
+              : subject.isLocked === true
+                ? "bg-gray-400/90"
+                : "gradient-bg"
+          } flex items-end p-5`}
+        >
+          {subject.backgroundImage && (
+            <div
+              className={`${subject.isLocked === true ? "bg-gray-400/90" : "gradient-shadow"} absolute bottom-0 left-0 right-0 top-0 z-10 m-auto h-full w-full`}
+            ></div>
+          )}
+          {subject.backgroundImage && (
+            <Image
+              src={subject.backgroundImage}
+              fill
+              sizes="(max-width: 768px) 100vw, 33vw"
+              placeholder="blur"
+              blurDataURL={decodeBlurhashToCanvas(
+                subject.blurHash ?? defaultBlurHash,
+              )}
+              alt="background"
+              className="object-cover"
+            />
+          )}
+          <div className="absolute left-2 top-2 z-20 m-auto flex w-max items-center justify-center gap-1 rounded-full border border-black bg-orange-500 px-2 py-1 text-xs text-white">
+            SUBJECT
+          </div>
+          <h1 className="z-20 w-48 truncate text-lg font-semibold text-white">
+            {subject.title}
+          </h1>
+          {subject.isLocked === true && (
+            <div
+              title="This Subject is being locked"
+              className="absolute right-14 top-2 z-20 flex h-6 w-max items-center justify-center rounded-2xl px-1 text-white hover:bg-gray-300/50"
+            >
+              <span className="text-sm">Subject is locked</span> <MdLock />
+            </div>
+          )}
+        </div>
+
         <div className="flex grow flex-col justify-between p-5 pb-2">
           <div className="flex flex-col gap-2">
             <div className="flex flex-col gap-1">
