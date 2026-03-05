@@ -214,6 +214,16 @@ export const settingOnSubjectDataLanguage = {
         return "Allow Student To View Assignment Score";
     }
   },
+  allowStudentDoneAssignmentInOrder: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Allow student to complete assignment in order";
+      case "th":
+        return "อนุญาตให้นักเรียนทำชิ้นงานที่มอบหมายตามลำดับ";
+      default:
+        return "Allow student to complete assignment in order";
+    }
+  },
   coTeacher: (language: Language) => {
     switch (language) {
       case "en":

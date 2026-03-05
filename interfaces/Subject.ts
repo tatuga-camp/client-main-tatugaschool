@@ -18,6 +18,7 @@ export interface Subject {
   allowStudentViewGrade: boolean;
   allowStudentViewAttendance: boolean;
   allowStudentViewScoreOnAssignment: boolean;
+  allowStudentDoneAssignmentInOrder?: boolean;
   isLocked: boolean;
 }
 

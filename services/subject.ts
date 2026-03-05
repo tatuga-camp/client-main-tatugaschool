@@ -123,6 +123,7 @@ export type RequestUpdateSubjectService = {
     allowStudentViewGrade?: boolean;
     allowStudentViewAttendance?: boolean;
     allowStudentViewScoreOnAssignment?: boolean;
+    allowStudentDoneAssignmentInOrder?: boolean;
   };
 };
 
