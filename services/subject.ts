@@ -124,6 +124,7 @@ export type RequestUpdateSubjectService = {
     allowStudentViewAttendance?: boolean;
     allowStudentViewScoreOnAssignment?: boolean;
     allowStudentDoneAssignmentInOrder?: boolean;
+    allowHideStudentList?: boolean;
   };
 };
 

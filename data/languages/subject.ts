@@ -224,6 +224,16 @@ export const settingOnSubjectDataLanguage = {
         return "Allow student to complete assignment in order";
     }
   },
+  allowHideStudentList: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Allow teacher to hide student list from students when login to subject";
+      case "th":
+        return "อนุญาตให้ครูซ่อนรายชื่อนักเรียนจากนักเรียนในหน้ารายวิชา";
+      default:
+        return "Allow teacher to hide student list from students when login to subject";
+    }
+  },
   coTeacher: (language: Language) => {
     switch (language) {
       case "en":

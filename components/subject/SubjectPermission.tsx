@@ -28,6 +28,7 @@ function SubjectPermission({ subjectId, onSummit, isPending }: Props) {
     allowStudentViewAttendance?: boolean;
     allowStudentViewScoreOnAssignment?: boolean;
     allowStudentDoneAssignmentInOrder?: boolean;
+    allowHideStudentList?: boolean;
   }>();
 
   React.useEffect(() => {
@@ -41,6 +42,7 @@ function SubjectPermission({ subjectId, onSummit, isPending }: Props) {
           subject.data.allowStudentViewScoreOnAssignment,
         allowStudentDoneAssignmentInOrder:
           subject.data.allowStudentDoneAssignmentInOrder,
+        allowHideStudentList: subject.data.allowHideStudentList,
       });
     }
   }, [subject.status]);
@@ -163,6 +165,25 @@ function SubjectPermission({ subjectId, onSummit, isPending }: Props) {
                 setPermission((prev) => ({
                   ...prev,
                   allowStudentDoneAssignmentInOrder: data,
+                }));
+              }}
+            />
+          </label>
+        </div>
+        <div className="flex gap-5 bg-gray-200/20 p-2 py-4">
+          <label className="flex w-full items-center">
+            <span className="flex-1 text-base text-black">
+              {settingOnSubjectDataLanguage.allowHideStudentList(
+                language.data ?? "en",
+              )}
+              :
+            </span>
+            <Switch
+              checked={permission?.allowHideStudentList}
+              setChecked={(data) => {
+                setPermission((prev) => ({
+                  ...prev,
+                  allowHideStudentList: data,
                 }));
               }}
             />
