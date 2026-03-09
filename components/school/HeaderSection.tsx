@@ -19,11 +19,13 @@ const HeaderSection: React.FC<{
       <div className="mb-5 flex w-max items-center justify-center gap-1 rounded-full border border-white px-2 py-1 text-xs text-white">
         SCHOOL
       </div>
-      <div className="w-max border-b border-b-white pb-2">
+      <div className="w-full border-b border-b-white pb-2">
         <h1 className="max-w-80 break-words text-4xl font-bold md:max-w-[60rem]">
           โรงเรียน - {school.title}{" "}
         </h1>
-        <p className="text-xl">{school.description}</p>
+        <p className="line-clamp-2 truncate break-words text-xl">
+          {school.description}
+        </p>
         <p className="line-clamp-2 max-w-60 break-words text-gray-300 md:max-w-[60rem]">
           {school.address} {school.city} {school.country} {school.zipCode}
         </p>
