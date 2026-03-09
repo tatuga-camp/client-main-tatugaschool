@@ -27,6 +27,7 @@ export type RequestCreateAssignmentService = {
   videoURL?: string;
   preventFastForward?: boolean;
   assignAll?: boolean;
+  order?: number;
 };
 
 type ResponseCreateAssignmentService = Assignment;

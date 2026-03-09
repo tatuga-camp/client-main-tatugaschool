@@ -24,7 +24,11 @@ import {
   ErrorMessages,
 } from "../../interfaces";
 import { MenuAssignmentQuery } from "../../pages/subject/[subjectId]/assignment/[assignmentId]";
-import { useCreateAssignment, useGetLanguage } from "../../react-query";
+import {
+  useCreateAssignment,
+  useGetAssignments,
+  useGetLanguage,
+} from "../../react-query";
 import {
   CreateFileAssignmentService,
   getSignedURLTeacherService,
@@ -86,6 +90,7 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
   const [loading, setLoading] = React.useState(false);
   const adjustedStyle = useAdjustPosition(divRef, 20); // 20px padding
   const create = useCreateAssignment();
+  const assignments = useGetAssignments({ subjectId });
 
   const [classworkData, setClassworkData] = React.useState<{
     title?: string;
@@ -151,6 +156,7 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
         beginDate: new Date(classworkData.beginDate).toISOString(),
         subjectId: subjectId,
         status: submitter.value as AssignmentStatus,
+        order: assignments.data ? assignments.data.length + 1 : 1,
       });
 
       if (files?.length > 0) {
