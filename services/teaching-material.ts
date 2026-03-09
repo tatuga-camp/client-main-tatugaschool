@@ -13,6 +13,8 @@ export type RequestGetDescriptionSuggestionTeachingMaterialService = {
 
 type ResponseGetDescriptionSuggestionTeachingMaterialService = {
   description: string;
+  title: string;
+  keywords: string[];
 };
 
 export async function GetDescriptionSuggestionTeachingMaterialService(

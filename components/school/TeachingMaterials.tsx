@@ -86,6 +86,7 @@ function TeachingMaterials({ schoolId }: Props) {
       {selectTeachingMaterial && (
         <PopupLayout
           onClose={() => {
+            document.body.style.overflow = "auto";
             setSelectTeachingMaterial(null);
           }}
         >
@@ -194,6 +195,7 @@ function TeachingMaterials({ schoolId }: Props) {
               return (
                 <TeachingMaterialCard
                   onClick={() => {
+                    document.body.style.overflow = "hidden";
                     setSelectTeachingMaterial(teachingMaterial);
                   }}
                   key={teachingMaterial.id}

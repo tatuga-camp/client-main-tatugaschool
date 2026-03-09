@@ -198,9 +198,11 @@ function TeachingMaterialSection({ onClose, teachingMaterial }: Props) {
       setTeachingMaterialData((prev) => {
         return {
           ...prev,
+          title: data.title,
           description: data.description,
         };
       });
+      setTags(data.keywords);
 
       setLoadingAi(false);
     } catch (error) {
@@ -494,6 +496,20 @@ function TeachingMaterialSection({ onClose, teachingMaterial }: Props) {
             })}
           </ul>
         </section>
+        <button
+          type="button"
+          disabled={loadingAi}
+          onClick={() => handleAiDescription()}
+          className="gradient-bg-success flex h-7 w-32 items-center justify-center rounded-2xl border px-2 text-white hover:scale-105 active:scale-110"
+        >
+          {loadingAi ? (
+            <LoadingSpinner />
+          ) : (
+            <>
+              <SiGooglegemini /> AI Generate
+            </>
+          )}
+        </button>
         <section className="flex flex-col gap-2">
           <div className="flex w-max items-center justify-center gap-2 text-sm font-semibold">
             <MdSubscriptions className="text-blue-700" /> Access Level
@@ -636,20 +652,6 @@ function TeachingMaterialSection({ onClose, teachingMaterial }: Props) {
             <div className="flex w-max items-center justify-center gap-2 text-sm font-semibold">
               <MdOutlineFormatAlignLeft className="text-blue-700" /> Description
             </div>
-            <button
-              type="button"
-              disabled={loadingAi}
-              onClick={() => handleAiDescription()}
-              className="gradient-bg-success flex h-7 w-32 items-center justify-center rounded-2xl border px-2 text-white hover:scale-105 active:scale-110"
-            >
-              {loadingAi ? (
-                <LoadingSpinner />
-              ) : (
-                <>
-                  <SiGooglegemini /> AI Generate
-                </>
-              )}
-            </button>
           </div>
           <textarea
             value={teachingMaterialData.description}
