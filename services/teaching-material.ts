@@ -115,6 +115,7 @@ export async function UpdateTeachingMaterialService(
 
 export type RequestGetTeachingMaterialByAiService = {
   search?: string;
+  filter?: string;
 };
 
 type ResponseGetTeachingMaterialByAiService = TeachingMaterial[];
@@ -127,6 +128,19 @@ export async function GetTeachingMaterialByAiService(
       method: "GET",
       url: `/v1/teaching-materials`,
       params: { ...input },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("request failed:", error.response.data);
+    throw error?.response?.data;
+  }
+}
+
+export async function GetTeachingMaterialsCountService(): Promise<number> {
+  try {
+    const response = await axiosInstance({
+      method: "GET",
+      url: `/v1/teaching-materials/count`,
     });
     return response.data;
   } catch (error: any) {

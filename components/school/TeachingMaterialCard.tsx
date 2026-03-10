@@ -8,16 +8,10 @@ type Props = {
 };
 function TeachingMaterialCard({ teachingMaterial, onClick }: Props) {
   return (
-    <div className="group relative h-max w-80 overflow-hidden rounded-2xl border-2 border-black bg-white font-Anuphan">
-      <div className="absolute bottom-0 left-0 right-0 top-0 z-30 m-auto hidden h-full w-full flex-col items-center justify-center gap-2 group-hover:flex">
-        <button
-          onClick={() => onClick()}
-          className="second-button flex h-8 w-40 items-center justify-center gap-2 border py-2"
-        >
-          <IoMdEye /> View File
-        </button>
-        <span className="text-sm text-white">click to view detail</span>
-      </div>
+    <button
+      onClick={() => onClick()}
+      className="group relative h-max w-80 overflow-hidden rounded-2xl border-2 border-black bg-white font-Anuphan transition hover:scale-105"
+    >
       <div className="absolute right-2 top-2 z-20 rounded-2xl border bg-green-100 px-3 text-sm text-green-800">
         AI Match: {(teachingMaterial.score * 100).toFixed(0)}%
       </div>
@@ -26,7 +20,6 @@ function TeachingMaterialCard({ teachingMaterial, onClick }: Props) {
           <SiCanva />
         </div>
       )}
-      <div className="absolute bottom-0 left-0 right-0 top-0 z-20 m-auto hidden h-full w-full gap-2 bg-sky-600/50 backdrop-blur-sm group-hover:flex"></div>
       <div className="relative h-60 w-full">
         <img
           src={
@@ -62,7 +55,7 @@ function TeachingMaterialCard({ teachingMaterial, onClick }: Props) {
           </div>
         </footer>
       </section>
-    </div>
+    </button>
   );
 }
 

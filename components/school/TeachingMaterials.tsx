@@ -5,6 +5,7 @@ import {
   useGetLanguage,
   useGetSchool,
   useGetTeachingMaterialByAI,
+  useGetTeachingMaterialsCount,
   useGetUser,
 } from "../../react-query";
 import PopupLayout from "../layout/PopupLayout";
@@ -29,18 +30,18 @@ const suggestionsSearch = [
     en: "A cute teaching Schedule table",
     th: "ตารางสอนน่ารัก ๆ",
   },
+  {
+    en: "Chinese worksheets for primary school",
+    th: "ใบงานภาษาจีนสำหรับประถม",
+  },
 ];
 
 function TeachingMaterials({ schoolId }: Props) {
   const school = useGetSchool({ schoolId });
   const user = useGetUser();
   const language = useGetLanguage();
-  const [query, setQuery] = useState(
-    language.data === "th" ? suggestionsSearch[0].th : suggestionsSearch[0].en,
-  );
-  const [search, setSearch] = useState(
-    language.data === "th" ? suggestionsSearch[0].th : suggestionsSearch[0].en,
-  );
+  const [query, setQuery] = useState("");
+  const [search, setSearch] = useState("");
   const [teachingMaterials, setTeachingMaterials] = useState<
     TeachingMaterial[]
   >([]);
@@ -49,9 +50,13 @@ function TeachingMaterials({ schoolId }: Props) {
   const [selectTeachingMaterial, setSelectTeachingMaterial] =
     useState<TeachingMaterial | null>(null);
   const [displayedSuggestion, setDisplayedSuggestion] = useState("");
+  const [filter, setFilter] = useState<"relevant" | "recent">("relevant");
+
+  const teachingMaterialsCount = useGetTeachingMaterialsCount();
 
   const getTeachingMaterials = useGetTeachingMaterialByAI({
     ...(search !== "" && { search: search }),
+    ...(filter === "recent" && { filter: "recent" }),
   });
 
   useEffect(() => {
@@ -105,7 +110,10 @@ function TeachingMaterials({ schoolId }: Props) {
             AI-Powered Teaching Materials Search
           </h1>
           <p className="text-center text-lg text-white/90">
-            Discover over <span className="text-3xl font-extrabold">350</span>{" "}
+            Discover over{" "}
+            <span className="text-3xl font-extrabold">
+              {teachingMaterialsCount.data ?? 350}
+            </span>{" "}
             personalized educational resources with intelligent recommendations{" "}
             <br />
             tailored to your teaching needs
@@ -172,7 +180,7 @@ function TeachingMaterials({ schoolId }: Props) {
           )}
         </header>
         <main className="flex w-full max-w-7xl flex-col gap-2 px-10 pb-10">
-          <section className="mt-5">
+          <section className="mt-5 flex w-full items-center justify-between">
             <div className="flex w-max items-center justify-center gap-2">
               <h3 className="text-3xl font-semibold text-black">
                 Search Results
@@ -181,6 +189,17 @@ function TeachingMaterials({ schoolId }: Props) {
                 {totalFound} teaching materials found
               </span>
             </div>
+
+            <select
+              value={filter}
+              onChange={(e) =>
+                setFilter(e.target.value as "relevant" | "recent")
+              }
+              className="rounded-xl border border-gray-300 px-4 py-2 text-black outline-none"
+            >
+              <option value="relevant">Relevant</option>
+              <option value="recent">Recently Added</option>
+            </select>
           </section>
 
           <ul className="mt-10 grid w-full grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">

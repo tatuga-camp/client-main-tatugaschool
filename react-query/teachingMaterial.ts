@@ -4,6 +4,7 @@ import {
   GetDescriptionSuggestionTeachingMaterialService,
   GetTeachingMaterialByAiService,
   GetTeachingMaterialService,
+  GetTeachingMaterialsCountService,
   RequestCreateTeachingMaterialService,
   RequestGetDescriptionSuggestionTeachingMaterialService,
   RequestGetTeachingMaterialByAiService,
@@ -22,11 +23,12 @@ import {
 
 export const keyTeachingMaterial = {
   get: ["teaching-materials"],
+  count: ["teaching-materials-count"],
   getById: (request: { id: string }) => [
     keyTeachingMaterial.get,
     { id: request.id },
   ],
-  getByAI: (request: { search?: string }) => [
+  getByAI: (request: { search?: string; filter?: string }) => [
     keyTeachingMaterial.get[0],
     { ...request },
   ],
@@ -42,6 +44,13 @@ export function useGetTeachingMaterialByAI(
   return useQuery({
     queryKey: keyTeachingMaterial.getByAI(request),
     queryFn: () => GetTeachingMaterialByAiService(request),
+  });
+}
+
+export function useGetTeachingMaterialsCount() {
+  return useQuery({
+    queryKey: keyTeachingMaterial.count,
+    queryFn: () => GetTeachingMaterialsCountService(),
   });
 }
 
