@@ -47,7 +47,7 @@ function Sidebar({ active, schoolId, menuList }: Props) {
         <h2 className="text-xs text-gray-600">{school.data?.phoneNumber}</h2>
       </header>
 
-      <ul className="grid w-full gap-2">
+      <ul className="grid h-full w-full gap-2 lg:h-80 lg:overflow-auto xl:h-96">
         {menuList.map((menu, index) => {
           return (
             <button

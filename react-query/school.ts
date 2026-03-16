@@ -30,10 +30,17 @@ export function useGetSchools(
   });
 }
 
-export function useGetSchool({ schoolId }: { schoolId: string }) {
+export function useGetSchool({
+  schoolId,
+  enable,
+}: {
+  schoolId: string;
+  enable?: boolean;
+}) {
   return useQuery({
     queryKey: ["school", { id: schoolId }],
     queryFn: () => GetSchoolByIdService({ schoolId }),
+    enabled: enable,
   });
 }
 

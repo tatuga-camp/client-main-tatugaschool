@@ -32,7 +32,7 @@ function DropdownRole({
         onClick={() => {
           setTrigger(true);
         }}
-        className="rounded-2xll flex w-24 items-center justify-center gap-1 bg-gray-200/50 py-1 text-sm transition hover:bg-gray-300/50"
+        className="flex w-24 items-center justify-center gap-1 rounded-2xl bg-gray-200/50 py-1 text-sm transition hover:bg-gray-300/50"
       >
         {selectRole}
         {!disabled && <GoChevronDown />}

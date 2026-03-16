@@ -9,6 +9,7 @@ import useClickOutside from "../hook/useClickOutside";
 import {
   useGetLanguage,
   useGetNotifications,
+  useGetSchool,
   useGetUser,
 } from "../react-query";
 import ButtonProfile from "./button/ButtonProfile";
@@ -37,7 +38,10 @@ function Navbar({
   const [animateBell, setAnimateBell] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
   const prevUnreadCountRef = useRef<number>(0);
-
+  const school = useGetSchool({
+    schoolId: schoolId ?? "",
+    enable: !!schoolId,
+  });
   // Fetch notifications for badge and animation
   const { data: notifications } = useGetNotifications();
 
@@ -79,7 +83,11 @@ function Navbar({
           >
             <div className="relative h-10 w-10 overflow-hidden rounded-2xl ring-1 ring-white transition duration-150 hover:scale-105 active:scale-110">
               <Image
-                src="/favicon.ico"
+                src={
+                  school.data && school.data.plan === "ENTERPRISE"
+                    ? school.data.logo
+                    : "/favicon.ico"
+                }
                 placeholder="blur"
                 blurDataURL={defaultCanvas}
                 fill
@@ -87,8 +95,10 @@ function Navbar({
                 alt="logo tatuga school"
               />
             </div>
-            <div className="hidden text-xs font-bold uppercase text-icon-color md:text-base xl:block">
-              Tatuga School
+            <div className="max-w-32 truncate text-xs font-bold uppercase text-icon-color md:text-base xl:block 2xl:max-w-60">
+              {school.data && school.data.plan === "ENTERPRISE"
+                ? school.data.title
+                : "Tatuga School"}{" "}
             </div>
           </Link>
         </div>
