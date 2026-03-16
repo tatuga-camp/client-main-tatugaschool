@@ -303,147 +303,135 @@ function VideoQuizCard({
     ...style,
   };
   return (
-    <button
-      ref={sortable.setNodeRef}
-      style={inlineStyles}
-      {...sortable.attributes}
-      className="flex h-max w-full flex-col transition-height"
-      key={videoQuiz.id}
+    <Link
+      style={{
+        pointerEvents: sortable.isDragging ? "none" : "auto",
+      }}
+      href={`/subject/${subjectId}/assignment/${videoQuiz.id}`}
     >
-      <div
-        onClick={() => onSelect(videoQuiz)}
-        className={`relative flex h-40 w-full items-stretch justify-start gap-2 overflow-hidden rounded-2xl border-2 border-black bg-white hover:ring ${
-          selectVideoQuiz?.id === videoQuiz.id &&
-          !sortable.isDragging &&
-          "rounded-b-none"
-        } `}
+      <button
+        ref={sortable.setNodeRef}
+        style={inlineStyles}
+        {...sortable.attributes}
+        className="flex h-max w-full flex-col transition-height"
+        key={videoQuiz.id}
       >
         <div
-          className={`flex h-full w-24 flex-col items-center justify-center gap-2 p-2 text-2xl text-white ${videoQuiz.status === "Draft" ? "bg-gray-400" : "bg-gradient-to-b from-pink-400 to-rose-400"} `}
+          onClick={() => onSelect(videoQuiz)}
+          className={`relative flex h-40 w-full items-stretch justify-start gap-2 overflow-hidden rounded-2xl border-2 border-black bg-white hover:ring ${
+            selectVideoQuiz?.id === videoQuiz.id &&
+            !sortable.isDragging &&
+            "rounded-b-none"
+          } `}
         >
-          <MdOndemandVideo />
-          <span className="text-xs">
-            {classworkCardDataLanguage[
-              videoQuiz.status as keyof typeof classworkCardDataLanguage
-            ](language.data ?? "en")}
-          </span>
-        </div>
-        <div className="flex w-9/12 grow flex-col gap-2 p-2">
-          <div className="max-w-[80%] truncate border-b text-start text-lg font-semibold">
-            {videoQuiz.title}
+          <div
+            className={`flex h-full w-24 flex-col items-center justify-center gap-2 p-2 text-2xl text-white ${videoQuiz.status === "Draft" ? "bg-gray-400" : "bg-gradient-to-b from-pink-400 to-rose-400"} `}
+          >
+            <MdOndemandVideo />
+            <span className="text-xs">
+              {classworkCardDataLanguage[
+                videoQuiz.status as keyof typeof classworkCardDataLanguage
+              ](language.data ?? "en")}
+            </span>
           </div>
-          <div className="flex gap-1 text-xs text-gray-500">
-            {new Date(videoQuiz.beginDate).toLocaleDateString(undefined, {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-              minute: "numeric",
-              hour: "numeric",
-            })}
-          </div>
-          <div className="flex w-full items-center justify-between">
-            <ul className="flex w-full flex-wrap items-end gap-2">
-              <li className="ga-2 flex h-max w-max flex-col items-center justify-start rounded-2xl border bg-gray-50 p-1">
-                <span className="max-w-40 truncate text-base font-medium text-primary-color">
-                  {videoQuiz.maxScore ? videoQuiz.maxScore.toLocaleString() : 0}
-                </span>
-                <span className="text-xs">
-                  {classworkCardDataLanguage.score(language.data ?? "en")}
-                </span>
-              </li>
-              {videoQuiz.weight !== null && (
+          <div className="flex w-9/12 grow flex-col gap-2 p-2">
+            <div className="max-w-[80%] truncate border-b text-start text-lg font-semibold">
+              {videoQuiz.title}
+            </div>
+            <div className="flex gap-1 text-xs text-gray-500">
+              {new Date(videoQuiz.beginDate).toLocaleDateString(undefined, {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                minute: "numeric",
+                hour: "numeric",
+              })}
+            </div>
+            <div className="flex w-full items-center justify-between">
+              <ul className="flex w-full flex-wrap items-end gap-2">
                 <li className="ga-2 flex h-max w-max flex-col items-center justify-start rounded-2xl border bg-gray-50 p-1">
                   <span className="max-w-40 truncate text-base font-medium text-primary-color">
-                    {videoQuiz.weight}%
+                    {videoQuiz.maxScore
+                      ? videoQuiz.maxScore.toLocaleString()
+                      : 0}
                   </span>
                   <span className="text-xs">
-                    {classworkCardDataLanguage.weight(language.data ?? "en")}
+                    {classworkCardDataLanguage.score(language.data ?? "en")}
                   </span>
                 </li>
-              )}
-              {videoQuiz.dueDate && (
-                <li className="flex h-max w-max items-center justify-start gap-1 rounded-2xl border bg-gray-50 p-1">
-                  <span className="truncate text-sm font-medium text-red-700">
-                    {new Date(videoQuiz.dueDate).toLocaleDateString(undefined, {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                      minute: "numeric",
-                      hour: "numeric",
-                    })}
+                {videoQuiz.weight !== null && (
+                  <li className="ga-2 flex h-max w-max flex-col items-center justify-start rounded-2xl border bg-gray-50 p-1">
+                    <span className="max-w-40 truncate text-base font-medium text-primary-color">
+                      {videoQuiz.weight}%
+                    </span>
+                    <span className="text-xs">
+                      {classworkCardDataLanguage.weight(language.data ?? "en")}
+                    </span>
+                  </li>
+                )}
+                {videoQuiz.dueDate && (
+                  <li className="flex h-max w-max items-center justify-start gap-1 rounded-2xl border bg-gray-50 p-1">
+                    <span className="truncate text-sm font-medium text-red-700">
+                      {new Date(videoQuiz.dueDate).toLocaleDateString(
+                        undefined,
+                        {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                          minute: "numeric",
+                          hour: "numeric",
+                        },
+                      )}
+                    </span>
+                    <span className="text-xs">
+                      {classworkCardDataLanguage.Deadline(
+                        language.data ?? "en",
+                      )}
+                    </span>
+                  </li>
+                )}
+              </ul>
+              <ul className="flex gap-2">
+                <li className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-black md:h-16 md:w-16 lg:h-20 lg:w-20">
+                  <span className="text-2xl font-semibold">
+                    {videoQuiz.penddingNumber}
                   </span>
                   <span className="text-xs">
-                    {classworkCardDataLanguage.Deadline(language.data ?? "en")}
+                    {classworkCardDataLanguage.NoWork(language.data ?? "en")}
                   </span>
                 </li>
-              )}
-            </ul>
-            <ul className="flex gap-2">
-              <li className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-black md:h-16 md:w-16 lg:h-20 lg:w-20">
-                <span className="text-2xl font-semibold">
-                  {videoQuiz.penddingNumber}
-                </span>
-                <span className="text-xs">
-                  {classworkCardDataLanguage.NoWork(language.data ?? "en")}
-                </span>
-              </li>
-              <li className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-yellow-400 md:h-16 md:w-16 lg:h-20 lg:w-20">
-                <span className="text-2xl font-semibold">
-                  {videoQuiz.summitNumber}
-                </span>
-                <span className="text-xs">
-                  {classworkCardDataLanguage.WaitReview(language.data ?? "en")}
-                </span>
-              </li>
-              <li className="flex flex-col items-center justify-center gap-1 rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 text-white md:h-16 md:w-16 lg:h-20 lg:w-20">
-                <span className="text-2xl font-semibold">
-                  {videoQuiz.reviewNumber}
-                </span>
-                <span className="text-xs">
-                  {classworkCardDataLanguage.Reviewed(language.data ?? "en")}
-                </span>
-              </li>
-            </ul>
+                <li className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-yellow-400 md:h-16 md:w-16 lg:h-20 lg:w-20">
+                  <span className="text-2xl font-semibold">
+                    {videoQuiz.summitNumber}
+                  </span>
+                  <span className="text-xs">
+                    {classworkCardDataLanguage.WaitReview(
+                      language.data ?? "en",
+                    )}
+                  </span>
+                </li>
+                <li className="flex flex-col items-center justify-center gap-1 rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 text-white md:h-16 md:w-16 lg:h-20 lg:w-20">
+                  <span className="text-2xl font-semibold">
+                    {videoQuiz.reviewNumber}
+                  </span>
+                  <span className="text-xs">
+                    {classworkCardDataLanguage.Reviewed(language.data ?? "en")}
+                  </span>
+                </li>
+              </ul>
+            </div>
           </div>
-        </div>
 
-        <div
-          {...sortable.listeners}
-          style={{ cursor: sortable.isDragging ? "grabbing" : "grab" }}
-          className="absolute right-2 top-2 flex h-10 w-6 items-center justify-center rounded-2xl hover:bg-gray-300/50"
-        >
-          <MdDragIndicator />
-        </div>
-      </div>
-      <div
-        className={`${
-          selectVideoQuiz?.id === videoQuiz.id && !sortable.isDragging
-            ? "h-80 border border-t-0"
-            : "h-0"
-        } flex w-full flex-col overflow-hidden rounded-2xl rounded-t-none bg-white text-start transition-height`}
-      >
-        <div className="h-64 overflow-auto p-2">
-          <div className="h-max w-full">
-            <p className="h-96 w-full">
-              <TextEditor
-                schoolId={videoQuiz.schoolId}
-                disabled={true}
-                toolbar={false}
-                onChange={() => {}}
-                value={videoQuiz.description}
-                menubar={false}
-              />
-            </p>
+          <div
+            {...sortable.listeners}
+            style={{ cursor: sortable.isDragging ? "grabbing" : "grab" }}
+            className="absolute right-2 top-2 flex h-10 w-6 items-center justify-center rounded-2xl hover:bg-gray-300/50"
+          >
+            <MdDragIndicator />
           </div>
         </div>
-        <Link
-          href={`/subject/${subjectId}/assignment/${videoQuiz.id}`}
-          className="flex h-14 items-center gap-2 border-t p-2"
-        >
-          <button className="main-button w-40">View</button>
-        </Link>
-      </div>
-    </button>
+      </button>
+    </Link>
   );
 }
 

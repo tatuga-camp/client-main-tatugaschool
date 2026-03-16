@@ -141,9 +141,16 @@ export function useReoderAssignment() {
       subjectId: string;
     }) => ReorderAssignmentService(request.request),
     onSuccess(newDatas, variables, context) {
+      const cacheAssignments = queryClient.getQueryData([
+        "assignments",
+        { subjectId: variables.subjectId },
+      ]);
+      if (!cacheAssignments) return;
       queryClient.setQueryData(
         ["assignments", { subjectId: variables.subjectId }],
-        (oldData: ResponseGetAssignmentsService) => {
+        (
+          oldData: ResponseGetAssignmentsService,
+        ): ResponseGetAssignmentsService => {
           return oldData?.map((prevAssignment) => {
             const newAssignment = newDatas.find(
               (newData) => newData.id === prevAssignment.id,
@@ -152,6 +159,11 @@ export function useReoderAssignment() {
               return {
                 ...newAssignment,
                 files: prevAssignment.files,
+                studentAssign: prevAssignment.studentAssign,
+                reviewNumber: prevAssignment.reviewNumber,
+                penddingNumber: prevAssignment.penddingNumber,
+                questions: prevAssignment.questions,
+                summitNumber: prevAssignment.summitNumber,
               };
             } else {
               return prevAssignment;
