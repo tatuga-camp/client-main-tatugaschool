@@ -10,9 +10,12 @@ import Swal from "sweetalert2";
 import { useRouter } from "next-nprogress-bar";
 import Link from "next/link";
 import Head from "next/head";
+import { useGetLanguage } from "../../react-query";
+import { verifyEmailLanguageData } from "../../data/languages";
 
 const VerifyEmailPage = ({ token }: { token: string | null }) => {
   const router = useRouter();
+  const language = useGetLanguage();
   const [verificationStatus, setVerificationStatus] = useState<
     "success" | "fail" | "pending" | "no-token"
   >("pending");
@@ -31,8 +34,8 @@ const VerifyEmailPage = ({ token }: { token: string | null }) => {
       await VerifyEmailService({ token });
       setVerificationStatus("success");
       Swal.fire({
-        title: "Email Verified",
-        text: "Your email has been verified successfully",
+        title: verifyEmailLanguageData.swalSuccessTitle(language.data ?? "en"),
+        text: verifyEmailLanguageData.swalSuccessText(language.data ?? "en"),
         icon: "success",
       });
       router.push("/");
@@ -41,10 +44,13 @@ const VerifyEmailPage = ({ token }: { token: string | null }) => {
       console.log(error);
       let result = error as ErrorMessages;
       Swal.fire({
-        title: result.error ? result.error : "Something Went Wrong",
+        title: result.error
+          ? result.error
+          : verifyEmailLanguageData.swalErrorTitle(language.data ?? "en"),
         text: result.message.toString(),
         footer: result.statusCode
-          ? "Code Error: " + result.statusCode?.toString()
+          ? verifyEmailLanguageData.swalErrorCode(language.data ?? "en") +
+            result.statusCode?.toString()
           : "",
         icon: "error",
       });
@@ -54,7 +60,9 @@ const VerifyEmailPage = ({ token }: { token: string | null }) => {
   return (
     <>
       <Head>
-        <title>Verify Email</title>
+        <title>
+          {verifyEmailLanguageData.headTitle(language.data ?? "en")}
+        </title>
       </Head>
       <div className="flex min-h-screen flex-col items-center justify-center bg-[#F7F7F9] px-4 py-10">
         <AuthHeader />
@@ -62,36 +70,43 @@ const VerifyEmailPage = ({ token }: { token: string | null }) => {
           {verificationStatus === "success" && (
             <>
               <h2 className="mb-4 text-5xl font-bold text-green-600">
-                Your Email Has Been Verified
+                {verifyEmailLanguageData.successTitle(language.data ?? "en")}
               </h2>
               <p className="mb-8 text-lg text-[#6E6E6E]">
-                Please click the button below to sign in again.
+                {verifyEmailLanguageData.successDescription(
+                  language.data ?? "en",
+                )}
               </p>
               <Link
                 href={"/auth/sign-in"}
                 className="rounded-2xl bg-[#5F3DC4] p-4 font-semibold text-white transition duration-300 hover:bg-[#482ab4]"
               >
-                Sign In
+                {verifyEmailLanguageData.signInButton(language.data ?? "en")}
               </Link>
             </>
           )}
           {verificationStatus === "pending" && (
             <>
               <h2 className="mb-4 animate-pulse text-5xl font-bold text-blue-600">
-                Verifying Your Email..
+                {verifyEmailLanguageData.pendingTitle(language.data ?? "en")}
               </h2>
               <p className="mb-8 text-lg text-[#6E6E6E]">
-                Please wait while we verify your email.
+                {verifyEmailLanguageData.pendingDescription(
+                  language.data ?? "en",
+                )}
               </p>
             </>
           )}
           {verificationStatus === "no-token" && (
             <>
               <h2 className="mb-4 flex items-center justify-center gap-1 text-5xl font-bold text-red-600">
-                No Token Found <FiXCircle />
+                {verifyEmailLanguageData.noTokenTitle(language.data ?? "en")}{" "}
+                <FiXCircle />
               </h2>
               <p className="mb-8 text-lg text-[#6E6E6E]">
-                Please resend the email again or contact admin.
+                {verifyEmailLanguageData.errorDescription(
+                  language.data ?? "en",
+                )}
               </p>
             </>
           )}
@@ -99,10 +114,12 @@ const VerifyEmailPage = ({ token }: { token: string | null }) => {
           {verificationStatus === "fail" && (
             <>
               <h2 className="mb-4 text-5xl font-bold text-red-500">
-                Email Validation Fail
+                {verifyEmailLanguageData.failTitle(language.data ?? "en")}
               </h2>
               <p className="mb-8 text-lg text-[#6E6E6E]">
-                Please resend the email again or contact admin.
+                {verifyEmailLanguageData.errorDescription(
+                  language.data ?? "en",
+                )}
               </p>
             </>
           )}

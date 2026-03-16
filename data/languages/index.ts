@@ -19,3 +19,5 @@ export * from "./attendance";
 export * from "./card-picker";
 export * from "./video-config";
 export * from "./attendance-table-setting";
+export * from "./verify-email";
+export * from "./wait-verify-email";

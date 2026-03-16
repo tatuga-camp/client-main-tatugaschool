@@ -6,15 +6,21 @@ import { AuthLayout } from "../../components/auth/AuthLayout";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import { ErrorMessages } from "../../interfaces";
 import {
+  useGetLanguage,
   useGetNoVerifyUser,
   useResendVerifyEmail,
   useUpdateUser,
 } from "../../react-query";
 import ButtonProfile from "../../components/button/ButtonProfile";
 import Link from "next/link";
+import {
+  waitVerifyEmailLanguageData,
+  verifyEmailLanguageData,
+} from "../../data/languages";
 
 function Index() {
   const user = useGetNoVerifyUser();
+  const language = useGetLanguage();
   const resend = useResendVerifyEmail();
   const updateUser = useUpdateUser();
   const [triggerUpdate, setTriggerUpdate] = React.useState(false);
@@ -23,18 +29,25 @@ function Index() {
     try {
       await resend.mutateAsync();
       Swal.fire({
-        title: "Success",
-        text: "Verification Email Sent",
+        title: waitVerifyEmailLanguageData.swalSuccessTitle(
+          language.data ?? "en",
+        ),
+        text: waitVerifyEmailLanguageData.swalSuccessTextResend(
+          language.data ?? "en",
+        ),
         icon: "success",
       });
     } catch (error) {
       console.log(error);
       let result = error as ErrorMessages;
       Swal.fire({
-        title: result?.error ? result?.error : "Something Went Wrong",
+        title: result?.error
+          ? result?.error
+          : verifyEmailLanguageData.swalErrorTitle(language.data ?? "en"),
         text: result?.message?.toString(),
         footer: result?.statusCode
-          ? "Code Error: " + result?.statusCode?.toString()
+          ? verifyEmailLanguageData.swalErrorCode(language.data ?? "en") +
+            result?.statusCode?.toString()
           : "",
         icon: "error",
       });
@@ -46,8 +59,12 @@ function Index() {
     try {
       await updateUser.mutateAsync({ email });
       Swal.fire({
-        title: "Success",
-        text: "Email Updated Successfully",
+        title: waitVerifyEmailLanguageData.swalSuccessTitle(
+          language.data ?? "en",
+        ),
+        text: waitVerifyEmailLanguageData.swalSuccessTextUpdate(
+          language.data ?? "en",
+        ),
         icon: "success",
       });
       setEmail("");
@@ -56,10 +73,13 @@ function Index() {
       console.log(error);
       let result = error as ErrorMessages;
       Swal.fire({
-        title: result?.error ? result?.error : "Something Went Wrong",
+        title: result?.error
+          ? result?.error
+          : verifyEmailLanguageData.swalErrorTitle(language.data ?? "en"),
         text: result?.message?.toString(),
         footer: result?.statusCode
-          ? "Code Error: " + result?.statusCode?.toString()
+          ? verifyEmailLanguageData.swalErrorCode(language.data ?? "en") +
+            result?.statusCode?.toString()
           : "",
         icon: "error",
       });
@@ -72,13 +92,13 @@ function Index() {
         <div className="flex w-full grow flex-col items-center justify-center gap-5">
           <AuthHeader />
           <div className="h-max w-full rounded-2xl bg-white p-3 text-center md:w-8/12 xl:w-4/12">
-            Your Account Email has already been verified
+            {waitVerifyEmailLanguageData.alreadyVerified(language.data ?? "en")}
           </div>
           <Link
             href={"/"}
             className="rounded-2xl bg-[#5F3DC4] p-4 font-semibold text-white transition duration-300 hover:bg-[#482ab4]"
           >
-            Enter Dashboard
+            {waitVerifyEmailLanguageData.enterDashboard(language.data ?? "en")}
           </Link>
         </div>
         <AuthFooter />
@@ -95,16 +115,21 @@ function Index() {
           {triggerUpdate ? (
             <form onSubmit={handleUpdateEmail}>
               <h2 className="text-xl font-semibold">
-                Update Your Email Address
+                {waitVerifyEmailLanguageData.updateEmailTitle(
+                  language.data ?? "en",
+                )}
               </h2>
               <span className="text-sm text-gray-600">
-                after updating your email address, we will send a verification
-                link to your new email address
+                {waitVerifyEmailLanguageData.updateEmailDescription(
+                  language.data ?? "en",
+                )}
               </span>
 
               <input
                 type="email"
-                placeholder="E-mail"
+                placeholder={waitVerifyEmailLanguageData.emailPlaceholder(
+                  language.data ?? "en",
+                )}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -114,7 +139,13 @@ function Index() {
                 disabled={updateUser.isPending}
                 className="main-button mt-2 flex w-full items-center justify-center p-2"
               >
-                {updateUser.isPending ? <LoadingSpinner /> : "Update Email"}
+                {updateUser.isPending ? (
+                  <LoadingSpinner />
+                ) : (
+                  waitVerifyEmailLanguageData.updateEmailButton(
+                    language.data ?? "en",
+                  )
+                )}
               </button>
 
               <button
@@ -122,21 +153,25 @@ function Index() {
                 onClick={() => setTriggerUpdate(false)}
                 className="mt-2 text-xs text-gray-600 hover:underline"
               >
-                Back to Verify Email
+                {waitVerifyEmailLanguageData.backToVerifyEmail(
+                  language.data ?? "en",
+                )}
               </button>
             </form>
           ) : (
             <>
               <h2 className="text-xl font-semibold">
-                Please Verify Your Email
+                {waitVerifyEmailLanguageData.pleaseVerifyTitle(
+                  language.data ?? "en",
+                )}
               </h2>
               <span className="text-sm text-gray-600">
                 ({user.data?.email})
               </span>
               <p className="pb-5 text-center text-sm">
-                We have sent a verification link to your email address. Please
-                check your email and click on the link to verify your email
-                address.
+                {waitVerifyEmailLanguageData.verifyDescription(
+                  language.data ?? "en",
+                )}
               </p>
 
               <button
@@ -147,14 +182,18 @@ function Index() {
                 {resend.isPending ? (
                   <LoadingSpinner />
                 ) : (
-                  "Resend Verification Email"
+                  waitVerifyEmailLanguageData.resendButton(
+                    language.data ?? "en",
+                  )
                 )}
               </button>
               <button
                 onClick={() => setTriggerUpdate(true)}
                 className="mt-2 text-xs text-gray-600 hover:underline"
               >
-                Want to change your email address?
+                {waitVerifyEmailLanguageData.changeEmailPrompt(
+                  language.data ?? "en",
+                )}
               </button>
             </>
           )}

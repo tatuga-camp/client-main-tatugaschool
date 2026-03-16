@@ -1,23 +1,21 @@
+import Image from "next/image";
+import Link from "next/link";
 import React, { ReactNode, useEffect, useRef, useState } from "react";
-import ButtonProfile from "./button/ButtonProfile";
+import { IoMdNotifications } from "react-icons/io";
+import { IoMenu } from "react-icons/io5";
+import { defaultCanvas } from "../data";
+import { navbarLanguageData } from "../data/languages";
+import useClickOutside from "../hook/useClickOutside";
 import {
   useGetLanguage,
   useGetNotifications,
   useGetUser,
 } from "../react-query";
-import { QueryClient, UseQueryResult } from "@tanstack/react-query";
-import { IoMenu } from "react-icons/io5";
-import Link from "next/link";
-import Image from "next/image";
-import { defaultCanvas, menuSubjectList } from "../data";
-import Sidebar from "./Sidebar";
-import LanguageSelect from "./LanguageSelect";
-import { MdHelp } from "react-icons/md";
-import useClickOutside from "../hook/useClickOutside";
-import { IoMdNotifications } from "react-icons/io";
-import Notification from "./common/Notification";
-import { navbarLanguageData } from "../data/languages";
+import ButtonProfile from "./button/ButtonProfile";
 import Breadcrumbs from "./common/Breadcrumbs";
+import Notification from "./common/Notification";
+import LanguageSelect from "./LanguageSelect";
+import Sidebar from "./Sidebar";
 
 type Props = {
   schoolId?: string;
@@ -113,8 +111,8 @@ function Navbar({
           </div>
         )}
         {breadcrumbs && <Breadcrumbs breadcrumbs={breadcrumbs} />}
-        <div className="w-60 overflow-auto md:w-max">
-          <div className="flex w-max items-center justify-center gap-2">
+        <div className="w-max">
+          <div className="flex items-center justify-center gap-2">
             {/* --- Notification Button --- */}
             <div className="relative" ref={notificationRef}>
               <button
