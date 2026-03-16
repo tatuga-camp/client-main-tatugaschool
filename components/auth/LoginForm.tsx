@@ -99,11 +99,7 @@ export const LoginForm = () => {
       <h2 className="mb-[40px] text-[24px] font-bold">
         {signInData.title(language.data ?? "en")}
       </h2>
-      {router.query?.error && (
-        <span className="text-sm text-red-700">
-          Error: {router.query?.error}
-        </span>
-      )}
+
       <span className="text-sm text-gray-500">
         ({signInData.teacherOnly(language.data ?? "en")})
       </span>
@@ -131,7 +127,11 @@ export const LoginForm = () => {
       >
         {signInData.forgetPassword(language.data ?? "en")}
       </Link>
-
+      {router.query?.error && (
+        <span className="text-sm text-red-700">
+          Error: {router.query?.error}
+        </span>
+      )}
       <div className="flex flex-col gap-3">
         <button type="submit" className="main-button w-full p-2">
           {signInData.loginButton(language.data ?? "en")}

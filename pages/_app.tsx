@@ -52,7 +52,11 @@ function MyApp({ Component, pageProps }: AppProps) {
     const returnUrl = localStorage.getItem("returnUrl");
     const pathName = router.pathname;
 
-    if (returnUrl && pathName !== "/auth/sign-up") {
+    if (
+      returnUrl &&
+      pathName !== "/auth/sign-up" &&
+      pathName !== "/auth/sign-in"
+    ) {
       localStorage.removeItem("returnUrl");
       router.push(returnUrl);
     }
