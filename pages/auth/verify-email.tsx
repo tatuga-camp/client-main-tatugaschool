@@ -14,7 +14,6 @@ import { useGetLanguage } from "../../react-query";
 import { verifyEmailLanguageData } from "../../data/languages";
 
 const VerifyEmailPage = ({ token }: { token: string | null }) => {
-  const router = useRouter();
   const language = useGetLanguage();
   const [verificationStatus, setVerificationStatus] = useState<
     "success" | "fail" | "pending" | "no-token"
@@ -33,27 +32,8 @@ const VerifyEmailPage = ({ token }: { token: string | null }) => {
       setVerificationStatus("pending");
       await VerifyEmailService({ token });
       setVerificationStatus("success");
-      Swal.fire({
-        title: verifyEmailLanguageData.swalSuccessTitle(language.data ?? "en"),
-        text: verifyEmailLanguageData.swalSuccessText(language.data ?? "en"),
-        icon: "success",
-      });
-      router.push("/");
     } catch (error) {
       setVerificationStatus("fail");
-      console.log(error);
-      let result = error as ErrorMessages;
-      Swal.fire({
-        title: result.error
-          ? result.error
-          : verifyEmailLanguageData.swalErrorTitle(language.data ?? "en"),
-        text: result.message.toString(),
-        footer: result.statusCode
-          ? verifyEmailLanguageData.swalErrorCode(language.data ?? "en") +
-            result.statusCode?.toString()
-          : "",
-        icon: "error",
-      });
     }
   };
 
@@ -66,7 +46,7 @@ const VerifyEmailPage = ({ token }: { token: string | null }) => {
       </Head>
       <div className="flex min-h-screen flex-col items-center justify-center bg-[#F7F7F9] px-4 py-10">
         <AuthHeader />
-        <div className="flex flex-col items-center text-center">
+        <div className="mt-5 flex flex-col items-center text-center">
           {verificationStatus === "success" && (
             <>
               <h2 className="mb-4 text-5xl font-bold text-green-600">

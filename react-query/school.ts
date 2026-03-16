@@ -20,10 +20,13 @@ import {
 } from "../services";
 import { MemberOnSchool, School } from "../interfaces";
 
-export function useGetSchools(): UseQueryResult<School[], Error> {
+export function useGetSchools(
+  enable?: boolean,
+): UseQueryResult<School[], Error> {
   return useQuery({
     queryKey: ["schools"],
     queryFn: () => GetSchoolService(),
+    enabled: enable,
   });
 }
 
@@ -63,7 +66,7 @@ export function useUpdateSchool() {
         ["school", { id: data.id }],
         (oldData: ResponseGetSchoolService) => {
           return { ...oldData, ...data };
-        }
+        },
       );
     },
   });

@@ -34,7 +34,7 @@ const ListsSchoolComponent = () => {
   );
   const tableHeaders = ["Name", "Plan", "Create At", "Description", "Action"];
   const inputClasses = "border rounded-2xl px-4 py-2 w-full";
-  const schools = useGetSchools();
+  const schools = useGetSchools(!!user.data);
 
   useEffect(() => {
     if (!user.data) return;

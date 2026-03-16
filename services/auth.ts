@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { User } from "../interfaces";
+import { School, User } from "../interfaces";
 
 import createAxiosInstance from "./api-service";
 
@@ -68,7 +68,7 @@ type RequestVerifyEmailService = {
   token: string;
 };
 
-type ResponseVerifyEmailService = {};
+type ResponseVerifyEmailService = School | void;
 
 export async function VerifyEmailService(
   input: RequestVerifyEmailService,
