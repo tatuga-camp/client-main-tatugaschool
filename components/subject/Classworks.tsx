@@ -111,7 +111,7 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
           />
         </PopupLayout>
       )}
-      <header className="flex w-full justify-between px-40">
+      <header className="flex w-full flex-col justify-between px-5 md:flex-row md:px-40">
         <section>
           <h1 className="text-3xl font-semibold">
             {classworksDataLanguage.title(language.data ?? "en")}

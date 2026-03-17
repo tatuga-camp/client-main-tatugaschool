@@ -99,14 +99,14 @@ function AssignmentCard({
     >
       <div
         onClick={() => onSelect(assignemnt)}
-        className={`relative flex h-40 w-full items-stretch justify-start gap-2 overflow-hidden rounded-2xl border-2 border-black bg-white hover:ring ${
+        className={`relative flex h-max w-full items-stretch justify-start gap-2 overflow-hidden rounded-2xl border-2 border-black bg-white hover:ring sm:h-40 ${
           selectAssignment?.id === assignemnt.id &&
           !sortable.isDragging &&
           "rounded-b-none"
         } `}
       >
         <div
-          className={`flex h-full w-24 flex-col items-center justify-center gap-2 p-2 text-2xl text-white ${assignemnt.status === "Draft" ? "bg-gray-400" : "gradient-bg"} `}
+          className={`flex h-full w-20 flex-col items-center justify-center gap-2 p-2 text-2xl text-white sm:w-24 ${assignemnt.status === "Draft" ? "bg-gray-400" : "gradient-bg"} `}
         >
           <MdAssignment />
           <span className="text-xs">
@@ -115,7 +115,7 @@ function AssignmentCard({
             ](language.data ?? "en")}
           </span>
         </div>
-        <div className="flex w-9/12 grow flex-col gap-2 p-2">
+        <div className="flex w-full grow flex-col gap-2 p-2 sm:w-9/12">
           <div className="max-w-[80%] truncate border-b text-start text-lg font-semibold">
             {assignemnt.title}
           </div>
@@ -128,7 +128,7 @@ function AssignmentCard({
               hour: "numeric",
             })}
           </div>
-          <div className="flex w-full items-center justify-between">
+          <div className="flex w-full flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
             <ul className="flex w-full flex-wrap items-end gap-2">
               <li className="ga-2 flex h-max w-max flex-col items-center justify-start rounded-2xl border bg-gray-50 p-1">
                 <span className="max-w-40 truncate text-base font-medium text-primary-color">
@@ -169,27 +169,27 @@ function AssignmentCard({
               )}
             </ul>
             <ul className="flex gap-2">
-              <li className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-black md:h-16 md:w-16 lg:h-20 lg:w-20">
+              <li className="flex h-16 w-16 flex-col items-center justify-center gap-1 rounded-2xl border border-black p-2 md:h-16 md:w-16 lg:h-20 lg:w-20">
                 <span className="text-2xl font-semibold">
                   {assignemnt.penddingNumber}
                 </span>
-                <span className="text-xs">
+                <span className="max-w-[100%] truncate text-center text-xs">
                   {classworkCardDataLanguage.NoWork(language.data ?? "en")}
                 </span>
               </li>
-              <li className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-yellow-400 md:h-16 md:w-16 lg:h-20 lg:w-20">
+              <li className="flex h-16 w-16 flex-col items-center justify-center gap-1 rounded-2xl border border-yellow-400 p-2 md:h-16 md:w-16 lg:h-20 lg:w-20">
                 <span className="text-2xl font-semibold">
                   {assignemnt.summitNumber}
                 </span>
-                <span className="text-xs">
+                <span className="max-w-[100%] truncate text-center text-xs">
                   {classworkCardDataLanguage.WaitReview(language.data ?? "en")}
                 </span>
               </li>
-              <li className="flex flex-col items-center justify-center gap-1 rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 text-white md:h-16 md:w-16 lg:h-20 lg:w-20">
+              <li className="flex h-16 w-16 flex-col items-center justify-center gap-1 rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 p-2 text-white md:h-16 md:w-16 lg:h-20 lg:w-20">
                 <span className="text-2xl font-semibold">
                   {assignemnt.reviewNumber}
                 </span>
-                <span className="text-xs">
+                <span className="max-w-[100%] truncate text-center text-xs">
                   {classworkCardDataLanguage.Reviewed(language.data ?? "en")}
                 </span>
               </li>
@@ -318,23 +318,23 @@ function VideoQuizCard({
       >
         <div
           onClick={() => onSelect(videoQuiz)}
-          className={`relative flex h-40 w-full items-stretch justify-start gap-2 overflow-hidden rounded-2xl border-2 border-black bg-white hover:ring ${
+          className={`relative flex h-max w-full items-stretch justify-start gap-2 overflow-hidden rounded-2xl border-2 border-black bg-white hover:ring sm:h-40 ${
             selectVideoQuiz?.id === videoQuiz.id &&
             !sortable.isDragging &&
             "rounded-b-none"
           } `}
         >
           <div
-            className={`flex h-full w-24 flex-col items-center justify-center gap-2 p-2 text-2xl text-white ${videoQuiz.status === "Draft" ? "bg-gray-400" : "bg-gradient-to-b from-pink-400 to-rose-400"} `}
+            className={`flex h-full w-20 flex-col items-center justify-center gap-2 p-2 text-2xl text-white sm:w-24 ${videoQuiz.status === "Draft" ? "bg-gray-400" : "bg-gradient-to-b from-pink-400 to-rose-400"} `}
           >
             <MdOndemandVideo />
-            <span className="text-xs">
+            <span className="text-center text-xs">
               {classworkCardDataLanguage[
                 videoQuiz.status as keyof typeof classworkCardDataLanguage
               ](language.data ?? "en")}
             </span>
           </div>
-          <div className="flex w-9/12 grow flex-col gap-2 p-2">
+          <div className="flex w-full grow flex-col gap-2 p-2 sm:w-9/12">
             <div className="max-w-[80%] truncate border-b text-start text-lg font-semibold">
               {videoQuiz.title}
             </div>
@@ -347,7 +347,7 @@ function VideoQuizCard({
                 hour: "numeric",
               })}
             </div>
-            <div className="flex w-full items-center justify-between">
+            <div className="flex w-full flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
               <ul className="flex w-full flex-wrap items-end gap-2">
                 <li className="ga-2 flex h-max w-max flex-col items-center justify-start rounded-2xl border bg-gray-50 p-1">
                   <span className="max-w-40 truncate text-base font-medium text-primary-color">
@@ -392,29 +392,29 @@ function VideoQuizCard({
                 )}
               </ul>
               <ul className="flex gap-2">
-                <li className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-black md:h-16 md:w-16 lg:h-20 lg:w-20">
+                <li className="flex h-16 w-16 flex-col items-center justify-center gap-1 rounded-2xl border border-black p-2 md:h-16 md:w-16 lg:h-20 lg:w-20">
                   <span className="text-2xl font-semibold">
                     {videoQuiz.penddingNumber}
                   </span>
-                  <span className="text-xs">
+                  <span className="max-w-[100%] truncate text-center text-xs">
                     {classworkCardDataLanguage.NoWork(language.data ?? "en")}
                   </span>
                 </li>
-                <li className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-yellow-400 md:h-16 md:w-16 lg:h-20 lg:w-20">
+                <li className="flex h-16 w-16 flex-col items-center justify-center gap-1 rounded-2xl border border-yellow-400 p-2 md:h-16 md:w-16 lg:h-20 lg:w-20">
                   <span className="text-2xl font-semibold">
                     {videoQuiz.summitNumber}
                   </span>
-                  <span className="text-xs">
+                  <span className="max-w-[100%] truncate text-center text-xs">
                     {classworkCardDataLanguage.WaitReview(
                       language.data ?? "en",
                     )}
                   </span>
                 </li>
-                <li className="flex flex-col items-center justify-center gap-1 rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 text-white md:h-16 md:w-16 lg:h-20 lg:w-20">
+                <li className="flex h-16 w-16 flex-col items-center justify-center gap-1 rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 p-2 text-white md:h-16 md:w-16 lg:h-20 lg:w-20">
                   <span className="text-2xl font-semibold">
                     {videoQuiz.reviewNumber}
                   </span>
-                  <span className="text-xs">
+                  <span className="max-w-[100%] truncate text-center text-xs">
                     {classworkCardDataLanguage.Reviewed(language.data ?? "en")}
                   </span>
                 </li>
@@ -466,14 +466,14 @@ function MaterialCard({
     >
       <button
         onClick={() => onSelect(material)}
-        className={`relative flex h-40 w-full items-stretch justify-start gap-2 overflow-hidden rounded-2xl border-2 border-black hover:ring ${
+        className={`relative flex h-max w-full items-stretch justify-start gap-2 overflow-hidden rounded-2xl border-2 border-black hover:ring sm:h-40 ${
           selectMaterial?.id === material.id &&
           !sortable.isDragging &&
           "rounded-b-none"
         } `}
       >
         <div
-          className={`flex h-full w-24 flex-col items-center justify-center gap-2 p-2 text-2xl text-white ${
+          className={`flex h-full w-20 flex-col items-center justify-center gap-2 p-2 text-2xl text-white sm:w-24 ${
             material.status === "Draft"
               ? "bg-gray-400"
               : "bg-gradient-to-r from-emerald-400 to-cyan-400"
@@ -481,14 +481,14 @@ function MaterialCard({
         >
           <BiBook />
 
-          <span className="text-xs">
+          <span className="text-center text-xs">
             {" "}
             {classworkCardDataLanguage[
               material.status as keyof typeof classworkCardDataLanguage
             ](language.data ?? "en")}
           </span>
         </div>
-        <div className="flex h-max w-9/12 flex-col gap-2 p-2">
+        <div className="flex h-max w-full flex-col gap-2 p-2 sm:w-9/12">
           <div className="max-w-[80%] truncate border-b text-start text-lg font-semibold">
             {material.title}
           </div>

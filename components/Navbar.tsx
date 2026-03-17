@@ -15,7 +15,6 @@ import {
 import ButtonProfile from "./button/ButtonProfile";
 import Breadcrumbs from "./common/Breadcrumbs";
 import Notification from "./common/Notification";
-import LanguageSelect from "./LanguageSelect";
 import Sidebar from "./Sidebar";
 
 type Props = {
@@ -103,7 +102,7 @@ function Navbar({
           </Link>
         </div>
         {!schoolId && (
-          <div className="w-40 overflow-auto md:w-max">
+          <div className="hidden overflow-auto md:w-max">
             <nav className="flex w-max items-center justify-center gap-2 text-black md:gap-5">
               <Link
                 href="/"
@@ -143,7 +142,6 @@ function Navbar({
               )}
             </div>
             {/* --- End Notification Button --- */}
-            <LanguageSelect />
             <ButtonProfile user={user} />
           </div>
         </div>

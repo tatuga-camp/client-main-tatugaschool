@@ -17,6 +17,7 @@ import { useGetLanguage } from "../../react-query";
 import { decodeBlurhashToCanvas } from "../../utils";
 import useClickOutside from "../../hook/useClickOutside";
 import Link from "next/link";
+import LanguageSelect from "../LanguageSelect";
 
 type Props = {
   user: UseQueryResult<User, Error>;
@@ -150,6 +151,14 @@ function ButtonProfile({ user }: Props) {
               <FiHelpCircle size={18} className="text-gray-500" />
               {navbarLanguageData.helpCenter(language.data ?? "en")}
             </Link>
+
+            <div className="my-1 border-t border-gray-100"></div>
+
+            <div className="px-3 py-1">
+              <LanguageSelect />
+            </div>
+
+            <div className="my-1 border-t border-gray-100"></div>
 
             <button
               disabled={loading}
