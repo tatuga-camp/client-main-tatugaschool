@@ -654,7 +654,7 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
           studentOnAssignmentId: studentOnAssignment.id,
         },
         body: {
-          score: studentWork?.score ?? 0,
+          score: status === "PENDDING" ? 0 : (studentWork?.score ?? 0),
           status: status,
           body: studentWork?.body,
         },
