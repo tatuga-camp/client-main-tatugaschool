@@ -9,7 +9,7 @@ import {
   MdKeyboardArrowUp,
   MdUpgrade,
 } from "react-icons/md";
-import { VscSettings } from "react-icons/vsc";
+import { VscReport, VscSettings } from "react-icons/vsc";
 import { defaultBlurHash, defaultCanvas } from "../../data";
 import { navbarLanguageData } from "../../data/languages";
 import { User } from "../../interfaces";
@@ -21,8 +21,9 @@ import LanguageSelect from "../LanguageSelect";
 
 type Props = {
   user: UseQueryResult<User, Error>;
+  onTriggerFeedback?: () => void;
 };
-function ButtonProfile({ user }: Props) {
+function ButtonProfile({ user, onTriggerFeedback }: Props) {
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const language = useGetLanguage();
@@ -142,7 +143,18 @@ function ButtonProfile({ user }: Props) {
               <VscSettings size={18} className="text-gray-500" />
               {navbarLanguageData.profileSettings(language.data ?? "en")}
             </button>
-
+            {onTriggerFeedback && (
+              <button
+                onClick={() => {
+                  onTriggerFeedback();
+                  setIsOpen(false);
+                }}
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100"
+              >
+                <VscReport size={18} className="text-gray-500" />
+                {navbarLanguageData.report(language.data ?? "en")}
+              </button>
+            )}
             <Link
               href={"https://tatugaschool.com/support/contact-us"}
               target="_blank"

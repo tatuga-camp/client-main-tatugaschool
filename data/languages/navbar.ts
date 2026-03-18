@@ -11,6 +11,16 @@ export const navbarLanguageData = {
         return "List of School";
     }
   },
+  report: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Give a feedback";
+      case "th":
+        return "ให้ข้อเสนอแนะ";
+      default:
+        return "Give a feedback";
+    }
+  },
   account: (language: Language) => {
     switch (language) {
       case "en":

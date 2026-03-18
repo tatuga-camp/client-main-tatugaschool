@@ -11,7 +11,7 @@ import {
   useResendVerifyEmail,
   useUpdateUser,
 } from "../../react-query";
-import ButtonProfile from "../../components/button/ButtonProfile";
+import ButtonProfile from "../../components/common/ButtonProfile";
 import Link from "next/link";
 import {
   waitVerifyEmailLanguageData,

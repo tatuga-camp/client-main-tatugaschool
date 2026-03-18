@@ -1,6 +1,7 @@
 # Allow all crawlers
 User-agent: *
 Allow: /
+Disallow: /feedback
 
 
 Sitemap: https://app.tatugaschool.com/sitemap.xml

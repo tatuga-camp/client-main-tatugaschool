@@ -35,3 +35,4 @@ export * from "./TeachingMaterial";
 export * from "./FileOnTeachingMaterial";
 export * from "./Notification";
 export * from "./QuestionOnVideo";
+export * from "./Feedback";

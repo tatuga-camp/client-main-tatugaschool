@@ -12,10 +12,12 @@ import {
   useGetSchool,
   useGetUser,
 } from "../react-query";
-import ButtonProfile from "./button/ButtonProfile";
+import ButtonProfile from "./common/ButtonProfile";
 import Breadcrumbs from "./common/Breadcrumbs";
 import Notification from "./common/Notification";
 import Sidebar from "./Sidebar";
+import PopupLayout from "./layout/PopupLayout";
+import Feedback from "./common/Feedback";
 
 type Props = {
   schoolId?: string;
@@ -36,6 +38,7 @@ function Navbar({
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [animateBell, setAnimateBell] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
+  const [triggerFeedback, setTriggerFeedback] = useState(false);
   const prevUnreadCountRef = useRef<number>(0);
   const school = useGetSchool({
     schoolId: schoolId ?? "",
@@ -60,6 +63,15 @@ function Navbar({
   });
   return (
     <>
+      {triggerFeedback && (
+        <PopupLayout
+          onClose={() => {
+            setTriggerFeedback(false);
+          }}
+        >
+          <Feedback />
+        </PopupLayout>
+      )}
       <div className="flex h-20 flex-row items-center justify-between gap-4 border-b-2 border-black bg-white p-4 text-white">
         <div className="flex gap-2">
           {menuLists.length > 0 && (
@@ -142,7 +154,12 @@ function Navbar({
               )}
             </div>
             {/* --- End Notification Button --- */}
-            <ButtonProfile user={user} />
+            <ButtonProfile
+              user={user}
+              onTriggerFeedback={() => {
+                setTriggerFeedback(true);
+              }}
+            />
           </div>
         </div>
         {menuLists.length > 0 && schoolId && (

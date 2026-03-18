@@ -11,7 +11,7 @@ export async function GetUserService(): Promise<User> {
     });
     return response.data;
   } catch (error: any) {
-    console.error("User request failed:", error?.response?.data);
+    console.log(error);
     throw error?.response?.data;
   }
 }

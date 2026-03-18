@@ -21,3 +21,4 @@ export * from "./video-config";
 export * from "./attendance-table-setting";
 export * from "./verify-email";
 export * from "./wait-verify-email";
+export * from "./feedback";
