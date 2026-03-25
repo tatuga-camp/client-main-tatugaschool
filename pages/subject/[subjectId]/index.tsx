@@ -478,7 +478,7 @@ function Index({ subjectId }: Props) {
                       setTriggerLineConnect((prev) => !prev);
                     }}
                     aria-label="QR Code Subject"
-                    className="w- flex items-center justify-center gap-1 rounded-2xl bg-[#00B900] px-2 py-1 text-xs text-white active:scale-110"
+                    className="flex w-32 items-center justify-center gap-1 rounded-2xl bg-[#00B900] px-2 py-1 text-xs text-white active:scale-110"
                   >
                     {subject.data?.isVerifyLine === true ? (
                       <>
