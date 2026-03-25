@@ -214,7 +214,7 @@ function ClassworkView({
                     key={index}
                     className="flex h-20 w-full items-center justify-between overflow-hidden rounded-2xl border bg-white"
                   >
-                    <div className="flex h-full w-full items-center justify-start gap-2">
+                    <div className="flex h-full w-10/12 items-center justify-start gap-2">
                       <div className="gradient-bg flex h-full w-16 items-center justify-center border-r text-lg text-white">
                         {isLink ? (
                           <MdLink />
@@ -229,7 +229,7 @@ function ClassworkView({
                       <a
                         href={file.url}
                         target="_blank"
-                        className="flex w-10/12 items-center gap-2 truncate"
+                        className="flex w-7/12 items-center gap-2 truncate"
                       >
                         <span className="truncate">
                           {file.type === "LINK" ? file.url : file.name}

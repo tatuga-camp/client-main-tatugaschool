@@ -17,7 +17,7 @@ import { useGetLanguage } from "../../react-query";
 import { decodeBlurhashToCanvas } from "../../utils";
 import useClickOutside from "../../hook/useClickOutside";
 import Link from "next/link";
-import LanguageSelect from "../LanguageSelect";
+import LanguageSelect from "./LanguageSelect";
 
 type Props = {
   user: UseQueryResult<User, Error>;

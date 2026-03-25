@@ -1,4 +1,4 @@
-import LanguageSelect from "../LanguageSelect";
+import LanguageSelect from "../common/LanguageSelect";
 
 export const AuthLayout = ({ children }: { children: React.ReactNode }) => (
   <div className="gradient-bg flex h-full min-h-screen min-w-full flex-col items-center justify-between gap-2 p-5 font-Anuphan">
