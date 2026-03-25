@@ -10,10 +10,11 @@ import ClassroomSetting from "../../components/classroom/ClassroomSetting";
 import GradeSummaryReport from "../../components/classroom/GradeSummaryReport";
 import StudentSection from "../../components/classroom/StudentLists";
 import ClassroomLayout from "../../components/layout/ClassroomLayout";
+import DefaultLayout from "../../components/layout/DefaultLayout";
 import { MenuClassroom } from "../../data";
 import { classroomDataLanguage } from "../../data/languages";
 import { useGetClassroom, useGetLanguage } from "../../react-query";
-import { getRefetchtoken, timeAgo, validateMongodbId } from "../../utils";
+import { timeAgo, validateMongodbId } from "../../utils";
 
 function Index({ classroomId }: { classroomId: string }) {
   const toast = React.useRef<Toast>(null);
@@ -25,7 +26,7 @@ function Index({ classroomId }: { classroomId: string }) {
     classId: classroomId,
   });
 
-  if (classroom.isLoading || !classroom.data) {
+  if (classroom.isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <ProgressSpinner />
@@ -33,6 +34,38 @@ function Index({ classroomId }: { classroomId: string }) {
     );
   }
 
+  if (classroom.error) {
+    return (
+      <DefaultLayout>
+        <div className="flex h-screen flex-col items-center justify-center gap-3">
+          <h1 className="text-4xl text-red-500">
+            {classroom.error.message || "Something went wrong"}
+          </h1>
+          <button
+            onClick={() => router.back()}
+            className="w-40 rounded-2xl bg-primary-color px-4 py-2 text-white"
+          >
+            Back
+          </button>
+        </div>
+      </DefaultLayout>
+    );
+  }
+  if (!classroom.data) {
+    return (
+      <DefaultLayout>
+        <div className="flex h-screen flex-col items-center justify-center gap-3">
+          <h1 className="text-4xl text-red-500">No School Found</h1>
+          <button
+            onClick={() => router.push("/")}
+            className="w-40 rounded-2xl bg-primary-color px-4 py-2 text-white"
+          >
+            Back
+          </button>
+        </div>
+      </DefaultLayout>
+    );
+  }
   const dateMonth = new Date(classroom.data.createAt).toLocaleDateString(
     undefined,
     {

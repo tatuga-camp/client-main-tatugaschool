@@ -1,15 +1,13 @@
 import {
-  QueryClient,
   useMutation,
-  UseMutationResult,
   useQuery,
   useQueryClient,
   UseQueryResult,
 } from "@tanstack/react-query";
+import { School } from "../interfaces";
 import {
   CreateSchoolService,
   DeleteSchoolService,
-  GetMembersBySchoolIdService,
   GetSchoolByIdService,
   GetSchoolService,
   RequestCreateSchoolService,
@@ -18,7 +16,6 @@ import {
   ResponseGetSchoolService,
   UpdateSchoolService,
 } from "../services";
-import { MemberOnSchool, School } from "../interfaces";
 
 export function useGetSchools(
   enable?: boolean,

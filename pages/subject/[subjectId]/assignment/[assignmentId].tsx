@@ -40,6 +40,8 @@ import {
   convertToDateTimeLocalString,
   generateBlurHash,
 } from "../../../../utils";
+import { ProgressSpinner } from "primereact/progressspinner";
+import DefaultLayout from "../../../../components/layout/DefaultLayout";
 
 type SummitValue = "Published" | "Save Change" | "Mark as Draft";
 
@@ -75,9 +77,8 @@ function Index({
   assignmentId: string;
 }) {
   const router = useRouter();
-  const subject = useGetSubject({
-    subjectId,
-  });
+
+  const subject = useGetSubject({ subjectId });
   const language = useGetLanguage();
   const [triggerOption, setTriggerOption] = React.useState(false);
   const [files, setFiles] = React.useState<FileClasswork[]>([]);
@@ -99,6 +100,7 @@ function Index({
   const [selectMenu, setSelectMenu] =
     React.useState<MenuAssignmentQuery>("classwork");
   const bodyRef = React.useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
     if (router.isReady) {
       const menu = router.query.menu as MenuAssignmentQuery;
@@ -297,6 +299,47 @@ function Index({
       });
     }
   };
+
+  if (subject.isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <ProgressSpinner />
+      </div>
+    );
+  }
+
+  if (subject.error) {
+    return (
+      <DefaultLayout>
+        <div className="flex h-screen flex-col items-center justify-center gap-3">
+          <h1 className="text-4xl text-red-500">
+            {subject.error.message || "Something went wrong"}
+          </h1>
+          <button
+            onClick={() => router.back()}
+            className="w-40 rounded-2xl bg-primary-color px-4 py-2 text-white"
+          >
+            Back
+          </button>
+        </div>
+      </DefaultLayout>
+    );
+  }
+  if (!subject.data) {
+    return (
+      <DefaultLayout>
+        <div className="flex h-screen flex-col items-center justify-center gap-3">
+          <h1 className="text-4xl text-red-500">No Subject Found</h1>
+          <button
+            onClick={() => router.push("/")}
+            className="w-40 rounded-2xl bg-primary-color px-4 py-2 text-white"
+          >
+            Back
+          </button>
+        </div>
+      </DefaultLayout>
+    );
+  }
 
   return (
     <>
