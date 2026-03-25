@@ -51,6 +51,16 @@ export const subjectDataLanguage = {
         return "QR Code Subject";
     }
   },
+  line: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Connect to Line";
+      case "th":
+        return "เชื่อมต่อกับลาย";
+      default:
+        return "Connect to Line";
+    }
+  },
 };
 
 export const settingOnSubjectDataLanguage = {

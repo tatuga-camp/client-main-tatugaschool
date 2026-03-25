@@ -188,3 +188,23 @@ export async function ReorderSubjectsService(
     throw error?.response?.data;
   }
 }
+
+export type RequestVerifyLineTokenService = {
+  body: { token: string; confirm: boolean; subjectId: string };
+};
+
+export async function VerifyLineTokenService(
+  input: RequestVerifyLineTokenService,
+): Promise<Subject> {
+  try {
+    const response = await axiosInstance({
+      method: "PATCH",
+      url: `/v1/subjects/line/verify`,
+      data: input.body,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Verify Line Token request failed:", error.response?.data);
+    throw error?.response?.data;
+  }
+}

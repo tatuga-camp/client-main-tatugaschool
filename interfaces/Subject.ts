@@ -12,6 +12,9 @@ export interface Subject {
   userId: string;
   schoolId: string;
   code: string;
+  lineGroupId?: string | null;
+  isVerifyLine: boolean;
+  verifyLineToken?: string | null;
   wheelOfNamePath?: string | null;
   allowStudentDeleteWork: boolean;
   allowStudentViewOverallScore: boolean;

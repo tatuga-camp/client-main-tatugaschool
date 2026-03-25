@@ -40,6 +40,7 @@ import {
   useGetStudentOnSubject,
   useGetSubject,
   useGetTeacherOnSubject,
+  useVerifyLineToken,
 } from "../../../react-query";
 import {
   getSignedURLTeacherService,
@@ -52,6 +53,9 @@ import {
   generateBlurHash,
   localStorageGetRemoveRandomStudents,
 } from "../../../utils";
+import VerifyConnectLine from "../../../components/subject/VerifyConnectLine";
+import { FaCheck, FaLine } from "react-icons/fa6";
+import QrCodeLineConnect from "../../../components/subject/QrCodeLineConnect";
 type Props = {
   subjectId: string;
 };
@@ -87,6 +91,8 @@ function Index({ subjectId }: Props) {
   const [triggerInviteTeacher, setTriggerInviteTeacher] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [triggerQRCode, setTriggerQRCode] = React.useState(false);
+  const [triggerLineConnect, setTriggerLineConnect] = React.useState(false);
+
   const [triggerStopWatch, setTriggerStopWatch] = React.useState(false);
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   useClickOutside(divRef, () => {
@@ -299,6 +305,15 @@ function Index({ subjectId }: Props) {
           />
         </PopupLayout>
       )}
+      {subject.data && triggerLineConnect && (
+        <PopupLayout onClose={() => setTriggerLineConnect(false)}>
+          <QrCodeLineConnect
+            onClose={() => {
+              setTriggerLineConnect(false);
+            }}
+          />
+        </PopupLayout>
+      )}
       {triggerInviteTeacher && subject.data && (
         <PopupLayout onClose={() => setTriggerInviteTeacher(false)}>
           <div className="rounded-2xl border">
@@ -319,6 +334,16 @@ function Index({ subjectId }: Props) {
           />
         </PopupLayout>
       )}
+      {subject.data &&
+        subject.data.verifyLineToken &&
+        subject.data.isVerifyLine === false && (
+          <PopupLayout onClose={() => {}}>
+            <VerifyConnectLine
+              subjectId={subject.data.id}
+              verifyLineToken={subject.data.verifyLineToken}
+            />
+          </PopupLayout>
+        )}
       <SubjectLayout
         setSelectFooter={setSelectFooter}
         selectFooter={selectFooter}
@@ -446,6 +471,23 @@ function Index({ subjectId }: Props) {
                   >
                     {subjectDataLanguage.qrCode(language.data ?? "en")}
                     <IoQrCode />
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (subject.data?.isVerifyLine === true) return;
+                      setTriggerLineConnect((prev) => !prev);
+                    }}
+                    aria-label="QR Code Subject"
+                    className="w- flex items-center justify-center gap-1 rounded-2xl bg-[#00B900] px-2 py-1 text-xs text-white active:scale-110"
+                  >
+                    {subject.data?.isVerifyLine === true ? (
+                      <>
+                        CONNECTED <FaCheck />
+                      </>
+                    ) : (
+                      subjectDataLanguage.line(language.data ?? "en")
+                    )}
+                    <FaLine />
                   </button>
                 </div>
               </div>

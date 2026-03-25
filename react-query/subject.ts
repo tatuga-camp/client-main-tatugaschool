@@ -24,6 +24,7 @@ import {
   RequestUpdateSubjectService,
   ResponseGetSubjectBySchoolsService,
   UpdateSubjectService,
+  VerifyLineTokenService,
 } from "../services";
 import {
   getSortStudentLocaStorage,
@@ -43,6 +44,7 @@ export function useGetSubject({
       GetSubjectByIdService({
         subjectId: subjectId,
       }),
+    refetchInterval: 1000 * 10,
   });
 }
 
@@ -280,6 +282,20 @@ export function useUpdateSortConfigOnSubject() {
         },
       );
       return Promise.resolve(request);
+    },
+  });
+}
+
+export function useVerifyLineToken() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["verify-line-token"],
+    mutationFn: VerifyLineTokenService,
+    onSuccess: (data, variables) => {
+      queryClient.setQueryData(
+        ["subject", { id: variables.body.subjectId }],
+        data,
+      );
     },
   });
 }
