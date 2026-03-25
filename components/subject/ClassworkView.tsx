@@ -204,7 +204,7 @@ function ClassworkView({
               />
             </div>
 
-            <ul className="mt-10 flex h-max w-full flex-col gap-2">
+            <ul className="mt-10 grid h-max w-full max-w-full gap-2 xl:grid-cols-2">
               {files?.map((file, index) => {
                 const isImage = file.type.includes("image");
                 const isLink = file.type === "LINK" || file.type === "url";
