@@ -308,6 +308,7 @@ function Index({ subjectId }: Props) {
       {subject.data && triggerLineConnect && (
         <PopupLayout onClose={() => setTriggerLineConnect(false)}>
           <QrCodeLineConnect
+            subjectId={subject.data.id}
             onClose={() => {
               setTriggerLineConnect(false);
             }}
@@ -474,7 +475,6 @@ function Index({ subjectId }: Props) {
                   </button>
                   <button
                     onClick={() => {
-                      if (subject.data?.isVerifyLine === true) return;
                       setTriggerLineConnect((prev) => !prev);
                     }}
                     aria-label="QR Code Subject"
