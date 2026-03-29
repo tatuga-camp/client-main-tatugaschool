@@ -26,7 +26,7 @@ function SubjectLayout({
     subjectId,
   });
   const navbarRef = useRef<HTMLDivElement>(null);
-  const [active, setActive] = React.useState(false);
+  const [active, setActive] = React.useState(true);
   const language = useGetLanguage();
   const [triggerShowLock, setTriggerShowLock] = useState(false);
   // Use the custom hook to detect clicks outside the navbar

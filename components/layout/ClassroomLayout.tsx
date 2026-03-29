@@ -13,7 +13,7 @@ type LayoutProps = {
 
 function ClassroomLayout({ children, classroomId, schoolId }: LayoutProps) {
   const navbarRef = React.useRef<HTMLDivElement>(null);
-  const [active, setActive] = React.useState(false);
+  const [active, setActive] = React.useState(true);
   const classroom = useGetClassroom({
     classId: classroomId,
   });

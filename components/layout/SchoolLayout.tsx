@@ -14,7 +14,7 @@ type LayoutProps = {
 
 function SchoolLayout({ children, selectMenu, schoolId }: LayoutProps) {
   const navbarRef = useRef<HTMLDivElement>(null);
-  const [active, setActive] = React.useState(false);
+  const [active, setActive] = React.useState(true);
   const school = useGetSchool({ schoolId });
   const user = useGetUser();
   useClickOutside(navbarRef, () => {
