@@ -4,6 +4,8 @@ import { useGetLanguage, useGetListSubscription } from "../../react-query";
 import LoadingBar from "../common/LoadingBar";
 import InputNumber from "../common/InputNumber";
 import { SubscriptionDataLanguage } from "../../data/languages/subscription";
+import { FiCheck, FiX } from "react-icons/fi";
+
 const pricingData = [
   {
     mainTitle: "",
@@ -29,6 +31,8 @@ const pricingData = [
     Classroom_Limit_th: "จำกัดห้องเรียน",
     Subject_Limit: "Subject Limit",
     Subject_Limit_th: "จำกัดวิชา",
+    line_chat_bot: "LINE Chat Bot",
+    line_chat_bot_th: "แชทบอทใน LINE",
   },
   {
     mainTitle: "FREE",
@@ -56,6 +60,7 @@ const pricingData = [
     Classroom_Limit_th: "3 ห้องเรียน",
     Subject_Limit: "3 subjects",
     Subject_Limit_th: "3 วิชา",
+    line_chat_bot: false,
   },
   {
     mainTitle: "BASIC",
@@ -77,13 +82,14 @@ const pricingData = [
     "Basic Feature": true,
     Users: 2,
     Users_th: 2,
-    "Total Storage Size": "15GB",
-    "Total Storage Size_th": "15GB",
+    "Total Storage Size": "Unlimited",
+    "Total Storage Size_th": "ไม่จำกัด",
     Support: true,
     Classroom_Limit: "10 classrooms",
     Classroom_Limit_th: "10 ห้องเรียน",
     Subject_Limit: "10 subjects",
     Subject_Limit_th: "10 วิชา",
+    line_chat_bot: false,
   },
   {
     mainTitle: "PREMIUM",
@@ -106,13 +112,15 @@ const pricingData = [
     Users: 3,
     Users_th: 3,
 
-    "Total Storage Size": "100GB",
-    "Total Storage Size_th": "100GB",
+    "Total Storage Size": "Unlimited",
+    "Total Storage Size_th": "ไม่จำกัด",
     Support: true,
     Classroom_Limit: "20 classrooms",
     Classroom_Limit_th: "20 ห้องเรียน",
     Subject_Limit: "30 subjects",
     Subject_Limit_th: "30 วิชา",
+    line_chat_bot: "Available",
+    line_chat_bot_th: "มีให้บริการ",
   },
   {
     popular: false,
@@ -135,36 +143,17 @@ const pricingData = [
     "Basic Feature": true,
     Users: "custom",
     Users_th: "กำหนดเอง",
-    "Total Storage Size": "9.77 TB",
-    "Total Storage Size_th": "9.77 TB",
+    "Total Storage Size": "Unlimited",
+    "Total Storage Size_th": "ไม่จำกัด",
     Support: true,
     Classroom_Limit: "Unlimited",
     Classroom_Limit_th: "ไม่จำกัด",
     Subject_Limit: "Unlimited",
     Subject_Limit_th: "ไม่จำกัด",
+    line_chat_bot: "Available",
+    line_chat_bot_th: "มีให้บริการ",
   },
-] as const;
-
-const RightIcon = ({ className }: { className: string }) => {
-  return (
-    <svg
-      className={className}
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M5 13L9 17L19 7"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-};
+];
 
 type Props = {
   school: School;
@@ -241,6 +230,7 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
     "Support",
     "Classroom_Limit",
     "Subject_Limit",
+    "line_chat_bot",
   ] as const;
 
   const calculateMaxSavings = () => {
@@ -414,29 +404,38 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
                 <p className="h-16 text-center text-sm text-gray-600">
                   {language.data === "en" ? data.infoNote : data.infoNote_th}
                 </p>
-
                 <div className="flex-grow">
                   <ul className="my-6 space-y-3">
-                    {features.map((feature, i) => (
-                      <li key={i} className="flex items-start">
-                        <RightIcon
-                          className={`mr-2 h-6 w-6 flex-shrink-0 ${colorScheme.rightIcon}`}
-                        />
-                        <span className="text-sm text-gray-700">
-                          <strong>
-                            {language.data === "en"
-                              ? pricingData[0][feature]
-                              : (pricingData[0] as any)[`${feature}_th`]}
-                            :
-                          </strong>{" "}
-                          {typeof (data as any)[feature] === "boolean"
-                            ? "Available"
-                            : language.data === "en"
-                              ? (data as any)[feature]
-                              : (data as any)[`${feature}_th`]}
-                        </span>
-                      </li>
-                    ))}
+                    {features.map((feature, i) => {
+                      return (
+                        <li key={i} className="flex items-start">
+                          {data[feature] === false ? (
+                            <FiX
+                              className={`mr-2 h-6 w-6 flex-shrink-0 text-red-500`}
+                            />
+                          ) : (
+                            <FiCheck
+                              className={`mr-2 h-6 w-6 flex-shrink-0 ${colorScheme.rightIcon}`}
+                            />
+                          )}
+                          <span className="text-sm text-gray-700">
+                            <strong>
+                              {language.data === "en"
+                                ? pricingData[0][feature]
+                                : pricingData[0][`${feature}_th`]}
+                              :
+                            </strong>{" "}
+                            {data[feature] === true
+                              ? "Available"
+                              : data[feature] === false
+                                ? "Not Available"
+                                : language.data === "en"
+                                  ? data[feature]
+                                  : data[`${feature}_th`]}
+                          </span>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
 
