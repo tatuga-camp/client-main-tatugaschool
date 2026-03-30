@@ -42,7 +42,11 @@ const Stats = ({ schoolId }: Props) => {
             <h2 className="font-bold text-gray-900 lg:text-lg xl:text-2xl">
               {school.data?.totalClass}/{" "}
               <span className="text-gray-400 lg:text-sm xl:text-lg">
-                {school.data?.limitClassNumber.toLocaleString()}
+                {school.data?.plan === "ENTERPRISE"
+                  ? language.data === "en"
+                    ? "Unlimited"
+                    : "ไม่จำกัด"
+                  : school.data?.limitClassNumber.toLocaleString()}{" "}
               </span>
             </h2>
           </div>
@@ -66,7 +70,11 @@ const Stats = ({ schoolId }: Props) => {
               {" "}
               {school.data?.totalSubject} /{" "}
               <span className="text-gray-400 lg:text-sm xl:text-lg">
-                {school.data?.limitSubjectNumber.toLocaleString()}
+                {school.data?.plan === "ENTERPRISE"
+                  ? language.data === "en"
+                    ? "Unlimited"
+                    : "ไม่จำกัด"
+                  : school.data?.limitSubjectNumber.toLocaleString()}{" "}
               </span>
             </h2>
           </div>
