@@ -364,7 +364,7 @@ function Index({ subjectId }: Props) {
           >
             {subject.data?.backgroundImage && (
               <div
-                className={`${subject.data.isLocked === true ? "bg-gray-400/90" : "gradient-shadow"} absolute bottom-0 left-0 right-0 top-0 -z-10 m-auto h-full w-full`}
+                className={`${subject.data.isLocked === true ? "bg-gray-400/90" : ""} absolute bottom-0 left-0 right-0 top-0 -z-10 m-auto h-full w-full`}
               ></div>
             )}
             {subject.data?.backgroundImage && (
