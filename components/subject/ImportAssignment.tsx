@@ -8,6 +8,7 @@ import {
   useGetMemberOnSchoolBySchool,
   useGetSubjectFromSchool,
   useGetUser,
+  useUpdateSkillToAssignment,
 } from "../../react-query";
 import { subjectsDataLanguage } from "../../data/languages";
 import InputEducationYear from "../common/InputEducationYear";
@@ -268,6 +269,7 @@ function AssignmentLists({
     | null
   >(null);
   const [loading, setLoading] = useState(false);
+  const updateSkill = useUpdateSkillToAssignment();
 
   const handleDupicateAssignment = async () => {
     try {
@@ -315,6 +317,10 @@ function AssignmentLists({
           ),
         );
       }
+      updateSkill.mutate({
+        assignmentId: classwork.id,
+      });
+
       toast.current?.show({
         severity: "success",
         summary: "Success",

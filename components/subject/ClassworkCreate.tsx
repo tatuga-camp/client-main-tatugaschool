@@ -2,16 +2,13 @@ import { useRouter } from "next/router";
 import { ProgressBar } from "primereact/progressbar";
 import { Toast } from "primereact/toast";
 import React, { ReactNode, useEffect } from "react";
-import { FaRegFile } from "react-icons/fa6";
 import { IoChevronDownSharp, IoClose } from "react-icons/io5";
 import {
-  MdAssignment,
   MdAssignmentAdd,
   MdDelete,
   MdOutlineDataSaverOn,
   MdPublish,
   MdUnpublished,
-  MdVideoLibrary,
 } from "react-icons/md";
 import Swal from "sweetalert2";
 import { classworkHeadMenuBarDataLanguage } from "../../data/languages";
@@ -28,6 +25,7 @@ import {
   useCreateAssignment,
   useGetAssignments,
   useGetLanguage,
+  useUpdateSkillToAssignment,
 } from "../../react-query";
 import {
   CreateFileAssignmentService,
@@ -91,6 +89,7 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
   const adjustedStyle = useAdjustPosition(divRef, 20); // 20px padding
   const create = useCreateAssignment();
   const assignments = useGetAssignments({ subjectId });
+  const updateSkill = useUpdateSkillToAssignment();
 
   const [classworkData, setClassworkData] = React.useState<{
     title?: string;
@@ -203,6 +202,9 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
 
         await Promise.allSettled(uploadTasks);
       }
+      updateSkill.mutate({
+        assignmentId: assignment.id,
+      });
       setLoading(false);
       toast.current?.show({
         severity: "success",

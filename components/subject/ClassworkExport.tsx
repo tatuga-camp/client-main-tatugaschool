@@ -8,6 +8,7 @@ import {
   useGetSubjectFromSchool,
   useGetUser,
   useGetQuestionOnVideoByAssignmentId,
+  useUpdateSkillToAssignment,
 } from "../../react-query";
 import { subjectsDataLanguage } from "../../data/languages";
 import InputEducationYear from "../common/InputEducationYear";
@@ -75,6 +76,7 @@ function ClassworkExport({
   const createFiles = useCreateFileOnAssignment();
   const createQuestions = useCreateQuestionOnVideo();
   const [loading, setLoading] = useState(false);
+  const updateSkill = useUpdateSkillToAssignment();
 
   React.useEffect(() => {
     if (subjects.data && user.data) {
@@ -216,6 +218,9 @@ function ClassworkExport({
               ),
             );
           }
+          updateSkill.mutate({
+            assignmentId: classwork.id,
+          });
         }),
       );
 
