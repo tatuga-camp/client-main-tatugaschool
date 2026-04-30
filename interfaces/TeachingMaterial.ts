@@ -6,6 +6,7 @@ export type TeachingMaterial = {
   createAt: Date;
   updateAt: Date;
   title: string;
+  titleTH: string;
   tags: string[];
   accessLevel: Plan;
   thumbnail?: string;

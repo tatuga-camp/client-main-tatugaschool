@@ -4,9 +4,10 @@ import { SiCanva } from "react-icons/si";
 
 type Props = {
   teachingMaterial: TeachingMaterial;
+  language: "en" | "th";
   onClick: () => void;
 };
-function TeachingMaterialCard({ teachingMaterial, onClick }: Props) {
+function TeachingMaterialCard({ teachingMaterial, onClick, language }: Props) {
   return (
     <button
       onClick={() => onClick()}
@@ -31,7 +32,11 @@ function TeachingMaterialCard({ teachingMaterial, onClick }: Props) {
         />
       </div>
       <section className="mt-3 flex w-full grow flex-col justify-between gap-2 px-2 pb-2">
-        <h1 className="text-lg font-semibold">{teachingMaterial.title}</h1>
+        <h1 className="text-lg font-semibold">
+          {language === "en"
+            ? teachingMaterial.title
+            : teachingMaterial.titleTH}
+        </h1>
         <ul className="flex flex-wrap gap-2">
           {teachingMaterial.tags.map((tag, index) => {
             return (

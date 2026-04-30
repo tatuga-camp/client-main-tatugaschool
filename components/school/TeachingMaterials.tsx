@@ -213,6 +213,7 @@ function TeachingMaterials({ schoolId }: Props) {
             {teachingMaterials.flat().map((teachingMaterial) => {
               return (
                 <TeachingMaterialCard
+                  language={language.data === "th" ? "th" : "en"}
                   onClick={() => {
                     document.body.style.overflow = "hidden";
                     setSelectTeachingMaterial(teachingMaterial);

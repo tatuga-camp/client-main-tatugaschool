@@ -15,6 +15,7 @@ type ResponseGetDescriptionSuggestionTeachingMaterialService = {
   description: string;
   title: string;
   keywords: string[];
+  titleTH: string;
 };
 
 export async function GetDescriptionSuggestionTeachingMaterialService(
@@ -56,6 +57,7 @@ export async function UpdateThumnailTeachingMaterialService(
 
 export type RequestCreateTeachingMaterialService = {
   title: string;
+  titleTH: string;
   description: string;
   tags: string[];
   accessLevel: Plan;
@@ -87,6 +89,7 @@ export type RequestUpdateTeachingMaterialService = {
   };
   body: {
     title?: string;
+    titleTH?: string;
     description?: string;
     tags?: string[];
     accessLevel?: Plan;

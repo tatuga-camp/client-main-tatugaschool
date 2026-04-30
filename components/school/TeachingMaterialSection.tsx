@@ -81,11 +81,13 @@ function TeachingMaterialSection({ onClose, teachingMaterial }: Props) {
   );
   const [teachingMaterialData, setTeachingMaterialData] = useState<{
     title: string;
+    titleTH: string;
     description: string;
     creatorURL: string;
     canvaURL: string;
   }>({
     title: teachingMaterial?.title ?? "",
+    titleTH: teachingMaterial?.titleTH ?? "",
     description: teachingMaterial?.description ?? "",
     creatorURL: teachingMaterial?.creatorURL ?? "",
     canvaURL: teachingMaterial?.canvaURL ?? "",
@@ -199,6 +201,7 @@ function TeachingMaterialSection({ onClose, teachingMaterial }: Props) {
         return {
           ...prev,
           title: data.title,
+          titleTH: data.titleTH,
           description: data.description,
         };
       });
@@ -231,6 +234,7 @@ function TeachingMaterialSection({ onClose, teachingMaterial }: Props) {
 
       const teachingMaterial = await create.mutateAsync({
         title: teachingMaterialData.title,
+        titleTH: teachingMaterialData.titleTH,
         description: teachingMaterialData.description,
         tags: tags,
         creatorURL: teachingMaterialData.creatorURL,
@@ -297,6 +301,7 @@ function TeachingMaterialSection({ onClose, teachingMaterial }: Props) {
         },
         body: {
           title: teachingMaterialData.title,
+          titleTH: teachingMaterialData.titleTH,
           description: teachingMaterialData.description,
           tags: tags,
           accessLevel: selectPlan,
@@ -548,6 +553,20 @@ function TeachingMaterialSection({ onClose, teachingMaterial }: Props) {
             }
             className="main-input"
             placeholder="Enter a descriptive title for your teaching material"
+          />
+          <input
+            required
+            value={teachingMaterialData.titleTH}
+            onChange={(e) =>
+              setTeachingMaterialData((prev) => {
+                return {
+                  ...prev,
+                  titleTH: e.target.value,
+                };
+              })
+            }
+            className="main-input"
+            placeholder="Enter a descriptive title for your teaching material in Thai"
           />
         </section>
         <section className="flex flex-col gap-2">
