@@ -69,6 +69,7 @@ function Subjects({ schoolId }: Props) {
     educationYear: educationYear as EducationYear,
   });
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
+  const hasInitialized = React.useRef(false);
 
   useEffect(() => {
     if (defaultFilter) {
@@ -118,9 +119,14 @@ function Subjects({ schoolId }: Props) {
   );
 
   React.useEffect(() => {
-    if (subjects.data && user.data) {
+    if (!subjects.data) return;
+
+    if (!hasInitialized.current && user.data) {
       setSelectFilterUserId(user.data.id);
       handleFilterByUser(user.data.id);
+      hasInitialized.current = true;
+    } else if (hasInitialized.current) {
+      handleFilterByUser(selectFilterUserId);
     }
   }, [subjects.data, user.data]);
 
