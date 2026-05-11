@@ -8,6 +8,7 @@ import {
 } from "../../react-query";
 import { ErrorMessages } from "../../interfaces";
 import Swal from "sweetalert2";
+import { useRouter } from "next/router";
 
 type Props = {
   onClose?: () => void;
@@ -19,6 +20,7 @@ function QrCodeLineConnect({ onClose, subjectId }: Props) {
   const subject = useGetSubject({ subjectId });
   const verifyLineTokenMutation = useVerifyLineToken();
   const [isConfirmingDisconnect, setIsConfirmingDisconnect] = useState(false);
+  const router = useRouter();
 
   const handleVerifyLineToken = async () => {
     try {
@@ -62,6 +64,24 @@ function QrCodeLineConnect({ onClose, subjectId }: Props) {
                 ? "คุณได้เชื่อมต่อกลุ่มไลน์สำหรับรายวิชานี้เรียบร้อยแล้ว"
                 : "You have successfully connected the Line group for this subject."}
             </p>
+            <div className="mt-2 rounded-lg bg-blue-50 p-3 text-center text-xs text-blue-600">
+              {language.data === "th"
+                ? "หมายเหตุ: กรุณาไปที่หน้าตั้งค่าเพื่อเปิดหรือปิดการแจ้งเตือนต่างๆ ตามที่ต้องการ"
+                : "Note: Please go to the settings page to toggle notifications on or off as needed."}
+            </div>
+            <button
+              onClick={() => {
+                router.push(
+                  `/subject/${subjectId}?menu=SettingSubject#permission`,
+                );
+                if (onClose) onClose();
+              }}
+              className="mt-2 w-full rounded-xl bg-blue-500 py-3 font-semibold text-white shadow-sm transition-colors hover:bg-blue-600"
+            >
+              {language.data === "th"
+                ? "ไปที่หน้าตั้งค่าการแจ้งเตือน"
+                : "Go to Notification Settings"}
+            </button>
           </div>
           {isConfirmingDisconnect ? (
             <div className="flex w-full flex-col gap-3">

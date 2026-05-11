@@ -5,6 +5,7 @@ import { ErrorMessages } from "../../interfaces";
 import { FaLine, FaSpinner } from "react-icons/fa";
 import Image from "next/image";
 import { defaultCanvas } from "../../data";
+import { useRouter } from "next/router";
 
 type Props = {
   verifyLineToken: string;
@@ -13,12 +14,41 @@ type Props = {
 function VerifyConnectLine({ verifyLineToken, subjectId }: Props) {
   const language = useGetLanguage();
   const verifyLineTokenMutation = useVerifyLineToken();
+  const router = useRouter();
 
   const handleVerifyLineToken = async (confirm: boolean) => {
     try {
       await verifyLineTokenMutation.mutateAsync({
         body: { token: verifyLineToken, confirm, subjectId },
       });
+
+      if (confirm) {
+        Swal.fire({
+          title:
+            language.data === "th"
+              ? "เชื่อมต่อสำเร็จ"
+              : "Connected Successfully",
+          text:
+            language.data === "th"
+              ? "คุณสามารถตั้งค่าการแจ้งเตือนเพิ่มเติมได้ที่หน้าตั้งค่า"
+              : "You can update your notification settings at the setting page.",
+          icon: "success",
+          confirmButtonText:
+            language.data === "th" ? "ไปที่หน้าตั้งค่า" : "Go to Settings",
+          showCancelButton: true,
+          cancelButtonText: language.data === "th" ? "ปิด" : "Close",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            router.push(`/subject/${subjectId}?menu=SettingSubject#permission`);
+          }
+        });
+      } else {
+        Swal.fire({
+          title:
+            language.data === "th" ? "ยกเลิกสำเร็จ" : "Canceled Successfully",
+          icon: "success",
+        });
+      }
     } catch (error: any) {
       console.log(error);
       let result = error as ErrorMessages;
@@ -60,6 +90,11 @@ function VerifyConnectLine({ verifyLineToken, subjectId }: Props) {
             ? "คุณต้องการเชื่อมต่อรายวิชานี้กับกลุ่มไลน์หรือไม่?"
             : "Do you want to connect this subject to the Line Group?"}
         </p>
+        <div className="mt-2 rounded-lg bg-blue-50 p-3 text-center text-xs text-blue-600">
+          {language.data === "th"
+            ? "หมายเหตุ: หลังจากเชื่อมต่อสำเร็จแล้ว กรุณาไปที่หน้าตั้งค่าเพื่อเปิดหรือปิดการแจ้งเตือนต่างๆ ตามที่ต้องการ"
+            : "Note: After connecting successfully, please go to the settings page to toggle notifications on or off as needed."}
+        </div>
       </div>
 
       <div className="mt-4 flex w-full flex-col gap-3">

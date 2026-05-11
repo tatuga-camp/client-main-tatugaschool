@@ -63,6 +63,7 @@ function SubjectPermission({ subjectId, onSummit, isPending }: Props) {
   }, [subject.status]);
   return (
     <form
+      id="permission"
       onSubmit={(e) => {
         if (permission) {
           onSummit(e, permission);
