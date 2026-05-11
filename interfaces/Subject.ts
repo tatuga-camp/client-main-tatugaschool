@@ -23,6 +23,9 @@ export interface Subject {
   allowStudentViewScoreOnAssignment: boolean;
   allowStudentDoneAssignmentInOrder?: boolean;
   allowHideStudentList?: boolean;
+  allowSendNotificationOnStudentOnAssignmentToLine?: boolean;
+  allowSendNotificationOnAssignmentToLine?: boolean;
+  allowSendNotificationMorningSummaryToLine?: boolean;
   isLocked: boolean;
 }
 

@@ -244,6 +244,36 @@ export const settingOnSubjectDataLanguage = {
         return "Allow teacher to hide student list from students when login to subject";
     }
   },
+  allowSendNotificationOnStudentOnAssignmentToLine: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Allow sending notification to Line when student submits assignment";
+      case "th":
+        return "อนุญาตให้ส่งการแจ้งเตือนไปยัง Line เมื่อนักเรียนส่งงาน";
+      default:
+        return "Allow sending notification to Line when student submits assignment";
+    }
+  },
+  allowSendNotificationOnAssignmentToLine: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Allow sending notification to Line when assignment is created";
+      case "th":
+        return "อนุญาตให้ส่งการแจ้งเตือนไปยัง Line เมื่อมีการสร้างชิ้นงาน";
+      default:
+        return "Allow sending notification to Line when assignment is created";
+    }
+  },
+  allowSendNotificationMorningSummaryToLine: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Allow sending morning summary notification to Line";
+      case "th":
+        return "อนุญาตให้ส่งสรุปข้อมูลช่วงเช้าไปยัง Line";
+      default:
+        return "Allow sending morning summary notification to Line";
+    }
+  },
   coTeacher: (language: Language) => {
     switch (language) {
       case "en":

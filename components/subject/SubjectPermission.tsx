@@ -14,6 +14,12 @@ type Props = {
       allowStudentViewOverallScore?: boolean;
       allowStudentViewGrade?: boolean;
       allowStudentViewAttendance?: boolean;
+      allowStudentViewScoreOnAssignment?: boolean;
+      allowStudentDoneAssignmentInOrder?: boolean;
+      allowHideStudentList?: boolean;
+      allowSendNotificationOnStudentOnAssignmentToLine?: boolean;
+      allowSendNotificationOnAssignmentToLine?: boolean;
+      allowSendNotificationMorningSummaryToLine?: boolean;
     },
   ) => void;
   isPending: boolean;
@@ -29,6 +35,9 @@ function SubjectPermission({ subjectId, onSummit, isPending }: Props) {
     allowStudentViewScoreOnAssignment?: boolean;
     allowStudentDoneAssignmentInOrder?: boolean;
     allowHideStudentList?: boolean;
+    allowSendNotificationOnStudentOnAssignmentToLine?: boolean;
+    allowSendNotificationOnAssignmentToLine?: boolean;
+    allowSendNotificationMorningSummaryToLine?: boolean;
   }>();
 
   React.useEffect(() => {
@@ -43,6 +52,12 @@ function SubjectPermission({ subjectId, onSummit, isPending }: Props) {
         allowStudentDoneAssignmentInOrder:
           subject.data.allowStudentDoneAssignmentInOrder,
         allowHideStudentList: subject.data.allowHideStudentList,
+        allowSendNotificationOnStudentOnAssignmentToLine:
+          subject.data.allowSendNotificationOnStudentOnAssignmentToLine,
+        allowSendNotificationOnAssignmentToLine:
+          subject.data.allowSendNotificationOnAssignmentToLine,
+        allowSendNotificationMorningSummaryToLine:
+          subject.data.allowSendNotificationMorningSummaryToLine,
       });
     }
   }, [subject.status]);
@@ -184,6 +199,65 @@ function SubjectPermission({ subjectId, onSummit, isPending }: Props) {
                 setPermission((prev) => ({
                   ...prev,
                   allowHideStudentList: data,
+                }));
+              }}
+            />
+          </label>
+        </div>
+        <div className="flex gap-5 p-2 py-4">
+          <label className="flex w-full items-center">
+            <span className="flex-1 text-base text-black">
+              {settingOnSubjectDataLanguage.allowSendNotificationOnStudentOnAssignmentToLine(
+                language.data ?? "en",
+              )}
+              :
+            </span>
+            <Switch
+              checked={
+                permission?.allowSendNotificationOnStudentOnAssignmentToLine
+              }
+              setChecked={(data) => {
+                setPermission((prev) => ({
+                  ...prev,
+                  allowSendNotificationOnStudentOnAssignmentToLine: data,
+                }));
+              }}
+            />
+          </label>
+        </div>
+        <div className="flex gap-5 bg-gray-200/20 p-2 py-4">
+          <label className="flex w-full items-center">
+            <span className="flex-1 text-base text-black">
+              {settingOnSubjectDataLanguage.allowSendNotificationOnAssignmentToLine(
+                language.data ?? "en",
+              )}
+              :
+            </span>
+            <Switch
+              checked={permission?.allowSendNotificationOnAssignmentToLine}
+              setChecked={(data) => {
+                setPermission((prev) => ({
+                  ...prev,
+                  allowSendNotificationOnAssignmentToLine: data,
+                }));
+              }}
+            />
+          </label>
+        </div>
+        <div className="flex gap-5 p-2 py-4">
+          <label className="flex w-full items-center">
+            <span className="flex-1 text-base text-black">
+              {settingOnSubjectDataLanguage.allowSendNotificationMorningSummaryToLine(
+                language.data ?? "en",
+              )}
+              :
+            </span>
+            <Switch
+              checked={permission?.allowSendNotificationMorningSummaryToLine}
+              setChecked={(data) => {
+                setPermission((prev) => ({
+                  ...prev,
+                  allowSendNotificationMorningSummaryToLine: data,
                 }));
               }}
             />
