@@ -58,8 +58,6 @@ function AttendanceChecker({
     | null
   >(null);
   const [qrCodeURL, setQrCodeURL] = useState<string | null>(null);
-  const sound = useSound("/sounds/ringing.mp3");
-  const successSong = useSound("/sounds/ding.mp3");
   const language = useGetLanguage();
   const [loading, setLoading] = React.useState(false);
   const createAttendanceRow = useCreateAttendanceRow();
@@ -278,7 +276,6 @@ function AttendanceChecker({
       }
 
       show();
-      successSong?.play();
       setLoading(false);
       onClose();
     } catch (error) {
@@ -311,7 +308,6 @@ function AttendanceChecker({
       await removeRow.mutateAsync({
         attendanceRowId: selectAttendanceRow.id,
       });
-      sound?.play();
       toast.current?.show({
         severity: "success",
         summary: "Delete Success",
