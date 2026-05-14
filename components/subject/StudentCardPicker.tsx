@@ -1,14 +1,17 @@
-import { animated, interpolate, useSprings } from "@react-spring/web";
+import {
+  animated,
+  interpolate,
+  useSpring,
+  useSprings,
+  useTransition,
+} from "@react-spring/web";
 import { useDrag } from "@use-gesture/react";
 import Image from "next/image";
-import React, { useEffect, useRef, useState } from "react";
-import { IoMdClose } from "react-icons/io";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { IoMdClose, IoMdRefresh, IoMdShuffle, IoMdStar } from "react-icons/io";
 import { useWindowSize } from "react-use";
-import Swal from "sweetalert2";
-import { defaultBlurHash } from "../../data";
-import { StudentOnSubject } from "../../interfaces";
+import { Language, StudentOnSubject } from "../../interfaces";
 import {
-  decodeBlurhashToCanvas,
   localStorageGetRemoveRandomStudents,
   localStorageSetRemoveRandomStudents,
 } from "../../utils";
@@ -25,17 +28,326 @@ interface StudentCardPickerProps {
   onClose: () => void;
   toast: React.RefObject<Toast>;
 }
+
 const to = (i: number) => ({
   x: 0,
   y: i * -4,
   scale: 1,
   rot: -10 + Math.random() * 20,
-  delay: i * 100,
+  delay: i * 80,
 });
 const from = (_i: number) => ({ x: 0, rot: 0, scale: 1.5, y: -1000 });
-// This is being used down there in the view, it interpolates rotation and scale into a css transform
+// interpolates rotation and scale into a css transform
 const trans = (r: number, s: number) =>
   `perspective(1500px) rotateX(30deg) rotateY(${r / 10}deg) rotateZ(${r}deg) scale(${s})`;
+
+const CONFETTI_COLORS = [
+  "#fde68a",
+  "#fca5a5",
+  "#a5b4fc",
+  "#86efac",
+  "#f0abfc",
+  "#fcd34d",
+  "#7dd3fc",
+];
+
+function ConfettiBurst() {
+  const pieces = useMemo(
+    () =>
+      Array.from({ length: 90 }).map((_, i) => ({
+        id: i,
+        left: Math.random() * 100,
+        size: 6 + Math.random() * 10,
+        color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+        delay: Math.random() * 0.4,
+        duration: 1.6 + Math.random() * 1.8,
+        sway: -120 + Math.random() * 240,
+        rotate: -360 + Math.random() * 720,
+      })),
+    [],
+  );
+
+  return (
+    <div className="pointer-events-none fixed inset-0 z-[80] overflow-hidden">
+      {pieces.map((p) => (
+        <span
+          key={p.id}
+          className="confetti-piece"
+          style={
+            {
+              left: `${p.left}%`,
+              width: p.size,
+              height: p.size * 0.4,
+              background: p.color,
+              animationDelay: `${p.delay}s`,
+              animationDuration: `${p.duration}s`,
+              ["--sway" as string]: `${p.sway}px`,
+              ["--rot" as string]: `${p.rotate}deg`,
+            } as React.CSSProperties
+          }
+        />
+      ))}
+      <style jsx>{`
+        .confetti-piece {
+          position: absolute;
+          top: -10px;
+          border-radius: 2px;
+          opacity: 0.95;
+          transform-origin: center;
+          animation-name: confetti-fall;
+          animation-timing-function: cubic-bezier(0.2, 0.6, 0.4, 1);
+          animation-fill-mode: forwards;
+        }
+        @keyframes confetti-fall {
+          0% {
+            transform: translate3d(0, -20px, 0) rotate(0deg);
+            opacity: 1;
+          }
+          100% {
+            transform: translate3d(var(--sway), 110vh, 0) rotate(var(--rot));
+            opacity: 0.9;
+          }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+function WinnerReveal({
+  student,
+  language,
+  onCancel,
+  onDelete,
+  onGiveScore,
+}: {
+  student: StudentOnSubject;
+  language: Language;
+  onCancel: () => void;
+  onDelete: () => void;
+  onGiveScore: () => void;
+}) {
+  const enter = useSpring({
+    from: { scale: 0.6, opacity: 0, y: 30 },
+    to: { scale: 1, opacity: 1, y: 0 },
+    config: { tension: 260, friction: 18 },
+  });
+
+  return (
+    <div
+      className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 backdrop-blur-md"
+      onClick={onCancel}
+    >
+      <ConfettiBurst />
+      <animated.div
+        style={enter}
+        onClick={(e) => e.stopPropagation()}
+        className="relative flex w-[90%] max-w-md flex-col items-center gap-5 overflow-hidden rounded-3xl bg-gradient-to-br from-white via-amber-50 to-rose-50 p-8 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.4)]"
+      >
+        <span className="winner-shine pointer-events-none absolute inset-0" />
+        <div className="relative flex items-center gap-2 text-amber-500">
+          <IoMdStar className="text-2xl drop-shadow" />
+          <span className="text-sm font-semibold uppercase tracking-[0.3em]">
+            Winner
+          </span>
+          <IoMdStar className="text-2xl drop-shadow" />
+        </div>
+        <div className="relative">
+          <div className="absolute -inset-2 animate-pulse rounded-full bg-gradient-to-tr from-amber-300 via-rose-300 to-violet-400 opacity-80 blur-md" />
+          <div className="relative h-28 w-28 overflow-hidden rounded-full border-4 border-white shadow-lg">
+            <Image
+              fill
+              sizes="120px"
+              src={student.photo}
+              alt={student.firstName}
+              className="object-cover"
+            />
+          </div>
+        </div>
+        <div className="relative text-center">
+          <p className="text-xs font-medium uppercase tracking-widest text-slate-400">
+            เลขที่ {student.number}
+          </p>
+          <h2 className="mt-1 text-2xl font-bold text-slate-800">
+            {student.firstName} {student.lastName}
+          </h2>
+          <p className="mt-2 text-sm text-slate-500">
+            ยินดีด้วยย คุณคือผู้ถูกเลือก
+          </p>
+        </div>
+        <div className="relative grid w-full grid-cols-1 gap-2">
+          <button
+            onClick={onDelete}
+            className="rounded-2xl bg-gradient-to-br from-rose-500 to-rose-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-rose-300/40 transition hover:brightness-110 active:scale-[0.98]"
+          >
+            {CardPickerLanguage.delete_name(language)}
+          </button>
+          <button
+            onClick={onGiveScore}
+            className="rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-300/40 transition hover:brightness-110 active:scale-[0.98]"
+          >
+            {CardPickerLanguage.give_score(language)}
+          </button>
+          <button
+            onClick={onCancel}
+            className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 active:scale-[0.98]"
+          >
+            {CardPickerLanguage.cancel(language)}
+          </button>
+        </div>
+        <style jsx>{`
+          .winner-shine {
+            background: linear-gradient(
+              115deg,
+              transparent 30%,
+              rgba(255, 255, 255, 0.6) 50%,
+              transparent 70%
+            );
+            background-size: 200% 100%;
+            animation: shine 3s linear infinite;
+          }
+          @keyframes shine {
+            0% {
+              background-position: 200% 0;
+            }
+            100% {
+              background-position: -100% 0;
+            }
+          }
+        `}</style>
+      </animated.div>
+    </div>
+  );
+}
+
+function SidePanelItem({
+  student,
+  onClick,
+}: {
+  student: StudentOnSubject;
+  onClick: () => void;
+}) {
+  return (
+    <div
+      onClick={onClick}
+      className="group flex w-full cursor-pointer items-center gap-3 rounded-xl bg-white/85 p-2 text-black backdrop-blur transition hover:-translate-y-0.5 hover:bg-white hover:shadow-md"
+    >
+      <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full ring-2 ring-white/70">
+        <Image
+          fill
+          sizes="40px"
+          src={student.photo}
+          alt={student.firstName}
+          className="object-cover"
+        />
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <span className="truncate text-sm font-semibold text-slate-700">
+          {student.firstName} {student.lastName}
+        </span>
+        <span className="text-[10px] uppercase tracking-wider text-slate-400">
+          # {student.number}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function DeckPanel({
+  title,
+  count,
+  items,
+  onItemClick,
+  tone,
+}: {
+  title: string;
+  count: number;
+  items: StudentOnSubject[];
+  onItemClick: (s: StudentOnSubject) => void;
+  tone: "emerald" | "rose";
+}) {
+  const palette =
+    tone === "emerald"
+      ? {
+          gradient: "from-emerald-500/70 via-teal-500/60 to-cyan-500/50",
+          chip: "bg-emerald-400/90 text-white",
+          glow: "shadow-emerald-500/30",
+          ring: "ring-emerald-300/40",
+        }
+      : {
+          gradient: "from-rose-500/70 via-fuchsia-500/60 to-pink-500/50",
+          chip: "bg-rose-400/90 text-white",
+          glow: "shadow-rose-500/30",
+          ring: "ring-rose-300/40",
+        };
+
+  const transitions = useTransition(items, {
+    keys: (s: StudentOnSubject) => s.id,
+    from: { opacity: 0, x: -20 },
+    enter: { opacity: 1, x: 0 },
+    leave: { opacity: 0, x: 20 },
+    config: { tension: 260, friction: 22 },
+  });
+
+  return (
+    <div
+      className={`flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-2xl bg-gradient-to-br ${palette.gradient} p-3 shadow-xl ${palette.glow} ring-1 ${palette.ring} backdrop-blur-xl`}
+    >
+      <div className="flex items-center justify-between px-1 pb-2 text-white">
+        <h2 className="text-sm font-bold uppercase tracking-[0.25em] drop-shadow">
+          {title}
+        </h2>
+        <span
+          className={`min-w-7 rounded-full ${palette.chip} px-2 py-0.5 text-center text-xs font-bold shadow ring-1 ring-white/40`}
+        >
+          {count}
+        </span>
+      </div>
+      <div className="flex w-full flex-1 flex-col gap-2 overflow-auto pr-1">
+        {transitions((style, student) => (
+          <animated.div style={style} className="w-full">
+            <SidePanelItem
+              student={student}
+              onClick={() => onItemClick(student)}
+            />
+          </animated.div>
+        ))}
+        {items.length === 0 && (
+          <div className="mt-2 w-full rounded-xl bg-white/15 px-3 py-4 text-center text-xs text-white/80">
+            —
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ActionButton({
+  onClick,
+  disabled,
+  gradient,
+  icon,
+  label,
+}: {
+  onClick: () => void;
+  disabled?: boolean;
+  gradient: string;
+  icon: React.ReactNode;
+  label: string;
+}) {
+  return (
+    <button
+      disabled={disabled}
+      onClick={onClick}
+      className={`group relative flex w-44 items-center justify-center gap-2 overflow-hidden rounded-full bg-gradient-to-br ${gradient} px-5 py-3 text-base font-semibold text-white shadow-xl shadow-black/20 transition hover:scale-[1.04] active:scale-95 disabled:opacity-50`}
+    >
+      <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+      <span className="relative flex items-center gap-2">
+        {icon}
+        {label}
+      </span>
+    </button>
+  );
+}
 
 function Deck({
   students,
@@ -44,6 +356,7 @@ function Deck({
   subjectId,
 }: StudentCardPickerProps) {
   const language = useGetLanguage();
+  const lang = language.data ?? "en";
   const sound = {
     cards: "https://storage.googleapis.com/tatugacamp.com/sound/card.mp3",
     sheer: "https://storage.googleapis.com/tatugacamp.com/sound/sheer.mp3",
@@ -54,12 +367,15 @@ function Deck({
     [],
   );
 
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const { width, height } = useWindowSize();
   const [selectedStudent, setSelectedStudent] =
     useState<StudentOnSubject | null>(null);
+  const [pickedStudent, setPickedStudent] = useState<StudentOnSubject | null>(
+    null,
+  );
   const prevSelectedStudent = useRef<StudentOnSubject | null>(null);
-  const [activeCongrest, setActiveCongrest] = useState(false);
+  const [, setActiveCongrest] = useState(false);
   const [audioSheer] = useState<HTMLAudioElement>(() => new Audio(sound.sheer));
   const [audioCard] = useState<HTMLAudioElement>(() => new Audio(sound.cards));
   const [audioShuffle] = useState<HTMLAudioElement>(
@@ -72,7 +388,6 @@ function Deck({
       const j = Math.floor(Math.random() * (i + 1));
       [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
     }
-
     return newArray;
   }
 
@@ -91,8 +406,8 @@ function Deck({
   const [props, api] = useSprings(shuffledStudents.length, (i) => ({
     ...to(i),
     from: from(i),
-  })); // Create a bunch of springs using the helpers above
-  // Create a gesture, we're interested in down-state, delta (current-pos - click-pos), direction and velocity
+  }));
+
   const bind = useDrag(
     ({
       args: [number, student],
@@ -100,7 +415,6 @@ function Deck({
       movement: [mx],
       direction: [xDir],
       velocity,
-      event,
       first,
       last,
     }) => {
@@ -113,24 +427,19 @@ function Deck({
         audioCard.pause();
         audioCard.currentTime = 0;
       }
-      const triggerThreshold = 200; // Trigger if dragged 200px left or right
+      const triggerThreshold = 200;
       const trigger = Math.abs(mx) > triggerThreshold;
-      const dir = xDir < 0 ? -1 : 1; // Direction should either point left or right
+      const dir = xDir < 0 ? -1 : 1;
       if (!down && trigger) {
-        handleShowSweetAleart(value);
-      } // If button/finger's up and trigger velocity is reached, we flag the card ready to fly out
+        handleShowWinner(value);
+      }
       api.start((i) => {
-        // Only animate the card being interacted with
         if (index !== i) return;
-
-        // A card is "gone" if it's in the set OR if it just met the trigger
         const isGone = gone.has(value.id) || (!down && trigger);
-
-        // When a card is gone, it flies out. Otherwise, it follows the mouse or returns to 0
         const x = isGone ? (200 + window.innerWidth) * dir : down ? mx : 0;
         const rot =
           mx / 100 + (isGone ? dir * 10 * (velocity[0] + velocity[1]) : 0);
-        const scale = down ? 1.1 : 1; // Active cards lift up a bit
+        const scale = down ? 1.1 : 1;
         return {
           x,
           rot,
@@ -141,39 +450,37 @@ function Deck({
       });
     },
   );
-  const handleShowSweetAleart = (student: StudentOnSubject) => {
+
+  const handleShowWinner = (student: StudentOnSubject) => {
     setActiveCongrest(true);
-    Swal.fire({
-      title: `เลขที่ ${student.number} ${student.firstName} ${student.lastName}`,
-      text: "ยินดีด้วยย คุณคือผู้ถูกเลือก",
-      showCancelButton: true,
-      showDenyButton: true,
-      denyButtonText: CardPickerLanguage.give_score(language.data ?? "en"),
-      cancelButtonText: CardPickerLanguage.cancel(language.data ?? "en"),
-      confirmButtonText: CardPickerLanguage.delete_name(language.data ?? "en"),
-      confirmButtonColor: "#eb4034",
-      cancelButtonColor: "#1be4f2",
-      denyButtonColor: "#1bf278",
-      width: "max-content",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        fadeOut(audioSheer, 2000);
-        moveStudentOutOfDeck(student);
-        setActiveCongrest(() => false);
-      } else if (result.dismiss) {
-        fadeOut(audioSheer, 2000);
-        setActiveCongrest(() => false);
-      } else if (result.isDenied) {
-        fadeOut(audioSheer, 2000);
-        setActiveCongrest(() => false);
-        setSelectedStudent(student);
-      }
-    });
+    setPickedStudent(student);
+  };
+
+  const handleWinnerDelete = () => {
+    if (!pickedStudent) return;
+    fadeOut(audioSheer, 2000);
+    moveStudentOutOfDeck(pickedStudent);
+    setActiveCongrest(false);
+    setPickedStudent(null);
+  };
+
+  const handleWinnerCancel = () => {
+    fadeOut(audioSheer, 2000);
+    setActiveCongrest(false);
+    setPickedStudent(null);
+  };
+
+  const handleWinnerGiveScore = () => {
+    if (!pickedStudent) return;
+    fadeOut(audioSheer, 2000);
+    setActiveCongrest(false);
+    setSelectedStudent(pickedStudent);
+    setPickedStudent(null);
   };
 
   function fadeOut(audioElement: HTMLAudioElement, duration: number) {
     const initialVolume = audioElement.volume;
-    const volumeStep = initialVolume / (duration / 100); // Adjust the division factor for the desired fade-out duration
+    const volumeStep = initialVolume / (duration / 100);
 
     const fadeOutInterval = setInterval(() => {
       if (audioElement.volume > 0) {
@@ -183,13 +490,13 @@ function Deck({
         audioElement.currentTime = 0;
         clearInterval(fadeOutInterval);
       }
-    }, 100); // Adjust the interval for smoother fading
+    }, 100);
   }
+
   const moveStudentToDeck = (student: StudentOnSubject) => {
     gone.delete(student.id);
     handleTakeIn(student);
     const studentIndex = shuffledStudents.findIndex((s) => s.id === student.id);
-
     if (studentIndex !== -1) {
       api.start((i) => {
         if (i === studentIndex) {
@@ -204,49 +511,54 @@ function Deck({
     handleTakeOff();
 
     const studentIndex = shuffledStudents.findIndex((s) => s.id === student.id);
-
     if (studentIndex !== -1) {
       api.start((i) => {
         if (i === studentIndex) {
           return {
-            x: window.innerWidth + 200, // Fly out to the right
-            rot: 30, // Give it some rotation
-            config: { friction: 50, tension: 200 }, // Use the 'isGone' config
+            x: window.innerWidth + 200,
+            rot: 30,
+            config: { friction: 50, tension: 200 },
           };
         }
       });
     }
   };
+
   const restart = () => {
     setShuffledStudents(() => shuffleArray(students));
     gone.clear();
-    api.start((i) => {
-      return from(i);
-    });
-    api.start((i) => {
-      return to(i);
-    });
+    api.start((i) => from(i));
+    api.start((i) => to(i));
     localStorageSetRemoveRandomStudents({
       subjectId: subjectId,
       studentIds: [],
     });
   };
+
   const shuffle = () => {
     setShuffledStudents((prev) => shuffleArray(prev));
     audioShuffle.play();
+    // Lift, swirl, restack — cinematic stagger
+    api.start((i) => ({
+      y: -180 - i * 6,
+      rot: -25 + Math.random() * 50,
+      scale: 1.08,
+      delay: i * 30,
+      config: { friction: 26, tension: 320 },
+    }));
     setTimeout(() => {
       audioShuffle.pause();
       audioShuffle.currentTime = 0;
+      api.start((i) => ({
+        ...to(i),
+        delay: i * 40,
+      }));
     }, 500);
-    api.start((i) => from(i));
-    api.start((i) => to(i));
   };
 
-  //set random card with the first render only
+  // first render only
   useEffect(() => {
-    setShuffledStudents(() => {
-      return shuffleArray(students);
-    });
+    setShuffledStudents(() => shuffleArray(students));
     const remove_studnets =
       localStorageGetRemoveRandomStudents({ subjectId: subjectId }) ?? [];
     for (const studentId of remove_studnets) {
@@ -258,114 +570,107 @@ function Deck({
 
   useEffect(() => {
     if (prevSelectedStudent.current && !selectedStudent) {
-      handleShowSweetAleart(prevSelectedStudent.current);
+      handleShowWinner(prevSelectedStudent.current);
     }
-
     prevSelectedStudent.current = selectedStudent;
   }, [selectedStudent]);
+
+  const inDeckList = shuffledStudents.filter((s) => !gone.has(s.id));
+  const outOfDeckList = Array.from(gone)
+    .map((id) => students.find((s) => s.id === id))
+    .filter((s): s is StudentOnSubject => Boolean(s));
 
   return (
     <>
       {selectedStudent && (
-        <PopupLayout
-          onClose={() => {
-            setSelectedStudent(null);
-          }}
-        >
+        <PopupLayout onClose={() => setSelectedStudent(null)}>
           <PopUpStudent
             student={selectedStudent}
             toast={toast}
-            onClose={() => {
-              setSelectedStudent(null);
-            }}
+            onClose={() => setSelectedStudent(null)}
           />
         </PopupLayout>
       )}
-      <div className="relative h-screen w-screen">
-        <div className="absolute left-5 top-5 flex h-[calc(100vh-2.5rem)] w-80 flex-col gap-5 text-white">
-          <div className="flex h-60 w-full flex-col items-center rounded-lg bg-green-500 p-3">
-            <h2 className="text-lg font-semibold">
-              In Deck (
-              {
-                shuffledStudents.filter((student) => !gone.has(student.id))
-                  .length
-              }
-              )
-            </h2>
-            <ul className="flex h-60 w-full flex-col items-start justify-start gap-2 overflow-auto p-2">
-              {shuffledStudents
-                .filter((student) => !gone.has(student.id))
-                .map((student, index) => {
-                  return (
-                    <li
-                      className="flex w-full cursor-pointer items-center justify-between rounded-lg bg-white p-2 text-black transition hover:bg-slate-200"
-                      key={student.id}
-                      onClick={() => moveStudentOutOfDeck(student)}
-                    >
-                      <span>
-                        {student.firstName} {student.lastName}
-                      </span>
-                    </li>
-                  );
-                })}
-            </ul>
-          </div>
-          <div className="flex h-60 w-full flex-col items-center rounded-lg bg-red-500 p-3">
-            <h2 className="text-lg font-semibold">Out of Deck ({gone.size})</h2>
-            <ul className="flex h-60 w-full flex-col items-start justify-start gap-2 overflow-auto p-2">
-              {Array.from(gone).map((studentId, index) => {
-                const student = students.find((s) => s.id === studentId);
-                if (!student) return null;
-                return (
-                  <li
-                    className="flex w-full cursor-pointer items-center justify-between rounded-lg bg-white p-2 text-black transition hover:bg-slate-200"
-                    key={student.id}
-                    onClick={() => moveStudentToDeck(student)}
-                  >
-                    <span>
-                      {student.firstName} {student.lastName}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        </div>
+      {pickedStudent && (
+        <WinnerReveal
+          student={pickedStudent}
+          language={lang}
+          onCancel={handleWinnerCancel}
+          onDelete={handleWinnerDelete}
+          onGiveScore={handleWinnerGiveScore}
+        />
+      )}
+      <div className="relative h-screen w-screen overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(99,102,241,0.22),transparent_55%),radial-gradient(ellipse_at_bottom,_rgba(236,72,153,0.22),transparent_55%)]" />
+
+        <aside className="absolute left-5 top-5 z-10 flex h-[calc(100vh-2.5rem)] w-80 flex-col gap-5">
+          <DeckPanel
+            title="In Deck"
+            count={inDeckList.length}
+            items={inDeckList}
+            onItemClick={moveStudentOutOfDeck}
+            tone="emerald"
+          />
+          <DeckPanel
+            title="Out of Deck"
+            count={outOfDeckList.length}
+            items={outOfDeckList}
+            onItemClick={moveStudentToDeck}
+            tone="rose"
+          />
+        </aside>
+
         <div className="card-container">
           {props.map(({ x, y, rot, scale }, i) => (
             <animated.div className="card-deck" key={i} style={{ x, y }}>
               <animated.div
                 {...bind(i, shuffledStudents[i])}
-                className="group relative flex h-60 w-40 touch-none select-none flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl border-2 border-black bg-white p-3 text-black hover:drop-shadow-md active:scale-105 sm:h-60 md:h-60 lg:h-60 xl:h-60"
+                className="group relative flex h-64 w-44 touch-none select-none flex-col items-center justify-center gap-2 overflow-hidden rounded-3xl border border-white/60 bg-gradient-to-br from-white via-indigo-50 to-fuchsia-50 p-4 shadow-[0_20px_40px_-15px_rgba(79,70,229,0.55)] backdrop-blur active:scale-[1.04]"
                 style={{
                   transform: interpolate([rot, scale], trans),
                 }}
               >
-                <button className="absolute z-20 h-full w-full bg-white/20 backdrop-blur-md group-hover:bg-white/0 group-hover:backdrop-blur-none group-active:bg-white/0 group-active:backdrop-blur-none"></button>
-                <div className="absolute -top-3 left-0 right-0 m-auto flex h-12 w-max min-w-10 max-w-20 select-none items-center justify-center rounded-2xl bg-primary-color text-white group-hover:bg-white">
-                  <span className="w-max max-w-14 truncate text-black group-hover:text-primary-color">
+                {/* Holographic sheen */}
+                <span className="pointer-events-none absolute inset-0 z-10 bg-[linear-gradient(115deg,transparent_30%,rgba(255,255,255,0.55)_50%,transparent_70%)] bg-[length:200%_100%] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+
+                {/* Frosted back face — clears on hover/press */}
+                <button className="absolute inset-0 z-20 flex items-center justify-center bg-white/30 backdrop-blur-md transition duration-300 group-hover:bg-white/0 group-hover:backdrop-blur-none group-active:bg-white/0 group-active:backdrop-blur-none">
+                  <span className="rounded-full border border-white/70 bg-white/40 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.25em] text-indigo-700 shadow-sm transition group-hover:opacity-0">
+                    Reveal
+                  </span>
+                </button>
+
+                {/* Score badge */}
+                <div className="absolute -top-2 left-0 right-0 z-30 m-auto flex h-10 w-max min-w-12 max-w-24 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 px-3 text-white shadow-lg shadow-amber-400/40 ring-2 ring-white">
+                  <IoMdStar className="mr-1 text-sm" />
+                  <span className="max-w-14 truncate text-sm font-bold">
                     {shuffledStudents[i].totalSpeicalScore}
                   </span>
                 </div>
 
-                <div className="relative h-20 w-20 overflow-hidden rounded-full">
-                  <Image
-                    fill
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                    src={shuffledStudents[i].photo}
-                    alt="Student"
-                    className="pointer-events-none h-full w-full object-cover transition group-hover:scale-150"
-                  />
+                {/* Photo with rainbow glow */}
+                <div className="relative mt-3">
+                  <div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-indigo-400 via-fuchsia-400 to-amber-300 opacity-90 blur-sm" />
+                  <div className="relative h-20 w-20 overflow-hidden rounded-full ring-2 ring-white">
+                    <Image
+                      fill
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      src={shuffledStudents[i].photo}
+                      alt="Student"
+                      className="pointer-events-none h-full w-full object-cover transition duration-500 group-hover:scale-110"
+                    />
+                  </div>
                 </div>
+
                 <div className="flex w-full select-none flex-col items-center justify-center gap-0 text-center">
-                  <span className="text-xs text-gray-500">
+                  <span className="text-[10px] uppercase tracking-widest text-slate-400">
                     {shuffledStudents[i].title}
                   </span>
-                  <h2 className="group-hover:text-blacksm:text-base w-11/12 truncate text-center text-sm font-semibold text-gray-800 md:text-lg lg:text-base">
+                  <h2 className="w-11/12 truncate text-center text-base font-bold text-slate-800">
                     {shuffledStudents[i].firstName}{" "}
                     {shuffledStudents[i].lastName}
                   </h2>
-                  <span className="group-hover:text-blacksm:text-sm text-xs font-medium text-gray-500 md:text-sm">
+                  <span className="mt-1 text-[10px] font-medium uppercase tracking-wider text-slate-400">
                     Number {shuffledStudents[i].number}
                   </span>
                 </div>
@@ -373,22 +678,23 @@ function Deck({
             </animated.div>
           ))}
         </div>
-        <div className="absolute bottom-5 w-full">
-          <div className="flex w-full items-center justify-center gap-5">
-            <button
-              disabled={loading}
-              className="w-40 rounded-full bg-blue-500 p-3 text-xl font-semibold text-white drop-shadow-lg transition hover:scale-105 active:scale-95"
+
+        <div className="absolute bottom-6 left-0 z-10 w-full">
+          <div className="flex w-full items-center justify-center gap-4">
+            <ActionButton
               onClick={restart}
-            >
-              {CardPickerLanguage.restart(language.data ?? "en")}
-            </button>
-            <button
               disabled={loading}
+              gradient="from-indigo-500 to-blue-600"
+              icon={<IoMdRefresh className="text-xl" />}
+              label={CardPickerLanguage.restart(lang)}
+            />
+            <ActionButton
               onClick={shuffle}
-              className="w-40 rounded-full bg-orange-500 p-3 text-xl font-semibold text-white drop-shadow-lg transition hover:scale-105 active:scale-95"
-            >
-              {CardPickerLanguage.shuffle(language.data ?? "en")}
-            </button>
+              disabled={loading}
+              gradient="from-amber-500 to-pink-500"
+              icon={<IoMdShuffle className="text-xl" />}
+              label={CardPickerLanguage.shuffle(lang)}
+            />
           </div>
         </div>
       </div>
@@ -404,16 +710,17 @@ const StudentCardPicker: React.FC<StudentCardPickerProps> = ({
   onClose,
 }) => {
   return (
-    <div className="flex h-screen w-screen flex-col items-center justify-center bg-slate-200">
+    <div className="relative flex h-screen w-screen flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900">
       <button
         type="button"
         onClick={() => {
           document.body.style.overflow = "auto";
           onClose();
         }}
-        className="fixed right-3 top-3 z-40 flex h-6 w-6 items-center justify-center rounded border-2 border-black bg-white text-lg font-semibold hover:bg-gray-300/50"
+        className="fixed right-4 top-4 z-50 flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur transition hover:rotate-90 hover:bg-white/20"
+        aria-label="Close"
       >
-        <IoMdClose />
+        <IoMdClose className="text-xl" />
       </button>
       <Deck
         toast={toast}
