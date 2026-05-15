@@ -1161,7 +1161,6 @@ const StudentDesktopRow = React.memo(
     handleNoteChange: (input: { studentId: string; note: string }) => void;
     index: number;
   }) => {
-    console.log(studentOnSubject.id)
     const odd = index % 2 === 0;
     const rowBg = odd ? "#F9FBFD" : "#FFFFFF";
     return (
