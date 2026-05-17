@@ -61,6 +61,46 @@ export const subjectDataLanguage = {
         return "Connect to Line";
     }
   },
+  noStudentsTitle: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "No students yet";
+      case "th":
+        return "ยังไม่มีนักเรียน";
+      default:
+        return "No students yet";
+    }
+  },
+  noStudentsBody: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Students are added at the classroom level, not in the subject. Go to the classroom this subject belongs to and add students there — they will be automatically included in every subject linked to that classroom.";
+      case "th":
+        return "นักเรียนถูกเพิ่มที่ระดับชั้นเรียน ไม่ใช่ในรายวิชา กรุณาไปที่ชั้นเรียนของรายวิชานี้และเพิ่มนักเรียน ระบบจะเพิ่มนักเรียนเข้าทุกรายวิชาที่เชื่อมกับชั้นเรียนนี้โดยอัตโนมัติ";
+      default:
+        return "Students are added at the classroom level, not in the subject. Go to the classroom this subject belongs to and add students there — they will be automatically included in every subject linked to that classroom.";
+    }
+  },
+  goToClassroom: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Go to Classroom";
+      case "th":
+        return "ไปที่ชั้นเรียน";
+      default:
+        return "Go to Classroom";
+    }
+  },
+  noStudentsLater: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Later";
+      case "th":
+        return "ภายหลัง";
+      default:
+        return "Later";
+    }
+  },
 };
 
 export const settingOnSubjectDataLanguage = {
