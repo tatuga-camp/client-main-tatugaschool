@@ -41,6 +41,7 @@ import PopupLayout from "../layout/PopupLayout";
 import StudentCard from "../student/StudentCard";
 import ShowGroups from "./groupOnSubject/ShowGroups";
 import ScorePanel from "./ScorePanel";
+import SubjectNoStudentsNotification from "./SubjectNoStudentsNotification";
 
 type Props = {
   subjectId: string;
@@ -82,6 +83,9 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
 
   const [triggerSelectMultipleStudent, setTriggerSelectMultipleStudent] =
     useState<boolean>(false);
+
+  const [triggerNoStudents, setTriggerNoStudents] = useState<boolean>(false);
+  const hasShownNoStudentsRef = useRef(false);
 
   const [dates, setDates] = useState<Nullable<(Date | null)[]>>(null);
   const scoreOnStudents = useGetScoreOnStudent({
@@ -136,7 +140,12 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
 
   useEffect(() => {
     if (studentOnSubjects.data) {
-      setStudents(studentOnSubjects.data.filter((item) => item.isActive));
+      const active = studentOnSubjects.data.filter((item) => item.isActive);
+      setStudents(active);
+      if (!hasShownNoStudentsRef.current && active.length === 0) {
+        setTriggerNoStudents(true);
+        hasShownNoStudentsRef.current = true;
+      }
     }
   }, [studentOnSubjects.data]);
 
@@ -307,6 +316,22 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
 
   return (
     <div className="flex w-full flex-col items-center gap-5">
+      {triggerNoStudents && (
+        <PopupLayout
+          onClose={() => {
+            setTriggerNoStudents(false);
+            document.body.style.overflow = "auto";
+          }}
+        >
+          <SubjectNoStudentsNotification
+            subjectId={subjectId}
+            onClose={() => {
+              setTriggerNoStudents(false);
+              document.body.style.overflow = "auto";
+            }}
+          />
+        </PopupLayout>
+      )}
       {triggerChooseScore && (
         <PopupLayout
           onClose={() => {
