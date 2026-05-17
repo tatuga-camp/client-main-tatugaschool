@@ -101,6 +101,46 @@ export const classesDataLanguage = {
         return "Sort By";
     }
   },
+  successTitle: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Classroom is ready";
+      case "th":
+        return "สร้างชั้นเรียนสำเร็จ";
+      default:
+        return "Classroom is ready";
+    }
+  },
+  successCalloutBody: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "In Tatuga School, classrooms hold multiple subjects (Math, Science, English…) — like a real school. Next, create a subject inside this classroom to start teaching.";
+      case "th":
+        return "ใน Tatuga School ชั้นเรียนหนึ่งสามารถมีหลายรายวิชาได้ เช่น คณิตศาสตร์ วิทยาศาสตร์ ภาษาอังกฤษ เหมือนโรงเรียนจริง ต่อไปกรุณาสร้างรายวิชาในชั้นเรียนนี้เพื่อเริ่มสอน";
+      default:
+        return "In Tatuga School, classrooms hold multiple subjects (Math, Science, English…) — like a real school. Next, create a subject inside this classroom to start teaching.";
+    }
+  },
+  successCreateSubject: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Go to Subjects";
+      case "th":
+        return "ไปที่รายวิชา";
+      default:
+        return "Go to Subjects";
+    }
+  },
+  successSkip: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Later";
+      case "th":
+        return "ภายหลัง";
+      default:
+        return "Later";
+    }
+  },
 } as const;
 
 export const sortByOptionsDataLanguage = {

@@ -31,6 +31,7 @@ import {
 import { ResponseGetClassesBySchoolIdService } from "../../services";
 import ClassesCard from "../classroom/ClassroomCard";
 import ClassesCreate from "../classroom/ClassroomCreate";
+import ClassroomCreatedNotification from "../classroom/ClassroomCreatedNotification";
 import LoadingBar from "../common/LoadingBar";
 import PopupLayout from "../layout/PopupLayout";
 import LoadingSpinner from "../common/LoadingSpinner";
@@ -54,8 +55,10 @@ function Classrooms({ schoolId }: Props) {
   >([]);
   const [selectFilterUserId, setSelectFilterUserId] = useState<
     string | "show-all"
-  >(user.data?.id ?? "show-all");
+  >("show-all");
   const [triggerCreateClass, setTriggerCreateClass] = React.useState(false);
+  const [notifiedClassroom, setNotifiedClassroom] =
+    React.useState<Classroom | null>(null);
   const [triggerActiveClasses, setTriggerActiveClasses] = React.useState(true);
   const [sortBy, setSortBy] = React.useState<SortByOption>("Default");
   const [search, setSearch] = React.useState("");
@@ -92,8 +95,7 @@ function Classrooms({ schoolId }: Props) {
 
   useEffect(() => {
     if (classrooms.data && user.data) {
-      setSelectFilterUserId(user.data.id);
-      handleFilterByUser(user.data.id);
+      handleFilterByUser("show-all");
     }
   }, [classrooms.data, user.data]);
 
@@ -195,8 +197,33 @@ function Classrooms({ schoolId }: Props) {
                 <IoMdClose />
               </button>
             </div>
-            <ClassesCreate schoolId={schoolId} toast={toast} />
+            <ClassesCreate
+              schoolId={schoolId}
+              toast={toast}
+              onClose={() => {
+                setTriggerCreateClass(false);
+                document.body.style.overflow = "auto";
+              }}
+              onSuccess={(created) => setNotifiedClassroom(created)}
+            />
           </div>
+        </PopupLayout>
+      )}
+      {notifiedClassroom && (
+        <PopupLayout
+          onClose={() => {
+            setNotifiedClassroom(null);
+            document.body.style.overflow = "auto";
+          }}
+        >
+          <ClassroomCreatedNotification
+            classroom={notifiedClassroom}
+            schoolId={schoolId}
+            onClose={() => {
+              setNotifiedClassroom(null);
+              document.body.style.overflow = "auto";
+            }}
+          />
         </PopupLayout>
       )}
       <div className="flex w-full flex-col justify-center bg-white">

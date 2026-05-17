@@ -5,7 +5,7 @@ import { TbFileDescription } from "react-icons/tb";
 import ClassLevel from "../common/InputClassLevel";
 import { useCreateClassroom } from "../../react-query";
 import LoadingSpinner from "../common/LoadingSpinner";
-import { ErrorMessages } from "../../interfaces";
+import { Classroom, ErrorMessages } from "../../interfaces";
 import Swal from "sweetalert2";
 import { useSound } from "../../hook";
 import { Toast } from "primereact/toast";
@@ -14,8 +14,10 @@ type Props = {
   schoolId: string;
   toast: React.RefObject<Toast>;
   onClose?: () => void;
+  onSuccess?: (classroom: Classroom) => void;
 };
-function ClassesCreate({ schoolId, toast, onClose }: Props) {
+
+function ClassesCreate({ schoolId, toast, onClose, onSuccess }: Props) {
   const sound = useSound("/sounds/ding.mp3") as HTMLAudioElement;
   const createClassroom = useCreateClassroom();
   const [data, setData] = React.useState<{
@@ -31,7 +33,7 @@ function ClassesCreate({ schoolId, toast, onClose }: Props) {
   const handleCreate = async (e: React.FormEvent) => {
     try {
       e.preventDefault();
-      await createClassroom.mutateAsync({
+      const created = await createClassroom.mutateAsync({
         title: data.title,
         description: data.description,
         level: data.level,
@@ -50,6 +52,7 @@ function ClassesCreate({ schoolId, toast, onClose }: Props) {
         level: "",
       });
       onClose?.();
+      onSuccess?.(created);
     } catch (error) {
       let result = error as ErrorMessages;
       Swal.fire({
