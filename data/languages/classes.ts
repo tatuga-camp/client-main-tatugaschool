@@ -141,6 +141,26 @@ export const classesDataLanguage = {
         return "Later";
     }
   },
+  filterByLevel: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Filter by class level";
+      case "th":
+        return "ค้นหาตามระดับชั้น";
+      default:
+        return "Filter by class level";
+    }
+  },
+  showAll: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Show All";
+      case "th":
+        return "ทั้งหมด";
+      default:
+        return "Show All";
+    }
+  },
 } as const;
 
 export const sortByOptionsDataLanguage = {
