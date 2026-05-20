@@ -6,6 +6,7 @@ import {
   useGetSchool,
   useManageSubscription,
   useUpdateSchool,
+  useUpgradeSubscription,
 } from "../../react-query";
 import { ErrorMessages, MemberOnSchool } from "../../interfaces";
 import Swal from "sweetalert2";
@@ -15,6 +16,9 @@ import { RiBillFill } from "react-icons/ri";
 import { useRouter } from "next/router";
 import LoadingSpinner from "../common/LoadingSpinner";
 import SubscriptionPlan from "../payments/SubscriptionPlan";
+import ConfirmSubscriptionModal from "../payments/ConfirmSubscriptionModal";
+import RedeemDiscountSection from "../payments/RedeemDiscountSection";
+import UpgradePlanModal from "../payments/UpgradePlanModal";
 import Dropdown from "../common/Dropdown";
 import { Toast } from "primereact/toast";
 import { useSound } from "../../hook";
@@ -42,6 +46,18 @@ const BillingPlanSection = (props: { schoolId: string }) => {
     time: string;
     price: string;
   }>();
+  const [pendingPlan, setPendingPlan] = useState<{
+    priceId: string;
+    product: { title: string; time: string; price: string };
+    members: number;
+  } | null>(null);
+  const [pendingUpgrade, setPendingUpgrade] = useState<{
+    priceId: string;
+    productTitle: string;
+    time: string;
+    isEnterprise: boolean;
+    members: number;
+  } | null>(null);
 
   useEffect(() => {
     if (members.data && school.data) {
@@ -53,25 +69,29 @@ const BillingPlanSection = (props: { schoolId: string }) => {
   }, [members.data, school.data]);
   const managesubscription = useManageSubscription();
   const createSubscription = useCreateSubscription();
+  const upgradeSubscription = useUpgradeSubscription();
   const handleCreateSubscription = async ({
     priceId,
     product,
     members = 1,
+    discountCode,
   }: {
     priceId: string;
     product: { title: string; time: string; price: string };
     members: number;
+    discountCode?: string;
   }) => {
     try {
       const create = await createSubscription.mutateAsync({
         schoolId: props.schoolId,
         priceId: priceId,
         members: members,
+        discountCode: discountCode,
       });
       if (create.clientSecret === null) {
         Swal.fire({
-          title: "Request Complete",
-          text: "You have paid by your own credit from previous subscription",
+          title: "Subscription Active",
+          text: "No payment was required for this subscription.",
           icon: "success",
         });
         document.body.style.overflow = "auto";
@@ -91,6 +111,56 @@ const BillingPlanSection = (props: { schoolId: string }) => {
       document.body.style.overflow = "auto";
       console.log(error);
       let result = error as ErrorMessages;
+      Swal.fire({
+        title: result.error ? result.error : "Something Went Wrong",
+        text: result.message.toString(),
+        footer: result.statusCode
+          ? "Code Error: " + result.statusCode?.toString()
+          : "",
+        icon: "error",
+      });
+    }
+  };
+
+  const handleUpgrade = async ({
+    priceId,
+    members,
+    productTitle,
+    time,
+  }: {
+    priceId: string;
+    members: number;
+    productTitle: string;
+    time: string;
+  }) => {
+    try {
+      const result = await upgradeSubscription.mutateAsync({
+        schoolId: props.schoolId,
+        priceId,
+        members,
+      });
+      if (result.clientSecret === null) {
+        Swal.fire({
+          title: "Upgrade Complete",
+          text: "Your plan has been upgraded. No payment was required.",
+          icon: "success",
+        });
+        document.body.style.overflow = "auto";
+        setTimeout(() => {
+          school.refetch();
+        }, 2000);
+        return;
+      }
+      setClientSecret(result.clientSecret);
+      setSelectProduct({
+        title: productTitle,
+        time: time,
+        price: (result.price / 100).toLocaleString(),
+      });
+    } catch (error) {
+      document.body.style.overflow = "auto";
+      console.log(error);
+      const result = error as ErrorMessages;
       Swal.fire({
         title: result.error ? result.error : "Something Went Wrong",
         text: result.message.toString(),
@@ -158,7 +228,7 @@ const BillingPlanSection = (props: { schoolId: string }) => {
   return (
     <>
       <Toast ref={toast} />
-      {createSubscription.isPending && (
+      {(createSubscription.isPending || upgradeSubscription.isPending) && (
         <PopupLayout onClose={() => {}}>
           <div className="flex h-screen w-screen items-center justify-center bg-white/80">
             <LoadingSpinner />
@@ -175,6 +245,45 @@ const BillingPlanSection = (props: { schoolId: string }) => {
             />
           </div>
         </PopupLayout>
+      )}
+      {pendingPlan && school.data && (
+        <ConfirmSubscriptionModal
+          school={school.data}
+          plan={pendingPlan}
+          onCancel={() => setPendingPlan(null)}
+          onConfirm={(discountCode) => {
+            const plan = pendingPlan;
+            setPendingPlan(null);
+            handleCreateSubscription({
+              priceId: plan.priceId,
+              product: plan.product,
+              members: plan.members,
+              discountCode,
+            });
+          }}
+        />
+      )}
+      {pendingUpgrade && school.data && (
+        <UpgradePlanModal
+          school={school.data}
+          target={{
+            priceId: pendingUpgrade.priceId,
+            productTitle: pendingUpgrade.productTitle,
+            isEnterprise: pendingUpgrade.isEnterprise,
+          }}
+          initialMembers={pendingUpgrade.members}
+          onCancel={() => setPendingUpgrade(null)}
+          onConfirm={(payload) => {
+            const up = pendingUpgrade;
+            setPendingUpgrade(null);
+            handleUpgrade({
+              priceId: payload.priceId,
+              members: payload.members,
+              productTitle: up.productTitle,
+              time: up.time,
+            });
+          }}
+        />
       )}
       <div className="w-full rounded-2xl border bg-white p-5 2xl:p-10">
         <h1 className="text-lg font-medium sm:text-xl">
@@ -219,15 +328,22 @@ const BillingPlanSection = (props: { schoolId: string }) => {
             />
           )}
         </div>
+        {school.data?.stripe_subscription_id && (
+          <RedeemDiscountSection school={school.data} />
+        )}
         {school.data && (
           <SubscriptionPlan
-            onSelectPlan={(priceId, product, members) => {
-              if (confirm("Are you confirm to pay?")) {
-                handleCreateSubscription({
+            onSelectPlan={(priceId, product, members, isUpgrade) => {
+              if (isUpgrade) {
+                setPendingUpgrade({
                   priceId,
-                  product: product,
+                  productTitle: product.title,
+                  time: product.time,
+                  isEnterprise: product.title === "Tatuga School Enterprise",
                   members,
                 });
+              } else {
+                setPendingPlan({ priceId, product, members });
               }
             }}
             school={school.data}
