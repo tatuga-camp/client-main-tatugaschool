@@ -11,8 +11,12 @@ const pricingData = [
     mainTitle: "",
     mainTitle_th: "",
     price: {
-      month: null,
-      year: null,
+      month: "Free",
+      month_th: "ฟรี",
+      year: "Free",
+      year_th: "ฟรี",
+      monthValue: 0,
+      yearValue: 0,
       permember: false,
     },
     popular: false,
@@ -139,7 +143,7 @@ const pricingData = [
     },
     infoNote:
       "Enterprise plan is good for a school that has more than 5 teachers",
-    infoNote_th: "แผนองค์กรเหมาะสำหรับโรงเรียนที่มีครูมากกว่า 5 คน",
+    infoNote_th: "แผนองค์กรเหมาะสำหรับโรงเรียนที่มีครูมากกว่า 4 คน",
     "Basic Feature": true,
     Users: "custom",
     Users_th: "กำหนดเอง",
@@ -161,6 +165,7 @@ type Props = {
     priceId: string,
     product: { price: string; title: string; time: string },
     members: number,
+    isUpgrade: boolean,
   ) => void;
 };
 
@@ -206,6 +211,13 @@ const planColors: {
     border: "border-yellow-300",
     rightIcon: "text-yellow-500",
   },
+};
+
+const planRank: Record<string, number> = {
+  FREE: 0,
+  BASIC: 1,
+  PREMIUM: 2,
+  ENTERPRISE: 3,
 };
 
 const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
@@ -297,6 +309,10 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
             const colorScheme =
               planColors[data.mainTitle as keyof typeof planColors] ||
               planColors.FREE;
+            const isUpgrade =
+              !!school.stripe_subscription_id &&
+              (planRank[data.mainTitle] ?? 0) >
+                (planRank[school.plan] ?? 0);
             return (
               <div
                 key={index}
@@ -333,35 +349,29 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
                         ? monthprice
                           ? language.data === "en"
                             ? data.price?.month
-                            : (data.price as any)?.month_th
+                            : data.price.month_th
                           : language.data === "en"
                             ? data.price?.year
-                            : (data.price as any)?.year_th
+                            : data.price?.year_th
                         : null}
                       {data.mainTitle === "ENTERPRISE" && (
                         <>
                           {monthprice
-                            ? (
-                                (data.price as any)?.monthValue * members
-                              ).toLocaleString()
-                            : (
-                                (data.price as any)?.yearValue * members
-                              ).toLocaleString()}
+                            ? (data.price.monthValue * members).toLocaleString()
+                            : (data.price.yearValue * members).toLocaleString()}
                           ฿
                         </>
                       )}
                     </span>
-                    {!monthprice && (data.price as any).monthValue > 0 && (
+                    {!monthprice && data.price.monthValue > 0 && (
                       <span className="text-2xl text-gray-500 line-through">
                         {data.mainTitle === "ENTERPRISE"
                           ? (
-                              (data.price as any).monthValue *
+                              data.price.monthValue *
                               members *
                               12
                             ).toLocaleString()
-                          : (
-                              (data.price as any).monthValue * 12
-                            ).toLocaleString()}
+                          : (data.price.monthValue * 12).toLocaleString()}
                         ฿
                       </span>
                     )}
@@ -371,12 +381,12 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
                   >
                     {data.price.permember
                       ? monthprice
-                        ? SubscriptionDataLanguage.per_member_month(
+                        ? `${SubscriptionDataLanguage.per_member_month(
                             language.data ?? "en",
-                          )
-                        : SubscriptionDataLanguage.per_member_year(
+                          )} ${members} ${language.data === "en" ? "members monthly" : "ท่าน"}  `
+                        : `${SubscriptionDataLanguage.per_member_year(
                             language.data ?? "en",
-                          )
+                          )} ${members} ${language.data === "en" ? "members yearly" : "ท่าน"} `
                       : monthprice
                         ? SubscriptionDataLanguage.monthly(
                             language.data ?? "en",
@@ -385,14 +395,14 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
                             language.data ?? "en",
                           )}
                   </div>
-                  {!monthprice && (data.price as any).yearValue > 0 && (
+                  {!monthprice && data.price.yearValue > 0 && (
                     <div className="mt-2 flex justify-center">
                       <span className="rounded-lg bg-red-100 px-3 py-1 text-sm font-semibold text-red-600">
                         {SubscriptionDataLanguage.only(language.data ?? "en")}{" "}
                         {Math.round(
                           data.mainTitle === "ENTERPRISE"
-                            ? ((data.price as any).yearValue * members) / 12
-                            : (data.price as any).yearValue / 12,
+                            ? (data.price.yearValue * members) / 12
+                            : data.price.yearValue / 12,
                         ).toLocaleString()}
                         {SubscriptionDataLanguage.month_unit(
                           language.data ?? "en",
@@ -467,19 +477,20 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
                             monthprice ? p.time === "month" : p.time === "year",
                           );
 
-                          if (price?.priceId) {
-                            onSelectPlan(
-                              price?.priceId,
-                              {
-                                time: monthprice ? "month" : "year",
-                                title: data.product as string,
-                                price: monthprice
-                                  ? (data.price.month as string)
-                                  : (data.price.year as string),
-                              },
-                              members,
-                            );
-                          }
+                          if (!price) return;
+                          if (!price.priceId) return;
+                          onSelectPlan(
+                            price?.priceId,
+                            {
+                              time: monthprice ? "month" : "year",
+                              title: data.product as string,
+                              price: monthprice
+                                ? (data.price.monthValue * members).toString()
+                                : (data.price.yearValue * members).toString(),
+                            },
+                            members,
+                            isUpgrade,
+                          );
                         }}
                         className={`w-full transform rounded-2xl border-2 border-black py-3 font-semibold transition-transform hover:scale-105 ${
                           school.plan === data.mainTitle
@@ -489,7 +500,9 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
                       >
                         {school.plan === data.mainTitle
                           ? "Update Members"
-                          : "Get Started"}
+                          : isUpgrade
+                            ? "Upgrade"
+                            : "Get Started"}
                       </button>
                     </div>
                   ) : data.price.month === "ไม่มี" && monthprice === true ? (
@@ -508,19 +521,21 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
                           monthprice ? p.time === "month" : p.time === "year",
                         );
 
-                        if (price?.priceId) {
-                          onSelectPlan(
-                            price?.priceId,
-                            {
-                              time: monthprice ? "month" : "year",
-                              title: data.product as string,
-                              price: monthprice
-                                ? (data.price.month as string)
-                                : (data.price.year as string),
-                            },
-                            1,
-                          );
-                        }
+                        if (!price) return;
+                        if (!price.priceId) return;
+
+                        onSelectPlan(
+                          price.priceId,
+                          {
+                            time: monthprice ? "month" : "year",
+                            title: data.product as string,
+                            price: monthprice
+                              ? data.price.month
+                              : data.price.year,
+                          },
+                          1,
+                          isUpgrade,
+                        );
                       }}
                       disabled={school.plan === data.mainTitle}
                       className={`w-full transform rounded-2xl border-2 border-black py-3 font-semibold transition-transform hover:scale-105 ${
@@ -531,7 +546,9 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
                     >
                       {school.plan === data.mainTitle
                         ? "You are on this plan"
-                        : "Get Started"}
+                        : isUpgrade
+                          ? "Upgrade"
+                          : "Get Started"}
                     </button>
                   )}
                 </div>

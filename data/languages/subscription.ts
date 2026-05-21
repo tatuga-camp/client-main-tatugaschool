@@ -127,21 +127,21 @@ export const SubscriptionDataLanguage = {
   per_member_month: (language: Language) => {
     switch (language) {
       case "en":
-        return "Per member/month";
+        return "Price for";
       case "th":
-        return "ราคาต่ออคนต่อเดือน";
+        return "ราคารายเดือนสำหรับจำนวนคุณครู";
       default:
-        return "Per member/month";
+        return "Price for";
     }
   },
   per_member_year: (language: Language) => {
     switch (language) {
       case "en":
-        return "Per member/year";
+        return "Price for";
       case "th":
-        return "ราคาต่ออคนต่อปี";
+        return "ราคารายปีสำหรับจำนวนคุณครู";
       default:
-        return "Per member/year";
+        return "Price for";
     }
   },
   only: (language: Language) => {

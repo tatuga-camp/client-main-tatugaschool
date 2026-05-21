@@ -67,19 +67,16 @@ function ClassroomCard({ classroom }: Props) {
         ref={setNodeRef}
         style={inlineStyles}
         {...attributes}
-        className="flex h-64 w-full cursor-pointer flex-col overflow-hidden rounded-2xl border-2 border-black active:scale-105"
+        className="flex h-max w-full cursor-pointer flex-col overflow-hidden rounded-2xl border-2 border-black active:scale-105"
       >
         <div
-          className={`relative h-24 w-full ${
+          className={`relative h-14 w-full ${
             classroom.isAchieved ? "gradient-bg-success" : "gradient-bg"
           } flex items-end p-5`}
         >
           <div className="absolute left-2 top-2 m-auto flex w-max items-center justify-center gap-1 rounded-full border border-black bg-yellow-300 px-2 py-1 text-xs text-black">
             CLASSROOM
           </div>
-          <h1 className="w-48 truncate text-lg font-semibold text-white">
-            {classroom.title}
-          </h1>
           {classroom.isAchieved && (
             <div className="flex w-max items-center justify-center gap-1 rounded-full border border-white px-2 py-1 text-xs text-white">
               ACHIEVED
@@ -95,15 +92,15 @@ function ClassroomCard({ classroom }: Props) {
         </div>
         <div className="flex grow flex-col justify-between p-5 pb-2">
           <div className="flex flex-col gap-2">
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-3">
               <span
                 title="Class's Level"
-                className="border-b text-xl font-semibold"
+                className="border-b text-2xl font-semibold"
               >
                 {classroom.level}
               </span>
               <p title="Class Begin Year" className="line-clamp-2 text-sm">
-                {classroom.description}
+                {classroom.title} - {classroom.description}
               </p>
             </div>
 
@@ -115,7 +112,7 @@ function ClassroomCard({ classroom }: Props) {
             </div>
           </div>
           {creator ? (
-            <div className="flex items-center justify-start gap-2 text-xs text-gray-400">
+            <div className="my-2 flex items-center justify-start gap-2 text-xs text-gray-400">
               Created By: <ListMemberCircle members={[creator]} />{" "}
               {creator.firstName} {creator.lastName}
             </div>
