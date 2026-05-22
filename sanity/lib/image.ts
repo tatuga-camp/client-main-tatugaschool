@@ -1,9 +1,9 @@
-import imageUrlBuilder from "@sanity/image-url";
-import type { SanityImageSource } from "@sanity/image-url";
+import { createImageUrlBuilder } from "@sanity/image-url";
+import type { ImageUrlBuilder, SanityImageSource } from "@sanity/image-url";
 import { sanityClient } from "./client";
 
-const builder = imageUrlBuilder(sanityClient);
+const builder = createImageUrlBuilder(sanityClient);
 
-export function urlForImage(source: SanityImageSource) {
+export function urlForImage(source: SanityImageSource): ImageUrlBuilder {
   return builder.image(source);
 }
