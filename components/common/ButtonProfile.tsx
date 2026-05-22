@@ -7,6 +7,7 @@ import { FiHelpCircle, FiMoon } from "react-icons/fi";
 import {
   MdKeyboardArrowDown,
   MdKeyboardArrowUp,
+  MdNewReleases,
   MdUpgrade,
 } from "react-icons/md";
 import { VscReport, VscSettings } from "react-icons/vsc";
@@ -163,6 +164,17 @@ function ButtonProfile({ user, onTriggerFeedback }: Props) {
               <FiHelpCircle size={18} className="text-gray-500" />
               {navbarLanguageData.helpCenter(language.data ?? "en")}
             </Link>
+
+            <button
+              onClick={() => {
+                setIsOpen(false);
+                router.push("/updates");
+              }}
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100"
+            >
+              <MdNewReleases size={18} className="text-gray-500" />
+              {navbarLanguageData.whatsNew(language.data ?? "en")}
+            </button>
 
             <div className="my-1 border-t border-gray-100"></div>
 
