@@ -27,13 +27,12 @@ const typeStyles: Record<
   },
 };
 
-function AnnouncementCard({
-  announcement,
-  language,
-}: {
+type Props = {
   announcement: Announcement;
   language: Language;
-}) {
+};
+
+function AnnouncementCard({ announcement, language }: Props) {
   const title = language === "th" ? announcement.titleTh : announcement.titleEn;
   const body = language === "th" ? announcement.bodyTh : announcement.bodyEn;
   const style = typeStyles[announcement.type];

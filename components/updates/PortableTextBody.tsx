@@ -1,8 +1,28 @@
 import {
   PortableText,
   type PortableTextComponents,
+  type PortableTextMarkComponent,
 } from "@portabletext/react";
 import type { PortableTextBlock } from "@portabletext/types";
+
+type LinkMark = { _type: "link"; href?: string };
+
+const LinkMarkComponent: PortableTextMarkComponent<LinkMark> = ({
+  children,
+  value,
+}) => {
+  const href = value?.href ?? "#";
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-primary-color underline hover:text-primary-color-hover"
+    >
+      {children}
+    </a>
+  );
+};
 
 const components: PortableTextComponents = {
   block: {
@@ -43,23 +63,15 @@ const components: PortableTextComponents = {
       <strong className="font-semibold text-gray-800">{children}</strong>
     ),
     em: ({ children }) => <em className="italic">{children}</em>,
-    link: ({ children, value }) => {
-      const href = (value as { href?: string } | undefined)?.href ?? "#";
-      return (
-        <a
-          href={href}
-          target="_blank"
-          rel="noreferrer"
-          className="text-primary-color underline hover:text-primary-color-hover"
-        >
-          {children}
-        </a>
-      );
-    },
+    link: LinkMarkComponent,
   },
 };
 
-function PortableTextBody({ value }: { value: PortableTextBlock[] }) {
+type Props = {
+  value: PortableTextBlock[];
+};
+
+function PortableTextBody({ value }: Props) {
   return (
     <div className="text-sm md:text-base">
       <PortableText value={value} components={components} />

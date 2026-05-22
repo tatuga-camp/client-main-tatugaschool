@@ -13,21 +13,20 @@ const filters: { value: FilterValue; label: (language: Language) => string }[] =
     { value: "announcement", label: updatesLanguageData.filterAnnouncement },
   ];
 
-function AnnouncementFilter({
-  active,
-  onChange,
-  language,
-}: {
+type Props = {
   active: FilterValue;
   onChange: (value: FilterValue) => void;
   language: Language;
-}) {
+};
+
+function AnnouncementFilter({ active, onChange, language }: Props) {
   return (
     <div className="flex flex-wrap gap-2">
       {filters.map((filter) => (
         <button
           key={filter.value}
           onClick={() => onChange(filter.value)}
+          aria-pressed={active === filter.value}
           className={`rounded-full border px-4 py-1.5 text-sm font-medium transition ${
             active === filter.value
               ? "border-primary-color bg-primary-color text-white"
