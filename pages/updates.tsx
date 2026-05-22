@@ -60,7 +60,9 @@ function UpdatesPage() {
 
         {!isLoading && !isError && visible.length === 0 && (
           <div className="rounded-2xl border-2 border-dashed border-gray-300 p-10 text-center text-gray-500">
-            {updatesLanguageData.empty(lang)}
+            {filter === "all"
+              ? updatesLanguageData.empty(lang)
+              : updatesLanguageData.emptyFiltered(lang)}
           </div>
         )}
 

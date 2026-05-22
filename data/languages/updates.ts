@@ -81,6 +81,16 @@ export const updatesLanguageData = {
         return "No updates yet. Check back soon!";
     }
   },
+  emptyFiltered: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "No updates match this filter.";
+      case "th":
+        return "ไม่มีอัปเดตที่ตรงกับตัวกรองนี้";
+      default:
+        return "No updates match this filter.";
+    }
+  },
   error: (language: Language) => {
     switch (language) {
       case "en":
