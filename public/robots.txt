@@ -2,7 +2,6 @@
 User-agent: *
 Allow: /
 Disallow: /feedback
-Disallow: /studio
 
 
 Sitemap: https://app.tatugaschool.com/sitemap.xml
