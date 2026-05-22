@@ -81,4 +81,14 @@ export const navbarLanguageData = {
         return "Upgrade Plan";
     }
   },
+  whatsNew: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "What's New";
+      case "th":
+        return "อัปเดตล่าสุด";
+      default:
+        return "What's New";
+    }
+  },
 } as const;
