@@ -166,7 +166,8 @@ function ButtonProfile({ user, onTriggerFeedback }: Props) {
             </Link>
 
             <Link
-              href="/updates"
+              href="https://tatugaschool.com/news"
+              target="_blank"
               onClick={() => setIsOpen(false)}
               className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100"
             >

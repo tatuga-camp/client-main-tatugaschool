@@ -18,4 +18,3 @@ export * from "./studentOnSubject";
 export * from "./teachingMaterial";
 export * from "./notification";
 export * from "./assignment-video-quiz";
-export * from "./announcement";

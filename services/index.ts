@@ -30,4 +30,3 @@ export * from "./student-on-group";
 export * from "./teaching-material";
 export * from "./notification";
 export * from "./assignment-video-quiz";
-export * from "./announcement";
