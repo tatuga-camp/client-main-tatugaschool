@@ -101,6 +101,9 @@ function ClassworkView({
   const updateFile = useUpdateFileOnAssignment();
   const [triggerLink, setTriggerLink] = React.useState(false);
   const [linkValue, setLinkValue] = React.useState("");
+  const [allowWeight, setAllowWeight] = React.useState(
+    classwork?.allowWeight || false,
+  );
   const [configuringVideo, setConfiguringVideo] =
     React.useState<FileClasswork | null>(null);
   const [description, setDescription] = useState<string>(
@@ -488,13 +491,13 @@ function ClassworkView({
                     )}
                   </span>
                   <Switch
-                    checked={classwork?.allowWeight}
+                    checked={allowWeight}
                     setChecked={(e) => {
                       let weight = classwork?.weight;
                       if (weight === null) {
                         weight = 0;
                       }
-
+                      setAllowWeight(e);
                       onChange({
                         allowWeight: e,
                         weight: e ? weight : null,
@@ -503,7 +506,7 @@ function ClassworkView({
                   />
                 </label>
               )}
-              {assignmentType !== "Material" && classwork?.allowWeight && (
+              {assignmentType !== "Material" && allowWeight && (
                 <label className="flex w-full flex-col">
                   <span className="text-base font-medium">
                     {classworkViewDataLanguage.weight(language.data ?? "en")}

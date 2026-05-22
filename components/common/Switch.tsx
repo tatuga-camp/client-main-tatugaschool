@@ -22,7 +22,7 @@ function Switch({ checked, setChecked, disabled = false }: Props) {
         }),
         input: {
           className: classNames(
-            "absolute appearance-none top-0 left-0 size-full p-0 m-0 opacity-0 z-10 outline-none cursor-pointer"
+            "absolute appearance-none top-0 left-0 size-full p-0 m-0 opacity-0 z-10 outline-none cursor-pointer",
           ),
         },
         slider: (option) => ({
@@ -35,7 +35,7 @@ function Switch({ checked, setChecked, disabled = false }: Props) {
               "bg-gray-200  hover:bg-gray-300  ": !option?.props.checked,
               "bg-blue-500 before:transform before:translate-x-5":
                 option?.props.checked,
-            }
+            },
           ),
         }),
       }}

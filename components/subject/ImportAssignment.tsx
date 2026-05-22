@@ -363,17 +363,19 @@ function AssignmentLists({
           .map((classwork) => {
             return (
               <div
+                onClick={() => {
+                  setSelectClasswork(classwork);
+                }}
                 key={classwork.id}
                 className={`w-full rounded-2xl ${selectClasswork && selectClasswork.id === classwork.id && "ring-2 ring-black"} md:w-9/12 xl:w-8/12`}
               >
                 <ClassworkCard
+                  disabled={true}
                   key={classwork.id}
                   classwork={classwork}
                   selectClasswork={null}
                   subjectId={subjectId}
-                  onSelect={(data) => {
-                    setSelectClasswork(classwork);
-                  }}
+                  onSelect={(data) => {}}
                 />
               </div>
             );

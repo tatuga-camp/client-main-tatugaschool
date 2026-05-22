@@ -23,6 +23,7 @@ type PropsClassworkCard = {
     summitNumber: number;
     penddingNumber: number;
   };
+  disabled?: boolean;
   selectClasswork: Assignment | null;
   subjectId: string;
   onSelect: (classwork: Assignment) => void;
@@ -280,6 +281,7 @@ type PropsVideoQuizCard = {
     summitNumber: number;
     penddingNumber: number;
   };
+  disabled?: boolean;
   subjectId: string;
   selectVideoQuiz: Assignment | null;
   onSelect: (videoQuiz: Assignment) => void;
@@ -289,6 +291,7 @@ function VideoQuizCard({
   selectVideoQuiz,
   onSelect,
   subjectId,
+  disabled = false,
 }: PropsVideoQuizCard) {
   const sortable = useSortable({ id: videoQuiz.id });
   const style = {
@@ -305,7 +308,7 @@ function VideoQuizCard({
   return (
     <Link
       style={{
-        pointerEvents: sortable.isDragging ? "none" : "auto",
+        pointerEvents: sortable.isDragging || disabled ? "none" : "auto",
       }}
       href={`/subject/${subjectId}/assignment/${videoQuiz.id}`}
     >
