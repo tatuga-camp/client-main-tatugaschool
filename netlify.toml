@@ -1,0 +1,5 @@
+[[redirects]]
+  from = "/updates"
+  to = "https://tatugaschool.com/news"
+  status = 301
+  force = true
