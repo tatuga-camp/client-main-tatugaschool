@@ -15,7 +15,7 @@ export type Announcement = {
   coverImage: SanityImageSource | null;
 };
 
-const announcementsQuery = `*[_type == "announcement" && defined(publishedAt)] | order(publishedAt desc){
+const announcementsQuery = `*[_type == "news" && defined(publishedAt)] | order(publishedAt desc){
   _id,
   type,
   publishedAt,
