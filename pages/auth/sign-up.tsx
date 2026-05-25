@@ -4,6 +4,14 @@ import { AuthFooter } from "@/components/auth/AuthFooter";
 import { SignUpForm } from "@/components/auth/SignUpForm";
 import Head from "next/head";
 import { GetServerSideProps } from "next";
+import axios from "axios";
+
+type InvitationProps = {
+  email: string;
+  schoolTitle: string;
+  schoolLogo: string;
+  invitationToken: string;
+} | null;
 
 type Props = {
   googleSignUpData?: {
@@ -14,7 +22,10 @@ type Props = {
     photo: string;
     provider: "google";
   } | null;
+  invitation?: InvitationProps;
+  invitationError?: string | null;
 };
+
 function SignUpPage(data: Props) {
   return (
     <>
@@ -45,7 +56,11 @@ function SignUpPage(data: Props) {
       </Head>
       <AuthLayout>
         <AuthHeader />
-        <SignUpForm {...data?.googleSignUpData} />
+        <SignUpForm
+          {...data?.googleSignUpData}
+          invitation={data?.invitation ?? null}
+          invitationError={data?.invitationError ?? null}
+        />
         <AuthFooter />
       </AuthLayout>
     </>
@@ -56,32 +71,52 @@ export default SignUpPage;
 
 export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   const query = ctx.query as {
-    email: string;
-    firstName: string;
-    lastName: string;
-    photo: string;
-    providerId: string;
-    provider: "google";
+    email?: string;
+    firstName?: string;
+    lastName?: string;
+    photo?: string;
+    providerId?: string;
+    provider?: "google";
+    invitationToken?: string;
   };
 
-  if (!query.provider) {
-    return {
-      props: {
-        googleSignUpData: null,
-      },
-    };
+  let invitation: InvitationProps = null;
+  let invitationError: string | null = null;
+
+  if (query.invitationToken) {
+    try {
+      const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL;
+      const res = await axios.get(
+        `${serverUrl}/v1/member-on-schools/invitation/${query.invitationToken}`,
+      );
+      invitation = {
+        email: res.data.email,
+        schoolTitle: res.data.schoolTitle,
+        schoolLogo: res.data.schoolLogo,
+        invitationToken: query.invitationToken,
+      };
+    } catch (e: any) {
+      invitationError =
+        e?.response?.data?.message ?? "Invitation could not be loaded";
+    }
   }
+
+  const googleSignUpData = query.provider
+    ? {
+        email: query.email as string,
+        firstName: query.firstName as string,
+        lastName: query.lastName as string,
+        photo: query.photo as string,
+        providerId: query.providerId as string,
+        provider: query.provider,
+      }
+    : null;
 
   return {
     props: {
-      googleSignUpData: {
-        email: query.email,
-        firstName: query.firstName,
-        lastName: query.lastName,
-        photo: query.photo,
-        providerId: query.providerId,
-        provider: query.provider,
-      },
+      googleSignUpData,
+      invitation,
+      invitationError,
     },
   };
 };

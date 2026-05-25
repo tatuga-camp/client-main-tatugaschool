@@ -18,6 +18,13 @@ type Props = {
   providerId?: string | undefined;
   photo?: string | undefined;
   provider?: "google" | undefined;
+  invitation?: {
+    email: string;
+    schoolTitle: string;
+    schoolLogo: string;
+    invitationToken: string;
+  } | null;
+  invitationError?: string | null;
 };
 export const SignUpForm = (props: Props) => {
   const router = useRouter();
@@ -26,7 +33,7 @@ export const SignUpForm = (props: Props) => {
   const [firstName, setFirstName] = useState(props.firstName);
   const [phone, setPhone] = useState("");
   const [lastName, setLastName] = useState(props.lastName);
-  const [email, setEmail] = useState(props.email);
+  const [email, setEmail] = useState(props.invitation?.email ?? props.email);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [photo, setPhoto] = useState<string | undefined>(props.photo);
@@ -73,6 +80,7 @@ export const SignUpForm = (props: Props) => {
         photo: photo,
         providerId: providerId,
         provider: props.provider === "google" ? "GOOGLE" : "LOCAL",
+        invitationToken: props.invitation?.invitationToken,
       });
 
       router.push(response.redirectUrl);
@@ -122,10 +130,34 @@ export const SignUpForm = (props: Props) => {
   };
 
   return (
-    <form
-      className="flex w-96 flex-col items-center gap-4 rounded-2xl bg-white p-10 text-center shadow-[0_12px_24px_rgba(145,158,171,0.12)] md:w-5/12"
-      onSubmit={handleSignUp}
-    >
+    <>
+      {props.invitation && (
+        <div className="mb-4 flex w-96 items-center gap-3 rounded-2xl bg-blue-50 p-4 text-left md:w-5/12">
+          {props.invitation.schoolLogo && (
+            <img
+              src={props.invitation.schoolLogo}
+              alt="School logo"
+              className="h-10 w-10 rounded-lg object-cover"
+            />
+          )}
+          <div className="flex flex-col">
+            <span className="text-xs text-gray-500">You're being invited to</span>
+            <span className="text-sm font-semibold">
+              {props.invitation.schoolTitle}
+            </span>
+          </div>
+        </div>
+      )}
+      {props.invitationError && (
+        <div className="mb-4 w-96 rounded-2xl bg-yellow-50 p-4 text-sm text-yellow-900 md:w-5/12">
+          {props.invitationError} — you can still create an account; ask the
+          school admin to re-invite you.
+        </div>
+      )}
+      <form
+        className="flex w-96 flex-col items-center gap-4 rounded-2xl bg-white p-10 text-center shadow-[0_12px_24px_rgba(145,158,171,0.12)] md:w-5/12"
+        onSubmit={handleSignUp}
+      >
       <h2 className="text-[24px] font-bold">
         {signUpLanguageData.title(language.data ?? "en")}
       </h2>
@@ -190,7 +222,7 @@ export const SignUpForm = (props: Props) => {
           </span>
           <input
             type="email"
-            disabled={props.provider === "google"}
+            disabled={props.provider === "google" || !!props.invitation}
             placeholder={signUpLanguageData.emailPlaceholder(
               language.data ?? "en",
             )}
@@ -267,5 +299,6 @@ export const SignUpForm = (props: Props) => {
         </button>
       )}
     </form>
+    </>
   );
 };

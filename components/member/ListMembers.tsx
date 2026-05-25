@@ -21,6 +21,7 @@ type Props = {
     role: MemberRole;
     userId: string;
     blurHash?: string;
+    isExternal?: boolean;
   }[];
   currentListMembers: {
     id: string;
@@ -56,6 +57,7 @@ function ListMembers({
       blurHash?: string;
       role: MemberRole;
       trigger: boolean;
+      isExternal?: boolean;
     }[]
   >(
     members.map((member) => ({
@@ -85,18 +87,22 @@ function ListMembers({
           className="flex items-center justify-between gap-2 border-b py-2"
         >
           <div className="flex gap-2">
-            <div className="relative h-10 w-10 overflow-hidden rounded-2xl ring-1">
-              <Image
-                src={member.photo}
-                fill
-                sizes="(max-width: 768px) 100vw, 33vw"
-                placeholder="blur"
-                blurDataURL={decodeBlurhashToCanvas(
-                  member.blurHash ?? defaultBlurHash,
-                )}
-                alt="logo tatuga school"
-                className="object-cover"
-              />
+            <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-2xl bg-gray-200 text-sm font-semibold uppercase text-gray-700 ring-1">
+              {member.photo ? (
+                <Image
+                  src={member.photo}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  placeholder="blur"
+                  blurDataURL={decodeBlurhashToCanvas(
+                    member.blurHash ?? defaultBlurHash,
+                  )}
+                  alt="logo tatuga school"
+                  className="object-cover"
+                />
+              ) : (
+                <span>{member.email?.[0] ?? "?"}</span>
+              )}
             </div>
             <div className="flex flex-col">
               <h1 className="text-sm font-semibold">{member.email}</h1>
@@ -104,9 +110,14 @@ function ListMembers({
                 {member.firstName} {member.lastName} (
                 {currentListMembers.find((m) => m.userId === member.id)?.role})
               </span>
+              {member.isExternal && (
+                <span className="mt-1 inline-block w-fit rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-700">
+                  Not yet on Tatuga School — they'll get a signup invite
+                </span>
+              )}
             </div>
           </div>
-          {member.isInvite && member.id ? (
+          {member.isInvite && (member.id || member.isExternal) ? (
             <div className="relative flex gap-1">
               {user?.id === member.userId ? (
                 <div className="flex items-center justify-center gap-1">

@@ -12,6 +12,8 @@ export type MemberOnSchool = {
   phone: string;
   userId: string;
   schoolId: string;
+  invitationToken?: string | null;
+  invitationTokenExpiresAt?: string | null;
 };
 
 export type Status = "PENDDING" | "ACCEPT" | "REJECT";

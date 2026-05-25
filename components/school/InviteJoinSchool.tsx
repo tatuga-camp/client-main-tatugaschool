@@ -30,6 +30,8 @@ import {
 import { ListSchoolRoles } from "../../data";
 import { createSchoolDataLanguage } from "../../data/languages";
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 type Props = {
   schoolId: string;
   hideFinishButton?: boolean;
@@ -55,35 +57,64 @@ function InviteJoinSchool({ schoolId, hideFinishButton }: Props) {
       role: MemberRole;
       userId: string;
       blurHash?: string;
+      isExternal?: boolean;
     }[]
   >([]);
 
   useEffect(() => {
-    if (getUsers.data && memberOnSchools.data) {
-      setUsers(() =>
-        getUsers.data.map((user) => {
-          return {
-            id:
-              memberOnSchools.data.find((member) => member.userId === user.id)
-                ?.id ?? null,
-            email: user.email,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            photo: user.photo,
-            isInvite: memberOnSchools.data.some(
-              (member) => member.userId === user.id,
-            ),
-            userId: user.id,
-            isLoading: false,
-            role:
-              memberOnSchools.data.find((member) => member.userId === user.id)
-                ?.role ?? "ADMIN",
-            trigger: false,
-          };
-        }),
-      );
-    }
-  }, [getUsers.data, memberOnSchools.data]);
+    if (!memberOnSchools.data) return;
+
+    const existingRows = (getUsers.data ?? []).map((user) => ({
+      id:
+        memberOnSchools.data.find((member) => member.userId === user.id)?.id ??
+        null,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      photo: user.photo,
+      isInvite: memberOnSchools.data.some(
+        (member) => member.userId === user.id,
+      ),
+      userId: user.id,
+      isLoading: false,
+      role:
+        memberOnSchools.data.find((member) => member.userId === user.id)
+          ?.role ?? ("ADMIN" as MemberRole),
+      isExternal: false,
+    }));
+
+    const trimmed = query.trim().toLowerCase();
+    const looksLikeEmail = EMAIL_REGEX.test(trimmed);
+    const alreadyKnownByEmail = memberOnSchools.data.some(
+      (m) => m.email?.toLowerCase() === trimmed,
+    );
+    const alreadyInExistingRows = existingRows.some(
+      (r) => r.email.toLowerCase() === trimmed,
+    );
+
+    const syntheticRow =
+      looksLikeEmail &&
+      !alreadyKnownByEmail &&
+      !alreadyInExistingRows &&
+      (getUsers.data?.length ?? 0) === 0
+        ? [
+            {
+              id: null,
+              email: query.trim(),
+              firstName: "",
+              lastName: "",
+              photo: "",
+              isInvite: false,
+              isLoading: false,
+              role: "TEACHER" as MemberRole,
+              userId: "",
+              isExternal: true,
+            },
+          ]
+        : [];
+
+    setUsers([...existingRows, ...syntheticRow]);
+  }, [getUsers.data, memberOnSchools.data, query]);
 
   const handleSummit = async ({ email }: { email: string }) => {
     try {
