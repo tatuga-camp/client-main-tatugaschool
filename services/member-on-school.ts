@@ -142,3 +142,24 @@ export async function UpdateMemberInvitationService(
     throw error?.response?.data;
   }
 }
+
+export type ResponseGetInvitationByTokenService = {
+  email: string;
+  role: MemberRole;
+  schoolTitle: string;
+  schoolLogo: string;
+};
+
+export async function GetInvitationByTokenService(input: {
+  token: string;
+}): Promise<ResponseGetInvitationByTokenService> {
+  try {
+    const response = await axiosInstance({
+      method: "GET",
+      url: `/v1/member-on-schools/invitation/${input.token}`,
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data;
+  }
+}
