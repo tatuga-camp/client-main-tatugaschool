@@ -43,6 +43,7 @@ type RequestSignUpService = {
   provider: "LOCAL" | "GOOGLE";
   providerId?: string;
   photo?: string;
+  invitationToken?: string;
 };
 
 type ResponseSignUpService = { redirectUrl: string };
