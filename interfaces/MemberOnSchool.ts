@@ -4,14 +4,16 @@ export type MemberOnSchool = {
   updateAt: Date;
   status: Status;
   role: MemberRole;
-  firstName: string;
-  lastName: string;
+  firstName: string | null;
+  lastName: string | null;
   email: string;
-  blurHash: string;
-  photo: string;
-  phone: string;
-  userId: string;
+  blurHash: string | null;
+  photo: string | null;
+  phone: string | null;
+  userId: string | null;
   schoolId: string;
+  invitationToken?: string | null;
+  invitationTokenExpiresAt?: string | null;
 };
 
 export type Status = "PENDDING" | "ACCEPT" | "REJECT";
