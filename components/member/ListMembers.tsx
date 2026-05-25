@@ -21,6 +21,7 @@ type Props = {
     role: MemberRole;
     userId: string;
     blurHash?: string;
+    isExternal?: boolean;
   }[];
   currentListMembers: {
     id: string;
@@ -56,6 +57,7 @@ function ListMembers({
       blurHash?: string;
       role: MemberRole;
       trigger: boolean;
+      isExternal?: boolean;
     }[]
   >(
     members.map((member) => ({
@@ -104,6 +106,11 @@ function ListMembers({
                 {member.firstName} {member.lastName} (
                 {currentListMembers.find((m) => m.userId === member.id)?.role})
               </span>
+              {member.isExternal && (
+                <span className="mt-1 inline-block w-fit rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-700">
+                  Not yet on Tatuga School — they'll get a signup invite
+                </span>
+              )}
             </div>
           </div>
           {member.isInvite && member.id ? (
