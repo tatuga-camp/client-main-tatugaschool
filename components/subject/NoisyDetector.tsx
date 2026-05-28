@@ -23,6 +23,7 @@ import {
   FaMusic,
   FaHistory,
   FaTrash,
+  FaSlidersH,
 } from "react-icons/fa";
 import { IoMdWarning } from "react-icons/io";
 import { useSound } from "../../hook";
@@ -48,9 +49,62 @@ type AlertRecord = {
   limit: number;
 };
 
+type LevelConfig = {
+  name: string;
+  icon: React.ReactNode;
+  activeClass: string;
+} & ({ type: "preset"; limit: number } | { type: "custom" });
+
+const CUSTOM_LIMIT_STORAGE_KEY = "noisyDetector.customLimit";
+
+const LEVELS: LevelConfig[] = [
+  {
+    type: "preset",
+    name: "Silent",
+    limit: 30,
+    icon: <FaBook />,
+    activeClass: "bg-pink-500 text-white shadow-pink-500/30",
+  },
+  {
+    type: "preset",
+    name: "Whisper",
+    limit: 50,
+    icon: <FaComment />,
+    activeClass: "bg-orange-500 text-white shadow-orange-500/30",
+  },
+  {
+    type: "preset",
+    name: "Group",
+    limit: 80,
+    icon: <FaUsers />,
+    activeClass: "bg-blue-500 text-white shadow-blue-500/30",
+  },
+  {
+    type: "preset",
+    name: "Party",
+    limit: 95,
+    icon: <FaMusic />,
+    activeClass: "bg-green-500 text-white shadow-green-500/30",
+  },
+  {
+    type: "custom",
+    name: "Custom",
+    icon: <FaSlidersH />,
+    activeClass: "bg-purple-500 text-white shadow-purple-500/30",
+  },
+];
+
 const NoisyDetector = ({ onClose }: NoisyDetectorProps) => {
   const [isListening, setIsListening] = useState(false);
-  const [noiseLimit, setNoiseLimit] = useState(80); // 0-100 scale
+  const [mode, setMode] = useState<"preset" | "custom">("preset");
+  const [presetLimit, setPresetLimit] = useState(80); // 0-100 scale
+  const [customLimit, setCustomLimit] = useState<number>(() => {
+    if (typeof window === "undefined") return 70;
+    const saved = window.localStorage.getItem(CUSTOM_LIMIT_STORAGE_KEY);
+    const n = saved !== null ? parseInt(saved, 10) : NaN;
+    return !isNaN(n) && n >= 0 && n <= 100 ? n : 70;
+  });
+  const noiseLimit = mode === "custom" ? customLimit : presetLimit;
   const [currentVolume, setCurrentVolume] = useState(0);
   const [isAlerting, setIsAlerting] = useState(false);
   const [alerts, setAlerts] = useState<AlertRecord[]>([]);
@@ -73,6 +127,12 @@ const NoisyDetector = ({ onClose }: NoisyDetectorProps) => {
       stopListening();
     };
   }, []);
+
+  // Persist customLimit across sessions
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(CUSTOM_LIMIT_STORAGE_KEY, String(customLimit));
+  }, [customLimit]);
 
   const startListening = async () => {
     try {
@@ -414,50 +474,54 @@ const NoisyDetector = ({ onClose }: NoisyDetectorProps) => {
               <FaCog className="text-gray-400" />
               <span>Sensitivity Mode</span>
             </div>
-            <div className="grid grid-cols-4 gap-3">
-              {[
-                {
-                  name: "Silent",
-                  limit: 30,
-                  icon: <FaBook />,
-                  activeClass: "bg-pink-500 text-white shadow-pink-500/30",
-                },
-                {
-                  name: "Whisper",
-                  limit: 50,
-                  icon: <FaComment />,
-                  activeClass: "bg-orange-500 text-white shadow-orange-500/30",
-                },
-                {
-                  name: "Group",
-                  limit: 80,
-                  icon: <FaUsers />,
-                  activeClass: "bg-blue-500 text-white shadow-blue-500/30",
-                },
-                {
-                  name: "Party",
-                  limit: 95,
-                  icon: <FaMusic />,
-                  activeClass: "bg-green-500 text-white shadow-green-500/30",
-                },
-              ].map((level) => (
-                <button
-                  key={level.name}
-                  onClick={() => {
-                    setNoiseLimit(level.limit);
-                    stopListening();
-                  }}
-                  className={`flex flex-col items-center justify-center rounded-xl py-2 transition-all duration-200 ${
-                    noiseLimit === level.limit
-                      ? `${level.activeClass} scale-105 shadow-lg`
-                      : "bg-gray-100 text-gray-400 hover:bg-gray-200"
-                  }`}
-                >
-                  <span className="mb-1 text-xl">{level.icon}</span>
-                  <span className="text-xs font-bold">{level.name}</span>
-                </button>
-              ))}
+            <div className="grid grid-cols-5 gap-3">
+              {LEVELS.map((level) => {
+                const isActive =
+                  level.type === "custom"
+                    ? mode === "custom"
+                    : mode === "preset" && presetLimit === level.limit;
+                return (
+                  <button
+                    key={level.name}
+                    onClick={() => {
+                      if (level.type === "custom") {
+                        setMode("custom");
+                      } else {
+                        setMode("preset");
+                        setPresetLimit(level.limit);
+                        stopListening();
+                      }
+                    }}
+                    className={`flex flex-col items-center justify-center rounded-xl py-2 transition-all duration-200 ${
+                      isActive
+                        ? `${level.activeClass} scale-105 shadow-lg`
+                        : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                    }`}
+                  >
+                    <span className="mb-1 text-xl">{level.icon}</span>
+                    <span className="text-xs font-bold">{level.name}</span>
+                  </button>
+                );
+              })}
             </div>
+            {mode === "custom" && (
+              <div className="mt-3 flex items-center gap-3">
+                <span className="text-xs font-bold text-gray-500">0</span>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  value={customLimit}
+                  onChange={(e) => setCustomLimit(Number(e.target.value))}
+                  className="flex-1 accent-purple-500"
+                  aria-label="Custom noise limit"
+                />
+                <span className="text-xs font-bold text-gray-500">100</span>
+                <span className="ml-2 min-w-[3.5rem] rounded bg-purple-100 px-2 py-1 text-center text-xs font-bold text-purple-700">
+                  {customLimit}%
+                </span>
+              </div>
+            )}
           </div>
         </div>
 

@@ -2,17 +2,18 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getLocalStorage, setLocalStorage } from "../utils";
 import { Language } from "../interfaces";
 
+function detectInitialLanguage(): Language {
+  if (typeof window === "undefined") return "en";
+  const stored = getLocalStorage("language") as Language | null;
+  if (stored === "en" || stored === "th") return stored;
+  const browser = (window.navigator?.language ?? "").toLowerCase();
+  return browser.startsWith("th") ? "th" : "en";
+}
+
 export function useGetLanguage() {
   return useQuery({
     queryKey: ["language"],
-    queryFn: () => {
-      const language = getLocalStorage("language") as Language;
-      if (language) {
-        return language;
-      } else {
-        return "en";
-      }
-    },
+    queryFn: () => detectInitialLanguage(),
   });
 }
 
