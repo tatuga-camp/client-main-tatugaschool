@@ -189,6 +189,7 @@ function ClassworkExport({
             videoURL: assignment.videoURL,
             preventFastForward: assignment.preventFastForward,
             assignAll: true,
+            tags: assignment.tags,
           });
 
           if (files && files.length > 0) {
