@@ -4,20 +4,9 @@ export async function urlToFile(
   mimeType: string = "image/jpeg",
 ) {
   try {
-    // Fetch the image from the URL
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": mimeType,
-      },
-    });
-
-    // Convert the response to a Blob
+    const response = await fetch(url);
     const blob = await response.blob();
-
-    // Create a File object from the Blob
-    const file = new File([blob], fileName, { type: mimeType });
-
+    const file = new File([blob], fileName, { type: blob.type || mimeType });
     return file;
   } catch (error) {
     console.error("Error converting URL to File:", error);

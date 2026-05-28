@@ -140,7 +140,7 @@ function FileCard({ file, onEditImage }: Props) {
             onClick={() => window.open(file.body, "_blank")}
             className="flex w-60 items-center gap-2"
           >
-            <div className="max-w-52 overflow-x-auto text-sm">
+            <div className="max-w-40 overflow-x-auto text-sm">
               <span className="w-max text-nowrap">{fileName}</span>
             </div>
           </button>
