@@ -13,7 +13,7 @@ import {
   SortableContext,
 } from "@dnd-kit/sortable";
 import { Toast } from "primereact/toast";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FaPlus } from "react-icons/fa6";
 import { Assignment } from "../../interfaces";
 import {
@@ -28,6 +28,7 @@ import { classworksDataLanguage } from "../../data/languages";
 import { MdImportContacts, MdImportExport } from "react-icons/md";
 import PopupLayout from "../layout/PopupLayout";
 import ImportAssignment from "./ImportAssignment";
+import AssignmentTagFilterBar from "./AssignmentTagFilterBar";
 
 type Props = {
   toast: React.RefObject<Toast>;
@@ -45,6 +46,45 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
     React.useState<ResponseGetAssignmentsService>([]);
   const reorderAssignment = useReoderAssignment();
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
+
+  const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
+
+  const uniqueTags = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const a of classworksData) {
+      for (const t of a.tags ?? []) {
+        const key = t.toLowerCase();
+        if (!map.has(key)) map.set(key, t);
+      }
+    }
+    return [...map.values()].sort((a, b) => a.localeCompare(b));
+  }, [classworksData]);
+
+  const counts = useMemo(() => {
+    const out: Record<string, number> = {};
+    for (const c of classworksData) {
+      for (const t of c.tags ?? []) {
+        const key = t.toLowerCase();
+        out[key] = (out[key] ?? 0) + 1;
+      }
+    }
+    return out;
+  }, [classworksData]);
+
+  const visibleClassworks = useMemo(() => {
+    if (selectedTags.size === 0) return classworksData;
+    return classworksData.filter((c) =>
+      (c.tags ?? []).some((t) => selectedTags.has(t.toLowerCase())),
+    );
+  }, [classworksData, selectedTags]);
+
+  useEffect(() => {
+    const lower = new Set(uniqueTags.map((t) => t.toLowerCase()));
+    setSelectedTags((prev) => {
+      const filtered = new Set([...prev].filter((t) => lower.has(t)));
+      return filtered.size === prev.size ? prev : filtered;
+    });
+  }, [uniqueTags]);
 
   const handleDragEnd = useCallback(async (event: DragEndEvent) => {
     const { active, over } = event;
@@ -143,6 +183,16 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
         </section>
       </header>
 
+      <section className="mt-4 w-full">
+        <AssignmentTagFilterBar
+          uniqueTags={uniqueTags}
+          counts={counts}
+          selectedTags={selectedTags}
+          onChange={setSelectedTags}
+          totalCount={classworksData.length}
+        />
+      </section>
+
       <main className="mt-20 flex w-full flex-col items-center gap-5 px-0 lg:px-10 2xl:px-40">
         {classworks.isLoading && <div>Loading...</div>}
         <DndContext
@@ -151,16 +201,17 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
           onDragEnd={handleDragEnd}
         >
           <SortableContext
-            items={classworksData}
+            items={visibleClassworks}
             strategy={rectSortingStrategy}
           >
-            {classworksData?.map((classwork) => {
+            {visibleClassworks?.map((classwork) => {
               return (
                 <div key={classwork.id} className="w-full md:w-9/12 xl:w-8/12">
                   <ClassworkCard
                     classwork={classwork}
                     selectClasswork={selectClasswork}
                     subjectId={subjectId}
+                    uniqueTags={uniqueTags}
                     onSelect={(classwork) => {
                       setSelectClasswork((prev) => {
                         if (prev?.id === classwork.id) {

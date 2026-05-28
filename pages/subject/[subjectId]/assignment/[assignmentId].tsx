@@ -3,7 +3,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ProgressBar } from "primereact/progressbar";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { IoChevronDownSharp, IoClose } from "react-icons/io5";
 import { MdAssignmentAdd } from "react-icons/md";
 import Swal from "sweetalert2";
@@ -28,6 +28,7 @@ import {
   useDeleteAssignment,
   useDeleteFileOnAssignment,
   useGetAssignment,
+  useGetAssignments,
   useGetLanguage,
   useGetSubject,
   useUpdateAssignment,
@@ -85,6 +86,21 @@ function Index({
   const divRef = React.useRef<HTMLDivElement | null>(null);
   const [loading, setLoading] = React.useState(false);
   const assignment = useGetAssignment({ id: assignmentId });
+
+  const siblingAssignments = useGetAssignments({ subjectId });
+
+  const uniqueTags = useMemo(() => {
+    const list = siblingAssignments.data ?? [];
+    const map = new Map<string, string>();
+    for (const a of list) {
+      for (const t of a.tags ?? []) {
+        const key = t.toLowerCase();
+        if (!map.has(key)) map.set(key, t);
+      }
+    }
+    return [...map.values()].sort((a, b) => a.localeCompare(b));
+  }, [siblingAssignments.data]);
+
   const updateAssignment = useUpdateAssignment();
   const deleteFileAssignment = useDeleteFileOnAssignment();
   const createFileAssignment = useCreateFileOnAssignment();
@@ -177,6 +193,7 @@ function Index({
             ? new Date(classwork.dueDate).toISOString()
             : null,
           status: status,
+          tags: classwork?.tags,
         },
       });
 
@@ -532,6 +549,7 @@ function Index({
           <ClasswordView
             skills={assignment?.data?.skills}
             classwork={classwork}
+            uniqueTags={uniqueTags}
             onChange={(d) =>
               setClasswork((prev) => {
                 if (!prev) return;

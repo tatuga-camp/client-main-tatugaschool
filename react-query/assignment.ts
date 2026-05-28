@@ -65,7 +65,15 @@ export function useUpdateAssignment() {
         (oldData: ResponseGetAssignmentsService) => {
           return oldData?.map((prevAssignment) => {
             if (prevAssignment.id === data.id) {
-              return { ...data, files: prevAssignment.files };
+              return {
+                ...data,
+                files: prevAssignment.files,
+                questions: prevAssignment.questions,
+                studentAssign: prevAssignment.studentAssign,
+                reviewNumber: prevAssignment.reviewNumber,
+                summitNumber: prevAssignment.summitNumber,
+                penddingNumber: prevAssignment.penddingNumber,
+              };
             } else {
               return prevAssignment;
             }

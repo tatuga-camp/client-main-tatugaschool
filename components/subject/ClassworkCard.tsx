@@ -1,6 +1,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { CSSProperties } from "react";
 import { BiBook } from "react-icons/bi";
 import { FaRegFile, FaRegFileImage } from "react-icons/fa6";
@@ -12,8 +13,9 @@ import {
 } from "react-icons/md";
 import { classworkCardDataLanguage } from "../../data/languages";
 import { Assignment, FileOnAssignment } from "../../interfaces";
-import { useGetLanguage } from "../../react-query";
+import { useGetLanguage, useUpdateAssignment } from "../../react-query";
 import TextEditor from "../common/TextEditor";
+import AssignmentTagEditor from "./AssignmentTagEditor";
 
 type PropsClassworkCard = {
   classwork: Assignment & {
@@ -26,6 +28,7 @@ type PropsClassworkCard = {
   disabled?: boolean;
   selectClasswork: Assignment | null;
   subjectId: string;
+  uniqueTags: string[];
   onSelect: (classwork: Assignment) => void;
 };
 function ClassworkCard(props: PropsClassworkCard) {
@@ -69,6 +72,7 @@ type PropsAssignmentCard = {
     penddingNumber: number;
   };
   subjectId: string;
+  uniqueTags: string[];
   selectAssignment: Assignment | null;
   onSelect: (assignment: Assignment) => void;
 };
@@ -77,6 +81,7 @@ function AssignmentCard({
   selectAssignment,
   onSelect,
   subjectId,
+  uniqueTags,
 }: PropsAssignmentCard) {
   const sortable = useSortable({ id: assignemnt.id });
   const style = {
@@ -84,6 +89,7 @@ function AssignmentCard({
     transition: sortable.transition || undefined,
   };
   const language = useGetLanguage();
+  const updateAssignment = useUpdateAssignment();
   const inlineStyles: CSSProperties = {
     opacity: sortable.isDragging ? "0.5" : "1",
     transformOrigin: "50% 50%",
@@ -100,7 +106,7 @@ function AssignmentCard({
     >
       <div
         onClick={() => onSelect(assignemnt)}
-        className={`relative flex h-max w-full items-stretch justify-start gap-2 overflow-hidden rounded-2xl border-2 border-black bg-white hover:ring sm:h-40 ${
+        className={`relative flex h-max w-full items-stretch justify-start gap-2 overflow-hidden rounded-2xl border-2 border-black bg-white hover:ring sm:min-h-40 ${
           selectAssignment?.id === assignemnt.id &&
           !sortable.isDragging &&
           "rounded-b-none"
@@ -117,7 +123,7 @@ function AssignmentCard({
           </span>
         </div>
         <div className="flex w-full grow flex-col gap-2 p-2 sm:w-9/12">
-          <div className="max-w-[80%] truncate border-b text-start text-lg font-semibold">
+          <div className="max-w-[80%] border-b text-start text-lg font-semibold">
             {assignemnt.title}
           </div>
           <div className="flex gap-1 text-xs text-gray-500">
@@ -128,6 +134,25 @@ function AssignmentCard({
               minute: "numeric",
               hour: "numeric",
             })}
+          </div>
+          <div
+            className="flex w-full flex-wrap"
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+            onKeyUp={(e) => e.stopPropagation()}
+          >
+            <AssignmentTagEditor
+              value={assignemnt.tags ?? []}
+              suggestions={uniqueTags}
+              size="sm"
+              onChange={(next) =>
+                updateAssignment.mutate({
+                  query: { assignmentId: assignemnt.id },
+                  data: { tags: next },
+                })
+              }
+            />
           </div>
           <div className="flex w-full flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
             <ul className="flex w-full flex-wrap items-end gap-2">
@@ -270,6 +295,7 @@ function AssignmentCard({
 type PropsMaterialCard = {
   material: Assignment & { files: FileOnAssignment[] };
   subjectId: string;
+  uniqueTags: string[];
   selectMaterial: Assignment | null;
   onSelect: (material: Assignment) => void;
 };
@@ -283,6 +309,7 @@ type PropsVideoQuizCard = {
   };
   disabled?: boolean;
   subjectId: string;
+  uniqueTags: string[];
   selectVideoQuiz: Assignment | null;
   onSelect: (videoQuiz: Assignment) => void;
 };
@@ -291,6 +318,7 @@ function VideoQuizCard({
   selectVideoQuiz,
   onSelect,
   subjectId,
+  uniqueTags,
   disabled = false,
 }: PropsVideoQuizCard) {
   const sortable = useSortable({ id: videoQuiz.id });
@@ -299,6 +327,8 @@ function VideoQuizCard({
     transition: sortable.transition || undefined,
   };
   const language = useGetLanguage();
+  const updateAssignment = useUpdateAssignment();
+  const router = useRouter();
   const inlineStyles: CSSProperties = {
     opacity: sortable.isDragging ? "0.5" : "1",
     transformOrigin: "50% 50%",
@@ -306,22 +336,20 @@ function VideoQuizCard({
     ...style,
   };
   return (
-    <Link
-      style={{
-        pointerEvents: sortable.isDragging || disabled ? "none" : "auto",
+    <div
+      ref={sortable.setNodeRef}
+      style={inlineStyles}
+      {...sortable.attributes}
+      onClick={() => {
+        if (sortable.isDragging || disabled) return;
+        router.push(`/subject/${subjectId}/assignment/${videoQuiz.id}`);
       }}
-      href={`/subject/${subjectId}/assignment/${videoQuiz.id}`}
+      className="flex h-max w-full cursor-pointer flex-col transition-height"
+      key={videoQuiz.id}
     >
-      <button
-        ref={sortable.setNodeRef}
-        style={inlineStyles}
-        {...sortable.attributes}
-        className="flex h-max w-full flex-col transition-height"
-        key={videoQuiz.id}
-      >
         <div
           onClick={() => onSelect(videoQuiz)}
-          className={`relative flex h-max w-full items-stretch justify-start gap-2 overflow-hidden rounded-2xl border-2 border-black bg-white hover:ring sm:h-40 ${
+          className={`relative flex h-max w-full items-stretch justify-start gap-2 overflow-hidden rounded-2xl border-2 border-black bg-white hover:ring sm:min-h-40 ${
             selectVideoQuiz?.id === videoQuiz.id &&
             !sortable.isDragging &&
             "rounded-b-none"
@@ -338,7 +366,7 @@ function VideoQuizCard({
             </span>
           </div>
           <div className="flex w-full grow flex-col gap-2 p-2 sm:w-9/12">
-            <div className="max-w-[80%] truncate border-b text-start text-lg font-semibold">
+            <div className="max-w-[80%] border-b text-start text-lg font-semibold">
               {videoQuiz.title}
             </div>
             <div className="flex gap-1 text-xs text-gray-500">
@@ -349,6 +377,25 @@ function VideoQuizCard({
                 minute: "numeric",
                 hour: "numeric",
               })}
+            </div>
+            <div
+              className="flex w-full flex-wrap"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+              onKeyDown={(e) => e.stopPropagation()}
+              onKeyUp={(e) => e.stopPropagation()}
+            >
+              <AssignmentTagEditor
+                value={videoQuiz.tags ?? []}
+                suggestions={uniqueTags}
+                size="sm"
+                onChange={(next) =>
+                  updateAssignment.mutate({
+                    query: { assignmentId: videoQuiz.id },
+                    data: { tags: next },
+                  })
+                }
+              />
             </div>
             <div className="flex w-full flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
               <ul className="flex w-full flex-wrap items-end gap-2">
@@ -433,8 +480,7 @@ function VideoQuizCard({
             <MdDragIndicator />
           </div>
         </div>
-      </button>
-    </Link>
+    </div>
   );
 }
 
@@ -443,6 +489,7 @@ function MaterialCard({
   subjectId,
   selectMaterial,
   onSelect,
+  uniqueTags,
 }: PropsMaterialCard) {
   const sortable = useSortable({ id: material.id });
 
@@ -451,6 +498,7 @@ function MaterialCard({
     transition: sortable.transition || undefined,
   };
   const language = useGetLanguage();
+  const updateAssignment = useUpdateAssignment();
 
   const inlineStyles: CSSProperties = {
     opacity: sortable.isDragging ? "0.5" : "1",
@@ -469,7 +517,7 @@ function MaterialCard({
     >
       <button
         onClick={() => onSelect(material)}
-        className={`relative flex h-max w-full items-stretch justify-start gap-2 overflow-hidden rounded-2xl border-2 border-black hover:ring sm:h-40 ${
+        className={`relative flex h-max w-full items-stretch justify-start gap-2 overflow-hidden rounded-2xl border-2 border-black hover:ring sm:min-h-40 ${
           selectMaterial?.id === material.id &&
           !sortable.isDragging &&
           "rounded-b-none"
@@ -492,7 +540,7 @@ function MaterialCard({
           </span>
         </div>
         <div className="flex h-max w-full flex-col gap-2 p-2 sm:w-9/12">
-          <div className="max-w-[80%] truncate border-b text-start text-lg font-semibold">
+          <div className="max-w-[80%] border-b text-start text-lg font-semibold">
             {material.title}
           </div>
           <div className="flex gap-1 text-xs text-gray-500">
@@ -503,6 +551,25 @@ function MaterialCard({
               minute: "numeric",
               hour: "numeric",
             })}
+          </div>
+          <div
+            className="flex w-full flex-wrap px-2"
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+            onKeyUp={(e) => e.stopPropagation()}
+          >
+            <AssignmentTagEditor
+              value={material.tags ?? []}
+              suggestions={uniqueTags}
+              size="sm"
+              onChange={(next) =>
+                updateAssignment.mutate({
+                  query: { assignmentId: material.id },
+                  data: { tags: next },
+                })
+              }
+            />
           </div>
           <ul className="flex max-h-20 w-full flex-wrap gap-2 overflow-auto p-3">
             {material.files?.map((file, index) => {

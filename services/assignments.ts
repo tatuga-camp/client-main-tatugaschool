@@ -28,6 +28,7 @@ export type RequestCreateAssignmentService = {
   preventFastForward?: boolean;
   assignAll?: boolean;
   order?: number;
+  tags?: string[];
 };
 
 type ResponseCreateAssignmentService = Assignment;
@@ -137,6 +138,7 @@ export type RequestUpdateAssignmentService = {
     status?: AssignmentStatus;
     videoURL?: string;
     preventFastForward?: boolean;
+    tags?: string[];
   };
 };
 

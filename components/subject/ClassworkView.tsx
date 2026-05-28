@@ -12,7 +12,7 @@ import {
   MdVideoLibrary,
 } from "react-icons/md";
 import { SiGooglegemini } from "react-icons/si";
-import { classworkViewDataLanguage } from "../../data/languages";
+import { classworkViewDataLanguage, tagsDataLanguage } from "../../data/languages";
 import {
   Assignment,
   AssignmentType,
@@ -36,6 +36,7 @@ import {
   BsLayoutSidebarInsetReverse,
 } from "react-icons/bs";
 import FileVideoConfigurator from "../common/FileVideoConfigurator";
+import AssignmentTagEditor from "./AssignmentTagEditor";
 export const classworkLists = [
   {
     title: "Assignment",
@@ -69,6 +70,7 @@ type Props = {
   classwork?: (Assignment & { allowWeight?: boolean }) | undefined;
   files: FileClasswork[];
   skills?: Omit<Skill, "vector">[];
+  uniqueTags?: string[];
   onChange: (data: {
     title?: string;
     description?: string;
@@ -78,6 +80,7 @@ type Props = {
     weight?: number | null;
     maxScore?: number;
     type?: AssignmentType;
+    tags?: string[];
   }) => void;
   onDeleteFile: (file: FileClasswork) => void;
   onUploadFile: (file: FileClasswork[]) => void;
@@ -95,6 +98,7 @@ function ClassworkView({
   onUpdateFile,
   subjectId,
   schoolId,
+  uniqueTags = [],
 }: Props) {
   const refetchSkill = useUpdateSkillToAssignment();
   const language = useGetLanguage();
@@ -206,6 +210,18 @@ function ClassworkView({
                 }}
               />
             </div>
+
+            <section className="flex flex-col gap-1">
+              <span className="text-base font-medium">
+                {tagsDataLanguage.sectionTitle(language.data ?? "en")}
+              </span>
+              <AssignmentTagEditor
+                value={classwork?.tags ?? []}
+                suggestions={uniqueTags}
+                size="md"
+                onChange={(next) => onChange({ tags: next })}
+              />
+            </section>
 
             <ul className="mt-10 grid h-max w-full max-w-full gap-2 xl:grid-cols-2">
               {files?.map((file, index) => {

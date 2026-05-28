@@ -289,6 +289,7 @@ function AssignmentLists({
         beginDate: selectClasswork.beginDate,
         videoURL: selectClasswork.videoURL,
         preventFastForward: selectClasswork.preventFastForward,
+        tags: selectClasswork.tags,
       });
 
       if (selectClasswork.files && selectClasswork.files?.length > 0) {
@@ -375,6 +376,7 @@ function AssignmentLists({
                   classwork={classwork}
                   selectClasswork={null}
                   subjectId={subjectId}
+                  uniqueTags={[]}
                   onSelect={(data) => {}}
                 />
               </div>

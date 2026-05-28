@@ -593,3 +593,66 @@ export const dropdownStatusStudentOnAssignmentLanguage = {
     }
   },
 } as const;
+
+export const tagsDataLanguage = {
+  addTag: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Tag";
+      case "th":
+        return "แท็ก";
+      default:
+        return "Tag";
+    }
+  },
+  placeholder: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Add tag…";
+      case "th":
+        return "เพิ่มแท็ก…";
+      default:
+        return "Add tag…";
+    }
+  },
+  showAll: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Show All";
+      case "th":
+        return "แสดงทั้งหมด";
+      default:
+        return "Show All";
+    }
+  },
+  limitReached: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Maximum 20 tags reached";
+      case "th":
+        return "เพิ่มแท็กได้สูงสุด 20 แท็ก";
+      default:
+        return "Maximum 20 tags reached";
+    }
+  },
+  tooLong: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Tag too long (max 30 characters)";
+      case "th":
+        return "แท็กยาวเกินไป (สูงสุด 30 ตัวอักษร)";
+      default:
+        return "Tag too long (max 30 characters)";
+    }
+  },
+  sectionTitle: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Tags";
+      case "th":
+        return "แท็ก";
+      default:
+        return "Tags";
+    }
+  },
+} as const;

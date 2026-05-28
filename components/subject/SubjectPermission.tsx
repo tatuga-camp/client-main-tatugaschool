@@ -17,7 +17,6 @@ type Props = {
       allowStudentViewScoreOnAssignment?: boolean;
       allowStudentDoneAssignmentInOrder?: boolean;
       allowHideStudentList?: boolean;
-      allowSendNotificationOnStudentOnAssignmentToLine?: boolean;
       allowSendNotificationOnAssignmentToLine?: boolean;
       allowSendNotificationMorningSummaryToLine?: boolean;
     },
@@ -35,7 +34,6 @@ function SubjectPermission({ subjectId, onSummit, isPending }: Props) {
     allowStudentViewScoreOnAssignment?: boolean;
     allowStudentDoneAssignmentInOrder?: boolean;
     allowHideStudentList?: boolean;
-    allowSendNotificationOnStudentOnAssignmentToLine?: boolean;
     allowSendNotificationOnAssignmentToLine?: boolean;
     allowSendNotificationMorningSummaryToLine?: boolean;
   }>();
@@ -52,8 +50,6 @@ function SubjectPermission({ subjectId, onSummit, isPending }: Props) {
         allowStudentDoneAssignmentInOrder:
           subject.data.allowStudentDoneAssignmentInOrder,
         allowHideStudentList: subject.data.allowHideStudentList,
-        allowSendNotificationOnStudentOnAssignmentToLine:
-          subject.data.allowSendNotificationOnStudentOnAssignmentToLine,
         allowSendNotificationOnAssignmentToLine:
           subject.data.allowSendNotificationOnAssignmentToLine,
         allowSendNotificationMorningSummaryToLine:
@@ -200,27 +196,6 @@ function SubjectPermission({ subjectId, onSummit, isPending }: Props) {
                 setPermission((prev) => ({
                   ...prev,
                   allowHideStudentList: data,
-                }));
-              }}
-            />
-          </label>
-        </div>
-        <div className="flex gap-5 p-2 py-4">
-          <label className="flex w-full items-center">
-            <span className="flex-1 text-base text-black">
-              {settingOnSubjectDataLanguage.allowSendNotificationOnStudentOnAssignmentToLine(
-                language.data ?? "en",
-              )}
-              :
-            </span>
-            <Switch
-              checked={
-                permission?.allowSendNotificationOnStudentOnAssignmentToLine
-              }
-              setChecked={(data) => {
-                setPermission((prev) => ({
-                  ...prev,
-                  allowSendNotificationOnStudentOnAssignmentToLine: data,
                 }));
               }}
             />
