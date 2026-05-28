@@ -321,7 +321,7 @@ function ClassworkExport({
 
       {loading && <LoadingBar />}
 
-      <main className="grid w-full grid-cols-1 gap-5 overflow-auto pb-20 md:grid-cols-3 xl:grid-cols-5">
+      <main className="grid w-full grid-cols-1 gap-5 overflow-auto pb-20 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
         {subjectData.map((subject) => {
           const isSelected = selectSubjects.some((s) => s.id === subject.id);
           return (
