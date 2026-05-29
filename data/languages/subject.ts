@@ -457,7 +457,26 @@ export const footerOnSubjectDataLangugae = {
         return "Card Picker";
     }
   },
+  WordCloud: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Word Cloud";
+      case "th":
+        return "เวิร์ดคลาวด์";
+      default:
+        return "Word Cloud";
+    }
+  },
 };
+
+export const footerGroupLanguage = {
+  Attendance: (language: Language) =>
+    language === "th" ? "เช็คชื่อ" : "Attendance",
+  Pickers: (language: Language) => (language === "th" ? "สุ่มชื่อ" : "Pickers"),
+  Tools: (language: Language) => (language === "th" ? "เครื่องมือ" : "Tools"),
+  Activities: (language: Language) =>
+    language === "th" ? "กิจกรรม" : "Activities",
+} as const;
 
 export const attendanceCheckerDataLanugae = {
   title: (language: Language) => {

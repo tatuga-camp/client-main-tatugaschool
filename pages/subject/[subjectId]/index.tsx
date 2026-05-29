@@ -56,6 +56,7 @@ import {
 import VerifyConnectLine from "../../../components/subject/VerifyConnectLine";
 import { FaCheck, FaLine } from "react-icons/fa6";
 import QrCodeLineConnect from "../../../components/subject/QrCodeLineConnect";
+import WordCloudPanel from "../../../components/subject/word-cloud/WordCloudPanel";
 type Props = {
   subjectId: string;
 };
@@ -251,6 +252,14 @@ function Index({ subjectId }: Props) {
       {selectFooter === "NoisyDetector" && (
         <PopupLayout onClose={() => setSelectFooter("EMTY")}>
           <NoisyDetector onClose={() => setSelectFooter("EMTY")} />
+        </PopupLayout>
+      )}
+      {selectFooter === "WordCloud" && (
+        <PopupLayout onClose={() => setSelectFooter("EMTY")}>
+          <WordCloudPanel
+            subjectId={subjectId}
+            onClose={() => setSelectFooter("EMTY")}
+          />
         </PopupLayout>
       )}
       {selectFooter === "SlidePicker" && randomStudents && (
