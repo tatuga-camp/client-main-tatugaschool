@@ -35,6 +35,8 @@ function SubjectPermission({ subjectId, onSummit, isPending }: Props) {
     allowStudentDoneAssignmentInOrder?: boolean;
     allowHideStudentList?: boolean;
     allowSendNotificationOnAssignmentToLine?: boolean;
+    allowSendNotificationOnAssignmentToLine?: boolean;
+
     allowSendNotificationMorningSummaryToLine?: boolean;
   }>();
 
