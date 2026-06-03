@@ -120,7 +120,7 @@ function FileCard({ file, onEditImage }: Props) {
       return;
     }
     const nextName = editingName.trim();
-    if (!nextName || nextName === file.name) return;
+    if (!nextName || nextName === displayName) return;
     try {
       await updateFile.mutateAsync({
         query: { id: file.id },
