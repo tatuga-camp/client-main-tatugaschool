@@ -109,9 +109,8 @@ function FileCard({ file, onEditImage }: Props) {
   const cancelRenameRef = React.useRef(false);
 
   const displayName =
-    file.type === "link-url"
-      ? file.body
-      : (file.name ?? file.body.split("/").pop());
+    file.name ??
+    (file.type === "link-url" ? file.body : file.body.split("/").pop());
 
   const handleCommitRename = async () => {
     if (!isEditing) return;
@@ -201,7 +200,7 @@ function FileCard({ file, onEditImage }: Props) {
               aria-label="Rename file"
               onClick={() => {
                 cancelRenameRef.current = false;
-                setEditingName(file.name ?? "");
+                setEditingName(displayName ?? "");
                 setIsEditing(true);
               }}
               className="flex items-center justify-center rounded-full p-2 text-xl text-blue-500 hover:bg-blue-300/50 active:scale-105"
