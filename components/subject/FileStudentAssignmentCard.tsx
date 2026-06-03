@@ -106,20 +106,30 @@ function FileCard({ file, onEditImage }: Props) {
   const updateFile = useUpdateFileStudentOnAssignment();
   const [isEditing, setIsEditing] = React.useState(false);
   const [editingName, setEditingName] = React.useState(file.name ?? "");
+  const cancelRenameRef = React.useRef(false);
 
   const displayName =
     file.type === "link-url"
       ? file.body
       : (file.name ?? file.body.split("/").pop());
 
-  const handleSaveRename = async () => {
-    const nextName = editingName.trim();
+  const handleCommitRename = async () => {
+    if (!isEditing) return;
     setIsEditing(false);
+    if (cancelRenameRef.current) {
+      cancelRenameRef.current = false;
+      return;
+    }
+    const nextName = editingName.trim();
     if (!nextName || nextName === file.name) return;
-    await updateFile.mutateAsync({
-      query: { id: file.id },
-      body: { name: nextName },
-    });
+    try {
+      await updateFile.mutateAsync({
+        query: { id: file.id },
+        body: { name: nextName },
+      });
+    } catch {
+      setIsEditing(true);
+    }
   };
 
   const handleDeleteFile = async () => {
@@ -161,13 +171,14 @@ function FileCard({ file, onEditImage }: Props) {
               className="w-32 rounded border px-2 py-1 text-sm"
               value={editingName}
               onChange={(e) => setEditingName(e.target.value)}
-              onBlur={handleSaveRename}
+              onBlur={handleCommitRename}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  e.preventDefault();
-                  handleSaveRename();
-                } else if (e.key === "Escape") {
-                  setIsEditing(false);
+                  e.currentTarget.blur();
+                }
+                if (e.key === "Escape") {
+                  cancelRenameRef.current = true;
+                  e.currentTarget.blur();
                 }
               }}
             />
@@ -189,6 +200,7 @@ function FileCard({ file, onEditImage }: Props) {
               type="button"
               aria-label="Rename file"
               onClick={() => {
+                cancelRenameRef.current = false;
                 setEditingName(file.name ?? "");
                 setIsEditing(true);
               }}
