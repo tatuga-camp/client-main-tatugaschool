@@ -6,6 +6,7 @@ import {
   MdArrowCircleRight,
   MdAssignment,
   MdDelete,
+  MdEdit,
   MdLink,
   MdOutlineFileUpload,
   MdSettings,
@@ -118,6 +119,27 @@ function ClassworkView({
       classworkLists[0].value,
   );
   const [triggerSildeOption, setTriggerSildeOption] = useState<boolean>(false);
+  const [editingFileUrl, setEditingFileUrl] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState<string>("");
+
+  const handleStartRename = (file: FileClasswork) => {
+    setEditingFileUrl(file.url);
+    setEditingName(file.name);
+  };
+
+  const handleSaveRename = async (file: FileClasswork) => {
+    const nextName = editingName.trim();
+    setEditingFileUrl(null);
+    if (!nextName || nextName === file.name) return;
+    if (file.fileOnAssignment?.id) {
+      await updateFile.mutateAsync({
+        id: file.fileOnAssignment.id,
+        name: nextName,
+      });
+    }
+    onUpdateFile?.({ ...file, name: nextName });
+  };
+
   return (
     <main className="flex h-full w-full">
       {configuringVideo && (
@@ -245,15 +267,27 @@ function ClassworkView({
                           <FaRegFile />
                         )}
                       </div>
-                      <a
-                        href={file.url}
-                        target="_blank"
-                        className="flex w-7/12 items-center gap-2 truncate"
-                      >
-                        <span className="truncate">
-                          {file.type === "LINK" ? file.url : file.name}
-                        </span>
-                      </a>
+                      {editingFileUrl === file.url ? (
+                        <input
+                          autoFocus
+                          value={editingName}
+                          onChange={(e) => setEditingName(e.target.value)}
+                          onBlur={() => handleSaveRename(file)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") handleSaveRename(file);
+                            if (e.key === "Escape") setEditingFileUrl(null);
+                          }}
+                          className="main-input w-7/12 py-1 text-sm"
+                        />
+                      ) : (
+                        <a
+                          href={file.url}
+                          target="_blank"
+                          className="flex w-7/12 items-center gap-2 truncate"
+                        >
+                          <span className="truncate">{file.name}</span>
+                        </a>
+                      )}
                     </div>
                     <div className="mr-5 flex items-center">
                       {isVideo && (
@@ -265,6 +299,13 @@ function ClassworkView({
                           <MdSettings />
                         </button>
                       )}
+                      <button
+                        type="button"
+                        onClick={() => handleStartRename(file)}
+                        className="rounded-full p-2 text-xl text-gray-500 hover:bg-gray-200 active:scale-105"
+                      >
+                        <MdEdit />
+                      </button>
                       <button
                         type="button"
                         onClick={() => {
