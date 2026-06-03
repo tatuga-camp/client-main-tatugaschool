@@ -151,7 +151,7 @@ function Index({
             type: file.type,
             data: file,
             fileOnAssignment: file,
-            name: file.url.split("/").pop() as string,
+            name: file.name ?? (file.url.split("/").pop() as string),
             url: file.url,
           };
         });
@@ -284,6 +284,7 @@ function Index({
           await createFileAssignment.mutateAsync({
             assignmentId: assignmentId,
             url: signURL.originalURL,
+            name: file.name,
             type: file.file.type,
             size: file.file.size,
             blurHash: blurHashData,
@@ -294,6 +295,7 @@ function Index({
           await createFileAssignment.mutateAsync({
             assignmentId: assignmentId,
             url: file.url,
+            name: file.name,
             type: file.type,
             size: 1,
           });

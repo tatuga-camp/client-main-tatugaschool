@@ -4,6 +4,7 @@ export interface FileOnAssignment {
   updateAt: Date;
   type: string;
   url: string;
+  name: string | null;
   size: number;
   subjectId: string;
   schoolId: string;
