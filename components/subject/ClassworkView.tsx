@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useRef, useState } from "react";
 import { CgInfo } from "react-icons/cg";
 import { FaRegFile, FaRegFileImage, FaRegFileVideo } from "react-icons/fa6";
 import {
@@ -121,15 +121,22 @@ function ClassworkView({
   const [triggerSildeOption, setTriggerSildeOption] = useState<boolean>(false);
   const [editingFileUrl, setEditingFileUrl] = useState<string | null>(null);
   const [editingName, setEditingName] = useState<string>("");
+  const cancelRenameRef = useRef(false);
 
   const handleStartRename = (file: FileClasswork) => {
+    cancelRenameRef.current = false;
     setEditingFileUrl(file.url);
     setEditingName(file.name);
   };
 
-  const handleSaveRename = async (file: FileClasswork) => {
-    const nextName = editingName.trim();
+  const handleCommitRename = async (file: FileClasswork) => {
+    if (editingFileUrl === null) return;
     setEditingFileUrl(null);
+    if (cancelRenameRef.current) {
+      cancelRenameRef.current = false;
+      return;
+    }
+    const nextName = editingName.trim();
     if (!nextName || nextName === file.name) return;
     if (file.fileOnAssignment?.id) {
       await updateFile.mutateAsync({
@@ -272,10 +279,15 @@ function ClassworkView({
                           autoFocus
                           value={editingName}
                           onChange={(e) => setEditingName(e.target.value)}
-                          onBlur={() => handleSaveRename(file)}
+                          onBlur={() => handleCommitRename(file)}
                           onKeyDown={(e) => {
-                            if (e.key === "Enter") handleSaveRename(file);
-                            if (e.key === "Escape") setEditingFileUrl(null);
+                            if (e.key === "Enter") {
+                              e.currentTarget.blur();
+                            }
+                            if (e.key === "Escape") {
+                              cancelRenameRef.current = true;
+                              e.currentTarget.blur();
+                            }
                           }}
                           className="main-input w-7/12 py-1 text-sm"
                         />
