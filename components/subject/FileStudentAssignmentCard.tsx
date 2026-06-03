@@ -167,6 +167,7 @@ function FileCard({ file, onEditImage }: Props) {
             <input
               autoFocus
               aria-label="File name"
+              maxLength={255}
               className="w-32 rounded border px-2 py-1 text-sm"
               value={editingName}
               onChange={(e) => setEditingName(e.target.value)}

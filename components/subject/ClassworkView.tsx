@@ -283,6 +283,7 @@ function ClassworkView({
                         <input
                           autoFocus
                           aria-label="File name"
+                          maxLength={255}
                           value={editingName}
                           onChange={(e) => setEditingName(e.target.value)}
                           onBlur={() => handleCommitRename(file)}
