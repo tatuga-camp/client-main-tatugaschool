@@ -237,6 +237,10 @@ function Index({
     }
   };
 
+  const handleUpdateFile = (file: FileClasswork) => {
+    setFiles((prev) => prev.map((f) => (f.url === file.url ? file : f)));
+  };
+
   const handleDeleteFile = async (file: FileClasswork) => {
     try {
       if (!file.data) return;
@@ -563,6 +567,7 @@ function Index({
             files={files}
             onDeleteFile={(file) => handleDeleteFile(file)}
             onUploadFile={(file) => handleUploadFile(file)}
+            onUpdateFile={(file) => handleUpdateFile(file)}
           />
         )}
         {selectMenu === "studentwork" && (

@@ -138,13 +138,18 @@ function ClassworkView({
     }
     const nextName = editingName.trim();
     if (!nextName || nextName === file.name) return;
-    if (file.fileOnAssignment?.id) {
-      await updateFile.mutateAsync({
-        id: file.fileOnAssignment.id,
-        name: nextName,
-      });
+    try {
+      if (file.fileOnAssignment?.id) {
+        await updateFile.mutateAsync({
+          id: file.fileOnAssignment.id,
+          name: nextName,
+        });
+      }
+      onUpdateFile?.({ ...file, name: nextName });
+    } catch {
+      setEditingFileUrl(file.url);
+      setEditingName(nextName);
     }
-    onUpdateFile?.({ ...file, name: nextName });
   };
 
   return (
@@ -277,6 +282,7 @@ function ClassworkView({
                       {editingFileUrl === file.url ? (
                         <input
                           autoFocus
+                          aria-label="File name"
                           value={editingName}
                           onChange={(e) => setEditingName(e.target.value)}
                           onBlur={() => handleCommitRename(file)}
