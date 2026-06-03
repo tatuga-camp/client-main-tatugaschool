@@ -184,6 +184,7 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
             return CreateFileAssignmentService({
               assignmentId: assignment.id,
               url: signURL.originalURL,
+              name: file.name,
               type: file.file.type,
               size: file.file.size,
               blurHash: blurHashData,
@@ -194,6 +195,7 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
             return CreateFileAssignmentService({
               assignmentId: assignment.id,
               url: file.url,
+              name: file.name,
               type: file.type,
               size: 1,
             });

@@ -7,6 +7,7 @@ const axiosInstance = createAxiosInstance();
 export type RequestCreateFileAssignmentService = {
   type: string;
   url: string;
+  name?: string;
   size: number;
   assignmentId: string;
   blurHash?: string;
@@ -44,6 +45,7 @@ export async function CreateFileAssignmentService(
 export type RequestUpdateFileAssignmentService = {
   id: string;
   preventFastForward?: boolean;
+  name?: string;
 };
 
 type ResponseUpdateFileAssignmentService = FileOnAssignment;

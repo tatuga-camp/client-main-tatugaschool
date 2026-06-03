@@ -66,7 +66,7 @@ export type RequestUpdateFileOnStudentAssignmentService = {
     id: string;
   };
   body: {
-    body: string;
+    body?: string;
     name?: string;
   };
 };

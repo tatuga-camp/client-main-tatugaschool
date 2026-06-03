@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useRef, useState } from "react";
 import { CgInfo } from "react-icons/cg";
 import { FaRegFile, FaRegFileImage, FaRegFileVideo } from "react-icons/fa6";
 import {
@@ -6,6 +6,7 @@ import {
   MdArrowCircleRight,
   MdAssignment,
   MdDelete,
+  MdEdit,
   MdLink,
   MdOutlineFileUpload,
   MdSettings,
@@ -118,6 +119,39 @@ function ClassworkView({
       classworkLists[0].value,
   );
   const [triggerSildeOption, setTriggerSildeOption] = useState<boolean>(false);
+  const [editingFileUrl, setEditingFileUrl] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState<string>("");
+  const cancelRenameRef = useRef(false);
+
+  const handleStartRename = (file: FileClasswork) => {
+    cancelRenameRef.current = false;
+    setEditingFileUrl(file.url);
+    setEditingName(file.name);
+  };
+
+  const handleCommitRename = async (file: FileClasswork) => {
+    if (editingFileUrl === null) return;
+    setEditingFileUrl(null);
+    if (cancelRenameRef.current) {
+      cancelRenameRef.current = false;
+      return;
+    }
+    const nextName = editingName.trim();
+    if (!nextName || nextName === file.name) return;
+    try {
+      if (file.fileOnAssignment?.id) {
+        await updateFile.mutateAsync({
+          id: file.fileOnAssignment.id,
+          name: nextName,
+        });
+      }
+      onUpdateFile?.({ ...file, name: nextName });
+    } catch {
+      setEditingFileUrl(file.url);
+      setEditingName(nextName);
+    }
+  };
+
   return (
     <main className="flex h-full w-full">
       {configuringVideo && (
@@ -245,15 +279,34 @@ function ClassworkView({
                           <FaRegFile />
                         )}
                       </div>
-                      <a
-                        href={file.url}
-                        target="_blank"
-                        className="flex w-7/12 items-center gap-2 truncate"
-                      >
-                        <span className="truncate">
-                          {file.type === "LINK" ? file.url : file.name}
-                        </span>
-                      </a>
+                      {editingFileUrl === file.url ? (
+                        <input
+                          autoFocus
+                          aria-label="File name"
+                          maxLength={255}
+                          value={editingName}
+                          onChange={(e) => setEditingName(e.target.value)}
+                          onBlur={() => handleCommitRename(file)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.currentTarget.blur();
+                            }
+                            if (e.key === "Escape") {
+                              cancelRenameRef.current = true;
+                              e.currentTarget.blur();
+                            }
+                          }}
+                          className="main-input w-7/12 py-1 text-sm"
+                        />
+                      ) : (
+                        <a
+                          href={file.url}
+                          target="_blank"
+                          className="flex w-7/12 items-center gap-2 truncate"
+                        >
+                          <span className="truncate">{file.name}</span>
+                        </a>
+                      )}
                     </div>
                     <div className="mr-5 flex items-center">
                       {isVideo && (
@@ -265,6 +318,13 @@ function ClassworkView({
                           <MdSettings />
                         </button>
                       )}
+                      <button
+                        type="button"
+                        onClick={() => handleStartRename(file)}
+                        className="rounded-full p-2 text-xl text-gray-500 hover:bg-gray-200 active:scale-105"
+                      >
+                        <MdEdit />
+                      </button>
                       <button
                         type="button"
                         onClick={() => {
