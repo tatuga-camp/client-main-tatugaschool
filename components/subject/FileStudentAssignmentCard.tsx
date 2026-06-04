@@ -4,13 +4,17 @@ import { FiFile } from "react-icons/fi";
 import { FaRegFile, FaRegFileImage } from "react-icons/fa";
 import {
   MdDelete,
+  MdEdit,
   MdNoteAlt,
   MdOutlineImageNotSupported,
 } from "react-icons/md";
 import Swal from "sweetalert2";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { LuLink } from "react-icons/lu";
-import { useDeleteFileStudentOnAssignment } from "../../react-query";
+import {
+  useDeleteFileStudentOnAssignment,
+  useUpdateFileStudentOnAssignment,
+} from "../../react-query";
 import Image from "next/image";
 import { defaultBlurHash } from "../../data";
 import { decodeBlurhashToCanvas } from "../../utils";
@@ -98,10 +102,34 @@ function FileCard({ file, onEditImage }: Props) {
     fileType = "unsupported";
   }
 
-  const fileName =
-    file.type === "link-url" ? file.body : file.body.split("/").pop();
-
   const deleteFile = useDeleteFileStudentOnAssignment();
+  const updateFile = useUpdateFileStudentOnAssignment();
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [editingName, setEditingName] = React.useState(file.name ?? "");
+  const cancelRenameRef = React.useRef(false);
+
+  const displayName =
+    file.name ??
+    (file.type === "link-url" ? file.body : file.body.split("/").pop());
+
+  const handleCommitRename = async () => {
+    if (!isEditing) return;
+    setIsEditing(false);
+    if (cancelRenameRef.current) {
+      cancelRenameRef.current = false;
+      return;
+    }
+    const nextName = editingName.trim();
+    if (!nextName || nextName === displayName) return;
+    try {
+      await updateFile.mutateAsync({
+        query: { id: file.id },
+        body: { name: nextName },
+      });
+    } catch {
+      setIsEditing(true);
+    }
+  };
 
   const handleDeleteFile = async () => {
     try {
@@ -135,17 +163,52 @@ function FileCard({ file, onEditImage }: Props) {
               <FaRegFile />
             )}
           </button>
-          <button
-            type="button"
-            onClick={() => window.open(file.body, "_blank")}
-            className="flex w-40 items-center gap-2"
-          >
-            <div className="max-w-40 overflow-x-auto text-sm">
-              <span className="w-max text-nowrap">{fileName}</span>
-            </div>
-          </button>
+          {isEditing ? (
+            <input
+              autoFocus
+              aria-label="File name"
+              maxLength={255}
+              className="w-32 rounded border px-2 py-1 text-sm"
+              value={editingName}
+              onChange={(e) => setEditingName(e.target.value)}
+              onBlur={handleCommitRename}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.currentTarget.blur();
+                }
+                if (e.key === "Escape") {
+                  cancelRenameRef.current = true;
+                  e.currentTarget.blur();
+                }
+              }}
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={() => window.open(file.body, "_blank")}
+              className="flex w-40 items-center gap-2"
+            >
+              <div className="max-w-40 overflow-x-auto text-sm">
+                <span className="w-max text-nowrap">{displayName}</span>
+              </div>
+            </button>
+          )}
         </div>
         <div className="flex items-center justify-center gap-1">
+          {!isEditing && (
+            <button
+              type="button"
+              aria-label="Rename file"
+              onClick={() => {
+                cancelRenameRef.current = false;
+                setEditingName(displayName ?? "");
+                setIsEditing(true);
+              }}
+              className="flex items-center justify-center rounded-full p-2 text-xl text-blue-500 hover:bg-blue-300/50 active:scale-105"
+            >
+              <MdEdit />
+            </button>
+          )}
           {fileType === "image" && (
             <button
               onClick={() => onEditImage?.(file)}
@@ -198,7 +261,7 @@ function FileCard({ file, onEditImage }: Props) {
             sizes="(max-width: 768px) 100vw, 33vw"
             className="object-contain"
             fill
-            alt={fileName ?? "Image"}
+            alt={displayName ?? "Image"}
           />
         </div>
       )}
