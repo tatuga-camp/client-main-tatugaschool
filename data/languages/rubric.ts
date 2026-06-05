@@ -356,6 +356,16 @@ export const rubricLanguage = {
         return "Add level";
     }
   },
+  criteriaColumnHeader: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Criteria";
+      case "th":
+        return "เกณฑ์การประเมิน";
+      default:
+        return "Criteria";
+    }
+  },
   // Validation hints
   rubricTitleRequired: (language: Language) => {
     switch (language) {
@@ -395,6 +405,26 @@ export const rubricLanguage = {
         return `เกณฑ์ข้อที่ ${index} ต้องมีระดับอย่างน้อย 2 ระดับ`;
       default:
         return `Criterion ${index} requires at least 2 levels`;
+    }
+  },
+  atLeastTwoLevels: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Each rubric needs at least 2 levels.";
+      case "th":
+        return "เกณฑ์ต้องมีอย่างน้อย 2 ระดับ";
+      default:
+        return "Each rubric needs at least 2 levels.";
+    }
+  },
+  columnTitleRequired: (language: Language) => (index: number) => {
+    switch (language) {
+      case "en":
+        return `Level ${index} requires a title`;
+      case "th":
+        return `ระดับที่ ${index} ต้องมีชื่อ`;
+      default:
+        return `Level ${index} requires a title`;
     }
   },
   criterionLevelRequiresTitle:

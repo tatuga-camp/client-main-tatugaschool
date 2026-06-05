@@ -3,11 +3,21 @@ import { ProgressBar } from "primereact/progressbar";
 import React, { useEffect, useMemo, useState } from "react";
 import { FiPlus } from "react-icons/fi";
 import { IoMdClose } from "react-icons/io";
-import { MdDelete, MdOutlineDataSaverOn } from "react-icons/md";
+import { MdOutlineDataSaverOn } from "react-icons/md";
 import { RiSparkling2Line } from "react-icons/ri";
 import { rubricLanguage } from "../../../data/languages";
-import { ErrorMessages, Rubric, RubricDraft } from "../../../interfaces";
-import { useCreateRubric, useGetLanguage, useGetRubricById, useUpdateRubric } from "../../../react-query";
+import {
+  ErrorMessages,
+  Rubric,
+  RubricDraft,
+  RubricWithTree,
+} from "../../../interfaces";
+import {
+  useCreateRubric,
+  useGetLanguage,
+  useGetRubricById,
+  useUpdateRubric,
+} from "../../../react-query";
 import InputNumber from "../../common/InputNumber";
 import PopupLayout from "../../layout/PopupLayout";
 import RubricAiAssistant from "./RubricAiAssistant";
@@ -21,48 +31,119 @@ type Props = {
   toast: React.RefObject<Toast>;
 };
 
-type LevelState = {
-  title: string;
-  description: string;
-  points: number;
-};
-
-type CriterionState = {
-  title: string;
-  description: string;
-  weight: number;
-  levels: LevelState[];
-};
+// Shared performance-level column shown across every criterion row.
+type Column = { title: string; points: number };
+// One criterion row. `description[i]` is the descriptor for column `i`.
+type Row = { title: string; weight: number; description: string[] };
 
 type BuilderState = {
   title: string;
   description: string;
-  criteria: CriterionState[];
+  columns: Column[];
+  rows: Row[];
 };
 
-function emptyLevel(): LevelState {
-  return { title: "", description: "", points: 0 };
+// Default starter matrix used for brand-new rubrics: 4 shared columns
+// (points 4..1, high-to-low) and a single empty criterion row.
+const DEFAULT_COLUMN_POINTS = [4, 3, 2, 1];
+
+function emptyColumns(): Column[] {
+  return DEFAULT_COLUMN_POINTS.map((points) => ({ title: "", points }));
 }
 
-function emptyCriterion(): CriterionState {
-  return { title: "", description: "", weight: 1, levels: [emptyLevel(), emptyLevel()] };
+function emptyRow(columnCount: number): Row {
+  return {
+    title: "",
+    weight: 1,
+    description: Array.from({ length: columnCount }, () => ""),
+  };
+}
+
+function emptyState(): BuilderState {
+  const columns = emptyColumns();
+  return {
+    title: "",
+    description: "",
+    columns,
+    rows: [emptyRow(columns.length)],
+  };
+}
+
+// Keep `row.description.length === columnCount` for every row by padding with
+// "" or truncating. Used after add/remove column and when loading data whose
+// per-criterion level counts may differ.
+function alignDescription(description: string[], columnCount: number): string[] {
+  const next = description.slice(0, columnCount);
+  while (next.length < columnCount) next.push("");
+  return next;
+}
+
+// Reconstruct the shared-column matrix state from a source that stores levels
+// PER criterion (AI draft or fetched rubric). The first criterion's levels
+// become the canonical columns; every row's descriptors are aligned by index.
+type SourceCriterion = {
+  title?: string;
+  weight?: number;
+  levels: Array<{ title?: string; description?: string; points?: number }>;
+};
+
+function criteriaToState(
+  title: string,
+  description: string,
+  criteria: SourceCriterion[],
+): BuilderState {
+  if (criteria.length === 0) {
+    const starter = emptyState();
+    return { ...starter, title, description };
+  }
+  const columns: Column[] = criteria[0].levels.map((l) => ({
+    title: l.title ?? "",
+    points: l.points ?? 0,
+  }));
+  // Guard: a source with no levels still needs a usable matrix.
+  if (columns.length === 0) {
+    const fallback = emptyColumns();
+    return {
+      title,
+      description,
+      columns: fallback,
+      rows: criteria.map((c) => ({
+        title: c.title ?? "",
+        weight: c.weight ?? 1,
+        description: alignDescription([], fallback.length),
+      })),
+    };
+  }
+  const rows: Row[] = criteria.map((c) => ({
+    title: c.title ?? "",
+    weight: c.weight ?? 1,
+    description: alignDescription(
+      c.levels.map((l) => l.description ?? ""),
+      columns.length,
+    ),
+  }));
+  return { title, description, columns, rows };
 }
 
 function draftToState(draft: RubricDraft): BuilderState {
-  return {
-    title: draft.title ?? "",
-    description: draft.description ?? "",
-    criteria: draft.criteria.map((c) => ({
-      title: c.title ?? "",
-      description: c.description ?? "",
-      weight: c.weight ?? 1,
-      levels: c.levels.map((l) => ({
-        title: l.title ?? "",
-        description: l.description ?? "",
-        points: l.points ?? 0,
-      })),
-    })),
-  };
+  return criteriaToState(draft.title ?? "", draft.description ?? "", draft.criteria);
+}
+
+function rubricToState(data: RubricWithTree): BuilderState {
+  const criteria = [...data.criteria]
+    .sort((a, b) => a.order - b.order)
+    .map((c) => ({
+      title: c.title,
+      weight: c.weight,
+      levels: [...c.levels]
+        .sort((a, b) => a.order - b.order)
+        .map((l) => ({
+          title: l.title,
+          description: l.description,
+          points: l.points,
+        })),
+    }));
+  return criteriaToState(data.title ?? "", data.description ?? "", criteria);
 }
 
 function RubricBuilder({
@@ -84,9 +165,9 @@ function RubricBuilder({
     }
     if (rubricId) {
       // Will be seeded from the fetched data once it loads.
-      return { title: "", description: "", criteria: [] };
+      return { title: "", description: "", columns: [], rows: [] };
     }
-    return { title: "", description: "", criteria: [emptyCriterion()] };
+    return emptyState();
   });
   const [seededFromServer, setSeededFromServer] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -106,114 +187,113 @@ function RubricBuilder({
     if (seededFromServer) return;
     const data = rubricQuery.data;
     if (!data) return;
-    setState({
-      title: data.title ?? "",
-      description: data.description ?? "",
-      criteria: [...data.criteria]
-        .sort((a, b) => a.order - b.order)
-        .map((c) => ({
-          title: c.title ?? "",
-          description: c.description ?? "",
-          weight: c.weight ?? 1,
-          levels: [...c.levels]
-            .sort((a, b) => a.order - b.order)
-            .map((l) => ({
-              title: l.title ?? "",
-              description: l.description ?? "",
-              points: l.points ?? 0,
-            })),
-        })),
-    });
+    setState(rubricToState(data));
     setSeededFromServer(true);
   }, [initialDraft, rubricId, rubricQuery.data, seededFromServer]);
 
-  const updateCriterion = (index: number, partial: Partial<CriterionState>) => {
+  const setTitle = (title: string) =>
+    setState((prev) => ({ ...prev, title }));
+  const setDescription = (description: string) =>
+    setState((prev) => ({ ...prev, description }));
+
+  const updateColumn = (index: number, partial: Partial<Column>) => {
     setState((prev) => ({
       ...prev,
-      criteria: prev.criteria.map((c, i) => (i === index ? { ...c, ...partial } : c)),
+      columns: prev.columns.map((c, i) =>
+        i === index ? { ...c, ...partial } : c,
+      ),
     }));
   };
 
-  const updateLevel = (
-    cIndex: number,
-    lIndex: number,
-    partial: Partial<LevelState>,
-  ) => {
+  const handleAddColumn = () => {
     setState((prev) => ({
       ...prev,
-      criteria: prev.criteria.map((c, i) =>
-        i === cIndex
+      columns: [...prev.columns, { title: "", points: 0 }],
+      rows: prev.rows.map((r) => ({
+        ...r,
+        description: [...r.description, ""],
+      })),
+    }));
+  };
+
+  const handleRemoveColumn = (index: number) => {
+    setState((prev) => {
+      if (prev.columns.length <= 2) return prev;
+      return {
+        ...prev,
+        columns: prev.columns.filter((_, i) => i !== index),
+        rows: prev.rows.map((r) => ({
+          ...r,
+          description: r.description.filter((_, i) => i !== index),
+        })),
+      };
+    });
+  };
+
+  const updateRow = (index: number, partial: Partial<Row>) => {
+    setState((prev) => ({
+      ...prev,
+      rows: prev.rows.map((r, i) => (i === index ? { ...r, ...partial } : r)),
+    }));
+  };
+
+  const updateCell = (rowIndex: number, colIndex: number, value: string) => {
+    setState((prev) => ({
+      ...prev,
+      rows: prev.rows.map((r, i) =>
+        i === rowIndex
           ? {
-              ...c,
-              levels: c.levels.map((l, j) =>
-                j === lIndex ? { ...l, ...partial } : l,
+              ...r,
+              description: r.description.map((d, j) =>
+                j === colIndex ? value : d,
               ),
             }
-          : c,
+          : r,
       ),
     }));
   };
 
-  const handleAddCriterion = () => {
-    setState((prev) => ({ ...prev, criteria: [...prev.criteria, emptyCriterion()] }));
-  };
-
-  const handleRemoveCriterion = (index: number) => {
+  const handleAddRow = () => {
     setState((prev) => ({
       ...prev,
-      criteria: prev.criteria.filter((_, i) => i !== index),
+      rows: [...prev.rows, emptyRow(prev.columns.length)],
     }));
   };
 
-  const handleAddLevel = (cIndex: number) => {
+  const handleRemoveRow = (index: number) => {
     setState((prev) => ({
       ...prev,
-      criteria: prev.criteria.map((c, i) =>
-        i === cIndex ? { ...c, levels: [...c.levels, emptyLevel()] } : c,
-      ),
-    }));
-  };
-
-  const handleRemoveLevel = (cIndex: number, lIndex: number) => {
-    setState((prev) => ({
-      ...prev,
-      criteria: prev.criteria.map((c, i) =>
-        i === cIndex
-          ? { ...c, levels: c.levels.filter((_, j) => j !== lIndex) }
-          : c,
-      ),
+      rows: prev.rows.filter((_, i) => i !== index),
     }));
   };
 
   const validationError = useMemo<string | null>(() => {
     const lang = language.data ?? "en";
     if (!state.title.trim()) return rubricLanguage.rubricTitleRequired(lang);
-    if (state.criteria.length < 1)
-      return rubricLanguage.atLeastOneCriterion(lang);
-    for (let i = 0; i < state.criteria.length; i++) {
-      const c = state.criteria[i];
-      if (!c.title.trim())
-        return rubricLanguage.criterionRequiresTitle(lang)(i + 1);
-      if (c.levels.length < 2) {
-        return rubricLanguage.criterionRequiresLevels(lang)(i + 1);
+    if (state.rows.length < 1) return rubricLanguage.atLeastOneCriterion(lang);
+    if (state.columns.length < 2) return rubricLanguage.atLeastTwoLevels(lang);
+    for (let i = 0; i < state.columns.length; i++) {
+      if (!state.columns[i].title.trim()) {
+        return rubricLanguage.columnTitleRequired(lang)(i + 1);
       }
-      for (let j = 0; j < c.levels.length; j++) {
-        if (!c.levels[j].title.trim()) {
-          return rubricLanguage.criterionLevelRequiresTitle(lang)(i + 1, j + 1);
-        }
+    }
+    for (let i = 0; i < state.rows.length; i++) {
+      if (!state.rows[i].title.trim()) {
+        return rubricLanguage.criterionRequiresTitle(lang)(i + 1);
       }
     }
     return null;
   }, [state, language.data]);
 
   const maxRawPoints = useMemo(() => {
-    return state.criteria.reduce((sum, c) => {
-      const maxPoints = c.levels.reduce(
-        (m, l) => (l.points > m ? l.points : m),
-        0,
-      );
-      return sum + maxPoints * (c.weight ?? 0);
-    }, 0);
+    const maxColumnPoints = state.columns.reduce(
+      (m, c) => (c.points > m ? c.points : m),
+      0,
+    );
+    return state.rows.reduce(
+      (sum, r) => sum + maxColumnPoints * (r.weight ?? 0),
+      0,
+    );
   }, [state]);
 
   const handleSave = async (e: React.FormEvent) => {
@@ -221,16 +301,16 @@ function RubricBuilder({
     if (validationError) return;
     try {
       setLoading(true);
-      const criteria = state.criteria.map((c, cIndex) => ({
-        title: c.title.trim(),
-        description: c.description.trim() || undefined,
-        weight: c.weight ?? 0,
-        order: cIndex,
-        levels: c.levels.map((l, lIndex) => ({
-          title: l.title.trim(),
-          description: l.description.trim() || undefined,
-          points: l.points ?? 0,
-          order: lIndex,
+      const criteria = state.rows.map((row, rowIndex) => ({
+        title: row.title.trim(),
+        description: undefined,
+        weight: row.weight ?? 0,
+        order: rowIndex,
+        levels: state.columns.map((col, i) => ({
+          title: col.title.trim(),
+          description: row.description[i]?.trim() || undefined,
+          points: col.points ?? 0,
+          order: i,
         })),
       }));
 
@@ -279,6 +359,8 @@ function RubricBuilder({
     }
   };
 
+  const lang = language.data ?? "en";
+
   return (
     <form
       onSubmit={handleSave}
@@ -290,8 +372,8 @@ function RubricBuilder({
         <div className="flex w-full items-center justify-between gap-2">
           <h1 className="text-lg font-medium">
             {rubricId
-              ? rubricLanguage.editRubricHeading(language.data ?? "en")
-              : rubricLanguage.createRubricHeading(language.data ?? "en")}
+              ? rubricLanguage.editRubricHeading(lang)
+              : rubricLanguage.createRubricHeading(lang)}
           </h1>
           <button
             type="button"
@@ -299,56 +381,162 @@ function RubricBuilder({
             disabled={loading}
             className="second-button flex w-max items-center justify-center gap-1 border py-1 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <RiSparkling2Line /> {rubricLanguage.draftWithAi(language.data ?? "en")}
+            <RiSparkling2Line /> {rubricLanguage.draftWithAi(lang)}
           </button>
         </div>
         <input
           type="text"
-          placeholder={rubricLanguage.rubricTitlePlaceholder(language.data ?? "en")}
+          placeholder={rubricLanguage.rubricTitlePlaceholder(lang)}
           value={state.title}
-          onChange={(e) => setState((prev) => ({ ...prev, title: e.target.value }))}
-          className="main-input w-full"
+          onChange={(e) => setTitle(e.target.value)}
+          className="gradient-bg w-full rounded-xl border-none px-4 py-3 text-lg font-semibold text-white placeholder:text-white/70 focus:outline-none focus:ring-2 focus:ring-primary-color"
         />
         <textarea
-          placeholder={rubricLanguage.descriptionOptionalPlaceholder(
-            language.data ?? "en",
-          )}
+          placeholder={rubricLanguage.descriptionOptionalPlaceholder(lang)}
           value={state.description}
-          onChange={(e) =>
-            setState((prev) => ({ ...prev, description: e.target.value }))
-          }
+          onChange={(e) => setDescription(e.target.value)}
           className="main-input w-full resize-none"
           rows={2}
         />
       </header>
 
-      <main className="flex max-h-[60vh] w-full flex-col gap-4 overflow-auto">
-        {state.criteria.map((criterion, cIndex) => (
-          <RubricCriterionRow
-            key={cIndex}
-            index={cIndex}
-            criterion={criterion}
-            onChange={(partial) => updateCriterion(cIndex, partial)}
-            onChangeLevel={(lIndex, partial) => updateLevel(cIndex, lIndex, partial)}
-            onAddLevel={() => handleAddLevel(cIndex)}
-            onRemoveLevel={(lIndex) => handleRemoveLevel(cIndex, lIndex)}
-            onRemove={() => handleRemoveCriterion(cIndex)}
-          />
-        ))}
+      <main className="flex max-h-[60vh] w-full flex-col gap-3 overflow-auto">
+        <div className="w-full overflow-x-auto">
+          <table className="w-full min-w-[640px] border-collapse">
+            <thead>
+              <tr>
+                <th className="bg-primary-color/10 sticky left-0 z-10 w-56 min-w-56 border p-2 text-left align-top text-sm font-semibold text-primary-color">
+                  {rubricLanguage.criteriaColumnHeader(lang)}
+                </th>
+                {state.columns.map((column, cIndex) => (
+                  <th
+                    key={cIndex}
+                    className="bg-primary-color/10 w-48 min-w-48 border p-2 align-top"
+                  >
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-start justify-between gap-1">
+                        <input
+                          type="text"
+                          placeholder={rubricLanguage.levelTitlePlaceholder(lang)}
+                          value={column.title}
+                          onChange={(e) =>
+                            updateColumn(cIndex, { title: e.target.value })
+                          }
+                          className="main-input w-full text-sm"
+                        />
+                        <button
+                          type="button"
+                          title={rubricLanguage.removeLevel(lang)}
+                          onClick={() => handleRemoveColumn(cIndex)}
+                          disabled={state.columns.length <= 2}
+                          className="rounded bg-red-100 p-1 text-red-500 disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                          <IoMdClose />
+                        </button>
+                      </div>
+                      <div className="flex w-24 items-center gap-1">
+                        <InputNumber
+                          value={column.points}
+                          min={0}
+                          placeholder={rubricLanguage.pts(lang)}
+                          onValueChange={(value) =>
+                            updateColumn(cIndex, { points: value ?? 0 })
+                          }
+                        />
+                        <span className="text-xs text-gray-500">
+                          {rubricLanguage.pts(lang)}
+                        </span>
+                      </div>
+                    </div>
+                  </th>
+                ))}
+                <th className="bg-primary-color/10 w-32 min-w-32 border p-2 align-top">
+                  <button
+                    type="button"
+                    onClick={handleAddColumn}
+                    className="second-button flex w-full items-center justify-center gap-1 border text-sm"
+                  >
+                    <FiPlus /> {rubricLanguage.addLevel(lang)}
+                  </button>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {state.rows.map((row, rowIndex) => (
+                <tr key={rowIndex} className="align-top">
+                  <td className="sticky left-0 z-10 w-56 min-w-56 border bg-white p-2">
+                    <div className="flex flex-col gap-2">
+                      <input
+                        type="text"
+                        placeholder={rubricLanguage.criterionTitlePlaceholder(
+                          lang,
+                        )}
+                        value={row.title}
+                        onChange={(e) =>
+                          updateRow(rowIndex, { title: e.target.value })
+                        }
+                        className="main-input w-full text-sm"
+                      />
+                      <div className="flex flex-col gap-1">
+                        <label className="text-xs text-gray-500">
+                          {rubricLanguage.weight(lang)}
+                        </label>
+                        <InputNumber
+                          value={row.weight}
+                          min={0}
+                          placeholder={rubricLanguage.weight(lang)}
+                          onValueChange={(value) =>
+                            updateRow(rowIndex, { weight: value ?? 0 })
+                          }
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        title={rubricLanguage.removeCriterion(lang)}
+                        onClick={() => handleRemoveRow(rowIndex)}
+                        className="flex w-max items-center gap-1 rounded bg-red-100 px-2 py-1 text-xs text-red-500"
+                      >
+                        <IoMdClose /> {rubricLanguage.removeCriterion(lang)}
+                      </button>
+                    </div>
+                  </td>
+                  {state.columns.map((_, colIndex) => (
+                    <td
+                      key={colIndex}
+                      className="w-48 min-w-48 border bg-white p-2"
+                    >
+                      <textarea
+                        placeholder={rubricLanguage.levelDescriptionPlaceholder(
+                          lang,
+                        )}
+                        value={row.description[colIndex] ?? ""}
+                        onChange={(e) =>
+                          updateCell(rowIndex, colIndex, e.target.value)
+                        }
+                        className="main-input min-h-24 w-full resize-y text-sm"
+                      />
+                    </td>
+                  ))}
+                  <td className="w-32 min-w-32 border bg-gray-50" />
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
         <button
           type="button"
-          onClick={handleAddCriterion}
-          className="second-button flex items-center justify-center gap-1 border"
+          onClick={handleAddRow}
+          className="second-button flex w-max items-center justify-center gap-1 border"
         >
-          <FiPlus /> {rubricLanguage.addCriterion(language.data ?? "en")}
+          <FiPlus /> {rubricLanguage.addCriterion(lang)}
         </button>
       </main>
 
       <footer className="flex w-full flex-col gap-2 border-t pt-3">
         <div className="flex w-full items-center justify-between text-sm text-gray-500">
           <span>
-            {rubricLanguage.maxRawPoints(language.data ?? "en")} {maxRawPoints}
+            {rubricLanguage.maxRawPoints(lang)} {maxRawPoints}
           </span>
           {validationError && (
             <span className="text-red-500">{validationError}</span>
@@ -360,14 +548,14 @@ function RubricBuilder({
             onClick={onCancel}
             className="second-button flex items-center justify-center gap-1 border"
           >
-            {rubricLanguage.cancel(language.data ?? "en")}
+            {rubricLanguage.cancel(lang)}
           </button>
           <button
             type="submit"
             disabled={!!validationError || loading}
             className="main-button flex items-center justify-center gap-1 disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100"
           >
-            <MdOutlineDataSaverOn /> {rubricLanguage.save(language.data ?? "en")}
+            <MdOutlineDataSaverOn /> {rubricLanguage.save(lang)}
           </button>
         </div>
       </footer>
@@ -397,137 +585,3 @@ function RubricBuilder({
 }
 
 export default RubricBuilder;
-
-type RubricCriterionRowProps = {
-  index: number;
-  criterion: CriterionState;
-  onChange: (partial: Partial<CriterionState>) => void;
-  onChangeLevel: (lIndex: number, partial: Partial<LevelState>) => void;
-  onAddLevel: () => void;
-  onRemoveLevel: (lIndex: number) => void;
-  onRemove: () => void;
-};
-
-function RubricCriterionRow({
-  index,
-  criterion,
-  onChange,
-  onChangeLevel,
-  onAddLevel,
-  onRemoveLevel,
-  onRemove,
-}: RubricCriterionRowProps) {
-  const language = useGetLanguage();
-  return (
-    <section className="flex w-full flex-col gap-3 rounded-2xl border bg-white p-3">
-      <header className="flex w-full items-start justify-between gap-2">
-        <span className="mt-2 text-sm font-semibold text-gray-500">
-          #{index + 1}
-        </span>
-        <div className="flex flex-1 flex-col gap-2">
-          <input
-            type="text"
-            placeholder={rubricLanguage.criterionTitlePlaceholder(
-              language.data ?? "en",
-            )}
-            value={criterion.title}
-            onChange={(e) => onChange({ title: e.target.value })}
-            className="main-input w-full"
-          />
-          <textarea
-            placeholder={rubricLanguage.criterionDescriptionPlaceholder(
-              language.data ?? "en",
-            )}
-            value={criterion.description}
-            onChange={(e) => onChange({ description: e.target.value })}
-            className="main-input w-full resize-none"
-            rows={1}
-          />
-        </div>
-        <div className="flex w-28 flex-col gap-1">
-          <label className="text-xs text-gray-500">
-            {rubricLanguage.weight(language.data ?? "en")}
-          </label>
-          <InputNumber
-            value={criterion.weight}
-            min={0}
-            placeholder={rubricLanguage.weight(language.data ?? "en")}
-            onValueChange={(value) => onChange({ weight: value ?? 0 })}
-          />
-        </div>
-        <button
-          type="button"
-          title={rubricLanguage.removeCriterion(language.data ?? "en")}
-          onClick={onRemove}
-          className="mt-1 rounded bg-red-100 p-2 text-red-500"
-        >
-          <MdDelete />
-        </button>
-      </header>
-
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-        {criterion.levels.map((level, lIndex) => (
-          <div
-            key={lIndex}
-            className="flex flex-col gap-2 rounded-2xl border bg-gray-50 p-2"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-gray-500">
-                {rubricLanguage.level(language.data ?? "en")} {lIndex + 1}
-              </span>
-              <button
-                type="button"
-                title={rubricLanguage.removeLevel(language.data ?? "en")}
-                onClick={() => onRemoveLevel(lIndex)}
-                className="rounded bg-red-100 p-1 text-red-500"
-              >
-                <IoMdClose />
-              </button>
-            </div>
-            <input
-              type="text"
-              placeholder={rubricLanguage.levelTitlePlaceholder(
-                language.data ?? "en",
-              )}
-              value={level.title}
-              onChange={(e) => onChangeLevel(lIndex, { title: e.target.value })}
-              className="main-input w-full"
-            />
-            <div className="flex flex-col gap-1">
-              <label className="text-xs text-gray-500">
-                {rubricLanguage.points(language.data ?? "en")}
-              </label>
-              <InputNumber
-                value={level.points}
-                min={0}
-                placeholder={rubricLanguage.points(language.data ?? "en")}
-                onValueChange={(value) =>
-                  onChangeLevel(lIndex, { points: value ?? 0 })
-                }
-              />
-            </div>
-            <textarea
-              placeholder={rubricLanguage.levelDescriptionPlaceholder(
-                language.data ?? "en",
-              )}
-              value={level.description}
-              onChange={(e) =>
-                onChangeLevel(lIndex, { description: e.target.value })
-              }
-              className="main-input w-full resize-none"
-              rows={2}
-            />
-          </div>
-        ))}
-      </div>
-
-      <button
-        type="button"
-        onClick={onAddLevel}
-        className="second-button flex w-max items-center justify-center gap-1 border"
-      >
-        <FiPlus /> {rubricLanguage.addLevel(language.data ?? "en")}
-      </button>
-    </section>
-  );
-}
