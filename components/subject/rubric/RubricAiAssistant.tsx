@@ -133,8 +133,9 @@ function RubricAiAssistant({ subjectId, onDraft, onClose, toast }: Props) {
     } catch (error) {
       console.log(error);
       setPhase("idle");
-      const result = (error as { response?: { data?: ErrorMessages } })
-        ?.response?.data ?? (error as ErrorMessages);
+      const result =
+        (error as { response?: { data?: ErrorMessages } })?.response?.data ??
+        (error as ErrorMessages);
       toast.current?.show({
         severity: "error",
         summary: result?.error
@@ -220,7 +221,9 @@ function RubricAiAssistant({ subjectId, onDraft, onClose, toast }: Props) {
             </label>
             <input
               type="text"
-              placeholder={rubricLanguage.topicPlaceholder(uiLanguage.data ?? "en")}
+              placeholder={rubricLanguage.topicPlaceholder(
+                uiLanguage.data ?? "en",
+              )}
               value={form.topic}
               onChange={(e) =>
                 setForm((prev) => ({ ...prev, topic: e.target.value }))
@@ -336,41 +339,6 @@ function RubricAiAssistant({ subjectId, onDraft, onClose, toast }: Props) {
                 <option value="th">ไทย (Thai)</option>
               </select>
             </div>
-          </div>
-
-          <div className="flex w-full flex-col gap-1">
-            <label className="text-sm text-gray-600">
-              {rubricLanguage.curriculumFileOptional(uiLanguage.data ?? "en")}
-            </label>
-            <p className="text-xs text-gray-400">
-              {rubricLanguage.curriculumFileHint(uiLanguage.data ?? "en")}
-            </p>
-            {file ? (
-              <div className="flex w-full items-center justify-between gap-2 rounded-2xl border bg-white p-2">
-                <span className="truncate text-sm">{file.name}</span>
-                <button
-                  type="button"
-                  title={rubricLanguage.removeFile(uiLanguage.data ?? "en")}
-                  onClick={handleRemoveFile}
-                  disabled={busy}
-                  className="rounded bg-red-100 p-1 text-red-500"
-                >
-                  <IoMdClose />
-                </button>
-              </div>
-            ) : (
-              <label className="second-button flex w-max cursor-pointer items-center justify-center gap-1 border">
-                <FiUpload /> {rubricLanguage.chooseFile(uiLanguage.data ?? "en")}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept={ACCEPT_ATTR}
-                  disabled={busy}
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-              </label>
-            )}
           </div>
 
           <footer className="flex w-full flex-col gap-2 border-t pt-3">

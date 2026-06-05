@@ -72,7 +72,10 @@ function emptyState(): BuilderState {
 // Keep `row.description.length === columnCount` for every row by padding with
 // "" or truncating. Used after add/remove column and when loading data whose
 // per-criterion level counts may differ.
-function alignDescription(description: string[], columnCount: number): string[] {
+function alignDescription(
+  description: string[],
+  columnCount: number,
+): string[] {
   const next = description.slice(0, columnCount);
   while (next.length < columnCount) next.push("");
   return next;
@@ -126,7 +129,11 @@ function criteriaToState(
 }
 
 function draftToState(draft: RubricDraft): BuilderState {
-  return criteriaToState(draft.title ?? "", draft.description ?? "", draft.criteria);
+  return criteriaToState(
+    draft.title ?? "",
+    draft.description ?? "",
+    draft.criteria,
+  );
 }
 
 function rubricToState(data: RubricWithTree): BuilderState {
@@ -191,8 +198,7 @@ function RubricBuilder({
     setSeededFromServer(true);
   }, [initialDraft, rubricId, rubricQuery.data, seededFromServer]);
 
-  const setTitle = (title: string) =>
-    setState((prev) => ({ ...prev, title }));
+  const setTitle = (title: string) => setState((prev) => ({ ...prev, title }));
   const setDescription = (description: string) =>
     setState((prev) => ({ ...prev, description }));
 
@@ -366,7 +372,9 @@ function RubricBuilder({
       onSubmit={handleSave}
       className="flex h-max w-full flex-col gap-3 rounded-2xl border bg-gray-100 p-4"
     >
-      {loading && <ProgressBar mode="indeterminate" style={{ height: "6px" }} />}
+      {loading && (
+        <ProgressBar mode="indeterminate" style={{ height: "6px" }} />
+      )}
 
       <header className="flex w-full flex-col gap-2 border-b pb-3">
         <div className="flex w-full items-center justify-between gap-2">
@@ -405,19 +413,21 @@ function RubricBuilder({
           <table className="w-full min-w-[640px] border-collapse">
             <thead>
               <tr>
-                <th className="bg-primary-color/10 sticky left-0 z-10 w-56 min-w-56 border p-2 text-left align-top text-sm font-semibold text-primary-color">
+                <th className="sticky left-0 z-10 w-56 min-w-56 border bg-gray-100 p-2 text-left align-top text-sm font-semibold text-primary-color">
                   {rubricLanguage.criteriaColumnHeader(lang)}
                 </th>
                 {state.columns.map((column, cIndex) => (
                   <th
                     key={cIndex}
-                    className="bg-primary-color/10 w-48 min-w-48 border p-2 align-top"
+                    className="w-48 min-w-48 border bg-gray-100 p-2 align-top"
                   >
                     <div className="flex flex-col gap-2">
                       <div className="flex items-start justify-between gap-1">
                         <input
                           type="text"
-                          placeholder={rubricLanguage.levelTitlePlaceholder(lang)}
+                          placeholder={rubricLanguage.levelTitlePlaceholder(
+                            lang,
+                          )}
                           value={column.title}
                           onChange={(e) =>
                             updateColumn(cIndex, { title: e.target.value })
@@ -450,7 +460,7 @@ function RubricBuilder({
                     </div>
                   </th>
                 ))}
-                <th className="bg-primary-color/10 w-32 min-w-32 border p-2 align-top">
+                <th className="w-32 min-w-32 border bg-primary-color/10 p-2 align-top">
                   <button
                     type="button"
                     onClick={handleAddColumn}

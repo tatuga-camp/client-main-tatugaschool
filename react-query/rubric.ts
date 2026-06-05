@@ -12,8 +12,10 @@ import {
   RequestGenerateRubricDraftService,
   RequestGradeRubricService,
   RequestUpdateRubricService,
+  ResponseGetOverviewAssignmentService,
   UpdateRubricService,
 } from "../services";
+import { gradeKey } from "./grade";
 
 export function useGetRubricsBySubject({ subjectId }: { subjectId: string }) {
   return useQuery({
@@ -74,9 +76,44 @@ export function useGradeRubric() {
   return useMutation({
     mutationKey: ["grade-rubric"],
     mutationFn: (req: RequestGradeRubricService) => GradeRubricService(req),
-    onSuccess() {
+    onSuccess(updateData) {
       qc.invalidateQueries({ queryKey: ["student-assignments"] });
       qc.invalidateQueries({ queryKey: ["rubric-breakdown"] });
+
+      qc.setQueryData(
+        gradeKey.overview({ subjectId: updateData.subjectId }),
+        (
+          oldData: ResponseGetOverviewAssignmentService,
+        ): ResponseGetOverviewAssignmentService => {
+          return {
+            grade: oldData.grade,
+            assignments: oldData?.assignments.map((prevAssignment) => {
+              if (prevAssignment.assignment.id === updateData.assignmentId) {
+                return {
+                  ...prevAssignment,
+                  students: prevAssignment.students.map(
+                    (studentOnAssignment) => {
+                      if (
+                        studentOnAssignment.id ===
+                        updateData.studentOnAssignmentId
+                      ) {
+                        return {
+                          ...studentOnAssignment,
+                          score: updateData.score,
+                          status: "REVIEWD",
+                        };
+                      }
+                      return studentOnAssignment;
+                    },
+                  ),
+                };
+              }
+              return prevAssignment;
+            }),
+            scoreOnSubjects: oldData.scoreOnSubjects,
+          };
+        },
+      );
     },
   });
 }

@@ -185,7 +185,7 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
           </div>
         </PopupLayout>
       )}
-      <header className="flex w-full flex-col px-5 md:px-40">
+      <header className="flex w-full flex-col px-5 lg:px-40">
         <section>
           <h1 className="text-3xl font-semibold">
             {classworksDataLanguage.title(language.data ?? "en")}
@@ -195,10 +195,10 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
           </span>
         </section>
 
-        <section className="mt-10 flex items-center gap-1 font-Anuphan">
+        <section className="mt-10 grid items-center gap-1 font-Anuphan md:flex">
           <button
             onClick={() => setTriggerManageRubric(true)}
-            className="second-button relative flex w-max items-center justify-center gap-1 border py-1"
+            className="second-button relative flex w-60 items-center justify-center gap-1 border py-1"
           >
             <div className="flex items-center justify-center gap-2">
               <MdChecklist />
@@ -207,7 +207,7 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
           </button>
           <button
             onClick={() => setTriggerImportAssignment(true)}
-            className="second-button relative flex w-max items-center justify-center gap-1 border py-1"
+            className="second-button relative flex w-60 items-center justify-center gap-1 border py-1"
           >
             <div className="flex items-center justify-center gap-2">
               <MdImportContacts />
@@ -216,7 +216,7 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
           </button>
           <button
             onClick={() => setTriggerCreate((prev) => !prev)}
-            className="second-button relative flex w-max items-center justify-center gap-1 border py-1"
+            className="second-button relative flex w-60 items-center justify-center gap-1 border py-1"
           >
             <div className="flex items-center justify-center gap-2">
               <FaPlus />

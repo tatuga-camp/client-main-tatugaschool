@@ -171,7 +171,7 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
         });
       }
 
-      if (files?.length > 0) {
+      if (files && files.length > 0) {
         const uploadTasks = files.map(async (file) => {
           if (file.type !== "LINK" && file.file) {
             const isImage = file.type.includes("image");

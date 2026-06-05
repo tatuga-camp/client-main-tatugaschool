@@ -4,7 +4,12 @@ import React from "react";
 import { CiSaveUp2 } from "react-icons/ci";
 import { rubricLanguage } from "../../../data/languages";
 import { RubricWithTree } from "../../../interfaces";
-import { useGetLanguage, useGetRubricById, useGetRubricBreakdown, useGradeRubric } from "../../../react-query";
+import {
+  useGetLanguage,
+  useGetRubricById,
+  useGetRubricBreakdown,
+  useGradeRubric,
+} from "../../../react-query";
 import { computeRubricScore } from "./rubricMath";
 
 type Props = {
@@ -36,11 +41,9 @@ function RubricGradingPanel({
   const [selections, setSelections] = React.useState<Record<string, Selection>>(
     {},
   );
-  const [seeded, setSeeded] = React.useState(false);
 
   // Preselect existing grades from the breakdown once it loads.
   React.useEffect(() => {
-    if (seeded) return;
     const breakdown = breakdownQuery.data;
     if (!breakdown) return;
     const next: Record<string, Selection> = {};
@@ -51,8 +54,7 @@ function RubricGradingPanel({
       };
     });
     setSelections(next);
-    setSeeded(true);
-  }, [breakdownQuery.data, seeded]);
+  }, [breakdownQuery.data]);
 
   const rubric: RubricWithTree | undefined = rubricQuery.data;
 
@@ -95,8 +97,7 @@ function RubricGradingPanel({
   const displayScore = Math.round(liveScore * 100) / 100;
 
   const selectedCount = React.useMemo(
-    () =>
-      criteria.filter((c) => !!selections[c.id]?.selectedLevelId).length,
+    () => criteria.filter((c) => !!selections[c.id]?.selectedLevelId).length,
     [criteria, selections],
   );
 
@@ -207,7 +208,9 @@ function RubricGradingPanel({
 
       <div className="flex max-h-[60vh] w-full flex-col gap-4 overflow-auto">
         {criteria.map((criterion) => {
-          const levels = [...criterion.levels].sort((a, b) => a.order - b.order);
+          const levels = [...criterion.levels].sort(
+            (a, b) => a.order - b.order,
+          );
           const selection = selections[criterion.id];
           return (
             <section
@@ -239,7 +242,9 @@ function RubricGradingPanel({
                       key={level.id}
                       type="button"
                       onClick={() =>
-                        setSelection(criterion.id, { selectedLevelId: level.id })
+                        setSelection(criterion.id, {
+                          selectedLevelId: level.id,
+                        })
                       }
                       className={`flex flex-col gap-1 rounded-2xl border p-2 text-left transition ${
                         isSelected
@@ -252,7 +257,8 @@ function RubricGradingPanel({
                           {level.title}
                         </span>
                         <span className="text-xs font-semibold text-gray-500">
-                          {level.points} {rubricLanguage.pts(language.data ?? "en")}
+                          {level.points}{" "}
+                          {rubricLanguage.pts(language.data ?? "en")}
                         </span>
                       </div>
                       {level.description && (

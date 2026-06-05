@@ -67,8 +67,8 @@ export function useUpdateAssignment() {
             if (prevAssignment.id === data.id) {
               return {
                 ...data,
-                files: prevAssignment.files,
-                questions: prevAssignment.questions,
+                files: prevAssignment?.files,
+                questions: prevAssignment?.questions,
                 studentAssign: prevAssignment.studentAssign,
                 reviewNumber: prevAssignment.reviewNumber,
                 summitNumber: prevAssignment.summitNumber,
@@ -85,7 +85,11 @@ export function useUpdateAssignment() {
         (
           prev: ResponseGetAssignmentByIdService,
         ): ResponseGetAssignmentByIdService => {
-          return { ...data, files: prev.files, skills: prev.skills };
+          return {
+            ...data,
+            files: prev?.files,
+            skills: prev?.skills,
+          };
         },
       );
     },

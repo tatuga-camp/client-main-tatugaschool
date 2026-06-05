@@ -1,9 +1,11 @@
 import React, { ReactNode, useRef, useState } from "react";
+import {
+  BsLayoutSidebarInset,
+  BsLayoutSidebarInsetReverse,
+} from "react-icons/bs";
 import { CgInfo } from "react-icons/cg";
 import { FaRegFile, FaRegFileImage, FaRegFileVideo } from "react-icons/fa6";
 import {
-  MdArrowCircleLeft,
-  MdArrowCircleRight,
   MdAssignment,
   MdDelete,
   MdEdit,
@@ -13,12 +15,14 @@ import {
   MdVideoLibrary,
 } from "react-icons/md";
 import { SiGooglegemini } from "react-icons/si";
-import { classworkViewDataLanguage, tagsDataLanguage } from "../../data/languages";
+import {
+  classworkViewDataLanguage,
+  tagsDataLanguage,
+} from "../../data/languages";
 import {
   Assignment,
   AssignmentType,
   FileOnAssignment,
-  QuestionOnVideo,
   Skill,
 } from "../../interfaces";
 import {
@@ -27,16 +31,12 @@ import {
   useUpdateSkillToAssignment,
 } from "../../react-query";
 import Dropdown from "../common/Dropdown";
+import FileVideoConfigurator from "../common/FileVideoConfigurator";
 import InputNumber from "../common/InputNumber";
 import LoadingSpinner from "../common/LoadingSpinner";
 import Switch from "../common/Switch";
 import TextEditor from "../common/TextEditor";
 import VideoConfigurator from "../common/VideoConfigurator";
-import {
-  BsLayoutSidebarInset,
-  BsLayoutSidebarInsetReverse,
-} from "react-icons/bs";
-import FileVideoConfigurator from "../common/FileVideoConfigurator";
 import AssignmentTagEditor from "./AssignmentTagEditor";
 import RubricPicker from "./rubric/RubricPicker";
 export const classworkLists = [
@@ -250,17 +250,19 @@ function ClassworkView({
               />
             </div>
 
-            <section className="flex flex-col gap-1">
-              <span className="text-base font-medium">
-                {tagsDataLanguage.sectionTitle(language.data ?? "en")}
-              </span>
-              <AssignmentTagEditor
-                value={classwork?.tags ?? []}
-                suggestions={uniqueTags}
-                size="md"
-                onChange={(next) => onChange({ tags: next })}
-              />
-            </section>
+            {classwork && (
+              <section className="flex flex-col gap-1">
+                <span className="text-base font-medium">
+                  {tagsDataLanguage.sectionTitle(language.data ?? "en")}
+                </span>
+                <AssignmentTagEditor
+                  value={classwork?.tags ?? []}
+                  suggestions={uniqueTags}
+                  size="md"
+                  onChange={(next) => onChange({ tags: next })}
+                />
+              </section>
+            )}
 
             <ul className="mt-10 grid h-max w-full max-w-full gap-2 xl:grid-cols-2">
               {files?.map((file, index) => {

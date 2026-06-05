@@ -90,7 +90,7 @@ function Navbar({
                 ? `/school/${user.data?.favoritSchool}`
                 : "/"
             }
-            className="flex items-center justify-center gap-1 md:gap-3"
+            className="flex items-center justify-center gap-1 md:hidden md:gap-3 lg:flex"
           >
             <div className="relative h-10 w-10 overflow-hidden rounded-2xl ring-1 ring-white transition duration-150 hover:scale-105 active:scale-110">
               <Image
