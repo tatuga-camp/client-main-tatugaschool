@@ -194,6 +194,7 @@ function Index({
             : null,
           status: status,
           tags: classwork?.tags,
+          rubricId: classwork?.rubricId ?? null,
         },
       });
 

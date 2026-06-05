@@ -139,6 +139,7 @@ export type RequestUpdateAssignmentService = {
     videoURL?: string;
     preventFastForward?: boolean;
     tags?: string[];
+    rubricId?: string | null;
   };
 };
 

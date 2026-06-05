@@ -37,3 +37,4 @@ export * from "./Notification";
 export * from "./QuestionOnVideo";
 export * from "./Feedback";
 export * from "./WordCloud";
+export * from "./Rubric";

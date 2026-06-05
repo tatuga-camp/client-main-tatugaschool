@@ -58,6 +58,7 @@ import AssignmentText from "./AssignmentText";
 import CommentSection from "./CommentSection";
 import FileStudentAssignmentCard from "./FileStudentAssignmentCard";
 import StatusAssignmentButton from "./StatusAssignmentButton";
+import RubricGradingPanel from "./rubric/RubricGradingPanel";
 import { useRouter } from "next/router";
 
 type Props = {
@@ -694,7 +695,9 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
   };
 
   useEnterKey(() => {
-    if (!selectFileImage) {
+    // When a rubric is attached, grading is done via RubricGradingPanel — skip
+    // the numeric quick-save so Enter can't overwrite the rubric score.
+    if (!selectFileImage && !assignment.rubricId) {
       handleSaveChange("REVIEWD");
     }
   });
@@ -837,24 +840,28 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
 
           <div className="flex flex-wrap gap-2">
             <StatusAssignmentButton studentOnAssignment={studentOnAssignment} />
-            <div className="w-40">
-              <InputNumber
-                inputRef={scoreInputRef}
-                onChange={(value) =>
-                  setStudentWork((prev) => ({
-                    ...prev,
-                    score: value,
-                  }))
-                }
-                onValueChange={() => {}}
-                maxFractionDigits={3}
-                value={studentWork?.score ?? 0}
-                min={0}
-                placeholder={studentWork?.score ? "Enter score" : "Not graded"}
-                suffix={`/${assignment.maxScore}`}
-                max={assignment.maxScore}
-              />
-            </div>
+            {!assignment.rubricId && (
+              <div className="w-40">
+                <InputNumber
+                  inputRef={scoreInputRef}
+                  onChange={(value) =>
+                    setStudentWork((prev) => ({
+                      ...prev,
+                      score: value,
+                    }))
+                  }
+                  onValueChange={() => {}}
+                  maxFractionDigits={3}
+                  value={studentWork?.score ?? 0}
+                  min={0}
+                  placeholder={
+                    studentWork?.score ? "Enter score" : "Not graded"
+                  }
+                  suffix={`/${assignment.maxScore}`}
+                  max={assignment.maxScore}
+                />
+              </div>
+            )}
             <div className="relative flex grow items-center">
               <button
                 disabled={update.isPending}
@@ -1034,6 +1041,17 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
         </ul>
       </div>
       <main className="flex w-full flex-col gap-2 bg-white p-5 pb-40">
+        {assignment.rubricId && (
+          <div className="mb-2 w-full rounded-2xl border bg-gray-50 p-4">
+            <RubricGradingPanel
+              rubricId={assignment.rubricId}
+              assignmentMaxScore={assignment.maxScore ?? null}
+              studentOnAssignmentId={studentOnAssignment.id}
+              toast={toast}
+              onGraded={() => {}}
+            />
+          </div>
+        )}
         <div className="flex w-full gap-3 border-b pb-2 text-lg font-semibold">
           {menuViewStudentWorks.map((menu, index) => {
             return (

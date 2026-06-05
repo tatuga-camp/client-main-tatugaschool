@@ -26,20 +26,20 @@ export function useCreateGrade() {
       CreateGradeService(request),
     onSuccess(data, variables, context) {
       const overview = queryClient.getQueryData(
-        gradeKey.overview({ subjectId: data.subjectId })
+        gradeKey.overview({ subjectId: data.subjectId }),
       );
       if (overview) {
         queryClient.setQueryData(
           gradeKey.overview({ subjectId: data.subjectId }),
           (
-            prev: ResponseGetOverviewAssignmentService
+            prev: ResponseGetOverviewAssignmentService,
           ): ResponseGetOverviewAssignmentService => {
             return {
               assignments: prev.assignments,
               grade: data,
               scoreOnSubjects: prev.scoreOnSubjects,
             };
-          }
+          },
         );
       }
     },
@@ -55,20 +55,20 @@ export function useUpdateGrade() {
       UpdateGradeService(request),
     onSuccess(data, variables, context) {
       const overview = queryClient.getQueryData(
-        gradeKey.overview({ subjectId: data.subjectId })
+        gradeKey.overview({ subjectId: data.subjectId }),
       );
       if (overview) {
         queryClient.setQueryData(
           gradeKey.overview({ subjectId: data.subjectId }),
           (
-            prev: ResponseGetOverviewAssignmentService
+            prev: ResponseGetOverviewAssignmentService,
           ): ResponseGetOverviewAssignmentService => {
             return {
               assignments: prev.assignments,
               grade: data,
               scoreOnSubjects: prev.scoreOnSubjects,
             };
-          }
+          },
         );
       }
     },
@@ -92,7 +92,7 @@ export function useUpdateAssignmentOverview() {
       queryClient.setQueryData(
         gradeKey.overview({ subjectId: updateData.subjectId }),
         (
-          oldData: ResponseGetOverviewAssignmentService
+          oldData: ResponseGetOverviewAssignmentService,
         ): ResponseGetOverviewAssignmentService => {
           return {
             grade: oldData.grade,
@@ -108,7 +108,7 @@ export function useUpdateAssignmentOverview() {
               return prevAssignment;
             }),
           };
-        }
+        },
       );
     },
   });
@@ -124,7 +124,7 @@ export function useUpdateStudentAssignmentOverview() {
       queryClient.setQueryData(
         gradeKey.overview({ subjectId: updateData.subjectId }),
         (
-          oldData: ResponseGetOverviewAssignmentService
+          oldData: ResponseGetOverviewAssignmentService,
         ): ResponseGetOverviewAssignmentService => {
           return {
             grade: oldData.grade,
@@ -138,7 +138,7 @@ export function useUpdateStudentAssignmentOverview() {
                         return updateData;
                       }
                       return studentOnAssignment;
-                    }
+                    },
                   ),
                 };
               }
@@ -146,7 +146,7 @@ export function useUpdateStudentAssignmentOverview() {
             }),
             scoreOnSubjects: oldData.scoreOnSubjects,
           };
-        }
+        },
       );
     },
   });

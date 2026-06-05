@@ -115,21 +115,19 @@ function Grade({
             setSelectStudentOnAssignment(null);
           }}
         >
-          <div className="h-max w-max rounded-2xl border bg-background-color p-2">
-            {selectStudentOnAssignment && (
-              <GradePopup
-                studentOnAssignment={
-                  selectStudentOnAssignment.studentOnAssignment
-                }
-                assignment={selectStudentOnAssignment.assignment}
-                toast={toast}
-                onClose={() => {
-                  document.body.style.overflow = "auto";
-                  setSelectStudentOnAssignment(null);
-                }}
-              />
-            )}
-          </div>
+          {selectStudentOnAssignment && (
+            <GradePopup
+              studentOnAssignment={
+                selectStudentOnAssignment.studentOnAssignment
+              }
+              assignment={selectStudentOnAssignment.assignment}
+              toast={toast}
+              onClose={() => {
+                document.body.style.overflow = "auto";
+                setSelectStudentOnAssignment(null);
+              }}
+            />
+          )}
         </PopupLayout>
       )}
 

@@ -24,11 +24,12 @@ import {
 import { ResponseGetAssignmentsService } from "../../services";
 import ClassworkCard from "./ClassworkCard";
 import ClassworkCreate from "./ClassworkCreate";
-import { classworksDataLanguage } from "../../data/languages";
-import { MdImportContacts, MdImportExport } from "react-icons/md";
+import { classworksDataLanguage, rubricLanguage } from "../../data/languages";
+import { MdChecklist, MdImportContacts, MdImportExport } from "react-icons/md";
 import PopupLayout from "../layout/PopupLayout";
 import ImportAssignment from "./ImportAssignment";
 import AssignmentTagFilterBar from "./AssignmentTagFilterBar";
+import RubricList from "./rubric/RubricList";
 
 type Props = {
   toast: React.RefObject<Toast>;
@@ -42,6 +43,7 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
   const [selectClasswork, setSelectClasswork] =
     React.useState<Assignment | null>(null);
   const [triggerImportAssignment, setTriggerImportAssignment] = useState(false);
+  const [triggerManageRubric, setTriggerManageRubric] = useState(false);
   const [classworksData, setClassworksData] =
     React.useState<ResponseGetAssignmentsService>([]);
   const reorderAssignment = useReoderAssignment();
@@ -151,7 +153,39 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
           />
         </PopupLayout>
       )}
-      <header className="flex w-full flex-col justify-between px-5 md:flex-row md:px-40">
+      {triggerManageRubric && (
+        <PopupLayout
+          onClose={() => {
+            document.body.style.overflow = "auto";
+            setTriggerManageRubric(false);
+          }}
+        >
+          <div className="max-h-[85vh] w-11/12 max-w-3xl overflow-auto rounded-2xl bg-background-color p-5">
+            <div className="mb-3 flex items-start justify-between">
+              <div>
+                <h1 className="text-lg font-medium sm:text-xl">
+                  {rubricLanguage.rubricsTitle(language.data ?? "en")}
+                </h1>
+                <h4 className="text-xs text-gray-500 sm:text-sm">
+                  {rubricLanguage.rubricsDescription(language.data ?? "en")}
+                </h4>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  document.body.style.overflow = "auto";
+                  setTriggerManageRubric(false);
+                }}
+                className="second-button flex items-center justify-center border px-3 py-1"
+              >
+                {rubricLanguage.close(language.data ?? "en")}
+              </button>
+            </div>
+            <RubricList subjectId={subjectId} toast={toast} />
+          </div>
+        </PopupLayout>
+      )}
+      <header className="flex w-full flex-col px-5 lg:px-40">
         <section>
           <h1 className="text-3xl font-semibold">
             {classworksDataLanguage.title(language.data ?? "en")}
@@ -161,10 +195,19 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
           </span>
         </section>
 
-        <section className="flex items-center gap-1 font-Anuphan">
+        <section className="mt-10 grid items-center gap-1 font-Anuphan md:flex">
+          <button
+            onClick={() => setTriggerManageRubric(true)}
+            className="second-button relative flex w-60 items-center justify-center gap-1 border py-1"
+          >
+            <div className="flex items-center justify-center gap-2">
+              <MdChecklist />
+              {rubricLanguage.manageRubric(language.data ?? "en")}
+            </div>
+          </button>
           <button
             onClick={() => setTriggerImportAssignment(true)}
-            className="second-button relative flex w-52 items-center justify-center gap-1 border py-1"
+            className="second-button relative flex w-60 items-center justify-center gap-1 border py-1"
           >
             <div className="flex items-center justify-center gap-2">
               <MdImportContacts />
@@ -173,7 +216,7 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
           </button>
           <button
             onClick={() => setTriggerCreate((prev) => !prev)}
-            className="second-button relative flex w-52 items-center justify-center gap-1 border py-1"
+            className="second-button relative flex w-60 items-center justify-center gap-1 border py-1"
           >
             <div className="flex items-center justify-center gap-2">
               <FaPlus />

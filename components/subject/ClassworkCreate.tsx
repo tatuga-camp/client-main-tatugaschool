@@ -25,6 +25,7 @@ import {
   useCreateAssignment,
   useGetAssignments,
   useGetLanguage,
+  useUpdateAssignment,
   useUpdateSkillToAssignment,
 } from "../../react-query";
 import {
@@ -88,6 +89,7 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
   const [loading, setLoading] = React.useState(false);
   const adjustedStyle = useAdjustPosition(divRef, 20); // 20px padding
   const create = useCreateAssignment();
+  const updateAssignment = useUpdateAssignment();
   const assignments = useGetAssignments({ subjectId });
   const updateSkill = useUpdateSkillToAssignment();
 
@@ -100,10 +102,12 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
     allowWeight?: boolean;
     beginDate?: string;
     dueDate?: string;
+    rubricId?: string | null;
     classwork?: Assignment;
   }>({
     type: "Assignment",
     beginDate: convertToDateTimeLocalString(new Date()),
+    rubricId: null,
   });
 
   useClickOutside(divRef, () => {
@@ -158,7 +162,16 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
         order: assignments.data ? assignments.data.length + 1 : 1,
       });
 
-      if (files?.length > 0) {
+      // The create endpoint does not accept rubricId, so attach the selected
+      // rubric (if any) via an update once the assignment exists.
+      if (classworkData?.rubricId) {
+        await updateAssignment.mutateAsync({
+          query: { assignmentId: assignment.id },
+          data: { rubricId: classworkData.rubricId },
+        });
+      }
+
+      if (files && files.length > 0) {
         const uploadTasks = files.map(async (file) => {
           if (file.type !== "LINK" && file.file) {
             const isImage = file.type.includes("image");

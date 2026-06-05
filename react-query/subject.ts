@@ -44,7 +44,6 @@ export function useGetSubject({
       GetSubjectByIdService({
         subjectId: subjectId,
       }),
-    refetchInterval: 1000 * 10,
   });
 }
 
