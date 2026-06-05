@@ -371,7 +371,6 @@ const NoisyDetector = ({ onClose }: NoisyDetectorProps) => {
     ],
   };
 
-  console.log(buildupProgress);
   return (
     <div
       className={`fixed inset-0 z-50 flex h-screen w-screen flex-col items-center justify-between p-6 transition-colors duration-300 ${isAlerting ? "bg-red-400" : "bg-white"}`}
