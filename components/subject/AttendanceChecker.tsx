@@ -379,6 +379,33 @@ function AttendanceChecker({
           background: #D6DDEB; border-radius: 999px;
         }
         .ac-shell *::-webkit-scrollbar-track { background: transparent; }
+
+        /* Short, wide viewports (e.g. 1240×600 landscape tablets / split screens):
+           reclaim vertical space from the chrome AND scale the table internals
+           down proportionally so rows stay airy instead of cramped. */
+        @media (min-width: 768px) and (max-height: 820px) {
+          .ac-shell { height: 95vh; }
+
+          /* chrome */
+          .ac-shell .ac-header { padding-top: 0.6rem; padding-bottom: 0.45rem; }
+          .ac-shell .ac-header h1 { font-size: 1.125rem; line-height: 1.2; }
+          .ac-shell .ac-desc { display: none; }
+          .ac-shell .ac-dates { margin-top: 0.5rem; gap: 0.5rem; }
+          .ac-shell .ac-chips { margin-top: 0.5rem; }
+          .ac-shell .ac-footer { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+
+          /* table density */
+          .ac-shell .ac-table td { padding-top: 0.3rem; padding-bottom: 0.3rem; }
+          .ac-shell .ac-table thead th { padding-top: 0.45rem; padding-bottom: 0.45rem; }
+          .ac-shell .ac-student-col { width: 11rem; gap: 0.55rem; }
+          .ac-shell .ac-avatar { height: 1.9rem; width: 1.9rem; }
+          .ac-shell .ac-name { font-size: 0.78rem; }
+          .ac-shell .ac-num { font-size: 0.66rem; }
+          .ac-shell .ac-status-btn { padding: 0.3rem 0.6rem; font-size: 0.68rem; }
+          .ac-shell .ac-check { height: 1.65rem; width: 1.65rem; border-width: 2px; }
+          .ac-shell .ac-check-dot { height: 0.65rem; width: 0.65rem; }
+          .ac-shell .ac-note { height: 1.75rem; width: 8rem; font-size: 0.78rem; padding-top: 0.2rem; padding-bottom: 0.2rem; }
+        }
       `}</style>
 
       {qrCodeURL && selectAttendanceRow ? (
@@ -392,32 +419,12 @@ function AttendanceChecker({
           setTriggerQRCode={(vale) => onClose()}
         />
       ) : (
-        <div
-          className="ac-shell font-Anuphan relative h-dvh w-screen overflow-hidden bg-background-color text-icon-color shadow-2xl md:h-[88vh] md:w-[92vw] md:max-w-7xl md:rounded-[2rem]"
-        >
+        <div className="ac-shell relative h-dvh w-screen overflow-hidden bg-background-color font-Anuphan text-icon-color shadow-2xl md:h-[88vh] md:w-[92vw] md:max-w-7xl md:rounded-[2rem]">
           {/* soft dotted texture */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 opacity-[0.05]"
-            style={{
-              backgroundImage:
-                "radial-gradient(circle at 20% 30%, #383767 0.6px, transparent 1.2px), radial-gradient(circle at 70% 80%, #383767 0.6px, transparent 1.2px)",
-              backgroundSize: "48px 48px, 72px 72px",
-            }}
-          />
-          {/* washi tape top edge in brand blue */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute left-0 right-0 top-0 h-2"
-            style={{
-              background:
-                "repeating-linear-gradient(90deg, #2C7CD1 0 22px, transparent 22px 44px)",
-            }}
-          />
 
           <div className="relative flex h-full flex-col">
             {/* HEADER */}
-            <div className="flex-none border-b border-dashed border-gray-200 bg-white/70 px-4 pb-3 pt-5 backdrop-blur-sm sm:px-6 md:px-8 md:pb-4 md:pt-7">
+            <div className="ac-header flex-none border-b border-dashed border-gray-200 bg-white/70 px-4 pb-3 pt-5 backdrop-blur-sm sm:px-6 md:px-8 md:pb-4 md:pt-7">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex min-w-0 items-start gap-3">
                   <div
@@ -434,7 +441,7 @@ function AttendanceChecker({
                             language.data ?? "en",
                           )}
                     </h1>
-                    <p className="mt-0.5 text-xs text-icon-color/60 sm:text-sm">
+                    <p className="ac-desc mt-0.5 text-xs text-icon-color/60 sm:text-sm">
                       {selectAttendanceRow
                         ? "Review or update what was taken on this day."
                         : attendanceCheckerDataLanugae.description(
@@ -505,7 +512,7 @@ function AttendanceChecker({
 
               {/* Date controls + tabs */}
               {!selectAttendanceRow ? (
-                <div className="mt-4 flex flex-col gap-4">
+                <div className="ac-dates mt-4 flex flex-col gap-4">
                   {/* Table tabs */}
                   {attendanceTables.data &&
                     attendanceTables.data.length > 0 && (
@@ -536,7 +543,7 @@ function AttendanceChecker({
 
                   <form
                     ref={formRef}
-                    className="grid grid-cols-1 gap-3 sm:grid-cols-2"
+                    className="grid max-w-96 grid-cols-1 gap-3 sm:grid-cols-2 md:max-w-screen-md"
                   >
                     <FieldLabel
                       icon={<LuCalendarClock />}
@@ -589,7 +596,7 @@ function AttendanceChecker({
                   )}
                 </div>
               ) : (
-                <div className="mt-4 flex flex-col gap-3">
+                <div className="ac-dates mt-4 flex flex-col gap-3">
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <FieldLabel
                       icon={<LuCalendarClock />}
@@ -711,7 +718,7 @@ function AttendanceChecker({
 
               {/* Summary chip strip */}
               {!triggerNote && selectTable && sortedStudents.length > 0 && (
-                <div className="mt-4 flex flex-wrap items-center gap-2">
+                <div className="ac-chips mt-4 flex flex-wrap items-center gap-2">
                   <span
                     className="inline-flex items-center gap-1.5 rounded-full bg-primary-color/10 px-3 py-1 text-xs font-semibold text-primary-color"
                     style={{ transform: "rotate(-1deg)" }}
@@ -743,9 +750,9 @@ function AttendanceChecker({
             </div>
 
             {/* MAIN */}
-            <div className="flex-1 overflow-y-auto px-3 py-4 sm:px-6 md:px-8">
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-3 py-3 sm:px-6 md:px-8 md:py-4">
               {triggerNote && selectTable ? (
-                <div className="mx-auto h-96 max-w-3xl rounded-3xl border border-dashed border-gray-200 bg-white p-2 sm:p-3">
+                <div className="mx-auto h-96 max-h-full w-full max-w-3xl overflow-y-auto rounded-3xl border border-dashed border-gray-200 bg-white p-2 sm:p-3">
                   <div className="mb-2 flex items-center gap-2 px-2 pt-1">
                     <BiSolidNote className="text-warning-color" />
                     <h3 className="text-sm font-semibold text-icon-color sm:text-base">
@@ -766,7 +773,7 @@ function AttendanceChecker({
               ) : (
                 <>
                   {/* MOBILE CARD LIST */}
-                  <div className="space-y-3 md:hidden">
+                  <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pb-1 md:hidden">
                     {visibleStatusLists.length > 0 && (
                       <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1">
                         {visibleStatusLists.map((status) => (
@@ -812,10 +819,10 @@ function AttendanceChecker({
                   </div>
 
                   {/* DESKTOP TABLE */}
-                  <div className="hidden md:block">
-                    <div className="overflow-hidden rounded-3xl border border-gray-200 bg-white">
-                      <div className="max-h-[60vh] w-full overflow-auto">
-                        <table className="w-max min-w-full text-sm">
+                  <div className="hidden min-h-0 flex-1 md:flex md:flex-col">
+                    <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white">
+                      <div className="min-h-0 w-full flex-1 overflow-auto">
+                        <table className="ac-table w-max min-w-full text-sm">
                           <thead>
                             <tr
                               className="sticky top-0 z-30"
@@ -825,7 +832,7 @@ function AttendanceChecker({
                               }}
                             >
                               <th
-                                className="sticky left-0 z-40 w-56 px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-icon-color/60"
+                                className="ac-student-col sticky left-0 z-40 w-56 px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-icon-color/60"
                                 style={{
                                   background: "#EEF4FB",
                                   borderRight: "1px dashed #E5E7EB",
@@ -846,7 +853,7 @@ function AttendanceChecker({
                                       })
                                     }
                                     name={status.title}
-                                    className="flex w-full select-none items-center justify-center gap-1.5 rounded-2xl px-3 py-2 text-xs font-semibold text-icon-color transition hover:translate-y-[-1px] hover:shadow-md active:scale-[0.97]"
+                                    className="ac-status-btn flex w-full select-none items-center justify-center gap-1.5 rounded-2xl px-3 py-2 text-xs font-semibold text-icon-color transition hover:translate-y-[-1px] hover:shadow-md active:scale-[0.97]"
                                     style={{
                                       background: `${status.color}25`,
                                       boxShadow: `0 2px 0 ${status.color}55`,
@@ -911,7 +918,7 @@ function AttendanceChecker({
 
             {/* FOOTER */}
             <div
-              className="flex-none border-t border-dashed border-gray-200 bg-white/80 px-4 py-3 backdrop-blur sm:px-6 md:px-8 md:py-4"
+              className="ac-footer flex-none border-t border-dashed border-gray-200 bg-white/80 px-4 py-3 backdrop-blur sm:px-6 md:px-8 md:py-4"
               style={{
                 boxShadow: "0 -10px 30px -20px rgba(56,55,103,0.15)",
               }}
@@ -1090,7 +1097,7 @@ const StudentMobileCard = React.memo(
           </div>
         </div>
 
-        <div className="mt-3 -mx-1 flex flex-wrap gap-1.5 px-1">
+        <div className="-mx-1 mt-3 flex flex-wrap gap-1.5 px-1">
           {statusLists.map((status) => {
             const isActive = studentOnSubject.status === status.title;
             return (
@@ -1177,14 +1184,14 @@ const StudentDesktopRow = React.memo(
             borderRight: "1px dashed #E5E7EB",
           }}
         >
-          <div className="flex w-56 items-center gap-3">
-            <div className="relative h-11 w-11 flex-none">
+          <div className="ac-student-col flex w-56 items-center gap-3">
+            <div className="ac-avatar relative h-11 w-11 flex-none">
               <div
                 className="absolute inset-0 rounded-2xl bg-primary-color/15"
                 style={{ transform: "rotate(-4deg)" }}
               />
               <div
-                className="relative h-11 w-11 overflow-hidden rounded-2xl ring-2 ring-white"
+                className="ac-avatar relative h-11 w-11 overflow-hidden rounded-2xl ring-2 ring-white"
                 style={{ transform: "rotate(2deg)" }}
               >
                 <Image
@@ -1201,10 +1208,10 @@ const StudentDesktopRow = React.memo(
               </div>
             </div>
             <div className="min-w-0">
-              <h4 className="truncate text-sm font-semibold text-icon-color">
+              <h4 className="ac-name truncate text-sm font-semibold text-icon-color">
                 {studentOnSubject.firstName} {studentOnSubject.lastName}
               </h4>
-              <p className="text-xs text-icon-color/60">
+              <p className="ac-num text-xs text-icon-color/60">
                 #{studentOnSubject.number}
               </p>
             </div>
@@ -1225,7 +1232,7 @@ const StudentDesktopRow = React.memo(
                     })
                   }
                   aria-pressed={isActive}
-                  className="group flex h-9 w-9 items-center justify-center rounded-full transition active:scale-95"
+                  className="ac-check group flex h-9 w-9 items-center justify-center rounded-full transition active:scale-95"
                   style={{
                     background: isActive ? status.color : "transparent",
                     border: isActive
@@ -1246,7 +1253,7 @@ const StudentDesktopRow = React.memo(
                         stiffness: 600,
                         damping: 20,
                       }}
-                      className="block h-3.5 w-3.5 rounded-full bg-white"
+                      className="ac-check-dot block h-3.5 w-3.5 rounded-full bg-white"
                     />
                   )}
                 </button>
@@ -1272,7 +1279,7 @@ const StudentDesktopRow = React.memo(
             }
             placeholder="Add a note…"
             rows={1}
-            className="h-9 w-40 resize-none rounded-xl border border-gray-200 bg-white px-2.5 py-1.5 text-sm text-icon-color placeholder:text-icon-color/40 focus:border-primary-color focus:outline-none focus:ring-4 focus:ring-primary-color/15"
+            className="ac-note h-9 w-40 resize-none rounded-xl border border-gray-200 bg-white px-2.5 py-1.5 text-sm text-icon-color placeholder:text-icon-color/40 focus:border-primary-color focus:outline-none focus:ring-4 focus:ring-primary-color/15"
           />
         </td>
       </tr>
