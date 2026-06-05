@@ -123,6 +123,7 @@ function RubricGradingPanel({
       });
       onGraded(result.score);
     } catch (error) {
+      console.error("Failed to grade rubric", error);
       const result = error as
         | { message?: string | string[]; error?: string }
         | undefined;

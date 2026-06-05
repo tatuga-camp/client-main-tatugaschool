@@ -80,6 +80,14 @@ export function useGradeRubric() {
       qc.invalidateQueries({ queryKey: ["student-assignments"] });
       qc.invalidateQueries({ queryKey: ["rubric-breakdown"] });
 
+      const gradeOverviewCache = qc.getQueryData([
+        gradeKey.overview({ subjectId: updateData.subjectId }),
+      ]);
+
+      if (!gradeOverviewCache) {
+        return;
+      }
+
       qc.setQueryData(
         gradeKey.overview({ subjectId: updateData.subjectId }),
         (
@@ -87,7 +95,7 @@ export function useGradeRubric() {
         ): ResponseGetOverviewAssignmentService => {
           return {
             grade: oldData.grade,
-            assignments: oldData?.assignments.map((prevAssignment) => {
+            assignments: oldData.assignments.map((prevAssignment) => {
               if (prevAssignment.assignment.id === updateData.assignmentId) {
                 return {
                   ...prevAssignment,
