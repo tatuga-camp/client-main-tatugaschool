@@ -25,7 +25,7 @@ import { ResponseGetAssignmentsService } from "../../services";
 import ClassworkCard from "./ClassworkCard";
 import ClassworkCreate from "./ClassworkCreate";
 import { classworksDataLanguage } from "../../data/languages";
-import { MdImportContacts, MdImportExport } from "react-icons/md";
+import { MdChecklist, MdImportContacts, MdImportExport } from "react-icons/md";
 import PopupLayout from "../layout/PopupLayout";
 import ImportAssignment from "./ImportAssignment";
 import AssignmentTagFilterBar from "./AssignmentTagFilterBar";
@@ -43,6 +43,7 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
   const [selectClasswork, setSelectClasswork] =
     React.useState<Assignment | null>(null);
   const [triggerImportAssignment, setTriggerImportAssignment] = useState(false);
+  const [triggerManageRubric, setTriggerManageRubric] = useState(false);
   const [classworksData, setClassworksData] =
     React.useState<ResponseGetAssignmentsService>([]);
   const reorderAssignment = useReoderAssignment();
@@ -152,6 +153,37 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
           />
         </PopupLayout>
       )}
+      {triggerManageRubric && (
+        <PopupLayout
+          onClose={() => {
+            document.body.style.overflow = "auto";
+            setTriggerManageRubric(false);
+          }}
+        >
+          <div className="max-h-[85vh] w-11/12 max-w-3xl overflow-auto rounded-2xl bg-background-color p-5">
+            <div className="mb-3 flex items-start justify-between">
+              <div>
+                <h1 className="text-lg font-medium sm:text-xl">Rubrics</h1>
+                <h4 className="text-xs text-gray-500 sm:text-sm">
+                  Create and manage grading rubrics for this subject&apos;s
+                  assignments.
+                </h4>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  document.body.style.overflow = "auto";
+                  setTriggerManageRubric(false);
+                }}
+                className="second-button flex items-center justify-center border px-3 py-1"
+              >
+                Close
+              </button>
+            </div>
+            <RubricList subjectId={subjectId} toast={toast} />
+          </div>
+        </PopupLayout>
+      )}
       <header className="flex w-full flex-col justify-between px-5 md:flex-row md:px-40">
         <section>
           <h1 className="text-3xl font-semibold">
@@ -163,6 +195,15 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
         </section>
 
         <section className="flex items-center gap-1 font-Anuphan">
+          <button
+            onClick={() => setTriggerManageRubric(true)}
+            className="second-button relative flex w-52 items-center justify-center gap-1 border py-1"
+          >
+            <div className="flex items-center justify-center gap-2">
+              <MdChecklist />
+              Manage Rubric
+            </div>
+          </button>
           <button
             onClick={() => setTriggerImportAssignment(true)}
             className="second-button relative flex w-52 items-center justify-center gap-1 border py-1"
@@ -183,15 +224,6 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
           </button>
         </section>
       </header>
-
-      <section className="mt-8 w-full px-5 md:px-40">
-        <h1 className="text-lg font-medium sm:text-xl">Rubrics</h1>
-        <h4 className="text-xs text-gray-500 sm:text-sm">
-          Create and manage grading rubrics for this subject&apos;s
-          assignments.
-        </h4>
-        <RubricList subjectId={subjectId} toast={toast} />
-      </section>
 
       <section className="mt-4 w-full">
         <AssignmentTagFilterBar
