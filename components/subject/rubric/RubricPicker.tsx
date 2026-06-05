@@ -1,6 +1,7 @@
 import { DropdownChangeEvent } from "primereact/dropdown";
 import React, { useMemo } from "react";
-import { useGetRubricsBySubject } from "../../../react-query";
+import { rubricLanguage } from "../../../data/languages";
+import { useGetLanguage, useGetRubricsBySubject } from "../../../react-query";
 import Dropdown from "../../common/Dropdown";
 
 type Props = {
@@ -21,14 +22,17 @@ type RubricOption = {
 
 function RubricPicker({ subjectId, value, onChange, disabled }: Props) {
   const rubrics = useGetRubricsBySubject({ subjectId });
+  const language = useGetLanguage();
 
   const options = useMemo<RubricOption[]>(() => {
-    const list: RubricOption[] = [{ label: "No rubric", id: NO_RUBRIC }];
+    const list: RubricOption[] = [
+      { label: rubricLanguage.noRubric(language.data ?? "en"), id: NO_RUBRIC },
+    ];
     rubrics.data?.forEach((rubric) => {
       list.push({ label: rubric.title, id: rubric.id });
     });
     return list;
-  }, [rubrics.data]);
+  }, [rubrics.data, language.data]);
 
   const selected = useMemo<RubricOption>(() => {
     return (
@@ -40,12 +44,14 @@ function RubricPicker({ subjectId, value, onChange, disabled }: Props) {
 
   return (
     <label className="flex w-full flex-col">
-      <span className="text-base font-medium">Rubric (optional)</span>
+      <span className="text-base font-medium">
+        {rubricLanguage.rubricOptional(language.data ?? "en")}
+      </span>
       <Dropdown<RubricOption>
         value={selected}
         disabled={disabled || rubrics.isLoading}
         loading={rubrics.isLoading}
-        placeholder="Select a rubric"
+        placeholder={rubricLanguage.selectARubric(language.data ?? "en")}
         options={options}
         optionLabel="label"
         onChange={(e: DropdownChangeEvent) => {
@@ -55,7 +61,7 @@ function RubricPicker({ subjectId, value, onChange, disabled }: Props) {
       />
       {!rubrics.isLoading && !hasRubrics && (
         <span className="mt-1 text-xs text-gray-400">
-          No rubrics yet. Create one in Settings to attach it here.
+          {rubricLanguage.pickerNoRubricsHint(language.data ?? "en")}
         </span>
       )}
     </label>

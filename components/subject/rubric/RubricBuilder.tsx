@@ -5,8 +5,9 @@ import { FiPlus } from "react-icons/fi";
 import { IoMdClose } from "react-icons/io";
 import { MdDelete, MdOutlineDataSaverOn } from "react-icons/md";
 import { RiSparkling2Line } from "react-icons/ri";
+import { rubricLanguage } from "../../../data/languages";
 import { ErrorMessages, Rubric, RubricDraft } from "../../../interfaces";
-import { useCreateRubric, useGetRubricById, useUpdateRubric } from "../../../react-query";
+import { useCreateRubric, useGetLanguage, useGetRubricById, useUpdateRubric } from "../../../react-query";
 import InputNumber from "../../common/InputNumber";
 import PopupLayout from "../../layout/PopupLayout";
 import RubricAiAssistant from "./RubricAiAssistant";
@@ -75,6 +76,7 @@ function RubricBuilder({
   const create = useCreateRubric();
   const update = useUpdateRubric();
   const rubricQuery = useGetRubricById({ rubricId: rubricId ?? "" });
+  const language = useGetLanguage();
 
   const [state, setState] = useState<BuilderState>(() => {
     if (initialDraft) {
@@ -184,22 +186,25 @@ function RubricBuilder({
   };
 
   const validationError = useMemo<string | null>(() => {
-    if (!state.title.trim()) return "Rubric title is required";
-    if (state.criteria.length < 1) return "At least one criterion is required";
+    const lang = language.data ?? "en";
+    if (!state.title.trim()) return rubricLanguage.rubricTitleRequired(lang);
+    if (state.criteria.length < 1)
+      return rubricLanguage.atLeastOneCriterion(lang);
     for (let i = 0; i < state.criteria.length; i++) {
       const c = state.criteria[i];
-      if (!c.title.trim()) return `Criterion ${i + 1} requires a title`;
+      if (!c.title.trim())
+        return rubricLanguage.criterionRequiresTitle(lang)(i + 1);
       if (c.levels.length < 2) {
-        return `Criterion ${i + 1} requires at least 2 levels`;
+        return rubricLanguage.criterionRequiresLevels(lang)(i + 1);
       }
       for (let j = 0; j < c.levels.length; j++) {
         if (!c.levels[j].title.trim()) {
-          return `Criterion ${i + 1}, level ${j + 1} requires a title`;
+          return rubricLanguage.criterionLevelRequiresTitle(lang)(i + 1, j + 1);
         }
       }
     }
     return null;
-  }, [state]);
+  }, [state, language.data]);
 
   const maxRawPoints = useMemo(() => {
     return state.criteria.reduce((sum, c) => {
@@ -250,8 +255,10 @@ function RubricBuilder({
       setLoading(false);
       toast.current?.show({
         severity: "success",
-        summary: "Success",
-        detail: rubricId ? "Rubric has been updated" : "Rubric has been created",
+        summary: rubricLanguage.success(language.data ?? "en"),
+        detail: rubricId
+          ? rubricLanguage.rubricUpdated(language.data ?? "en")
+          : rubricLanguage.rubricCreated(language.data ?? "en"),
         life: 3000,
       });
       onSaved(result);
@@ -261,10 +268,12 @@ function RubricBuilder({
       const result = error as ErrorMessages;
       toast.current?.show({
         severity: "error",
-        summary: result?.error ? result.error : "Something Went Wrong",
+        summary: result?.error
+          ? result.error
+          : rubricLanguage.somethingWentWrong(language.data ?? "en"),
         detail: result?.message
           ? result.message.toString()
-          : "Could not save rubric",
+          : rubricLanguage.couldNotSaveRubric(language.data ?? "en"),
         life: 5000,
       });
     }
@@ -280,7 +289,9 @@ function RubricBuilder({
       <header className="flex w-full flex-col gap-2 border-b pb-3">
         <div className="flex w-full items-center justify-between gap-2">
           <h1 className="text-lg font-medium">
-            {rubricId ? "Edit Rubric" : "Create Rubric"}
+            {rubricId
+              ? rubricLanguage.editRubricHeading(language.data ?? "en")
+              : rubricLanguage.createRubricHeading(language.data ?? "en")}
           </h1>
           <button
             type="button"
@@ -288,18 +299,20 @@ function RubricBuilder({
             disabled={loading}
             className="second-button flex w-max items-center justify-center gap-1 border py-1 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <RiSparkling2Line /> Draft with AI
+            <RiSparkling2Line /> {rubricLanguage.draftWithAi(language.data ?? "en")}
           </button>
         </div>
         <input
           type="text"
-          placeholder="Rubric title"
+          placeholder={rubricLanguage.rubricTitlePlaceholder(language.data ?? "en")}
           value={state.title}
           onChange={(e) => setState((prev) => ({ ...prev, title: e.target.value }))}
           className="main-input w-full"
         />
         <textarea
-          placeholder="Description (optional)"
+          placeholder={rubricLanguage.descriptionOptionalPlaceholder(
+            language.data ?? "en",
+          )}
           value={state.description}
           onChange={(e) =>
             setState((prev) => ({ ...prev, description: e.target.value }))
@@ -328,13 +341,15 @@ function RubricBuilder({
           onClick={handleAddCriterion}
           className="second-button flex items-center justify-center gap-1 border"
         >
-          <FiPlus /> Add criterion
+          <FiPlus /> {rubricLanguage.addCriterion(language.data ?? "en")}
         </button>
       </main>
 
       <footer className="flex w-full flex-col gap-2 border-t pt-3">
         <div className="flex w-full items-center justify-between text-sm text-gray-500">
-          <span>Max raw points: {maxRawPoints}</span>
+          <span>
+            {rubricLanguage.maxRawPoints(language.data ?? "en")} {maxRawPoints}
+          </span>
           {validationError && (
             <span className="text-red-500">{validationError}</span>
           )}
@@ -345,14 +360,14 @@ function RubricBuilder({
             onClick={onCancel}
             className="second-button flex items-center justify-center gap-1 border"
           >
-            Cancel
+            {rubricLanguage.cancel(language.data ?? "en")}
           </button>
           <button
             type="submit"
             disabled={!!validationError || loading}
             className="main-button flex items-center justify-center gap-1 disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100"
           >
-            <MdOutlineDataSaverOn /> Save
+            <MdOutlineDataSaverOn /> {rubricLanguage.save(language.data ?? "en")}
           </button>
         </div>
       </footer>
@@ -402,6 +417,7 @@ function RubricCriterionRow({
   onRemoveLevel,
   onRemove,
 }: RubricCriterionRowProps) {
+  const language = useGetLanguage();
   return (
     <section className="flex w-full flex-col gap-3 rounded-2xl border bg-white p-3">
       <header className="flex w-full items-start justify-between gap-2">
@@ -411,13 +427,17 @@ function RubricCriterionRow({
         <div className="flex flex-1 flex-col gap-2">
           <input
             type="text"
-            placeholder="Criterion title"
+            placeholder={rubricLanguage.criterionTitlePlaceholder(
+              language.data ?? "en",
+            )}
             value={criterion.title}
             onChange={(e) => onChange({ title: e.target.value })}
             className="main-input w-full"
           />
           <textarea
-            placeholder="Criterion description (optional)"
+            placeholder={rubricLanguage.criterionDescriptionPlaceholder(
+              language.data ?? "en",
+            )}
             value={criterion.description}
             onChange={(e) => onChange({ description: e.target.value })}
             className="main-input w-full resize-none"
@@ -425,17 +445,19 @@ function RubricCriterionRow({
           />
         </div>
         <div className="flex w-28 flex-col gap-1">
-          <label className="text-xs text-gray-500">Weight</label>
+          <label className="text-xs text-gray-500">
+            {rubricLanguage.weight(language.data ?? "en")}
+          </label>
           <InputNumber
             value={criterion.weight}
             min={0}
-            placeholder="Weight"
+            placeholder={rubricLanguage.weight(language.data ?? "en")}
             onValueChange={(value) => onChange({ weight: value ?? 0 })}
           />
         </div>
         <button
           type="button"
-          title="Remove criterion"
+          title={rubricLanguage.removeCriterion(language.data ?? "en")}
           onClick={onRemove}
           className="mt-1 rounded bg-red-100 p-2 text-red-500"
         >
@@ -451,11 +473,11 @@ function RubricCriterionRow({
           >
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium text-gray-500">
-                Level {lIndex + 1}
+                {rubricLanguage.level(language.data ?? "en")} {lIndex + 1}
               </span>
               <button
                 type="button"
-                title="Remove level"
+                title={rubricLanguage.removeLevel(language.data ?? "en")}
                 onClick={() => onRemoveLevel(lIndex)}
                 className="rounded bg-red-100 p-1 text-red-500"
               >
@@ -464,24 +486,30 @@ function RubricCriterionRow({
             </div>
             <input
               type="text"
-              placeholder="Level title"
+              placeholder={rubricLanguage.levelTitlePlaceholder(
+                language.data ?? "en",
+              )}
               value={level.title}
               onChange={(e) => onChangeLevel(lIndex, { title: e.target.value })}
               className="main-input w-full"
             />
             <div className="flex flex-col gap-1">
-              <label className="text-xs text-gray-500">Points</label>
+              <label className="text-xs text-gray-500">
+                {rubricLanguage.points(language.data ?? "en")}
+              </label>
               <InputNumber
                 value={level.points}
                 min={0}
-                placeholder="Points"
+                placeholder={rubricLanguage.points(language.data ?? "en")}
                 onValueChange={(value) =>
                   onChangeLevel(lIndex, { points: value ?? 0 })
                 }
               />
             </div>
             <textarea
-              placeholder="Level description (optional)"
+              placeholder={rubricLanguage.levelDescriptionPlaceholder(
+                language.data ?? "en",
+              )}
               value={level.description}
               onChange={(e) =>
                 onChangeLevel(lIndex, { description: e.target.value })
@@ -498,7 +526,7 @@ function RubricCriterionRow({
         onClick={onAddLevel}
         className="second-button flex w-max items-center justify-center gap-1 border"
       >
-        <FiPlus /> Add level
+        <FiPlus /> {rubricLanguage.addLevel(language.data ?? "en")}
       </button>
     </section>
   );

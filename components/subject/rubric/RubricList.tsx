@@ -2,6 +2,7 @@ import { Toast } from "primereact/toast";
 import React, { useState } from "react";
 import { FiPlus } from "react-icons/fi";
 import { MdDelete, MdEdit } from "react-icons/md";
+import { rubricLanguage } from "../../../data/languages";
 import { ErrorMessages, Rubric } from "../../../interfaces";
 import { useDeleteRubric, useGetLanguage, useGetRubricsBySubject } from "../../../react-query";
 import ConfirmDeleteMessage from "../../common/ConfirmDeleteMessage";
@@ -32,8 +33,8 @@ function RubricList({ subjectId, toast }: Props) {
           await deleteRubric.mutateAsync({ rubricId: rubric.id });
           toast.current?.show({
             severity: "success",
-            summary: "Success",
-            detail: "Rubric has been deleted",
+            summary: rubricLanguage.success(language.data ?? "en"),
+            detail: rubricLanguage.rubricDeleted(language.data ?? "en"),
             life: 3000,
           });
         } catch (error) {
@@ -42,10 +43,12 @@ function RubricList({ subjectId, toast }: Props) {
             ?.response?.data ?? (error as ErrorMessages);
           toast.current?.show({
             severity: "error",
-            summary: result?.error ? result.error : "Something Went Wrong",
+            summary: result?.error
+              ? result.error
+              : rubricLanguage.somethingWentWrong(language.data ?? "en"),
             detail: result?.message
               ? result.message.toString()
-              : "Could not delete rubric",
+              : rubricLanguage.couldNotDeleteRubric(language.data ?? "en"),
             life: 5000,
           });
         }
@@ -56,13 +59,15 @@ function RubricList({ subjectId, toast }: Props) {
   return (
     <div className="mt-5 flex min-h-80 flex-col gap-5 rounded-2xl border bg-white p-4">
       <header className="flex items-center justify-between border-b py-3">
-        <h2 className="text-base font-medium sm:text-lg">Rubrics</h2>
+        <h2 className="text-base font-medium sm:text-lg">
+          {rubricLanguage.rubricsTitle(language.data ?? "en")}
+        </h2>
         <button
           type="button"
           onClick={() => setBuilderTarget("create")}
           className="main-button flex w-max items-center justify-center gap-1 py-1"
         >
-          <FiPlus /> Create rubric
+          <FiPlus /> {rubricLanguage.createRubric(language.data ?? "en")}
         </button>
       </header>
 
@@ -72,9 +77,11 @@ function RubricList({ subjectId, toast }: Props) {
         </div>
       ) : !rubrics.data || rubrics.data.length === 0 ? (
         <div className="flex w-full flex-col items-center justify-center gap-1 py-8 text-center">
-          <h4 className="text-sm font-medium text-gray-600">No rubrics yet</h4>
+          <h4 className="text-sm font-medium text-gray-600">
+            {rubricLanguage.noRubricsYet(language.data ?? "en")}
+          </h4>
           <p className="text-xs text-gray-400">
-            Create a rubric to grade assignments by criteria.
+            {rubricLanguage.noRubricsHint(language.data ?? "en")}
           </p>
         </div>
       ) : (
@@ -97,20 +104,20 @@ function RubricList({ subjectId, toast }: Props) {
               <div className="flex flex-shrink-0 items-center gap-2">
                 <button
                   type="button"
-                  title="Edit rubric"
+                  title={rubricLanguage.editRubricTitle(language.data ?? "en")}
                   onClick={() => setBuilderTarget(rubric.id)}
                   className="second-button flex items-center justify-center gap-1 border py-1"
                 >
-                  <MdEdit /> Edit
+                  <MdEdit /> {rubricLanguage.edit(language.data ?? "en")}
                 </button>
                 <button
                   type="button"
-                  title="Delete rubric"
+                  title={rubricLanguage.deleteRubricTitle(language.data ?? "en")}
                   disabled={deleteRubric.isPending}
                   onClick={() => handleDelete(rubric)}
                   className="reject-button flex items-center justify-center gap-1 py-1"
                 >
-                  <MdDelete /> Delete
+                  <MdDelete /> {rubricLanguage.deleteAction(language.data ?? "en")}
                 </button>
               </div>
             </li>

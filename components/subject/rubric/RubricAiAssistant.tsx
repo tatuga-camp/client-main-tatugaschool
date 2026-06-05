@@ -4,8 +4,9 @@ import React, { useMemo, useRef, useState } from "react";
 import { FiUpload } from "react-icons/fi";
 import { IoMdClose } from "react-icons/io";
 import { RiSparkling2Line } from "react-icons/ri";
+import { rubricLanguage } from "../../../data/languages";
 import { ErrorMessages, RubricDraft } from "../../../interfaces";
-import { useGenerateRubricDraft } from "../../../react-query";
+import { useGenerateRubricDraft, useGetLanguage } from "../../../react-query";
 import {
   getSignedURLTeacherService,
   UploadSignURLService,
@@ -41,6 +42,7 @@ type FormState = {
 
 function RubricAiAssistant({ subjectId, onDraft, onClose, toast }: Props) {
   const generate = useGenerateRubricDraft();
+  const uiLanguage = useGetLanguage();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState<FormState>({
@@ -64,11 +66,13 @@ function RubricAiAssistant({ subjectId, onDraft, onClose, toast }: Props) {
   const busy = phase !== "idle";
 
   const validationError = useMemo<string | null>(() => {
-    if (!form.topic.trim()) return "Topic is required";
-    if (!form.gradeLevel.trim()) return "Grade level is required";
-    if (!form.learningGoal.trim()) return "Learning goal is required";
+    const lang = uiLanguage.data ?? "en";
+    if (!form.topic.trim()) return rubricLanguage.topicRequired(lang);
+    if (!form.gradeLevel.trim()) return rubricLanguage.gradeLevelRequired(lang);
+    if (!form.learningGoal.trim())
+      return rubricLanguage.learningGoalRequired(lang);
     return null;
-  }, [form]);
+  }, [form, uiLanguage.data]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0];
@@ -76,8 +80,8 @@ function RubricAiAssistant({ subjectId, onDraft, onClose, toast }: Props) {
     if (!ACCEPTED_TYPES.includes(selected.type)) {
       toast.current?.show({
         severity: "error",
-        summary: "Unsupported file",
-        detail: "Please upload a PDF, text file, or PNG/JPEG/WebP image.",
+        summary: rubricLanguage.unsupportedFile(uiLanguage.data ?? "en"),
+        detail: rubricLanguage.unsupportedFileDetail(uiLanguage.data ?? "en"),
         life: 5000,
       });
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -133,8 +137,10 @@ function RubricAiAssistant({ subjectId, onDraft, onClose, toast }: Props) {
         ?.response?.data ?? (error as ErrorMessages);
       toast.current?.show({
         severity: "error",
-        summary: result?.error ? result.error : "Something Went Wrong",
-        detail: "Could not generate a rubric draft. Please try again.",
+        summary: result?.error
+          ? result.error
+          : rubricLanguage.somethingWentWrong(uiLanguage.data ?? "en"),
+        detail: rubricLanguage.couldNotGenerateDraft(uiLanguage.data ?? "en"),
         life: 5000,
       });
     }
@@ -152,11 +158,12 @@ function RubricAiAssistant({ subjectId, onDraft, onClose, toast }: Props) {
 
       <header className="flex w-full items-center justify-between gap-2 border-b pb-3">
         <h1 className="flex items-center gap-2 text-lg font-medium">
-          <RiSparkling2Line /> Draft a rubric with AI
+          <RiSparkling2Line />{" "}
+          {rubricLanguage.draftRubricWithAi(uiLanguage.data ?? "en")}
         </h1>
         <button
           type="button"
-          title="Close"
+          title={rubricLanguage.close(uiLanguage.data ?? "en")}
           onClick={onClose}
           className="rounded p-1 text-gray-500 hover:bg-gray-200"
         >
@@ -167,14 +174,16 @@ function RubricAiAssistant({ subjectId, onDraft, onClose, toast }: Props) {
       {result ? (
         <main className="flex w-full flex-col gap-3">
           <p className="text-sm text-gray-600">
-            A draft for{" "}
-            <span className="font-semibold">{result.draft.title}</span> is
-            ready with {result.draft.criteria.length} criteria.
+            {rubricLanguage.draftReadyPrefix(uiLanguage.data ?? "en")}{" "}
+            <span className="font-semibold">{result.draft.title}</span>{" "}
+            {rubricLanguage.draftReadySuffix(uiLanguage.data ?? "en")(
+              result.draft.criteria.length,
+            )}
           </p>
           {result.curriculumSummary && (
             <div className="flex w-full flex-col gap-1">
               <label className="text-xs font-medium text-gray-500">
-                Curriculum summary
+                {rubricLanguage.curriculumSummary(uiLanguage.data ?? "en")}
               </label>
               <textarea
                 readOnly
@@ -190,14 +199,15 @@ function RubricAiAssistant({ subjectId, onDraft, onClose, toast }: Props) {
               onClick={() => setResult(null)}
               className="second-button flex items-center justify-center gap-1 border"
             >
-              Back
+              {rubricLanguage.back(uiLanguage.data ?? "en")}
             </button>
             <button
               type="button"
               onClick={handleApply}
               className="main-button flex items-center justify-center gap-1"
             >
-              <RiSparkling2Line /> Apply draft
+              <RiSparkling2Line />{" "}
+              {rubricLanguage.applyDraft(uiLanguage.data ?? "en")}
             </button>
           </div>
         </main>
@@ -205,11 +215,12 @@ function RubricAiAssistant({ subjectId, onDraft, onClose, toast }: Props) {
         <main className="flex w-full flex-col gap-3">
           <div className="flex w-full flex-col gap-1">
             <label className="text-sm text-gray-600">
-              Topic <span className="text-red-500">*</span>
+              {rubricLanguage.topic(uiLanguage.data ?? "en")}{" "}
+              <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
-              placeholder="e.g. Persuasive essay"
+              placeholder={rubricLanguage.topicPlaceholder(uiLanguage.data ?? "en")}
               value={form.topic}
               onChange={(e) =>
                 setForm((prev) => ({ ...prev, topic: e.target.value }))
@@ -221,11 +232,14 @@ function RubricAiAssistant({ subjectId, onDraft, onClose, toast }: Props) {
 
           <div className="flex w-full flex-col gap-1">
             <label className="text-sm text-gray-600">
-              Grade level <span className="text-red-500">*</span>
+              {rubricLanguage.gradeLevel(uiLanguage.data ?? "en")}{" "}
+              <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
-              placeholder="e.g. Grade 8"
+              placeholder={rubricLanguage.gradeLevelPlaceholder(
+                uiLanguage.data ?? "en",
+              )}
               value={form.gradeLevel}
               onChange={(e) =>
                 setForm((prev) => ({ ...prev, gradeLevel: e.target.value }))
@@ -237,10 +251,13 @@ function RubricAiAssistant({ subjectId, onDraft, onClose, toast }: Props) {
 
           <div className="flex w-full flex-col gap-1">
             <label className="text-sm text-gray-600">
-              Learning goal <span className="text-red-500">*</span>
+              {rubricLanguage.learningGoal(uiLanguage.data ?? "en")}{" "}
+              <span className="text-red-500">*</span>
             </label>
             <textarea
-              placeholder="What should students demonstrate?"
+              placeholder={rubricLanguage.learningGoalPlaceholder(
+                uiLanguage.data ?? "en",
+              )}
               value={form.learningGoal}
               onChange={(e) =>
                 setForm((prev) => ({ ...prev, learningGoal: e.target.value }))
@@ -253,7 +270,9 @@ function RubricAiAssistant({ subjectId, onDraft, onClose, toast }: Props) {
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="flex flex-col gap-1">
-              <label className="text-sm text-gray-600">Levels per criterion</label>
+              <label className="text-sm text-gray-600">
+                {rubricLanguage.levelsPerCriterion(uiLanguage.data ?? "en")}
+              </label>
               <InputNumber
                 value={form.levelCount}
                 min={2}
@@ -266,13 +285,13 @@ function RubricAiAssistant({ subjectId, onDraft, onClose, toast }: Props) {
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-sm text-gray-600">
-                Number of criteria (optional)
+                {rubricLanguage.numberOfCriteria(uiLanguage.data ?? "en")}
               </label>
               <InputNumber
                 value={form.criteriaCount}
                 min={1}
                 disabled={busy}
-                placeholder="Auto"
+                placeholder={rubricLanguage.auto(uiLanguage.data ?? "en")}
                 onValueChange={(value) =>
                   setForm((prev) => ({
                     ...prev,
@@ -282,7 +301,9 @@ function RubricAiAssistant({ subjectId, onDraft, onClose, toast }: Props) {
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm text-gray-600">Max points per level</label>
+              <label className="text-sm text-gray-600">
+                {rubricLanguage.maxPointsPerLevel(uiLanguage.data ?? "en")}
+              </label>
               <InputNumber
                 value={form.maxPointsPerLevel}
                 min={1}
@@ -297,7 +318,9 @@ function RubricAiAssistant({ subjectId, onDraft, onClose, toast }: Props) {
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm text-gray-600">Language</label>
+              <label className="text-sm text-gray-600">
+                {rubricLanguage.languageLabel(uiLanguage.data ?? "en")}
+              </label>
               <select
                 value={form.language}
                 disabled={busy}
@@ -317,17 +340,17 @@ function RubricAiAssistant({ subjectId, onDraft, onClose, toast }: Props) {
 
           <div className="flex w-full flex-col gap-1">
             <label className="text-sm text-gray-600">
-              Curriculum file (optional)
+              {rubricLanguage.curriculumFileOptional(uiLanguage.data ?? "en")}
             </label>
             <p className="text-xs text-gray-400">
-              PDF, text, or image (PNG/JPEG/WebP). The AI uses it as context.
+              {rubricLanguage.curriculumFileHint(uiLanguage.data ?? "en")}
             </p>
             {file ? (
               <div className="flex w-full items-center justify-between gap-2 rounded-2xl border bg-white p-2">
                 <span className="truncate text-sm">{file.name}</span>
                 <button
                   type="button"
-                  title="Remove file"
+                  title={rubricLanguage.removeFile(uiLanguage.data ?? "en")}
                   onClick={handleRemoveFile}
                   disabled={busy}
                   className="rounded bg-red-100 p-1 text-red-500"
@@ -337,7 +360,7 @@ function RubricAiAssistant({ subjectId, onDraft, onClose, toast }: Props) {
               </div>
             ) : (
               <label className="second-button flex w-max cursor-pointer items-center justify-center gap-1 border">
-                <FiUpload /> Choose file
+                <FiUpload /> {rubricLanguage.chooseFile(uiLanguage.data ?? "en")}
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -354,9 +377,9 @@ function RubricAiAssistant({ subjectId, onDraft, onClose, toast }: Props) {
             <div className="flex w-full items-center justify-between text-sm text-gray-500">
               <span>
                 {phase === "uploading"
-                  ? "Uploading curriculum…"
+                  ? rubricLanguage.uploadingCurriculum(uiLanguage.data ?? "en")
                   : phase === "generating"
-                    ? "Generating draft… this can take a moment."
+                    ? rubricLanguage.generatingDraft(uiLanguage.data ?? "en")
                     : ""}
               </span>
               {validationError && (
@@ -370,7 +393,7 @@ function RubricAiAssistant({ subjectId, onDraft, onClose, toast }: Props) {
                 disabled={busy}
                 className="second-button flex items-center justify-center gap-1 border"
               >
-                Cancel
+                {rubricLanguage.cancel(uiLanguage.data ?? "en")}
               </button>
               <button
                 type="button"
@@ -379,7 +402,9 @@ function RubricAiAssistant({ subjectId, onDraft, onClose, toast }: Props) {
                 className="main-button flex items-center justify-center gap-1 disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100"
               >
                 <RiSparkling2Line />
-                {busy ? "Working…" : "Generate"}
+                {busy
+                  ? rubricLanguage.working(uiLanguage.data ?? "en")
+                  : rubricLanguage.generate(uiLanguage.data ?? "en")}
               </button>
             </div>
           </footer>

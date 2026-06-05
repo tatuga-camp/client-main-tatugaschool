@@ -2,8 +2,9 @@ import { ProgressSpinner } from "primereact/progressspinner";
 import { Toast } from "primereact/toast";
 import React from "react";
 import { CiSaveUp2 } from "react-icons/ci";
+import { rubricLanguage } from "../../../data/languages";
 import { RubricWithTree } from "../../../interfaces";
-import { useGetRubricById, useGetRubricBreakdown, useGradeRubric } from "../../../react-query";
+import { useGetLanguage, useGetRubricById, useGetRubricBreakdown, useGradeRubric } from "../../../react-query";
 import { computeRubricScore } from "./rubricMath";
 
 type Props = {
@@ -30,6 +31,7 @@ function RubricGradingPanel({
   const rubricQuery = useGetRubricById({ rubricId });
   const breakdownQuery = useGetRubricBreakdown({ studentOnAssignmentId });
   const grade = useGradeRubric();
+  const language = useGetLanguage();
 
   const [selections, setSelections] = React.useState<Record<string, Selection>>(
     {},
@@ -115,8 +117,8 @@ function RubricGradingPanel({
       });
       toast.current?.show({
         severity: "success",
-        summary: "Update Success",
-        detail: "Score has been updated",
+        summary: rubricLanguage.updateSuccess(language.data ?? "en"),
+        detail: rubricLanguage.scoreUpdated(language.data ?? "en"),
       });
       onGraded(result.score);
     } catch (error) {
@@ -125,10 +127,12 @@ function RubricGradingPanel({
         | undefined;
       toast.current?.show({
         severity: "error",
-        summary: result?.error ? result.error : "Something Went Wrong",
+        summary: result?.error
+          ? result.error
+          : rubricLanguage.somethingWentWrong(language.data ?? "en"),
         detail: result?.message
           ? result.message.toString()
-          : "Could not grade with the rubric",
+          : rubricLanguage.couldNotGradeRubric(language.data ?? "en"),
         life: 5000,
       });
     }
@@ -150,7 +154,7 @@ function RubricGradingPanel({
   if (rubricQuery.isError || !rubric) {
     return (
       <div className="flex h-40 w-full items-center justify-center text-red-500">
-        Could not load the rubric. Please try again.
+        {rubricLanguage.couldNotLoadRubric(language.data ?? "en")}
       </div>
     );
   }
@@ -166,12 +170,12 @@ function RubricGradingPanel({
             {rubric.title}
           </h1>
           <span className="text-xs text-gray-500">
-            Grade with rubric
+            {rubricLanguage.gradeWithRubric(language.data ?? "en")}
           </span>
         </div>
         <div className="flex items-center gap-3">
           <span className="text-sm font-semibold text-gray-800">
-            Score: {displayScore}
+            {rubricLanguage.score(language.data ?? "en")} {displayScore}
             {assignmentMaxScore != null && ` / ${assignmentMaxScore}`}
           </span>
           {grade.isPending ? (
@@ -189,13 +193,13 @@ function RubricGradingPanel({
               disabled={selectedCount === 0}
               title={
                 selectedCount === 0
-                  ? "Select a level for at least one criterion"
+                  ? rubricLanguage.selectLevelHint(language.data ?? "en")
                   : undefined
               }
               className="main-button flex h-8 items-center justify-center gap-1 disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100"
             >
               <CiSaveUp2 />
-              Save Grade
+              {rubricLanguage.saveGrade(language.data ?? "en")}
             </button>
           )}
         </div>
@@ -222,7 +226,8 @@ function RubricGradingPanel({
                   )}
                 </div>
                 <span className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-500">
-                  Weight {criterion.weight}
+                  {rubricLanguage.weightLabel(language.data ?? "en")}{" "}
+                  {criterion.weight}
                 </span>
               </header>
 
@@ -247,7 +252,7 @@ function RubricGradingPanel({
                           {level.title}
                         </span>
                         <span className="text-xs font-semibold text-gray-500">
-                          {level.points} pts
+                          {level.points} {rubricLanguage.pts(language.data ?? "en")}
                         </span>
                       </div>
                       {level.description && (
@@ -261,7 +266,9 @@ function RubricGradingPanel({
               </div>
 
               <label className="flex w-full flex-col gap-1">
-                <span className="text-xs text-gray-500">Comment (optional)</span>
+                <span className="text-xs text-gray-500">
+                  {rubricLanguage.commentOptional(language.data ?? "en")}
+                </span>
                 <textarea
                   value={selection?.comment ?? ""}
                   onChange={(e) =>
@@ -269,7 +276,9 @@ function RubricGradingPanel({
                   }
                   className="main-input w-full resize-none"
                   rows={2}
-                  placeholder="Feedback for this criterion"
+                  placeholder={rubricLanguage.criterionFeedbackPlaceholder(
+                    language.data ?? "en",
+                  )}
                 />
               </label>
             </section>
