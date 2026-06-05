@@ -28,7 +28,6 @@ import {
   useUpdateAssignment,
   useUpdateSkillToAssignment,
 } from "../../react-query";
-import RubricPicker from "./rubric/RubricPicker";
 import {
   CreateFileAssignmentService,
   getSignedURLTeacherService,
@@ -396,18 +395,6 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
           onUploadFile={(file) => handleFileChange(file)}
           onUpdateFile={handleUpdateFile}
         />
-        {classworkData.type === "Assignment" && (
-          <section className="mx-auto mt-2 w-11/12 max-w-md px-5 pb-10">
-            <RubricPicker
-              subjectId={subjectId}
-              value={classworkData.rubricId ?? null}
-              onChange={(rubricId) =>
-                setClassworkData((prev) => ({ ...prev, rubricId }))
-              }
-              disabled={loading}
-            />
-          </section>
-        )}
       </main>
     </form>
   );

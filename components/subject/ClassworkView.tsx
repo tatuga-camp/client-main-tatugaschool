@@ -38,6 +38,7 @@ import {
 } from "react-icons/bs";
 import FileVideoConfigurator from "../common/FileVideoConfigurator";
 import AssignmentTagEditor from "./AssignmentTagEditor";
+import RubricPicker from "./rubric/RubricPicker";
 export const classworkLists = [
   {
     title: "Assignment",
@@ -82,6 +83,7 @@ type Props = {
     maxScore?: number;
     type?: AssignmentType;
     tags?: string[];
+    rubricId?: string | null;
   }) => void;
   onDeleteFile: (file: FileClasswork) => void;
   onUploadFile: (file: FileClasswork[]) => void;
@@ -601,6 +603,15 @@ function ClassworkView({
                     }
                   />
                 </label>
+              )}
+              {assignmentType === "Assignment" && (
+                <div className="flex w-full flex-col">
+                  <RubricPicker
+                    subjectId={subjectId}
+                    value={classwork?.rubricId ?? null}
+                    onChange={(rubricId) => onChange({ rubricId })}
+                  />
+                </div>
               )}
             </section>
           </>
