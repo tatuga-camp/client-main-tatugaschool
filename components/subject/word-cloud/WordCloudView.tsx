@@ -162,7 +162,7 @@ function WordCloudView({ words }: { words: WordCount[] }) {
         className="flex h-full min-h-60 w-full flex-wrap content-center items-center justify-center gap-x-3 gap-y-1 p-6"
       >
         {transitions((style, w) => (
-          <WithAnswerers students={w.students} className="leading-none">
+          <WithAnswerers students={w.students} className="leading-none max-w-[70%]">
             <animated.span
               style={{
                 ...style,
@@ -170,7 +170,7 @@ function WordCloudView({ words }: { words: WordCount[] }) {
                 fontWeight: weightFor(sizeFor(w.count)),
               }}
               title={`${w.text}: ${w.count}`}
-              className="inline-block whitespace-nowrap px-1 font-Anuphan leading-none"
+              className="inline-block px-1 text-left font-Anuphan leading-tight"
             >
               {w.text}
             </animated.span>
