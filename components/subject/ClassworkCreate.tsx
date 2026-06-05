@@ -25,8 +25,10 @@ import {
   useCreateAssignment,
   useGetAssignments,
   useGetLanguage,
+  useUpdateAssignment,
   useUpdateSkillToAssignment,
 } from "../../react-query";
+import RubricPicker from "./rubric/RubricPicker";
 import {
   CreateFileAssignmentService,
   getSignedURLTeacherService,
@@ -88,6 +90,7 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
   const [loading, setLoading] = React.useState(false);
   const adjustedStyle = useAdjustPosition(divRef, 20); // 20px padding
   const create = useCreateAssignment();
+  const updateAssignment = useUpdateAssignment();
   const assignments = useGetAssignments({ subjectId });
   const updateSkill = useUpdateSkillToAssignment();
 
@@ -100,10 +103,12 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
     allowWeight?: boolean;
     beginDate?: string;
     dueDate?: string;
+    rubricId?: string | null;
     classwork?: Assignment;
   }>({
     type: "Assignment",
     beginDate: convertToDateTimeLocalString(new Date()),
+    rubricId: null,
   });
 
   useClickOutside(divRef, () => {
@@ -157,6 +162,15 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
         status: submitter.value as AssignmentStatus,
         order: assignments.data ? assignments.data.length + 1 : 1,
       });
+
+      // The create endpoint does not accept rubricId, so attach the selected
+      // rubric (if any) via an update once the assignment exists.
+      if (classworkData?.rubricId) {
+        await updateAssignment.mutateAsync({
+          query: { assignmentId: assignment.id },
+          data: { rubricId: classworkData.rubricId },
+        });
+      }
 
       if (files?.length > 0) {
         const uploadTasks = files.map(async (file) => {
@@ -382,6 +396,18 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
           onUploadFile={(file) => handleFileChange(file)}
           onUpdateFile={handleUpdateFile}
         />
+        {classworkData.type === "Assignment" && (
+          <section className="mx-auto mt-2 w-11/12 max-w-md px-5 pb-10">
+            <RubricPicker
+              subjectId={subjectId}
+              value={classworkData.rubricId ?? null}
+              onChange={(rubricId) =>
+                setClassworkData((prev) => ({ ...prev, rubricId }))
+              }
+              disabled={loading}
+            />
+          </section>
+        )}
       </main>
     </form>
   );
