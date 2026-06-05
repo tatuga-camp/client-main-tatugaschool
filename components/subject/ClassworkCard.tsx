@@ -7,11 +7,12 @@ import { BiBook } from "react-icons/bi";
 import { FaRegFile, FaRegFileImage } from "react-icons/fa6";
 import {
   MdAssignment,
+  MdChecklist,
   MdDragIndicator,
   MdLink,
   MdOndemandVideo,
 } from "react-icons/md";
-import { classworkCardDataLanguage } from "../../data/languages";
+import { classworkCardDataLanguage, rubricLanguage } from "../../data/languages";
 import { Assignment, FileOnAssignment } from "../../interfaces";
 import { useGetLanguage, useUpdateAssignment } from "../../react-query";
 import TextEditor from "../common/TextEditor";
@@ -164,6 +165,14 @@ function AssignmentCard({
                   {classworkCardDataLanguage.score(language.data ?? "en")}
                 </span>
               </li>
+              {assignemnt.rubricId && (
+                <li className="flex h-max w-max items-center justify-center gap-1 rounded-2xl border border-primary-color bg-primary-color/10 px-2 py-1 text-primary-color">
+                  <MdChecklist className="text-base" />
+                  <span className="text-xs font-medium">
+                    {rubricLanguage.rubricBadge(language.data ?? "en")}
+                  </span>
+                </li>
+              )}
               {assignemnt.weight !== null && (
                 <li className="ga-2 flex h-max w-max flex-col items-center justify-start rounded-2xl border bg-gray-50 p-1">
                   <span className="max-w-40 truncate text-base font-medium text-primary-color">

@@ -84,12 +84,22 @@ export const rubricLanguage = {
         return "Rubrics";
     }
   },
+  rubricBadge: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Rubric";
+      case "th":
+        return "เกณฑ์รูบิก";
+      default:
+        return "Rubric";
+    }
+  },
   createRubric: (language: Language) => {
     switch (language) {
       case "en":
         return "Create rubric";
       case "th":
-        return "สร้างเกณฑ์การให้คะแนน";
+        return "สร้างเกณฑ์การให้คะแนนแบบรูบิก";
       default:
         return "Create rubric";
     }
@@ -99,7 +109,7 @@ export const rubricLanguage = {
       case "en":
         return "Manage Rubric";
       case "th":
-        return "จัดการเกณฑ์การให้คะแนน";
+        return "จัดการเกณฑ์รูบิก";
       default:
         return "Manage Rubric";
     }
