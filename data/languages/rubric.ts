@@ -94,6 +94,26 @@ export const rubricLanguage = {
         return "Create rubric";
     }
   },
+  manageRubric: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Manage Rubric";
+      case "th":
+        return "จัดการเกณฑ์การให้คะแนน";
+      default:
+        return "Manage Rubric";
+    }
+  },
+  rubricsDescription: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Create and manage grading rubrics for this subject's assignments.";
+      case "th":
+        return "สร้างและจัดการเกณฑ์การให้คะแนนสำหรับงานของวิชานี้";
+      default:
+        return "Create and manage grading rubrics for this subject's assignments.";
+    }
+  },
   noRubricsYet: (language: Language) => {
     switch (language) {
       case "en":
