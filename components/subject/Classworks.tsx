@@ -29,6 +29,7 @@ import { MdImportContacts, MdImportExport } from "react-icons/md";
 import PopupLayout from "../layout/PopupLayout";
 import ImportAssignment from "./ImportAssignment";
 import AssignmentTagFilterBar from "./AssignmentTagFilterBar";
+import RubricList from "./rubric/RubricList";
 
 type Props = {
   toast: React.RefObject<Toast>;
@@ -182,6 +183,15 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
           </button>
         </section>
       </header>
+
+      <section className="mt-8 w-full px-5 md:px-40">
+        <h1 className="text-lg font-medium sm:text-xl">Rubrics</h1>
+        <h4 className="text-xs text-gray-500 sm:text-sm">
+          Create and manage grading rubrics for this subject&apos;s
+          assignments.
+        </h4>
+        <RubricList subjectId={subjectId} toast={toast} />
+      </section>
 
       <section className="mt-4 w-full">
         <AssignmentTagFilterBar
