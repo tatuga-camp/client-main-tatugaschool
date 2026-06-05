@@ -120,6 +120,9 @@ function ClassworkView({
     classworkLists.find((c) => c.value === classwork?.type)?.value ||
       classworkLists[0].value,
   );
+  const [rubricId, setRubricId] = useState<string | null>(
+    classwork?.rubricId ?? null,
+  );
   const [triggerSildeOption, setTriggerSildeOption] = useState<boolean>(false);
   const [editingFileUrl, setEditingFileUrl] = useState<string | null>(null);
   const [editingName, setEditingName] = useState<string>("");
@@ -608,8 +611,11 @@ function ClassworkView({
                 <div className="flex w-full flex-col">
                   <RubricPicker
                     subjectId={subjectId}
-                    value={classwork?.rubricId ?? null}
-                    onChange={(rubricId) => onChange({ rubricId })}
+                    value={rubricId}
+                    onChange={(next) => {
+                      setRubricId(next);
+                      onChange({ rubricId: next });
+                    }}
                   />
                 </div>
               )}
