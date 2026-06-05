@@ -4,9 +4,12 @@ import React, { useEffect, useMemo, useState } from "react";
 import { FiPlus } from "react-icons/fi";
 import { IoMdClose } from "react-icons/io";
 import { MdDelete, MdOutlineDataSaverOn } from "react-icons/md";
+import { RiSparkling2Line } from "react-icons/ri";
 import { ErrorMessages, Rubric, RubricDraft } from "../../../interfaces";
 import { useCreateRubric, useGetRubricById, useUpdateRubric } from "../../../react-query";
 import InputNumber from "../../common/InputNumber";
+import PopupLayout from "../../layout/PopupLayout";
+import RubricAiAssistant from "./RubricAiAssistant";
 
 type Props = {
   subjectId: string;
@@ -85,6 +88,14 @@ function RubricBuilder({
   });
   const [seededFromServer, setSeededFromServer] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [aiOpen, setAiOpen] = useState(false);
+
+  // Replace the builder's editing state with an AI-generated draft so the
+  // teacher can review/edit before saving. Reuses the same draft mapping the
+  // builder uses to seed from `initialDraft`.
+  const applyDraft = (draft: RubricDraft) => {
+    setState(draftToState(draft));
+  };
 
   // Seed from fetched rubric (edit mode) once when data arrives.
   useEffect(() => {
@@ -267,9 +278,19 @@ function RubricBuilder({
       {loading && <ProgressBar mode="indeterminate" style={{ height: "6px" }} />}
 
       <header className="flex w-full flex-col gap-2 border-b pb-3">
-        <h1 className="text-lg font-medium">
-          {rubricId ? "Edit Rubric" : "Create Rubric"}
-        </h1>
+        <div className="flex w-full items-center justify-between gap-2">
+          <h1 className="text-lg font-medium">
+            {rubricId ? "Edit Rubric" : "Create Rubric"}
+          </h1>
+          <button
+            type="button"
+            onClick={() => setAiOpen(true)}
+            disabled={loading}
+            className="second-button flex w-max items-center justify-center gap-1 border py-1 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <RiSparkling2Line /> Draft with AI
+          </button>
+        </div>
         <input
           type="text"
           placeholder="Rubric title"
@@ -335,6 +356,27 @@ function RubricBuilder({
           </button>
         </div>
       </footer>
+
+      {aiOpen && (
+        <PopupLayout
+          onClose={() => {
+            document.body.style.overflow = "auto";
+            setAiOpen(false);
+          }}
+        >
+          <div className="h-max max-h-[90vh] w-[95vw] max-w-2xl overflow-auto rounded-2xl border bg-background-color p-2">
+            <RubricAiAssistant
+              subjectId={subjectId}
+              toast={toast}
+              onDraft={(draft) => applyDraft(draft)}
+              onClose={() => {
+                document.body.style.overflow = "auto";
+                setAiOpen(false);
+              }}
+            />
+          </div>
+        </PopupLayout>
+      )}
     </form>
   );
 }
