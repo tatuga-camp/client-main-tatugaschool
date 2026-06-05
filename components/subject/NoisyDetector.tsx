@@ -57,6 +57,15 @@ type LevelConfig = {
 
 const CUSTOM_LIMIT_STORAGE_KEY = "noisyDetector.customLimit";
 
+// The noise must stay above the limit continuously for this long before alerting.
+const SUSTAIN_DURATION_MS = 5000;
+// After an alert fires, wait this long before firing again while noise stays loud.
+const RETRIGGER_COOLDOWN_MS = 5000;
+// Tolerate brief dips below the limit (e.g. the gaps between words) for this long
+// before resetting the sustain timer. Without this, the loudest-bin metric's
+// frame-to-frame flicker keeps snapping the build-up back to zero.
+const BELOW_LIMIT_GRACE_MS = 400;
+
 const LEVELS: LevelConfig[] = [
   {
     type: "preset",
@@ -107,6 +116,8 @@ const NoisyDetector = ({ onClose }: NoisyDetectorProps) => {
   const noiseLimit = mode === "custom" ? customLimit : presetLimit;
   const [currentVolume, setCurrentVolume] = useState(0);
   const [isAlerting, setIsAlerting] = useState(false);
+  // 0 -> 1 progress through the 5s sustain window before the alarm fires.
+  const [buildupProgress, setBuildupProgress] = useState(0);
   const [alerts, setAlerts] = useState<AlertRecord[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -117,7 +128,14 @@ const NoisyDetector = ({ onClose }: NoisyDetectorProps) => {
   // Using more bins for "many bars" effect
   const [audioData, setAudioData] = useState<number[]>(new Array(64).fill(0));
 
-  const frozenUntil = useRef<number>(0);
+  // Timestamp when the noise first started continuously exceeding the limit.
+  // 0 means the noise is currently below the limit (timer not running).
+  const exceedSince = useRef<number>(0);
+  // Earliest time the alert is allowed to fire again (re-trigger cooldown).
+  const cooldownUntil = useRef<number>(0);
+  // Timestamp when the noise dropped below the limit, for the dip grace window.
+  // 0 means the noise is currently at/above the limit.
+  const belowSince = useRef<number>(0);
   const alertSound = useSound("/sounds/ringing.mp3");
   const lastAlertTime = useRef<number>(0);
 
@@ -200,9 +218,12 @@ const NoisyDetector = ({ onClose }: NoisyDetectorProps) => {
     }
     setIsListening(false);
     setIsAlerting(false);
+    setBuildupProgress(0);
     setCurrentVolume(0);
     setAudioData(new Array(64).fill(0));
-    frozenUntil.current = 0;
+    exceedSince.current = 0;
+    belowSince.current = 0;
+    cooldownUntil.current = 0;
   };
 
   const clearHistory = () => {
@@ -217,48 +238,65 @@ const NoisyDetector = ({ onClose }: NoisyDetectorProps) => {
     // Use Frequency Data for "bars" visualization
     analyserRef.current.getByteFrequencyData(dataArray);
 
-    // Calculate overall volume for the meter (average of frequency data)
-    let sum = 0;
-    for (let i = 0; i < bufferLength; i++) {
-      sum += dataArray[i];
-    }
-    const average = sum / bufferLength;
-    const volume = Math.min(Math.round((average / 255) * 100), 100);
-
-    const now = Date.now();
-
-    // Check Threshold on individual bars
-    // Map noiseLimit (0-100) to byte range (0-255)
-    const limitThreshold = (noiseLimit / 100) * 255;
-
-    // Check if any bar exceeds the limit
+    // Loudness = the loudest frequency bin, on a 0-100 scale. We use the peak
+    // rather than the average across all bins because the average is diluted by
+    // the many near-silent high-frequency bins (it sits at ~5-20% even for loud
+    // talking) and would almost never reach the preset limits. The Volume meter
+    // and the alarm both read this same value, so they always agree.
     let maxVal = 0;
     for (let i = 0; i < bufferLength; i++) {
       if (dataArray[i] > maxVal) maxVal = dataArray[i];
     }
+    const volume = Math.round((maxVal / 255) * 100);
 
-    if (maxVal > limitThreshold) {
-      // Trigger Alert
-      if (now > frozenUntil.current) {
-        // Only re-trigger if not currently frozen/alerting
-        const peakPercent = Math.round((maxVal / 255) * 100);
-        triggerAlert(peakPercent);
-        frozenUntil.current = now + 1000 * 5; // Freeze for 5 seconds
+    const now = Date.now();
+
+    const isExceeding = volume > noiseLimit;
+
+    if (isExceeding) {
+      // At/above the limit: start the sustain timer on the first frame and
+      // cancel any in-progress dip grace.
+      if (exceedSince.current === 0) {
+        exceedSince.current = now;
       }
-      setIsAlerting(true);
-    } else if (now > frozenUntil.current) {
-      // Only clear alert if freeze time has passed
+      belowSince.current = 0;
+    } else if (exceedSince.current !== 0) {
+      // Below the limit while a sustain timer is running. Only reset it once the
+      // noise has stayed below the limit continuously for the grace period -
+      // brief dips between words shouldn't restart the 5s count.
+      if (belowSince.current === 0) {
+        belowSince.current = now;
+      }
+      if (now - belowSince.current >= BELOW_LIMIT_GRACE_MS) {
+        exceedSince.current = 0;
+        belowSince.current = 0;
+      }
+    }
+
+    // Drive the build-up bar and the alarm from the sustain timer.
+    if (exceedSince.current !== 0) {
+      const elapsed = now - exceedSince.current;
+      // How far into the 5s sustain window we are (0 -> 1), for the build-up bar.
+      setBuildupProgress(Math.min(elapsed / SUSTAIN_DURATION_MS, 1));
+
+      // Only alert once the noise has stayed above the limit long enough.
+      if (elapsed >= SUSTAIN_DURATION_MS) {
+        setIsAlerting(true);
+
+        // Throttle repeat alerts while the noise stays loud.
+        if (now >= cooldownUntil.current) {
+          triggerAlert(volume);
+          cooldownUntil.current = now + RETRIGGER_COOLDOWN_MS;
+        }
+      }
+    } else {
+      setBuildupProgress(0);
       setIsAlerting(false);
     }
 
-    // If not frozen, update the chart
-    if (now > frozenUntil.current) {
-      setCurrentVolume(volume);
-
-      // Prepare chart data
-      const relevantData = Array.from(dataArray).slice(0, 64);
-      setAudioData(relevantData);
-    }
+    // Keep the chart live at all times so the user can watch the noise build up.
+    setCurrentVolume(volume);
+    setAudioData(Array.from(dataArray).slice(0, 64));
 
     // Schedule next frame using the ref to ensure fresh closure
     animationRef.current = requestAnimationFrame(() => updateRef.current?.());
@@ -333,34 +371,51 @@ const NoisyDetector = ({ onClose }: NoisyDetectorProps) => {
     ],
   };
 
+  console.log(buildupProgress);
   return (
     <div
       className={`fixed inset-0 z-50 flex h-screen w-screen flex-col items-center justify-between p-6 transition-colors duration-300 ${isAlerting ? "bg-red-400" : "bg-white"}`}
     >
       {/* Header */}
-      <div className="flex w-full items-center justify-between px-4">
-        <div className="flex items-center gap-3">
-          <h2 className="flex items-center gap-2 text-3xl font-bold text-gray-800">
-            {isAlerting ? (
-              <IoMdWarning className="animate-pulse text-red-600" />
-            ) : (
-              <FaVolumeUp className="text-blue-500" />
+      <div className="flex w-full flex-col gap-2">
+        <div className="flex w-full items-center justify-between px-4">
+          <div className="flex items-center gap-3">
+            <h2 className="flex items-center gap-2 text-3xl font-bold text-gray-800">
+              {isAlerting ? (
+                <IoMdWarning className="animate-pulse text-red-600" />
+              ) : (
+                <FaVolumeUp className="text-blue-500" />
+              )}
+              Noise Detector
+            </h2>
+            {isAlerting && (
+              <span className="animate-bounce rounded-full bg-red-500 px-4 py-1 text-sm font-bold text-white shadow-md">
+                TOO LOUD!
+              </span>
             )}
-            Noise Detector
-          </h2>
-          {isAlerting && (
-            <span className="animate-bounce rounded-full bg-red-500 px-4 py-1 text-sm font-bold text-white shadow-md">
-              TOO LOUD!
-            </span>
-          )}
+          </div>
+
+          <button
+            onClick={onClose}
+            className="rounded-full bg-gray-200 p-3 text-gray-600 transition-colors hover:bg-red-500 hover:text-white"
+          >
+            <FaTimes size={24} />
+          </button>
         </div>
 
-        <button
-          onClick={onClose}
-          className="rounded-full bg-gray-200 p-3 text-gray-600 transition-colors hover:bg-red-500 hover:text-white"
-        >
-          <FaTimes size={24} />
-        </button>
+        {/* Build-up indicator: fills over the 5s the noise must stay above
+            the limit before the alarm fires. Hidden once it actually fires. */}
+
+        <div className="flex items-center gap-3 px-4">
+          <IoMdWarning className="shrink-0 animate-pulse text-amber-500" />
+          <span className="shrink-0 text-sm font-bold text-amber-600">
+            Getting loud…
+          </span>
+
+          <span className="shrink-0 font-mono text-sm font-bold text-amber-600">
+            {Math.ceil((SUSTAIN_DURATION_MS / 1000) * (1 - buildupProgress))}s
+          </span>
+        </div>
       </div>
 
       {/* Main Visualization Area */}
@@ -487,9 +542,10 @@ const NoisyDetector = ({ onClose }: NoisyDetectorProps) => {
                       if (level.type === "custom") {
                         setMode("custom");
                       } else {
+                        // Re-target detection live; noiseLimit is read fresh
+                        // each frame, so no need to stop the mic.
                         setMode("preset");
                         setPresetLimit(level.limit);
-                        stopListening();
                       }
                     }}
                     className={`flex flex-col items-center justify-center rounded-xl py-2 transition-all duration-200 ${
