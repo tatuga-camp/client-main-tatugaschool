@@ -27,6 +27,7 @@ import { decodeBlurhashToCanvas } from "../../utils";
 import ConfirmDeleteMessage from "../common/ConfirmDeleteMessage";
 import Switch from "../common/Switch";
 import ListMembers from "../member/ListMembers";
+import RubricList from "./rubric/RubricList";
 import SubjectInfomation from "./SubjectInfomation";
 import SubjectPermission from "./SubjectPermission";
 
@@ -237,6 +238,13 @@ function Setting({ subjectId, schoolId }: Props) {
             />
           )}
         </div>
+        <h1 className="mt-10 text-lg font-medium sm:text-xl">Rubrics</h1>
+        <h4 className="text-xs text-gray-500 sm:text-sm">
+          Create and manage grading rubrics for this subject&apos;s
+          assignments.
+        </h4>
+        <RubricList subjectId={subjectId} toast={toast} />
+
         <h1 className="mt-10 text-lg font-medium sm:text-xl">
           {settingOnSubjectDataLanguage.studentSetting(language.data ?? "en")}
         </h1>
