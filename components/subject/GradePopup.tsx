@@ -17,6 +17,7 @@ import {
 import InputNumber from "../common/InputNumber";
 import Switch from "../common/Switch";
 import Link from "next/link";
+import RubricGradingPanel from "./rubric/RubricGradingPanel";
 
 type Props = {
   toast: React.RefObject<Toast>;
@@ -179,6 +180,56 @@ function StudentUpdateGrade({
     studentOnAssignment.score,
   );
   const update = useUpdateStudentAssignmentOverview();
+
+  // When the assignment has a rubric, grade with the rubric grid instead of
+  // the single numeric score input. The rubric panel persists the score via
+  // the grade endpoint, so we do NOT also call the numeric update mutation.
+  if (assignment.rubricId) {
+    return (
+      <div className="flex h-max w-full flex-col items-start gap-2">
+        <div className="flex w-full items-center justify-end gap-2 border-b pb-2">
+          <button
+            onClick={() => onClose()}
+            className="flex h-6 w-6 items-center justify-center rounded text-lg font-semibold hover:bg-gray-300/50"
+          >
+            <IoMdClose />
+          </button>
+        </div>
+        <div className="flex w-full justify-between gap-3">
+          <div className="flex w-40 flex-col items-center justify-center">
+            <div className="relative h-20 w-20">
+              <Image
+                src={studentOnAssignment.photo}
+                alt="Student"
+                fill
+                sizes="(max-width: 768px) 100vw, 33vw"
+                className="rounded-full"
+              />
+            </div>
+            <div className="flex h-16 w-full flex-col items-center justify-center md:w-40">
+              <span className="text-sm font-semibold text-gray-800">
+                {studentOnAssignment.firstName} {studentOnAssignment.lastName}
+              </span>
+              <span className="text-xs text-gray-500">
+                Number {studentOnAssignment.number}
+              </span>
+            </div>
+          </div>
+          <div className="flex flex-1 flex-col gap-2">
+            <RubricGradingPanel
+              rubricId={assignment.rubricId}
+              assignmentMaxScore={assignment.maxScore ?? null}
+              studentOnAssignmentId={studentOnAssignment.id}
+              toast={toast}
+              onGraded={() => {
+                onClose();
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleUpdate = async (e: React.FormEvent) => {
     try {
