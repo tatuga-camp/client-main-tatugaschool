@@ -1,13 +1,20 @@
 import { Toast } from "primereact/toast";
 import React, { useState } from "react";
-import { FiPlus } from "react-icons/fi";
-import { MdDelete, MdEdit } from "react-icons/md";
+import { FiCopy, FiPlus } from "react-icons/fi";
+import { MdContentCopy, MdDelete, MdEdit } from "react-icons/md";
 import { rubricLanguage } from "../../../data/languages";
 import { ErrorMessages, Rubric } from "../../../interfaces";
-import { useDeleteRubric, useGetLanguage, useGetRubricsBySubject } from "../../../react-query";
+import {
+  useDeleteRubric,
+  useGetLanguage,
+  useGetRubricsBySubject,
+  useGetSubject,
+} from "../../../react-query";
 import ConfirmDeleteMessage from "../../common/ConfirmDeleteMessage";
 import LoadingSpinner from "../../common/LoadingSpinner";
 import PopupLayout from "../../layout/PopupLayout";
+import CopyRubricFromSubjectDialog from "./CopyRubricFromSubjectDialog";
+import CopyRubricToSubjectDialog from "./CopyRubricToSubjectDialog";
 import RubricBuilder from "./RubricBuilder";
 
 type Props = {
@@ -19,11 +26,14 @@ function RubricList({ subjectId, toast }: Props) {
   const rubrics = useGetRubricsBySubject({ subjectId });
   const deleteRubric = useDeleteRubric();
   const language = useGetLanguage();
+  const subject = useGetSubject({ subjectId });
 
   // null = closed, "create" = create modal, otherwise the rubricId being edited.
   const [builderTarget, setBuilderTarget] = useState<"create" | string | null>(
     null,
   );
+  const [copyFromOpen, setCopyFromOpen] = useState(false);
+  const [copyToTarget, setCopyToTarget] = useState<Rubric | null>(null);
 
   const handleDelete = async (rubric: Rubric) => {
     await ConfirmDeleteMessage({
@@ -62,13 +72,23 @@ function RubricList({ subjectId, toast }: Props) {
         <h2 className="text-base font-medium sm:text-lg">
           {rubricLanguage.rubricsTitle(language.data ?? "en")}
         </h2>
-        <button
-          type="button"
-          onClick={() => setBuilderTarget("create")}
-          className="main-button flex w-max items-center justify-center gap-1 py-1"
-        >
-          <FiPlus /> {rubricLanguage.createRubric(language.data ?? "en")}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            disabled={!subject.data}
+            onClick={() => setCopyFromOpen(true)}
+            className="second-button flex w-max items-center justify-center gap-1 border py-1"
+          >
+            <FiCopy /> {rubricLanguage.copyFromSubject(language.data ?? "en")}
+          </button>
+          <button
+            type="button"
+            onClick={() => setBuilderTarget("create")}
+            className="main-button flex w-max items-center justify-center gap-1 py-1"
+          >
+            <FiPlus /> {rubricLanguage.createRubric(language.data ?? "en")}
+          </button>
+        </div>
       </header>
 
       {rubrics.isLoading ? (
@@ -102,6 +122,16 @@ function RubricList({ subjectId, toast }: Props) {
                 )}
               </div>
               <div className="flex flex-shrink-0 items-center gap-2">
+                <button
+                  type="button"
+                  title={rubricLanguage.copyToSubject(language.data ?? "en")}
+                  disabled={!subject.data}
+                  onClick={() => setCopyToTarget(rubric)}
+                  className="second-button flex items-center justify-center gap-1 border py-1"
+                >
+                  <MdContentCopy />{" "}
+                  {rubricLanguage.copyAction(language.data ?? "en")}
+                </button>
                 <button
                   type="button"
                   title={rubricLanguage.editRubricTitle(language.data ?? "en")}
@@ -148,6 +178,33 @@ function RubricList({ subjectId, toast }: Props) {
             />
           </div>
         </PopupLayout>
+      )}
+
+      {copyFromOpen && subject.data && (
+        <CopyRubricFromSubjectDialog
+          currentSubjectId={subjectId}
+          schoolId={subject.data.schoolId}
+          educationYear={subject.data.educationYear}
+          toast={toast}
+          onClose={() => {
+            document.body.style.overflow = "auto";
+            setCopyFromOpen(false);
+          }}
+        />
+      )}
+
+      {copyToTarget && subject.data && (
+        <CopyRubricToSubjectDialog
+          rubric={copyToTarget}
+          currentSubjectId={subjectId}
+          schoolId={subject.data.schoolId}
+          educationYear={subject.data.educationYear}
+          toast={toast}
+          onClose={() => {
+            document.body.style.overflow = "auto";
+            setCopyToTarget(null);
+          }}
+        />
       )}
     </div>
   );

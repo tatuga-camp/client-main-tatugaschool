@@ -33,6 +33,7 @@ import Swal from "sweetalert2";
 import { Toast } from "primereact/toast";
 import { useRouter } from "next/router";
 import { MenuAssignmentQuery } from "../../pages/subject/[subjectId]/assignment/[assignmentId]";
+import { getDefaultSubjectFilter } from "../../utils";
 
 type Props = {
   schoolId: string;
@@ -51,6 +52,8 @@ function ImportAssignment({
   const memberOnSchools = useGetMemberOnSchoolBySchool({
     schoolId,
   });
+  const defaultFilter = getDefaultSubjectFilter({ schoolId });
+
   const [selectSubject, setSelectSubject] = useState<Subject | null>(null);
   const [selectFilterUserId, setSelectFilterUserId] = React.useState<
     string | "show-all"
@@ -72,8 +75,12 @@ function ImportAssignment({
   });
 
   useEffect(() => {
-    const year = new Date().getFullYear();
-    setEducationYear(() => `1/${year}`);
+    if (defaultFilter) {
+      setEducationYear(defaultFilter.educationYear);
+    } else {
+      const year = new Date().getFullYear();
+      setEducationYear(() => `1/${year}`);
+    }
   }, []);
 
   React.useEffect(() => {

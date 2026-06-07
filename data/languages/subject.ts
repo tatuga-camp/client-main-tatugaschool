@@ -677,7 +677,7 @@ export const classworksDataLanguage = {
       case "en":
         return "Classworks";
       case "th":
-        return "มอบหมายงานชั้นเรียน";
+        return "มอบหมายงานในรายวิชา";
       default:
         return "Classworks";
     }

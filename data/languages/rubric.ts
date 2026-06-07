@@ -42,6 +42,106 @@ export const rubricLanguage = {
         return "Delete";
     }
   },
+  copyFromSubject: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Copy from another subject";
+      case "th":
+        return "คัดลอกจากวิชาอื่น";
+      default:
+        return "Copy from another subject";
+    }
+  },
+  copyToSubject: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Copy to another subject";
+      case "th":
+        return "คัดลอกไปยังวิชาอื่น";
+      default:
+        return "Copy to another subject";
+    }
+  },
+  selectSourceSubject: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Select a subject to copy from";
+      case "th":
+        return "เลือกวิชาที่ต้องการคัดลอกมา";
+      default:
+        return "Select a subject to copy from";
+    }
+  },
+  selectDestinationSubject: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Select a destination subject";
+      case "th":
+        return "เลือกวิชาปลายทาง";
+      default:
+        return "Select a destination subject";
+    }
+  },
+  selectRubricToCopy: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Select a rubric to copy";
+      case "th":
+        return "เลือกเกณฑ์การให้คะแนนที่ต้องการคัดลอก";
+      default:
+        return "Select a rubric to copy";
+    }
+  },
+  copyAction: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Copy";
+      case "th":
+        return "คัดลอก";
+      default:
+        return "Copy";
+    }
+  },
+  rubricCopied: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Rubric copied successfully";
+      case "th":
+        return "คัดลอกเกณฑ์การให้คะแนนสำเร็จ";
+      default:
+        return "Rubric copied successfully";
+    }
+  },
+  couldNotCopyRubric: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Could not copy the rubric";
+      case "th":
+        return "ไม่สามารถคัดลอกเกณฑ์การให้คะแนนได้";
+      default:
+        return "Could not copy the rubric";
+    }
+  },
+  noOtherSubjects: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "No other subjects available in this school year.";
+      case "th":
+        return "ไม่มีวิชาอื่นในปีการศึกษานี้";
+      default:
+        return "No other subjects available in this school year.";
+    }
+  },
+  noRubricsInSubject: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "This subject has no rubrics to copy.";
+      case "th":
+        return "วิชานี้ไม่มีเกณฑ์การให้คะแนนให้คัดลอก";
+      default:
+        return "This subject has no rubrics to copy.";
+    }
+  },
   back: (language: Language) => {
     switch (language) {
       case "en":
