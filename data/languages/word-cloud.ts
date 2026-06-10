@@ -201,4 +201,134 @@ export const wordCloudLanguage = {
         return "Answered by";
     }
   },
+  sessionTitle: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Word Cloud Session";
+      case "th":
+        return "เซสชันเวิร์ดคลาวด์";
+      default:
+        return "Word Cloud Session";
+    }
+  },
+  addQuestion: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Add question";
+      case "th":
+        return "เพิ่มคำถาม";
+      default:
+        return "Add question";
+    }
+  },
+  removeQuestion: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Remove";
+      case "th":
+        return "ลบ";
+      default:
+        return "Remove";
+    }
+  },
+  questionN: (language: Language, n: number) => {
+    switch (language) {
+      case "en":
+        return `Question ${n}`;
+      case "th":
+        return `คำถามที่ ${n}`;
+      default:
+        return `Question ${n}`;
+    }
+  },
+  questionXofY: (language: Language, x: number, y: number) => {
+    switch (language) {
+      case "en":
+        return `Question ${x} of ${y}`;
+      case "th":
+        return `คำถาม ${x} จาก ${y}`;
+      default:
+        return `Question ${x} of ${y}`;
+    }
+  },
+  nextQuestion: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Next";
+      case "th":
+        return "ถัดไป";
+      default:
+        return "Next";
+    }
+  },
+  prevQuestion: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Back";
+      case "th":
+        return "ย้อนกลับ";
+      default:
+        return "Back";
+    }
+  },
+  liveBadge: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "LIVE";
+      case "th":
+        return "สด";
+      default:
+        return "LIVE";
+    }
+  },
+  startSession: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Start session";
+      case "th":
+        return "เริ่มเซสชัน";
+      default:
+        return "Start session";
+    }
+  },
+  emptySets: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "No sessions yet. Create one above.";
+      case "th":
+        return "ยังไม่มีเซสชัน สร้างอันใหม่ด้านบน";
+      default:
+        return "No sessions yet. Create one above.";
+    }
+  },
+  settings: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Settings";
+      case "th":
+        return "ตั้งค่า";
+      default:
+        return "Settings";
+    }
+  },
+  titleLabel: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Session name";
+      case "th":
+        return "ชื่อเซสชัน";
+      default:
+        return "Session name";
+    }
+  },
+  titlePlaceholder: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Name this session…";
+      case "th":
+        return "ตั้งชื่อเซสชันนี้…";
+      default:
+        return "Name this session…";
+    }
+  },
 } as const;

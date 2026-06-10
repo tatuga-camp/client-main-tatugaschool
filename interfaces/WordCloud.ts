@@ -26,3 +26,28 @@ export interface WordCloudDetail {
   words: WordCount[];
   totalAnswers: number;
 }
+
+export interface WordCloudSet {
+  id: string;
+  createAt: string;
+  updateAt: string;
+  title?: string | null;
+  status: WordCloudStatus;
+  accessMode: WordCloudAccess;
+  allowMultiple: boolean;
+  activeWordCloudId: string | null;
+  subjectId: string;
+  schoolId: string;
+  userId: string;
+}
+
+export interface SetQuestionResult {
+  wordCloud: WordCloud;
+  words: WordCount[];
+  totalAnswers: number;
+}
+
+export interface WordCloudSetDetail {
+  set: WordCloudSet;
+  questions: SetQuestionResult[];
+}

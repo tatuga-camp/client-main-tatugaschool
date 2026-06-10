@@ -31,4 +31,5 @@ export * from "./teaching-material";
 export * from "./notification";
 export * from "./assignment-video-quiz";
 export * from "./word-cloud";
+export * from "./word-cloud-set";
 export * from "./rubric";
