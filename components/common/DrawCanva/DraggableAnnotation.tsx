@@ -1,7 +1,7 @@
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import parse from "html-react-parser";
-import React from "react";
+import React, { useRef } from "react";
 import {
   ModeType,
   StampAnnotation,
@@ -31,6 +31,9 @@ const stampGlyph = (symbol: StampAnnotation["symbol"]): string => {
   }
 };
 
+const DOUBLE_TAP_MS = 350;
+const DOUBLE_TAP_SLOP_PX = 12;
+
 export const DraggableAnnotation: React.FC<Props> = ({
   obj,
   mode,
@@ -40,9 +43,36 @@ export const DraggableAnnotation: React.FC<Props> = ({
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: obj.id,
   });
+  const lastTapTimeRef = useRef(0);
+  const downPosRef = useRef<{ x: number; y: number } | null>(null);
 
   const isEditing = currentEditId === obj.id && mode === "text-edit";
   const isMouseMode = mode === "mouse";
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    downPosRef.current = { x: e.clientX, y: e.clientY };
+  };
+
+  // iOS Safari does not reliably synthesize dblclick from touch, so detect
+  // a double tap from pointerup pairs. Mouse keeps using onDoubleClick.
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (!isMouseMode || e.pointerType === "mouse") return;
+    const down = downPosRef.current;
+    const moved =
+      down &&
+      Math.hypot(e.clientX - down.x, e.clientY - down.y) > DOUBLE_TAP_SLOP_PX;
+    downPosRef.current = null;
+    if (moved) {
+      lastTapTimeRef.current = 0;
+      return;
+    }
+    if (e.timeStamp - lastTapTimeRef.current < DOUBLE_TAP_MS) {
+      lastTapTimeRef.current = 0;
+      onActivate(obj.id);
+    } else {
+      lastTapTimeRef.current = e.timeStamp;
+    }
+  };
 
   const baseStyle: React.CSSProperties = {
     position: "absolute",
@@ -52,6 +82,9 @@ export const DraggableAnnotation: React.FC<Props> = ({
     cursor: isMouseMode ? "move" : "default",
     pointerEvents: isEditing ? "none" : "auto",
     userSelect: "none",
+    WebkitUserSelect: "none",
+    WebkitTouchCallout: "none",
+    touchAction: "none",
   };
 
   if (obj.kind === "text") {
@@ -74,6 +107,8 @@ export const DraggableAnnotation: React.FC<Props> = ({
         }}
         {...attributes}
         {...listeners}
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
       >
         {parse(obj.text.replace(/\n/g, "<br />"))}
       </p>
@@ -99,6 +134,8 @@ export const DraggableAnnotation: React.FC<Props> = ({
         }}
         {...attributes}
         {...listeners}
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
       >
         {stampGlyph(obj.symbol)}
       </span>
@@ -128,6 +165,8 @@ export const DraggableAnnotation: React.FC<Props> = ({
       }}
       {...attributes}
       {...listeners}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
     >
       {obj.text || "Add note…"}
     </div>

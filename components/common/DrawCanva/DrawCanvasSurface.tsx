@@ -114,31 +114,91 @@ export const DrawCanvasSurface: React.FC<Props> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const tempCanvasRef = useRef<HTMLCanvasElement>(null);
-  const [currentStroke, setCurrentStroke] = useState<StrokeAnnotation | null>(
-    null,
-  );
+  // The in-progress stroke lives in a ref and is painted via rAF so that
+  // 120Hz pointer input on iPad doesn't trigger a React re-render per event.
+  const currentStrokeRef = useRef<StrokeAnnotation | null>(null);
+  const drawingPointerRef = useRef<number | null>(null);
+  const rafRef = useRef<number | null>(null);
   const [draftShape, setDraftShape] = useState<ShapeAnnotation | null>(null);
 
   const isCanvasActive = isInkMode(mode);
 
+  const renderTempCanvas = useCallback(() => {
+    const canvas = tempCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (currentStrokeRef.current) drawStroke(ctx, currentStrokeRef.current);
+  }, []);
+
+  const scheduleTempRender = useCallback(() => {
+    if (rafRef.current !== null) return;
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null;
+      renderTempCanvas();
+    });
+  }, [renderTempCanvas]);
+
+  useEffect(
+    () => () => {
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    },
+    [],
+  );
+
+  // offsetX/offsetY is unreliable in Safari when an ancestor has a CSS
+  // scale() transform, so map client coordinates onto the canvas bitmap
+  // through its bounding rect instead.
+  const getCanvasPoint = useCallback(
+    (canvas: HTMLCanvasElement, clientX: number, clientY: number) => {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = rect.width > 0 ? canvas.width / rect.width : 1;
+      const scaleY = rect.height > 0 ? canvas.height / rect.height : 1;
+      return {
+        x: (clientX - rect.left) * scaleX,
+        y: (clientY - rect.top) * scaleY,
+      };
+    },
+    [],
+  );
+
+  const discardActiveInput = useCallback(() => {
+    currentStrokeRef.current = null;
+    drawingPointerRef.current = null;
+    setDraftShape(null);
+    renderTempCanvas();
+  }, [renderTempCanvas]);
+
   const handlePointerDown = useCallback(
     (e: React.PointerEvent<HTMLCanvasElement>) => {
       if (stylusOnly && e.pointerType === "touch") return;
-      e.currentTarget.setPointerCapture(e.pointerId);
-      const x = e.nativeEvent.offsetX;
-      const y = e.nativeEvent.offsetY;
+      // A second finger landing means the user wants to pinch/pan, not
+      // draw — drop the half-drawn input instead of leaving a stray mark.
+      if (
+        e.pointerType === "touch" &&
+        drawingPointerRef.current !== null &&
+        drawingPointerRef.current !== e.pointerId
+      ) {
+        discardActiveInput();
+        return;
+      }
+      const canvas = e.currentTarget;
+      canvas.setPointerCapture(e.pointerId);
+      const { x, y } = getCanvasPoint(canvas, e.clientX, e.clientY);
 
       if (mode === "sticky") {
-        onStickyDrop(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+        onStickyDrop(x, y);
         return;
       }
 
       if (mode === "stamp") {
-        onStampDrop(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+        onStampDrop(x, y);
         return;
       }
 
       if (mode === "shape") {
+        drawingPointerRef.current = e.pointerId;
         setDraftShape({
           kind: "shape",
           id: `sh-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
@@ -154,16 +214,19 @@ export const DrawCanvasSurface: React.FC<Props> = ({
       }
 
       if (!isCanvasActive) return;
-      const point = [x, y, e.pressure || 0.5];
-      setCurrentStroke({
+      drawingPointerRef.current = e.pointerId;
+      const pressure =
+        e.pointerType === "pen" && e.pressure > 0 ? e.pressure : 0.5;
+      currentStrokeRef.current = {
         kind: "stroke",
         id: `s-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-        points: [point],
+        points: [[x, y, pressure]],
         color: brushColor,
         size: mode === "highlighter" ? brushRadius * 4 : brushRadius * 2,
         isEraser: mode === "eraser",
         isHighlighter: mode === "highlighter",
-      });
+      };
+      scheduleTempRender();
     },
     [
       isCanvasActive,
@@ -174,40 +237,88 @@ export const DrawCanvasSurface: React.FC<Props> = ({
       stylusOnly,
       onStampDrop,
       onStickyDrop,
+      getCanvasPoint,
+      scheduleTempRender,
+      discardActiveInput,
     ],
   );
 
   const handlePointerMove = useCallback(
     (e: React.PointerEvent<HTMLCanvasElement>) => {
-      if (stylusOnly && e.pointerType === "touch") return;
-      const x = e.nativeEvent.offsetX;
-      const y = e.nativeEvent.offsetY;
+      if (drawingPointerRef.current !== e.pointerId) return;
+      const canvas = e.currentTarget;
 
-      if (mode === "shape" && draftShape) {
-        setDraftShape({ ...draftShape, x2: x, y2: y });
+      if (mode === "shape") {
+        const { x, y } = getCanvasPoint(canvas, e.clientX, e.clientY);
+        setDraftShape((prev) => (prev ? { ...prev, x2: x, y2: y } : prev));
         return;
       }
 
-      if (!isCanvasActive || !currentStroke) return;
-      const point = [x, y, e.pressure || 0.5];
-      setCurrentStroke((prev) =>
-        prev ? { ...prev, points: [...prev.points, point] } : null,
-      );
+      const stroke = currentStrokeRef.current;
+      if (!isCanvasActive || !stroke) return;
+      const native = e.nativeEvent;
+      // Coalesced events carry the full-rate input samples (120Hz pencil)
+      // that the browser batched between frames — using them keeps fast
+      // strokes from turning into straight segments.
+      const samples =
+        typeof native.getCoalescedEvents === "function" &&
+        native.getCoalescedEvents().length > 0
+          ? native.getCoalescedEvents()
+          : [native];
+      for (const sample of samples) {
+        const { x, y } = getCanvasPoint(canvas, sample.clientX, sample.clientY);
+        const pressure =
+          e.pointerType === "pen" && sample.pressure > 0
+            ? sample.pressure
+            : 0.5;
+        stroke.points.push([x, y, pressure]);
+      }
+      scheduleTempRender();
     },
-    [isCanvasActive, currentStroke, mode, draftShape, stylusOnly],
+    [isCanvasActive, mode, getCanvasPoint, scheduleTempRender],
   );
 
-  const handlePointerUp = useCallback(() => {
-    if (draftShape) {
-      onShapeComplete(draftShape);
-      setDraftShape(null);
-      return;
-    }
-    if (currentStroke) {
-      onStrokeComplete(currentStroke);
-      setCurrentStroke(null);
-    }
-  }, [currentStroke, draftShape, onStrokeComplete, onShapeComplete]);
+  const handlePointerUp = useCallback(
+    (e: React.PointerEvent<HTMLCanvasElement>) => {
+      if (
+        drawingPointerRef.current !== null &&
+        drawingPointerRef.current !== e.pointerId
+      ) {
+        return;
+      }
+      if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      }
+      drawingPointerRef.current = null;
+      if (draftShape) {
+        onShapeComplete(draftShape);
+        setDraftShape(null);
+        return;
+      }
+      const stroke = currentStrokeRef.current;
+      if (stroke) {
+        currentStrokeRef.current = null;
+        onStrokeComplete(stroke);
+        renderTempCanvas();
+      }
+    },
+    [draftShape, onStrokeComplete, onShapeComplete, renderTempCanvas],
+  );
+
+  // iOS fires pointercancel when the system takes over the gesture
+  // (scroll, pinch, app switch) — discard instead of committing garbage.
+  const handlePointerCancel = useCallback(
+    (e: React.PointerEvent<HTMLCanvasElement>) => {
+      if (
+        drawingPointerRef.current !== null &&
+        drawingPointerRef.current !== e.pointerId
+      ) {
+        return;
+      }
+      discardActiveInput();
+    },
+    [discardActiveInput],
+  );
 
   // Persist annotations to canvas
   useEffect(() => {
@@ -221,20 +332,13 @@ export const DrawCanvasSurface: React.FC<Props> = ({
     });
   }, [annotations, canvasWidth, canvasHeight]);
 
-  // Active stroke on temp canvas
-  useEffect(() => {
-    const canvas = tempCanvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if (currentStroke) drawStroke(ctx, currentStroke);
-  }, [currentStroke, canvasWidth, canvasHeight]);
-
   const mouseSensor = useSensor(MouseSensor, {
     activationConstraint: { distance: 5 },
   });
-  const sensors = useSensors(mouseSensor, useSensor(TouchSensor));
+  const touchSensor = useSensor(TouchSensor, {
+    activationConstraint: { delay: 200, tolerance: 8 },
+  });
+  const sensors = useSensors(mouseSensor, touchSensor);
 
   return (
     <div
@@ -266,9 +370,10 @@ export const DrawCanvasSurface: React.FC<Props> = ({
       }}
       onTouchEnd={onPanEnd}
       onTouchCancel={onPanEnd}
+      onContextMenu={(e) => e.preventDefault()}
       style={{
         width: "100vw",
-        height: "calc(100vh - 5rem)",
+        height: "calc(100dvh - 5rem)",
         overflow: "hidden",
         cursor:
           mode === "mouse" && !isDraggingAnnotation
@@ -277,6 +382,12 @@ export const DrawCanvasSurface: React.FC<Props> = ({
               : "grab"
             : "default",
         touchAction: "none",
+        // Without these, double-tap / long-press on iPadOS selects the
+        // background image and pops the Copy/Save callout.
+        userSelect: "none",
+        WebkitUserSelect: "none",
+        WebkitTouchCallout: "none",
+        overscrollBehavior: "none",
       }}
       className="mt-16"
     >
@@ -302,8 +413,14 @@ export const DrawCanvasSurface: React.FC<Props> = ({
             <img
               src={image}
               alt="Annotation background"
+              draggable={false}
               className="absolute left-0 top-0 h-full w-full"
-              style={{ pointerEvents: "none" }}
+              style={{
+                pointerEvents: "none",
+                userSelect: "none",
+                WebkitUserSelect: "none",
+                WebkitTouchCallout: "none",
+              }}
             />
           )}
 
@@ -322,6 +439,7 @@ export const DrawCanvasSurface: React.FC<Props> = ({
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
             onPointerLeave={handlePointerUp}
+            onPointerCancel={handlePointerCancel}
             className="absolute left-0 top-0"
             style={{
               pointerEvents:

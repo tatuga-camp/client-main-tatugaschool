@@ -156,12 +156,15 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
     const initialText = "Add Your Text Here";
     setCurrentText(initialText);
     setCurrentEditId(id);
+    const rect = containerRef.current?.getBoundingClientRect();
+    const cx = rect ? rect.width / 2 : canvasWidth / 2;
+    const cy = rect ? rect.height / 2 : canvasHeight / 2;
     const newAnnotation: TextAnnotation = {
       kind: "text",
       id,
       text: initialText,
-      x: canvasWidth / 2 - viewport.x / viewport.scale,
-      y: canvasHeight / 2 - viewport.y / viewport.scale,
+      x: (cx - viewport.x) / viewport.scale,
+      y: (cy - viewport.y) / viewport.scale,
       color: textColor,
       fontSize: textSize,
     };
@@ -492,7 +495,13 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
         <textarea
           ref={textAreaRef}
           value={currentText}
-          style={textareaStyle}
+          // The canvas surface disables text selection for iOS; the editor
+          // must opt back in or the caret/selection breaks on iPad.
+          style={{
+            ...textareaStyle,
+            userSelect: "text",
+            WebkitUserSelect: "text",
+          }}
           onChange={(e) => {
             const newText = e.target.value;
             setCurrentText(newText);
@@ -572,7 +581,7 @@ const DrawCanva = ({ imageURL, onClose, name, onSave }: Props) => {
   };
 
   return (
-    <div className="flex h-full w-full flex-col items-center bg-gray-200">
+    <div className="flex h-full w-full touch-manipulation flex-col items-center bg-gray-200">
       {loadingImage && (
         <div className="fixed top-0 z-20 flex h-full w-full items-center justify-center bg-white/80 backdrop-blur-sm">
           Loading...
