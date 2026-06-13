@@ -391,10 +391,10 @@ function Index({ subjectId }: Props) {
               />
             )}
             <div className="flex flex-col justify-end gap-1">
-              <h1 className="line-clamp-2 w-full text-lg font-semibold text-white lg:w-8/12">
+              <h1 className="line-clamp-2 w-full text-lg font-semibold text-white [text-shadow:-1px_-1px_0_#000,1px_-1px_0_#000,-1px_1px_0_#000,1px_1px_0_#000] lg:w-8/12">
                 {subject.data ? subject.data?.title : "Loading..."}
               </h1>
-              <p className="line-clamp-2 w-full text-lg text-white lg:w-11/12">
+              <p className="line-clamp-2 w-full text-lg font-bold text-white [text-shadow:-1px_-1px_0_#000,1px_-1px_0_#000,-1px_1px_0_#000,1px_1px_0_#000] lg:w-11/12">
                 {subject.data ? subject.data?.description : "Loading..."}
               </p>
               <div className="flex flex-wrap gap-2">
