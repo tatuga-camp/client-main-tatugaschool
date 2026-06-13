@@ -51,6 +51,16 @@ export const sidebarDataLanguage = {
         return "Subjects";
     }
   },
+  insights: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Insights";
+      case "th":
+        return "ข้อมูลเชิงลึก";
+      default:
+        return "Insights";
+    }
+  },
   homepage: (language: Language) => {
     switch (language) {
       case "en":

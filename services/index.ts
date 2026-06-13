@@ -33,3 +33,4 @@ export * from "./assignment-video-quiz";
 export * from "./word-cloud";
 export * from "./word-cloud-set";
 export * from "./rubric";
+export * from "./analytics";

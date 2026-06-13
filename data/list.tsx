@@ -100,6 +100,7 @@ export type MenuSchool =
   | "Teams"
   | "Homepage"
   | "Subjects"
+  | "Insights"
   | "Setting"
   | "Subscription"
   | "TeachingMaterial";
@@ -122,9 +123,10 @@ export const menuSchoolList = (): {
       icon: <SiGoogleclassroom />,
     },
     {
-      title: "Setting",
-      icon: <MdSettings />,
+      title: "Insights",
+      icon: <TbReportAnalytics />,
     },
+
     {
       title: "Subscription",
       icon: <MdSubscriptions />,
@@ -132,6 +134,10 @@ export const menuSchoolList = (): {
     {
       title: "TeachingMaterial",
       icon: <SiMaterialdesignicons />,
+    },
+    {
+      title: "Setting",
+      icon: <MdSettings />,
     },
     {
       title: "Homepage",

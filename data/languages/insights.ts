@@ -1,0 +1,53 @@
+import { Language } from "../../interfaces";
+
+const t = (en: string, th: string) => (language: Language) =>
+  language === "th" ? th : en;
+
+export const insightsDataLanguage = {
+  title: t("School Insights", "ข้อมูลเชิงลึกของโรงเรียน"),
+  educationYear: t("Education year", "ปีการศึกษา"),
+  updated: t("updated", "อัปเดตเมื่อ"),
+  sourceScheduled: t("scheduled", "ตามกำหนดเวลา"),
+  sourceOnDemand: t("live", "เรียลไทม์"),
+  atRiskStudents: t("At-risk students", "นักเรียนกลุ่มเสี่ยง"),
+  sortedByRisk: t("sorted by risk", "เรียงตามความเสี่ยง"),
+  noAtRisk: t("No at-risk students for this year", "ไม่มีนักเรียนกลุ่มเสี่ยงในปีนี้"),
+  onTimeSubmission: t("On-time submission", "ส่งงานตรงเวลา"),
+  awaitingGrading: t("awaiting grading", "รอตรวจ"),
+  attendanceRate: t("Attendance rate", "อัตราการเข้าเรียน"),
+  averageScore: t("Average score", "คะแนนเฉลี่ย"),
+  acrossGraded: t("across graded work", "จากงานที่ตรวจแล้ว"),
+  high: t("high", "สูง"),
+  medium: t("medium", "ปานกลาง"),
+  missing: t("missing", "ค้างส่ง"),
+  absent: t("absent", "ขาด"),
+  limitedData: t("limited data", "ข้อมูลจำกัด"),
+  scoreDistribution: t("Score distribution", "การกระจายของคะแนน"),
+  classLeaderboard: t("Class leaderboard", "อันดับห้องเรียน"),
+  subjectAttendance: t("Subjects by attendance", "วิชาตามอัตราการเข้าเรียน"),
+  bestTeachers: t("Best teachers (lowest at-risk)", "ครูที่ดีที่สุด (เสี่ยงต่ำสุด)"),
+  atRisk: t("at-risk", "เสี่ยง"),
+  subjects: t("subjects", "วิชา"),
+  students: t("students", "นักเรียน"),
+  noMissing: t("No missing assignments", "ไม่มีงานค้างส่ง"),
+  loading: t("Loading…", "กำลังโหลด…"),
+  couldNotLoad: t("Could not load insights", "ไม่สามารถโหลดข้อมูลได้"),
+  due: t("due", "กำหนดส่ง"),
+  // Risk score legend
+  riskScoreInfo: t("What does the risk score mean?", "คะแนนความเสี่ยงหมายถึงอะไร?"),
+  riskScoreTitle: t("About the risk score", "เกี่ยวกับคะแนนความเสี่ยง"),
+  riskScoreScale: t(
+    "0–100 — the higher the score, the more the student needs attention.",
+    "0–100 — ยิ่งคะแนนสูง นักเรียนยิ่งต้องการการดูแลมากขึ้น",
+  ),
+  riskHighLabel: t("High (60–100)", "สูง (60–100)"),
+  riskHighDesc: t("needs urgent attention", "ต้องดูแลอย่างเร่งด่วน"),
+  riskMediumLabel: t("Medium (35–59)", "ปานกลาง (35–59)"),
+  riskMediumDesc: t("worth keeping an eye on", "ควรเฝ้าระวัง"),
+  riskLowLabel: t("Low (0–34)", "ต่ำ (0–34)"),
+  riskLowDesc: t("not shown in this list", "ไม่แสดงในรายการนี้"),
+  riskBasedOn: t("Calculated from", "คำนวณจาก"),
+  factorMissing: t("missing / overdue work", "งานค้างส่งหรือเลยกำหนด"),
+  factorScore: t("low scores", "คะแนนต่ำ"),
+  factorAttendance: t("absences", "การขาดเรียน"),
+};

@@ -24,3 +24,4 @@ export * from "./wait-verify-email";
 export * from "./feedback";
 export * from "./word-cloud";
 export * from "./rubric";
+export * from "./insights";
