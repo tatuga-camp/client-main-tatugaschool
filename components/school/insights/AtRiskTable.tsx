@@ -56,12 +56,14 @@ const ExpandedDetail = ({
           <span className="flex min-w-0 items-center gap-2">
             <TbFileText className="shrink-0 text-error-color" />
             <Link
+              target="_blank"
               href={`/subject/${m.subjectId}/assignment/${m.assignmentId}?studentOnAssignmentId=${m.studentOnAssignmentId}&menu=studentwork`}
               className="truncate text-xs text-gray-800"
             >
               {m.title}
             </Link>
             <Link
+              target="_blank"
               href={`/subject/${m.subjectId}`}
               className="shrink-0 rounded-full bg-secondary-color/15 px-2 py-0.5 text-[10px] font-medium text-primary-color hover:underline"
             >
@@ -152,7 +154,9 @@ const AtRiskTable = ({
               </p>
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center gap-2 text-xs text-gray-600">
-                  <span className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold ${tierBadge("HIGH")}`}>
+                  <span
+                    className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold ${tierBadge("HIGH")}`}
+                  >
                     60–100
                   </span>
                   <span>
@@ -163,7 +167,9 @@ const AtRiskTable = ({
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-gray-600">
-                  <span className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold ${tierBadge("MEDIUM")}`}>
+                  <span
+                    className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold ${tierBadge("MEDIUM")}`}
+                  >
                     35–59
                   </span>
                   <span>
@@ -242,6 +248,7 @@ const AtRiskTable = ({
                       #{st.number} {st.firstName} {st.lastName}
                     </p>
                     <Link
+                      target="_blank"
                       href={`/classroom/${st.classId}`}
                       className="truncate font-Anuphan text-xs text-blue-500 hover:underline"
                     >
