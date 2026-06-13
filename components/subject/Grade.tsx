@@ -3,17 +3,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { Toast } from "primereact/toast";
 import React, { useState } from "react";
-import { FaCheckSquare, FaExclamationTriangle } from "react-icons/fa";
+import { FaCheckSquare, FaExclamationTriangle, FaTable } from "react-icons/fa";
 import { FaUser } from "react-icons/fa6";
 import { IoMdSettings } from "react-icons/io";
-import { MdFileDownload, MdMoodBad } from "react-icons/md";
+import { MdFileDownload, MdLeaderboard, MdMoodBad } from "react-icons/md";
 import { SiMicrosoftexcel } from "react-icons/si";
 import { defaultBlurHash } from "../../data";
 import { gradeData } from "../../data/languages";
 import {
   Assignment,
   ErrorMessages,
-  ScoreOnStudent,
   ScoreOnSubject,
   StudentOnAssignment,
   StudentOnSubject,
@@ -24,9 +23,8 @@ import {
   useGetStudentOnSubject,
 } from "../../react-query";
 import {
-  calulateGrade,
+  calculateStudentTotals,
   decodeBlurhashToCanvas,
-  defaultGradeRule,
   getRandomSlateShade,
   getSlateColorStyle,
 } from "../../utils";
@@ -36,6 +34,7 @@ import GradePopup from "./GradePopup";
 import GradeSetting from "./GradeSetting";
 import GradeSettingScoreOnSubject from "./GradeSettingScoreOnSubject";
 import GradeSpecialScoreSetting from "./GradeSpecialScoreSetting";
+import GradeLeaderboard from "./GradeLeaderboard";
 
 function Grade({
   subjectId,
@@ -57,6 +56,7 @@ function Grade({
   >(null);
 
   const [triggerGradeSetting, setTriggerGradeSetting] = useState(false);
+  const [view, setView] = useState<"table" | "leaderboard">("table");
   const handleExportExcel = async () => {
     try {
       setLoading(true);
@@ -107,6 +107,19 @@ function Grade({
 
     return assignmentTotal + specialScoresTotal;
   }, [assignmentsOverview.data]); // Recalculate only when data changes
+
+  const studentTotals = React.useMemo(() => {
+    if (!assignmentsOverview.data || !studentOnSubjects.data) return [];
+    return calculateStudentTotals(
+      assignmentsOverview.data,
+      studentOnSubjects.data,
+    );
+  }, [assignmentsOverview.data, studentOnSubjects.data]);
+
+  const totalsByStudentId = React.useMemo(
+    () => new Map(studentTotals.map((t) => [t.student.id, t])),
+    [studentTotals],
+  );
   return (
     <>
       {selectStudentOnAssignment && (
@@ -184,6 +197,30 @@ function Grade({
           </span>
         </section>
         <section className="flex flex-col items-center gap-2 md:gap-1 xl:flex-row">
+          <div className="flex items-center gap-1 rounded-2xl bg-background-color p-1">
+            <button
+              onClick={() => setView("table")}
+              className={`flex items-center gap-1 rounded-xl px-3 py-1 text-sm font-semibold transition-colors ${
+                view === "table"
+                  ? "bg-primary-color text-white"
+                  : "text-icon-color hover:bg-gray-200"
+              }`}
+            >
+              <FaTable />
+              {gradeData.table(language.data ?? "en")}
+            </button>
+            <button
+              onClick={() => setView("leaderboard")}
+              className={`flex items-center gap-1 rounded-xl px-3 py-1 text-sm font-semibold transition-colors ${
+                view === "leaderboard"
+                  ? "bg-primary-color text-white"
+                  : "text-icon-color hover:bg-gray-200"
+              }`}
+            >
+              <MdLeaderboard />
+              {gradeData.leaderboard(language.data ?? "en")}
+            </button>
+          </div>
           <button
             onClick={() => setTriggerGradeSetting(true)}
             className="main-button flex w-max items-center justify-center gap-1 py-1 ring-1 ring-blue-600"
@@ -210,6 +247,7 @@ function Grade({
         </section>
       </header>
       <main className="mx-auto mt-5 flex w-full flex-col items-center md:max-w-screen-md md:px-0 lg:max-w-screen-lg 2xl:max-w-screen-2xl">
+        {view === "table" && (
         <div className="relative mt-5 h-[30rem] w-full overflow-auto rounded-2xl bg-white 2xl:h-[40rem]">
           <table className="table-fixed bg-white md:min-w-[640px]">
             <thead className="">
@@ -330,61 +368,12 @@ function Grade({
                 ?.sort((a, b) => Number(a.number) - Number(b.number))
                 ?.map((student, index) => {
                   const odd = index % 2 === 0;
-                  let totalScore =
-                    assignmentsOverview.data?.assignments.reduce(
-                      (prev, current) => {
-                        let score =
-                          current.students.find(
-                            (s) => s.studentOnSubjectId === student.id,
-                          )?.score ?? 0;
-                        if (current.assignment.weight !== null) {
-                          const originalScore =
-                            score / current.assignment.maxScore;
-                          score = originalScore * current.assignment.weight;
-                        }
-
-                        return prev + score;
-                      },
-                      0,
-                    ) ?? 0;
-
-                  totalScore =
-                    assignmentsOverview.data?.scoreOnSubjects.reduce(
-                      (prev, scoreOnSubject) => {
-                        const sumRawScore = scoreOnSubject.students.reduce(
-                          (prev, studentOnScore) => {
-                            if (
-                              studentOnScore.studentOnSubjectId === student.id
-                            ) {
-                              return (prev += studentOnScore.score);
-                            }
-                            return prev;
-                          },
-                          0,
-                        );
-
-                        let score = sumRawScore;
-                        const maxScore =
-                          scoreOnSubject.scoreOnSubject.maxScore ?? 100;
-                        if (scoreOnSubject.scoreOnSubject.weight !== null) {
-                          const originalScore =
-                            (sumRawScore > maxScore ? maxScore : sumRawScore) /
-                            maxScore;
-                          score =
-                            originalScore *
-                            scoreOnSubject.scoreOnSubject.weight;
-                        }
-
-                        return (prev += score);
-                      },
-                      totalScore,
-                    ) ?? 0;
-
-                  const grade = calulateGrade(
-                    assignmentsOverview.data?.grade?.gradeRules ??
-                      defaultGradeRule,
-                    totalScore,
-                  );
+                  const { totalScore, grade } = totalsByStudentId.get(
+                    student.id,
+                  ) ?? {
+                    totalScore: 0,
+                    grade: "N/A",
+                  };
                   return (
                     <tr
                       className={` ${
@@ -648,6 +637,25 @@ function Grade({
             </tbody>
           </table>
         </div>
+        )}
+        {view === "leaderboard" &&
+          (assignmentsOverview.isLoading || studentOnSubjects.isLoading ? (
+            <div className="mt-5 flex w-full flex-col gap-2">
+              {[...Array(8)].map((_, index) => {
+                const number = getRandomSlateShade();
+                const color = getSlateColorStyle(number);
+                return (
+                  <div
+                    key={index}
+                    style={color}
+                    className="h-12 w-full animate-pulse rounded-2xl"
+                  />
+                );
+              })}
+            </div>
+          ) : (
+            <GradeLeaderboard studentTotals={studentTotals} />
+          ))}
       </main>
     </>
   );

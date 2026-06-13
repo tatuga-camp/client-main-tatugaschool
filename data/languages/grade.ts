@@ -101,4 +101,64 @@ export const gradeData = {
         return "weight";
     }
   },
+  leaderboard: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Leaderboard";
+      case "th":
+        return "อันดับคะแนน";
+      default:
+        return "Leaderboard";
+    }
+  },
+  table: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Table";
+      case "th":
+        return "ตาราง";
+      default:
+        return "Table";
+    }
+  },
+  hide_scores: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Hide Scores";
+      case "th":
+        return "ซ่อนคะแนน";
+      default:
+        return "Hide Scores";
+    }
+  },
+  show_scores: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Show Scores";
+      case "th":
+        return "แสดงคะแนน";
+      default:
+        return "Show Scores";
+    }
+  },
+  fullscreen: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Fullscreen";
+      case "th":
+        return "เต็มหน้าจอ";
+      default:
+        return "Fullscreen";
+    }
+  },
+  exit_fullscreen: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Exit Fullscreen";
+      case "th":
+        return "ออกจากเต็มหน้าจอ";
+      default:
+        return "Exit Fullscreen";
+    }
+  },
 } as const;
