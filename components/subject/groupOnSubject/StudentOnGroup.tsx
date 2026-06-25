@@ -6,6 +6,8 @@ import { MdDragIndicator } from "react-icons/md";
 import { CSSProperties } from "styled-components";
 import { decodeBlurhashToCanvas } from "../../../utils";
 import { defaultBlurHash } from "../../../data";
+import { groupOnSubjectLanguage } from "../../../data/languages";
+import { Language } from "../../../interfaces";
 import { SortableIdType } from "./SelectGroup";
 
 type StudentOnGroupProps = {
@@ -23,6 +25,8 @@ type StudentOnGroupProps = {
   studentOnGroupId: string | null;
   unitOnGroupId: string | null;
   isDragOver?: boolean;
+  score?: number;
+  lang?: Language;
 };
 function StudentOnGroup({
   student,
@@ -31,6 +35,8 @@ function StudentOnGroup({
   studentOnGroupId,
   unitOnGroupId,
   isDragOver = false,
+  score,
+  lang = "en",
 }: StudentOnGroupProps) {
   const sortableId = {
     type: type,
@@ -93,11 +99,13 @@ function StudentOnGroup({
             >
               {student.firstName} {student.lastName}
             </h1>
-            <p className="text-xs text-gray-500">Number {student.number}</p>
+            <p className="text-xs text-gray-500">
+              {groupOnSubjectLanguage.number(lang)} {student.number}
+            </p>
           </div>
         </div>
         <div className="gradient-bg flex rounded-sm px-2 text-white">
-          {student.score}
+          {score ?? student.score}
         </div>
       </div>
     </li>

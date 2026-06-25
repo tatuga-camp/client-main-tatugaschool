@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useGetGroupOnSubjects } from "../../../react-query";
 import { Toast } from "primereact/toast";
 import { GroupOnSubject } from "../../../interfaces";
@@ -16,7 +16,14 @@ function ShowGroups({ subjectId }: Props) {
   const groups = useGetGroupOnSubjects({
     subjectId,
   });
+
   const [triggerCreateGroup, setTriggerCreateGroup] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (groups.data && groups.data.length > 0) {
+      setSelectGroup(() => groups.data[0]);
+    }
+  }, [groups.isSuccess]);
 
   return (
     <>
@@ -37,7 +44,6 @@ function ShowGroups({ subjectId }: Props) {
         <header className="flex w-full items-center justify-start gap-2 border-b py-2">
           <button
             onClick={() => {
-              setSelectGroup(undefined);
               setTriggerCreateGroup(() => true);
             }}
             className="main-button flex h-full w-40 flex-col items-center justify-center gap-1 text-xs"

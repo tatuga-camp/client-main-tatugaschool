@@ -2,6 +2,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { CSSProperties, memo, useRef, useState } from "react";
 import { MdDelete, MdDragIndicator } from "react-icons/md";
+import { IoStar } from "react-icons/io5";
 import Swal from "sweetalert2";
 import {
   ErrorMessages,
@@ -13,9 +14,9 @@ import {
   useCreateScoreOnStudent,
   useDeleteUnitOnGroup,
   useGetLanguage,
-  useGetScoreOnStudent,
   useUpdateUnitOnGroup,
 } from "../../../react-query";
+import { groupOnSubjectLanguage } from "../../../data/languages";
 import ConfirmDeleteMessage from "../../common/ConfirmDeleteMessage";
 import LoadingBar from "../../common/LoadingBar";
 import ListMemberCircle from "../../member/ListMemberCircle";
@@ -32,9 +33,17 @@ type ColumProps = {
   type: "unitOnGroup" | "ungroupStudent";
   students?: StudentOnSubject[];
   toast?: React.RefObject<Toast>;
+  /** Aggregated score per studentOnSubjectId, lifted to and memoized by SelectGroup. */
+  scoreByStudentOnSubjectId?: Map<string, number>;
 };
 
-function Colum({ unit, type, students, toast }: ColumProps) {
+function Colum({
+  unit,
+  type,
+  students,
+  toast,
+  scoreByStudentOnSubjectId,
+}: ColumProps) {
   const sortableId = {
     type: type,
     studentOnGroupId: null,
@@ -66,9 +75,6 @@ function Colum({ unit, type, students, toast }: ColumProps) {
   const [triggerUnitGroupId, setTriggerUnitGroupId] = useState<string | null>(
     null,
   );
-  const scoreOnStudents = useGetScoreOnStudent({
-    subjectId: unit?.subjectId ?? "",
-  });
   const [loadingScore, setLoadingScore] = useState<boolean>(false);
 
   const formRef = useRef<HTMLFormElement>(null);
@@ -80,6 +86,7 @@ function Colum({ unit, type, students, toast }: ColumProps) {
     description: unit?.description ?? "",
   });
   const language = useGetLanguage();
+  const lang = language.data ?? "en";
   const deleteColum = useDeleteUnitOnGroup();
   const update = useUpdateUnitOnGroup();
 
@@ -90,7 +97,7 @@ function Colum({ unit, type, students, toast }: ColumProps) {
         className="flex h-max min-h-full w-full flex-col rounded-2xl"
       >
         <header className="relative flex h-max w-full items-center justify-between gap-2 rounded-2xl bg-gradient-to-r from-rose-400 to-red-500 px-2 py-2 font-semibold text-white">
-          Ungroup Students
+          {groupOnSubjectLanguage.ungroupStudents(lang)}
         </header>
 
         <ul className="grid min-h-40 grid-cols-1 place-content-start bg-white">
@@ -103,6 +110,7 @@ function Colum({ unit, type, students, toast }: ColumProps) {
                 studentOnGroupId={null}
                 studentOnSubjectId={studentOnSubject.id}
                 type="ungroupStudent"
+                lang={lang}
               />
             );
           })}
@@ -193,8 +201,8 @@ function Colum({ unit, type, students, toast }: ColumProps) {
       if (toast) {
         toast.current?.show({
           severity: "success",
-          summary: "Updated",
-          detail: "Group has been updated",
+          summary: groupOnSubjectLanguage.updatedToastSummary(lang),
+          detail: groupOnSubjectLanguage.updatedToastDetail(lang),
         });
       }
 
@@ -300,23 +308,31 @@ function Colum({ unit, type, students, toast }: ColumProps) {
                 <MdDragIndicator />
               </button>
             </section>
-            <button
-              onClick={() => {
-                setTriggerUnitGroupId(unit.id);
-              }}
-              className="flex flex-col gap-1"
-            >
+            <div className="flex flex-col items-end gap-1">
               <h1 className="border-b text-center text-xl font-semibold text-white">
                 {unit.totalScore}{" "}
-                <span className="text-sm font-normal">score</span>
+                <span className="text-sm font-normal">
+                  {groupOnSubjectLanguage.score(lang)}
+                </span>
               </h1>
               <ListMemberCircle maxShow={4} members={unit.students} />
-            </button>
+              <button
+                onClick={() => {
+                  setTriggerUnitGroupId(unit.id);
+                }}
+                disabled={loadingScore}
+                title={groupOnSubjectLanguage.addScoreTooltip(lang)}
+                className="font-Anuphan mt-1 flex items-center justify-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-semibold text-primary-color shadow-sm transition hover:scale-105 active:scale-95 disabled:opacity-60"
+              >
+                <IoStar />
+                {groupOnSubjectLanguage.addScore(lang)}
+              </button>
+            </div>
           </section>
         </header>
         {unit.students.length > 0 ? (
           <ul className="grid grid-cols-1">
-            {unit.students
+            {[...unit.students]
               .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
               .map((studentOnGroup) => {
                 return (
@@ -326,25 +342,20 @@ function Colum({ unit, type, students, toast }: ColumProps) {
                     type="studentOnGroup"
                     studentOnSubjectId={null}
                     unitOnGroupId={studentOnGroup.unitOnGroupId}
-                    student={{
-                      ...studentOnGroup,
-                      score: scoreOnStudents.data
-                        ?.filter(
-                          (s) =>
-                            s.studentOnSubjectId ===
-                            studentOnGroup.studentOnSubjectId,
-                        )
-                        .reduce((prev, current) => {
-                          return (prev += current.score);
-                        }, 0),
-                    }}
+                    student={studentOnGroup}
+                    score={
+                      scoreByStudentOnSubjectId?.get(
+                        studentOnGroup.studentOnSubjectId,
+                      ) ?? 0
+                    }
+                    lang={lang}
                   />
                 );
               })}
           </ul>
         ) : (
           <div className="flex w-full grow items-center justify-center bg-white">
-            No Students
+            {groupOnSubjectLanguage.noStudents(lang)}
           </div>
         )}
       </li>

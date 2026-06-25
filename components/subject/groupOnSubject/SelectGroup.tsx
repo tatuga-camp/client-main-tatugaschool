@@ -15,7 +15,8 @@ import {
   SortableContext,
 } from "@dnd-kit/sortable";
 import { Toast } from "primereact/toast";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { IoMdSettings } from "react-icons/io";
 import { MdAutoAwesome, MdCreate, MdDelete } from "react-icons/md";
 import Swal from "sweetalert2";
@@ -26,20 +27,20 @@ import {
   UnitOnGroup,
 } from "../../../interfaces";
 import {
-  useCreateScoreOnStudent,
   useCreateStudentOnGroup,
   useCreateUnitOnGroup,
   useDeleteGroupOnSubject,
   useDeleteStudentOnGroup,
   useGetGroupOnSubject,
   useGetLanguage,
+  useGetScoreOnStudent,
   useGetStudentOnSubject,
   useRefetchGroupOnSubject,
   useReorderStudentOnGroup,
   useReorderUnitGroup,
   useUpdateStudentOnGroup,
-  useUpdateUnitOnGroup,
 } from "../../../react-query";
+import { groupOnSubjectLanguage } from "../../../data/languages";
 import ConfirmDeleteMessage from "../../common/ConfirmDeleteMessage";
 import LoadingBar from "../../common/LoadingBar";
 import LoadingSpinner from "../../common/LoadingSpinner";
@@ -73,6 +74,9 @@ function ShowSelectGroup({
   const studentOnSubjects = useGetStudentOnSubject({
     subjectId,
   });
+  const scoreOnStudents = useGetScoreOnStudent({
+    subjectId,
+  });
   const [units, setUnits] = useState<
     (UnitOnGroup & { students: StudentOnGroup[] })[]
   >([]);
@@ -80,6 +84,7 @@ function ShowSelectGroup({
   const reorderUnit = useReorderUnitGroup();
   const createColum = useCreateUnitOnGroup();
   const language = useGetLanguage();
+  const lang = language.data ?? "en";
   const deleteGroup = useDeleteGroupOnSubject();
   const reorderStudent = useReorderStudentOnGroup();
   const updatestudentOnGroup = useUpdateStudentOnGroup();
@@ -96,20 +101,70 @@ function ShowSelectGroup({
     | null
   >(null);
   const [triggerUpdate, setTriggerUpdate] = useState<boolean>(false);
-  const unGroupStudents = studentOnSubjects.data
-    ?.filter((s) => s.isActive === true)
-    .filter(
-      (studentOnSubject) =>
-        !groupOnSubject.data?.units
-          .map((u) => u.students)
-          .flat()
-          .some(
-            (studentOnGroup) =>
-              studentOnGroup.studentOnSubjectId === studentOnSubject.id,
-          ),
-    );
+  const unGroupStudents = useMemo(
+    () =>
+      studentOnSubjects.data
+        ?.filter((s) => s.isActive === true)
+        .filter(
+          (studentOnSubject) =>
+            !groupOnSubject.data?.units
+              .map((u) => u.students)
+              .flat()
+              .some(
+                (studentOnGroup) =>
+                  studentOnGroup.studentOnSubjectId === studentOnSubject.id,
+              ),
+        ),
+    [studentOnSubjects.data, groupOnSubject.data],
+  );
 
-  const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
+  // Sorted copy + the matching sortable identifiers for SortableContext.
+  // The identifiers MUST equal the ids each unit registers via useSortable
+  // (JSON.stringify of its SortableIdType), otherwise the sorting strategy
+  // can't track the items. Never sort `units` in place — it mutates state.
+  const sortedUnits = useMemo(
+    () => [...units].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)),
+    [units],
+  );
+  const unitSortableIds = useMemo(
+    () =>
+      sortedUnits.map((unit) =>
+        JSON.stringify({
+          type: "unitOnGroup",
+          studentOnGroupId: null,
+          unitOnGroupId: unit.id,
+          studentOnSubjectId: null,
+        } as SortableIdType),
+      ),
+    [sortedUnits],
+  );
+
+  // One score query for the whole board (lifted out of every column). The
+  // aggregated, memoized map is handed down so each column/student receives a
+  // stable primitive score instead of re-subscribing and re-rendering.
+  const scoreByStudentOnSubjectId = useMemo(() => {
+    const map = new Map<string, number>();
+    scoreOnStudents.data?.forEach((s) => {
+      map.set(
+        s.studentOnSubjectId,
+        (map.get(s.studentOnSubjectId) ?? 0) + s.score,
+      );
+    });
+    return map;
+  }, [scoreOnStudents.data]);
+
+  // Activation constraints stop a plain click (or a tiny accidental move) from
+  // starting the drag lifecycle. Without them, every pointer-down on a student
+  // fires onDragStart/onDragEnd, and dnd-kit re-renders EVERY sortable node
+  // (all students + columns) twice per click — the click-time perf spike.
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: { distance: 8 },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 50, tolerance: 8 },
+    }),
+  );
 
   const handleRefetchGroup = async () => {
     try {
@@ -137,8 +192,8 @@ function ShowSelectGroup({
       });
       toast.current?.show({
         severity: "success",
-        summary: "Delete",
-        detail: "Group has been deleted",
+        summary: groupOnSubjectLanguage.deleteToastSummary(lang),
+        detail: groupOnSubjectLanguage.deleteToastDetail(lang),
       });
       onClose();
     } catch (error) {
@@ -183,7 +238,6 @@ function ShowSelectGroup({
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
     const id = JSON.parse(active.id as string) as SortableIdType;
-    console.log(active);
     if (id.type === "studentOnGroup") {
       const student = units
         .find((u) => u.id === id.unitOnGroupId)
@@ -278,20 +332,30 @@ function ShowSelectGroup({
           }
 
           if (activeId.unitOnGroupId !== overId.unitOnGroupId) {
-            let newSort: StudentOnGroup[] = [];
-            setUnits((prevs) => {
-              let targetStudent: StudentOnGroup | undefined = prevs
-                .find((u) => u.id === activeId.unitOnGroupId)
-                ?.students.find((s) => s.id === activeId.studentOnGroupId);
+            // Compute the move BEFORE updating state so the setUnits updater
+            // stays pure — no mutations fired from inside a reducer (which
+            // StrictMode double-invokes and React may replay).
+            const sourceStudent = units
+              .find((u) => u.id === activeId.unitOnGroupId)
+              ?.students.find((s) => s.id === activeId.studentOnGroupId);
 
-              if (targetStudent) {
-                targetStudent = {
-                  ...targetStudent,
-                  unitOnGroupId: overId.unitOnGroupId as string,
-                };
-              }
+            if (!sourceStudent) {
+              return;
+            }
 
-              return prevs.map((prev) => {
+            const movedStudent: StudentOnGroup = {
+              ...sourceStudent,
+              unitOnGroupId: overId.unitOnGroupId as string,
+            };
+
+            const targetUnit = units.find((u) => u.id === overId.unitOnGroupId);
+            const newSort: StudentOnGroup[] = [
+              ...(targetUnit?.students ?? []),
+              movedStudent,
+            ].map((s, index) => ({ ...s, order: index }));
+
+            setUnits((prevs) =>
+              prevs.map((prev) => {
                 if (prev.id === activeId.unitOnGroupId) {
                   return {
                     ...prev,
@@ -299,30 +363,24 @@ function ShowSelectGroup({
                       (s) => s.id !== activeId.studentOnGroupId,
                     ),
                   };
-                } else if (prev.id === overId.unitOnGroupId && targetStudent) {
-                  newSort = [...prev.students, targetStudent];
-                  updatestudentOnGroup.mutateAsync({
-                    query: {
-                      studentOnGroupId: targetStudent.id,
-                    },
-                    body: {
-                      unitOnGroupId: targetStudent.unitOnGroupId,
-                      order: newSort.length,
-                    },
-                  });
-                  return {
-                    ...prev,
-                    students: newSort.map((s, index) => {
-                      return {
-                        ...s,
-                        order: index,
-                      };
-                    }),
-                  };
+                }
+                if (prev.id === overId.unitOnGroupId) {
+                  return { ...prev, students: newSort };
                 }
                 return prev;
-              });
+              }),
+            );
+
+            // Persist the unit change first, then the new order, so the two
+            // cache writes land in a deterministic order.
+            await updatestudentOnGroup.mutateAsync({
+              query: { studentOnGroupId: movedStudent.id },
+              body: {
+                unitOnGroupId: movedStudent.unitOnGroupId,
+                order: newSort.length,
+              },
             });
+
             if (newSort.length > 0) {
               await reorderStudent.mutateAsync({
                 studentOnGroupIds: newSort.map((unit) => unit.id),
@@ -388,7 +446,10 @@ function ShowSelectGroup({
     if (groupOnSubject.data) {
       setUnits(() => groupOnSubject.data.units);
     }
-  }, [groupOnSubject.isFetching]);
+    // Sync from the query cache only when the data reference actually changes.
+    // Keying this on `isFetching` re-ran on every (often unrelated) refetch and
+    // clobbered the locally-managed optimistic drag state.
+  }, [groupOnSubject.data]);
 
   useEffect(() => {
     groupOnSubject.refetch();
@@ -426,7 +487,7 @@ function ShowSelectGroup({
             <button
               disabled={refetchGroup.isPending}
               onClick={() => {
-                if (confirm("Are you sure?")) {
+                if (confirm(groupOnSubjectLanguage.confirmAutoRefresh(lang))) {
                   handleRefetchGroup();
                 }
               }}
@@ -437,7 +498,7 @@ function ShowSelectGroup({
               ) : (
                 <>
                   <MdAutoAwesome />
-                  Auto Refresh Group
+                  {groupOnSubjectLanguage.autoRefreshGroup(lang)}
                 </>
               )}
             </button>
@@ -449,7 +510,7 @@ function ShowSelectGroup({
             >
               <>
                 <IoMdSettings />
-                Group Setting
+                {groupOnSubjectLanguage.groupSetting(lang)}
               </>
             </button>
             <button
@@ -466,7 +527,7 @@ function ShowSelectGroup({
             >
               <>
                 <MdDelete />
-                Group Delete
+                {groupOnSubjectLanguage.groupDelete(lang)}
               </>
             </button>
           </div>
@@ -478,21 +539,46 @@ function ShowSelectGroup({
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <SortableContext items={units} strategy={rectSortingStrategy}>
+        <SortableContext items={unitSortableIds} strategy={rectSortingStrategy}>
           <ul className="mt-5 grid gap-5 md:grid-cols-2 2xl:grid-cols-3">
             {groupOnSubject.isLoading ? (
               <LoadingBar />
             ) : (
               <ColumMemo type="ungroupStudent" students={unGroupStudents} />
             )}
-            {units
-              .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-              .map((unit) => {
-                return (
-                  <ColumMemo type="unitOnGroup" unit={unit} key={unit.id} />
-                );
-              })}
+            {sortedUnits.map((unit) => {
+              return (
+                <ColumMemo
+                  type="unitOnGroup"
+                  unit={unit}
+                  key={unit.id}
+                  scoreByStudentOnSubjectId={scoreByStudentOnSubjectId}
+                  toast={toast}
+                />
+              );
+            })}
 
+            <button
+              onClick={handleCreate}
+              className="flex h-full min-h-40 w-full flex-col items-center justify-center rounded-2xl border border-dashed bg-white text-xl text-gray-500 transition hover:bg-primary-color hover:text-white active:scale-105"
+            >
+              {createColum.isPending ? (
+                <LoadingSpinner />
+              ) : (
+                <>
+                  {groupOnSubjectLanguage.createNewColumn(lang)}
+                  <MdCreate />
+                </>
+              )}
+            </button>
+          </ul>
+        </SortableContext>
+
+        {/* DragOverlay is rendered once, outside SortableContext, and portaled
+            to <body> so it escapes the modal's stacking context and is not
+            coupled to the sortable list's re-renders (dnd-kit best practice). */}
+        {typeof document !== "undefined" &&
+          createPortal(
             <DragOverlay>
               {activeSortableId &&
                 activeSortableId.type === "studentOnGroup" &&
@@ -504,6 +590,7 @@ function ShowSelectGroup({
                     studentOnSubjectId={null}
                     student={activeSortableId.student}
                     isDragOver={true}
+                    lang={lang}
                   />
                 )}
 
@@ -517,6 +604,7 @@ function ShowSelectGroup({
                     studentOnSubjectId={null}
                     student={activeSortableId.student}
                     isDragOver={true}
+                    lang={lang}
                   />
                 )}
               {activeSortableId &&
@@ -524,23 +612,9 @@ function ShowSelectGroup({
                 activeSortableId.unit && (
                   <ColumMemo type="unitOnGroup" unit={activeSortableId.unit} />
                 )}
-            </DragOverlay>
-
-            <button
-              onClick={handleCreate}
-              className="flex h-full min-h-40 w-full flex-col items-center justify-center rounded-2xl border border-dashed bg-white text-xl text-gray-500 transition hover:bg-primary-color hover:text-white active:scale-105"
-            >
-              {createColum.isPending ? (
-                <LoadingSpinner />
-              ) : (
-                <>
-                  Create New Colum
-                  <MdCreate />
-                </>
-              )}
-            </button>
-          </ul>
-        </SortableContext>
+            </DragOverlay>,
+            document.body,
+          )}
       </DndContext>
     </>
   );

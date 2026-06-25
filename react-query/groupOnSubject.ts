@@ -320,14 +320,27 @@ export function useUpdateStudentOnGroup() {
         (
           prev: ResponseGetGroupOnSubjectService
         ): ResponseGetGroupOnSubjectService => {
+          // Idempotent move: the student must end up exactly once, in the
+          // target unit. Appending blindly duplicated it when this write
+          // raced the reorder write (or fired twice under StrictMode),
+          // producing duplicate React keys.
           return {
             ...prev,
             units: prev.units.map((unit) => {
-              if (unit.id !== data.unitOnGroupId) {
-                return unit;
+              if (unit.id === data.unitOnGroupId) {
+                const exists = unit.students.some((s) => s.id === data.id);
+                return {
+                  ...unit,
+                  students: exists
+                    ? unit.students.map((s) => (s.id === data.id ? data : s))
+                    : [...unit.students, data],
+                };
               }
-
-              return { ...unit, students: [...unit.students, data] };
+              // Drop any stale copy left behind in the previous unit.
+              return {
+                ...unit,
+                students: unit.students.filter((s) => s.id !== data.id),
+              };
             }),
           };
         }

@@ -2,8 +2,10 @@ import { Toast } from "primereact/toast";
 import { ErrorMessages, GroupOnSubject } from "../../../interfaces";
 import {
   useCreateGroupOnSubject,
+  useGetLanguage,
   useUpdateGroupOnSubject,
 } from "../../../react-query";
+import { groupOnSubjectLanguage } from "../../../data/languages";
 import { useState } from "react";
 import Swal from "sweetalert2";
 import { MdGroup } from "react-icons/md";
@@ -19,6 +21,8 @@ type GroupSettingProps = {
 function GroupSetting({ subjectId, data, onClose, toast }: GroupSettingProps) {
   const create = useCreateGroupOnSubject();
   const update = useUpdateGroupOnSubject();
+  const language = useGetLanguage();
+  const lang = language.data ?? "en";
   const [groupOnSubjectData, setGroupOnSubjectData] = useState<{
     title?: string | undefined;
     description?: string | undefined;
@@ -33,7 +37,7 @@ function GroupSetting({ subjectId, data, onClose, toast }: GroupSettingProps) {
     e.preventDefault();
     try {
       if (!groupOnSubjectData.title || !groupOnSubjectData.description) {
-        throw new Error("Fill out all data");
+        throw new Error(groupOnSubjectLanguage.fillOutAllData(lang));
       }
       await create.mutateAsync({
         title: groupOnSubjectData.title,
@@ -44,8 +48,8 @@ function GroupSetting({ subjectId, data, onClose, toast }: GroupSettingProps) {
 
       toast.current?.show({
         severity: "success",
-        summary: "Created",
-        detail: "Group has been created",
+        summary: groupOnSubjectLanguage.createdToastSummary(lang),
+        detail: groupOnSubjectLanguage.createdToastDetail(lang),
       });
 
       onClose();
@@ -81,8 +85,8 @@ function GroupSetting({ subjectId, data, onClose, toast }: GroupSettingProps) {
 
       toast.current?.show({
         severity: "success",
-        summary: "Updated",
-        detail: "Group has been updated",
+        summary: groupOnSubjectLanguage.updatedToastSummary(lang),
+        detail: groupOnSubjectLanguage.updatedToastDetail(lang),
       });
 
       onClose();
@@ -111,12 +115,17 @@ function GroupSetting({ subjectId, data, onClose, toast }: GroupSettingProps) {
       className="flex h-96 w-96 flex-col rounded-2xl border bg-white p-5 pb-2"
     >
       <header className="flex w-full items-center justify-start gap-1 border-b text-lg text-black">
-        <MdGroup /> {data ? "Update Group" : "Create Group"}
+        <MdGroup />{" "}
+        {data
+          ? groupOnSubjectLanguage.updateGroup(lang)
+          : groupOnSubjectLanguage.createGroup(lang)}
       </header>
       {(create.isPending || update.isPending) && <LoadingBar />}
       <main className="flex grow flex-col gap-2 pb-2">
         <label className="mt-2 flex w-full flex-col">
-          <span className="text-sm">title</span>
+          <span className="text-sm">
+            {groupOnSubjectLanguage.titleLabel(lang)}
+          </span>
           <input
             required
             value={groupOnSubjectData.title}
@@ -133,7 +142,9 @@ function GroupSetting({ subjectId, data, onClose, toast }: GroupSettingProps) {
           />
         </label>
         <label className="flex w-full grow flex-col">
-          <span className="text-sm">description</span>
+          <span className="text-sm">
+            {groupOnSubjectLanguage.descriptionLabel(lang)}
+          </span>
           <textarea
             required
             value={groupOnSubjectData.description}
@@ -150,7 +161,9 @@ function GroupSetting({ subjectId, data, onClose, toast }: GroupSettingProps) {
         </label>
         {!data && (
           <label className="flex w-full grow flex-col">
-            <span className="text-sm">numbers of groups</span>
+            <span className="text-sm">
+              {groupOnSubjectLanguage.numberOfGroupsLabel(lang)}
+            </span>
             <input
               required
               type="number"
@@ -177,14 +190,17 @@ function GroupSetting({ subjectId, data, onClose, toast }: GroupSettingProps) {
           type="button"
           className="second-button flex items-center justify-center gap-1 border"
         >
-          Cancel
+          {groupOnSubjectLanguage.cancel(lang)}
         </button>
         <button
           disabled={create.isPending || update.isPending}
           type="submit"
           className="main-button flex items-center justify-center gap-1"
         >
-          <FiPlus /> {data ? "Update Group" : "Create Group"}
+          <FiPlus />{" "}
+          {data
+            ? groupOnSubjectLanguage.updateGroup(lang)
+            : groupOnSubjectLanguage.createGroup(lang)}
         </button>
       </footer>
     </form>

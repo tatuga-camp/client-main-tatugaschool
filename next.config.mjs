@@ -3,6 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
   // Webpack config is removed because we handle asset copying via scripts now
   images: {
+    qualities: [25, 50, 60, 75],
     remotePatterns: [
       {
         protocol: "https",
