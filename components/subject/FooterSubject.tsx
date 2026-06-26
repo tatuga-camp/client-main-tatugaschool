@@ -3,6 +3,7 @@ import { BsQrCode } from "react-icons/bs";
 import { FaRandom, FaStopwatch20, FaWpforms } from "react-icons/fa";
 import { TbArrowsRandom } from "react-icons/tb";
 import { GiCardPick } from "react-icons/gi";
+import { LuScanFace } from "react-icons/lu";
 import { MdHeadphones } from "react-icons/md";
 import { PiCloudFog } from "react-icons/pi";
 import {
@@ -19,6 +20,7 @@ type MenuItem = {
     | "WheelOfName"
     | "SlidePicker"
     | "CardPicker"
+    | "FacePicker"
     | "NoisyDetector"
     | "WordCloud";
   icon: React.ReactNode;
@@ -77,6 +79,13 @@ const menuGroups: MenuGroup[] = [
         inactiveClasses:
           "bg-red-100 text-red-700 hover:bg-red-200 active:bg-red-500 active:text-white",
         activeClasses: "bg-red-500 text-white",
+      },
+      {
+        title: "FacePicker",
+        icon: <LuScanFace />,
+        inactiveClasses:
+          "bg-teal-100 text-teal-700 hover:bg-teal-200 active:bg-teal-500 active:text-white",
+        activeClasses: "bg-teal-500 text-white",
       },
     ],
   },

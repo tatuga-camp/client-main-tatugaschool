@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext",
-      "webworker"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext", "webworker"],
+    "types": ["node"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -18,9 +14,7 @@
     "jsx": "react-jsx",
     "incremental": true,
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"]
     },
     "target": "ES2017"
   },
@@ -31,8 +25,5 @@
     "public/sw.js",
     "prettier.config.js"
   ],
-  "exclude": [
-    "node_modules",
-    "**/*.test.ts"
-  ]
+  "exclude": ["node_modules", "**/*.test.ts"]
 }

@@ -4,3 +4,4 @@ export * from "./useWindow";
 export * from "./useKeyboard";
 export * from "./useGetRoleOnSubject";
 export * from "./useGetRoleOnSchool";
+export * from "./useFaceDetector";

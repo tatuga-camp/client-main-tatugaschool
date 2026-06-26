@@ -457,6 +457,16 @@ export const footerOnSubjectDataLangugae = {
         return "Card Picker";
     }
   },
+  FacePicker: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Face Picker";
+      case "th":
+        return "สุ่มด้วยใบหน้า";
+      default:
+        return "Face Picker";
+    }
+  },
   WordCloud: (language: Language) => {
     switch (language) {
       case "en":
