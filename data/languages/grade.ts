@@ -51,6 +51,16 @@ export const gradeData = {
         return "NOT GRADED";
     }
   },
+  graded: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "graded";
+      case "th":
+        return "ตรวจแล้ว";
+      default:
+        return "graded";
+    }
+  },
   need_improvement: (language: Language) => {
     switch (language) {
       case "en":

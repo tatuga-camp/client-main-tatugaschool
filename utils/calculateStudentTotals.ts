@@ -7,6 +7,12 @@ export type StudentTotal = {
   totalScore: number;
   grade: string;
   rank: number;
+  /** Assignments with status "REVIEWD" (graded). */
+  gradedCount: number;
+  /** Non-Material assignments the student is actually assigned. */
+  assignmentCount: number;
+  /** Round(gradedCount / assignmentCount * 100); null when assignmentCount === 0. */
+  completionPercentage: number | null;
 };
 
 /**
@@ -58,12 +64,39 @@ export function calculateStudentTotals(
       return (prev += score);
     }, totalScore);
 
+    // Graded-completion: numerator = REVIEWD, denominator = assigned
+    // non-Material assignments. scoreOnSubjects are excluded.
+    let gradedCount = 0;
+    let assignmentCount = 0;
+    for (const current of overview.assignments) {
+      if (current.assignment.type === "Material") continue;
+      const studentOnAssignment = current.students.find(
+        (s) => s.studentOnSubjectId === student.id,
+      );
+      if (!studentOnAssignment) continue; // "NO DATA" — not assigned, skip
+      assignmentCount += 1;
+      if (studentOnAssignment.status === "REVIEWD") {
+        gradedCount += 1;
+      }
+    }
+    const completionPercentage =
+      assignmentCount === 0
+        ? null
+        : Math.round((gradedCount / assignmentCount) * 100);
+
     const grade = calulateGrade(
       overview.grade?.gradeRules ?? defaultGradeRule,
       totalScore,
     );
 
-    return { student, totalScore, grade };
+    return {
+      student,
+      totalScore,
+      grade,
+      gradedCount,
+      assignmentCount,
+      completionPercentage,
+    };
   });
 
   // Stable sort by score desc; input is already number-ordered, so ties

@@ -7,7 +7,6 @@ import { MdImage, MdPhoto, MdUpload } from "react-icons/md";
 import { RxAvatar } from "react-icons/rx";
 import Swal from "sweetalert2";
 import { defaultBlurHash, studentAvatars } from "../../data";
-import { useSound } from "../../hook";
 import {
   ErrorMessages,
   ScoreOnSubject,
@@ -32,8 +31,6 @@ type Props = {
 };
 function PopUpStudent({ student, onClose, toast }: Props) {
   const [isModalOpen, setIsModalOpen] = useState(true);
-  const successSound = useSound("/sounds/ding.mp3");
-  const failSound = useSound("/sounds/fail.mp3");
   const [triggerAvartar, setSetTriggerAvatar] = useState<boolean>(false);
   const createScoreOnStudent = useCreateScoreOnStudent();
   const [image, setImage] = useState<string>(student.photo);
@@ -66,11 +63,15 @@ function PopUpStudent({ student, onClose, toast }: Props) {
       });
 
       setTotalScore((prev) => prev + data.score);
-      if (data.score >= 0) {
-        successSound?.play();
-      } else {
-        failSound?.play();
-      }
+      // Play a detached, fire-and-forget sound. The modal unmounts immediately
+      // via handleCloseModal(), and useSound()'s cleanup pauses its pooled audio
+      // element on unmount — which would cut the sound off. A one-shot Audio that
+      // isn't tied to this component's lifecycle survives the unmount and plays
+      // to completion. (Safe here: this is a discrete click, not a hot render path.)
+      const oneShotSound = new Audio(
+        data.score >= 0 ? "/sounds/ding.mp3" : "/sounds/fail.mp3",
+      );
+      oneShotSound.play().catch(() => {});
       showSuccess();
       handleCloseModal();
     } catch (error) {

@@ -248,313 +248,385 @@ function Grade({
       </header>
       <main className="mx-auto mt-5 flex w-full flex-col items-center md:max-w-screen-md md:px-0 lg:max-w-screen-lg 2xl:max-w-screen-2xl">
         {view === "table" && (
-        <div className="relative mt-5 h-[30rem] w-full overflow-auto rounded-2xl bg-white 2xl:h-[40rem]">
-          <table className="table-fixed bg-white md:min-w-[640px]">
-            <thead className="">
-              <tr className="sticky top-0 z-30 border-b bg-white">
-                <th className="sticky left-0 z-30 bg-white text-sm font-semibold">
-                  <div className="flex w-48 items-center justify-start gap-2 pl-4 md:w-96">
-                    <FaUser />
-                    Name
-                  </div>
-                </th>
-                {assignmentsOverview.isLoading
-                  ? [...Array(20)].map((_, index) => {
-                      const number = getRandomSlateShade();
-                      const color = getSlateColorStyle(number);
-                      return (
-                        <th key={index} className="text-sm font-semibold">
-                          <div
-                            style={color}
-                            className="h-14 w-40 animate-pulse"
-                          ></div>
-                        </th>
-                      );
-                    })
-                  : [
-                      assignmentsOverview.data?.assignments.map((data) => {
+          <div className="relative mt-5 h-[30rem] w-full overflow-auto rounded-2xl bg-white 2xl:h-[40rem]">
+            <table className="table-fixed bg-white md:min-w-[640px]">
+              <thead className="">
+                <tr className="sticky top-0 z-30 border-b bg-white">
+                  <th className="sticky left-0 z-30 bg-white text-sm font-semibold">
+                    <div className="flex w-48 items-center justify-start gap-2 pl-4 md:w-96">
+                      <FaUser />
+                      Name
+                    </div>
+                  </th>
+                  {assignmentsOverview.isLoading
+                    ? [...Array(20)].map((_, index) => {
+                        const number = getRandomSlateShade();
+                        const color = getSlateColorStyle(number);
                         return (
-                          <th
-                            key={data.assignment.id}
-                            className="group text-sm font-semibold"
-                          >
-                            <button
-                              onClick={() =>
-                                setSelectStudentOnAssignment({
-                                  assignment: data.assignment,
-                                })
-                              }
-                              className="relative flex w-52 min-w-52 flex-col items-start p-2 hover:bg-gray-100 hover:ring-1 active:bg-gray-200 group-hover:w-max"
+                          <th key={index} className="text-sm font-semibold">
+                            <div
+                              style={color}
+                              className="h-14 w-40 animate-pulse"
+                            ></div>
+                          </th>
+                        );
+                      })
+                    : [
+                        assignmentsOverview.data?.assignments.map((data) => {
+                          return (
+                            <th
+                              key={data.assignment.id}
+                              className="group text-sm font-semibold"
                             >
-                              <span className="w-max max-w-40 truncate group-hover:max-w-none">
-                                {data.assignment.title}
-                              </span>
-                              <span className="text-xs text-gray-500">
-                                {data.assignment.maxScore}{" "}
-                                {gradeData.score(language.data ?? "en")}
-                                {data.assignment.weight !== null &&
-                                  ` / ${
-                                    data.assignment.weight
-                                  }% ${gradeData.weight(
-                                    language.data ?? "en",
-                                  )}`}
-                              </span>
-                              <div className="rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-2 text-xs text-white">
-                                {gradeData.assignment_score(
-                                  language.data ?? "en",
-                                )}{" "}
-                              </div>
-                            </button>
-                          </th>
-                        );
-                      }),
-                      assignmentsOverview.data?.scoreOnSubjects.map((data) => {
-                        return (
-                          <th
-                            onClick={() => {
-                              setSelectScoreOnSubject(data.scoreOnSubject);
-                            }}
-                            key={data.scoreOnSubject.id}
-                            className="group text-sm font-semibold"
-                          >
-                            <button className="relative flex w-max min-w-40 flex-col items-start p-2 hover:bg-gray-100 hover:ring-1 active:bg-gray-200 group-hover:w-max">
-                              <span className="w-max max-w-40 truncate group-hover:max-w-none">
-                                {data.scoreOnSubject.title}
-                              </span>
-                              {data.scoreOnSubject.maxScore !== null && (
-                                <span className="text-xs text-gray-500">
-                                  {data.scoreOnSubject.maxScore !== null &&
-                                    `${data.scoreOnSubject.maxScore} ${gradeData.score(language.data ?? "en")} `}{" "}
-                                  /{" "}
-                                  {data.scoreOnSubject.weight !== null &&
-                                    ` ${
-                                      data.scoreOnSubject.weight
-                                    }% ${gradeData.weight(language.data ?? "en")}`}
+                              <button
+                                onClick={() =>
+                                  setSelectStudentOnAssignment({
+                                    assignment: data.assignment,
+                                  })
+                                }
+                                className="relative flex w-52 min-w-52 flex-col items-start p-2 hover:bg-gray-100 hover:ring-1 active:bg-gray-200 group-hover:w-max"
+                              >
+                                <span className="w-max max-w-40 truncate group-hover:max-w-none">
+                                  {data.assignment.title}
                                 </span>
-                              )}
-
-                              <div className="gradient-bg rounded-2xl px-2 text-xs text-white">
-                                {gradeData.speical_score(
-                                  language.data ?? "en",
-                                )}{" "}
-                              </div>
-                            </button>
-                          </th>
-                        );
-                      }),
-                    ]}
-                <th className="group text-sm font-semibold">
-                  <div className="relative flex w-40 min-w-40 flex-col items-start p-2 hover:bg-gray-100 hover:ring-1 active:bg-gray-200 group-hover:w-max">
-                    <span className="w-max max-w-40 truncate group-hover:max-w-none">
-                      Total Score
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      ({total_score} {gradeData.score(language.data ?? "en")})
-                    </span>
-                  </div>
-                </th>
-                <th className="group text-sm font-semibold">
-                  <div className="relative flex w-40 min-w-40 flex-col items-start p-2 hover:bg-gray-100 hover:ring-1 active:bg-gray-200 group-hover:w-max">
-                    <span className="w-max max-w-40 truncate group-hover:max-w-none">
-                      Grade
-                    </span>
-                  </div>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {studentOnSubjects.data
-                ?.filter((s) => s.isActive)
-                ?.sort((a, b) => Number(a.number) - Number(b.number))
-                ?.map((student, index) => {
-                  const odd = index % 2 === 0;
-                  const { totalScore, grade } = totalsByStudentId.get(
-                    student.id,
-                  ) ?? {
-                    totalScore: 0,
-                    grade: "N/A",
-                  };
-                  return (
-                    <tr
-                      className={` ${
-                        odd ? "bg-gray-200/20" : "bg-white"
-                      } group hover:bg-gray-200/40`}
-                      key={student.id}
-                    >
-                      <td
-                        className={`sticky left-0 z-20 text-sm font-semibold ${
-                          odd ? "bg-gray-100" : "bg-white"
-                        } group-hover:bg-gray-200`}
-                      >
-                        <div className="flex h-14 w-96 items-center justify-between gap-2 px-4">
-                          <div className="flex items-center gap-2">
-                            <div className="relative h-8 w-8 overflow-hidden rounded-2xl ring-1 md:h-10 md:w-10">
-                              <Image
-                                src={student.photo}
-                                alt={student.firstName}
-                                fill
-                                sizes="(max-width: 768px) 100vw, 33vw"
-                                placeholder="blur"
-                                blurDataURL={decodeBlurhashToCanvas(
-                                  student.blurHash ?? defaultBlurHash,
-                                )}
-                                className="object-cover"
-                              />
-                            </div>
-                            <div>
-                              <h1 className="text-xs font-semibold md:text-sm">
-                                {student.firstName} {student.lastName}
-                              </h1>
-                              <p className="text-xs text-gray-500">
-                                Number {student.number}
-                              </p>
-                            </div>
-                          </div>
-                          <Link
-                            href={`/subject/${subjectId}/reports/${student.id}`}
-                            target="_blank"
-                            className="second-button hidden items-center justify-center border text-sm md:flex"
-                          >
-                            Dowload Report <MdFileDownload />
-                          </Link>
-                        </div>
-                      </td>
-                      {assignmentsOverview.isLoading
-                        ? [...Array(20)].map((_, index) => {
-                            const number = getRandomSlateShade();
-                            const color = getSlateColorStyle(number);
+                                <span className="text-xs text-gray-500">
+                                  {data.assignment.maxScore}{" "}
+                                  {gradeData.score(language.data ?? "en")}
+                                  {data.assignment.weight !== null &&
+                                    ` / ${
+                                      data.assignment.weight
+                                    }% ${gradeData.weight(
+                                      language.data ?? "en",
+                                    )}`}
+                                </span>
+                                <div className="rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-2 text-xs text-white">
+                                  {gradeData.assignment_score(
+                                    language.data ?? "en",
+                                  )}{" "}
+                                </div>
+                              </button>
+                            </th>
+                          );
+                        }),
+                        assignmentsOverview.data?.scoreOnSubjects.map(
+                          (data) => {
                             return (
-                              <td key={index}>
-                                <div
-                                  style={color}
-                                  className="flex h-14 w-full animate-pulse"
-                                ></div>
-                              </td>
+                              <th
+                                onClick={() => {
+                                  setSelectScoreOnSubject(data.scoreOnSubject);
+                                }}
+                                key={data.scoreOnSubject.id}
+                                className="group text-sm font-semibold"
+                              >
+                                <button className="relative flex w-max min-w-40 flex-col items-start p-2 hover:bg-gray-100 hover:ring-1 active:bg-gray-200 group-hover:w-max">
+                                  <span className="w-max max-w-40 truncate group-hover:max-w-none">
+                                    {data.scoreOnSubject.title}
+                                  </span>
+                                  {data.scoreOnSubject.maxScore !== null && (
+                                    <span className="text-xs text-gray-500">
+                                      {data.scoreOnSubject.maxScore !== null &&
+                                        `${data.scoreOnSubject.maxScore} ${gradeData.score(language.data ?? "en")} `}{" "}
+                                      /{" "}
+                                      {data.scoreOnSubject.weight !== null &&
+                                        ` ${
+                                          data.scoreOnSubject.weight
+                                        }% ${gradeData.weight(language.data ?? "en")}`}
+                                    </span>
+                                  )}
+
+                                  <div className="gradient-bg rounded-2xl px-2 text-xs text-white">
+                                    {gradeData.speical_score(
+                                      language.data ?? "en",
+                                    )}{" "}
+                                  </div>
+                                </button>
+                              </th>
                             );
-                          })
-                        : [
-                            assignmentsOverview.data?.assignments
-                              .filter((a) => a.assignment.type !== "Material")
-                              .map((data, index) => {
-                                const studentOnAssignment = data.students.find(
-                                  (a) => a.studentOnSubjectId === student.id,
-                                );
-                                if (!studentOnAssignment) {
+                          },
+                        ),
+                      ]}
+                  <th className="group text-sm font-semibold">
+                    <div className="relative flex w-40 min-w-40 flex-col items-start p-2 hover:bg-gray-100 hover:ring-1 active:bg-gray-200 group-hover:w-max">
+                      <span className="w-max max-w-40 truncate group-hover:max-w-none">
+                        Total Score
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        ({total_score} {gradeData.score(language.data ?? "en")})
+                      </span>
+                    </div>
+                  </th>
+                  <th className="group text-sm font-semibold">
+                    <div className="relative flex w-40 min-w-40 flex-col items-start p-2 hover:bg-gray-100 hover:ring-1 active:bg-gray-200 group-hover:w-max">
+                      <span className="w-max max-w-40 truncate group-hover:max-w-none">
+                        Grade
+                      </span>
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {studentOnSubjects.data
+                  ?.filter((s) => s.isActive)
+                  ?.sort((a, b) => Number(a.number) - Number(b.number))
+                  ?.map((student, index) => {
+                    const odd = index % 2 === 0;
+                    const { totalScore, grade, completionPercentage } =
+                      totalsByStudentId.get(student.id) ?? {
+                        totalScore: 0,
+                        grade: "N/A",
+                        completionPercentage: null,
+                      };
+                    const gradedLabel = gradeData.graded(language.data ?? "en");
+                    const completionColor =
+                      completionPercentage === null
+                        ? "text-gray-400"
+                        : completionPercentage === 100
+                          ? "bg-success-color text-white"
+                          : completionPercentage >= 50
+                            ? "bg-warning-color text-black"
+                            : "bg-error-color text-white";
+                    return (
+                      <tr
+                        className={` ${
+                          odd ? "bg-gray-200/20" : "bg-white"
+                        } group hover:bg-gray-200/40`}
+                        key={student.id}
+                      >
+                        <td
+                          className={`sticky left-0 z-20 text-sm font-semibold ${
+                            odd ? "bg-gray-100" : "bg-white"
+                          } group-hover:bg-gray-200`}
+                        >
+                          <div className="flex h-14 w-96 items-center justify-between gap-2 px-4">
+                            <div className="flex items-center gap-2">
+                              <div className="relative h-8 w-8 overflow-hidden rounded-2xl ring-1 md:h-10 md:w-10">
+                                <Image
+                                  src={student.photo}
+                                  alt={student.firstName}
+                                  fill
+                                  sizes="(max-width: 768px) 100vw, 33vw"
+                                  placeholder="blur"
+                                  blurDataURL={decodeBlurhashToCanvas(
+                                    student.blurHash ?? defaultBlurHash,
+                                  )}
+                                  className="object-cover"
+                                />
+                              </div>
+                              <div>
+                                <h1 className="text-xs font-semibold md:text-sm">
+                                  {student.firstName} {student.lastName}
+                                </h1>
+                                <p className="text-xs text-gray-500">
+                                  Number {student.number}
+                                </p>
+                                <span
+                                  className={`mt-0.5 inline-block w-max rounded-2xl px-2 text-xs font-normal ${completionColor}`}
+                                >
+                                  {completionPercentage === null
+                                    ? "—"
+                                    : `${completionPercentage}% ${gradedLabel}`}
+                                </span>
+                              </div>
+                            </div>
+                            <Link
+                              href={`/subject/${subjectId}/reports/${student.id}`}
+                              target="_blank"
+                              className="second-button hidden items-center justify-center border text-sm md:flex"
+                            >
+                              Report <MdFileDownload />
+                            </Link>
+                          </div>
+                        </td>
+                        {assignmentsOverview.isLoading
+                          ? [...Array(20)].map((_, index) => {
+                              const number = getRandomSlateShade();
+                              const color = getSlateColorStyle(number);
+                              return (
+                                <td key={index}>
+                                  <div
+                                    style={color}
+                                    className="flex h-14 w-full animate-pulse"
+                                  ></div>
+                                </td>
+                              );
+                            })
+                          : [
+                              assignmentsOverview.data?.assignments
+                                .filter((a) => a.assignment.type !== "Material")
+                                .map((data, index) => {
+                                  const studentOnAssignment =
+                                    data.students.find(
+                                      (a) =>
+                                        a.studentOnSubjectId === student.id,
+                                    );
+                                  if (!studentOnAssignment) {
+                                    return (
+                                      <td key={data.assignment.id + student.id}>
+                                        <button className="relative flex h-14 w-full cursor-pointer select-none flex-col items-center justify-center bg-black text-white ring-black transition hover:ring-1 hover:drop-shadow-md">
+                                          NO DATA
+                                        </button>
+                                      </td>
+                                    );
+                                  }
+
+                                  let score:
+                                    | number
+                                    | "No Work"
+                                    | "Not Graded"
+                                    | string = 0;
+
+                                  if (
+                                    studentOnAssignment.status === "REVIEWD"
+                                  ) {
+                                    score = studentOnAssignment.score;
+                                  }
+                                  if (
+                                    studentOnAssignment.status === "PENDDING"
+                                  ) {
+                                    score = "No Work";
+                                  }
+                                  if (
+                                    studentOnAssignment.status === "SUBMITTED"
+                                  ) {
+                                    score = "Not Graded";
+                                  }
+                                  if (
+                                    studentOnAssignment.status === "IMPROVED"
+                                  ) {
+                                    score = "Need Improvement";
+                                  }
+
+                                  if (
+                                    data.assignment.weight !== null &&
+                                    studentOnAssignment.status === "REVIEWD"
+                                  ) {
+                                    const originalScore =
+                                      studentOnAssignment.score /
+                                      data.assignment.maxScore;
+                                    score = (
+                                      originalScore * data.assignment.weight
+                                    ).toFixed(2);
+                                  }
                                   return (
-                                    <td key={data.assignment.id + student.id}>
-                                      <button className="relative flex h-14 w-full cursor-pointer select-none flex-col items-center justify-center bg-black text-white ring-black transition hover:ring-1 hover:drop-shadow-md">
-                                        NO DATA
+                                    <td
+                                      key={
+                                        data.assignment.id +
+                                        studentOnAssignment.id
+                                      }
+                                      className="text-sm font-semibold"
+                                    >
+                                      <button
+                                        onClick={() => {
+                                          setSelectStudentOnAssignment({
+                                            assignment: data.assignment,
+                                            studentOnAssignment,
+                                          });
+                                        }}
+                                        className="h-14 w-full"
+                                      >
+                                        {score === "No Work" ? (
+                                          <div className="relative flex h-14 w-full cursor-pointer select-none flex-col items-center justify-center bg-red-500 text-white ring-red-500 transition hover:ring-1 hover:drop-shadow-md">
+                                            <MdMoodBad />
+                                            <span>
+                                              {gradeData.no_work(
+                                                language.data ?? "en",
+                                              )}
+                                            </span>
+                                          </div>
+                                        ) : score === "Not Graded" ? (
+                                          <div className="relative flex h-14 w-full cursor-pointer select-none flex-col items-center justify-center bg-orange-500 text-white ring-orange-500 transition hover:ring-1 hover:drop-shadow-md">
+                                            <FaCheckSquare />
+                                            <span>
+                                              {gradeData.wait_reviewed(
+                                                language.data ?? "en",
+                                              )}
+                                            </span>
+                                          </div>
+                                        ) : score === "Need Improvement" ? (
+                                          <div className="relative flex h-14 w-full cursor-pointer select-none flex-col items-center justify-center bg-yellow-500 text-white ring-yellow-500 transition hover:ring-1 hover:drop-shadow-md">
+                                            <FaExclamationTriangle />
+                                            <span>
+                                              {gradeData.need_improvement(
+                                                language.data ?? "en",
+                                              )}
+                                            </span>
+                                          </div>
+                                        ) : (
+                                          <div className="relative flex h-14 w-full cursor-pointer flex-col items-center justify-center ring-black transition hover:ring-1 hover:drop-shadow-md">
+                                            <span className="text-lg">
+                                              {score}
+                                            </span>
+                                            {data.assignment.weight !==
+                                              null && (
+                                              <span className="text-xs text-gray-500">
+                                                (
+                                                {studentOnAssignment.score.toFixed(
+                                                  2,
+                                                )}
+                                                )
+                                              </span>
+                                            )}
+                                          </div>
+                                        )}
                                       </button>
                                     </td>
                                   );
-                                }
+                                }),
+                              assignmentsOverview.data?.scoreOnSubjects.map(
+                                (data) => {
+                                  const scoreOnStudents = data.students.filter(
+                                    (s) => s.studentOnSubjectId === student.id,
+                                  );
 
-                                let score:
-                                  | number
-                                  | "No Work"
-                                  | "Not Graded"
-                                  | string = 0;
+                                  if (scoreOnStudents.length === 0) {
+                                    return (
+                                      <td
+                                        key={
+                                          data.scoreOnSubject.id + student.id
+                                        }
+                                      >
+                                        <button
+                                          onClick={() =>
+                                            setSelectScoreOnSubject({
+                                              ...data.scoreOnSubject,
+                                              studentOnSubject: student,
+                                            })
+                                          }
+                                          className="relative flex h-14 w-full cursor-pointer select-none flex-col items-center justify-center bg-black text-white ring-black transition hover:ring-1 hover:drop-shadow-md"
+                                        >
+                                          NO DATA
+                                        </button>
+                                      </td>
+                                    );
+                                  }
 
-                                if (studentOnAssignment.status === "REVIEWD") {
-                                  score = studentOnAssignment.score;
-                                }
-                                if (studentOnAssignment.status === "PENDDING") {
-                                  score = "No Work";
-                                }
-                                if (
-                                  studentOnAssignment.status === "SUBMITTED"
-                                ) {
-                                  score = "Not Graded";
-                                }
-                                if (studentOnAssignment.status === "IMPROVED") {
-                                  score = "Need Improvement";
-                                }
+                                  const sumRawScore = scoreOnStudents.reduce(
+                                    (previousValue, current) => {
+                                      return (previousValue += current.score);
+                                    },
+                                    0,
+                                  );
 
-                                if (
-                                  data.assignment.weight !== null &&
-                                  studentOnAssignment.status === "REVIEWD"
-                                ) {
-                                  const originalScore =
-                                    studentOnAssignment.score /
-                                    data.assignment.maxScore;
-                                  score = (
-                                    originalScore * data.assignment.weight
-                                  ).toFixed(2);
-                                }
-                                return (
-                                  <td
-                                    key={
-                                      data.assignment.id +
-                                      studentOnAssignment.id
-                                    }
-                                    className="text-sm font-semibold"
-                                  >
-                                    <button
-                                      onClick={() => {
-                                        setSelectStudentOnAssignment({
-                                          assignment: data.assignment,
-                                          studentOnAssignment,
-                                        });
-                                      }}
-                                      className="h-14 w-full"
-                                    >
-                                      {score === "No Work" ? (
-                                        <div className="relative flex h-14 w-full cursor-pointer select-none flex-col items-center justify-center bg-red-500 text-white ring-red-500 transition hover:ring-1 hover:drop-shadow-md">
-                                          <MdMoodBad />
-                                          <span>
-                                            {gradeData.no_work(
-                                              language.data ?? "en",
-                                            )}
-                                          </span>
-                                        </div>
-                                      ) : score === "Not Graded" ? (
-                                        <div className="relative flex h-14 w-full cursor-pointer select-none flex-col items-center justify-center bg-orange-500 text-white ring-orange-500 transition hover:ring-1 hover:drop-shadow-md">
-                                          <FaCheckSquare />
-                                          <span>
-                                            {gradeData.wait_reviewed(
-                                              language.data ?? "en",
-                                            )}
-                                          </span>
-                                        </div>
-                                      ) : score === "Need Improvement" ? (
-                                        <div className="relative flex h-14 w-full cursor-pointer select-none flex-col items-center justify-center bg-yellow-500 text-white ring-yellow-500 transition hover:ring-1 hover:drop-shadow-md">
-                                          <FaExclamationTriangle />
-                                          <span>
-                                            {gradeData.need_improvement(
-                                              language.data ?? "en",
-                                            )}
-                                          </span>
-                                        </div>
-                                      ) : (
-                                        <div className="relative flex h-14 w-full cursor-pointer flex-col items-center justify-center ring-black transition hover:ring-1 hover:drop-shadow-md">
-                                          <span className="text-lg">
-                                            {score}
-                                          </span>
-                                          {data.assignment.weight !== null && (
-                                            <span className="text-xs text-gray-500">
-                                              (
-                                              {studentOnAssignment.score.toFixed(
-                                                2,
-                                              )}
-                                              )
-                                            </span>
-                                          )}
-                                        </div>
-                                      )}
-                                    </button>
-                                  </td>
-                                );
-                              }),
-                            assignmentsOverview.data?.scoreOnSubjects.map(
-                              (data) => {
-                                const scoreOnStudents = data.students.filter(
-                                  (s) => s.studentOnSubjectId === student.id,
-                                );
+                                  let score = sumRawScore;
+                                  const maxScore =
+                                    data.scoreOnSubject.maxScore ?? 100;
+                                  if (data.scoreOnSubject.weight !== null) {
+                                    const originalScore =
+                                      (sumRawScore > maxScore
+                                        ? maxScore
+                                        : sumRawScore) / maxScore;
+                                    score =
+                                      originalScore *
+                                      data.scoreOnSubject.weight;
+                                  }
 
-                                if (scoreOnStudents.length === 0) {
                                   return (
                                     <td
-                                      key={data.scoreOnSubject.id + student.id}
+                                      key={
+                                        data.scoreOnSubject.id +
+                                        scoreOnStudents[0].id
+                                      }
+                                      className="text-sm font-semibold"
                                     >
                                       <button
                                         onClick={() =>
@@ -563,80 +635,39 @@ function Grade({
                                             studentOnSubject: student,
                                           })
                                         }
-                                        className="relative flex h-14 w-full cursor-pointer select-none flex-col items-center justify-center bg-black text-white ring-black transition hover:ring-1 hover:drop-shadow-md"
+                                        className="relative flex h-14 w-full cursor-pointer flex-col items-center justify-center ring-black transition hover:ring-1 hover:drop-shadow-md"
                                       >
-                                        NO DATA
+                                        <span className="text-lg">
+                                          {score.toFixed(2)}
+                                        </span>
+                                        {data.scoreOnSubject.weight !==
+                                          null && (
+                                          <span className="text-xs text-gray-500">
+                                            ({sumRawScore.toFixed(2)})
+                                          </span>
+                                        )}
                                       </button>
                                     </td>
                                   );
-                                }
-
-                                const sumRawScore = scoreOnStudents.reduce(
-                                  (previousValue, current) => {
-                                    return (previousValue += current.score);
-                                  },
-                                  0,
-                                );
-
-                                let score = sumRawScore;
-                                const maxScore =
-                                  data.scoreOnSubject.maxScore ?? 100;
-                                if (data.scoreOnSubject.weight !== null) {
-                                  const originalScore =
-                                    (sumRawScore > maxScore
-                                      ? maxScore
-                                      : sumRawScore) / maxScore;
-                                  score =
-                                    originalScore * data.scoreOnSubject.weight;
-                                }
-
-                                return (
-                                  <td
-                                    key={
-                                      data.scoreOnSubject.id +
-                                      scoreOnStudents[0].id
-                                    }
-                                    className="text-sm font-semibold"
-                                  >
-                                    <button
-                                      onClick={() =>
-                                        setSelectScoreOnSubject({
-                                          ...data.scoreOnSubject,
-                                          studentOnSubject: student,
-                                        })
-                                      }
-                                      className="relative flex h-14 w-full cursor-pointer flex-col items-center justify-center ring-black transition hover:ring-1 hover:drop-shadow-md"
-                                    >
-                                      <span className="text-lg">
-                                        {score.toFixed(2)}
-                                      </span>
-                                      {data.scoreOnSubject.weight !== null && (
-                                        <span className="text-xs text-gray-500">
-                                          ({sumRawScore.toFixed(2)})
-                                        </span>
-                                      )}
-                                    </button>
-                                  </td>
-                                );
-                              },
-                            ),
-                          ]}
-                      <td className="text-sm font-semibold">
-                        <div className="relative flex h-14 w-full flex-col items-center justify-center ring-black">
-                          <span>{totalScore.toFixed(2)}</span>
-                        </div>
-                      </td>
-                      <td className="text-sm font-semibold">
-                        <div className="relative flex h-14 w-full flex-col items-center justify-center ring-black">
-                          <span>{grade}</span>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-            </tbody>
-          </table>
-        </div>
+                                },
+                              ),
+                            ]}
+                        <td className="text-sm font-semibold">
+                          <div className="relative flex h-14 w-full flex-col items-center justify-center ring-black">
+                            <span>{totalScore.toFixed(2)}</span>
+                          </div>
+                        </td>
+                        <td className="text-sm font-semibold">
+                          <div className="relative flex h-14 w-full flex-col items-center justify-center ring-black">
+                            <span>{grade}</span>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+              </tbody>
+            </table>
+          </div>
         )}
         {view === "leaderboard" &&
           (assignmentsOverview.isLoading || studentOnSubjects.isLoading ? (
