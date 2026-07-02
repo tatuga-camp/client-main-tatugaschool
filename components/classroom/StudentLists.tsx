@@ -438,7 +438,7 @@ function StudentLists({ students, classroom }: Props) {
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
               type="text"
-              className="w-96 rounded-2xl border border-gray-300 p-2"
+              className="w-full max-w-96 rounded-2xl border border-gray-300 p-2"
               placeholder={studentOnClassDataLanguage.searchPlaceholder(
                 language.data ?? "en",
               )}

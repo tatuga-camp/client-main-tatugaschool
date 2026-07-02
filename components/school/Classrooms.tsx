@@ -181,7 +181,7 @@ function Classrooms({ schoolId }: Props) {
           }}
         >
           <Toast ref={toast} />
-          <div className="h-max w-96 rounded-2xl border bg-white p-3">
+          <div className="h-max w-full max-w-96 rounded-2xl border bg-white p-3">
             <div className="flex w-full justify-between border-b pb-1">
               <h1 className="text-lg font-semibold">
                 {classesDataLanguage.create(language.data ?? "en")}
@@ -270,7 +270,7 @@ function Classrooms({ schoolId }: Props) {
                   : classesDataLanguage.inactiveClass(language.data ?? "en")}
               </button>
             </label>
-            <label className="flex w-80 flex-col">
+            <label className="flex w-full max-w-80 flex-col">
               <span className="text-sm text-gray-400">
                 ค้นหาตามรายชื่อคุณครูในโรงเรียน
               </span>
@@ -282,7 +282,7 @@ function Classrooms({ schoolId }: Props) {
                   onChange={(e) => {
                     applyFilters(e.target.value, selectFilterLevel);
                   }}
-                  className="second-button w-80 border"
+                  className="second-button w-full max-w-80 border"
                 >
                   {[
                     ...(memberOnSchools.data ?? []),

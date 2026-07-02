@@ -314,7 +314,7 @@ const BillingPlanSection = (props: { schoolId: string }) => {
         <h4 className="text-xs text-gray-500 sm:text-sm">
           {schoolDataLanguage.billingManagerDescription(language.data ?? "en")}
         </h4>
-        <div className="w-96">
+        <div className="w-full max-w-96">
           {selectBillingManager && members.data && (
             <Dropdown<MemberOnSchool>
               optionLabel="email"

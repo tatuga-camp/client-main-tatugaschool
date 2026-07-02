@@ -361,7 +361,7 @@ function TeachingMaterialSection({ onClose, teachingMaterial }: Props) {
           ? handleUpdateTeachingMaterial
           : handleCreateTeachingMaterial
       }
-      className="flex h-[90%] w-7/12 flex-col rounded-2xl bg-white"
+      className="flex h-[90%] w-full flex-col px-4 md:w-7/12 md:px-0 rounded-2xl bg-white"
     >
       <header className="flex w-full items-center justify-between border-b p-5">
         <section className="flex items-center justify-center gap-2">

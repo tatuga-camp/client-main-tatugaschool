@@ -312,7 +312,7 @@ function Subjects({ schoolId }: Props) {
                 />
               </label>
             )}
-            <label className="flex w-80 flex-col">
+            <label className="flex w-full max-w-80 flex-col">
               <span className="text-sm text-gray-400">
                 ค้นหาตามรายชื่อคุณครูในโรงเรียน
               </span>
@@ -324,7 +324,7 @@ function Subjects({ schoolId }: Props) {
                   onChange={(e) => {
                     handleFilterByUser(e.target.value);
                   }}
-                  className="second-button w-80 border"
+                  className="second-button w-full max-w-80 border"
                 >
                   {[
                     ...(memberOnSchools.data ?? []),
