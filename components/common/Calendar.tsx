@@ -58,7 +58,7 @@ function Calendar({ value, onValue }: Props) {
               },
             }),
             panel: (option) => ({
-              className: classNames("bg-white", "min-w-96", {
+              className: classNames("bg-white", "min-w-0 w-[min(24rem,calc(100vw-1rem))]", {
                 "shadow-md border-0 absolute": !option?.props.inline,
                 "inline-block overflow-x-auto border border-gray-300  p-2 rounded-2xl":
                   option?.props.inline,

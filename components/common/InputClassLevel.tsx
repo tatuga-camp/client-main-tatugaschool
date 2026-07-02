@@ -40,7 +40,7 @@ function InputClassLevel({ value, onChange, required, title }: Props) {
       <label className="text-sm font-medium text-gray-700">
         {title ? title : language.data === "th" ? "ระดับชั้น" : "Level"}
       </label>
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         {isCustom ? (
           <div className="flex grow items-center gap-2">
             <input
@@ -114,7 +114,7 @@ function InputClassLevel({ value, onChange, required, title }: Props) {
               level: e.target.value,
             }))
           }
-          className="main-input w-32"
+          className="main-input w-full max-w-32 min-w-24"
         >
           {Array.from({ length: 100 }, (_, i) => i + 1).map((level) => {
             return <option key={level}>{level}</option>;

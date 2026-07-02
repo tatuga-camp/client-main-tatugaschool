@@ -40,7 +40,7 @@ function DropdownRole({
       {trigger && (
         <div
           ref={devRef}
-          className="absolute right-10 top-12 z-10 h-max w-60 rounded-2xl border bg-white drop-shadow"
+          className="absolute right-0 top-12 z-10 h-max w-60 max-w-[calc(100vw-2rem)] md:right-10 rounded-2xl border bg-white drop-shadow"
         >
           {listRoles.map((role) => (
             <div

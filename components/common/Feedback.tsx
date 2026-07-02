@@ -153,7 +153,7 @@ function Feedback() {
             {feedbackLanguageData.tagLabel(lang)}
             <span className="text-red-500">*</span>
           </label>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {(["COMPLIMENT", "BUG", "REQUEST_FEATURE"] as FeedbackTag[]).map(
               (t) => (
                 <button
@@ -237,7 +237,7 @@ function Feedback() {
                   <button
                     type="button"
                     onClick={() => removeFile(index)}
-                    className="absolute right-1 top-2 flex h-4 w-4 items-center justify-center rounded-full bg-white text-red-500 shadow-md transition-transform hover:scale-110 hover:text-red-700"
+                    className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-full bg-white text-red-500 shadow-md transition-transform hover:scale-110 hover:text-red-700"
                   >
                     <IoCloseCircle size={24} />
                   </button>
