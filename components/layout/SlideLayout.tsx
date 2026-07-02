@@ -49,7 +49,7 @@ function SlideLayout({ children, onClose, loading }: LayoutProps) {
               handleClose();
             }}
             type="button"
-            className="text-lg  hover:bg-gray-300/50 w-11 h-11 md:w-8 md:h-8 rounded flex items-center justify-center font-semibold"
+            className="text-lg  hover:bg-gray-300/50 w-11 h-11 md:w-6 md:h-6 rounded flex items-center justify-center font-semibold"
           >
             <IoMdClose />
           </button>
