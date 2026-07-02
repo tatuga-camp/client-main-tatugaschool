@@ -168,6 +168,11 @@ function Navbar({
               menuList={menuLists}
               active={trigger}
               schoolId={schoolId}
+              onNavigate={() => {
+                if (window.innerWidth < 768) {
+                  setTrigger(false);
+                }
+              }}
             />
           </div>
         )}

@@ -11,9 +11,10 @@ type Props = {
   active: boolean;
   schoolId: string;
   menuList: { title: string; icon: ReactNode; url?: string }[];
+  onNavigate?: () => void;
 };
 
-function Sidebar({ active, schoolId, menuList }: Props) {
+function Sidebar({ active, schoolId, menuList, onNavigate }: Props) {
   const language = useGetLanguage();
   const router = useRouter();
   const selectMenu = router.query.menu;
@@ -60,6 +61,7 @@ function Sidebar({ active, schoolId, menuList }: Props) {
                     query: { ...router.query, menu: menu.title },
                   });
                 }
+                onNavigate?.();
               }}
               key={index}
               className={`flex ${
