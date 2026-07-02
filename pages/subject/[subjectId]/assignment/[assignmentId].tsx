@@ -370,18 +370,19 @@ function Index({
       <Head>
         <title>{title}</title>
       </Head>
+      <div className="flex h-dvh flex-col">
       <form
         onSubmit={
           selectMenu === "classwork" ? handleUpdateClasswork : undefined
         }
-        className="flex h-full flex-col bg-background-color font-Anuphan"
+        className="flex shrink-0 flex-col bg-background-color font-Anuphan"
       >
         <nav
           className={`w-full px-5 ${
             classwork?.status === "Published" ? "bg-white" : "bg-gray-50"
           } flex min-h-20 flex-wrap md:flex-nowrap items-center justify-between gap-y-2 border-b py-2 md:h-20 md:py-0`}
         >
-          <section className="flex w-full items-center gap-4">
+          <section className="flex w-full min-w-0 items-center gap-4">
             <Link
               href={{
                 pathname: `/subject/${subjectId}`,
@@ -395,9 +396,9 @@ function Index({
             <div className="flex h-10 w-10 items-center justify-center rounded-full border bg-primary-color/30 text-3xl text-primary-color">
               <MdAssignmentAdd />
             </div>
-            <h1 className="max-w-full truncate text-lg font-medium">
+            <h1 className="min-w-0 max-w-full flex-1 truncate text-lg font-medium">
               <input
-                className="border-b outline-none"
+                className="w-full border-b outline-none md:w-auto"
                 value={assignmentTitle}
                 onChange={(e) => {
                   setAssignmentTitle(e.target.value);
@@ -550,7 +551,7 @@ function Index({
       </form>
       <main
         ref={bodyRef}
-        className={`h-full max-h-screen w-full overflow-auto font-Anuphan`}
+        className={`min-h-0 w-full flex-1 overflow-auto font-Anuphan`}
       >
         {selectMenu === "classwork" && assignment.data && classwork && (
           <ClasswordView
@@ -596,6 +597,7 @@ function Index({
           />
         )}
       </main>
+      </div>
     </>
   );
 }

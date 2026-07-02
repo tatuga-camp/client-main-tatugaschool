@@ -158,7 +158,7 @@ function ClassworkView({
   };
 
   return (
-    <main className="flex h-full w-full">
+    <main className="flex h-full w-full flex-col md:flex-row">
       {configuringVideo && (
         <FileVideoConfigurator
           fileUrl={configuringVideo.url}
@@ -361,7 +361,7 @@ function ClassworkView({
             <div className="flex h-20 w-full items-center justify-center gap-3">
               <label
                 htmlFor="upload"
-                className="gradient-bg flex w-40 items-center justify-center gap-1 rounded-2xl px-3 py-1 text-lg text-white transition active:scale-105"
+                className="gradient-bg flex w-full max-w-40 items-center justify-center gap-1 rounded-2xl px-3 py-1 text-lg text-white transition active:scale-105 sm:w-40"
               >
                 <MdOutlineFileUpload />
                 {classworkViewDataLanguage.uploadButton(language.data ?? "en")}
@@ -391,7 +391,7 @@ function ClassworkView({
               <button
                 onClick={() => setTriggerLink(true)}
                 type="button"
-                className="gradient-bg flex w-40 items-center justify-center gap-1 rounded-2xl px-3 py-1 text-lg text-white transition active:scale-105"
+                className="gradient-bg flex w-full max-w-40 items-center justify-center gap-1 rounded-2xl px-3 py-1 text-lg text-white transition active:scale-105 sm:w-40"
               >
                 <MdLink /> Link
               </button>
@@ -450,7 +450,7 @@ function ClassworkView({
         )}
       </section>
       <section
-        className={`relative ${triggerSildeOption ? "h-screen w-20" : "h-max w-4/12"} flex flex-col gap-2 rounded-bl-lg border-b border-l bg-white pb-20 transition-width`}
+        className={`relative ${triggerSildeOption ? "h-20 w-full md:h-screen md:w-20" : "h-max w-full md:w-4/12"} flex flex-col gap-2 rounded-bl-lg border-b border-l bg-white pb-20 transition-width`}
       >
         <button
           type="button"
