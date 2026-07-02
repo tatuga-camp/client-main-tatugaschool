@@ -13,7 +13,7 @@ type LayoutProps = {
 
 function ClassroomLayout({ children, classroomId, schoolId }: LayoutProps) {
   const navbarRef = React.useRef<HTMLDivElement>(null);
-  const [active, setActive] = React.useState(true);
+  const [active, setActive] = React.useState<boolean | null>(null);
   const classroom = useGetClassroom({
     classId: classroomId,
   });
@@ -21,6 +21,11 @@ function ClassroomLayout({ children, classroomId, schoolId }: LayoutProps) {
   useClickOutside(navbarRef, () => {
     setActive(() => false); // Close the SubjectNavbar when clicking outside
   });
+  // Sidebar starts open on desktop/tablet, closed on phones; null renders a
+  // CSS-responsive default until the viewport is known (avoids SSR mismatch).
+  React.useEffect(() => {
+    setActive(window.innerWidth >= 768);
+  }, []);
   return (
     <section className="min-h-screen bg-background-color font-Anuphan">
       <div ref={navbarRef} className="sticky top-0 z-50">

@@ -21,8 +21,8 @@ import Feedback from "./common/Feedback";
 
 type Props = {
   schoolId?: string;
-  setTrigger: React.Dispatch<React.SetStateAction<boolean>>;
-  trigger: boolean;
+  setTrigger: React.Dispatch<React.SetStateAction<boolean | null>>;
+  trigger: boolean | null;
   breadcrumbs?: { label: string; href: string }[];
   menuLists: { title: string; icon: ReactNode; url?: string }[];
 };

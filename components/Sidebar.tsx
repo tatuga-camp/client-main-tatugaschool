@@ -8,7 +8,7 @@ import { decodeBlurhashToCanvas } from "../utils";
 import PlanBadge from "./common/PlanBadge";
 
 type Props = {
-  active: boolean;
+  active: boolean | null;
   schoolId: string;
   menuList: { title: string; icon: ReactNode; url?: string }[];
   onNavigate?: () => void;
@@ -26,7 +26,11 @@ function Sidebar({ active, schoolId, menuList, onNavigate }: Props) {
   return (
     <div
       className={`flex h-screen flex-col items-center justify-start gap-3 overflow-hidden border-r-2 border-black bg-white text-black transition-width ${
-        active ? "w-screen p-5 md:w-60" : "w-0 p-0"
+        active === null
+          ? "w-0 p-0 md:w-60 md:p-5"
+          : active
+            ? "w-screen p-5 md:w-60"
+            : "w-0 p-0"
       } `}
     >
       <header className="mt-16 flex w-full flex-col items-center justify-center gap-1 rounded-2xl bg-background-color p-2 md:h-32 2xl:h-40">

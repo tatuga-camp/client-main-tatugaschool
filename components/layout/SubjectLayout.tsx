@@ -26,13 +26,18 @@ function SubjectLayout({
     subjectId,
   });
   const navbarRef = useRef<HTMLDivElement>(null);
-  const [active, setActive] = React.useState(true);
+  const [active, setActive] = React.useState<boolean | null>(null);
   const language = useGetLanguage();
   const [triggerShowLock, setTriggerShowLock] = useState(false);
   // Use the custom hook to detect clicks outside the navbar
   useClickOutside(navbarRef, () => {
     setActive(() => false); // Close the SubjectNavbar when clicking outside
   });
+  // Sidebar starts open on desktop/tablet, closed on phones; null renders a
+  // CSS-responsive default until the viewport is known (avoids SSR mismatch).
+  React.useEffect(() => {
+    setActive(window.innerWidth >= 768);
+  }, []);
   React.useEffect(() => {
     document.body.style.overflow = "auto";
   }, []);
