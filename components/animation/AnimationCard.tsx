@@ -119,7 +119,7 @@ const AnimationCard = <T extends AnimationImageItemProps>({
     <div className="relative flex w-full items-center justify-center">
       <div className="absolute z-10 h-full w-[3px] rounded-full bg-black p-0" />
 
-      <div className="min-w-[42rem] max-w-2xl overflow-hidden">
+      <div className="w-full max-w-2xl overflow-hidden md:min-w-[42rem]">
         <motion.div
           style={{
             display: "flex",

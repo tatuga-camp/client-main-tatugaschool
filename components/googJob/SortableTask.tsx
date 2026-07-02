@@ -40,7 +40,7 @@ export default function SortableTask({
         <div
           {...listeners}
           style={{ cursor: isDragging ? "grabbing" : "grab" }}
-          className="absolute right-2 top-2 flex h-10 w-6 items-center justify-center rounded-2xl hover:bg-gray-300/50"
+          className="absolute right-0 top-0 flex h-11 w-11 md:right-2 md:top-2 md:h-10 md:w-6 items-center justify-center rounded-2xl hover:bg-gray-300/50"
         >
           <MdDragIndicator />
         </div>

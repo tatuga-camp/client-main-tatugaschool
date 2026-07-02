@@ -49,7 +49,7 @@ const VerifyEmailPage = ({ token }: { token: string | null }) => {
         <div className="mt-5 flex flex-col items-center text-center">
           {verificationStatus === "success" && (
             <>
-              <h2 className="mb-4 text-5xl font-bold text-green-600">
+              <h2 className="mb-4 text-3xl md:text-5xl font-bold text-green-600">
                 {verifyEmailLanguageData.successTitle(language.data ?? "en")}
               </h2>
               <p className="mb-8 text-lg text-[#6E6E6E]">
@@ -67,7 +67,7 @@ const VerifyEmailPage = ({ token }: { token: string | null }) => {
           )}
           {verificationStatus === "pending" && (
             <>
-              <h2 className="mb-4 animate-pulse text-5xl font-bold text-blue-600">
+              <h2 className="mb-4 animate-pulse text-3xl md:text-5xl font-bold text-blue-600">
                 {verifyEmailLanguageData.pendingTitle(language.data ?? "en")}
               </h2>
               <p className="mb-8 text-lg text-[#6E6E6E]">
@@ -79,7 +79,7 @@ const VerifyEmailPage = ({ token }: { token: string | null }) => {
           )}
           {verificationStatus === "no-token" && (
             <>
-              <h2 className="mb-4 flex items-center justify-center gap-1 text-5xl font-bold text-red-600">
+              <h2 className="mb-4 flex items-center justify-center gap-1 text-3xl md:text-5xl font-bold text-red-600">
                 {verifyEmailLanguageData.noTokenTitle(language.data ?? "en")}{" "}
                 <FiXCircle />
               </h2>
@@ -93,7 +93,7 @@ const VerifyEmailPage = ({ token }: { token: string | null }) => {
 
           {verificationStatus === "fail" && (
             <>
-              <h2 className="mb-4 text-5xl font-bold text-red-500">
+              <h2 className="mb-4 text-3xl md:text-5xl font-bold text-red-500">
                 {verifyEmailLanguageData.failTitle(language.data ?? "en")}
               </h2>
               <p className="mb-8 text-lg text-[#6E6E6E]">

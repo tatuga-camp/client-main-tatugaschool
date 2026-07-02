@@ -49,7 +49,7 @@ function AskNotification() {
             setIsNotification(true);
           }}
         >
-          <div className="flex h-96 w-96 flex-col items-center justify-center gap-2 rounded-2xl border bg-white p-3 font-Anuphan">
+          <div className="flex h-max max-h-[90dvh] w-full max-w-96 flex-col mx-4 md:mx-0 md:h-96 items-center justify-center gap-2 rounded-2xl border bg-white p-3 font-Anuphan">
             <div className="relative h-10 w-10">
               <Image
                 fill

@@ -65,7 +65,7 @@ export default function SortableColumn({
           <div className="flex gap-2">
             <button
               onClick={() => setIsEditModalOpen(true)}
-              className="text-blue-500 hover:text-blue-700"
+              className="flex h-11 w-11 items-center justify-center md:h-5 md:w-5 text-blue-500 hover:text-blue-700"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -79,7 +79,7 @@ export default function SortableColumn({
             </button>
             <button
               onClick={onDelete}
-              className="text-red-500 hover:text-red-700"
+              className="flex h-11 w-11 items-center justify-center md:h-5 md:w-5 text-red-500 hover:text-red-700"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
