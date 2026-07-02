@@ -123,7 +123,7 @@ function FileVideoConfigurator({
               onClick={onClose}
               className="h-11 w-11 flex items-center justify-center rounded-full hover:bg-gray-100 md:h-8 md:w-8"
             >
-              <MdClose />
+              <MdClose size={24} />
             </button>
           </div>
 
