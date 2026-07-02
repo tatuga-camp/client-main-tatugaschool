@@ -74,7 +74,7 @@ function SubjectLayout({
       </div>
       {triggerShowLock === true && (
         <div className="fixed bottom-0 left-0 right-0 top-0 z-50 flex h-dvh w-screen items-center justify-center bg-gray-400/90">
-          <div className="flex max-w-lg flex-col items-center justify-center gap-2 rounded-2xl bg-white p-8 text-center shadow-lg">
+          <div className="flex max-w-lg flex-col items-center justify-center gap-2 rounded-2xl bg-white p-5 text-center shadow-lg sm:p-8">
             <MdLock />
             <h2 className="text-2xl font-bold text-gray-800">
               {subjectIsLockedDataLanguage.title(language.data ?? "en")}
@@ -88,16 +88,16 @@ function SubjectLayout({
             <p className="mt-4 text-sm text-gray-500">
               ({subjectIsLockedDataLanguage.toUnlock(language.data ?? "en")})
             </p>
-            <div className="flex w-full justify-center gap-2">
+            <div className="flex w-full flex-col items-center justify-center gap-2 sm:flex-row">
               <Link
                 href={`/school/${subject.data?.schoolId}?menu=Subscription`}
-                className="main-button w-52"
+                className="main-button w-full max-w-52"
               >
                 {subjectIsLockedDataLanguage.renewButton(language.data ?? "en")}
               </Link>
               <button
                 onClick={() => setTriggerShowLock(false)}
-                className="second-button w-52 border"
+                className="second-button w-full max-w-52 border"
               >
                 {subjectIsLockedDataLanguage.understandButton(
                   language.data ?? "en",
