@@ -277,7 +277,7 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
           <div className="m-auto mt-5 flex items-center justify-center space-x-1 rounded-2xl bg-gray-200 p-2 md:mt-10">
             <button
               onClick={() => setMonthPrice(true)}
-              className={`w-40 rounded-2xl px-2 py-2 text-gray-600 transition-colors duration-300 sm:w-60 ${
+              className={`w-36 rounded-2xl px-2 py-2 text-gray-600 transition-colors duration-300 sm:w-60 ${
                 monthprice
                   ? "bg-white text-black shadow-md"
                   : "hover:bg-gray-300"
@@ -287,7 +287,7 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
             </button>
             <button
               onClick={() => setMonthPrice(false)}
-              className={`w-40 rounded-2xl px-2 py-2 text-gray-600 transition-colors duration-300 sm:w-60 ${
+              className={`w-36 rounded-2xl px-2 py-2 text-gray-600 transition-colors duration-300 sm:w-60 ${
                 !monthprice
                   ? "bg-white text-black shadow-md"
                   : "hover:bg-gray-300"

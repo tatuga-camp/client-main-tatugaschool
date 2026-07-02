@@ -64,7 +64,7 @@ function UpgradePlanModal({
 
   return (
     <PopupLayout onClose={onCancel}>
-      <div className="flex w-96 flex-col gap-4 rounded-2xl bg-white p-6 font-Anuphan">
+      <div className="flex w-full max-w-96 flex-col gap-4 rounded-2xl bg-white p-6 mx-4 md:mx-0 font-Anuphan">
         <h2 className="text-lg font-semibold text-icon-color">
           {UpgradeDataLanguage.modalTitle(lang)}
         </h2>
