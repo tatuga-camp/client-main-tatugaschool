@@ -40,7 +40,7 @@ function SlideLayout({ children, onClose, loading }: LayoutProps) {
         className={`
         ${
           triggerShow ? "translate-x-0" : "translate-x-full"
-        } transition-transform duration-300 md:w-10/12 lg:w-7/12
+        } transition-transform duration-300 w-full md:w-10/12 lg:w-7/12
         2xl:w-5/12 h-full flex justify-between flex-col relative bg-white`}
       >
         <header className="w-full p-2 flex justify-end">
@@ -49,7 +49,7 @@ function SlideLayout({ children, onClose, loading }: LayoutProps) {
               handleClose();
             }}
             type="button"
-            className="text-lg  hover:bg-gray-300/50 w-6 h-6 rounded flex items-center justify-center font-semibold"
+            className="text-lg  hover:bg-gray-300/50 w-11 h-11 md:w-8 md:h-8 rounded flex items-center justify-center font-semibold"
           >
             <IoMdClose />
           </button>
