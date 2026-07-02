@@ -372,7 +372,7 @@ function Index({ subjectId }: Props) {
       >
         <header className="mx-auto flex w-full items-center justify-center p-5 pb-10 md:max-w-screen-md lg:py-10 xl:max-w-screen-lg">
           <section
-            className={`relative z-30 flex h-96 w-full flex-col-reverse justify-between overflow-hidden p-5 shadow-inner md:aspect-[16/5] md:flex-row ${
+            className={`relative z-30 flex h-max min-h-72 md:h-96 w-full flex-col-reverse justify-between overflow-hidden p-5 shadow-inner md:aspect-[16/5] md:flex-row ${
               loading
                 ? "animate-pulse bg-gray-500/50"
                 : subject.data?.backgroundImage
@@ -476,7 +476,7 @@ function Index({ subjectId }: Props) {
                     />
                   </label>
                 </div>
-                <div className="mt-2 flex gap-3">
+                <div className="mt-2 flex flex-wrap gap-3">
                   {teacherOnSubjects.data ? (
                     <ListMemberCircle
                       setTrigger={setTriggerInviteTeacher}
@@ -488,7 +488,7 @@ function Index({ subjectId }: Props) {
                   <button
                     onClick={() => setTriggerQRCode((prev) => !prev)}
                     aria-label="QR Code Subject"
-                    className="flex w-40 items-center justify-center gap-1 rounded-2xl bg-white px-2 py-1 text-xs text-primary-color hover:bg-primary-color hover:text-white active:scale-110"
+                    className="flex w-full max-w-40 sm:w-40 items-center justify-center gap-1 rounded-2xl bg-white px-2 py-1 text-xs text-primary-color hover:bg-primary-color hover:text-white active:scale-110"
                   >
                     {subjectDataLanguage.qrCode(language.data ?? "en")}
                     <IoQrCode />
@@ -498,7 +498,7 @@ function Index({ subjectId }: Props) {
                       setTriggerLineConnect((prev) => !prev);
                     }}
                     aria-label="QR Code Subject"
-                    className="flex w-32 items-center justify-center gap-1 rounded-2xl bg-[#00B900] px-2 py-1 text-xs text-white active:scale-110"
+                    className="flex w-full max-w-32 sm:w-32 items-center justify-center gap-1 rounded-2xl bg-[#00B900] px-2 py-1 text-xs text-white active:scale-110"
                   >
                     {subject.data?.isVerifyLine === true ? (
                       <>

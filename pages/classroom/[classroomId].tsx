@@ -87,7 +87,7 @@ function Index({ classroomId }: { classroomId: string }) {
         schoolId={classroom.data?.schoolId}
       >
         <header
-          className={`flex flex-col p-12 pb-20 text-white ${
+          className={`flex flex-col p-5 pb-20 md:p-12 md:pb-20 text-white ${
             classroom.data.isAchieved ? "gradient-bg-success" : "gradient-bg"
           } `}
         >
@@ -105,7 +105,7 @@ function Index({ classroomId }: { classroomId: string }) {
 
           <div className="flex w-full items-start justify-between">
             <div className="w-max border-b border-b-white pb-2">
-              <h1 className="max-w-[60rem] break-words text-4xl font-bold">
+              <h1 className="max-w-[60rem] break-words text-2xl font-bold md:text-4xl">
                 ชั้นเรียน - {classroom.data.title}{" "}
               </h1>
               <p className="text-xl">{classroom.data.level}</p>
@@ -130,7 +130,7 @@ function Index({ classroomId }: { classroomId: string }) {
               </button>
             </div>
           </div>
-          <div className="flex gap-3 pt-5">
+          <div className="flex flex-wrap gap-3 pt-5">
             <div className="flex w-max items-center justify-center gap-1 rounded-full border bg-white px-2 py-1 text-black">
               <FaUsers />
               <span className="text-xs">
