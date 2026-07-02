@@ -397,7 +397,7 @@ function Grade({
                             odd ? "bg-gray-100" : "bg-white"
                           } group-hover:bg-gray-200`}
                         >
-                          <div className="flex h-14 w-96 items-center justify-between gap-2 px-4">
+                          <div className="flex h-14 w-48 items-center justify-between gap-2 px-4 md:w-96">
                             <div className="flex items-center gap-2">
                               <div className="relative h-8 w-8 overflow-hidden rounded-2xl ring-1 md:h-10 md:w-10">
                                 <Image

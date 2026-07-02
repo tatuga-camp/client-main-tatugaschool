@@ -268,7 +268,7 @@ function AttendanceTableSetting({ table, toast, onDelete }: Props) {
           )}
         </div>
         <div className="max-h-[35rem] w-full overflow-auto">
-          <table className="w-full table-fixed">
+          <table className="w-max min-w-full table-fixed">
             <thead>
               <tr>
                 <th>

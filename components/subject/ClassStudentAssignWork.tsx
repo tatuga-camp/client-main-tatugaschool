@@ -101,10 +101,11 @@ function ClassStudentAssignWork({
   return (
     <main className="mb-40 flex h-max w-full justify-center">
       <section
-        className={`flex h-full w-8/12 flex-col gap-2 border bg-white p-5 transition-width`}
+        className={`flex h-full w-full flex-col px-4 md:w-8/12 md:px-0 gap-2 border bg-white p-5 transition-width`}
       >
         <div className="flex w-full items-center justify-between gap-2 text-xl"></div>
-        <table className="w-full table-auto">
+        <div className="w-full overflow-x-auto">
+        <table className="w-max min-w-full table-auto">
           <thead>
             <tr>
               <th>
@@ -178,6 +179,7 @@ function ClassStudentAssignWork({
                   })}
           </tbody>
         </table>
+        </div>
       </section>
     </main>
   );

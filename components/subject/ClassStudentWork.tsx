@@ -533,7 +533,7 @@ function MultipleReview({ selectStudents, maxScore }: MultipleReviewProps) {
   return (
     <div className="flex h-full w-full grow flex-col items-center justify-center gap-5 font-Anuphan">
       {loading && (
-        <div className="w-96">
+        <div className="w-full max-w-96">
           <LoadingBar />
         </div>
       )}
@@ -1072,7 +1072,7 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
           })}
         </div>
         {selectMenu === "Works" && (
-          <ul className="grid h-max min-h-96 w-full min-w-96 grid-cols-1 gap-2 rounded-2xl bg-gray-100 p-5 xl:grid-cols-2">
+          <ul className="grid h-max min-h-96 w-full grid-cols-1 gap-2 rounded-2xl bg-gray-100 p-5 xl:grid-cols-2">
             {studentWork?.files?.map((file, index) => {
               return (
                 <FileStudentAssignmentCard
