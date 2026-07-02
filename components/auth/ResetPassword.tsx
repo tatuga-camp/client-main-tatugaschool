@@ -55,7 +55,7 @@ function ResetPassword({ token }: { token: string }) {
   };
 
   return (
-    <div className="flex h-max w-full max-w-96 flex-col items-center justify-start gap-2 rounded-2xl bg-white p-4 md:w-5/12">
+    <div className="flex h-max w-full max-w-96 md:max-w-none flex-col items-center justify-start gap-2 rounded-2xl bg-white p-4 md:w-5/12">
       <h2 className="text-xl font-semibold">Reset Password</h2>
 
       <p className="text-center text-sm">

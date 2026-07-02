@@ -108,7 +108,7 @@ function SubjectLayout({
         </div>
       )}
       {children}
-      <div className="fixed bottom-0 z-30 w-full">
+      <div className="fixed bottom-0 z-30 w-full bg-white pb-safe">
         <FooterSubject
           selectFooter={selectFooter}
           setSelectFooter={setSelectFooter}

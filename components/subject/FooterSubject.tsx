@@ -137,7 +137,7 @@ function FooterSubject({ setSelectFooter, selectFooter }: Props) {
 
   return (
     <div className="relative w-full max-w-full border-t-2 border-black">
-      <div className="flex h-14 w-full flex-nowrap items-center gap-3 overflow-x-auto bg-white px-3 pb-safe md:justify-center md:overflow-x-visible">
+      <div className="flex h-14 w-full flex-nowrap items-center gap-3 overflow-x-auto bg-white px-3 md:justify-center md:overflow-x-visible">
         {menuGroups.map((group) => {
           const isOpen = openGroup === group.group;
           const groupActive = group.items.some((i) => i.title === selectFooter);
@@ -163,7 +163,7 @@ function FooterSubject({ setSelectFooter, selectFooter }: Props) {
               </button>
 
               {isOpen && (
-                <div className="fixed bottom-16 left-1/2 z-50 mb-2 flex w-max max-w-[calc(100vw-1rem)] -translate-x-1/2 flex-col gap-2 rounded-2xl border border-gray-200 bg-white p-2 shadow-xl md:absolute md:bottom-full md:max-w-none">
+                <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom,0px))] left-1/2 z-50 mb-2 flex w-max max-w-[calc(100vw-1rem)] -translate-x-1/2 flex-col gap-2 rounded-2xl border border-gray-200 bg-white p-2 shadow-xl md:absolute md:bottom-full md:max-w-none">
                   {group.items.map((menu) => (
                     <button
                       key={menu.title}

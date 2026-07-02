@@ -14,7 +14,7 @@ function PopupLayout({ children, onClose }: LayoutProps) {
 
   return (
     <div
-      className={`fixed bottom-0 left-0 right-0 top-0 z-50 m-auto flex max-h-dvh items-center justify-center overflow-y-auto`}
+      className={`fixed bottom-0 left-0 right-0 top-0 z-50 m-auto flex max-h-dvh [align-items:safe_center] justify-center overflow-y-auto`}
     >
       {children}
       <footer

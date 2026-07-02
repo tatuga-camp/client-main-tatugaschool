@@ -379,7 +379,7 @@ function Index({
         <nav
           className={`w-full px-5 ${
             classwork?.status === "Published" ? "bg-white" : "bg-gray-50"
-          } flex min-h-20 flex-wrap items-center justify-between gap-y-2 border-b py-2 md:h-20 md:py-0`}
+          } flex min-h-20 flex-wrap md:flex-nowrap items-center justify-between gap-y-2 border-b py-2 md:h-20 md:py-0`}
         >
           <section className="flex w-full items-center gap-4">
             <Link

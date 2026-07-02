@@ -132,7 +132,7 @@ export const SignUpForm = (props: Props) => {
   return (
     <>
       {props.invitation && (
-        <div className="mb-4 flex w-full max-w-96 items-center gap-3 rounded-2xl bg-blue-50 p-4 text-left md:w-5/12">
+        <div className="mb-4 flex w-full max-w-96 md:max-w-none items-center gap-3 rounded-2xl bg-blue-50 p-4 text-left md:w-5/12">
           {props.invitation.schoolLogo && (
             <img
               src={props.invitation.schoolLogo}
@@ -149,13 +149,13 @@ export const SignUpForm = (props: Props) => {
         </div>
       )}
       {props.invitationError && (
-        <div className="mb-4 w-full max-w-96 rounded-2xl bg-yellow-50 p-4 text-sm text-yellow-900 md:w-5/12">
+        <div className="mb-4 w-full max-w-96 md:max-w-none rounded-2xl bg-yellow-50 p-4 text-sm text-yellow-900 md:w-5/12">
           {props.invitationError} — you can still create an account; ask the
           school admin to re-invite you.
         </div>
       )}
       <form
-        className="flex w-full max-w-96 flex-col items-center gap-4 rounded-2xl bg-white p-6 sm:p-10 text-center shadow-[0_12px_24px_rgba(145,158,171,0.12)] md:w-5/12"
+        className="flex w-full max-w-96 md:max-w-none flex-col items-center gap-4 rounded-2xl bg-white p-6 sm:p-10 text-center shadow-[0_12px_24px_rgba(145,158,171,0.12)] md:w-5/12"
         onSubmit={handleSignUp}
       >
       <h2 className="text-[24px] font-bold">

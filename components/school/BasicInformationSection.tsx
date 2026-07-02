@@ -49,10 +49,10 @@ const BasicInformationSection = ({ school }: { school: School }) => {
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-6">
-      <div className="col-span-2">
+      <div className="col-span-1 sm:col-span-2">
         <ProfileUpload school={school} updateSchool={updateSchool} />
       </div>
-      <div className="col-span-4 w-full space-y-4 rounded-xl bg-white p-6">
+      <div className="col-span-1 sm:col-span-2 md:col-span-4 w-full space-y-4 rounded-xl bg-white p-6">
         <ProfileForm school={school} updateSchool={updateSchool} />
         <h1 className="mt-10 text-lg font-medium sm:text-xl">
           {schoolDataLanguage.dangerZoneTitle(language.data ?? "en")}
