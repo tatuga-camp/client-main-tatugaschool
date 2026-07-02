@@ -366,7 +366,7 @@ const VideoConfigurator = ({ assignment, onClose }: Props) => {
                 </span>
                 <button
                   onClick={() => setIsAddingQuestion(false)}
-                  className="flex h-7 w-7 items-center justify-center rounded-full text-slate-400 transition hover:bg-white hover:text-rose-500"
+                  className="flex h-11 w-11 md:h-7 md:w-7 items-center justify-center rounded-full text-slate-400 transition hover:bg-white hover:text-rose-500"
                   aria-label="Close"
                 >
                   <MdClose />
@@ -409,7 +409,7 @@ const VideoConfigurator = ({ assignment, onClose }: Props) => {
                             setCorrectOptions([...correctOptions, idx]);
                           }
                         }}
-                        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold transition ${
+                        className={`flex h-11 w-11 md:h-7 md:w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold transition ${
                           isCorrect
                             ? "bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow"
                             : "bg-slate-100 text-slate-500 hover:bg-slate-200"
@@ -445,7 +445,7 @@ const VideoConfigurator = ({ assignment, onClose }: Props) => {
                               .map((c) => (c > idx ? c - 1 : c)),
                           );
                         }}
-                        className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition hover:bg-rose-50 hover:text-rose-500 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent"
+                        className="flex h-11 w-11 md:h-7 md:w-7 items-center justify-center rounded-lg text-slate-400 transition hover:bg-rose-50 hover:text-rose-500 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent"
                         disabled={options.length <= 2}
                         aria-label="Delete option"
                       >
@@ -507,14 +507,14 @@ const VideoConfigurator = ({ assignment, onClose }: Props) => {
                     <div className="flex items-center gap-1 opacity-70 transition group-hover:opacity-100">
                       <button
                         onClick={() => handleEditQuestion(q)}
-                        className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition hover:bg-blue-50 hover:text-blue-500"
+                        className="flex h-11 w-11 md:h-7 md:w-7 items-center justify-center rounded-lg text-slate-400 transition hover:bg-blue-50 hover:text-blue-500"
                         aria-label="Edit"
                       >
                         <MdEdit />
                       </button>
                       <button
                         onClick={() => handleDeleteQuestion(q.id)}
-                        className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition hover:bg-rose-50 hover:text-rose-500"
+                        className="flex h-11 w-11 md:h-7 md:w-7 items-center justify-center rounded-lg text-slate-400 transition hover:bg-rose-50 hover:text-rose-500"
                         aria-label="Delete"
                       >
                         <MdDelete />

@@ -114,16 +114,16 @@ function FileVideoConfigurator({
         </div>
 
         {/* Right Side: Configuration */}
-        <div className="flex h-full w-full flex-col gap-4 overflow-y-auto border-l pl-5 md:w-1/3">
+        <div className="flex h-full w-full flex-col gap-4 overflow-y-auto md:border-l md:pl-5 md:w-1/3">
           <div className="flex items-start justify-between">
             <h2 className="text-xl font-semibold">
               {videoConfigLanguage.configuration(language)}
             </h2>
             <button
               onClick={onClose}
-              className="rounded-full p-1 hover:bg-gray-100"
+              className="h-11 w-11 flex items-center justify-center rounded-full hover:bg-gray-100 md:h-8 md:w-8"
             >
-              <MdClose size={24} />
+              <MdClose />
             </button>
           </div>
 
