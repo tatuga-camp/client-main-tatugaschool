@@ -379,7 +379,7 @@ function Index({
         <nav
           className={`w-full px-5 ${
             classwork?.status === "Published" ? "bg-white" : "bg-gray-50"
-          } flex h-20 items-center justify-between border-b`}
+          } flex min-h-20 flex-wrap items-center justify-between gap-y-2 border-b py-2 md:h-20 md:py-0`}
         >
           <section className="flex w-full items-center gap-4">
             <Link
@@ -411,7 +411,7 @@ function Index({
                 <button
                   type="submit"
                   value={"Published" as SummitValue}
-                  className="gradient-bg h-10 w-max min-w-40 rounded-2xl rounded-r-none p-2 text-base font-medium text-white opacity-85 hover:opacity-100"
+                  className="gradient-bg h-10 w-max min-w-0 rounded-2xl rounded-r-none p-2 text-base font-medium text-white opacity-85 hover:opacity-100 md:min-w-40"
                 >
                   {classworkHeadMenuBarDataLanguage.button.publish(
                     language.data ?? "en",
@@ -421,7 +421,7 @@ function Index({
                 <button
                   type="submit"
                   value={"Save Change" as SummitValue}
-                  className="gradient-bg h-10 w-max min-w-40 rounded-2xl rounded-r-none p-2 text-base font-medium text-white opacity-85 hover:opacity-100"
+                  className="gradient-bg h-10 w-max min-w-0 rounded-2xl rounded-r-none p-2 text-base font-medium text-white opacity-85 hover:opacity-100 md:min-w-40"
                 >
                   {classworkHeadMenuBarDataLanguage.button.saveChange(
                     language.data ?? "en",
@@ -444,7 +444,7 @@ function Index({
                   }}
                   ref={divRef}
                 >
-                  <div className="absolute -right-40 top-8 z-40 h-max w-60 rounded-2xl border bg-white p-1 drop-shadow">
+                  <div className="absolute right-0 top-8 z-40 h-max w-60 max-w-[calc(100vw-2rem)] rounded-2xl border bg-white p-1 drop-shadow md:-right-40">
                     {menuClassworkList.map((menu, index) => {
                       const disabled =
                         (menu.title === "Mark as Draft" &&
@@ -507,7 +507,7 @@ function Index({
           <ProgressBar mode="indeterminate" style={{ height: "6px" }} />
         )}
 
-        <div className="flex h-14 w-full items-center justify-start border-b bg-white px-10">
+        <div className="flex h-14 w-full items-center justify-start overflow-x-auto border-b bg-white px-3 md:px-10">
           {menuLists
             .filter((menu) =>
               assignment.data?.type === "Material"
