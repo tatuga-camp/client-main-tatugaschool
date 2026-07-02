@@ -101,7 +101,7 @@ function ClassStudentAssignWork({
   return (
     <main className="mb-40 flex h-max w-full justify-center">
       <section
-        className={`flex h-full w-full flex-col px-4 md:w-8/12 md:px-0 gap-2 border bg-white p-5 transition-width`}
+        className={`flex h-full w-full flex-col md:w-8/12 gap-2 border bg-white p-5 transition-width`}
       >
         <div className="flex w-full items-center justify-between gap-2 text-xl"></div>
         <div className="w-full overflow-x-auto">
