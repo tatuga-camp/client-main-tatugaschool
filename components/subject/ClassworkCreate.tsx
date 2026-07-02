@@ -285,8 +285,8 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
 
   return (
     <form onSubmit={handleCreateClasswork} className="flex h-full flex-col">
-      <nav className="flex h-20 w-full items-center justify-between border-b bg-white px-5">
-        <section className="flex items-center gap-4">
+      <nav className="flex min-h-20 w-full flex-wrap items-center justify-between gap-y-2 border-b bg-white px-5 py-2 md:h-20 md:flex-nowrap md:py-0">
+        <section className="flex w-full min-w-0 items-center gap-4">
           <button
             type="button"
             onClick={onClose}
@@ -297,11 +297,11 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
           <div className="flex h-10 w-10 items-center justify-center rounded-full border bg-primary-color/30 text-3xl text-primary-color">
             <MdAssignmentAdd />
           </div>
-          <h1 className="max-w-full truncate text-lg font-medium">
+          <h1 className="min-w-0 max-w-full flex-1 truncate text-lg font-medium">
             <input
               required
               placeholder="Type your title here."
-              className="border-b outline-none"
+              className="w-full border-b outline-none"
               value={classworkData.title}
               onChange={(e) => {
                 setClassworkData((prev) => {
@@ -319,7 +319,7 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
             type="submit"
             value="Published"
             disabled={loading}
-            className="gradient-bg h-10 w-40 rounded-2xl rounded-r-none p-2 text-base font-medium text-white opacity-85 hover:opacity-100"
+            className="gradient-bg h-10 w-max min-w-0 rounded-2xl rounded-r-none p-2 text-base font-medium text-white opacity-85 hover:opacity-100 md:min-w-40"
           >
             {classworkHeadMenuBarDataLanguage.button.publish(
               language.data ?? "en",

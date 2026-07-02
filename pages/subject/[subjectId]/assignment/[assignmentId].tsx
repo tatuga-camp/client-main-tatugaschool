@@ -371,232 +371,234 @@ function Index({
         <title>{title}</title>
       </Head>
       <div className="flex h-dvh flex-col">
-      <form
-        onSubmit={
-          selectMenu === "classwork" ? handleUpdateClasswork : undefined
-        }
-        className="flex shrink-0 flex-col bg-background-color font-Anuphan"
-      >
-        <nav
-          className={`w-full px-5 ${
-            classwork?.status === "Published" ? "bg-white" : "bg-gray-50"
-          } flex min-h-20 flex-wrap md:flex-nowrap items-center justify-between gap-y-2 border-b py-2 md:h-20 md:py-0`}
+        <form
+          onSubmit={
+            selectMenu === "classwork" ? handleUpdateClasswork : undefined
+          }
+          className="flex shrink-0 flex-col bg-background-color font-Anuphan"
         >
-          <section className="flex w-full min-w-0 items-center gap-4">
-            <Link
-              href={{
-                pathname: `/subject/${subjectId}`,
-                query: { menu: "Classwork" as MenuSubject },
-              }}
-              className="flex h-10 w-10 items-center justify-center rounded-full border text-3xl transition hover:bg-gray-300/50 active:scale-105"
-            >
-              <IoClose />
-            </Link>
-
-            <div className="flex h-10 w-10 items-center justify-center rounded-full border bg-primary-color/30 text-3xl text-primary-color">
-              <MdAssignmentAdd />
-            </div>
-            <h1 className="min-w-0 max-w-full flex-1 truncate text-lg font-medium">
-              <input
-                className="w-full border-b outline-none md:w-auto"
-                value={assignmentTitle}
-                onChange={(e) => {
-                  setAssignmentTitle(e.target.value);
+          <nav
+            className={`w-full px-5 ${
+              classwork?.status === "Published" ? "bg-white" : "bg-gray-50"
+            } flex min-h-20 flex-wrap items-center justify-between gap-y-2 border-b py-2 md:h-20 md:flex-nowrap md:py-0`}
+          >
+            <section className="flex w-full min-w-0 items-center gap-4">
+              <Link
+                href={{
+                  pathname: `/subject/${subjectId}`,
+                  query: { menu: "Classwork" as MenuSubject },
                 }}
-              />
-            </h1>
-          </section>
-          {selectMenu === "classwork" && (
-            <section className="flex items-center gap-[2px]">
-              {classwork?.status === "Draft" ? (
-                <button
-                  type="submit"
-                  value={"Published" as SummitValue}
-                  className="gradient-bg h-10 w-max min-w-0 rounded-2xl rounded-r-none p-2 text-base font-medium text-white opacity-85 hover:opacity-100 md:min-w-40"
-                >
-                  {classworkHeadMenuBarDataLanguage.button.publish(
-                    language.data ?? "en",
-                  )}
-                </button>
-              ) : (
-                <button
-                  type="submit"
-                  value={"Save Change" as SummitValue}
-                  className="gradient-bg h-10 w-max min-w-0 rounded-2xl rounded-r-none p-2 text-base font-medium text-white opacity-85 hover:opacity-100 md:min-w-40"
-                >
-                  {classworkHeadMenuBarDataLanguage.button.saveChange(
-                    language.data ?? "en",
-                  )}
-                </button>
-              )}
-              <button
-                onClick={() => setTriggerOption((prev) => !prev)}
-                type="button"
-                className="gradient-bg h-10 w-max rounded-2xl rounded-l-none p-2 text-base font-medium text-white"
+                className="flex h-10 w-10 items-center justify-center rounded-full border text-3xl transition hover:bg-gray-300/50 active:scale-105"
               >
-                <IoChevronDownSharp />
-              </button>
+                <IoClose />
+              </Link>
 
-              {triggerOption && (
-                <div
-                  style={{
-                    position: "absolute",
-                    ...adjustedStyle,
+              <div className="flex h-10 w-10 items-center justify-center rounded-full border bg-primary-color/30 text-3xl text-primary-color">
+                <MdAssignmentAdd />
+              </div>
+              <h1 className="min-w-0 max-w-full flex-1 truncate text-lg font-medium">
+                <input
+                  className="w-full border-b outline-none"
+                  value={assignmentTitle}
+                  onChange={(e) => {
+                    setAssignmentTitle(e.target.value);
                   }}
-                  ref={divRef}
-                >
-                  <div className="absolute right-0 top-8 z-40 h-max w-60 max-w-[calc(100vw-2rem)] rounded-2xl border bg-white p-1 drop-shadow md:-right-40">
-                    {menuClassworkList.map((menu, index) => {
-                      const disabled =
-                        (menu.title === "Mark as Draft" &&
-                          classwork?.status === "Draft") ||
-                        (menu.title === "Publish" &&
-                          classwork?.status === "Published");
-                      let summitValue: SummitValue = "Published";
-
-                      if (menu.title === "Save Change") {
-                        summitValue = "Save Change";
-                      }
-                      if (menu.title === "Mark as Draft") {
-                        summitValue = "Mark as Draft";
-                      }
-                      if (menu.title === "Publish") {
-                        summitValue = "Published";
-                      }
-                      return (
-                        <button
-                          onClick={() => {
-                            if (menu.title === "Delete") {
-                              handleDeleteAssignment();
-                            }
-                          }}
-                          disabled={disabled}
-                          type={
-                            menu.title === "Publish" ||
-                            menu.title === "Save Change" ||
-                            menu.title === "Mark as Draft"
-                              ? "submit"
-                              : "button"
-                          }
-                          value={summitValue}
-                          key={index}
-                          className={`flex w-60 items-center justify-start gap-10 p-2 text-base font-medium ${
-                            menu.title === "Delete"
-                              ? "text-red-500 hover:bg-red-500 hover:text-white"
-                              : disabled
-                                ? "bg-gray-200 text-white"
-                                : "text-gray-500 hover:bg-primary-color hover:text-white"
-                          } `}
-                        >
-                          {menu.icon}
-                          {classworkHeadMenuBarDataLanguage.button[
-                            menu.value as keyof typeof classworkHeadMenuBarDataLanguage.button
-                          ](language.data ?? "en")}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
+                />
+              </h1>
             </section>
-          )}
-        </nav>
-        {(loading ||
-          assignment.isLoading ||
-          deleteFileAssignment.isPending ||
-          deleteAssignment.isPending) && (
-          <ProgressBar mode="indeterminate" style={{ height: "6px" }} />
-        )}
-
-        <div className="flex h-14 w-full items-center justify-start overflow-x-auto border-b bg-white px-3 md:px-10">
-          {menuLists
-            .filter((menu) =>
-              assignment.data?.type === "Material"
-                ? menu.query !== "studentwork"
-                : true,
-            )
-            .map((menu, index) => {
-              return (
-                <Link
-                  href={{
-                    pathname: `/subject/${subjectId}/assignment/${assignmentId}`,
-                    query: { menu: menu.query },
-                  }}
-                  onClick={() => setSelectMenu(menu.query)}
-                  key={index}
-                  className={`flex h-full shrink-0 flex-col justify-center gap-0 px-4 py-2 md:p-2 xl:px-10 ${
-                    selectMenu === menu.query
-                      ? "bg-primary-color text-white hover:bg-primary-color"
-                      : "bg-white text-black hover:bg-gray-100"
-                  } `}
+            {selectMenu === "classwork" && (
+              <section className="flex items-center gap-[2px]">
+                {classwork?.status === "Draft" ? (
+                  <button
+                    type="submit"
+                    value={"Published" as SummitValue}
+                    className="gradient-bg h-10 w-max min-w-0 rounded-2xl rounded-r-none p-2 text-base font-medium text-white opacity-85 hover:opacity-100 md:min-w-40"
+                  >
+                    {classworkHeadMenuBarDataLanguage.button.publish(
+                      language.data ?? "en",
+                    )}
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    value={"Save Change" as SummitValue}
+                    className="gradient-bg h-10 w-max min-w-0 rounded-2xl rounded-r-none p-2 text-base font-medium text-white opacity-85 hover:opacity-100 md:min-w-40"
+                  >
+                    {classworkHeadMenuBarDataLanguage.button.saveChange(
+                      language.data ?? "en",
+                    )}
+                  </button>
+                )}
+                <button
+                  onClick={() => setTriggerOption((prev) => !prev)}
+                  type="button"
+                  className="gradient-bg h-10 w-max rounded-2xl rounded-l-none p-2 text-base font-medium text-white"
                 >
-                  <h1 className="whitespace-nowrap">
-                    {classworkHeadMenuBarDataLanguage.title[
-                      menu.query as keyof typeof classworkHeadMenuBarDataLanguage.title
-                    ](language.data ?? "en")}
-                  </h1>
-                  <span
-                    className={`hidden whitespace-nowrap text-xs md:block ${
-                      selectMenu === menu.query ? "text-white" : "text-gray-400"
+                  <IoChevronDownSharp />
+                </button>
+
+                {triggerOption && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      ...adjustedStyle,
+                    }}
+                    ref={divRef}
+                  >
+                    <div className="absolute right-0 top-8 z-40 h-max w-60 max-w-[calc(100vw-2rem)] rounded-2xl border bg-white p-1 drop-shadow md:-right-40">
+                      {menuClassworkList.map((menu, index) => {
+                        const disabled =
+                          (menu.title === "Mark as Draft" &&
+                            classwork?.status === "Draft") ||
+                          (menu.title === "Publish" &&
+                            classwork?.status === "Published");
+                        let summitValue: SummitValue = "Published";
+
+                        if (menu.title === "Save Change") {
+                          summitValue = "Save Change";
+                        }
+                        if (menu.title === "Mark as Draft") {
+                          summitValue = "Mark as Draft";
+                        }
+                        if (menu.title === "Publish") {
+                          summitValue = "Published";
+                        }
+                        return (
+                          <button
+                            onClick={() => {
+                              if (menu.title === "Delete") {
+                                handleDeleteAssignment();
+                              }
+                            }}
+                            disabled={disabled}
+                            type={
+                              menu.title === "Publish" ||
+                              menu.title === "Save Change" ||
+                              menu.title === "Mark as Draft"
+                                ? "submit"
+                                : "button"
+                            }
+                            value={summitValue}
+                            key={index}
+                            className={`flex w-60 items-center justify-start gap-10 p-2 text-base font-medium ${
+                              menu.title === "Delete"
+                                ? "text-red-500 hover:bg-red-500 hover:text-white"
+                                : disabled
+                                  ? "bg-gray-200 text-white"
+                                  : "text-gray-500 hover:bg-primary-color hover:text-white"
+                            } `}
+                          >
+                            {menu.icon}
+                            {classworkHeadMenuBarDataLanguage.button[
+                              menu.value as keyof typeof classworkHeadMenuBarDataLanguage.button
+                            ](language.data ?? "en")}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </section>
+            )}
+          </nav>
+          {(loading ||
+            assignment.isLoading ||
+            deleteFileAssignment.isPending ||
+            deleteAssignment.isPending) && (
+            <ProgressBar mode="indeterminate" style={{ height: "6px" }} />
+          )}
+
+          <div className="flex h-14 w-full items-center justify-start overflow-x-auto border-b bg-white px-3 md:px-10">
+            {menuLists
+              .filter((menu) =>
+                assignment.data?.type === "Material"
+                  ? menu.query !== "studentwork"
+                  : true,
+              )
+              .map((menu, index) => {
+                return (
+                  <Link
+                    href={{
+                      pathname: `/subject/${subjectId}/assignment/${assignmentId}`,
+                      query: { menu: menu.query },
+                    }}
+                    onClick={() => setSelectMenu(menu.query)}
+                    key={index}
+                    className={`flex h-full shrink-0 flex-col justify-center gap-0 px-4 py-2 md:p-2 xl:px-10 ${
+                      selectMenu === menu.query
+                        ? "bg-primary-color text-white hover:bg-primary-color"
+                        : "bg-white text-black hover:bg-gray-100"
                     } `}
                   >
-                    {classworkHeadMenuBarDataLanguage.description[
-                      menu.query as keyof typeof classworkHeadMenuBarDataLanguage.description
-                    ](language.data ?? "en")}
-                  </span>
-                </Link>
-              );
-            })}
-        </div>
-      </form>
-      <main
-        ref={bodyRef}
-        className={`min-h-0 w-full flex-1 overflow-auto font-Anuphan`}
-      >
-        {selectMenu === "classwork" && assignment.data && classwork && (
-          <ClasswordView
-            skills={assignment?.data?.skills}
-            classwork={classwork}
-            uniqueTags={uniqueTags}
-            onChange={(d) =>
-              setClasswork((prev) => {
-                if (!prev) return;
-                return { ...prev, ...d };
-              })
-            }
-            subjectId={subjectId}
-            schoolId={assignment.data?.schoolId}
-            files={files}
-            onDeleteFile={(file) => handleDeleteFile(file)}
-            onUploadFile={(file) => handleUploadFile(file)}
-            onUpdateFile={(file) => handleUpdateFile(file)}
-          />
-        )}
-        {selectMenu === "studentwork" && (
-          <ClassStudentWork
-            assignmentId={assignmentId}
-            onScroll={() =>
-              bodyRef.current?.scrollTo({
-                top: 0,
-              })
-            }
-          />
-        )}
-        {selectMenu === "manageassigning" && (
-          <ClassStudentAssignWork
-            assignmentId={assignmentId}
-            subjectId={subjectId}
-          />
-        )}
-        {selectMenu === "exportclasswork" && assignment.data && (
-          <ClassworkExport
-            assignment={assignment.data}
-            files={assignment.data.files}
-            schoolId={assignment.data.schoolId}
-            currentSubjectId={subjectId}
-          />
-        )}
-      </main>
+                    <h1 className="whitespace-nowrap">
+                      {classworkHeadMenuBarDataLanguage.title[
+                        menu.query as keyof typeof classworkHeadMenuBarDataLanguage.title
+                      ](language.data ?? "en")}
+                    </h1>
+                    <span
+                      className={`hidden whitespace-nowrap text-xs md:block ${
+                        selectMenu === menu.query
+                          ? "text-white"
+                          : "text-gray-400"
+                      } `}
+                    >
+                      {classworkHeadMenuBarDataLanguage.description[
+                        menu.query as keyof typeof classworkHeadMenuBarDataLanguage.description
+                      ](language.data ?? "en")}
+                    </span>
+                  </Link>
+                );
+              })}
+          </div>
+        </form>
+        <main
+          ref={bodyRef}
+          className={`min-h-0 w-full flex-1 overflow-auto font-Anuphan`}
+        >
+          {selectMenu === "classwork" && assignment.data && classwork && (
+            <ClasswordView
+              skills={assignment?.data?.skills}
+              classwork={classwork}
+              uniqueTags={uniqueTags}
+              onChange={(d) =>
+                setClasswork((prev) => {
+                  if (!prev) return;
+                  return { ...prev, ...d };
+                })
+              }
+              subjectId={subjectId}
+              schoolId={assignment.data?.schoolId}
+              files={files}
+              onDeleteFile={(file) => handleDeleteFile(file)}
+              onUploadFile={(file) => handleUploadFile(file)}
+              onUpdateFile={(file) => handleUpdateFile(file)}
+            />
+          )}
+          {selectMenu === "studentwork" && (
+            <ClassStudentWork
+              assignmentId={assignmentId}
+              onScroll={() =>
+                bodyRef.current?.scrollTo({
+                  top: 0,
+                })
+              }
+            />
+          )}
+          {selectMenu === "manageassigning" && (
+            <ClassStudentAssignWork
+              assignmentId={assignmentId}
+              subjectId={subjectId}
+            />
+          )}
+          {selectMenu === "exportclasswork" && assignment.data && (
+            <ClassworkExport
+              assignment={assignment.data}
+              files={assignment.data.files}
+              schoolId={assignment.data.schoolId}
+              currentSubjectId={subjectId}
+            />
+          )}
+        </main>
       </div>
     </>
   );
