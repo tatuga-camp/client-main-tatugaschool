@@ -132,7 +132,7 @@ export const SignUpForm = (props: Props) => {
   return (
     <>
       {props.invitation && (
-        <div className="mb-4 flex w-96 items-center gap-3 rounded-2xl bg-blue-50 p-4 text-left md:w-5/12">
+        <div className="mb-4 flex w-full max-w-96 items-center gap-3 rounded-2xl bg-blue-50 p-4 text-left md:w-5/12">
           {props.invitation.schoolLogo && (
             <img
               src={props.invitation.schoolLogo}
@@ -149,13 +149,13 @@ export const SignUpForm = (props: Props) => {
         </div>
       )}
       {props.invitationError && (
-        <div className="mb-4 w-96 rounded-2xl bg-yellow-50 p-4 text-sm text-yellow-900 md:w-5/12">
+        <div className="mb-4 w-full max-w-96 rounded-2xl bg-yellow-50 p-4 text-sm text-yellow-900 md:w-5/12">
           {props.invitationError} — you can still create an account; ask the
           school admin to re-invite you.
         </div>
       )}
       <form
-        className="flex w-96 flex-col items-center gap-4 rounded-2xl bg-white p-10 text-center shadow-[0_12px_24px_rgba(145,158,171,0.12)] md:w-5/12"
+        className="flex w-full max-w-96 flex-col items-center gap-4 rounded-2xl bg-white p-6 sm:p-10 text-center shadow-[0_12px_24px_rgba(145,158,171,0.12)] md:w-5/12"
         onSubmit={handleSignUp}
       >
       <h2 className="text-[24px] font-bold">
@@ -184,7 +184,7 @@ export const SignUpForm = (props: Props) => {
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
             required
-            className="main-input w-80"
+            className="main-input w-full"
           />
         </label>
         <label className="relative flex h-max flex-col items-start">
@@ -200,10 +200,10 @@ export const SignUpForm = (props: Props) => {
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
             required
-            className="main-input w-80"
+            className="main-input w-full"
           />
         </label>
-        <label className="relative flex h-max w-80 flex-col items-start">
+        <label className="relative flex h-max w-full flex-col items-start">
           <span className="text-sm">
             {signUpLanguageData.phone(language.data ?? "en")}
           </span>
@@ -229,11 +229,11 @@ export const SignUpForm = (props: Props) => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="main-input w-80"
+            className="main-input w-full"
           />
         </label>
         {props.provider !== "google" && (
-          <label className="relative flex h-max w-80 flex-col items-start">
+          <label className="relative flex h-max w-full flex-col items-start">
             <span className="text-sm">
               {signUpLanguageData.password(language.data ?? "en")}
             </span>
@@ -249,7 +249,7 @@ export const SignUpForm = (props: Props) => {
           </label>
         )}
         {props.provider !== "google" && (
-          <label className="relative flex h-max w-80 flex-col items-start">
+          <label className="relative flex h-max w-full flex-col items-start">
             <span className="text-sm">
               {signUpLanguageData.confirmPassword(language.data ?? "en")}
             </span>
@@ -284,7 +284,7 @@ export const SignUpForm = (props: Props) => {
         disabled={!isAgree}
         className={`p-5 ${
           isAgree ? "bg-secondary-color hover:bg-primary-color" : "bg-gray-400"
-        } flex h-5 w-80 items-center justify-center rounded font-semibold text-white transition duration-300`}
+        } flex h-11 w-full items-center justify-center rounded font-semibold text-white transition duration-300`}
       >
         {signUpLanguageData.createAccount(language.data ?? "en")}
       </button>
@@ -292,7 +292,7 @@ export const SignUpForm = (props: Props) => {
         <button
           type="button"
           onClick={handleGoogleLogin}
-          className="second-button flex w-80 items-center justify-center gap-2 border"
+          className="second-button flex w-full items-center justify-center gap-2 border"
         >
           <FcGoogle />
           {signUpLanguageData.createAccountGoogle(language.data ?? "en")}
