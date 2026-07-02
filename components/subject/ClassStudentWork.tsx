@@ -199,11 +199,11 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
     }
   }, [studentOnAssignments.isSuccess]);
   return (
-    <main className="flex h-max w-full">
+    <main className="flex h-max w-full flex-col md:flex-row">
       <section
         className={`${
-          triggerHideStudentList ? "w-20" : "w-8/12"
-        } sticky top-0 flex h-max max-h-screen min-h-screen flex-col gap-2 overflow-auto border-r bg-white p-5 pb-40 transition-width`}
+          triggerHideStudentList ? "w-full md:w-20" : "w-full md:w-8/12"
+        } static top-0 flex h-max max-h-[70vh] min-h-0 flex-col gap-2 overflow-auto border-b bg-white p-5 pb-10 transition-width md:sticky md:max-h-screen md:min-h-screen md:border-b-0 md:border-r md:pb-40`}
       >
         <div className="flex w-full items-center justify-between gap-2 text-xl">
           {!triggerHideStudentList && (
@@ -253,7 +253,7 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
           </button>
         </div>
         <div
-          className={`${triggerHideStudentList ? "hidden" : "w-full"} overflow-auto pb-40`}
+          className={`${triggerHideStudentList ? "hidden" : "w-full"} overflow-auto pb-10 md:pb-40`}
         >
           <table className="w-max min-w-full">
             <thead>
@@ -356,7 +356,7 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
           </table>
         </div>
       </section>
-      <section className="flex h-max min-h-screen w-full flex-col items-start justify-start">
+      <section className="flex h-max min-h-0 w-full flex-col items-start justify-start md:min-h-screen">
         {selectStudentWork &&
         assignment.data &&
         !studentData?.some((s) => s.select === true) ? (
@@ -540,7 +540,7 @@ function MultipleReview({ selectStudents, maxScore }: MultipleReviewProps) {
       {selectStudents.length > 0 ? (
         <form
           onSubmit={handleSaveChange}
-          className="flex h-full items-center justify-center gap-2"
+          className="flex h-full flex-wrap items-center justify-center gap-2 px-4"
         >
           <div className="w-40">
             <InputNumber
@@ -811,7 +811,7 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
         </div>
       )}
       <div className="flex w-full flex-col">
-        <header className="flex h-max w-full items-center justify-between gap-5 bg-white p-2 px-4">
+        <header className="flex h-max w-full flex-wrap items-center justify-between gap-2 bg-white p-2 px-4 md:gap-5">
           <div className="flex h-14 w-max items-center gap-2 pl-2">
             <div className="relative h-10 w-10 overflow-hidden rounded-2xl ring-1">
               <Image

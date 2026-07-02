@@ -524,19 +524,19 @@ function Index({
                   }}
                   onClick={() => setSelectMenu(menu.query)}
                   key={index}
-                  className={`flex h-full flex-col justify-center gap-0 p-2 xl:px-10 ${
+                  className={`flex h-full shrink-0 flex-col justify-center gap-0 px-4 py-2 md:p-2 xl:px-10 ${
                     selectMenu === menu.query
                       ? "bg-primary-color text-white hover:bg-primary-color"
                       : "bg-white text-black hover:bg-gray-100"
                   } `}
                 >
-                  <h1>
+                  <h1 className="whitespace-nowrap">
                     {classworkHeadMenuBarDataLanguage.title[
                       menu.query as keyof typeof classworkHeadMenuBarDataLanguage.title
                     ](language.data ?? "en")}
                   </h1>
                   <span
-                    className={`text-xs ${
+                    className={`hidden whitespace-nowrap text-xs md:block ${
                       selectMenu === menu.query ? "text-white" : "text-gray-400"
                     } `}
                   >
