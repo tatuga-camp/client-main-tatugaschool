@@ -237,7 +237,7 @@ function Feedback() {
                   <button
                     type="button"
                     onClick={() => removeFile(index)}
-                    className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-full bg-white text-red-500 shadow-md transition-transform hover:scale-110 hover:text-red-700"
+                    className="absolute right-1 top-2 flex h-6 w-6 items-center justify-center md:h-4 md:w-4 rounded-full bg-white text-red-500 shadow-md transition-transform hover:scale-110 hover:text-red-700"
                   >
                     <IoCloseCircle size={24} />
                   </button>

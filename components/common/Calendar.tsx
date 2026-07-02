@@ -58,11 +58,15 @@ function Calendar({ value, onValue }: Props) {
               },
             }),
             panel: (option) => ({
-              className: classNames("bg-white", "min-w-0 w-[min(24rem,calc(100vw-1rem))]", {
-                "shadow-md border-0 absolute": !option?.props.inline,
-                "inline-block overflow-x-auto border border-gray-300  p-2 rounded-2xl":
-                  option?.props.inline,
-              }),
+              className: classNames(
+                "bg-white",
+                "min-w-0 w-[min(24rem,calc(100vw-1rem))] md:w-auto md:min-w-96",
+                {
+                  "shadow-md border-0 absolute": !option?.props.inline,
+                  "inline-block overflow-x-auto border border-gray-300  p-2 rounded-2xl":
+                    option?.props.inline,
+                },
+              ),
             }),
             header: {
               className: classNames(
@@ -101,13 +105,13 @@ function Calendar({ value, onValue }: Props) {
             table: {
               className: classNames("border-collapse w-full", "my-2"),
             },
-            tableHeaderCell: { className: "p-2" },
+            tableHeaderCell: { className: "p-1 md:p-2" },
             weekDay(options) {
               return {
                 className: classNames("text-gray-600 "),
               };
             },
-            day: { className: "p-2" },
+            day: { className: "p-1 md:p-2" },
             dayLabel: (option) => ({
               className: classNames(
                 "w-10 h-10 rounded-full transition-shadow duration-200 border-transparent border",
