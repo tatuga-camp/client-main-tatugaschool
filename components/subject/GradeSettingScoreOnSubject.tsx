@@ -63,7 +63,7 @@ function GradeSettingScoreOnSubject({ onClose, scoreOnSubject, toast }: Props) {
   return (
     <form
       onSubmit={handleSaveChange}
-      className="flex h-max w-96 flex-col gap-1 rounded-2xl border bg-gray-100 p-3"
+      className="flex h-max w-full max-w-96 flex-col gap-1 rounded-2xl border bg-gray-100 p-3"
     >
       <div className="flex w-full items-center justify-end gap-2 border-b pb-2">
         {update.isPending ? (
@@ -89,7 +89,7 @@ function GradeSettingScoreOnSubject({ onClose, scoreOnSubject, toast }: Props) {
         </button>
       </div>
       <div className="flex w-full justify-center gap-3">
-        <div className="flex w-80 flex-col gap-5">
+        <div className="flex w-full max-w-80 flex-col gap-5">
           <div className="flex flex-col gap-0">{scoreOnSubject.title}</div>
 
           <label className="flex w-full items-center justify-between gap-2">

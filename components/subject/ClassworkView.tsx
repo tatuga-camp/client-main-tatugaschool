@@ -180,7 +180,7 @@ function ClassworkView({
       )}
       {triggerLink && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="flex w-96 flex-col gap-5 rounded-2xl bg-white p-5">
+          <div className="flex w-full max-w-96 flex-col gap-5 rounded-2xl bg-white p-5">
             <h1 className="text-xl font-semibold">Add Link</h1>
             <input
               value={linkValue}

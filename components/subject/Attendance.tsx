@@ -143,7 +143,7 @@ function Attendance({
 
       {triggerCreateAttendanceTable && (
         <PopupLayout onClose={() => setTriggerCreateAttendanceTable(false)}>
-          <div className="w-96 rounded-2xl border bg-white p-2">
+          <div className="w-full max-w-96 rounded-2xl border bg-white p-2">
             <AttendanceTableCreate
               toast={toast}
               subjectId={subjectId}

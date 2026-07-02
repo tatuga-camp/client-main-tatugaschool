@@ -68,7 +68,7 @@ function AssignmentText({
           type="text"
           placeholder="Add Your Title"
           required
-          className="w-72 h-10 main-input"
+          className="w-full max-w-72 h-10 main-input"
         />
         <button
           type="button"

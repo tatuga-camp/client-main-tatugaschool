@@ -25,7 +25,7 @@ function SubjectNoStudentsNotification({ subjectId, onClose }: Props) {
   };
 
   return (
-    <div className="h-max w-96 overflow-hidden rounded-2xl border bg-white shadow-xl">
+    <div className="h-max w-full max-w-96 overflow-hidden rounded-2xl border bg-white shadow-xl">
       <div className="gradient-bg flex items-start justify-between px-4 py-4 text-white">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-white/25 text-lg">

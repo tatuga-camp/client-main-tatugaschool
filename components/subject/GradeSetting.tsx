@@ -100,7 +100,7 @@ function GradeSetting({ onClose, grade, subjectId, toast }: Props) {
   return (
     <form
       onSubmit={handleUpdate}
-      className="flex h-max w-96 flex-col gap-1 rounded-2xl border bg-gray-100 p-3"
+      className="flex h-max w-full max-w-96 flex-col gap-1 rounded-2xl border bg-gray-100 p-3"
     >
       <header className="flex w-full items-center justify-between border-b">
         <h1>Grade Setting</h1>
@@ -182,7 +182,7 @@ function GradeRuleItem({
   onRemove,
 }: GradeRuleItemProps) {
   return (
-    <li className="grid h-10 w-72 grid-cols-4 gap-2">
+    <li className="grid h-10 w-full max-w-72 grid-cols-4 gap-2">
       <InputNumber
         required
         value={data.max}

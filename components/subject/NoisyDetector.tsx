@@ -502,7 +502,7 @@ const NoisyDetector = ({ onClose }: NoisyDetectorProps) => {
       </div>
 
       {/* Footer Controls */}
-      <div className="flex w-full max-w-4xl items-center justify-between rounded-2xl border-2 border-black bg-white p-2 ring-1 ring-gray-100">
+      <div className="flex w-full max-w-4xl flex-wrap items-center justify-between gap-3 rounded-2xl border-2 border-black bg-white p-2 ring-1 ring-gray-100">
         <div className="flex flex-1 items-center gap-4">
           <button
             onClick={isListening ? stopListening : startListening}
@@ -528,7 +528,7 @@ const NoisyDetector = ({ onClose }: NoisyDetectorProps) => {
               <FaCog className="text-gray-400" />
               <span>Sensitivity Mode</span>
             </div>
-            <div className="grid grid-cols-5 gap-3">
+            <div className="grid w-full grid-cols-5 gap-1 sm:w-auto sm:gap-3">
               {LEVELS.map((level) => {
                 const isActive =
                   level.type === "custom"
@@ -581,7 +581,7 @@ const NoisyDetector = ({ onClose }: NoisyDetectorProps) => {
         </div>
 
         {/* Current Level Meter */}
-        <div className="ml-8 flex w-24 flex-col items-center">
+        <div className="ml-0 flex w-24 flex-col items-center sm:ml-8">
           <span className="mb-2 text-sm font-semibold text-gray-500">
             Volume
           </span>

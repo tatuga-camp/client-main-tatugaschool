@@ -226,7 +226,7 @@ function InviteTeacher({ subjectId, setTrigger, schoolId }: Props) {
                   />
                 </div>
                 {suggestMembers.length > 0 && (
-                  <ul className="absolute top-12 z-40 h-max w-96 overflow-hidden rounded-xl border bg-white hover:ring-1">
+                  <ul className="absolute top-12 z-40 h-max w-full max-w-96 overflow-hidden rounded-xl border bg-white hover:ring-1">
                     {suggestMembers.map((member, index) => (
                       <li
                         key={index}

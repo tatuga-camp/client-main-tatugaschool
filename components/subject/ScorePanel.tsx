@@ -326,7 +326,7 @@ function ScoreOnSubjectForm({
   return (
     <>
       <Toast ref={toast} />
-      <form onSubmit={handleSummit} className="flex h-72 w-96 flex-col gap-2">
+      <form onSubmit={handleSummit} className="flex h-72 w-full max-w-96 flex-col gap-2">
         <h1 className="flex items-center justify-center gap-2 text-center text-lg font-semibold">
           {scoreOnSubject?.id ? "Update" : "Create"} Score
           <IoStar />

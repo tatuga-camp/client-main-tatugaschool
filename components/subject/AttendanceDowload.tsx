@@ -116,7 +116,7 @@ function AttendanceDowload({ subjectId, toast, onClose }: Props) {
   return (
     <form
       onSubmit={handleDolwnloadExcel}
-      className="h-max w-96 overflow-hidden rounded-2xl bg-white font-Anuphan"
+      className="h-max w-full max-w-96 overflow-hidden rounded-2xl bg-white font-Anuphan"
     >
       <header className="flex w-full items-center justify-start gap-3 bg-blue-600 p-3">
         <div className="flex items-center justify-center rounded-2xl bg-white/50 p-2 text-lg text-white">

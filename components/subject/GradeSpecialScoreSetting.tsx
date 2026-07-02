@@ -68,7 +68,7 @@ export function GradeSpecialScoreSetting({
   return (
     <form
       onSubmit={handleUpdate}
-      className="flex h-max w-96 flex-col gap-1 rounded-2xl border bg-gray-100 p-3"
+      className="flex h-max w-full max-w-96 flex-col gap-1 rounded-2xl border bg-gray-100 p-3"
     >
       <div className="flex w-full items-center justify-end gap-2 border-b pb-2">
         {update.isPending ? (
@@ -113,7 +113,7 @@ export function GradeSpecialScoreSetting({
             </span>
           </div>
         </div>
-        <div className="flex w-80 flex-col gap-5">
+        <div className="flex w-full max-w-80 flex-col gap-5">
           <div className="flex flex-col gap-0">
             <h1 className="max-w-60 truncate">{scoreOnSubject.title}</h1>
             <span className="text-xs text-gray-500">

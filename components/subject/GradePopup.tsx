@@ -80,7 +80,7 @@ function GradePopup({
     <div className="h-max w-min rounded-2xl border bg-background-color p-2">
       <form
         onSubmit={handleUpdate}
-        className="flex h-max w-full min-w-96 flex-col items-start gap-2"
+        className="flex h-max w-full flex-col items-start gap-2"
       >
         <div className="flex w-full items-center justify-end gap-2 border-b pb-2">
           {update.isPending ? (
@@ -106,7 +106,7 @@ function GradePopup({
           </button>
         </div>
         <div className="flex w-full justify-center gap-3">
-          <div className="flex w-80 flex-col gap-5">
+          <div className="flex w-full max-w-80 flex-col gap-5">
             <div className="flex flex-col gap-0">
               <Link
                 target="_blank"
@@ -315,7 +315,7 @@ function StudentUpdateGrade({
               </span>
             </div>
           </div>
-          <div className="flex w-80 flex-col gap-5">
+          <div className="flex w-full max-w-80 flex-col gap-5">
             <div className="flex flex-col gap-0">
               <h1 className="max-w-60 truncate">{assignment.title}</h1>
               <span className="text-xs text-gray-500">

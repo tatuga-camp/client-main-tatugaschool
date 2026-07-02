@@ -314,7 +314,7 @@ function AvatarSetting({
         </span>
       </header>
 
-      <ul className="grid h-full w-full grid-cols-5 place-items-center gap-2 overflow-auto bg-gray-100 p-3">
+      <ul className="grid h-full w-full grid-cols-3 place-items-center gap-2 overflow-auto bg-gray-100 p-3 sm:grid-cols-5">
         <label
           htmlFor="imageUpload"
           className={`relative flex h-24 w-24 cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl bg-white hover:scale-105`}

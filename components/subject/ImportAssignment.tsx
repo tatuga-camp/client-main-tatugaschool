@@ -169,7 +169,7 @@ function ImportAssignment({
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
               type="text"
-              className="main-input w-96"
+              className="main-input w-full max-w-96"
               placeholder={subjectsDataLanguage.searchPlaceholder(
                 language.data ?? "en",
               )}
@@ -187,7 +187,7 @@ function ImportAssignment({
               />
             </label>
           )}
-          <label className="flex w-80 flex-col">
+          <label className="flex w-full max-w-80 flex-col">
             <span className="text-sm text-gray-400">
               ค้นหาตามรายชื่อคุณครูในโรงเรียน
             </span>
@@ -199,7 +199,7 @@ function ImportAssignment({
                 onChange={(e) => {
                   handleFilterByUser(e.target.value);
                 }}
-                className="second-button w-80 border"
+                className="second-button w-full max-w-80 border"
               >
                 {[
                   ...(memberOnSchools.data ?? []),
