@@ -285,7 +285,7 @@ function CreateByExcel({ classId, toast }: PropsCreateByExcel) {
   return (
     <form onSubmit={handleCreate} className="mt-5">
       {loading && <LoadingBar />}
-      <div className="grid w-full grid-cols-5 pr-8">
+      <div className="hidden w-full grid-cols-2 gap-2 pr-8 sm:grid sm:grid-cols-5 sm:gap-0">
         <div className="text-center">
           {studentOnClassDataLanguage.createStudent.number(
             language.data ?? "en",
@@ -311,7 +311,10 @@ function CreateByExcel({ classId, toast }: PropsCreateByExcel) {
       {dataStudents.length > 0 ? (
         <ul ref={tableRef} className="mt-2 grid max-h-80 w-full overflow-auto">
           {dataStudents.map((item, index, array) => (
-            <li className="grid grid-cols-5" key={item.id}>
+            <li
+              className="grid grid-cols-2 gap-2 sm:grid-cols-5 sm:gap-0"
+              key={item.id}
+            >
               <input
                 type="text"
                 maxLength={50}
@@ -319,6 +322,9 @@ function CreateByExcel({ classId, toast }: PropsCreateByExcel) {
                 value={item.number}
                 disabled={loading}
                 name="number"
+                placeholder={studentOnClassDataLanguage.createStudent.number(
+                  language.data ?? "en",
+                )}
                 required
                 onChange={(e) => {
                   setDataStudents((prev) => {
@@ -341,6 +347,9 @@ function CreateByExcel({ classId, toast }: PropsCreateByExcel) {
                 value={item.title}
                 name="title"
                 disabled={loading}
+                placeholder={studentOnClassDataLanguage.createStudent.title(
+                  language.data ?? "en",
+                )}
                 required
                 onChange={(e) => {
                   setDataStudents((prev) => {
@@ -363,6 +372,9 @@ function CreateByExcel({ classId, toast }: PropsCreateByExcel) {
                 value={item.firstName}
                 name="firstName"
                 disabled={loading}
+                placeholder={studentOnClassDataLanguage.createStudent.firstName(
+                  language.data ?? "en",
+                )}
                 required
                 onChange={(e) => {
                   setDataStudents((prev) => {
@@ -386,6 +398,9 @@ function CreateByExcel({ classId, toast }: PropsCreateByExcel) {
                 required
                 disabled={loading}
                 name="lastName"
+                placeholder={studentOnClassDataLanguage.createStudent.lastName(
+                  language.data ?? "en",
+                )}
                 onChange={(e) => {
                   setDataStudents((prev) => {
                     return prev.map((data) => {
