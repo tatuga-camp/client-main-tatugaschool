@@ -502,7 +502,7 @@ const NoisyDetector = ({ onClose }: NoisyDetectorProps) => {
       </div>
 
       {/* Footer Controls */}
-      <div className="flex w-full max-w-4xl flex-wrap items-center justify-between gap-3 rounded-2xl border-2 border-black bg-white p-2 ring-1 ring-gray-100">
+      <div className="flex w-full max-w-4xl flex-wrap items-center justify-between gap-3 sm:gap-0 rounded-2xl border-2 border-black bg-white p-2 ring-1 ring-gray-100">
         <div className="flex flex-1 items-center gap-4">
           <button
             onClick={isListening ? stopListening : startListening}
