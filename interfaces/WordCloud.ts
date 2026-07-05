@@ -36,6 +36,7 @@ export interface WordCloudSet {
   accessMode: WordCloudAccess;
   allowMultiple: boolean;
   activeWordCloudId: string | null;
+  publicResultsToken?: string | null;
   subjectId: string;
   schoolId: string;
   userId: string;

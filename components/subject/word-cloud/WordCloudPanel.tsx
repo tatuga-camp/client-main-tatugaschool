@@ -13,6 +13,8 @@ import {
   useGetLanguage,
   useGetWordCloudSetById,
   useGetWordCloudSetsBySubject,
+  useRevokeWordCloudResults,
+  useShareWordCloudResults,
   useUpdateWordCloudSet,
 } from "../../../react-query";
 import { wordCloudLanguage } from "../../../data/languages";
@@ -43,6 +45,9 @@ function WordCloudPanel({ subjectId, onClose }: Props) {
   const update = useUpdateWordCloudSet();
   const append = useAppendWordCloudQuestion();
   const remove = useDeleteWordCloudSet();
+  const share = useShareWordCloudResults();
+  const revoke = useRevokeWordCloudResults();
+  const [copied, setCopied] = useState(false);
 
   const detail = useGetWordCloudSetById({
     setId: activeSetId ?? "",
@@ -73,6 +78,9 @@ function WordCloudPanel({ subjectId, onClose }: Props) {
   // ----- Live view -----
   if (activeSetId && detail.data) {
     const set = detail.data.set;
+    const resultsUrl = set.publicResultsToken
+      ? `${process.env.NEXT_PUBLIC_STUDENT_CLIENT_URL}/word-cloud/results/${set.publicResultsToken}`
+      : "";
     const ordered = detail.data.questions; // already order-asc from the API
     const activeIndex = Math.max(
       0,
@@ -250,6 +258,55 @@ function WordCloudPanel({ subjectId, onClose }: Props) {
                 />
                 {wordCloudLanguage.allowMultiple(lang)}
               </label>
+            </div>
+            <div className="w-full border-t pt-3">
+              <p className="mb-2 text-xs font-bold uppercase tracking-wide text-icon-color/60">
+                {wordCloudLanguage.shareResults(lang)}
+              </p>
+              {set.publicResultsToken ? (
+                <div className="flex flex-col gap-2">
+                  <a
+                    href={resultsUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="break-all text-xs text-primary-color underline"
+                  >
+                    {resultsUrl}
+                  </a>
+                  <p className="text-[10px] text-icon-color/60">
+                    {wordCloudLanguage.shareHint(lang)}
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={async () => {
+                        await navigator.clipboard.writeText(resultsUrl);
+                        setCopied(true);
+                        setTimeout(() => setCopied(false), 2000);
+                      }}
+                      className="flex-1 rounded-lg bg-primary-color px-3 py-2 text-xs font-bold text-white"
+                    >
+                      {copied
+                        ? wordCloudLanguage.copied(lang)
+                        : wordCloudLanguage.copyLink(lang)}
+                    </button>
+                    <button
+                      onClick={() => revoke.mutate({ setId: set.id })}
+                      disabled={revoke.isPending}
+                      className="rounded-lg px-3 py-2 text-xs font-semibold text-error-color hover:bg-error-color/10 disabled:opacity-50"
+                    >
+                      {wordCloudLanguage.removePublicLink(lang)}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => share.mutate({ setId: set.id })}
+                  disabled={share.isPending}
+                  className="w-full rounded-lg bg-primary-color px-3 py-2 text-xs font-bold text-white disabled:opacity-50"
+                >
+                  {wordCloudLanguage.shareResultsAction(lang)}
+                </button>
+              )}
             </div>
             <button
               onClick={() =>

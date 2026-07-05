@@ -331,4 +331,64 @@ export const wordCloudLanguage = {
         return "Name this session…";
     }
   },
+  shareResults: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Share results";
+      case "th":
+        return "แชร์ผลลัพธ์";
+      default:
+        return "Share results";
+    }
+  },
+  shareResultsAction: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Share results to public";
+      case "th":
+        return "สร้างลิงก์สาธารณะ";
+      default:
+        return "Share results to public";
+    }
+  },
+  shareHint: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Anyone with this link can view the answers without logging in.";
+      case "th":
+        return "ทุกคนที่มีลิงก์นี้สามารถดูคำตอบได้โดยไม่ต้องเข้าสู่ระบบ";
+      default:
+        return "Anyone with this link can view the answers without logging in.";
+    }
+  },
+  copyLink: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Copy link";
+      case "th":
+        return "คัดลอกลิงก์";
+      default:
+        return "Copy link";
+    }
+  },
+  copied: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Copied!";
+      case "th":
+        return "คัดลอกแล้ว!";
+      default:
+        return "Copied!";
+    }
+  },
+  removePublicLink: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Remove public link";
+      case "th":
+        return "ลบลิงก์สาธารณะ";
+      default:
+        return "Remove public link";
+    }
+  },
 } as const;

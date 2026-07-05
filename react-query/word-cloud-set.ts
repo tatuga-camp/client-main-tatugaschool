@@ -8,7 +8,11 @@ import {
   RequestAppendQuestion,
   RequestCreateWordCloudSet,
   RequestDeleteWordCloudSet,
+  RequestRevokeWordCloudSetResults,
+  RequestShareWordCloudSetResults,
   RequestUpdateWordCloudSet,
+  RevokeWordCloudSetResultsService,
+  ShareWordCloudSetResultsService,
   UpdateWordCloudSetService,
 } from "../services";
 
@@ -97,6 +101,34 @@ export function useDeleteWordCloudSet() {
         ["word-cloud-sets", { subjectId: data.subjectId }],
         (old: any) => (old ?? []).filter((s: any) => s.id !== data.id),
       );
+    },
+  });
+}
+
+export function useShareWordCloudResults() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["share-word-cloud-results"],
+    mutationFn: (request: RequestShareWordCloudSetResults) =>
+      ShareWordCloudSetResultsService(request),
+    onSuccess(data) {
+      queryClient.invalidateQueries({
+        queryKey: ["word-cloud-set", { setId: data.id }],
+      });
+    },
+  });
+}
+
+export function useRevokeWordCloudResults() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["revoke-word-cloud-results"],
+    mutationFn: (request: RequestRevokeWordCloudSetResults) =>
+      RevokeWordCloudSetResultsService(request),
+    onSuccess(data) {
+      queryClient.invalidateQueries({
+        queryKey: ["word-cloud-set", { setId: data.id }],
+      });
     },
   });
 }
