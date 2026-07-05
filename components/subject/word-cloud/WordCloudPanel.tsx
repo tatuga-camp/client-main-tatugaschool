@@ -98,13 +98,13 @@ function WordCloudPanel({ subjectId, onClose }: Props) {
     };
 
     return (
-      <div className="flex h-[80vh] w-[90vw] max-w-4xl flex-col overflow-hidden rounded-2xl bg-white font-Anuphan">
-        <header className="flex items-center justify-between border-b p-4">
-          <div>
+      <div className="flex h-[85dvh] w-[95vw] max-w-4xl flex-col overflow-hidden rounded-2xl bg-white font-Anuphan md:h-[80vh] md:w-[90vw]">
+        <header className="flex items-center justify-between gap-2 border-b p-3 md:p-4">
+          <div className="min-w-0">
             <span className="text-xs font-semibold text-icon-color/60">
               {set.title || wordCloudLanguage.sessionTitle(lang)}
             </span>
-            <h2 className="text-lg font-bold text-icon-color">
+            <h2 className="break-words text-base font-bold text-icon-color md:text-lg">
               {current?.wordCloud.question}
             </h2>
             <span className="text-xs text-icon-color/60">
@@ -122,7 +122,7 @@ function WordCloudPanel({ subjectId, onClose }: Props) {
           </div>
           <button
             onClick={() => setActiveSetId(null)}
-            className="text-2xl text-icon-color"
+            className="shrink-0 text-2xl text-icon-color"
           >
             <IoMdClose />
           </button>
@@ -165,8 +165,8 @@ function WordCloudPanel({ subjectId, onClose }: Props) {
           />
         </div>
 
-        <div className="flex flex-1 overflow-hidden">
-          <div className="flex-1 overflow-auto">
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto md:flex-row md:overflow-hidden">
+          <div className="h-72 shrink-0 overflow-auto md:h-auto md:min-h-0 md:flex-1">
             {current &&
               (view === "cloud" ? (
                 <WordCloudView words={current.words} />
@@ -174,7 +174,7 @@ function WordCloudPanel({ subjectId, onClose }: Props) {
                 <WordCloudBars words={current.words} />
               ))}
           </div>
-          <aside className="flex w-64 flex-col items-center gap-3 border-l p-4">
+          <aside className="flex w-full shrink-0 flex-col items-center gap-3 border-t p-4 md:w-64 md:overflow-y-auto md:border-l md:border-t-0">
             <div className="relative flex w-full items-center justify-center">
               {activeSetId && (
                 <QRCode
@@ -329,7 +329,7 @@ function WordCloudPanel({ subjectId, onClose }: Props) {
 
   // ----- List + builder -----
   return (
-    <div className="flex h-[80vh] w-[90vw] max-w-2xl flex-col overflow-hidden rounded-2xl bg-white font-Anuphan">
+    <div className="flex h-[85dvh] w-[95vw] max-w-2xl flex-col overflow-hidden rounded-2xl bg-white font-Anuphan md:h-[80vh] md:w-[90vw]">
       <header className="flex items-center justify-between border-b p-4">
         <h2 className="flex items-center gap-2 text-lg font-bold text-icon-color">
           <PiCloudFog /> {wordCloudLanguage.sessionTitle(lang)}
@@ -416,7 +416,9 @@ function WordCloudPanel({ subjectId, onClose }: Props) {
 
       <div className="flex-1 overflow-auto p-4">
         {list.isLoading && (
-          <p className="text-icon-color/60">{wordCloudLanguage.loading(lang)}</p>
+          <p className="text-icon-color/60">
+            {wordCloudLanguage.loading(lang)}
+          </p>
         )}
         {list.data?.length === 0 && (
           <p className="text-icon-color/60">
