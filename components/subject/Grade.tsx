@@ -25,6 +25,7 @@ import {
 import {
   calculateStudentTotals,
   decodeBlurhashToCanvas,
+  downloadDataUri,
   getRandomSlateShade,
   getSlateColorStyle,
 } from "../../utils";
@@ -61,9 +62,7 @@ function Grade({
     try {
       setLoading(true);
       const response = await ExportAssignmentService({ subjectId });
-      const link = document.createElement("a");
-      link.href = response;
-      link.click();
+      downloadDataUri(response, "assignment-scores.xlsx");
       setLoading(false);
     } catch (error) {
       setLoading(false);

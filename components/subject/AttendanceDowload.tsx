@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ExportAttendanceService } from "../../services";
+import { downloadDataUri } from "../../utils";
 import { Toast } from "primereact/toast";
 import { MdDownload, MdInfo, MdTimer } from "react-icons/md";
 import { FiPlus } from "react-icons/fi";
@@ -53,9 +54,7 @@ function AttendanceDowload({ subjectId, toast, onClose }: Props) {
             return { endDate: endDate.toISOString() };
           })()),
       });
-      const link = document.createElement("a");
-      link.href = response;
-      link.click();
+      downloadDataUri(response, "attendance.xlsx");
       setLoading(false);
     } catch (error) {
       setLoading(false);

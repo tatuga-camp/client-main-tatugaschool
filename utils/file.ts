@@ -40,6 +40,34 @@ export const file2Base64 = (file: File): Promise<string> => {
   });
 };
 
+/**
+ * Triggers a file download from a base64 data URI in a way that works in
+ * Safari. Navigating a plain anchor to a `data:` URL is blocked by WebKit,
+ * so the data is converted to a Blob and downloaded via an object URL with
+ * a `download` attribute instead.
+ */
+export function downloadDataUri(dataUri: string, fileName: string) {
+  const [meta, base64] = dataUri.split(",");
+  const mimeType =
+    meta.match(/^data:(.*?);base64$/)?.[1] ?? "application/octet-stream";
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  const blob = new Blob([bytes], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  // Revoke after a delay so Safari has started the download before the URL dies
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
 import "pdfjs-dist/build/pdf.worker.mjs";
 
 /**
