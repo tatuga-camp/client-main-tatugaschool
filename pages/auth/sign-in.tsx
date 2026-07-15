@@ -1,9 +1,8 @@
-import { AuthLayout } from "@/components/auth/AuthLayout";
-import { AuthHeader } from "@/components/auth/AuthHeader";
 import { AuthFooter } from "@/components/auth/AuthFooter";
+import { AuthHeader } from "@/components/auth/AuthHeader";
+import { AuthLayout } from "@/components/auth/AuthLayout";
 import { LoginForm } from "@/components/auth/LoginForm";
 import Head from "next/head";
-import LanguageSelect from "../../components/common/LanguageSelect";
 
 const LoginPage = () => {
   return (

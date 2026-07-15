@@ -132,7 +132,7 @@ export const SignUpForm = (props: Props) => {
   return (
     <>
       {props.invitation && (
-        <div className="mb-4 flex w-full max-w-96 md:max-w-none items-center gap-3 rounded-2xl bg-blue-50 p-4 text-left md:w-5/12">
+        <div className="mb-4 flex w-full max-w-96 items-center gap-3 rounded-2xl bg-blue-50 p-4 text-left md:w-5/12 md:max-w-none">
           {props.invitation.schoolLogo && (
             <img
               src={props.invitation.schoolLogo}
@@ -141,7 +141,9 @@ export const SignUpForm = (props: Props) => {
             />
           )}
           <div className="flex flex-col">
-            <span className="text-xs text-gray-500">You're being invited to</span>
+            <span className="text-xs text-gray-500">
+              You're being invited to
+            </span>
             <span className="text-sm font-semibold">
               {props.invitation.schoolTitle}
             </span>
@@ -149,156 +151,158 @@ export const SignUpForm = (props: Props) => {
         </div>
       )}
       {props.invitationError && (
-        <div className="mb-4 w-full max-w-96 md:max-w-none rounded-2xl bg-yellow-50 p-4 text-sm text-yellow-900 md:w-5/12">
+        <div className="mb-4 w-full max-w-96 rounded-2xl bg-yellow-50 p-4 text-sm text-yellow-900 md:w-5/12 md:max-w-none">
           {props.invitationError} — you can still create an account; ask the
           school admin to re-invite you.
         </div>
       )}
       <form
-        className="flex w-full max-w-96 md:max-w-none flex-col items-center gap-4 rounded-2xl bg-white p-6 sm:p-10 text-center shadow-[0_12px_24px_rgba(145,158,171,0.12)] md:w-5/12"
+        className="flex w-full max-w-96 flex-col items-center gap-4 rounded-2xl bg-white p-6 text-center shadow-[0_12px_24px_rgba(145,158,171,0.12)] sm:p-10 md:w-5/12 md:max-w-none"
         onSubmit={handleSignUp}
       >
-      <h2 className="text-[24px] font-bold">
-        {signUpLanguageData.title(language.data ?? "en")}
-      </h2>
-      <span className="text-sm text-gray-500">
-        ({signUpLanguageData.teacherOnly(language.data ?? "en")})
-      </span>
-      {props.provider === "google" && (
-        <div className="second-button flex items-center justify-center gap-2 border">
-          <FcGoogle />
-          {signUpLanguageData.nowCreateAccountOnGoogle(language.data ?? "en")}
-        </div>
-      )}
-      <div className="flex flex-col items-center gap-4">
-        <label className="relative flex h-max flex-col items-start">
-          <span className="text-sm">
-            {signUpLanguageData.firstNameTitle(language.data ?? "en")}
-          </span>
-          <input
-            type="text"
-            disabled={props.provider === "google" && !!props.firstName}
-            placeholder={signUpLanguageData.firstNamePlaceholder(
-              language.data ?? "en",
-            )}
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            required
-            className="main-input w-full"
-          />
-        </label>
-        <label className="relative flex h-max flex-col items-start">
-          <span className="text-sm">
-            {signUpLanguageData.lastNameTitle(language.data ?? "en")}
-          </span>
-          <input
-            type="text"
-            disabled={props.provider === "google" && !!props.lastName}
-            placeholder={signUpLanguageData.lastNamePlaceholder(
-              language.data ?? "en",
-            )}
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            required
-            className="main-input w-full"
-          />
-        </label>
-        <label className="relative flex h-max w-full flex-col items-start">
-          <span className="text-sm">
-            {signUpLanguageData.phone(language.data ?? "en")}
-          </span>
-          <PhoneInput
-            required
-            defaultCountry="th"
-            value={phone}
-            onChange={(e) => {
-              setPhone(e);
-            }}
-          />
-        </label>
-        <label className="relative flex h-max flex-col items-start">
-          <span className="text-sm">
-            {signUpLanguageData.email(language.data ?? "en")}
-          </span>
-          <input
-            type="email"
-            disabled={props.provider === "google" || !!props.invitation}
-            placeholder={signUpLanguageData.emailPlaceholder(
-              language.data ?? "en",
-            )}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="main-input w-full"
-          />
-        </label>
-        {props.provider !== "google" && (
-          <label className="relative flex h-max w-full flex-col items-start">
-            <span className="text-sm">
-              {signUpLanguageData.password(language.data ?? "en")}
-            </span>
-            <Password
-              placeholder={signUpLanguageData.passwordPlaceholder(
-                language.data ?? "en",
-              )}
-              value={password}
-              feedback={true}
-              onChange={(e) => setPassword(e.target.value)}
-              toggleMask
-            />
-          </label>
-        )}
-        {props.provider !== "google" && (
-          <label className="relative flex h-max w-full flex-col items-start">
-            <span className="text-sm">
-              {signUpLanguageData.confirmPassword(language.data ?? "en")}
-            </span>
-            <Password
-              feedback={true}
-              placeholder={signUpLanguageData.confirmPasswordPlaceholder(
-                language.data ?? "en",
-              )}
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              toggleMask
-            />
-          </label>
-        )}
-      </div>
-      <div className="mt-10 h-40 overflow-auto text-left">
-        <UserAgreement />
-      </div>
-      <label className="flex items-center gap-2">
-        <input
-          checked={isAgree}
-          onChange={(e) => setIsAgree(() => e.target.checked)}
-          type="checkbox"
-          required
-        />
-        <span className="text-sm">
-          {signUpLanguageData.acceptPolicy(language.data ?? "en")}
+        <h2 className="text-[24px] font-bold">
+          {signUpLanguageData.title(language.data ?? "en")}
+        </h2>
+        <span className="text-sm text-gray-500">
+          ({signUpLanguageData.teacherOnly(language.data ?? "en")})
         </span>
-      </label>
-      <button
-        type="submit"
-        disabled={!isAgree}
-        className={`p-5 ${
-          isAgree ? "bg-secondary-color hover:bg-primary-color" : "bg-gray-400"
-        } flex h-11 w-full items-center justify-center rounded font-semibold text-white transition duration-300`}
-      >
-        {signUpLanguageData.createAccount(language.data ?? "en")}
-      </button>
-      {props.provider !== "google" && (
+        {props.provider === "google" && (
+          <div className="second-button flex items-center justify-center gap-2 border">
+            <FcGoogle />
+            {signUpLanguageData.nowCreateAccountOnGoogle(language.data ?? "en")}
+          </div>
+        )}
+        <div className="flex flex-col items-center gap-4">
+          <label className="relative flex h-max w-72 flex-col items-start">
+            <span className="text-sm">
+              {signUpLanguageData.firstNameTitle(language.data ?? "en")}
+            </span>
+            <input
+              type="text"
+              disabled={props.provider === "google" && !!props.firstName}
+              placeholder={signUpLanguageData.firstNamePlaceholder(
+                language.data ?? "en",
+              )}
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              required
+              className="main-input w-full"
+            />
+          </label>
+          <label className="relative flex h-max w-72 flex-col items-start">
+            <span className="text-sm">
+              {signUpLanguageData.lastNameTitle(language.data ?? "en")}
+            </span>
+            <input
+              type="text"
+              disabled={props.provider === "google" && !!props.lastName}
+              placeholder={signUpLanguageData.lastNamePlaceholder(
+                language.data ?? "en",
+              )}
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              required
+              className="main-input w-full"
+            />
+          </label>
+          <label className="relative flex h-max w-72 flex-col items-start">
+            <span className="text-sm">
+              {signUpLanguageData.phone(language.data ?? "en")}
+            </span>
+            <PhoneInput
+              required
+              defaultCountry="th"
+              value={phone}
+              onChange={(e) => {
+                setPhone(e);
+              }}
+            />
+          </label>
+          <label className="relative flex h-max w-72 flex-col items-start">
+            <span className="text-sm">
+              {signUpLanguageData.email(language.data ?? "en")}
+            </span>
+            <input
+              type="email"
+              disabled={props.provider === "google" || !!props.invitation}
+              placeholder={signUpLanguageData.emailPlaceholder(
+                language.data ?? "en",
+              )}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="main-input w-full"
+            />
+          </label>
+          {props.provider !== "google" && (
+            <label className="relative flex h-max w-full flex-col items-start">
+              <span className="text-sm">
+                {signUpLanguageData.password(language.data ?? "en")}
+              </span>
+              <Password
+                placeholder={signUpLanguageData.passwordPlaceholder(
+                  language.data ?? "en",
+                )}
+                value={password}
+                feedback={true}
+                onChange={(e) => setPassword(e.target.value)}
+                toggleMask
+              />
+            </label>
+          )}
+          {props.provider !== "google" && (
+            <label className="relative flex h-max w-full flex-col items-start">
+              <span className="text-sm">
+                {signUpLanguageData.confirmPassword(language.data ?? "en")}
+              </span>
+              <Password
+                feedback={true}
+                placeholder={signUpLanguageData.confirmPasswordPlaceholder(
+                  language.data ?? "en",
+                )}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                toggleMask
+              />
+            </label>
+          )}
+        </div>
+        <div className="mt-10 h-40 overflow-auto text-left">
+          <UserAgreement />
+        </div>
+        <label className="flex items-center gap-2">
+          <input
+            checked={isAgree}
+            onChange={(e) => setIsAgree(() => e.target.checked)}
+            type="checkbox"
+            required
+          />
+          <span className="text-sm">
+            {signUpLanguageData.acceptPolicy(language.data ?? "en")}
+          </span>
+        </label>
         <button
-          type="button"
-          onClick={handleGoogleLogin}
-          className="second-button flex w-full items-center justify-center gap-2 border"
+          type="submit"
+          disabled={!isAgree}
+          className={`p-5 ${
+            isAgree
+              ? "bg-secondary-color hover:bg-primary-color"
+              : "bg-gray-400"
+          } flex h-11 w-full items-center justify-center rounded font-semibold text-white transition duration-300`}
         >
-          <FcGoogle />
-          {signUpLanguageData.createAccountGoogle(language.data ?? "en")}
+          {signUpLanguageData.createAccount(language.data ?? "en")}
         </button>
-      )}
-    </form>
+        {props.provider !== "google" && (
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            className="second-button flex w-full items-center justify-center gap-2 border"
+          >
+            <FcGoogle />
+            {signUpLanguageData.createAccountGoogle(language.data ?? "en")}
+          </button>
+        )}
+      </form>
     </>
   );
 };

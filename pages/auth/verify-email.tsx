@@ -1,19 +1,17 @@
 // pages/verify-email.tsx
-import { useEffect, useState } from "react";
-import { VerifyEmailService } from "@/services"; // Import the service
 import { AuthHeader } from "@/components/auth/AuthHeader";
-import React from "react";
+import { VerifyEmailService } from "@/services"; // Import the service
 import { GetServerSideProps } from "next";
-import { FiXCircle } from "react-icons/fi";
-import { ErrorMessages } from "../../interfaces";
-import Swal from "sweetalert2";
-import { useRouter } from "next-nprogress-bar";
-import Link from "next/link";
 import Head from "next/head";
-import { useGetLanguage } from "../../react-query";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { FiXCircle } from "react-icons/fi";
 import { verifyEmailLanguageData } from "../../data/languages";
+import { useGetLanguage } from "../../react-query";
+import { useRouter } from "next/router";
 
 const VerifyEmailPage = ({ token }: { token: string | null }) => {
+  const router = useRouter();
   const language = useGetLanguage();
   const [verificationStatus, setVerificationStatus] = useState<
     "success" | "fail" | "pending" | "no-token"
@@ -30,8 +28,13 @@ const VerifyEmailPage = ({ token }: { token: string | null }) => {
   const verifyEmail = async (token: string) => {
     try {
       setVerificationStatus("pending");
-      await VerifyEmailService({ token });
+      const school = await VerifyEmailService({ token });
+
       setVerificationStatus("success");
+      console.log("school", school);
+      if (school && school.id) {
+        router.push(`/school/${school.id}/`);
+      }
     } catch (error) {
       setVerificationStatus("fail");
     }
@@ -49,7 +52,7 @@ const VerifyEmailPage = ({ token }: { token: string | null }) => {
         <div className="mt-5 flex flex-col items-center text-center">
           {verificationStatus === "success" && (
             <>
-              <h2 className="mb-4 text-3xl md:text-5xl font-bold text-green-600">
+              <h2 className="mb-4 text-3xl font-bold text-green-600 md:text-5xl">
                 {verifyEmailLanguageData.successTitle(language.data ?? "en")}
               </h2>
               <p className="mb-8 text-lg text-[#6E6E6E]">
@@ -67,7 +70,7 @@ const VerifyEmailPage = ({ token }: { token: string | null }) => {
           )}
           {verificationStatus === "pending" && (
             <>
-              <h2 className="mb-4 animate-pulse text-3xl md:text-5xl font-bold text-blue-600">
+              <h2 className="mb-4 animate-pulse text-3xl font-bold text-blue-600 md:text-5xl">
                 {verifyEmailLanguageData.pendingTitle(language.data ?? "en")}
               </h2>
               <p className="mb-8 text-lg text-[#6E6E6E]">
@@ -79,7 +82,7 @@ const VerifyEmailPage = ({ token }: { token: string | null }) => {
           )}
           {verificationStatus === "no-token" && (
             <>
-              <h2 className="mb-4 flex items-center justify-center gap-1 text-3xl md:text-5xl font-bold text-red-600">
+              <h2 className="mb-4 flex items-center justify-center gap-1 text-3xl font-bold text-red-600 md:text-5xl">
                 {verifyEmailLanguageData.noTokenTitle(language.data ?? "en")}{" "}
                 <FiXCircle />
               </h2>
@@ -93,7 +96,7 @@ const VerifyEmailPage = ({ token }: { token: string | null }) => {
 
           {verificationStatus === "fail" && (
             <>
-              <h2 className="mb-4 text-3xl md:text-5xl font-bold text-red-500">
+              <h2 className="mb-4 text-3xl font-bold text-red-500 md:text-5xl">
                 {verifyEmailLanguageData.failTitle(language.data ?? "en")}
               </h2>
               <p className="mb-8 text-lg text-[#6E6E6E]">

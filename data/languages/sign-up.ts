@@ -165,11 +165,11 @@ export const signUpLanguageData = {
   nowCreateAccountOnGoogle: (language: Language) => {
     switch (language) {
       case "en":
-        return "You are creating account with Google";
+        return "Create Account with Google";
       case "th":
         return "คุณกำลังสร้างบัญชีผู้ใช้โดยใช้ Google";
       default:
-        return "You are creating account with Google";
+        return "Create Account with Google";
     }
   },
 };

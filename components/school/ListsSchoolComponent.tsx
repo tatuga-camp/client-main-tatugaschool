@@ -40,6 +40,7 @@ const ListsSchoolComponent = () => {
     if (!user.data) return;
     setFavorites(() => user.data?.favoritSchool ?? null);
   }, [user.isSuccess]);
+
   const filteredSchools = schools.data?.filter((school: School) => {
     const matchesSearchTerm = school.title
       .toLowerCase()
