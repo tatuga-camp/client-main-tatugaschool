@@ -427,10 +427,10 @@ function AttendanceChecker({
         <div className="ac-shell relative h-dvh w-screen overflow-hidden bg-background-color font-Anuphan text-icon-color shadow-2xl md:h-[88vh] md:w-[92vw] md:max-w-7xl md:rounded-[2rem]">
           {/* soft dotted texture */}
 
-          <div className="relative flex h-full flex-col">
+          <div className="relative flex h-full flex-col overflow-y-auto md:overflow-hidden">
             {/* HEADER */}
             <div className="ac-header flex-none border-b border-dashed border-gray-200 bg-white/70 px-4 pb-3 pt-5 backdrop-blur-sm sm:px-6 md:px-8 md:pb-4 md:pt-7">
-              <div className="flex items-start justify-between gap-3">
+              <div className="sticky top-0 z-50 -mx-4 flex items-start justify-between gap-3 bg-white px-4 py-2 sm:-mx-6 sm:px-6 md:static md:z-auto md:mx-0 md:bg-transparent md:p-0">
                 <div className="flex min-w-0 items-start gap-3">
                   <div
                     className="hidden h-11 w-11 flex-none items-center justify-center rounded-2xl bg-primary-color/10 text-xl text-primary-color md:flex"
@@ -766,7 +766,7 @@ function AttendanceChecker({
             </div>
 
             {/* MAIN */}
-            <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-3 py-3 sm:px-6 md:px-8 md:py-4">
+            <div className="flex flex-col px-3 py-3 sm:px-6 md:min-h-0 md:flex-1 md:overflow-hidden md:px-8 md:py-4">
               {triggerNote && selectTable ? (
                 <div className="mx-auto h-96 max-h-full w-full max-w-3xl overflow-y-auto rounded-3xl border border-dashed border-gray-200 bg-white p-2 sm:p-3">
                   <div className="mb-2 flex items-center gap-2 px-2 pt-1">
@@ -789,7 +789,7 @@ function AttendanceChecker({
               ) : (
                 <>
                   {/* MOBILE CARD LIST */}
-                  <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pb-1 md:hidden">
+                  <div className="space-y-3 pb-1 md:hidden">
                     {visibleStatusLists.length > 0 && (
                       <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1">
                         {visibleStatusLists.map((status) => (
@@ -934,7 +934,7 @@ function AttendanceChecker({
 
             {/* FOOTER */}
             <div
-              className="ac-footer flex-none border-t border-dashed border-gray-200 bg-white/80 px-4 py-3 backdrop-blur sm:px-6 md:px-8 md:py-4"
+              className="ac-footer sticky bottom-0 z-50 flex-none border-t border-dashed border-gray-200 bg-white/80 px-4 py-3 backdrop-blur sm:px-6 md:static md:z-auto md:px-8 md:py-4"
               style={{
                 boxShadow: "0 -10px 30px -20px rgba(56,55,103,0.15)",
               }}
