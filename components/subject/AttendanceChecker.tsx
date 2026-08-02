@@ -934,7 +934,7 @@ function AttendanceChecker({
 
             {/* FOOTER */}
             <div
-              className="ac-footer sticky bottom-0 z-50 flex-none border-t border-dashed border-gray-200 bg-white/80 px-4 py-3 backdrop-blur sm:px-6 md:static md:z-auto md:px-8 md:py-4"
+              className="ac-footer sticky bottom-0 z-50 mt-auto flex-none border-t border-dashed border-gray-200 bg-white/80 px-4 py-3 backdrop-blur sm:px-6 md:static md:z-auto md:px-8 md:py-4"
               style={{
                 boxShadow: "0 -10px 30px -20px rgba(56,55,103,0.15)",
               }}
