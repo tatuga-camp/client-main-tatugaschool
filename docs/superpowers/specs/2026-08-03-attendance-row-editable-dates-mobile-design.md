@@ -51,9 +51,10 @@ Responsive-class changes only — no DOM restructuring:
 
 - The inner flex column (`flex h-full flex-col`) becomes the mobile scroll
   container: `overflow-y-auto md:overflow-hidden`.
-- The title row (heading + QR/note/close buttons) becomes `sticky top-0` with
-  an opaque background and appropriate z-index on mobile, `md:static`, so
-  Close is always reachable.
+- The title row (heading + QR/note/close buttons) becomes `sticky top-0 z-50`
+  with an opaque background on mobile, `md:static`, so Close is always
+  reachable (`z-50` because the desktop table already uses sticky cells up to
+  `z-40`; the mobile card list has no competing stacking contexts).
 - The footer becomes `sticky bottom-0` on mobile, `md:static`, so
   Update/Delete are always reachable.
 - The main region keeps `flex-1 min-h-0 overflow-hidden` as `md:`-prefixed
