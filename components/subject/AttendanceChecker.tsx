@@ -212,6 +212,9 @@ function AttendanceChecker({
         throw new Error("No studentOnSubject found");
       }
       if (selectAttendanceRow) {
+        if (!attendanceData.startDate || !attendanceData.endDate) {
+          throw new Error("Start Date and End Date is required");
+        }
         setLoading(true);
 
         const update = await updateAttendanceRow.mutateAsync({
@@ -219,6 +222,8 @@ function AttendanceChecker({
             attendanceRowId: selectAttendanceRow.id,
           },
           body: {
+            startDate: new Date(attendanceData.startDate).toISOString(),
+            endDate: new Date(attendanceData.endDate).toISOString(),
             note: attendanceData.note,
             expireAt:
               attendanceData.expireAt &&
@@ -606,8 +611,14 @@ function AttendanceChecker({
                     >
                       <BrandInput
                         required
-                        disabled
                         value={attendanceData.startDate ?? ""}
+                        onChange={(e) =>
+                          setAttendanceData((prev) => ({
+                            ...prev,
+                            startDate: e.target.value,
+                            endDate: addOneHour(e.target.value),
+                          }))
+                        }
                         type="datetime-local"
                       />
                     </FieldLabel>
@@ -619,8 +630,13 @@ function AttendanceChecker({
                     >
                       <BrandInput
                         required
-                        disabled
                         value={attendanceData.endDate ?? ""}
+                        onChange={(e) =>
+                          setAttendanceData((prev) => ({
+                            ...prev,
+                            endDate: e.target.value,
+                          }))
+                        }
                         type="datetime-local"
                       />
                     </FieldLabel>
