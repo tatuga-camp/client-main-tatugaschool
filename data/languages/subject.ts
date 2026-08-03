@@ -314,6 +314,16 @@ export const settingOnSubjectDataLanguage = {
         return "Allow sending morning summary notification to Line";
     }
   },
+  allowSendNotificationOnAnnouncementToLine: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Notify LINE group when an announcement is posted";
+      case "th":
+        return "แจ้งเตือนกลุ่ม LINE เมื่อมีประกาศใหม่";
+      default:
+        return "Notify LINE group when an announcement is posted";
+    }
+  },
   coTeacher: (language: Language) => {
     switch (language) {
       case "en":

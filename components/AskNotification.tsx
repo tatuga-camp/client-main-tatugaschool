@@ -3,13 +3,52 @@ import { registerServiceWorker } from "../utils/notifications";
 import PopupLayout from "./layout/PopupLayout";
 import Image from "next/image";
 import { SubscribeToPushService } from "../services/push";
+import { useGetUser } from "../react-query";
+
+// Browsers can rotate or invalidate a PushSubscription, and the server
+// self-deletes rows whose endpoint returns 410/404. Once permission is
+// granted this popup never shows again, so we silently re-send the current
+// subscription to the server on visits — at most once per day per user.
+const SYNC_INTERVAL_MS = 24 * 60 * 60 * 1000;
+
+function shouldSyncPush(userId: string): boolean {
+  try {
+    const last = window.localStorage.getItem(`push-sync-at:${userId}`);
+    return !last || Date.now() - Number(last) > SYNC_INTERVAL_MS;
+  } catch {
+    return true;
+  }
+}
+
+function markPushSynced(userId: string): void {
+  try {
+    window.localStorage.setItem(`push-sync-at:${userId}`, String(Date.now()));
+  } catch {
+    // localStorage unavailable — sync will just run again next visit
+  }
+}
 
 function AskNotification() {
+  const user = useGetUser();
   const [isNotification, setIsNotification] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
   useEffect(() => {
     registerServiceWorker();
   }, []);
+
+  const userId = user.data?.id;
+  useEffect(() => {
+    if (!userId) return;
+    if (typeof Notification === "undefined") return;
+    if (Notification.permission !== "granted") return;
+    if (!shouldSyncPush(userId)) return;
+
+    SubscribeToPushService()
+      .then(() => markPushSynced(userId))
+      .catch((error) =>
+        console.error("Push subscription re-sync failed:", error),
+      );
+  }, [userId]);
 
   const isNotificationGranted = (): boolean => {
     if (typeof Notification === "undefined") {

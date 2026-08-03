@@ -26,6 +26,7 @@ export interface Subject {
   allowSendNotificationOnStudentOnAssignmentToLine?: boolean;
   allowSendNotificationOnAssignmentToLine?: boolean;
   allowSendNotificationMorningSummaryToLine?: boolean;
+  allowSendNotificationOnAnnouncementToLine?: boolean;
   isLocked: boolean;
 }
 

@@ -128,6 +128,7 @@ export type RequestUpdateSubjectService = {
     allowSendNotificationOnStudentOnAssignmentToLine?: boolean;
     allowSendNotificationOnAssignmentToLine?: boolean;
     allowSendNotificationMorningSummaryToLine?: boolean;
+    allowSendNotificationOnAnnouncementToLine?: boolean;
   };
 };
 
