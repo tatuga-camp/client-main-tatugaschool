@@ -141,4 +141,54 @@ export const announcementDataLanguage = {
         return "Attachments";
     }
   },
+  edit: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Edit";
+      case "th":
+        return "แก้ไข";
+      default:
+        return "Edit";
+    }
+  },
+  editComposerTitle: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Edit announcement";
+      case "th":
+        return "แก้ไขประกาศ";
+      default:
+        return "Edit announcement";
+    }
+  },
+  saving: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Saving...";
+      case "th":
+        return "กำลังบันทึก...";
+      default:
+        return "Saving...";
+    }
+  },
+  saveChanges: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Save changes";
+      case "th":
+        return "บันทึกการแก้ไข";
+      default:
+        return "Save changes";
+    }
+  },
+  updated: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Announcement has been updated";
+      case "th":
+        return "ประกาศถูกแก้ไขแล้ว";
+      default:
+        return "Announcement has been updated";
+    }
+  },
 } as const;

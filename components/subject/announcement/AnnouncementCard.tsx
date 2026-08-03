@@ -1,7 +1,7 @@
 import Image from "next/image";
 import parse from "html-react-parser";
 import React from "react";
-import { FiPaperclip, FiTrash2 } from "react-icons/fi";
+import { FiEdit2, FiPaperclip, FiTrash2 } from "react-icons/fi";
 import { IoChatbubbleOutline, IoMegaphoneOutline } from "react-icons/io5";
 import Swal from "sweetalert2";
 import { announcementDataLanguage } from "../../../data/languages";
@@ -15,6 +15,7 @@ import {
   useToggleAnnouncementReactionTeacher,
 } from "../../../react-query";
 import { Announcement } from "../../../services";
+import AnnouncementEdit from "./AnnouncementEdit";
 
 const REACTION_EMOJIS = ["👍", "❤️", "😂", "😮", "🎉"];
 
@@ -27,7 +28,9 @@ type Props = {
 function AnnouncementCard({ announcement, subjectId, userId }: Props) {
   const language = useGetLanguage();
   const [showComments, setShowComments] = React.useState(false);
+  const [showEdit, setShowEdit] = React.useState(false);
   const [commentText, setCommentText] = React.useState("");
+  const isAuthor = announcement.userId === userId;
   const deleteAnnouncement = useDeleteAnnouncement();
   const toggleReaction = useToggleAnnouncementReactionTeacher({ subjectId });
   const comments = useGetAnnouncementCommentsTeacher({
@@ -124,15 +127,33 @@ function AnnouncementCard({ announcement, subjectId, userId }: Props) {
             </span>
           </div>
         </div>
-        <button
-          disabled={deleteAnnouncement.isPending}
-          onClick={handleDelete}
-          className="text-icon-color hover:text-error-color disabled:opacity-50"
-          title={announcementDataLanguage.delete(language.data ?? "en")}
-        >
-          <FiTrash2 />
-        </button>
+        <div className="flex items-center gap-3">
+          {isAuthor && (
+            <button
+              onClick={() => setShowEdit(true)}
+              className="text-icon-color hover:text-primary-color"
+              title={announcementDataLanguage.edit(language.data ?? "en")}
+            >
+              <FiEdit2 />
+            </button>
+          )}
+          <button
+            disabled={deleteAnnouncement.isPending}
+            onClick={handleDelete}
+            className="text-icon-color hover:text-error-color disabled:opacity-50"
+            title={announcementDataLanguage.delete(language.data ?? "en")}
+          >
+            <FiTrash2 />
+          </button>
+        </div>
       </div>
+
+      {showEdit && (
+        <AnnouncementEdit
+          announcement={announcement}
+          onClose={() => setShowEdit(false)}
+        />
+      )}
 
       <h3 className="mt-3 text-base font-semibold">{announcement.title}</h3>
       <div className="mt-1 whitespace-pre-wrap text-sm text-gray-700">
