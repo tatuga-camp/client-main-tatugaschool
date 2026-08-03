@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { Toast } from "primereact/toast";
 import React from "react";
 import { FiCheck, FiPaperclip, FiX } from "react-icons/fi";
@@ -34,6 +35,7 @@ function newItemId(): string {
 
 function AnnouncementCreate({ subjectId, schoolId, toast, onClose }: Props) {
   const language = useGetLanguage();
+  const queryClient = useQueryClient();
   const createAnnouncement = useCreateAnnouncement();
   const [title, setTitle] = React.useState("");
   const [content, setContent] = React.useState("");
@@ -116,6 +118,12 @@ function AnnouncementCreate({ subjectId, schoolId, toast, onClose }: Props) {
         icon: "error",
       });
     } finally {
+      // The create mutation invalidated the feed before any file finished
+      // uploading — refresh again so attached files appear without a reload
+      // (also covers partially-uploaded state after a failure).
+      queryClient.invalidateQueries({
+        queryKey: ["announcements-teacher", { subjectId }],
+      });
       setLoading(false);
     }
   };
