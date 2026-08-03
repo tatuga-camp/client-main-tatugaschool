@@ -27,3 +27,4 @@ export * from "./word-cloud";
 export * from "./rubric";
 export * from "./insights";
 export * from "./group-on-subject";
+export * from "./announcement";

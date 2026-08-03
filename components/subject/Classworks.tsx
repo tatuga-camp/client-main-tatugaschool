@@ -17,19 +17,27 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FaPlus } from "react-icons/fa6";
 import { Assignment } from "../../interfaces";
 import {
+  useGetAnnouncementsTeacher,
   useGetAssignments,
   useGetLanguage,
+  useGetUser,
   useReoderAssignment,
 } from "../../react-query";
 import { ResponseGetAssignmentsService } from "../../services";
 import ClassworkCard from "./ClassworkCard";
 import ClassworkCreate from "./ClassworkCreate";
-import { classworksDataLanguage, rubricLanguage } from "../../data/languages";
+import {
+  announcementDataLanguage,
+  classworksDataLanguage,
+  rubricLanguage,
+} from "../../data/languages";
 import { MdChecklist, MdImportContacts, MdImportExport } from "react-icons/md";
 import PopupLayout from "../layout/PopupLayout";
 import ImportAssignment from "./ImportAssignment";
 import AssignmentTagFilterBar from "./AssignmentTagFilterBar";
 import RubricList from "./rubric/RubricList";
+import AnnouncementCard from "./announcement/AnnouncementCard";
+import AnnouncementCreate from "./announcement/AnnouncementCreate";
 
 type Props = {
   toast: React.RefObject<Toast>;
@@ -38,7 +46,11 @@ type Props = {
 };
 function Classworks({ toast, subjectId, schoolId }: Props) {
   const language = useGetLanguage();
+  const user = useGetUser();
   const [triggerCreate, setTriggerCreate] = React.useState(false);
+  const [showAnnouncementCreate, setShowAnnouncementCreate] =
+    React.useState(false);
+  const announcements = useGetAnnouncementsTeacher({ subjectId });
   const classworks = useGetAssignments({ subjectId: subjectId });
   const [selectClasswork, setSelectClasswork] =
     React.useState<Assignment | null>(null);
@@ -136,6 +148,14 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
           </div>
         </PopupLayout>
       )}
+      {showAnnouncementCreate && (
+        <AnnouncementCreate
+          subjectId={subjectId}
+          schoolId={schoolId}
+          toast={toast}
+          onClose={() => setShowAnnouncementCreate(false)}
+        />
+      )}
       {triggerImportAssignment && (
         <PopupLayout
           onClose={() => {
@@ -223,8 +243,34 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
               {classworksDataLanguage.create(language.data ?? "en")}
             </div>
           </button>
+          <button
+            onClick={() => setShowAnnouncementCreate(true)}
+            className="second-button relative flex w-60 items-center justify-center gap-1 border py-1"
+          >
+            <div className="flex items-center justify-center gap-2">
+              📢 {announcementDataLanguage.create(language.data ?? "en")}
+            </div>
+          </button>
         </section>
       </header>
+
+      {announcements.data && announcements.data.length > 0 && (
+        <section className="mt-8 w-full px-5 lg:px-40">
+          <h2 className="text-sm font-semibold text-gray-500">
+            {announcementDataLanguage.sectionTitle(language.data ?? "en")}
+          </h2>
+          <ul className="mt-2 flex list-none flex-col gap-3 p-0">
+            {announcements.data.map((announcement) => (
+              <AnnouncementCard
+                key={announcement.id}
+                announcement={announcement}
+                subjectId={subjectId}
+                userId={user.data?.id ?? ""}
+              />
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section className="mt-4 w-full">
         <AssignmentTagFilterBar
