@@ -5,7 +5,7 @@ import Swal from "sweetalert2";
 import { announcementDataLanguage } from "../../../data/languages";
 import { ErrorMessages } from "../../../interfaces";
 import { useCreateAnnouncement, useGetLanguage } from "../../../react-query";
-import { CreateFileOnAnnouncementService } from "../../../services";
+import { Announcement, CreateFileOnAnnouncementService } from "../../../services";
 import {
   getSignedURLTeacherService,
   UploadSignURLService,
@@ -26,17 +26,24 @@ function AnnouncementCreate({ subjectId, schoolId, toast, onClose }: Props) {
   const [content, setContent] = React.useState("");
   const [files, setFiles] = React.useState<File[]>([]);
   const [loading, setLoading] = React.useState(false);
+  // Persists the announcement created by a previous (partially failed) submit
+  // attempt so a retry resumes the remaining uploads instead of creating a
+  // duplicate announcement.
+  const createdRef = React.useRef<Announcement | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !content.trim()) return;
     setLoading(true);
     try {
-      const announcement = await createAnnouncement.mutateAsync({
-        title: title.trim(),
-        content,
-        subjectId,
-      });
+      const announcement =
+        createdRef.current ??
+        (await createAnnouncement.mutateAsync({
+          title: title.trim(),
+          content,
+          subjectId,
+        }));
+      createdRef.current = announcement;
 
       for (const file of files) {
         const signed = await getSignedURLTeacherService({
@@ -57,6 +64,7 @@ function AnnouncementCreate({ subjectId, schoolId, toast, onClose }: Props) {
           name: file.name,
           size: file.size,
         });
+        setFiles((prev) => prev.filter((f) => f !== file));
       }
 
       toast.current?.show({
@@ -65,6 +73,7 @@ function AnnouncementCreate({ subjectId, schoolId, toast, onClose }: Props) {
         detail: announcementDataLanguage.posted(language.data ?? "en"),
         life: 3000,
       });
+      createdRef.current = null;
       document.body.style.overflow = "auto";
       onClose();
     } catch (error) {
