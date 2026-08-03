@@ -1,6 +1,6 @@
 import { Toast } from "primereact/toast";
 import React from "react";
-import { FiPaperclip, FiX } from "react-icons/fi";
+import { FiCheck, FiPaperclip, FiX } from "react-icons/fi";
 import Swal from "sweetalert2";
 import { announcementDataLanguage } from "../../../data/languages";
 import { ErrorMessages } from "../../../interfaces";
@@ -8,7 +8,7 @@ import { useCreateAnnouncement, useGetLanguage } from "../../../react-query";
 import { Announcement, CreateFileOnAnnouncementService } from "../../../services";
 import {
   getSignedURLTeacherService,
-  UploadSignURLService,
+  UploadSignURLWithProgressService,
 } from "../../../services/google-storage";
 import TextEditor from "../../common/TextEditor";
 
@@ -19,17 +19,36 @@ type Props = {
   onClose: () => void;
 };
 
+type UploadItem = {
+  id: string;
+  file: File;
+  progress: number;
+  status: "pending" | "uploading" | "done" | "error";
+};
+
+function newItemId(): string {
+  return typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : Math.random().toString(36).slice(2);
+}
+
 function AnnouncementCreate({ subjectId, schoolId, toast, onClose }: Props) {
   const language = useGetLanguage();
   const createAnnouncement = useCreateAnnouncement();
   const [title, setTitle] = React.useState("");
   const [content, setContent] = React.useState("");
-  const [files, setFiles] = React.useState<File[]>([]);
+  const [items, setItems] = React.useState<UploadItem[]>([]);
   const [loading, setLoading] = React.useState(false);
   // Persists the announcement created by a previous (partially failed) submit
   // attempt so a retry resumes the remaining uploads instead of creating a
   // duplicate announcement.
   const createdRef = React.useRef<Announcement | null>(null);
+
+  const patchItem = (id: string, patch: Partial<UploadItem>) => {
+    setItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, ...patch } : item)),
+    );
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,26 +64,35 @@ function AnnouncementCreate({ subjectId, schoolId, toast, onClose }: Props) {
         }));
       createdRef.current = announcement;
 
-      for (const file of files) {
-        const signed = await getSignedURLTeacherService({
-          fileName: file.name,
-          fileType: file.type,
-          fileSize: file.size,
-          schoolId,
-        });
-        await UploadSignURLService({
-          contentType: signed.contentType,
-          file,
-          signURL: signed.signURL,
-        });
-        await CreateFileOnAnnouncementService({
-          announcementId: announcement.id,
-          url: signed.originalURL,
-          type: file.type,
-          name: file.name,
-          size: file.size,
-        });
-        setFiles((prev) => prev.filter((f) => f !== file));
+      for (const item of items) {
+        if (item.status === "done") continue;
+        try {
+          patchItem(item.id, { status: "uploading", progress: 0 });
+          const signed = await getSignedURLTeacherService({
+            fileName: item.file.name,
+            fileType: item.file.type,
+            fileSize: item.file.size,
+            schoolId,
+          });
+          await UploadSignURLWithProgressService({
+            contentType: signed.contentType,
+            file: item.file,
+            signURL: signed.signURL,
+            onProgress: (progress) =>
+              patchItem(item.id, { progress: Math.round(progress) }),
+          });
+          await CreateFileOnAnnouncementService({
+            announcementId: announcement.id,
+            url: signed.originalURL,
+            type: item.file.type,
+            name: item.file.name,
+            size: item.file.size,
+          });
+          patchItem(item.id, { status: "done", progress: 100 });
+        } catch (error) {
+          patchItem(item.id, { status: "error" });
+          throw error;
+        }
       }
 
       toast.current?.show({
@@ -137,27 +165,67 @@ function AnnouncementCreate({ subjectId, schoolId, toast, onClose }: Props) {
             type="file"
             multiple
             hidden
-            onChange={(e) =>
-              setFiles((prev) => [...prev, ...Array.from(e.target.files ?? [])])
-            }
+            onChange={(e) => {
+              const picked = Array.from(e.target.files ?? []).map((file) => ({
+                id: newItemId(),
+                file,
+                progress: 0,
+                status: "pending" as const,
+              }));
+              setItems((prev) => [...prev, ...picked]);
+              e.target.value = "";
+            }}
           />
         </label>
-        {files.length > 0 && (
+        {items.length > 0 && (
           <ul className="flex flex-col gap-1">
-            {files.map((file, index) => (
+            {items.map((item) => (
               <li
-                key={`${file.name}-${index}`}
-                className="flex items-center justify-between rounded-lg border p-2 text-xs"
+                key={item.id}
+                className={`flex flex-col gap-1 rounded-lg border p-2 text-xs ${
+                  item.status === "error" ? "border-error-color" : ""
+                }`}
               >
-                <span className="truncate">{file.name}</span>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setFiles((prev) => prev.filter((_, i) => i !== index))
-                  }
-                >
-                  <FiX />
-                </button>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="truncate">{item.file.name}</span>
+                  {item.status === "done" ? (
+                    <FiCheck className="shrink-0 text-success-color" />
+                  ) : item.status === "uploading" ? (
+                    <span className="shrink-0 text-gray-500">
+                      {item.progress}%
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setItems((prev) =>
+                          prev.filter((f) => f.id !== item.id),
+                        )
+                      }
+                    >
+                      <FiX />
+                    </button>
+                  )}
+                </div>
+                {(item.status === "uploading" || item.status === "done") && (
+                  <div className="h-1 w-full overflow-hidden rounded-full bg-gray-200">
+                    <div
+                      className={`h-full rounded-full transition-all ${
+                        item.status === "done"
+                          ? "bg-success-color"
+                          : "bg-primary-color"
+                      }`}
+                      style={{ width: `${item.progress}%` }}
+                    />
+                  </div>
+                )}
+                {item.status === "error" && (
+                  <span className="text-[10px] text-error-color">
+                    {announcementDataLanguage.uploadFailedRetry(
+                      language.data ?? "en",
+                    )}
+                  </span>
+                )}
               </li>
             ))}
           </ul>

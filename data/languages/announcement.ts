@@ -141,6 +141,36 @@ export const announcementDataLanguage = {
         return "Attachments";
     }
   },
+  rename: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Rename";
+      case "th":
+        return "เปลี่ยนชื่อ";
+      default:
+        return "Rename";
+    }
+  },
+  deleteFileConfirm: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Remove this attachment?";
+      case "th":
+        return "ลบไฟล์แนบนี้?";
+      default:
+        return "Remove this attachment?";
+    }
+  },
+  uploadFailedRetry: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Upload failed — will retry on next post";
+      case "th":
+        return "อัปโหลดไม่สำเร็จ — จะลองใหม่เมื่อกดโพสต์อีกครั้ง";
+      default:
+        return "Upload failed — will retry on next post";
+    }
+  },
   edit: (language: Language) => {
     switch (language) {
       case "en":

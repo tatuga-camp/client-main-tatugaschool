@@ -248,6 +248,26 @@ export async function CreateFileOnAnnouncementService(
   }
 }
 
+export type RequestUpdateFileOnAnnouncementService = {
+  query: { fileOnAnnouncementId: string };
+  body: { name?: string };
+};
+export type ResponseUpdateFileOnAnnouncementService = FileOnAnnouncement;
+export async function UpdateFileOnAnnouncementService(
+  input: RequestUpdateFileOnAnnouncementService,
+): Promise<ResponseUpdateFileOnAnnouncementService> {
+  try {
+    const response = await axiosInstance({
+      method: "PATCH",
+      url: "/v1/file-on-announcements",
+      data: { ...input },
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data;
+  }
+}
+
 export type RequestDeleteFileOnAnnouncementService = {
   fileOnAnnouncementId: string;
 };
