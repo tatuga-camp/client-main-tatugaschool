@@ -92,3 +92,18 @@ self.addEventListener("message", async (event) => {
     }
   }
 });
+
+// Fired when the browser rotates or invalidates the push subscription.
+// Re-subscribe locally with the same options; the page re-sends the fresh
+// subscription to the server on its next visit (daily silent re-sync).
+self.addEventListener("pushsubscriptionchange", (event) => {
+  const oldSubscription = event.oldSubscription;
+  if (!oldSubscription || !oldSubscription.options) {
+    return;
+  }
+  event.waitUntil(
+    self.registration.pushManager
+      .subscribe(oldSubscription.options)
+      .catch((error) => console.error("Re-subscribe failed:", error))
+  );
+});
