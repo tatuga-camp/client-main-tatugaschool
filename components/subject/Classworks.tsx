@@ -218,7 +218,7 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
         <section className="mt-10 grid items-center gap-1 font-Anuphan md:flex">
           <button
             onClick={() => setTriggerManageRubric(true)}
-            className="second-button relative flex w-60 items-center justify-center gap-1 border py-1"
+            className="second-button relative flex w-full items-center justify-center gap-1 border py-1 md:w-60"
           >
             <div className="flex items-center justify-center gap-2">
               <MdChecklist />
@@ -227,7 +227,7 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
           </button>
           <button
             onClick={() => setTriggerImportAssignment(true)}
-            className="second-button relative flex w-60 items-center justify-center gap-1 border py-1"
+            className="second-button relative flex w-full items-center justify-center gap-1 border py-1 md:w-60"
           >
             <div className="flex items-center justify-center gap-2">
               <MdImportContacts />
@@ -236,7 +236,7 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
           </button>
           <button
             onClick={() => setTriggerCreate((prev) => !prev)}
-            className="second-button relative flex w-60 items-center justify-center gap-1 border py-1"
+            className="second-button relative flex w-full items-center justify-center gap-1 border py-1 md:w-60"
           >
             <div className="flex items-center justify-center gap-2">
               <FaPlus />
@@ -245,7 +245,7 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
           </button>
           <button
             onClick={() => setShowAnnouncementCreate(true)}
-            className="second-button relative flex w-60 items-center justify-center gap-1 border py-1"
+            className="second-button relative flex w-full items-center justify-center gap-1 border py-1 md:w-60"
           >
             <div className="flex items-center justify-center gap-2">
               📢 {announcementDataLanguage.create(language.data ?? "en")}
@@ -259,14 +259,16 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
           <h2 className="text-sm font-semibold text-gray-500">
             {announcementDataLanguage.sectionTitle(language.data ?? "en")}
           </h2>
-          <ul className="mt-2 flex list-none flex-col gap-3 p-0">
+          <ul className="mt-2 flex w-full list-none flex-col items-center justify-center gap-3 p-0">
             {announcements.data.map((announcement) => (
-              <AnnouncementCard
-                key={announcement.id}
-                announcement={announcement}
-                subjectId={subjectId}
-                userId={user.data?.id ?? ""}
-              />
+              <div className="w-full md:w-9/12 xl:w-8/12">
+                <AnnouncementCard
+                  key={announcement.id}
+                  announcement={announcement}
+                  subjectId={subjectId}
+                  userId={user.data?.id ?? ""}
+                />
+              </div>
             ))}
           </ul>
         </section>
