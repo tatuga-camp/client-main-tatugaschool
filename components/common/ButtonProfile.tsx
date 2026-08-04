@@ -1,9 +1,10 @@
 import { useQueryClient, UseQueryResult } from "@tanstack/react-query";
 import Image from "next/image";
 import router from "next/router";
-import { useRef, useState } from "react";
-import { AiOutlineLogout } from "react-icons/ai";
+import { useEffect, useRef, useState } from "react";
+import { AiOutlineLoading3Quarters, AiOutlineLogout } from "react-icons/ai";
 import { FiHelpCircle, FiMoon } from "react-icons/fi";
+import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
 import {
   MdKeyboardArrowDown,
   MdKeyboardArrowUp,
@@ -17,14 +18,16 @@ import { User } from "../../interfaces";
 import { useGetLanguage } from "../../react-query";
 import { decodeBlurhashToCanvas } from "../../utils";
 import useClickOutside from "../../hook/useClickOutside";
+import useTawkChat from "../../hook/useTawkChat";
 import Link from "next/link";
 import LanguageSelect from "./LanguageSelect";
 
 type Props = {
   user: UseQueryResult<User, Error>;
   onTriggerFeedback?: () => void;
+  schoolId?: string;
 };
-function ButtonProfile({ user, onTriggerFeedback }: Props) {
+function ButtonProfile({ user, onTriggerFeedback, schoolId }: Props) {
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const language = useGetLanguage();
@@ -34,6 +37,28 @@ function ButtonProfile({ user, onTriggerFeedback }: Props) {
   useClickOutside(dropdownRef, () => {
     setIsOpen(false);
   });
+
+  const tawk = useTawkChat({ user: user.data, schoolId });
+  const chatRequestedRef = useRef(false);
+
+  // Close the dropdown once a click-initiated load finishes and the chat opens.
+  useEffect(() => {
+    if (tawk.status === "ready" && chatRequestedRef.current) {
+      chatRequestedRef.current = false;
+      setIsOpen(false);
+    }
+  }, [tawk.status]);
+
+  const handleChatSupport = () => {
+    if (tawk.status === "ready") {
+      tawk.openChat();
+      setIsOpen(false);
+      return;
+    }
+    // idle or error → load (or retry); keep the menu open to show progress
+    chatRequestedRef.current = true;
+    tawk.openChat();
+  };
 
   const handleLogout = () => {
     setLoading(true);
@@ -164,6 +189,35 @@ function ButtonProfile({ user, onTriggerFeedback }: Props) {
               <FiHelpCircle size={18} className="text-gray-500" />
               {navbarLanguageData.helpCenter(language.data ?? "en")}
             </Link>
+
+            {user.data && (
+              <button
+                disabled={tawk.status === "loading"}
+                onClick={handleChatSupport}
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 disabled:cursor-wait disabled:opacity-70"
+              >
+                {tawk.status === "loading" ? (
+                  <AiOutlineLoading3Quarters
+                    size={18}
+                    className="animate-spin text-gray-500"
+                  />
+                ) : (
+                  <IoChatbubbleEllipsesOutline
+                    size={18}
+                    className="text-gray-500"
+                  />
+                )}
+                {tawk.status === "loading" ? (
+                  navbarLanguageData.chatSupportLoading(language.data ?? "en")
+                ) : tawk.status === "error" ? (
+                  <span className="text-error-color">
+                    {navbarLanguageData.chatSupportRetry(language.data ?? "en")}
+                  </span>
+                ) : (
+                  navbarLanguageData.chatSupport(language.data ?? "en")
+                )}
+              </button>
+            )}
 
             <Link
               href="https://tatugaschool.com/news"
