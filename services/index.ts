@@ -35,3 +35,4 @@ export * from "./word-cloud-set";
 export * from "./rubric";
 export * from "./analytics";
 export * from "./announcement";
+export * from "./tawk";
