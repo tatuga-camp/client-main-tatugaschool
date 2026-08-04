@@ -44,6 +44,11 @@ function load(user: User, schoolId?: string) {
   window.Tawk_API.onChatMinimized = () => {
     window.Tawk_API.hideWidget();
   };
+  // ...except when an admin replies while the widget is hidden: bring the
+  // bubble back (with Tawk's unread indicator) so the user notices.
+  window.Tawk_API.onChatMessageAgent = () => {
+    window.Tawk_API.showWidget();
+  };
   window.Tawk_API.onLoad = () => {
     window.Tawk_API.setAttributes(
       {
@@ -112,7 +117,7 @@ export default function useTawkChat(params: {
   // explicit Chat Support click still loads it there.
   useEffect(() => {
     if (!params.user) return;
-    if (window.origin.includes("localhost:")) return;
+    // if (window.origin.includes("localhost:")) return;
     if (status === "idle") {
       load(params.user, params.schoolId);
     }
