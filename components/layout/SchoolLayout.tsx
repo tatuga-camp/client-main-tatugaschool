@@ -3,8 +3,6 @@ import Navbar from "../Navbar";
 import React from "react";
 import useClickOutside from "../../hook/useClickOutside";
 import { menuSchoolList } from "../../data";
-import { useGetSchool, useGetUser } from "../../react-query";
-import TawkToChat from "../common/TawkToChat";
 
 type LayoutProps = {
   children: ReactNode;
@@ -15,8 +13,6 @@ type LayoutProps = {
 function SchoolLayout({ children, selectMenu, schoolId }: LayoutProps) {
   const navbarRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = React.useState<boolean | null>(null);
-  const school = useGetSchool({ schoolId });
-  const user = useGetUser();
   useClickOutside(navbarRef, () => {
     setActive(() => false); // Close the SubjectNavbar when clicking outside
   });
@@ -47,9 +43,6 @@ function SchoolLayout({ children, selectMenu, schoolId }: LayoutProps) {
         />
       </div>
       {children}
-      {school.data && user.data && (
-        <TawkToChat school={school.data} user={user.data} />
-      )}
     </section>
   );
 }

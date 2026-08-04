@@ -156,6 +156,7 @@ function Navbar({
             {/* --- End Notification Button --- */}
             <ButtonProfile
               user={user}
+              schoolId={schoolId}
               onTriggerFeedback={() => {
                 setTriggerFeedback(true);
               }}
