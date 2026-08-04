@@ -39,15 +39,17 @@ function ButtonProfile({ user, onTriggerFeedback, schoolId }: Props) {
   });
 
   const tawk = useTawkChat({ user: user.data, schoolId });
-  const chatRequestedRef = useRef(false);
+  // The script preloads in the background; only show loading feedback when
+  // the user actually asked for the chat before it finished.
+  const [chatRequested, setChatRequested] = useState(false);
 
   // Close the dropdown once a click-initiated load finishes and the chat opens.
   useEffect(() => {
-    if (tawk.status === "ready" && chatRequestedRef.current) {
-      chatRequestedRef.current = false;
+    if (tawk.status === "ready" && chatRequested) {
+      setChatRequested(false);
       setIsOpen(false);
     }
-  }, [tawk.status]);
+  }, [tawk.status, chatRequested]);
 
   const handleChatSupport = () => {
     if (tawk.status === "ready") {
@@ -55,10 +57,13 @@ function ButtonProfile({ user, onTriggerFeedback, schoolId }: Props) {
       setIsOpen(false);
       return;
     }
-    // idle or error → load (or retry); keep the menu open to show progress
-    chatRequestedRef.current = true;
+    // loading → opens when ready; idle/error → load (or retry) then open.
+    // Keep the menu open to show progress.
+    setChatRequested(true);
     tawk.openChat();
   };
+
+  const chatWaiting = chatRequested && tawk.status === "loading";
 
   const handleLogout = () => {
     setLoading(true);
@@ -192,11 +197,11 @@ function ButtonProfile({ user, onTriggerFeedback, schoolId }: Props) {
 
             {user.data && (
               <button
-                disabled={tawk.status === "loading"}
+                disabled={chatWaiting}
                 onClick={handleChatSupport}
                 className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 disabled:cursor-wait disabled:opacity-70"
               >
-                {tawk.status === "loading" ? (
+                {chatWaiting ? (
                   <AiOutlineLoading3Quarters
                     size={18}
                     className="animate-spin text-gray-500"
@@ -207,7 +212,7 @@ function ButtonProfile({ user, onTriggerFeedback, schoolId }: Props) {
                     className="text-gray-500"
                   />
                 )}
-                {tawk.status === "loading" ? (
+                {chatWaiting ? (
                   navbarLanguageData.chatSupportLoading(language.data ?? "en")
                 ) : tawk.status === "error" ? (
                   <span className="text-error-color">

@@ -1,4 +1,4 @@
-import { useCallback, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useSyncExternalStore } from "react";
 import { User } from "../interfaces";
 
 const TAWK_TO_PROPERTY_ID = "67dade5ac029cf190fdd8c17";
@@ -7,8 +7,11 @@ const TAWK_TO_WIDGET_ID = "1imnf9548";
 export type TawkStatus = "idle" | "loading" | "ready" | "error";
 
 // Tawk_API is a window-global singleton, so load state lives at module level
-// and every hook instance observes the same store.
+// and every hook instance observes the same store. The script loads on page
+// visit (hidden) so Tawk's dashboard counts the visitor; the widget only
+// becomes visible when the user asks for it.
 let status: TawkStatus = "idle";
+let pendingOpen = false;
 const listeners = new Set<() => void>();
 
 function setStatus(next: TawkStatus) {
@@ -31,7 +34,7 @@ function getServerSnapshot(): TawkStatus {
   return "idle";
 }
 
-function loadAndOpen(user: User, schoolId?: string) {
+function load(user: User, schoolId?: string) {
   setStatus("loading");
 
   // Callback properties must exist before the embed script executes —
@@ -60,8 +63,14 @@ function loadAndOpen(user: User, schoolId?: string) {
       });
     }
     setStatus("ready");
-    window.Tawk_API.showWidget();
-    window.Tawk_API.maximize();
+    if (pendingOpen) {
+      pendingOpen = false;
+      window.Tawk_API.showWidget();
+      window.Tawk_API.maximize();
+    } else {
+      // Visitor stays tracked; only the UI is hidden until asked for.
+      window.Tawk_API.hideWidget();
+    }
   };
 
   const script = document.createElement("script");
@@ -77,14 +86,15 @@ function loadAndOpen(user: User, schoolId?: string) {
 }
 
 function open(user: User, schoolId?: string) {
-  if (status === "loading") return;
   if (status === "ready") {
     window.Tawk_API.showWidget();
     window.Tawk_API.maximize();
     return;
   }
-  // "idle" or "error" (retry re-injects the script)
-  loadAndOpen(user, schoolId);
+  pendingOpen = true;
+  if (status === "loading") return; // will open in onLoad
+  // "idle" (e.g. localhost, where auto-load is skipped) or "error" (retry)
+  load(user, schoolId);
 }
 
 export default function useTawkChat(params: {
@@ -96,6 +106,17 @@ export default function useTawkChat(params: {
     getSnapshot,
     getServerSnapshot,
   );
+
+  // Load hidden on page visit so the visitor shows up in the Tawk dashboard.
+  // Skipped on localhost to keep dev sessions out of visitor stats; an
+  // explicit Chat Support click still loads it there.
+  useEffect(() => {
+    if (!params.user) return;
+    if (window.origin.includes("localhost:")) return;
+    if (status === "idle") {
+      load(params.user, params.schoolId);
+    }
+  }, [params.user, params.schoolId]);
 
   const openChat = useCallback(() => {
     if (!params.user) return;
