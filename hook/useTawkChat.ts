@@ -175,10 +175,7 @@ export default function useTawkChat(params: {
       {
         hash: params.login.hash,
         userId: params.login.userId,
-        name: {
-          first: user.firstName,
-          last: user.lastName,
-        },
+        name: `${user.firstName} ${user.lastName}`,
         email: user.email,
       },
       (error) => {
