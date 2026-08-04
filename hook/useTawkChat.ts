@@ -34,8 +34,13 @@ function getServerSnapshot(): TawkStatus {
 function loadAndOpen(user: User, schoolId?: string) {
   setStatus("loading");
 
-  // Callback properties must exist before the embed script executes.
+  // Callback properties must exist before the embed script executes —
+  // handlers assigned after load (e.g. inside onLoad) are not honored.
   window.Tawk_API = (window.Tawk_API || {}) as TawkAPIType;
+  // Closing/minimizing the chat removes the bubble entirely; reopening is menu-only.
+  window.Tawk_API.onChatMinimized = () => {
+    window.Tawk_API.hideWidget();
+  };
   window.Tawk_API.onLoad = () => {
     window.Tawk_API.setAttributes(
       {
@@ -54,10 +59,6 @@ function loadAndOpen(user: User, schoolId?: string) {
         if (error) console.error("Tawk tag error:", error);
       });
     }
-    // Closing the chat removes the bubble entirely; reopening is menu-only.
-    window.Tawk_API.onChatMinimized = () => {
-      window.Tawk_API.hideWidget();
-    };
     setStatus("ready");
     window.Tawk_API.showWidget();
     window.Tawk_API.maximize();
