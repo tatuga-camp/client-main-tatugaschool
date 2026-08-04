@@ -61,6 +61,36 @@ export const navbarLanguageData = {
         return "Help Center";
     }
   },
+  chatSupport: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Chat Support";
+      case "th":
+        return "แชทกับทีมงาน";
+      default:
+        return "Chat Support";
+    }
+  },
+  chatSupportLoading: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Loading chat…";
+      case "th":
+        return "กำลังโหลดแชท…";
+      default:
+        return "Loading chat…";
+    }
+  },
+  chatSupportRetry: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Failed — tap to retry";
+      case "th":
+        return "โหลดไม่สำเร็จ — แตะเพื่อลองใหม่";
+      default:
+        return "Failed — tap to retry";
+    }
+  },
   darkMode: (language: Language) => {
     switch (language) {
       case "en":
