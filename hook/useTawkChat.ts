@@ -34,6 +34,20 @@ function getServerSnapshot(): TawkStatus {
   return "idle";
 }
 
+// Tawk pushes a #max-widget URL hash when the chat maximizes (its back-button
+// minimize hook). Strip it so the app URL stays clean: replaceState keeps the
+// Next.js router's history state intact and fires no hashchange, so Tawk
+// doesn't react to the cleanup.
+function stripTawkHash() {
+  if (window.location.hash === "#max-widget") {
+    window.history.replaceState(
+      window.history.state,
+      "",
+      window.location.pathname + window.location.search,
+    );
+  }
+}
+
 function load(user: User, schoolId?: string) {
   setStatus("loading");
 
@@ -49,6 +63,10 @@ function load(user: User, schoolId?: string) {
   window.Tawk_API.onChatMessageAgent = () => {
     window.Tawk_API.showWidget();
   };
+  window.Tawk_API.onChatMaximized = stripTawkHash;
+  // The hash can be set a moment after onChatMaximized fires; catch it too.
+  // (Duplicate adds of the same function reference are no-ops.)
+  window.addEventListener("hashchange", stripTawkHash);
   window.Tawk_API.onLoad = () => {
     window.Tawk_API.setAttributes(
       {
@@ -117,7 +135,7 @@ export default function useTawkChat(params: {
   // explicit Chat Support click still loads it there.
   useEffect(() => {
     if (!params.user) return;
-    // if (window.origin.includes("localhost:")) return;
+    if (window.origin.includes("localhost:")) return;
     if (status === "idle") {
       load(params.user, params.schoolId);
     }
