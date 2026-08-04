@@ -15,7 +15,7 @@ import { VscReport, VscSettings } from "react-icons/vsc";
 import { defaultBlurHash, defaultCanvas } from "../../data";
 import { navbarLanguageData } from "../../data/languages";
 import { User } from "../../interfaces";
-import { useGetLanguage } from "../../react-query";
+import { useGetLanguage, useGetTawkHash } from "../../react-query";
 import { decodeBlurhashToCanvas } from "../../utils";
 import useClickOutside from "../../hook/useClickOutside";
 import useTawkChat from "../../hook/useTawkChat";
@@ -38,7 +38,8 @@ function ButtonProfile({ user, onTriggerFeedback, schoolId }: Props) {
     setIsOpen(false);
   });
 
-  const tawk = useTawkChat({ user: user.data, schoolId });
+  const tawkHash = useGetTawkHash();
+  const tawk = useTawkChat({ user: user.data, schoolId, login: tawkHash.data });
   // The script preloads in the background; only show loading feedback when
   // the user actually asked for the chat before it finished.
   const [chatRequested, setChatRequested] = useState(false);

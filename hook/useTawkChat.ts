@@ -12,6 +12,7 @@ export type TawkStatus = "idle" | "loading" | "ready" | "error";
 // becomes visible when the user asks for it.
 let status: TawkStatus = "idle";
 let pendingOpen = false;
+let loggedInUserId: string | null = null;
 const listeners = new Set<() => void>();
 
 function setStatus(next: TawkStatus) {
@@ -135,6 +136,7 @@ function open(user: User, schoolId?: string) {
 export default function useTawkChat(params: {
   user: User | undefined;
   schoolId?: string;
+  login?: { userId: string; hash: string };
 }) {
   const currentStatus = useSyncExternalStore(
     subscribe,
@@ -152,6 +154,31 @@ export default function useTawkChat(params: {
       load(params.user, params.schoolId);
     }
   }, [params.user, params.schoolId]);
+
+  // Identify the visitor to Tawk so the same account gets the same
+  // conversation across sessions/devices. Additive: runs once per userId
+  // after the widget is ready; any failure leaves the anonymous session
+  // (attributes were already set in onLoad) working as before.
+  useEffect(() => {
+    if (currentStatus !== "ready") return;
+    if (!params.user || !params.login) return;
+    if (loggedInUserId === params.login.userId) return;
+    loggedInUserId = params.login.userId;
+    window.Tawk_API.login(
+      {
+        hash: params.login.hash,
+        userId: params.login.userId,
+        name: {
+          first: params.user.firstName,
+          last: params.user.lastName,
+        },
+        email: params.user.email,
+      },
+      (error) => {
+        if (error) console.error("Tawk login error:", error);
+      },
+    );
+  }, [currentStatus, params.user, params.login]);
 
   const openChat = useCallback(() => {
     if (!params.user) return;
