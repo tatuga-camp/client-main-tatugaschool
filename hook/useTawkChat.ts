@@ -61,7 +61,7 @@ function sweepTawkHash() {
   );
 }
 
-function load() {
+function load(user: User, schoolId?: string) {
   setStatus("loading");
 
   // Callback properties must exist before the embed script executes —
@@ -81,9 +81,27 @@ function load() {
   // (Duplicate adds of the same function reference are no-ops.)
   window.addEventListener("hashchange", stripTawkHash);
   window.Tawk_API.onLoad = () => {
-    // No setAttributes/addTags here: Secure Mode rejects them from
-    // unverified visitors (UNAUTHORIZED_API_CALL). Identity and tags are
-    // applied by the login effect once the visitor is verified.
+    // Immediate dashboard identity for this session. NOTE: these anonymous
+    // calls require Secure Mode to be DISABLED on the Tawk property — with
+    // it enabled they fail with UNAUTHORIZED_API_CALL (identity would then
+    // have to come solely from the login effect below).
+    window.Tawk_API.setAttributes(
+      {
+        name: `${user.firstName} ${user.lastName}`,
+        email: user.email,
+        userid: user.id,
+        phone: user.phone,
+        provider: user.provider,
+      },
+      (error) => {
+        if (error) console.error("Tawk setAttributes Error:", error);
+      },
+    );
+    if (schoolId) {
+      window.Tawk_API.addTags([`School: ${schoolId}`], (error) => {
+        if (error) console.error("Tawk tag error:", error);
+      });
+    }
     setStatus("ready");
     if (pendingOpen) {
       pendingOpen = false;
@@ -107,7 +125,7 @@ function load() {
   document.body.appendChild(script);
 }
 
-function open() {
+function open(user: User, schoolId?: string) {
   if (status === "ready") {
     window.Tawk_API.showWidget();
     window.Tawk_API.maximize();
@@ -116,7 +134,7 @@ function open() {
   pendingOpen = true;
   if (status === "loading") return; // will open in onLoad
   // "idle" or "error" (retry re-injects the script)
-  load();
+  load(user, schoolId);
 }
 
 export default function useTawkChat(params: {
@@ -137,36 +155,48 @@ export default function useTawkChat(params: {
     if (!params.user) return;
     // if (window.origin.includes("localhost:")) return;
     if (status === "idle") {
-      load();
+      load(params.user, params.schoolId);
     }
-  }, [params.user]);
+  }, [params.user, params.schoolId]);
 
-  // Identify the visitor to Tawk so the same account gets the same
-  // conversation across sessions/devices. Runs once per userId after the
-  // widget is ready. Under Secure Mode only verified visitors may set
-  // attributes/tags, so the school tag is added after a successful login;
-  // without a hash the visitor stays anonymous (unnamed but functional).
+  // Log the visitor into Tawk so the same account gets the same conversation
+  // across sessions/devices (onLoad's setAttributes only labels the current
+  // browser session). Runs once per userId after the widget is ready. login
+  // reconnects the session, so attributes/tags are re-applied afterwards to
+  // keep the dashboard identity on the logged-in visitor too.
   useEffect(() => {
     if (currentStatus !== "ready") return;
     if (!params.user || !params.login) return;
     if (loggedInUserId === params.login.userId) return;
     loggedInUserId = params.login.userId;
+    const user = params.user;
     const schoolId = params.schoolId;
     window.Tawk_API.login(
       {
         hash: params.login.hash,
         userId: params.login.userId,
         name: {
-          first: params.user.firstName,
-          last: params.user.lastName,
+          first: user.firstName,
+          last: user.lastName,
         },
-        email: params.user.email,
+        email: user.email,
       },
       (error) => {
         if (error) {
           console.error("Tawk login error:", error);
           return;
         }
+        window.Tawk_API.setAttributes(
+          {
+            userid: user.id,
+            phone: user.phone,
+            provider: user.provider,
+          },
+          (attrError) => {
+            if (attrError)
+              console.error("Tawk setAttributes Error:", attrError);
+          },
+        );
         if (schoolId) {
           window.Tawk_API.addTags([`School: ${schoolId}`], (tagError) => {
             if (tagError) console.error("Tawk tag error:", tagError);
@@ -178,8 +208,8 @@ export default function useTawkChat(params: {
 
   const openChat = useCallback(() => {
     if (!params.user) return;
-    open();
-  }, [params.user]);
+    open(params.user, params.schoolId);
+  }, [params.user, params.schoolId]);
 
   return { openChat, status: currentStatus };
 }
