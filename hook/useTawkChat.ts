@@ -48,6 +48,18 @@ function stripTawkHash() {
   }
 }
 
+// Tawk sets the hash at slightly different moments depending on how the chat
+// was maximized (menu, bubble click, mobile), and pushState-based sets fire no
+// hashchange event — a single check misses it in production builds. Sweep for
+// a short window after each maximize instead.
+let stripSweepTimers: number[] = [];
+function sweepTawkHash() {
+  stripSweepTimers.forEach((timer) => clearTimeout(timer));
+  stripSweepTimers = [0, 150, 400, 800, 1500, 2500].map((ms) =>
+    window.setTimeout(stripTawkHash, ms),
+  );
+}
+
 function load(user: User, schoolId?: string) {
   setStatus("loading");
 
@@ -63,8 +75,8 @@ function load(user: User, schoolId?: string) {
   window.Tawk_API.onChatMessageAgent = () => {
     window.Tawk_API.showWidget();
   };
-  window.Tawk_API.onChatMaximized = stripTawkHash;
-  // The hash can be set a moment after onChatMaximized fires; catch it too.
+  window.Tawk_API.onChatMaximized = sweepTawkHash;
+  // Catch location.hash-style sets too, whenever they fire.
   // (Duplicate adds of the same function reference are no-ops.)
   window.addEventListener("hashchange", stripTawkHash);
   window.Tawk_API.onLoad = () => {
@@ -135,7 +147,7 @@ export default function useTawkChat(params: {
   // explicit Chat Support click still loads it there.
   useEffect(() => {
     if (!params.user) return;
-    if (window.origin.includes("localhost:")) return;
+    // if (window.origin.includes("localhost:")) return;
     if (status === "idle") {
       load(params.user, params.schoolId);
     }
