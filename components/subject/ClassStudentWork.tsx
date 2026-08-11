@@ -406,6 +406,19 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
                         />
                       );
                     })}
+              {!studentOnAssignments.isLoading &&
+                visibleStudents.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className="p-10 text-center text-sm text-gray-500"
+                    >
+                      {studentWorkDataLanguage.emptyStatusTab(
+                        language.data ?? "en",
+                      )}
+                    </td>
+                  </tr>
+                )}
             </tbody>
           </table>
         </div>
