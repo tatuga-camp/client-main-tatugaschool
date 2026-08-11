@@ -319,10 +319,14 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
                       onChange={(e) => {
                         setStudentData((prev) => {
                           return prev?.map((s) => {
-                            return {
-                              ...s,
-                              select: e.target.checked,
-                            };
+                            if (
+                              s.isAssigned &&
+                              (selectStatusTab === "ALL" ||
+                                s.status === selectStatusTab)
+                            ) {
+                              return { ...s, select: e.target.checked };
+                            }
+                            return s;
                           });
                         });
                       }}
