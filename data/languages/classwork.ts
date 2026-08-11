@@ -477,6 +477,26 @@ export const studentWorkDataLanguage = {
         return "Wait to review";
     }
   },
+  all: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "All";
+      case "th":
+        return "ทั้งหมด";
+      default:
+        return "All";
+    }
+  },
+  emptyStatusTab: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "No students in this status";
+      case "th":
+        return "ไม่มีนักเรียนในสถานะนี้";
+      default:
+        return "No students in this status";
+    }
+  },
   pleaseSelectStudent: (language: Language) => {
     switch (language) {
       case "en":
