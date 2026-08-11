@@ -61,6 +61,15 @@ import StatusAssignmentButton from "./StatusAssignmentButton";
 import RubricGradingPanel from "./rubric/RubricGradingPanel";
 import { useRouter } from "next/router";
 
+const studentStatusTabs = [
+  { key: "ALL", label: "all" },
+  { key: "SUBMITTED", label: "waitForReview" },
+  { key: "REVIEWD", label: "reviewed" },
+  { key: "IMPROVED", label: "improve" },
+  { key: "PENDDING", label: "noWork" },
+] as const;
+type StudentStatusTab = (typeof studentStatusTabs)[number]["key"];
+
 type Props = {
   assignmentId: string;
   onScroll?: () => void;
@@ -82,6 +91,23 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
 
   const [triggerHideStudentList, setTriggerHideStudentList] =
     React.useState(false);
+
+  const [selectStatusTab, setSelectStatusTab] =
+    useState<StudentStatusTab>("ALL");
+
+  const handleSelectStatusTab = (tab: StudentStatusTab) => {
+    setSelectStatusTab(tab);
+    setStudentData((prev) => prev?.map((s) => ({ ...s, select: false })));
+  };
+
+  // Counts ignore the search box: computed from the full fetched roster.
+  const assignedStudents =
+    studentOnAssignments.data?.filter((s) => s.isAssigned) ?? [];
+
+  const visibleStudents = (studentData ?? [])
+    .filter((d) => d.isAssigned === true)
+    .filter((d) => selectStatusTab === "ALL" || d.status === selectStatusTab)
+    .sort((a, b) => Number(a.number) - Number(b.number));
 
   const assignment = useGetAssignment({
     id: assignmentId,
@@ -252,6 +278,33 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
             </div>
           </button>
         </div>
+        {!triggerHideStudentList && (
+          <div className="flex w-full shrink-0 gap-1 overflow-x-auto border-b">
+            {studentStatusTabs.map((tab) => {
+              const active = selectStatusTab === tab.key;
+              const count =
+                tab.key === "ALL"
+                  ? assignedStudents.length
+                  : assignedStudents.filter((s) => s.status === tab.key)
+                      .length;
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => handleSelectStatusTab(tab.key)}
+                  className={`flex shrink-0 items-center gap-1 whitespace-nowrap border-b-2 px-3 py-2 text-sm transition ${
+                    active
+                      ? "border-primary-color font-semibold text-primary-color"
+                      : "border-transparent text-gray-500 hover:text-black"
+                  }`}
+                >
+                  {studentWorkDataLanguage[tab.label](language.data ?? "en")}
+                  {studentOnAssignments.data && <span>({count})</span>}
+                </button>
+              );
+            })}
+          </div>
+        )}
         <div
           className={`${triggerHideStudentList ? "hidden" : "w-full"} overflow-auto pb-10 md:pb-40`}
         >
@@ -337,10 +390,7 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
                       </tr>
                     );
                   })
-                : studentData
-                    ?.filter((d) => d.isAssigned === true)
-                    .sort((a, b) => Number(a.number) - Number(b.number))
-                    .map((student, index) => {
+                : visibleStudents.map((student, index) => {
                       const odd = index % 2 === 0;
                       return (
                         <StudentList
