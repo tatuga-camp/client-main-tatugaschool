@@ -35,7 +35,7 @@ A tab bar sits inside the student-list section, between the search/download head
 - Each tab shows a live count of **assigned** students in that bucket, e.g. `Wait to review (4)`. Counts are computed from `studentOnAssignments.data` (so they update with the existing 5s refetch) and **ignore the search box** — they always reflect the whole roster.
 - Styling follows the project theme tokens: active tab `text-primary-color` with a `border-primary-color` bottom border; inactive `text-gray-500`. Same visual family as the existing Works/Comments tabs in this file.
 - The bar is horizontally scrollable on narrow screens (`overflow-x-auto`, `whitespace-nowrap` / no wrap) so mobile layouts are not broken.
-- While student data is loading, the tab bar renders without counts (or with the All tab only active); the existing skeleton rows continue to show.
+- While student data is loading, the tab bar renders with the All tab active and no counts shown; the existing skeleton rows continue to show.
 
 ### State and filtering
 
@@ -50,7 +50,7 @@ A tab bar sits inside the student-list section, between the search/download head
 - **Switching tabs clears all selections.** Rationale: individually-checked rows hidden by the new tab could otherwise silently receive bulk grades.
 - **Deep-link** (`?studentOnAssignmentId=`) is unaffected: it opens the student's detail panel regardless of active tab; the default All tab shows every row.
 - **Detail panel** is untouched. When grading flips a student `SUBMITTED → REVIEWD`, the student drops out of the Wait to review tab on the next refetch — the intended "grade it and it leaves my queue" flow.
-- **Empty tab state:** when a tab has no students, show a short centered message in the table area via a new language key `emptyStatusTab` (en "No students in this status" / th equivalent).
+- **Empty tab state:** when a tab has no students, show a short centered message in the table area via a new language key `emptyStatusTab` (en "No students in this status" / th "ไม่มีนักเรียนในสถานะนี้").
 
 ### Scope
 
