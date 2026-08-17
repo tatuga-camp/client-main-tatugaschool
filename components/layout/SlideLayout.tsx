@@ -34,22 +34,20 @@ function SlideLayout({ children, onClose, loading }: LayoutProps) {
 
   return (
     <div
-      className={`fixed flex top-0 bottom-0 right-0 left-0 items-center justify-end m-auto z-50`}
+      className={`fixed bottom-0 left-0 right-0 top-0 z-40 m-auto flex items-center justify-end`}
     >
       <div
-        className={`
-        ${
+        className={` ${
           triggerShow ? "translate-x-0" : "translate-x-full"
-        } transition-transform duration-300 w-full md:w-10/12 lg:w-7/12
-        2xl:w-5/12 h-full flex justify-between flex-col relative bg-white`}
+        } relative flex h-full w-full flex-col justify-between bg-white transition-transform duration-300 md:w-10/12 lg:w-7/12 2xl:w-5/12`}
       >
-        <header className="w-full p-2 flex justify-end">
+        <header className="flex w-full justify-end p-2">
           <button
             onClick={() => {
               handleClose();
             }}
             type="button"
-            className="text-lg  hover:bg-gray-300/50 w-11 h-11 md:w-6 md:h-6 rounded flex items-center justify-center font-semibold"
+            className="flex h-11 w-11 items-center justify-center rounded text-lg font-semibold hover:bg-gray-300/50 md:h-6 md:w-6"
           >
             <IoMdClose />
           </button>
@@ -61,8 +59,7 @@ function SlideLayout({ children, onClose, loading }: LayoutProps) {
         onClick={() => {
           handleClose();
         }}
-        className="top-0 bottom-0 w-screen h-screen right-0 left-0 
-bg-black/50 fixed  m-auto -z-10"
+        className="fixed bottom-0 left-0 right-0 top-0 -z-10 m-auto h-screen w-screen bg-black/50"
       ></footer>
     </div>
   );

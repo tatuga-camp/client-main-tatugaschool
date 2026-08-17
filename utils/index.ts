@@ -9,3 +9,4 @@ export * from "./grade";
 export * from "./cookie";
 export * from "./algorithm";
 export * from "./calculateStudentTotals";
+export * from "./cropImage";

@@ -18,6 +18,7 @@ import {
 } from "../../services";
 import { generateBlurHash } from "../../utils";
 import LoadingBar from "../common/LoadingBar";
+import PhotoEditor from "../common/PhotoEditor";
 import StudentSection from "./StudentSection";
 
 type Props = {
@@ -32,6 +33,7 @@ function StudentCreate({ onClose, classId, toast, schoolId }: Props) {
   const create = useCreateStudent();
   const sound = useSound("/sounds/ding.mp3") as HTMLAudioElement;
   const [loading, setLoading] = React.useState(false);
+  const [photoFile, setPhotoFile] = React.useState<File | null>(null);
   const [data, setData] = React.useState<{
     title: string;
     firstName: string;
@@ -87,13 +89,16 @@ function StudentCreate({ onClose, classId, toast, schoolId }: Props) {
     }
   };
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setPhotoFile(file);
+  };
+
+  const handleSavePhoto = async (file: File) => {
     try {
       setLoading(true);
-      const file = e.target.files?.[0];
-      if (!file) {
-        throw new Error("File not found");
-      }
 
       const signURL = await getSignedURLTeacherService({
         fileName: file.name,
@@ -112,6 +117,7 @@ function StudentCreate({ onClose, classId, toast, schoolId }: Props) {
 
       setData((prev) => ({ ...prev, photo: signURL.originalURL, hash }));
 
+      setPhotoFile(null);
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -130,6 +136,13 @@ function StudentCreate({ onClose, classId, toast, schoolId }: Props) {
 
   return (
     <div className="h-[35rem] w-full rounded-2xl border bg-white p-4 md:w-10/12 lg:w-7/12 2xl:w-4/12">
+      {photoFile && (
+        <PhotoEditor
+          file={photoFile}
+          onClose={() => setPhotoFile(null)}
+          onSave={handleSavePhoto}
+        />
+      )}
       <div className="flex w-full items-center justify-between border-b pb-3">
         <h1 className="text-lg font-semibold">
           {studentOnClassDataLanguage.create(language.data ?? "en")}

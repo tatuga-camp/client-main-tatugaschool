@@ -27,6 +27,7 @@ import StudentCareerSuggest from "../student/StudentCareerSuggest";
 import { SiGooglegemini } from "react-icons/si";
 import { TbReportSearch } from "react-icons/tb";
 import ConfirmDeleteMessage from "../common/ConfirmDeleteMessage";
+import PhotoEditor from "../common/PhotoEditor";
 import {
   classesDataLanguage,
   sortByOptionsDataLanguage,
@@ -51,12 +52,12 @@ function StudentLists({ students, classroom }: Props) {
     students.sort((a, b) => Number(a.number) - Number(b.number)),
   );
 
-  const sound = useSound("/sounds/ding.mp3") as HTMLAudioElement;
   const [sortBy, setSortBy] = React.useState<SortByOption>("Default");
   const [search, setSearch] = React.useState("");
   const [selectStudent, setSelectStudent] = React.useState<Student | null>(
     null,
   );
+  const [photoFile, setPhotoFile] = React.useState<File | null>(null);
   const handleSortBy = (sortBy: SortByOption) => {
     switch (sortBy) {
       case "Default":
@@ -140,7 +141,6 @@ function StudentLists({ students, classroom }: Props) {
           ...(selectStudent?.number && { number: selectStudent?.number }),
         },
       });
-      sound.play();
     } catch (error) {
       console.log(error);
       let result = error as ErrorMessages;
@@ -155,13 +155,17 @@ function StudentLists({ students, classroom }: Props) {
     }
   };
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setPhotoFile(file);
+  };
+
+  const handleSavePhoto = async (file: File) => {
     try {
+      if (!selectStudent) return;
       setLoadingStudent(true);
-      const file = e.target.files?.[0];
-      if (!file) {
-        throw new Error("File not found");
-      }
 
       const signURL = await getSignedURLTeacherService({
         fileName: file.name,
@@ -177,7 +181,6 @@ function StudentLists({ students, classroom }: Props) {
       });
 
       const hash = await generateBlurHash(file);
-
       setSelectStudent((prev) => {
         if (!prev) return null;
         return {
@@ -186,7 +189,17 @@ function StudentLists({ students, classroom }: Props) {
           blurHash: hash,
         };
       });
+      await updateStudent.mutateAsync({
+        query: {
+          studentId: selectStudent?.id,
+        },
+        body: {
+          photo: signURL.originalURL,
+          blurHash: hash,
+        },
+      });
 
+      setPhotoFile(null);
       setLoadingStudent(false);
     } catch (error) {
       setLoadingStudent(false);
@@ -218,7 +231,6 @@ function StudentLists({ students, classroom }: Props) {
       await deleteStudent.mutateAsync({
         studentId: studentId,
       });
-      sound.play();
       Swal.fire({
         title: "Success",
         text: "Student Deleted",
@@ -246,7 +258,6 @@ function StudentLists({ students, classroom }: Props) {
       await resetPasword.mutateAsync({
         studentId: selectStudent.id,
       });
-      sound.play();
       toast.current?.show({
         severity: "success",
         summary: "Success",
@@ -271,6 +282,13 @@ function StudentLists({ students, classroom }: Props) {
 
   return (
     <>
+      {photoFile && (
+        <PhotoEditor
+          file={photoFile}
+          onClose={() => setPhotoFile(null)}
+          onSave={handleSavePhoto}
+        />
+      )}
       {selectStudent && (
         <SlideLayout
           loading={loadingStudent || updateStudent.isPending}
