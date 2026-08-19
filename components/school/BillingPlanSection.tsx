@@ -4,7 +4,9 @@ import {
   useGetLanguage,
   useGetMemberOnSchoolBySchool,
   useGetSchool,
+  useGetUser,
   useManageSubscription,
+  useRenewSubscription,
   useUpdateSchool,
   useUpgradeSubscription,
 } from "../../react-query";
@@ -19,10 +21,12 @@ import SubscriptionPlan from "../payments/SubscriptionPlan";
 import ConfirmSubscriptionModal from "../payments/ConfirmSubscriptionModal";
 import RedeemDiscountSection from "../payments/RedeemDiscountSection";
 import UpgradePlanModal from "../payments/UpgradePlanModal";
+import RenewPlanModal from "../payments/RenewPlanModal";
 import Dropdown from "../common/Dropdown";
 import { Toast } from "primereact/toast";
 import { useSound } from "../../hook";
 import { schoolDataLanguage } from "../../data/languages";
+import { RenewDataLanguage } from "../../data/languages/renew";
 import useGetRoleOnSchool from "../../hook/useGetRoleOnSchool";
 
 const BillingPlanSection = (props: { schoolId: string }) => {
@@ -58,6 +62,11 @@ const BillingPlanSection = (props: { schoolId: string }) => {
     isEnterprise: boolean;
     members: number;
   } | null>(null);
+  const user = useGetUser();
+  const renewSubscription = useRenewSubscription();
+  const [showRenew, setShowRenew] = useState(false);
+  const isBillingManager =
+    !!user.data && user.data.id === school.data?.billingManagerId;
 
   useEffect(() => {
     if (members.data && school.data) {
@@ -172,6 +181,47 @@ const BillingPlanSection = (props: { schoolId: string }) => {
     }
   };
 
+  const handleRenew = async (previewInfo: {
+    plan: string;
+    interval: string;
+  }) => {
+    try {
+      const result = await renewSubscription.mutateAsync({
+        schoolId: props.schoolId,
+      });
+      if (result.clientSecret === null) {
+        Swal.fire({
+          title: "Renewal Complete",
+          text: "Your plan has been renewed. No payment was required.",
+          icon: "success",
+        });
+        document.body.style.overflow = "auto";
+        setTimeout(() => {
+          school.refetch();
+        }, 2000);
+        return;
+      }
+      setClientSecret(result.clientSecret);
+      setSelectProduct({
+        title: previewInfo.plan,
+        time: previewInfo.interval,
+        price: (result.price / 100).toLocaleString(),
+      });
+    } catch (error) {
+      document.body.style.overflow = "auto";
+      console.log(error);
+      const result = error as ErrorMessages;
+      Swal.fire({
+        title: result.error ? result.error : "Something Went Wrong",
+        text: result.message.toString(),
+        footer: result.statusCode
+          ? "Code Error: " + result.statusCode?.toString()
+          : "",
+        icon: "error",
+      });
+    }
+  };
+
   const hanldeManageSubscription = async () => {
     try {
       const url = await managesubscription.mutateAsync({
@@ -228,7 +278,9 @@ const BillingPlanSection = (props: { schoolId: string }) => {
   return (
     <>
       <Toast ref={toast} />
-      {(createSubscription.isPending || upgradeSubscription.isPending) && (
+      {(createSubscription.isPending ||
+        upgradeSubscription.isPending ||
+        renewSubscription.isPending) && (
         <PopupLayout onClose={() => {}}>
           <div className="flex h-screen w-screen items-center justify-center bg-white/80">
             <LoadingSpinner />
@@ -285,6 +337,16 @@ const BillingPlanSection = (props: { schoolId: string }) => {
           }}
         />
       )}
+      {showRenew && school.data && (
+        <RenewPlanModal
+          school={school.data}
+          onCancel={() => setShowRenew(false)}
+          onConfirm={(previewInfo) => {
+            setShowRenew(false);
+            handleRenew(previewInfo);
+          }}
+        />
+      )}
       <div className="w-full rounded-2xl border bg-white p-5 2xl:p-10">
         <h1 className="text-lg font-medium sm:text-xl">
           {schoolDataLanguage.manageSubTitle(language.data ?? "en")}
@@ -307,6 +369,14 @@ const BillingPlanSection = (props: { schoolId: string }) => {
               </>
             )}
           </button>
+          {school.data?.stripe_subscription_id && isBillingManager && (
+            <button
+              onClick={() => setShowRenew(true)}
+              className="main-button mt-3 flex w-60 items-center justify-center"
+            >
+              {RenewDataLanguage.renewEarlyButton(language.data ?? "en")}
+            </button>
+          )}
         </div>
         <h1 className="mt-10 text-lg font-medium sm:text-xl">
           {schoolDataLanguage.billingManagerTitle(language.data ?? "en")}
