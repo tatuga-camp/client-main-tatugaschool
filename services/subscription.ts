@@ -187,3 +187,58 @@ export async function UpgradeSubscriptionService(
     throw error?.response?.data;
   }
 }
+
+export type RequestRenewalService = {
+  schoolId: string;
+};
+
+export type ResponseRenewalPreviewService =
+  | {
+      valid: true;
+      plan: string;
+      interval: string;
+      fullPrice: number;
+      credit: number;
+      amountDue: number;
+      currency: string;
+      currentExpireAt: string;
+    }
+  | { valid: false; reason: string };
+
+export async function RenewalPreviewService(
+  input: RequestRenewalService,
+): Promise<ResponseRenewalPreviewService> {
+  try {
+    const response = await axiosInstance({
+      method: "POST",
+      url: `/v1/subscriptions/renewal-preview`,
+      data: { ...input },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Renewal preview request failed:", error?.response);
+    throw error?.response?.data;
+  }
+}
+
+type ResponseRenewSubscriptionService = {
+  subscriptionId: string;
+  clientSecret: string | null;
+  price: number;
+};
+
+export async function RenewSubscriptionService(
+  input: RequestRenewalService,
+): Promise<ResponseRenewSubscriptionService> {
+  try {
+    const response = await axiosInstance({
+      method: "POST",
+      url: `/v1/subscriptions/renew`,
+      data: { ...input },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Renew subscription request failed:", error?.response);
+    throw error?.response?.data;
+  }
+}

@@ -4,9 +4,12 @@ import {
   CreateSubscriptionService,
   GetListSubscriptionService,
   GetManageSubscriptionService,
+  RenewalPreviewService,
+  RenewSubscriptionService,
   RequestApplyDiscountService,
   RequestCreateSubscriptionService,
   RequestGetManageSubscriptionService,
+  RequestRenewalService,
   RequestUpgradeService,
   RequestValidateDiscountService,
   UpgradePreviewService,
@@ -66,5 +69,21 @@ export function useUpgradeSubscription() {
     mutationKey: ["upgrade-subscription"],
     mutationFn: (request: RequestUpgradeService) =>
       UpgradeSubscriptionService(request),
+  });
+}
+
+export function useRenewalPreview() {
+  return useMutation({
+    mutationKey: ["renewal-preview"],
+    mutationFn: (request: RequestRenewalService) =>
+      RenewalPreviewService(request),
+  });
+}
+
+export function useRenewSubscription() {
+  return useMutation({
+    mutationKey: ["renew-subscription"],
+    mutationFn: (request: RequestRenewalService) =>
+      RenewSubscriptionService(request),
   });
 }
