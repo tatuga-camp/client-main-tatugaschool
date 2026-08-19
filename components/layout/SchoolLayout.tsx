@@ -42,9 +42,9 @@ function SchoolLayout({ children, selectMenu, schoolId }: LayoutProps) {
           setTrigger={setActive}
           trigger={active}
         />
-        <SubscriptionExpireBar schoolId={schoolId} />
       </div>
       {children}
+      <SubscriptionExpireBar schoolId={schoolId} />
     </section>
   );
 }

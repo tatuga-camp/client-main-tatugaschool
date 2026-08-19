@@ -304,15 +304,14 @@ const SubscriptionPlan = ({ school, onSelectPlan }: Props) => {
             </div>
           )}
         </div>
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-4">
           {pricingData.slice(1).map((data, index) => {
             const colorScheme =
               planColors[data.mainTitle as keyof typeof planColors] ||
               planColors.FREE;
             const isUpgrade =
               !!school.stripe_subscription_id &&
-              (planRank[data.mainTitle] ?? 0) >
-                (planRank[school.plan] ?? 0);
+              (planRank[data.mainTitle] ?? 0) > (planRank[school.plan] ?? 0);
             return (
               <div
                 key={index}

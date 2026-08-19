@@ -37,25 +37,25 @@ function SubscriptionExpireBar({ schoolId }: { schoolId: string }) {
   }
   const expireAt = school.data.stripe_subscription_expireAt;
   if (!expireAt) return null;
+
   const daysLeft = Math.ceil(
     (new Date(expireAt).getTime() - Date.now()) / DAY_MS,
   );
+  console.log("daysLeft", daysLeft);
   if (daysLeft <= 0 || daysLeft > 10) return null;
 
   const isBillingManager =
     !!user.data && user.data.id === school.data.billingManagerId;
 
   return (
-    <div className="flex w-full items-center justify-center gap-3 border-b border-warning-color bg-warning-color/10 px-4 py-2 font-Anuphan text-sm text-icon-color">
+    <div className="fixed bottom-0 z-10 flex w-full items-center justify-center gap-3 border-b border-warning-color bg-warning-color px-4 py-2 font-Anuphan text-sm text-icon-color">
       <MdOutlineTimer className="shrink-0 text-warning-color" />
       <span>
         {RenewDataLanguage.barMessage(lang, school.data.plan, daysLeft)}
       </span>
       {isBillingManager ? (
         <button
-          onClick={() =>
-            router.push(`/school/${schoolId}?menu=Subscription`)
-          }
+          onClick={() => router.push(`/school/${schoolId}?menu=Subscription`)}
           className="main-button shrink-0 px-3 py-1 text-xs"
         >
           {RenewDataLanguage.renewEarlyButton(lang)}
