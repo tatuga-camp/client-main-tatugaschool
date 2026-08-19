@@ -3,6 +3,7 @@ import Navbar from "../Navbar";
 import React from "react";
 import useClickOutside from "../../hook/useClickOutside";
 import { menuSchoolList } from "../../data";
+import SubscriptionExpireBar from "../subscription/SubscriptionExpireBar";
 
 type LayoutProps = {
   children: ReactNode;
@@ -41,6 +42,7 @@ function SchoolLayout({ children, selectMenu, schoolId }: LayoutProps) {
           setTrigger={setActive}
           trigger={active}
         />
+        <SubscriptionExpireBar schoolId={schoolId} />
       </div>
       {children}
     </section>
