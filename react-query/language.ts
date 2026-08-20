@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getLocalStorage, setLocalStorage } from "../utils";
 import { Language } from "../interfaces";
+import { UpdateUserService } from "../services";
 
 function detectInitialLanguage(): Language {
   if (typeof window === "undefined") return "en";
@@ -21,10 +22,18 @@ export function useUpdateLanguage() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ["language"],
-    mutationFn: (request: Language) => {
+    mutationFn: async (request: Language) => {
       setLocalStorage("language", request);
       queryClient.setQueryData(["language"], request);
-      return Promise.resolve(request); // Ensure it returns a Promise
+      // Best-effort server sync so emails follow the preference. On the
+      // unauthenticated auth pages this 401s — the local switch stands.
+      try {
+        const user = await UpdateUserService({ language: request });
+        queryClient.setQueryData(["user"], user);
+      } catch {
+        // not signed in / offline — ignore
+      }
+      return request;
     },
   });
 }
