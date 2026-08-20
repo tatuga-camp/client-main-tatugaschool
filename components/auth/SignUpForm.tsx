@@ -81,6 +81,7 @@ export const SignUpForm = (props: Props) => {
         providerId: providerId,
         provider: props.provider === "google" ? "GOOGLE" : "LOCAL",
         invitationToken: props.invitation?.invitationToken,
+        language: language.data ?? "en",
       });
 
       router.push(response.redirectUrl);
