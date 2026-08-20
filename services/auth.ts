@@ -44,6 +44,7 @@ type RequestSignUpService = {
   providerId?: string;
   photo?: string;
   invitationToken?: string;
+  language?: "en" | "th";
 };
 
 type ResponseSignUpService = { redirectUrl: string };

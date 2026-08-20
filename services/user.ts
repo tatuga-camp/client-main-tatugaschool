@@ -68,6 +68,7 @@ export type RequestUpdateUserService = {
   photo?: string;
   blurHash?: string;
   favoritSchool?: string;
+  language?: "en" | "th";
 };
 export async function UpdateUserService(
   input: RequestUpdateUserService,
