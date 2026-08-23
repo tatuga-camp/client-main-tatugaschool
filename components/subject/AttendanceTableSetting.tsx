@@ -40,7 +40,7 @@ function AttendanceTableSetting({ table, toast, onDelete }: Props) {
   const queryClient = useQueryClient();
   const [tableData, setTableData] = React.useState<
     (AttendanceTable & { statusLists: AttendanceStatusList[] }) | undefined
-  >();
+  >(table);
   const updateTable = useUpdateAttendanceTable();
   const updateStatus = useUpdateAttendanceStatus();
   const deleteAttendanceTable = useDeleteAttendanceTable();
@@ -301,15 +301,13 @@ function AttendanceTableSetting({ table, toast, onDelete }: Props) {
               {tableData?.statusLists.map((status, index) => {
                 const odd = index % 2 === 0;
                 return (
-                  <>
-                    <AttendanceStatusRow
-                      toast={toast}
-                      updateStatus={updateStatus}
-                      key={index}
-                      odd={odd}
-                      status={status}
-                    />
-                  </>
+                  <AttendanceStatusRow
+                    toast={toast}
+                    updateStatus={updateStatus}
+                    key={status.id}
+                    odd={odd}
+                    status={status}
+                  />
                 );
               })}
               <CreateAttendanceStatus
@@ -623,7 +621,7 @@ const CreateAttendanceStatus = memo(
               className="main-input w-full text-sm sm:text-base"
               maxLength={20}
               required
-              value={createData.title}
+              value={createData.title ?? ""}
               onChange={(e) => {
                 setCreateData((prev) => ({
                   ...prev,
