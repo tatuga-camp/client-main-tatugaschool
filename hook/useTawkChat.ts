@@ -153,7 +153,7 @@ export default function useTawkChat(params: {
   // explicit Chat Support click still loads it there.
   useEffect(() => {
     if (!params.user) return;
-    // if (window.origin.includes("localhost:")) return;
+    if (window.origin.includes("localhost:")) return;
     if (status === "idle") {
       load(params.user, params.schoolId);
     }
