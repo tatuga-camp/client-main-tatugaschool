@@ -1,4 +1,5 @@
 import { ExportAttendanceService } from "@/services";
+import html2canvas from "html2canvas";
 import Image from "next/image";
 import { ProgressBar } from "primereact/progressbar";
 import { Toast } from "primereact/toast";
@@ -7,7 +8,12 @@ import { BiCustomize } from "react-icons/bi";
 import { Bs123, BsQrCode } from "react-icons/bs";
 import { CiViewTable } from "react-icons/ci";
 import { FaUser } from "react-icons/fa6";
-import { MdOutlineSpeakerNotes } from "react-icons/md";
+import {
+  MdDownload,
+  MdKeyboardArrowDown,
+  MdKeyboardArrowUp,
+  MdOutlineSpeakerNotes,
+} from "react-icons/md";
 import { RiTable3 } from "react-icons/ri";
 import { SiMicrosoftexcel } from "react-icons/si";
 import { defaultBlurHash } from "../../data";
@@ -30,6 +36,7 @@ import {
   getRandomSlateShade,
   getSlateColorStyle,
 } from "../../utils";
+import useClickOutside from "../../hook/useClickOutside";
 import LoadingSpinner from "../common/LoadingSpinner";
 import PopupLayout from "../layout/PopupLayout";
 import AttendanceChecker from "./AttendanceChecker";
@@ -86,6 +93,24 @@ function Attendance({
   const [selectRow, setSelectRow] = React.useState<
     (AttendanceRow & { attendances: AttendanceType[] }) | null
   >(null);
+  const saveImageRef = React.useRef<(() => Promise<void>) | null>(null);
+  const [isSavingImage, setIsSavingImage] = React.useState(false);
+  const [isExportMenuOpen, setIsExportMenuOpen] = React.useState(false);
+  const exportMenuRef = React.useRef<HTMLDivElement>(null);
+
+  useClickOutside(exportMenuRef, () => {
+    setIsExportMenuOpen(false);
+  });
+
+  const handleSaveImage = async () => {
+    if (!saveImageRef.current || isSavingImage) return;
+    setIsSavingImage(true);
+    try {
+      await saveImageRef.current();
+    } finally {
+      setIsSavingImage(false);
+    }
+  };
 
   useEffect(() => {
     if (!selectTable && tables.data) {
@@ -173,22 +198,55 @@ function Attendance({
             <CiViewTable />
             {attendanceLanguageData.create(language.data ?? "en")}
           </button>
-          <button
-            disabled={loading}
-            onClick={() => {
-              setTriggerAttendanceDowload(true);
-            }}
-            className="main-button flex h-8 w-40 items-center justify-center gap-1 py-1 ring-1 ring-blue-600"
-          >
-            {loading ? (
-              <LoadingSpinner />
-            ) : (
-              <>
-                <SiMicrosoftexcel />
-                {attendanceLanguageData.export(language.data ?? "en")}
-              </>
+          <div ref={exportMenuRef} className="relative">
+            <button
+              disabled={loading || isSavingImage}
+              onClick={() => setIsExportMenuOpen((prev) => !prev)}
+              className="main-button flex h-8 w-52 items-center justify-center gap-1 py-1 ring-1 ring-blue-600"
+            >
+              {loading || isSavingImage ? (
+                <LoadingSpinner />
+              ) : (
+                <>
+                  <SiMicrosoftexcel />
+                  {attendanceLanguageData.export(language.data ?? "en")}
+                  {isExportMenuOpen ? (
+                    <MdKeyboardArrowUp />
+                  ) : (
+                    <MdKeyboardArrowDown />
+                  )}
+                </>
+              )}
+            </button>
+
+            {isExportMenuOpen && (
+              <div className="absolute left-1/2 top-full z-50 mt-2 w-56 -translate-x-1/2 rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+                <div className="flex flex-col gap-1">
+                  <button
+                    onClick={() => {
+                      setIsExportMenuOpen(false);
+                      setTriggerAttendanceDowload(true);
+                    }}
+                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100"
+                  >
+                    <SiMicrosoftexcel size={18} className="text-gray-500" />
+                    {attendanceLanguageData.export_excel(language.data ?? "en")}
+                  </button>
+                  <button
+                    disabled={triggerSetting || !selectTable}
+                    onClick={() => {
+                      setIsExportMenuOpen(false);
+                      handleSaveImage();
+                    }}
+                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <MdDownload size={18} className="text-gray-500" />
+                    {attendanceLanguageData.save_image(language.data ?? "en")}
+                  </button>
+                </div>
+              </div>
             )}
-          </button>
+          </div>
 
           <button
             onClick={() => setTriggerSetting((prev) => !prev)}
@@ -261,6 +319,8 @@ function Attendance({
                   selectTable={selectTable}
                   setSelectRow={setSelectRow}
                   setSelectAttendance={setSelectAttendance}
+                  toast={toast}
+                  saveImageRef={saveImageRef}
                 />
               </div>
             )
@@ -285,13 +345,18 @@ type Props = {
   setSelectAttendance: React.Dispatch<
     React.SetStateAction<SelectAttendance | null>
   >;
+  toast: React.RefObject<Toast>;
+  saveImageRef: React.MutableRefObject<(() => Promise<void>) | null>;
 };
 function DisplayAttendanceTable({
   selectTable,
   setSelectRow,
   setSelectAttendance,
+  toast,
+  saveImageRef,
 }: Props) {
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
+  const tableRef = React.useRef<HTMLTableElement | null>(null);
   const [selectMenu, setSelectMenu] =
     React.useState<MenuAttendance>("Attendances");
   const rows = useGetAttendanceRowByTableId({
@@ -306,6 +371,97 @@ function DisplayAttendanceTable({
       scrollRef.current.scrollLeft = scrollRef.current.scrollWidth;
     }
   }, [rows.isSuccess]);
+
+  const handleSaveImage = async () => {
+    if (!tableRef.current || !scrollRef.current || rows.isLoading) return;
+    const scrollContainer = scrollRef.current;
+    const previousScrollLeft = scrollContainer.scrollLeft;
+    const previousScrollTop = scrollContainer.scrollTop;
+    try {
+      // sticky header/name column render offset unless the container sits at 0,0
+      scrollContainer.scrollLeft = 0;
+      scrollContainer.scrollTop = 0;
+
+      const images = Array.from(tableRef.current.getElementsByTagName("img"));
+      // photos below the scroll fold are loading="lazy" and never start
+      // loading on their own — flip them to eager so the wait can finish
+      images.forEach((img) => {
+        if (img.loading === "lazy") img.loading = "eager";
+      });
+      await Promise.race([
+        Promise.all(
+          images.map((img) => {
+            if (img.complete) return Promise.resolve();
+            return new Promise((resolve) => {
+              img.onload = resolve;
+              img.onerror = resolve;
+            });
+          }),
+        ),
+        new Promise((resolve) => setTimeout(resolve, 10000)),
+      ]);
+
+      const liveTable = tableRef.current;
+      const liveHeaderCells = Array.from(
+        liveTable.querySelectorAll("thead th"),
+      );
+      const canvas = await html2canvas(liveTable, {
+        backgroundColor: "#fff",
+        scale: 2,
+        useCORS: true,
+        onclone: (_document, clonedTable) => {
+          const clonedContainer = clonedTable.parentElement;
+          if (clonedContainer) {
+            clonedContainer.style.overflow = "visible";
+            clonedContainer.style.height = "auto";
+            clonedContainer.style.width = "max-content";
+          }
+          // html2canvas shifts sticky cells; scroll is reset to 0 so static
+          // positioning puts them in the same place without the offset bug
+          clonedTable
+            .querySelectorAll<HTMLElement>(".sticky")
+            .forEach((el) => (el.style.position = "static"));
+          // pin column widths so the clone's layout matches the live table
+          clonedTable.style.tableLayout = "fixed";
+          clonedTable.style.width = `${liveTable.scrollWidth}px`;
+          clonedTable
+            .querySelectorAll<HTMLElement>("thead th")
+            .forEach((cell, index) => {
+              const liveCell = liveHeaderCells[index];
+              if (!liveCell) return;
+              const width = `${liveCell.getBoundingClientRect().width}px`;
+              cell.style.width = width;
+              cell.style.minWidth = width;
+              cell.style.maxWidth = width;
+            });
+        },
+      });
+
+      const suffix = selectMenu === "Attendances" ? "attendance" : "summary";
+      const fileName = `${selectTable.title.replace(/[\\/:*?"<>|]/g, "-")}-${suffix}.png`;
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL("image/png");
+      link.download = fileName;
+      link.click();
+    } catch (error) {
+      console.error("Error saving attendance image:", error);
+      toast.current?.show({
+        severity: "error",
+        summary: "Error",
+        detail: "Failed to save the table as an image",
+      });
+    } finally {
+      scrollContainer.scrollLeft = previousScrollLeft;
+      scrollContainer.scrollTop = previousScrollTop;
+    }
+  };
+
+  useEffect(() => {
+    saveImageRef.current = handleSaveImage;
+    return () => {
+      saveImageRef.current = null;
+    };
+  });
 
   return (
     <div className="flex w-full flex-col items-center">
@@ -329,7 +485,7 @@ function DisplayAttendanceTable({
         ref={scrollRef}
         className="relative h-[30rem] w-full overflow-auto rounded-2xl bg-white 2xl:h-[40rem]"
       >
-        <table className="table-fixed bg-white md:min-w-[640px]">
+        <table ref={tableRef} className="table-fixed bg-white md:min-w-[640px]">
           <thead className="">
             <tr className="sticky top-0 z-30 border-b bg-white">
               <th className="sticky left-0 z-30 bg-white text-sm font-semibold">
@@ -563,18 +719,16 @@ function DisplayAttendanceTable({
                               }
                             }, 0);
                             return (
-                              <>
-                                <td key={status.id}>
-                                  <div
-                                    style={{
-                                      backgroundColor: `${status.color}`,
-                                    }}
-                                    className="relative flex h-14 w-full cursor-pointer flex-col items-center justify-center ring-black transition hover:ring-1 hover:drop-shadow-md"
-                                  >
-                                    <span>{total}</span>
-                                  </div>
-                                </td>
-                              </>
+                              <td key={status.id}>
+                                <div
+                                  style={{
+                                    backgroundColor: `${status.color}`,
+                                  }}
+                                  className="relative flex h-14 w-full cursor-pointer flex-col items-center justify-center ring-black transition hover:ring-1 hover:drop-shadow-md"
+                                >
+                                  <span>{total}</span>
+                                </div>
+                              </td>
                             );
                           })}
                     {selectMenu === "Summary" && (

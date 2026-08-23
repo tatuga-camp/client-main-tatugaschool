@@ -81,4 +81,24 @@ export const attendanceLanguageData = {
         return "Summary";
     }
   },
+  export_excel: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Download as Excel";
+      case "th":
+        return "ดาวน์โหลดเป็น Excel";
+      default:
+        return "Download as Excel";
+    }
+  },
+  save_image: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Save as Image";
+      case "th":
+        return "บันทึกเป็นรูปภาพ";
+      default:
+        return "Save as Image";
+    }
+  },
 } as const;
