@@ -10,3 +10,4 @@ export * from "./cookie";
 export * from "./algorithm";
 export * from "./calculateStudentTotals";
 export * from "./cropImage";
+export * from "./uploadWithRetry";
