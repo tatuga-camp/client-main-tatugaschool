@@ -82,6 +82,15 @@ const createAxiosInstance = () => {
     (response) => response,
     async (error) => {
       const originalRequest = error.config;
+      if (
+        error.response?.status === 403 &&
+        error.response?.data?.message === "Email not verified" &&
+        typeof window !== "undefined" &&
+        window.location.pathname !== "/auth/wait-verify-email"
+      ) {
+        window.location.href = "/auth/wait-verify-email";
+        return Promise.reject(error);
+      }
       if (error.response?.status === 401 && !originalRequest._retry) {
         originalRequest._retry = true;
         const { refresh_token } = getRefetchtoken();
