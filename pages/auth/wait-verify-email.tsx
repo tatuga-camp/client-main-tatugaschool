@@ -110,8 +110,6 @@ function Index() {
       <div className="flex w-full grow flex-col items-center justify-center gap-5">
         <AuthHeader />
         <div className="flex h-max w-full flex-col items-center justify-center rounded-2xl bg-white p-3 text-center md:w-8/12 xl:w-4/12">
-          <ButtonProfile user={user} />
-
           {triggerUpdate ? (
             <form onSubmit={handleUpdateEmail}>
               <h2 className="text-xl font-semibold">
