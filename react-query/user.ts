@@ -13,13 +13,10 @@ import {
   UpdateUserService,
 } from "../services";
 import { User } from "../interfaces";
-import { useRouter } from "next/router";
-import Swal from "sweetalert2";
 import { useEffect } from "react";
 import { getLocalStorage, setLocalStorage } from "../utils";
 
 export function useGetUser() {
-  const router = useRouter();
   const queryClient = useQueryClient();
   const query = useQuery({
     queryKey: ["user"],
@@ -37,14 +34,6 @@ export function useGetUser() {
     queryClient.setQueryData(["language"], serverLanguage);
   }, [query.data?.language, queryClient]);
 
-  if (query.error && query.error?.message === "Email not verified") {
-    Swal.fire({
-      title: "Email not verified",
-      text: "Please verify your email",
-      icon: "warning",
-    });
-    router.push("/auth/wait-verify-email");
-  }
   return query;
 }
 
