@@ -35,6 +35,8 @@ function MyApp({ Component, pageProps }: AppProps) {
               // Don't retry for certain error responses
               if (
                 errorResponse?.statusCode === 401 ||
+                (errorResponse?.statusCode === 403 &&
+                  errorResponse?.message === "Email not verified") ||
                 errorObj?.message === "Session expired" ||
                 errorObj?.message === "Token not found"
               ) {

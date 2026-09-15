@@ -82,6 +82,37 @@ const createAxiosInstance = () => {
     (response) => response,
     async (error) => {
       const originalRequest = error.config;
+      if (
+        error.response?.status === 403 &&
+        error.response?.data?.message === "Email not verified"
+      ) {
+        // The claim lives in the access token, so a user who just verified
+        // may still hold a stale token: refresh once and retry before
+        // treating them as unverified.
+        if (!originalRequest._verifyRetry) {
+          originalRequest._verifyRetry = true;
+          const { refresh_token } = getRefetchtoken();
+          if (refresh_token) {
+            try {
+              const { accessToken } = await RefreshTokenService({
+                refreshToken: refresh_token,
+              });
+              setAccessToken({ access_token: accessToken });
+              originalRequest.headers["Authorization"] = `Bearer ${accessToken}`;
+              return instance(originalRequest);
+            } catch (refreshError) {
+              console.log("refreshError", refreshError);
+            }
+          }
+        }
+        if (
+          typeof window !== "undefined" &&
+          window.location.pathname !== "/auth/wait-verify-email"
+        ) {
+          window.location.href = "/auth/wait-verify-email";
+        }
+        return Promise.reject(error);
+      }
       if (error.response?.status === 401 && !originalRequest._retry) {
         originalRequest._retry = true;
         const { refresh_token } = getRefetchtoken();
