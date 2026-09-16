@@ -52,6 +52,7 @@ export function useGetNoVerifyUser() {
   const query = useQuery({
     queryKey: ["noverify-user"],
     queryFn: () => GetNoVerifyUserService(),
+    refetchInterval: 1000 * 3,
   });
   return query;
 }
@@ -64,7 +65,7 @@ export function useResendVerifyEmail() {
 }
 
 export function useGetUserByEmail(
-  email: string
+  email: string,
 ): UseQueryResult<User[], Error> {
   return useQuery({
     queryKey: ["users", { email }],
