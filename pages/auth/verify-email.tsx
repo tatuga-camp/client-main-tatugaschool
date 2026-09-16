@@ -8,7 +8,6 @@ import { useEffect, useState } from "react";
 import { FiXCircle } from "react-icons/fi";
 import { verifyEmailLanguageData } from "../../data/languages";
 import { useGetLanguage } from "../../react-query";
-import { useRouter } from "next/router";
 
 const VerifyEmailPage = ({ token }: { token: string | null }) => {
   const language = useGetLanguage();

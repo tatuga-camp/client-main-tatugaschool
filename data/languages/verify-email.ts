@@ -131,4 +131,22 @@ export const verifyEmailLanguageData = {
         return "Please resend the email again or contact admin.";
     }
   },
+  redirectCountdown: (language: Language, seconds: number) => {
+    switch (language) {
+      case "th":
+        return `เรากำลังพาคุณไปยังโรงเรียนของคุณใน ${seconds} วินาที...`;
+      default:
+        return `We are redirecting you to your school in ${seconds} second${seconds === 1 ? "" : "s"}...`;
+    }
+  },
+  goToSchoolButton: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Go to school now";
+      case "th":
+        return "ไปยังโรงเรียนตอนนี้";
+      default:
+        return "Go to school now";
+    }
+  },
 } as const;
