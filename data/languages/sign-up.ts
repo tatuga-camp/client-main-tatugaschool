@@ -131,6 +131,16 @@ export const signUpLanguageData = {
         return "Enter Your Confirm Password";
     }
   },
+  turnstileRequired: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Please complete the verification challenge before signing up";
+      case "th":
+        return "กรุณาผ่านการยืนยันตัวตนก่อนสร้างบัญชี";
+      default:
+        return "Please complete the verification challenge before signing up";
+    }
+  },
   acceptPolicy: (language: Language) => {
     switch (language) {
       case "en":

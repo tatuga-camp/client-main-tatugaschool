@@ -45,6 +45,7 @@ type RequestSignUpService = {
   photo?: string;
   invitationToken?: string;
   language?: "en" | "th";
+  turnstileToken: string;
 };
 
 type ResponseSignUpService = { redirectUrl: string };
