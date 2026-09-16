@@ -11,7 +11,6 @@ import { useGetLanguage } from "../../react-query";
 import { useRouter } from "next/router";
 
 const VerifyEmailPage = ({ token }: { token: string | null }) => {
-  const router = useRouter();
   const language = useGetLanguage();
   const [verificationStatus, setVerificationStatus] = useState<
     "success" | "fail" | "pending" | "no-token"
@@ -28,13 +27,9 @@ const VerifyEmailPage = ({ token }: { token: string | null }) => {
   const verifyEmail = async (token: string) => {
     try {
       setVerificationStatus("pending");
-      const school = await VerifyEmailService({ token });
+      await VerifyEmailService({ token });
 
       setVerificationStatus("success");
-      console.log("school", school);
-      if (school && school.id) {
-        router.push(`/school/${school.id}/`);
-      }
     } catch (error) {
       setVerificationStatus("fail");
     }
