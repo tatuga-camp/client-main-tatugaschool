@@ -4,11 +4,13 @@ import { VerifyEmailService } from "@/services"; // Import the service
 import { GetServerSideProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FiXCircle } from "react-icons/fi";
 import { verifyEmailLanguageData } from "../../data/languages";
 import { useGetLanguage } from "../../react-query";
 import { useRouter } from "next/router";
+
+const REDIRECT_SECONDS = 5;
 
 const VerifyEmailPage = ({ token }: { token: string | null }) => {
   const router = useRouter();
@@ -16,6 +18,12 @@ const VerifyEmailPage = ({ token }: { token: string | null }) => {
   const [verificationStatus, setVerificationStatus] = useState<
     "success" | "fail" | "pending" | "no-token"
   >("pending");
+  const [schoolId, setSchoolId] = useState<string | null>(null);
+  const [countdown, setCountdown] = useState(REDIRECT_SECONDS);
+
+  const goToSchool = useCallback(() => {
+    if (schoolId) router.push(`/school/${schoolId}/`);
+  }, [router, schoolId]);
 
   useEffect(() => {
     if (token) {
@@ -31,14 +39,26 @@ const VerifyEmailPage = ({ token }: { token: string | null }) => {
       const school = await VerifyEmailService({ token });
 
       setVerificationStatus("success");
-      console.log("school", school);
       if (school && school.id) {
-        router.push(`/school/${school.id}/`);
+        setSchoolId(school.id);
+        setCountdown(REDIRECT_SECONDS);
       }
     } catch (error) {
       setVerificationStatus("fail");
     }
   };
+
+  // Count down once verification succeeded and we know where to send the user,
+  // then redirect when the countdown reaches zero.
+  useEffect(() => {
+    if (verificationStatus !== "success" || !schoolId) return;
+    if (countdown <= 0) {
+      goToSchool();
+      return;
+    }
+    const timer = setTimeout(() => setCountdown((c) => c - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [verificationStatus, schoolId, countdown, goToSchool]);
 
   return (
     <>
@@ -55,17 +75,45 @@ const VerifyEmailPage = ({ token }: { token: string | null }) => {
               <h2 className="mb-4 text-3xl font-bold text-green-600 md:text-5xl">
                 {verifyEmailLanguageData.successTitle(language.data ?? "en")}
               </h2>
-              <p className="mb-8 text-lg text-[#6E6E6E]">
-                {verifyEmailLanguageData.successDescription(
-                  language.data ?? "en",
-                )}
-              </p>
-              <Link
-                href={"/auth/sign-in"}
-                className="rounded-2xl bg-[#5F3DC4] p-4 font-semibold text-white transition duration-300 hover:bg-[#482ab4]"
-              >
-                {verifyEmailLanguageData.signInButton(language.data ?? "en")}
-              </Link>
+              {schoolId ? (
+                <>
+                  <p
+                    className="mb-8 text-lg text-[#6E6E6E]"
+                    role="status"
+                    aria-live="polite"
+                  >
+                    {verifyEmailLanguageData.redirectCountdown(
+                      language.data ?? "en",
+                      countdown,
+                    )}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={goToSchool}
+                    className="rounded-2xl bg-[#5F3DC4] p-4 font-semibold text-white transition duration-300 hover:bg-[#482ab4]"
+                  >
+                    {verifyEmailLanguageData.goToSchoolButton(
+                      language.data ?? "en",
+                    )}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p className="mb-8 text-lg text-[#6E6E6E]">
+                    {verifyEmailLanguageData.successDescription(
+                      language.data ?? "en",
+                    )}
+                  </p>
+                  <Link
+                    href={"/auth/sign-in"}
+                    className="rounded-2xl bg-[#5F3DC4] p-4 font-semibold text-white transition duration-300 hover:bg-[#482ab4]"
+                  >
+                    {verifyEmailLanguageData.signInButton(
+                      language.data ?? "en",
+                    )}
+                  </Link>
+                </>
+              )}
             </>
           )}
           {verificationStatus === "pending" && (
