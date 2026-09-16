@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useRef, useState } from "react";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { SignUpService } from "@/services";
 import Swal from "sweetalert2";
 import UserAgreement from "../agreements/UserAgreement";
@@ -40,10 +41,21 @@ export const SignUpForm = (props: Props) => {
   const [providerId, setProvider] = useState<string | undefined>(
     props.providerId,
   );
+  // Cloudflare Turnstile bot check. Required for every provider, including
+  // Google, because the server can't tell a real Google sign-up from a forged
+  // POST. Tokens are single-use, so the widget is reset after a failed submit.
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileInstance>(null);
+  const canSubmit = isAgree && !!turnstileToken;
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      if (!turnstileToken) {
+        throw new Error(
+          signUpLanguageData.turnstileRequired(language.data ?? "en"),
+        );
+      }
       if (props.provider !== "google") {
         if (
           !firstName ||
@@ -82,6 +94,7 @@ export const SignUpForm = (props: Props) => {
         provider: props.provider === "google" ? "GOOGLE" : "LOCAL",
         invitationToken: props.invitation?.invitationToken,
         language: language.data ?? "en",
+        turnstileToken,
       });
 
       router.push(response.redirectUrl);
@@ -93,6 +106,8 @@ export const SignUpForm = (props: Props) => {
       });
     } catch (error) {
       console.log(error);
+      setTurnstileToken(null);
+      turnstileRef.current?.reset();
       let result = error as ErrorMessages;
       Swal.fire({
         title: result?.error ? result?.error : "Something Went Wrong",
@@ -282,11 +297,23 @@ export const SignUpForm = (props: Props) => {
             {signUpLanguageData.acceptPolicy(language.data ?? "en")}
           </span>
         </label>
+        <Turnstile
+          ref={turnstileRef}
+          siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY as string}
+          options={{
+            action: "teacher-sign-up",
+            theme: "light",
+            language: language.data ?? "en",
+          }}
+          onSuccess={(token) => setTurnstileToken(token)}
+          onExpire={() => setTurnstileToken(null)}
+          onError={() => setTurnstileToken(null)}
+        />
         <button
           type="submit"
-          disabled={!isAgree}
+          disabled={!canSubmit}
           className={`p-5 ${
-            isAgree
+            canSubmit
               ? "bg-secondary-color hover:bg-primary-color"
               : "bg-gray-400"
           } flex h-11 w-full items-center justify-center rounded font-semibold text-white transition duration-300`}
