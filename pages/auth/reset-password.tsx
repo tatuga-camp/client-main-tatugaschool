@@ -1,6 +1,5 @@
 import React from "react";
 import { AuthLayout } from "../../components/auth/AuthLayout";
-import { AuthHeader } from "../../components/auth/AuthHeader";
 import { AuthFooter } from "../../components/auth/AuthFooter";
 import ResetPassword from "../../components/auth/ResetPassword";
 import { GetServerSideProps } from "next";
@@ -13,7 +12,6 @@ function Index({ token }: { token: string }) {
         <title>Reset Password</title>
       </Head>
       <AuthLayout>
-        <AuthHeader />
         <ResetPassword token={token} />
         <AuthFooter />
       </AuthLayout>

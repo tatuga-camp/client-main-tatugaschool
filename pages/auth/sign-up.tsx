@@ -1,5 +1,4 @@
 import { AuthLayout } from "@/components/auth/AuthLayout";
-import { AuthHeader } from "@/components/auth/AuthHeader";
 import { AuthFooter } from "@/components/auth/AuthFooter";
 import { SignUpForm } from "@/components/auth/SignUpForm";
 import Head from "next/head";
@@ -55,7 +54,6 @@ function SignUpPage(data: Props) {
         <meta name="twitter:card" content="summary" />
       </Head>
       <AuthLayout>
-        <AuthHeader />
         <SignUpForm
           {...data?.googleSignUpData}
           invitation={data?.invitation ?? null}

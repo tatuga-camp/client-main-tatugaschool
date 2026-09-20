@@ -93,10 +93,10 @@ export const LoginForm = () => {
 
   return (
     <form
-      className="w-full max-w-96 rounded-2xl bg-white p-6 sm:p-10 text-center shadow-[0_12px_24px_rgba(145,158,171,0.12)]"
+      className="w-full max-w-sm rounded-2xl bg-white p-5 text-center shadow-[0_12px_24px_rgba(145,158,171,0.12)] sm:max-w-md sm:p-8 md:p-10 lg:max-w-md xl:max-w-lg xl:p-10 2xl:max-w-xl 2xl:p-12"
       onSubmit={handleLogin}
     >
-      <h2 className="mb-[40px] text-[24px] font-bold">
+      <h2 className="mb-6 text-2xl font-bold md:mb-8 xl:text-[28px] 2xl:mb-10 2xl:text-3xl">
         {signInData.title(language.data ?? "en")}
       </h2>
 
@@ -104,14 +104,14 @@ export const LoginForm = () => {
         ({signInData.teacherOnly(language.data ?? "en")})
       </span>
 
-      <div className="flex w-full flex-col gap-3">
+      <div className="flex w-full flex-col gap-3 md:gap-4">
         <input
           type="email"
           placeholder={signInData.inputEmail(language.data ?? "en")}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="main-input h-10 w-full"
+          className="main-input min-h-11 w-full"
         />
         <Password
           feedback={false}
@@ -123,7 +123,7 @@ export const LoginForm = () => {
       </div>
       <Link
         href={"/auth/forget-password"}
-        className="mb-[40px] mt-2 block text-left text-[14px] text-[#6E6E6E] hover:underline"
+        className="mb-6 mt-2 block text-left text-sm text-gray-500 hover:underline md:mb-8 2xl:mb-10"
       >
         {signInData.forgetPassword(language.data ?? "en")}
       </Link>
@@ -133,18 +133,21 @@ export const LoginForm = () => {
         </span>
       )}
       <div className="flex flex-col gap-3">
-        <button type="submit" className="main-button w-full p-2">
+        <button type="submit" className="main-button min-h-11 w-full p-2">
           {signInData.loginButton(language.data ?? "en")}
         </button>
         <button
           type="button"
           onClick={handleGoogleLogin}
-          className="second-button flex items-center justify-center gap-2 border"
+          className="second-button flex min-h-11 items-center justify-center gap-2 border"
         >
           <FcGoogle />
           {signInData.googleButton(language.data ?? "en")}
         </button>
-        <Link href="/auth/sign-up" className="second-button border">
+        <Link
+          href="/auth/sign-up"
+          className="second-button flex min-h-11 items-center justify-center border"
+        >
           {signInData.noAccountButton(language.data ?? "en")}
         </Link>
       </div>
