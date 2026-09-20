@@ -9,21 +9,21 @@ const Stats = ({ schoolId }: Props) => {
   const school = useGetSchool({ schoolId: schoolId });
   const language = useGetLanguage();
   return (
-    <div className="p-4 md:p-5 lg:p-5 xl:p-12">
-      <div className="-mt-24 grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-4 xl:gap-4">
-        <div className="flex items-center justify-between rounded-2xl border bg-white p-2 text-primary-color md:p-4 xl:p-6">
-          <div>
-            <p className="text-gray-600">
+    <div className="px-4 py-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16">
+      <div className="-mt-20 grid grid-cols-1 gap-3 sm:-mt-24 sm:grid-cols-2 xl:grid-cols-4 xl:gap-4 2xl:gap-6">
+        <div className="flex min-w-0 items-center justify-between rounded-2xl border bg-white p-3 text-primary-color sm:p-4 xl:p-6">
+          <div className="min-w-0 pr-2">
+            <p className="break-words text-sm text-gray-600 sm:text-base">
               {schoolDataLanguage.totalTeacher(language.data ?? "en")}
             </p>
-            <h2 className="font-bold text-gray-900 lg:text-lg xl:text-2xl">
+            <h2 className="break-words font-bold text-gray-900 lg:text-lg xl:text-2xl">
               {school.data?.totalTeacher}/{" "}
               <span className="text-gray-400 lg:text-sm xl:text-lg">
                 {school.data?.limitSchoolMember.toLocaleString()}
               </span>
             </h2>
           </div>
-          <div className="text-green-400">
+          <div className="shrink-0 text-green-400">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="currentColor"
@@ -34,12 +34,12 @@ const Stats = ({ schoolId }: Props) => {
             </svg>
           </div>
         </div>
-        <div className="flex items-center justify-between rounded-2xl border bg-white p-2 text-primary-color md:p-4 xl:p-6">
-          <div>
-            <p className="text-gray-600">
+        <div className="flex min-w-0 items-center justify-between rounded-2xl border bg-white p-3 text-primary-color sm:p-4 xl:p-6">
+          <div className="min-w-0 pr-2">
+            <p className="break-words text-sm text-gray-600 sm:text-base">
               {schoolDataLanguage.totalClassroom(language.data ?? "en")}
             </p>
-            <h2 className="font-bold text-gray-900 lg:text-lg xl:text-2xl">
+            <h2 className="break-words font-bold text-gray-900 lg:text-lg xl:text-2xl">
               {school.data?.totalClass}/{" "}
               <span className="text-gray-400 lg:text-sm xl:text-lg">
                 {school.data?.plan === "ENTERPRISE"
@@ -50,7 +50,7 @@ const Stats = ({ schoolId }: Props) => {
               </span>
             </h2>
           </div>
-          <div className="text-blue-400">
+          <div className="shrink-0 text-blue-400">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="currentColor"
@@ -61,12 +61,12 @@ const Stats = ({ schoolId }: Props) => {
             </svg>
           </div>
         </div>
-        <div className="flex items-center justify-between rounded-2xl border bg-white p-2 text-primary-color md:p-4 xl:p-6">
-          <div>
-            <p className="text-gray-600">
+        <div className="flex min-w-0 items-center justify-between rounded-2xl border bg-white p-3 text-primary-color sm:p-4 xl:p-6">
+          <div className="min-w-0 pr-2">
+            <p className="break-words text-sm text-gray-600 sm:text-base">
               {schoolDataLanguage.totalSubject(language.data ?? "en")}
             </p>
-            <h2 className="font-bold text-gray-900 lg:text-lg xl:text-2xl">
+            <h2 className="break-words font-bold text-gray-900 lg:text-lg xl:text-2xl">
               {" "}
               {school.data?.totalSubject} /{" "}
               <span className="text-gray-400 lg:text-sm xl:text-lg">
@@ -78,7 +78,7 @@ const Stats = ({ schoolId }: Props) => {
               </span>
             </h2>
           </div>
-          <div className="text-yellow-400">
+          <div className="shrink-0 text-yellow-400">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="currentColor"
@@ -89,12 +89,12 @@ const Stats = ({ schoolId }: Props) => {
             </svg>
           </div>
         </div>
-        <div className="flex items-center justify-between rounded-2xl border bg-white p-2 text-primary-color md:p-4 xl:p-6">
-          <div>
-            <p className="text-gray-600">
+        <div className="flex min-w-0 items-center justify-between rounded-2xl border bg-white p-3 text-primary-color sm:p-4 xl:p-6">
+          <div className="min-w-0 pr-2">
+            <p className="break-words text-sm text-gray-600 sm:text-base">
               {schoolDataLanguage.totalStorage(language.data ?? "en")}
             </p>
-            <h2 className="font-bold text-gray-900 lg:text-lg xl:text-2xl">
+            <h2 className="break-words font-bold text-gray-900 lg:text-lg xl:text-2xl">
               {" "}
               {filesize(school.data?.totalStorage ?? 0, {
                 standard: "jedec",
@@ -109,7 +109,7 @@ const Stats = ({ schoolId }: Props) => {
               </span>
             </h2>
           </div>
-          <div className="text-red-400">
+          <div className="shrink-0 text-red-400">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="currentColor"

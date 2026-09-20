@@ -50,15 +50,15 @@ const TabsMenuSection: FC<TabsMenuSectionProps> = ({
 
   return (
     <>
-      <div className="flex px-10">
+      <div className="flex gap-1 overflow-x-auto">
         {tabs.map((tab) => (
           <button
             key={tab.name}
             onClick={() => setActiveTab(tab.name)}
-            className={`pb-2 text-gray-600 ${
+            className={`shrink-0 pb-2 text-gray-600 ${
               activeTab === tab.name
-                ? "border-b-2 border-primary-color px-5 font-semibold text-primary-color"
-                : "px-5 hover:text-gray-800"
+                ? "border-b-2 border-primary-color px-3 font-semibold text-primary-color sm:px-5"
+                : "px-3 hover:text-gray-800 sm:px-5"
             }`}
           >
             {schoolDataLanguage[

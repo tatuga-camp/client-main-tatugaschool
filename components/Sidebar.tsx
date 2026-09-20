@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { useRouter } from "next/router";
 import React, { memo, ReactNode } from "react";
-import { defaultBlurHash, MenuSchool } from "../data";
+import { defaultBlurHash } from "../data";
 import { sidebarDataLanguage } from "../data/languages/sidebar";
 import { useGetLanguage, useGetSchool } from "../react-query";
 import { decodeBlurhashToCanvas } from "../utils";
@@ -23,18 +23,21 @@ function Sidebar({ active, schoolId, menuList, onNavigate }: Props) {
     schoolId: schoolId,
   });
 
+  const visibilityClass =
+    active === null
+      ? "-translate-x-full pointer-events-none xl:translate-x-0 xl:pointer-events-auto"
+      : active
+        ? "translate-x-0 pointer-events-auto"
+        : "-translate-x-full pointer-events-none";
+
   return (
-    <div
-      className={`flex h-screen flex-col items-center justify-start gap-3 overflow-hidden border-r-2 border-black bg-white text-black transition-width ${
-        active === null
-          ? "w-0 p-0 md:w-60 md:p-5"
-          : active
-            ? "w-screen p-5 md:w-60"
-            : "w-0 p-0"
-      } `}
+    <aside
+      id="school-sidebar"
+      aria-hidden={active === false}
+      className={`fixed left-0 top-20 z-40 flex h-[calc(100vh-5rem)] w-72 max-w-[min(18rem,85vw)] flex-col items-center justify-start gap-3 overflow-y-auto overflow-x-hidden border-r-2 border-black bg-white p-4 text-black shadow-lg transition-transform duration-200 xl:w-60 xl:max-w-none xl:p-5 xl:shadow-none 2xl:w-72 ${visibilityClass}`}
     >
-      <header className="mt-16 flex w-full flex-col items-center justify-center gap-1 rounded-2xl bg-background-color p-2 md:h-32 2xl:h-40">
-        <div className="relative h-12 w-12 overflow-hidden rounded-full bg-white">
+      <header className="flex min-h-28 w-full flex-col items-center justify-center gap-1 rounded-2xl bg-background-color p-2 2xl:min-h-36">
+        <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-white">
           <Image
             fill
             sizes="(max-width: 768px) 100vw, 33vw"
@@ -48,11 +51,15 @@ function Sidebar({ active, schoolId, menuList, onNavigate }: Props) {
           />
         </div>
         <PlanBadge plan={school.data?.plan ?? "FREE"} />
-        <h2 className="text-xs font-semibold">{school.data?.title}</h2>
-        <h2 className="text-xs text-gray-600">{school.data?.phoneNumber}</h2>
+        <h2 className="w-full break-words px-1 text-center text-xs font-semibold">
+          {school.data?.title}
+        </h2>
+        <h2 className="w-full break-all px-1 text-center text-xs text-gray-600">
+          {school.data?.phoneNumber}
+        </h2>
       </header>
 
-      <ul className="flex h-full w-full flex-col gap-2 lg:h-96 lg:overflow-auto xl:h-96">
+      <ul className="flex h-full w-full flex-col gap-2 overflow-y-auto">
         {menuList.map((menu, index) => {
           return (
             <button
@@ -68,12 +75,12 @@ function Sidebar({ active, schoolId, menuList, onNavigate }: Props) {
                 onNavigate?.();
               }}
               key={index}
-              className={`flex ${
+              className={`flex min-w-0 ${
                 menu.title === selectMenu && "bg-primary-color text-white"
               } hover:gradient-bg items-center justify-start gap-2 rounded-2xl p-2 hover:text-white active:bg-primary-color`}
             >
-              {menu.icon}
-              <span>
+              <span className="shrink-0">{menu.icon}</span>
+              <span className="min-w-0 break-words text-left">
                 {sidebarDataLanguage[
                   menu.title.toLowerCase() as keyof typeof sidebarDataLanguage
                 ](language.data ?? "en")}
@@ -82,7 +89,7 @@ function Sidebar({ active, schoolId, menuList, onNavigate }: Props) {
           );
         })}
       </ul>
-    </div>
+    </aside>
   );
 }
 

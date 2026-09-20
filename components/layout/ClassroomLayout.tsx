@@ -2,6 +2,11 @@ import type { ReactNode } from "react";
 import React from "react";
 import { menuClassroomList } from "../../data";
 import useClickOutside from "../../hook/useClickOutside";
+import {
+  isSidebarPersistent,
+  sidebarContentOffsetClass,
+  useResponsiveSidebar,
+} from "../../hook/useResponsiveSidebar";
 import Navbar from "../Navbar";
 import { useGetClassroom } from "../../react-query";
 
@@ -13,21 +18,17 @@ type LayoutProps = {
 
 function ClassroomLayout({ children, classroomId, schoolId }: LayoutProps) {
   const navbarRef = React.useRef<HTMLDivElement>(null);
-  const [active, setActive] = React.useState<boolean | null>(null);
+  const [active, setActive] = useResponsiveSidebar();
   const classroom = useGetClassroom({
     classId: classroomId,
   });
-  // Use the custom hook to detect clicks outside the navbar
   useClickOutside(navbarRef, () => {
-    setActive(() => false); // Close the SubjectNavbar when clicking outside
+    if (!isSidebarPersistent()) {
+      setActive(false);
+    }
   });
-  // Sidebar starts open on desktop/tablet, closed on phones; null renders a
-  // CSS-responsive default until the viewport is known (avoids SSR mismatch).
-  React.useEffect(() => {
-    setActive(window.innerWidth >= 768);
-  }, []);
   return (
-    <section className="min-h-screen bg-background-color font-Anuphan">
+    <section className="min-h-screen max-w-full bg-background-color font-Anuphan">
       <div ref={navbarRef} className="sticky top-0 z-50">
         {classroom.data && (
           <Navbar
@@ -52,7 +53,7 @@ function ClassroomLayout({ children, classroomId, schoolId }: LayoutProps) {
           />
         )}
       </div>
-      {children}
+      <div className={sidebarContentOffsetClass(active)}>{children}</div>
     </section>
   );
 }
