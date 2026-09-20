@@ -33,12 +33,12 @@ const LoginPage = () => {
         <meta name="twitter:card" content="summary" />
       </Head>
       <AuthLayout contentClassName="flex min-h-0 w-full flex-1 flex-col overflow-x-hidden pb-safe">
-        <div className="flex min-h-0 w-full flex-1 flex-col lg:flex-row">
+        <div className="flex min-h-0 w-full flex-1 flex-col md:flex-row">
           <AuthBrandPanel />
-          <div className="flex min-h-0 w-full flex-1 flex-col items-center px-4 py-4 sm:px-6 sm:py-6 md:px-8 md:py-8 lg:justify-center lg:px-10 lg:py-10 xl:px-12 2xl:px-16 2xl:py-12">
-            <div className="my-auto flex w-full flex-col items-center">
+          <div className="flex min-h-0 w-full min-w-0 flex-1 flex-col items-center px-4 py-4 sm:px-6 sm:py-6 md:justify-center md:px-6 md:py-8 lg:px-10 lg:py-10 xl:px-12 2xl:px-16 2xl:py-12">
+            <div className="my-auto flex w-full flex-col items-center md:my-0">
               <LoginForm />
-              <div className="w-full lg:hidden">
+              <div className="w-full md:hidden">
                 <AuthFooter />
               </div>
             </div>
