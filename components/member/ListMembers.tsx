@@ -84,9 +84,9 @@ function ListMembers({
       {memberData.map((member, index) => (
         <li
           key={index}
-          className="flex items-center justify-between gap-2 border-b py-2"
+          className="flex w-max items-center justify-between gap-2 border-b py-2"
         >
-          <div className="flex gap-2">
+          <div className="flex w-72 gap-2">
             <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-2xl bg-gray-200 text-sm font-semibold uppercase text-gray-700 ring-1">
               {member.photo ? (
                 <Image
@@ -105,7 +105,9 @@ function ListMembers({
               )}
             </div>
             <div className="flex flex-col">
-              <h1 className="text-sm font-semibold">{member.email}</h1>
+              <h1 className="max-w-60 truncate text-sm font-semibold">
+                {member.email}
+              </h1>
               <span className="text-xs">
                 {member.firstName} {member.lastName} (
                 {currentListMembers.find((m) => m.userId === member.id)?.role})

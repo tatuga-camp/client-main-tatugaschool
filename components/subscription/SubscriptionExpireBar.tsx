@@ -41,7 +41,6 @@ function SubscriptionExpireBar({ schoolId }: { schoolId: string }) {
   const daysLeft = Math.ceil(
     (new Date(expireAt).getTime() - Date.now()) / DAY_MS,
   );
-  console.log("daysLeft", daysLeft);
   if (daysLeft <= 0 || daysLeft > 10) return null;
 
   const isBillingManager =

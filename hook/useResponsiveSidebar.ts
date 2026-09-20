@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 /** Matches Tailwind `xl` — the school shell sidebar is persistent from this width up. */
-export const SIDEBAR_PERSISTENT_MQ = "(min-width: 1280px)";
+export const SIDEBAR_PERSISTENT_MQ = "(min-width: 1536px )";
 
 export function isSidebarPersistent(): boolean {
   return window.matchMedia(SIDEBAR_PERSISTENT_MQ).matches;
