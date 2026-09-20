@@ -128,7 +128,7 @@ function Navbar({
                 alt="logo tatuga school"
               />
             </div>
-            <div className="max-w-[7.5rem] truncate text-xs font-bold uppercase text-icon-color sm:max-w-32 sm:text-sm md:text-base xl:max-w-40 2xl:max-w-60">
+            <div className="max-w-[7.5rem] truncate text-xs font-bold uppercase text-icon-color sm:max-w-40 sm:text-sm md:max-w-56 md:text-base 2xl:max-w-72">
               {school.data && school.data.plan === "ENTERPRISE"
                 ? school.data.title
                 : "Tatuga School"}{" "}
