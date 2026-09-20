@@ -1,5 +1,5 @@
+import { AuthBrandPanel } from "@/components/auth/AuthBrandPanel";
 import { AuthFooter } from "@/components/auth/AuthFooter";
-import { AuthHeader } from "@/components/auth/AuthHeader";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { LoginForm } from "@/components/auth/LoginForm";
 import Head from "next/head";
@@ -32,12 +32,18 @@ const LoginPage = () => {
         <meta property="twitter:image" content="/icon.svg" />
         <meta name="twitter:card" content="summary" />
       </Head>
-      <AuthLayout>
-        <div className="flex w-full flex-col items-center justify-center gap-5">
-          <AuthHeader />
-          <LoginForm />
+      <AuthLayout contentClassName="flex min-h-0 w-full flex-1 flex-col overflow-x-hidden pb-safe">
+        <div className="flex min-h-0 w-full flex-1 flex-col lg:flex-row">
+          <AuthBrandPanel />
+          <div className="flex min-h-0 w-full flex-1 flex-col items-center px-4 py-4 sm:px-6 sm:py-6 md:px-8 md:py-8 lg:justify-center lg:px-10 lg:py-10 xl:px-12 2xl:px-16 2xl:py-12">
+            <div className="my-auto flex w-full flex-col items-center">
+              <LoginForm />
+              <div className="w-full lg:hidden">
+                <AuthFooter />
+              </div>
+            </div>
+          </div>
         </div>
-        <AuthFooter />
       </AuthLayout>
     </>
   );

@@ -1,10 +1,26 @@
 import LanguageSelect from "../common/LanguageSelect";
+import { AuthHeader } from "./AuthHeader";
 
-export const AuthLayout = ({ children }: { children: React.ReactNode }) => (
-  <div className="gradient-bg flex h-full min-h-screen min-w-full flex-col items-center justify-between gap-2 p-5 font-Anuphan">
-    <div className="fixed right-2 top-2">
-      <LanguageSelect className="w-40 border border-gray-200 shadow-sm md:w-48" />
+type AuthLayoutProps = {
+  children: React.ReactNode;
+  contentClassName?: string;
+};
+
+export const AuthLayout = ({ children, contentClassName }: AuthLayoutProps) => (
+  <div className="gradient-bg flex min-h-dvh w-full max-w-full flex-col overflow-x-hidden font-Anuphan">
+    <header className="flex w-full shrink-0 items-center justify-between gap-2 px-3 py-3 sm:gap-3 sm:px-5 sm:py-4 md:px-6 lg:px-8 2xl:px-10">
+      <div className="min-w-0">
+        <AuthHeader />
+      </div>
+      <LanguageSelect className="w-[9.25rem] shrink-0 border border-gray-200 shadow-sm sm:w-40 md:w-48" />
+    </header>
+    <div
+      className={
+        contentClassName ??
+        "pb-safe flex w-full flex-1 flex-col items-center px-4 pb-5 sm:px-6 md:px-8"
+      }
+    >
+      {children}
     </div>
-    {children}
   </div>
 );

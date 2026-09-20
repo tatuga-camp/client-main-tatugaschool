@@ -1,7 +1,6 @@
 import React from "react";
 import Swal from "sweetalert2";
 import { AuthFooter } from "../../components/auth/AuthFooter";
-import { AuthHeader } from "../../components/auth/AuthHeader";
 import { AuthLayout } from "../../components/auth/AuthLayout";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import { ErrorMessages } from "../../interfaces";
@@ -90,7 +89,6 @@ function Index() {
     return (
       <AuthLayout>
         <div className="flex w-full grow flex-col items-center justify-center gap-5">
-          <AuthHeader />
           <div className="h-max w-full rounded-2xl bg-white p-3 text-center md:w-8/12 xl:w-4/12">
             {waitVerifyEmailLanguageData.alreadyVerified(language.data ?? "en")}
           </div>
@@ -108,7 +106,6 @@ function Index() {
   return (
     <AuthLayout>
       <div className="flex w-full grow flex-col items-center justify-center gap-5">
-        <AuthHeader />
         <div className="flex h-max w-full flex-col items-center justify-center rounded-2xl bg-white p-3 text-center md:w-8/12 xl:w-4/12">
           {triggerUpdate ? (
             <form onSubmit={handleUpdateEmail}>

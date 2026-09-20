@@ -43,7 +43,7 @@ function LanguageSelect({ className }: { className?: string }) {
             await update.mutateAsync(lang.value);
             setCurrentLanguage(lang);
           }}
-          className={`flex w-full items-center justify-center gap-2 rounded-lg px-2 py-1.5 text-xs font-medium transition-all md:text-sm ${
+          className={`flex w-full items-center justify-center gap-1 rounded-lg px-1.5 py-1.5 text-[11px] font-medium transition-all sm:gap-2 sm:px-2 sm:text-xs md:text-sm ${
             currentLanguage.value === lang.value
               ? "bg-white text-gray-900 shadow-sm ring-1 ring-gray-200"
               : "text-gray-500 hover:text-gray-700"
@@ -58,7 +58,7 @@ function LanguageSelect({ className }: { className?: string }) {
               sizes="16px"
             />
           </div>
-          <span>{lang.title}</span>
+          <span className="truncate">{lang.title}</span>
         </button>
       ))}
     </div>

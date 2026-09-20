@@ -1,5 +1,4 @@
 import { AuthFooter } from "@/components/auth/AuthFooter";
-import { AuthHeader } from "@/components/auth/AuthHeader";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { ForgetPasswordForm } from "@/components/auth/ForgetPassword";
 import Head from "next/head";
@@ -11,8 +10,7 @@ const ForgetPasswordPage = () => {
         <title>Forget Password</title>
       </Head>
       <AuthLayout>
-        <div className="w-full grow  flex-col  flex justify-center items-center gap-5">
-          <AuthHeader />
+        <div className="flex w-full grow flex-col items-center justify-center gap-5">
           <ForgetPasswordForm />
         </div>
         <AuthFooter />
