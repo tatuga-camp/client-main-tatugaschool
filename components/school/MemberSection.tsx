@@ -115,11 +115,11 @@ const MemberSection: FC<MemberSectionProps> = ({
   };
 
   return (
-    <div className="h-max max-w-4xl rounded-2xl border bg-white md:px-5">
-      <div className="mb-0 rounded-t-2xl bg-white p-6 pb-0">
+    <div className="h-max max-w-4xl min-w-0 overflow-hidden rounded-2xl border bg-white md:px-5">
+      <div className="mb-0 rounded-t-2xl bg-white p-4 pb-0 sm:p-6 sm:pb-0">
         {/* Header Section */}
-        <div className="mb-4 flex items-center justify-between">
-          <div>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <div className="min-w-0">
             <h2 className="text-xl font-bold text-gray-800">
               Members ({members.data?.length})
             </h2>
@@ -127,7 +127,7 @@ const MemberSection: FC<MemberSectionProps> = ({
           </div>
           <button
             onClick={onInvite}
-            className="flex items-center space-x-1 rounded-2xl bg-primary-color px-6 py-2 text-white hover:bg-opacity-90"
+            className="flex shrink-0 items-center space-x-1 rounded-2xl bg-primary-color px-4 py-2 text-white hover:bg-opacity-90 sm:px-6"
           >
             <FaPlus />
             <span>

@@ -5,6 +5,11 @@ import { MdLock } from "react-icons/md";
 import { menuSubjectList } from "../../data";
 import { subjectIsLockedDataLanguage } from "../../data/languages/subscription";
 import useClickOutside from "../../hook/useClickOutside";
+import {
+  isSidebarPersistent,
+  sidebarContentOffsetClass,
+  useResponsiveSidebar,
+} from "../../hook/useResponsiveSidebar";
 import { useGetLanguage, useGetSubject } from "../../react-query";
 import Navbar from "../Navbar";
 import FooterSubject, { ListMenuFooter } from "../subject/FooterSubject";
@@ -26,18 +31,14 @@ function SubjectLayout({
     subjectId,
   });
   const navbarRef = useRef<HTMLDivElement>(null);
-  const [active, setActive] = React.useState<boolean | null>(null);
+  const [active, setActive] = useResponsiveSidebar();
   const language = useGetLanguage();
   const [triggerShowLock, setTriggerShowLock] = useState(false);
-  // Use the custom hook to detect clicks outside the navbar
   useClickOutside(navbarRef, () => {
-    setActive(() => false); // Close the SubjectNavbar when clicking outside
+    if (!isSidebarPersistent()) {
+      setActive(false);
+    }
   });
-  // Sidebar starts open on desktop/tablet, closed on phones; null renders a
-  // CSS-responsive default until the viewport is known (avoids SSR mismatch).
-  React.useEffect(() => {
-    setActive(window.innerWidth >= 768);
-  }, []);
   React.useEffect(() => {
     document.body.style.overflow = "auto";
   }, []);
@@ -48,7 +49,7 @@ function SubjectLayout({
     }
   }, [subject.isSuccess]);
   return (
-    <section className="min-h-screen bg-background-color font-Anuphan">
+    <section className="min-h-screen max-w-full bg-background-color font-Anuphan">
       <div ref={navbarRef} className="sticky top-0 z-40">
         {subject.data && (
           <Navbar
@@ -112,7 +113,7 @@ function SubjectLayout({
           </div>
         </div>
       )}
-      {children}
+      <div className={sidebarContentOffsetClass(active)}>{children}</div>
       <div className="fixed bottom-0 z-30 w-full bg-white pb-safe">
         <FooterSubject
           selectFooter={selectFooter}

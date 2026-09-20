@@ -5,6 +5,7 @@ import { IoMdNotifications } from "react-icons/io";
 import { IoMenu } from "react-icons/io5";
 import { defaultCanvas } from "../data";
 import { navbarLanguageData } from "../data/languages";
+import { isSidebarPersistent } from "../hook/useResponsiveSidebar";
 import useClickOutside from "../hook/useClickOutside";
 import {
   useGetLanguage,
@@ -48,6 +49,8 @@ function Navbar({
   const { data: notifications } = useGetNotifications();
 
   const unreadCount = notifications?.filter((n) => !n.isRead).length || 0;
+  const hasSidebar = menuLists.length > 0 && !!schoolId;
+  const overlayOpen = hasSidebar && trigger === true;
 
   // Effect for animation
   useEffect(() => {
@@ -61,6 +64,17 @@ function Navbar({
   useClickOutside(notificationRef, () => {
     setIsNotificationOpen(false);
   });
+
+  useEffect(() => {
+    if (!overlayOpen) return;
+    if (isSidebarPersistent()) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [overlayOpen]);
+
   return (
     <>
       {triggerFeedback && (
@@ -72,12 +86,20 @@ function Navbar({
           <Feedback />
         </PopupLayout>
       )}
-      <div className="flex h-20 flex-row items-center justify-between gap-4 border-b-2 border-black bg-white p-4 text-white">
-        <div className="flex gap-2">
+      <div className="relative z-50 flex h-20 w-full min-w-0 flex-row items-center justify-between gap-2 border-b-2 border-black bg-white p-2 text-white sm:gap-4 sm:p-4">
+        <div className="flex min-w-0 items-center gap-2">
           {menuLists.length > 0 && (
             <button
-              onClick={() => setTrigger(!trigger)}
-              className={`flex text-black ${
+              type="button"
+              aria-label="Toggle menu"
+              aria-expanded={Boolean(trigger)}
+              aria-controls="school-sidebar"
+              onClick={() =>
+                setTrigger((current) =>
+                  current === null ? !isSidebarPersistent() : !current,
+                )
+              }
+              className={`flex shrink-0 text-black ${
                 trigger ? "rotate-90" : "rotate-0"
               } items-center justify-center rounded-full border-2 border-gray-200 bg-white p-2 text-xl transition duration-150 hover:bg-primary-color hover:text-white`}
             >
@@ -90,9 +112,9 @@ function Navbar({
                 ? `/school/${user.data?.favoritSchool}`
                 : "/"
             }
-            className="flex items-center justify-center gap-1 md:hidden md:gap-3 lg:flex"
+            className="flex min-w-0 items-center justify-center gap-1 sm:gap-3"
           >
-            <div className="relative h-10 w-10 overflow-hidden rounded-2xl ring-1 ring-white transition duration-150 hover:scale-105 active:scale-110">
+            <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-2xl ring-1 ring-white transition duration-150 hover:scale-105 active:scale-110">
               <Image
                 src={
                   school.data && school.data.plan === "ENTERPRISE"
@@ -106,7 +128,7 @@ function Navbar({
                 alt="logo tatuga school"
               />
             </div>
-            <div className="max-w-32 truncate text-xs font-bold uppercase text-icon-color md:text-base xl:block 2xl:max-w-60">
+            <div className="max-w-[7.5rem] truncate text-xs font-bold uppercase text-icon-color sm:max-w-32 sm:text-sm md:text-base xl:max-w-40 2xl:max-w-60">
               {school.data && school.data.plan === "ENTERPRISE"
                 ? school.data.title
                 : "Tatuga School"}{" "}
@@ -131,9 +153,13 @@ function Navbar({
             </nav>
           </div>
         )}
-        {breadcrumbs && <Breadcrumbs breadcrumbs={breadcrumbs} />}
-        <div className="w-max">
-          <div className="flex items-center justify-center gap-2">
+        {breadcrumbs && (
+          <div className="hidden min-w-0 lg:flex">
+            <Breadcrumbs breadcrumbs={breadcrumbs} />
+          </div>
+        )}
+        <div className="shrink-0">
+          <div className="flex items-center justify-center gap-1 sm:gap-2">
             {/* --- Notification Button --- */}
             <div className="relative" ref={notificationRef}>
               <button
@@ -163,21 +189,27 @@ function Navbar({
             />
           </div>
         </div>
-        {menuLists.length > 0 && schoolId && (
-          <div className="fixed left-0 top-0 -z-10">
-            <Sidebar
-              menuList={menuLists}
-              active={trigger}
-              schoolId={schoolId}
-              onNavigate={() => {
-                if (window.innerWidth < 768) {
-                  setTrigger(false);
-                }
-              }}
-            />
-          </div>
-        )}
       </div>
+      {hasSidebar && overlayOpen && (
+        <button
+          type="button"
+          aria-label="Close menu"
+          className="fixed inset-0 z-30 bg-black/40 xl:hidden"
+          onClick={() => setTrigger(false)}
+        />
+      )}
+      {hasSidebar && (
+        <Sidebar
+          menuList={menuLists}
+          active={trigger}
+          schoolId={schoolId}
+          onNavigate={() => {
+            if (!isSidebarPersistent()) {
+              setTrigger(false);
+            }
+          }}
+        />
+      )}
     </>
   );
 }

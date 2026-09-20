@@ -117,7 +117,7 @@ function ButtonProfile({ user, onTriggerFeedback, schoolId }: Props) {
             className="object-cover"
           />
         </div>
-        <span className="hidden max-w-[100px] truncate text-sm font-medium text-gray-700 md:block">
+        <span className="hidden max-w-[100px] truncate text-sm font-medium text-gray-700 xl:block">
           {user.data?.firstName}
         </span>
 
