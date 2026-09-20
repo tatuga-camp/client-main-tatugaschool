@@ -93,7 +93,7 @@ export const LoginForm = () => {
 
   return (
     <form
-      className="w-full max-w-sm rounded-2xl bg-white p-5 text-center shadow-[0_12px_24px_rgba(145,158,171,0.12)] sm:max-w-md sm:p-8 md:p-10 lg:max-w-md xl:max-w-lg xl:p-10 2xl:max-w-xl 2xl:p-12"
+      className="w-full max-w-sm rounded-2xl bg-white p-5 text-center shadow-[0_12px_24px_rgba(145,158,171,0.12)] sm:max-w-md sm:p-8 md:max-w-full md:p-8 lg:max-w-md lg:p-10 xl:max-w-lg xl:p-10 2xl:max-w-xl 2xl:p-12"
       onSubmit={handleLogin}
     >
       <h2 className="mb-6 text-2xl font-bold md:mb-8 xl:text-[28px] 2xl:mb-10 2xl:text-3xl">
