@@ -28,3 +28,4 @@ export * from "./rubric";
 export * from "./insights";
 export * from "./group-on-subject";
 export * from "./announcement";
+export * from "./teaching-material";

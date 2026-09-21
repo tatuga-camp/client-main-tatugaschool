@@ -48,7 +48,11 @@ type RequestSignUpService = {
   turnstileToken: string;
 };
 
-type ResponseSignUpService = { redirectUrl: string };
+type ResponseSignUpService = {
+  redirectUrl: string;
+  accessToken: string;
+  refreshToken: string;
+};
 export async function SignUpService(
   input: RequestSignUpService,
 ): Promise<ResponseSignUpService> {
