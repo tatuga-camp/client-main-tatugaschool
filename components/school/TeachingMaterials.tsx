@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { SiGooglegemini } from "react-icons/si";
+import { MdOutlineSearch, MdOutlineSearchOff } from "react-icons/md";
+import { TbAlertCircle } from "react-icons/tb";
 import { TeachingMaterial } from "../../interfaces";
 import {
   useGetLanguage,
@@ -8,6 +9,8 @@ import {
   useGetTeachingMaterialsCount,
   useGetUser,
 } from "../../react-query";
+import { teachingMaterialDataLanguage as L } from "../../data/languages/teaching-material";
+import LoadingBar from "../common/LoadingBar";
 import PopupLayout from "../layout/PopupLayout";
 import TeachingMaterialCard from "./TeachingMaterialCard";
 import TeachingMaterialSection from "./TeachingMaterialSection";
@@ -19,7 +22,7 @@ type Props = {
 
 const suggestionsSearch = [
   {
-    en: "Cute English Worksheet for Grade 2",
+    en: "Cute English worksheet for grade 2",
     th: "ใบงานภาษาอังกฤษของ ป.2 น่ารักๆ ให้รักเรียนวาดรูป",
   },
   {
@@ -27,7 +30,7 @@ const suggestionsSearch = [
     th: "ใบงานวรรณกรรมไทย สำหรับประถม",
   },
   {
-    en: "A cute teaching Schedule table",
+    en: "A cute teaching schedule table",
     th: "ตารางสอนน่ารัก ๆ",
   },
   {
@@ -39,7 +42,8 @@ const suggestionsSearch = [
 function TeachingMaterials({ schoolId }: Props) {
   const school = useGetSchool({ schoolId });
   const user = useGetUser();
-  const language = useGetLanguage();
+  const languageQuery = useGetLanguage();
+  const language = languageQuery.data === "th" ? "th" : "en";
   const [query, setQuery] = useState("");
   const [search, setSearch] = useState("");
   const [teachingMaterials, setTeachingMaterials] = useState<
@@ -71,6 +75,12 @@ function TeachingMaterials({ schoolId }: Props) {
     setQuery(suggestion);
     setSearch(suggestion); // Immediately trigger search on suggestion click
   };
+
+  const materials = teachingMaterials.flat();
+  const showEmpty =
+    !getTeachingMaterials.isLoading &&
+    !getTeachingMaterials.error &&
+    materials.length === 0;
 
   return (
     <>
@@ -104,116 +114,159 @@ function TeachingMaterials({ schoolId }: Props) {
           />
         </PopupLayout>
       )}
-      <div className="flex w-full flex-col items-center font-Anuphan">
-        <header className="gradient-bg flex h-max w-full flex-col items-center justify-center gap-2 py-20 pt-10">
-          <h1 className="text-3xl font-semibold text-white">
-            AI-Powered Teaching Materials Search
-          </h1>
-          <p className="text-center text-lg text-white/90">
-            Discover over{" "}
-            <span className="text-3xl font-extrabold">
-              {teachingMaterialsCount.data ?? 350}
-            </span>{" "}
-            personalized educational resources with intelligent recommendations{" "}
-            <br />
-            tailored to your teaching needs
-          </p>
+      <div className="flex w-full flex-col justify-center bg-white font-Anuphan">
+        <header className="mx-auto flex w-full flex-col justify-between gap-4 p-3 md:max-w-screen-md md:flex-row md:px-5 xl:max-w-screen-lg">
+          <section className="min-w-0 text-center md:text-left">
+            <h1 className="text-2xl font-semibold md:text-3xl">
+              {L.title(language)}
+            </h1>
+            <p className="max-w-96 break-words text-sm text-gray-400 md:text-base">
+              {L.description(language)}
+            </p>
+            {typeof teachingMaterialsCount.data === "number" && (
+              <p className="mt-1 text-xs text-gray-400">
+                {L.available(teachingMaterialsCount.data)(language)}
+              </p>
+            )}
+          </section>
+          {user.data?.role === "ADMIN" && (
+            <section className="flex shrink-0 flex-col items-center gap-2 md:items-end">
+              <button
+                type="button"
+                onClick={() => setTriggerCreate(true)}
+                className="main-button flex w-full items-center justify-center gap-1 py-1 ring-1 ring-blue-600 md:w-auto"
+              >
+                {L.create(language)}
+              </button>
+            </section>
+          )}
+        </header>
 
-          <section className="mb-4 mt-10 w-full max-w-3xl rounded-xl bg-white/10 p-2 shadow-lg backdrop-blur-sm">
+        <main className="mx-auto flex min-h-screen w-full flex-col gap-4 p-3 pb-24 md:max-w-screen-md md:px-5 xl:max-w-screen-lg">
+          <section className="flex flex-col gap-2">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 setSearch(query);
               }}
-              className="relative flex items-center rounded-xl bg-white"
+              className="flex w-full flex-col gap-2 sm:flex-row sm:items-end"
             >
-              <input
-                value={query}
-                onChange={(event) => {
-                  setQuery(event.target.value);
-                  setDisplayedSuggestion(""); // Clear displayed suggestion
-                }}
-                type="text"
-                placeholder="Describe what you're looking for... e.g., 'Interactive math games for 5th grade'"
-                className="w-full bg-transparent py-3 pl-6 pr-60 text-black placeholder-gray-400 outline-none"
-              />
-              <button
-                onClick={() => {
-                  setSearch(query);
-                }}
-                className="gradient-bg-success absolute right-1.5 top-1/2 flex w-40 -translate-y-1/2 items-center gap-2 rounded-full px-6 py-2 font-semibold text-white transition-colors duration-200 hover:scale-105 active:scale-110"
-              >
-                <SiGooglegemini
-                  className={`${getTeachingMaterials.isFetching && "animate-spin"}`}
+              <label className="flex min-w-0 grow flex-col">
+                <span className="text-sm text-gray-400">
+                  {L.search(language)}
+                </span>
+                <input
+                  value={query}
+                  onChange={(event) => {
+                    setQuery(event.target.value);
+                    setDisplayedSuggestion(""); // Clear displayed suggestion
+                  }}
+                  type="text"
+                  placeholder={L.searchPlaceholder(language)}
+                  className="w-full min-w-0 rounded-2xl border border-gray-300 p-2 outline-none focus:border-primary-color"
                 />
-                <span>AI Search</span>
+              </label>
+              <button
+                type="submit"
+                className="main-button flex shrink-0 items-center justify-center gap-1 sm:w-auto"
+              >
+                <MdOutlineSearch className="text-lg" />
+                {L.searchButton(language)}
               </button>
             </form>
 
-            <div className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-white">
-              <span className="font-semibold text-gray-200">Quick Search:</span>
-              {suggestionsSearch.map((suggestion, index) => (
-                <a
-                  key={index}
-                  href="#"
-                  className="hover:text-white hover:underline"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleSuggestionClick(
-                      language.data === "th" ? suggestion.th : suggestion.en,
-                    );
-                  }}
-                >
-                  {language.data === "th" ? suggestion.th : suggestion.en}
-                </a>
-              ))}
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <span className="text-gray-400">{L.quickSearch(language)}</span>
+              {suggestionsSearch.map((suggestion, index) => {
+                const text = language === "th" ? suggestion.th : suggestion.en;
+                return (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => handleSuggestionClick(text)}
+                    className={`max-w-full truncate rounded-full border px-3 py-1 text-gray-600 transition hover:border-primary-color/60 hover:text-primary-color ${
+                      search === text
+                        ? "border-primary-color/60 bg-primary-color/10 text-primary-color"
+                        : "bg-white"
+                    }`}
+                  >
+                    {text}
+                  </button>
+                );
+              })}
             </div>
           </section>
 
-          {user.data?.role === "ADMIN" && (
-            <button
-              onClick={() => setTriggerCreate(true)}
-              className="main-button gradient-bg-success rounded-full text-sm text-white"
-            >
-              CREATE
-            </button>
-          )}
-        </header>
-        <main className="flex w-full max-w-7xl flex-col gap-2 px-10 pb-10">
-          <section className="mt-5 flex w-full items-center justify-between">
-            <div className="flex w-max items-center justify-center gap-2">
-              <h3 className="text-3xl font-semibold text-black">
-                Search Results
-              </h3>
-              <span className="rounded-2xl bg-primary-color/5 px-3 text-lg text-primary-color">
-                {totalFound} teaching materials found
+          <section className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2">
+              <h2 className="text-lg font-semibold text-gray-900 md:text-xl">
+                {L.results(language)}
+              </h2>
+              {!getTeachingMaterials.isLoading && (
+                <span className="shrink-0 rounded-full bg-primary-color/10 px-2 py-0.5 text-xs font-medium text-primary-color">
+                  {L.found(totalFound)(language)}
+                </span>
+              )}
+            </div>
+            <label className="flex w-full items-center gap-2 sm:w-auto">
+              <span className="shrink-0 text-sm text-gray-400">
+                {L.sortBy(language)}
               </span>
-            </div>
-
-            <select
-              value={filter}
-              onChange={(e) =>
-                setFilter(e.target.value as "relevant" | "recent")
-              }
-              className="rounded-xl border border-gray-300 px-4 py-2 text-black outline-none"
-            >
-              <option value="relevant">Relevant</option>
-              <option value="recent">Recently Added</option>
-            </select>
+              <select
+                value={filter}
+                onChange={(e) =>
+                  setFilter(e.target.value as "relevant" | "recent")
+                }
+                className="second-button min-w-0 grow border sm:w-44 sm:grow-0"
+              >
+                <option value="relevant">{L.sortRelevant(language)}</option>
+                <option value="recent">{L.sortRecent(language)}</option>
+              </select>
+            </label>
           </section>
 
-          <ul className="mt-10 grid w-full grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {getTeachingMaterials.isFetching && <LoadingBar />}
+
+          {getTeachingMaterials.error && (
+            <div className="flex items-center justify-center gap-2 rounded-2xl border border-error-color/40 bg-white p-6 text-center text-sm text-error-color">
+              <TbAlertCircle className="shrink-0 text-lg" />
+              <span>{L.errorTitle(language)}</span>
+            </div>
+          )}
+
+          {showEmpty && (
+            <div className="flex flex-col items-center justify-center gap-1 rounded-2xl border bg-white px-4 py-10 text-center">
+              <span className="mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-primary-color/10">
+                <MdOutlineSearchOff className="text-xl text-primary-color" />
+              </span>
+              <p className="text-sm font-medium text-gray-700">
+                {L.emptyTitle(language)}
+              </p>
+              <p className="max-w-xs text-xs text-gray-400">
+                {L.emptyHint(language)}
+              </p>
+            </div>
+          )}
+
+          <ul className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {getTeachingMaterials.isLoading &&
-              [...Array(10)].map((_, index) => (
-                <div
+              [...Array(6)].map((_, index) => (
+                <li
                   key={index}
-                  className="h-80 w-80 animate-pulse rounded-2xl bg-gray-200"
-                />
+                  className="min-w-0 overflow-hidden rounded-2xl border bg-white"
+                >
+                  <div className="aspect-[4/3] w-full animate-pulse bg-gray-100" />
+                  <div className="flex flex-col gap-2 p-3">
+                    <div className="h-4 w-3/4 animate-pulse rounded bg-gray-100" />
+                    <div className="h-4 w-1/2 animate-pulse rounded bg-gray-100" />
+                    <div className="h-3 w-1/3 animate-pulse rounded bg-gray-100" />
+                  </div>
+                </li>
               ))}
-            {teachingMaterials.flat().map((teachingMaterial) => {
+            {materials.map((teachingMaterial) => {
               return (
                 <TeachingMaterialCard
-                  language={language.data === "th" ? "th" : "en"}
+                  language={language}
                   onClick={() => {
                     document.body.style.overflow = "hidden";
                     setSelectTeachingMaterial(teachingMaterial);
