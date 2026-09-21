@@ -28,10 +28,13 @@ export const LoginForm = () => {
         },
       });
       const response = await SignInService({ email, password });
+      // The axios interceptor gates every request on a refresh_token cookie it can
+      // read from THIS origin. The server's Set-Cookie only lands on the server's
+      // own host, so when the API runs on a different host (e.g. a tunnel in dev)
+      // the client must store its own copy before the next request goes out.
+      setAccessToken({ access_token: response.accessToken });
+      setRefreshToken({ refresh_token: response.refreshToken });
       const user = await GetUserService();
-      // server already set cookie
-      // setAccessToken({ access_token: response.accessToken });
-      // setRefreshToken({ refresh_token: response.refreshToken });
       const returnUrl = router.query.returnUrl as string;
       router.push(
         returnUrl

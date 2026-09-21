@@ -11,6 +11,7 @@ import { FcGoogle } from "react-icons/fc";
 import { PhoneInput } from "react-international-phone";
 import { requestData, signUpLanguageData } from "../../data/languages";
 import { useGetLanguage } from "../../react-query";
+import { setAccessToken, setRefreshToken } from "../../utils";
 
 type Props = {
   email?: string | undefined;
@@ -97,6 +98,10 @@ export const SignUpForm = (props: Props) => {
         turnstileToken,
       });
 
+      // Same as sign-in: the server cookie only lands on the API host, so store
+      // our own copy before the next page fires authenticated requests.
+      setAccessToken({ access_token: response.accessToken });
+      setRefreshToken({ refresh_token: response.refreshToken });
       router.push(response.redirectUrl);
 
       await Swal.fire({
