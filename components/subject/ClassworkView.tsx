@@ -196,7 +196,13 @@ function ClassworkView({
   };
 
   return (
-    <main className="mx-auto grid w-full max-w-6xl gap-5 px-4 py-6 md:px-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
+    <main
+      className={`mx-auto grid w-full max-w-6xl gap-5 px-4 py-6 md:px-6 lg:items-start ${
+        triggerSildeOption
+          ? "lg:grid-cols-[minmax(0,1fr)_3.5rem]"
+          : "lg:grid-cols-[minmax(0,1fr)_20rem]"
+      }`}
+    >
       {configuringVideo && (
         <FileVideoConfigurator
           fileUrl={configuringVideo.url}
@@ -682,7 +688,7 @@ function ClassworkView({
               </RailGroup>
             )}
 
-            {assignmentType !== "Material" && (
+            {assignmentType !== "Material" && !!classwork?.id && (
               <RailGroup
                 label={classworkViewDataLanguage.groupVisibility(
                   language.data ?? "en",

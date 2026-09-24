@@ -15,13 +15,17 @@ import ClasswordView, {
   FileClasswork,
 } from "../../../../components/subject/ClassworkView";
 import { MenuSubject } from "../../../../data";
-import { classworkHeadMenuBarDataLanguage } from "../../../../data/languages";
+import {
+  classworkHeadMenuBarDataLanguage,
+  classworkViewDataLanguage,
+} from "../../../../data/languages";
 import useClickOutside from "../../../../hook/useClickOutside";
 import useAdjustPosition from "../../../../hook/useWindow";
 import {
   Assignment,
   AssignmentStatus,
   ErrorMessages,
+  Language,
 } from "../../../../interfaces";
 import {
   useCreateFileOnAssignment,
@@ -77,7 +81,13 @@ const typeIcon: Record<string, React.ReactNode> = {
   VideoQuiz: <MdVideoLibrary />,
 };
 
-function StatusChip({ status }: { status?: AssignmentStatus }) {
+function StatusChip({
+  status,
+  language,
+}: {
+  status?: AssignmentStatus;
+  language: Language;
+}) {
   if (!status) return null;
   const isPublished = status === "Published";
   return (
@@ -88,7 +98,9 @@ function StatusChip({ status }: { status?: AssignmentStatus }) {
           : "bg-gray-100 text-gray-600"
       }`}
     >
-      {isPublished ? "Published" : "Draft"}
+      {isPublished
+        ? classworkViewDataLanguage.published(language)
+        : classworkViewDataLanguage.draft(language)}
     </span>
   );
 }
@@ -427,7 +439,10 @@ function Index({
                   onChange={(e) => setAssignmentTitle(e.target.value)}
                 />
                 <div className="hidden md:block">
-                  <StatusChip status={classwork?.status} />
+                  <StatusChip
+                    status={classwork?.status}
+                    language={language.data ?? "en"}
+                  />
                 </div>
               </div>
             </section>
@@ -537,7 +552,7 @@ function Index({
             <ProgressBar mode="indeterminate" style={{ height: "3px" }} />
           )}
 
-          <div className="flex h-12 w-full items-center justify-start gap-1 overflow-x-auto border-b border-gray-100 bg-white px-2 md:h-14 md:px-4">
+          <div className="flex h-12 w-full items-center justify-start gap-1 overflow-x-auto border-b border-gray-100 bg-white px-4 md:h-14 md:px-6">
             {menuLists
               .filter((menu) =>
                 assignment.data?.type === "Material"
