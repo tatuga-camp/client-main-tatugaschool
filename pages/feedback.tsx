@@ -1,63 +1,13 @@
-import axios, { AxiosError } from "axios";
-import { GetServerSideProps, GetServerSidePropsContext } from "next";
+import { GetServerSideProps } from "next";
 import Head from "next/head";
 import { useState } from "react";
 import { AiOutlineDelete } from "react-icons/ai";
 import DefaultLayout from "../components/layout/DefaultLayout";
 import { useDeleteFeedback, useGetFeedbacks } from "../react-query/feedback";
-import { RefreshTokenService } from "../services";
-import { getRefetchtoken } from "../utils";
+import { requireAdmin } from "../utils/requireAdmin";
 
-export const getServerSideProps: GetServerSideProps = async (
-  context: GetServerSidePropsContext,
-) => {
-  const refetch_token = getRefetchtoken(context);
-
-  if (!refetch_token.refresh_token) {
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-    };
-  }
-
-  try {
-    const access_token = await RefreshTokenService({
-      refreshToken: refetch_token.refresh_token,
-    });
-    const user = await axios.get(
-      `${process.env.NEXT_PUBLIC_SERVER_URL}/v1/users/me`,
-      {
-        headers: {
-          Authorization: `Bearer ${access_token.accessToken}`,
-        },
-      },
-    );
-
-    if (user.data.role !== "ADMIN") {
-      return {
-        redirect: {
-          destination: "/",
-          permanent: false,
-        },
-      };
-    }
-
-    return {
-      props: {
-        user: user.data,
-      },
-    };
-  } catch (error) {
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-    };
-  }
-};
+export const getServerSideProps: GetServerSideProps = (context) =>
+  requireAdmin(context);
 
 function AdminFeedback() {
   const [page, setPage] = useState(1);
