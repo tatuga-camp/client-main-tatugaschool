@@ -14,6 +14,7 @@ import { ErrorMessages } from "../interfaces";
 import { classNames } from "primereact/utils";
 import { useGetUser } from "../react-query";
 import { useRouter } from "next/router";
+import ErrorBoundary from "../components/common/ErrorBoundary";
 
 const prompt = Prompt({
   subsets: ["latin", "thai"],
@@ -246,7 +247,9 @@ function MyApp({ Component, pageProps }: AppProps) {
           shallowRouting
         />
         <div className={prompt.className}>
-          <Component {...pageProps} />
+          <ErrorBoundary>
+            <Component {...pageProps} />
+          </ErrorBoundary>
         </div>
       </PrimeReactProvider>
     </QueryClientProvider>
