@@ -195,6 +195,7 @@ function Index({
           status: status,
           tags: classwork?.tags,
           rubricId: classwork?.rubricId ?? null,
+          allowStudentViewScore: classwork?.allowStudentViewScore ?? true,
         },
       });
 

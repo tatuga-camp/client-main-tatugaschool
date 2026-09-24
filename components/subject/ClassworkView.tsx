@@ -27,6 +27,7 @@ import {
 } from "../../interfaces";
 import {
   useGetLanguage,
+  useGetSubject,
   useUpdateFileOnAssignment,
   useUpdateSkillToAssignment,
 } from "../../react-query";
@@ -84,6 +85,7 @@ type Props = {
     type?: AssignmentType;
     tags?: string[];
     rubricId?: string | null;
+    allowStudentViewScore?: boolean;
   }) => void;
   onDeleteFile: (file: FileClasswork) => void;
   onUploadFile: (file: FileClasswork[]) => void;
@@ -106,6 +108,10 @@ function ClassworkView({
   const refetchSkill = useUpdateSkillToAssignment();
   const language = useGetLanguage();
   const updateFile = useUpdateFileOnAssignment();
+  const subject = useGetSubject({ subjectId });
+  const hideScore = classwork?.allowStudentViewScore === false;
+  const subjectHidesScores =
+    subject.data?.allowStudentViewScoreOnAssignment === false;
   const [triggerLink, setTriggerLink] = React.useState(false);
   const [linkValue, setLinkValue] = React.useState("");
   const [allowWeight, setAllowWeight] = React.useState(
@@ -619,6 +625,35 @@ function ClassworkView({
                       onChange({ rubricId: next });
                     }}
                   />
+                </div>
+              )}
+              {assignmentType !== "Material" && (
+                <div className="flex w-full flex-col gap-2 border-t pt-3">
+                  <label className="flex w-full items-center justify-between gap-2">
+                    <span className="text-base font-medium">
+                      {classworkViewDataLanguage.hideScore(
+                        language.data ?? "en",
+                      )}
+                    </span>
+                    <Switch
+                      checked={hideScore}
+                      setChecked={(next) =>
+                        onChange({ allowStudentViewScore: !next })
+                      }
+                    />
+                  </label>
+                  <span className="text-xs text-gray-400">
+                    {classworkViewDataLanguage.hideScoreDescription(
+                      language.data ?? "en",
+                    )}
+                  </span>
+                  {subjectHidesScores && (
+                    <span className="text-xs text-warning-color">
+                      {classworkViewDataLanguage.hideScoreSubjectNote(
+                        language.data ?? "en",
+                      )}
+                    </span>
+                  )}
                 </div>
               )}
             </section>

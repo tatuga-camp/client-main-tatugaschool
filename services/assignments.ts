@@ -138,6 +138,7 @@ export type RequestUpdateAssignmentService = {
     status?: AssignmentStatus;
     videoURL?: string;
     preventFastForward?: boolean;
+    allowStudentViewScore?: boolean;
     tags?: string[];
     rubricId?: string | null;
   };
