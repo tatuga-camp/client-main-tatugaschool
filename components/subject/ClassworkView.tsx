@@ -323,7 +323,7 @@ function ClassworkView({
                   return (
                     <li
                       key={index}
-                      className="flex items-center gap-3 rounded-xl border border-gray-100 p-3"
+                      className="flex min-w-0 items-center gap-3 rounded-xl border border-gray-100 p-3"
                     >
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-color/10 text-lg text-primary-color">
                         {isLink ? (
