@@ -84,6 +84,16 @@ export const classworkCardDataLanguage = {
 } as const;
 
 export const classworkHeadMenuBarDataLanguage = {
+  untitled: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Untitled classwork";
+      case "th":
+        return "ชิ้นงานยังไม่มีชื่อ";
+      default:
+        return "Untitled classwork";
+    }
+  },
   title: {
     classwork: (language: Language) => {
       switch (language) {
@@ -372,6 +382,76 @@ export const classworkViewDataLanguage = {
         return "เปอร์เซ็นนำหนักของชิ้นงาน (ไม่บังคับ)";
       default:
         return "Weight of Classwork (Optional)";
+    }
+  },
+  groupType: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Type";
+      case "th":
+        return "ประเภท";
+      default:
+        return "Type";
+    }
+  },
+  groupSchedule: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Schedule";
+      case "th":
+        return "กำหนดเวลา";
+      default:
+        return "Schedule";
+    }
+  },
+  groupGrading: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Grading";
+      case "th":
+        return "การให้คะแนน";
+      default:
+        return "Grading";
+    }
+  },
+  groupVisibility: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Visibility";
+      case "th":
+        return "การมองเห็น";
+      default:
+        return "Visibility";
+    }
+  },
+  hideScore: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Hide score from students";
+      case "th":
+        return "ซ่อนคะแนนจากนักเรียน";
+      default:
+        return "Hide score from students";
+    }
+  },
+  hideScoreDescription: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Students see 'Score hidden' instead of their score for this classwork.";
+      case "th":
+        return "นักเรียนจะเห็นคำว่า 'ซ่อนคะแนน' แทนคะแนนของชิ้นงานนี้";
+      default:
+        return "Students see 'Score hidden' instead of their score for this classwork.";
+    }
+  },
+  hideScoreSubjectNote: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Scores are already hidden for the whole subject in subject settings.";
+      case "th":
+        return "คะแนนถูกซ่อนทั้งวิชาไว้แล้วในตั้งค่าวิชา";
+      default:
+        return "Scores are already hidden for the whole subject in subject settings.";
     }
   },
 } as const;
