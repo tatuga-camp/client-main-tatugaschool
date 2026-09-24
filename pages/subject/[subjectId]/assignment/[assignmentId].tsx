@@ -20,7 +20,6 @@ import {
   classworkViewDataLanguage,
 } from "../../../../data/languages";
 import useClickOutside from "../../../../hook/useClickOutside";
-import useAdjustPosition from "../../../../hook/useWindow";
 import {
   Assignment,
   AssignmentStatus,
@@ -140,7 +139,6 @@ function Index({
   const deleteFileAssignment = useDeleteFileOnAssignment();
   const createFileAssignment = useCreateFileOnAssignment();
   const deleteAssignment = useDeleteAssignment();
-  const adjustedStyle = useAdjustPosition(divRef, 20); // 20px padding
   const [assignmentTitle, setAssignmentTitle] = useState(
     assignment.data?.title,
   );
@@ -413,7 +411,7 @@ function Index({
           }
           className="flex shrink-0 flex-col bg-white font-Anuphan"
         >
-          <nav className="flex min-h-16 w-full flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-gray-100 px-4 py-2 md:flex-nowrap md:px-6">
+          <nav className="relative flex min-h-16 w-full flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-gray-100 px-4 py-2 md:flex-nowrap md:px-6">
             <section className="flex min-w-0 flex-1 items-center gap-3">
               <Link
                 href={{
@@ -447,7 +445,7 @@ function Index({
               </div>
             </section>
             {selectMenu === "classwork" && (
-              <section className="relative flex shrink-0 items-center">
+              <section className="flex shrink-0 items-center md:relative">
                 <button
                   type="submit"
                   disabled={loading}
@@ -478,13 +476,9 @@ function Index({
 
                 {triggerOption && (
                   <div
-                    style={{
-                      position: "absolute",
-                      ...adjustedStyle,
-                    }}
                     ref={divRef}
+                    className="absolute right-4 top-full z-40 mt-1 w-56 max-w-[calc(100vw-2rem)] rounded-2xl border border-gray-100 bg-white p-1.5 shadow-lg md:right-0 md:mt-2"
                   >
-                    <div className="absolute right-0 top-10 z-40 w-56 max-w-[calc(100vw-2rem)] rounded-2xl border border-gray-100 bg-white p-1.5 shadow-lg">
                       {menuClassworkList.map((menu, index) => {
                         const disabled =
                           (menu.title === "Mark as Draft" &&
@@ -539,7 +533,6 @@ function Index({
                           </React.Fragment>
                         );
                       })}
-                    </div>
                   </div>
                 )}
               </section>
