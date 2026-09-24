@@ -23,3 +23,4 @@ export * from "./word-cloud-set";
 export * from "./rubric";
 export * from "./announcement";
 export * from "./tawk";
+export * from "./issue";
