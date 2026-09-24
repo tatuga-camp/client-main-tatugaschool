@@ -3,7 +3,6 @@ import {
   BsLayoutSidebarInset,
   BsLayoutSidebarInsetReverse,
 } from "react-icons/bs";
-import { CgInfo } from "react-icons/cg";
 import { FaRegFile, FaRegFileImage, FaRegFileVideo } from "react-icons/fa6";
 import {
   MdAssignment,
@@ -68,6 +67,39 @@ export type FileClasswork = {
   url: string;
   fileOnAssignment: FileOnAssignment | null;
 };
+
+function RailGroup({
+  label,
+  children,
+  first = false,
+}: {
+  label: string;
+  children: React.ReactNode;
+  first?: boolean;
+}) {
+  return (
+    <div
+      className={`flex flex-col gap-3 ${first ? "" : "border-t border-gray-100 pt-4"}`}
+    >
+      <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+        {label}
+      </span>
+      {children}
+    </div>
+  );
+}
+
+function CardHeading({ title, helper }: { title: string; helper?: string }) {
+  return (
+    <div className="mb-3 flex flex-col">
+      <h2 className="text-base font-semibold text-icon-color">{title}</h2>
+      {helper && <span className="text-xs text-gray-400">{helper}</span>}
+    </div>
+  );
+}
+
+const outlineButton =
+  "flex items-center justify-center gap-1.5 rounded-xl border border-primary-color/30 px-4 py-2 text-sm font-medium text-primary-color transition hover:bg-primary-color/5 active:scale-[0.98]";
 
 type Props = {
   classwork?: (Assignment & { allowWeight?: boolean }) | undefined;
@@ -164,7 +196,7 @@ function ClassworkView({
   };
 
   return (
-    <main className="flex h-full w-full flex-col md:flex-row">
+    <main className="mx-auto grid w-full max-w-6xl gap-5 px-4 py-6 md:px-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
       {configuringVideo && (
         <FileVideoConfigurator
           fileUrl={configuringVideo.url}
@@ -175,7 +207,6 @@ function ClassworkView({
           }}
           onClose={() => setConfiguringVideo(null)}
           onSave={async (config) => {
-            console.log(config);
             if (configuringVideo.fileOnAssignment?.id)
               await updateFile.mutateAsync({
                 id: configuringVideo.fileOnAssignment.id,
@@ -202,7 +233,7 @@ function ClassworkView({
                   setLinkValue("");
                 }}
                 type="button"
-                className="rounded-2xl border px-4 py-1 hover:bg-gray-100"
+                className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
               >
                 Cancel
               </button>
@@ -223,27 +254,34 @@ function ClassworkView({
                   setLinkValue("");
                 }}
                 type="button"
-                className="gradient-bg rounded-2xl px-4 py-1 text-white"
+                className="rounded-xl bg-primary-color px-4 py-2 text-sm font-semibold text-white hover:bg-primary-color-hover"
               >
-                Upload
+                Add
               </button>
             </div>
           </div>
         </div>
       )}
-      <section className="mb-40 flex h-full w-full flex-col items-center justify-start gap-5">
+
+      {/* Left column */}
+      <section className="flex min-w-0 flex-col gap-5 pb-24">
         {assignmentType === "VideoQuiz" && classwork && (
-          <VideoConfigurator
-            assignment={classwork}
-            onClose={() => setConfiguringVideo(null)}
-          />
+          <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+            <VideoConfigurator
+              assignment={classwork}
+              onClose={() => setConfiguringVideo(null)}
+            />
+          </div>
         )}
+
         {assignmentType !== "VideoQuiz" && (
-          <div className="mt-10 flex h-max max-h-max w-11/12 flex-col gap-2 rounded-2xl bg-white p-5">
+          <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+            <CardHeading
+              title={classworkViewDataLanguage.description(
+                language.data ?? "en",
+              )}
+            />
             <div className="h-96 w-full pb-5">
-              <span className="text-base font-medium">
-                {classworkViewDataLanguage.description(language.data ?? "en")}
-              </span>
               <TextEditor
                 schoolId={schoolId}
                 value={description}
@@ -255,10 +293,9 @@ function ClassworkView({
                 }}
               />
             </div>
-
             {classwork && (
-              <section className="flex flex-col gap-1">
-                <span className="text-base font-medium">
+              <section className="mt-6 flex flex-col gap-1">
+                <span className="text-sm font-medium text-icon-color">
                   {tagsDataLanguage.sectionTitle(language.data ?? "en")}
                 </span>
                 <AssignmentTagEditor
@@ -269,19 +306,26 @@ function ClassworkView({
                 />
               </section>
             )}
+          </div>
+        )}
 
-            <ul className="mt-10 grid h-max w-full max-w-full gap-2 xl:grid-cols-2">
-              {files?.map((file, index) => {
-                const isImage = file.type.includes("image");
-                const isLink = file.type === "LINK" || file.type === "url";
-                const isVideo = file.type.includes("video");
-                return (
-                  <li
-                    key={index}
-                    className="flex h-20 w-full items-center justify-between overflow-hidden rounded-2xl border bg-white"
-                  >
-                    <div className="flex h-full w-10/12 items-center justify-start gap-2">
-                      <div className="gradient-bg flex h-full w-16 items-center justify-center border-r text-lg text-white">
+        {assignmentType !== "VideoQuiz" && (
+          <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+            <CardHeading
+              title={classworkViewDataLanguage.fileTilte(language.data ?? "en")}
+            />
+            {files && files.length > 0 && (
+              <ul className="mb-4 grid gap-2 xl:grid-cols-2">
+                {files.map((file, index) => {
+                  const isImage = file.type.includes("image");
+                  const isLink = file.type === "LINK" || file.type === "url";
+                  const isVideo = file.type.includes("video");
+                  return (
+                    <li
+                      key={index}
+                      className="flex items-center gap-3 rounded-xl border border-gray-100 p-3"
+                    >
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-color/10 text-lg text-primary-color">
                         {isLink ? (
                           <MdLink />
                         ) : isImage ? (
@@ -309,218 +353,223 @@ function ClassworkView({
                               e.currentTarget.blur();
                             }
                           }}
-                          className="main-input w-7/12 py-1 text-sm"
+                          className="main-input min-w-0 flex-1 py-1 text-sm"
                         />
                       ) : (
                         <a
                           href={file.url}
                           target="_blank"
-                          className="flex w-7/12 items-center gap-2 truncate"
+                          className="min-w-0 flex-1 truncate text-sm font-medium text-icon-color hover:text-primary-color"
                         >
-                          <span className="truncate">{file.name}</span>
+                          {file.name}
                         </a>
                       )}
-                    </div>
-                    <div className="mr-5 flex items-center">
-                      {isVideo && (
+                      <div className="flex shrink-0 items-center">
+                        {isVideo && (
+                          <button
+                            type="button"
+                            aria-label="Video settings"
+                            onClick={() => setConfiguringVideo(file)}
+                            className="rounded-full p-2 text-lg text-gray-400 transition hover:bg-gray-100 hover:text-icon-color"
+                          >
+                            <MdSettings />
+                          </button>
+                        )}
                         <button
                           type="button"
-                          onClick={() => setConfiguringVideo(file)}
-                          className="rounded-full p-2 text-xl text-gray-500 hover:bg-gray-200 active:scale-105"
+                          aria-label="Rename"
+                          onClick={() => handleStartRename(file)}
+                          className="rounded-full p-2 text-lg text-gray-400 transition hover:bg-gray-100 hover:text-icon-color"
                         >
-                          <MdSettings />
+                          <MdEdit />
                         </button>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => handleStartRename(file)}
-                        className="rounded-full p-2 text-xl text-gray-500 hover:bg-gray-200 active:scale-105"
-                      >
-                        <MdEdit />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (confirm("Do you want to delete?"))
-                            onDeleteFile(file);
-                        }}
-                        className="rounded-full p-2 text-xl text-red-500 hover:bg-red-300/50 active:scale-105"
-                      >
-                        <MdDelete />
-                      </button>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        )}
-
-        {assignmentType !== "VideoQuiz" && (
-          <div className="h-max w-11/12 rounded-2xl border bg-white p-5">
-            <h1>
-              {classworkViewDataLanguage.fileTilte(language.data ?? "en")}
-            </h1>
-            <span className="text-xs text-gray-400">
-              {classworkViewDataLanguage.fileDescription(language.data ?? "en")}
-            </span>
-            <div className="flex h-20 w-full items-center justify-center gap-3">
-              <label
-                htmlFor="upload"
-                className="gradient-bg flex w-full max-w-40 items-center justify-center gap-1 rounded-2xl px-3 py-1 text-lg text-white transition active:scale-105 sm:w-40"
-              >
-                <MdOutlineFileUpload />
-                {classworkViewDataLanguage.uploadButton(language.data ?? "en")}
-                <input
-                  onChange={(e) => {
-                    const files = e.target.files;
-                    if (!files) return;
-                    const filesArray = Array.from(files).map((file) => {
-                      return {
-                        file,
-                        data: null,
-                        id: null,
-                        fileOnAssignment: null,
-                        type: file.type,
-                        name: file.name,
-                        url: URL.createObjectURL(file),
-                      };
-                    });
-                    onUploadFile(filesArray);
-                  }}
-                  id="upload"
-                  type="file"
-                  multiple
-                  className="hidden"
-                />
-              </label>
-              <button
-                onClick={() => setTriggerLink(true)}
-                type="button"
-                className="gradient-bg flex w-full max-w-40 items-center justify-center gap-1 rounded-2xl px-3 py-1 text-lg text-white transition active:scale-105 sm:w-40"
-              >
-                <MdLink /> Link
-              </button>
+                        <button
+                          type="button"
+                          aria-label="Delete"
+                          onClick={() => {
+                            if (confirm("Do you want to delete?"))
+                              onDeleteFile(file);
+                          }}
+                          className="rounded-full p-2 text-lg text-gray-400 transition hover:bg-error-color/10 hover:text-error-color"
+                        >
+                          <MdDelete />
+                        </button>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+            <div className="flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-gray-200 p-6">
+              <span className="text-sm text-gray-400">
+                {classworkViewDataLanguage.fileDescription(
+                  language.data ?? "en",
+                )}
+              </span>
+              <div className="flex flex-wrap justify-center gap-2">
+                <label htmlFor="upload" className={`${outlineButton} cursor-pointer`}>
+                  <MdOutlineFileUpload className="text-lg" />
+                  {classworkViewDataLanguage.uploadButton(language.data ?? "en")}
+                  <input
+                    onChange={(e) => {
+                      const files = e.target.files;
+                      if (!files) return;
+                      const filesArray = Array.from(files).map((file) => {
+                        return {
+                          file,
+                          data: null,
+                          id: null,
+                          fileOnAssignment: null,
+                          type: file.type,
+                          name: file.name,
+                          url: URL.createObjectURL(file),
+                        };
+                      });
+                      onUploadFile(filesArray);
+                    }}
+                    id="upload"
+                    type="file"
+                    multiple
+                    className="hidden"
+                  />
+                </label>
+                <button
+                  onClick={() => setTriggerLink(true)}
+                  type="button"
+                  className={outlineButton}
+                >
+                  <MdLink className="text-lg" /> Link
+                </button>
+              </div>
             </div>
           </div>
         )}
 
         {assignmentType === "Assignment" && classwork && (
-          <div className="gradient-bg h-max w-11/12 rounded-2xl border p-5 text-white">
-            <div className="flex w-full justify-between">
-              <h1 className="flex items-center gap-2">
-                <SiGooglegemini />
-                Suggest Skills for Classwork by AI
-              </h1>
-              <a
-                href="#"
-                className="second-button flex items-center gap-2 border"
-              >
-                <CgInfo />
-                Learn more
-              </a>
-            </div>
-
-            <span className="text-xs text-gray-50">
-              Suggest the skill that related to your classwork for evaluation
-            </span>
-
-            <ul className="mt-2 flex flex-wrap gap-2">
-              {skills?.map((skill, index) => (
-                <li
-                  key={index}
-                  className="rounded-2xl bg-white p-2 text-sm text-black"
-                >
-                  #{skill.title}
-                </li>
-              ))}
-            </ul>
-            {(skills?.length === 0 || !skills) && (
+          <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+            <div className="mb-3 flex items-start justify-between gap-3">
               <div className="flex flex-col">
-                <h1>No skill found</h1>
+                <h2 className="flex items-center gap-2 text-base font-semibold text-icon-color">
+                  <SiGooglegemini className="text-primary-color" />
+                  Suggest Skills for Classwork by AI
+                </h2>
+                <span className="text-xs text-gray-400">
+                  Suggest the skill that related to your classwork for evaluation
+                </span>
               </div>
+              <button
+                onClick={async () => {
+                  await refetchSkill.mutateAsync({
+                    assignmentId: classwork.id,
+                  });
+                }}
+                disabled={refetchSkill.isPending}
+                type="button"
+                className={`${outlineButton} shrink-0 disabled:opacity-60`}
+              >
+                {refetchSkill.isPending ? <LoadingSpinner /> : "Update skill"}
+              </button>
+            </div>
+            {skills && skills.length > 0 ? (
+              <ul className="flex flex-wrap gap-2">
+                {skills.map((skill, index) => (
+                  <li
+                    key={index}
+                    className="rounded-full bg-primary-color/10 px-3 py-1 text-sm text-primary-color"
+                  >
+                    #{skill.title}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <span className="text-sm text-gray-400">No skill found</span>
             )}
-            <button
-              onClick={async () => {
-                await refetchSkill.mutateAsync({
-                  assignmentId: classwork.id,
-                });
-              }}
-              disabled={refetchSkill.isPending}
-              type="button"
-              className="second-button mt-5 flex w-40 items-center justify-center border"
-            >
-              {refetchSkill.isPending ? <LoadingSpinner /> : "Update skill"}
-            </button>
           </div>
         )}
       </section>
-      <section
-        className={`relative ${triggerSildeOption ? "h-20 w-full md:h-screen md:w-20" : "h-max w-full md:w-4/12"} flex flex-col gap-2 rounded-bl-lg border-b border-l bg-white pb-20 transition-width`}
+
+      {/* Settings rail */}
+      <aside
+        className={`rounded-2xl border border-gray-100 bg-white shadow-sm lg:sticky lg:top-6 ${
+          triggerSildeOption ? "p-2 lg:w-14" : "p-5"
+        }`}
       >
-        <button
-          type="button"
-          onClick={() => setTriggerSildeOption((prev) => !prev)}
-          className="second-button absolute left-4 top-2 flex items-center justify-center rounded-full border p-0 text-2xl"
-        >
-          {triggerSildeOption ? (
-            <BsLayoutSidebarInset />
-          ) : (
-            <BsLayoutSidebarInsetReverse />
-          )}
-        </button>
-        {triggerSildeOption === false && (
-          <>
-            <div className="mt-5 flex w-full flex-col items-start border-b px-5 py-5">
-              <h1 className="text-lg font-medium">
+        <div className="flex items-start justify-between gap-2">
+          {!triggerSildeOption && (
+            <div className="flex min-w-0 flex-col">
+              <h2 className="text-base font-semibold text-icon-color">
                 {classworkViewDataLanguage.settingTitle(language.data ?? "en")}
-              </h1>
+              </h2>
               <span className="text-xs text-gray-400">
                 {classworkViewDataLanguage.settingDescription(
                   language.data ?? "en",
                 )}
               </span>
+            </div>
+          )}
+          <button
+            type="button"
+            aria-label={triggerSildeOption ? "Expand settings" : "Collapse settings"}
+            onClick={() => setTriggerSildeOption((prev) => !prev)}
+            className="hidden shrink-0 rounded-full p-2 text-xl text-gray-400 transition hover:bg-gray-100 hover:text-icon-color lg:block"
+          >
+            {triggerSildeOption ? (
+              <BsLayoutSidebarInsetReverse />
+            ) : (
+              <BsLayoutSidebarInset />
+            )}
+          </button>
+        </div>
+
+        {!triggerSildeOption && (
+          <div className="mt-4 flex flex-col gap-4">
+            <div>
               {classwork?.status === "Draft" && (
-                <div className="mt-5 rounded-2xl bg-gray-500 px-5 py-1 text-white">
+                <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
                   {classworkViewDataLanguage.draft(language.data ?? "en")}
-                </div>
+                </span>
               )}
               {classwork?.status === "Published" && (
-                <div className="gradient-bg mt-5 rounded-2xl px-5 py-1 text-white">
+                <span className="rounded-full bg-success-color/10 px-2.5 py-0.5 text-xs font-medium text-success-color">
                   {classworkViewDataLanguage.published(language.data ?? "en")}
-                </div>
+                </span>
               )}
             </div>
 
-            <section className="mt-5 flex w-10/12 flex-col gap-3 px-5">
-              <label className="flex w-full flex-col border-b pb-2">
-                <span className="text-base font-medium">
-                  {classworkViewDataLanguage.type(language.data ?? "en")}
-                </span>
-                <Dropdown<{ title: string; value: string; icon: ReactNode }>
-                  value={assignmentType}
-                  disabled={!!classwork?.id}
-                  itemTemplate={(item) => {
-                    return (
-                      <div className="flex items-center gap-2">
-                        {item.icon}
-                        <span>{item.title}</span>
-                      </div>
-                    );
-                  }}
-                  placeholder="Choose Type of Classwork"
-                  onChange={(e) => {
-                    onChange({
-                      type: e.value,
-                    });
-                    setAssignmentType(e.value);
-                  }}
-                  options={classworkLists as any}
-                  optionLabel="title"
-                />
-              </label>
-              <label className="flex w-full flex-col">
-                <span className="text-base font-medium">
+            <RailGroup
+              first
+              label={classworkViewDataLanguage.groupType(language.data ?? "en")}
+            >
+              <Dropdown<{ title: string; value: string; icon: ReactNode }>
+                value={assignmentType}
+                disabled={!!classwork?.id}
+                itemTemplate={(item) => {
+                  return (
+                    <div className="flex items-center gap-2">
+                      {item.icon}
+                      <span>{item.title}</span>
+                    </div>
+                  );
+                }}
+                placeholder="Choose Type of Classwork"
+                onChange={(e) => {
+                  onChange({
+                    type: e.value,
+                  });
+                  setAssignmentType(e.value);
+                }}
+                options={classworkLists as any}
+                optionLabel="title"
+              />
+            </RailGroup>
+
+            <RailGroup
+              label={classworkViewDataLanguage.groupSchedule(
+                language.data ?? "en",
+              )}
+            >
+              <label className="flex w-full flex-col gap-1">
+                <span className="text-sm font-medium text-icon-color">
                   {classworkViewDataLanguage.assignAt(language.data ?? "en")}
                 </span>
                 <input
@@ -532,12 +581,12 @@ function ClassworkView({
                     })
                   }
                   type="datetime-local"
-                  className="main-input"
+                  className="main-input text-sm"
                 />
               </label>
               {assignmentType === "Assignment" && (
-                <label className="flex w-full flex-col border-b pb-2">
-                  <span className="text-base font-medium">
+                <label className="flex w-full flex-col gap-1">
+                  <span className="text-sm font-medium text-icon-color">
                     {classworkViewDataLanguage.deadLine(language.data ?? "en")}
                   </span>
                   <input
@@ -548,14 +597,20 @@ function ClassworkView({
                       })
                     }
                     type="datetime-local"
-                    className="main-input"
+                    className="main-input text-sm"
                   />
                 </label>
               )}
+            </RailGroup>
 
-              {assignmentType !== "Material" && (
-                <label className="flex w-full flex-col border-b pb-2">
-                  <span className="text-base font-medium">
+            {assignmentType !== "Material" && (
+              <RailGroup
+                label={classworkViewDataLanguage.groupGrading(
+                  language.data ?? "en",
+                )}
+              >
+                <label className="flex w-full flex-col gap-1">
+                  <span className="text-sm font-medium text-icon-color">
                     {classworkViewDataLanguage.maxScore(language.data ?? "en")}
                   </span>
                   <InputNumber
@@ -571,10 +626,8 @@ function ClassworkView({
                     }}
                   />
                 </label>
-              )}
-              {assignmentType !== "Material" && (
                 <label className="flex w-full items-center justify-between gap-2">
-                  <span className="text-base font-medium">
+                  <span className="text-sm font-medium text-icon-color">
                     {classworkViewDataLanguage.allowWeight(
                       language.data ?? "en",
                     )}
@@ -594,72 +647,75 @@ function ClassworkView({
                     }}
                   />
                 </label>
-              )}
-              {assignmentType !== "Material" && allowWeight && (
-                <label className="flex w-full flex-col">
-                  <span className="text-base font-medium">
-                    {classworkViewDataLanguage.weight(language.data ?? "en")}
-                  </span>
-                  <InputNumber
-                    value={classwork?.weight || 0}
-                    max={100}
-                    suffix="%"
-                    min={0}
-                    placeholder="percentage of classwork"
-                    onValueChange={(e) => {}}
-                    onChange={(e) =>
-                      onChange({
-                        weight: e,
-                      })
-                    }
-                  />
-                </label>
-              )}
-              {assignmentType === "Assignment" && (
-                <div className="flex w-full flex-col">
-                  <RubricPicker
-                    subjectId={subjectId}
-                    value={rubricId}
-                    onChange={(next) => {
-                      setRubricId(next);
-                      onChange({ rubricId: next });
-                    }}
-                  />
-                </div>
-              )}
-              {assignmentType !== "Material" && (
-                <div className="flex w-full flex-col gap-2 border-t pt-3">
-                  <label className="flex w-full items-center justify-between gap-2">
-                    <span className="text-base font-medium">
-                      {classworkViewDataLanguage.hideScore(
-                        language.data ?? "en",
-                      )}
+                {allowWeight && (
+                  <label className="flex w-full flex-col gap-1">
+                    <span className="text-sm font-medium text-icon-color">
+                      {classworkViewDataLanguage.weight(language.data ?? "en")}
                     </span>
-                    <Switch
-                      checked={hideScore}
-                      setChecked={(next) =>
-                        onChange({ allowStudentViewScore: !next })
+                    <InputNumber
+                      value={classwork?.weight || 0}
+                      max={100}
+                      suffix="%"
+                      min={0}
+                      placeholder="percentage of classwork"
+                      onValueChange={(e) => {}}
+                      onChange={(e) =>
+                        onChange({
+                          weight: e,
+                        })
                       }
                     />
                   </label>
-                  <span className="text-xs text-gray-400">
-                    {classworkViewDataLanguage.hideScoreDescription(
+                )}
+                {assignmentType === "Assignment" && (
+                  <div className="flex w-full flex-col">
+                    <RubricPicker
+                      subjectId={subjectId}
+                      value={rubricId}
+                      onChange={(next) => {
+                        setRubricId(next);
+                        onChange({ rubricId: next });
+                      }}
+                    />
+                  </div>
+                )}
+              </RailGroup>
+            )}
+
+            {assignmentType !== "Material" && (
+              <RailGroup
+                label={classworkViewDataLanguage.groupVisibility(
+                  language.data ?? "en",
+                )}
+              >
+                <label className="flex w-full items-center justify-between gap-2">
+                  <span className="text-sm font-medium text-icon-color">
+                    {classworkViewDataLanguage.hideScore(language.data ?? "en")}
+                  </span>
+                  <Switch
+                    checked={hideScore}
+                    setChecked={(next) =>
+                      onChange({ allowStudentViewScore: !next })
+                    }
+                  />
+                </label>
+                <span className="text-xs text-gray-400">
+                  {classworkViewDataLanguage.hideScoreDescription(
+                    language.data ?? "en",
+                  )}
+                </span>
+                {subjectHidesScores && (
+                  <span className="rounded-lg bg-warning-color/15 px-2.5 py-1.5 text-xs text-icon-color">
+                    {classworkViewDataLanguage.hideScoreSubjectNote(
                       language.data ?? "en",
                     )}
                   </span>
-                  {subjectHidesScores && (
-                    <span className="text-xs text-warning-color">
-                      {classworkViewDataLanguage.hideScoreSubjectNote(
-                        language.data ?? "en",
-                      )}
-                    </span>
-                  )}
-                </div>
-              )}
-            </section>
-          </>
+                )}
+              </RailGroup>
+            )}
+          </div>
         )}
-      </section>
+      </aside>
     </main>
   );
 }
