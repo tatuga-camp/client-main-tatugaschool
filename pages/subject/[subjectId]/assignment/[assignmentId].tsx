@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { ProgressBar } from "primereact/progressbar";
 import React, { useEffect, useMemo, useState } from "react";
-import { IoChevronDownSharp, IoClose } from "react-icons/io5";
-import { MdAssignmentAdd } from "react-icons/md";
+import { IoArrowBack, IoChevronDownSharp } from "react-icons/io5";
+import { MdAssignment, MdMenuBook, MdVideoLibrary } from "react-icons/md";
 import Swal from "sweetalert2";
 import ClassStudentAssignWork from "../../../../components/subject/ClassStudentAssignWork";
 import ClassStudentWork from "../../../../components/subject/ClassStudentWork";
@@ -42,6 +42,7 @@ import {
   generateBlurHash,
 } from "../../../../utils";
 import { ProgressSpinner } from "primereact/progressspinner";
+import LoadingSpinner from "../../../../components/common/LoadingSpinner";
 import DefaultLayout from "../../../../components/layout/DefaultLayout";
 
 type SummitValue = "Published" | "Save Change" | "Mark as Draft";
@@ -69,6 +70,28 @@ const menuLists = [
   },
 ] as const;
 export type MenuAssignmentQuery = (typeof menuLists)[number]["query"];
+
+const typeIcon: Record<string, React.ReactNode> = {
+  Assignment: <MdAssignment />,
+  Material: <MdMenuBook />,
+  VideoQuiz: <MdVideoLibrary />,
+};
+
+function StatusChip({ status }: { status?: AssignmentStatus }) {
+  if (!status) return null;
+  const isPublished = status === "Published";
+  return (
+    <span
+      className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+        isPublished
+          ? "bg-success-color/10 text-success-color"
+          : "bg-gray-100 text-gray-600"
+      }`}
+    >
+      {isPublished ? "Published" : "Draft"}
+    </span>
+  );
+}
 
 function Index({
   subjectId,
@@ -371,69 +394,69 @@ function Index({
       <Head>
         <title>{title}</title>
       </Head>
-      <div className="flex h-dvh flex-col">
+      <div className="flex h-dvh flex-col bg-background-color">
         <form
           onSubmit={
             selectMenu === "classwork" ? handleUpdateClasswork : undefined
           }
-          className="flex shrink-0 flex-col bg-background-color font-Anuphan"
+          className="flex shrink-0 flex-col bg-white font-Anuphan"
         >
-          <nav
-            className={`w-full px-5 ${
-              classwork?.status === "Published" ? "bg-white" : "bg-gray-50"
-            } flex min-h-20 flex-wrap items-center justify-between gap-y-2 border-b py-2 md:h-20 md:flex-nowrap md:py-0`}
-          >
-            <section className="flex w-full min-w-0 items-center gap-4">
+          <nav className="flex min-h-16 w-full flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-gray-100 px-4 py-2 md:flex-nowrap md:px-6">
+            <section className="flex min-w-0 flex-1 items-center gap-3">
               <Link
                 href={{
                   pathname: `/subject/${subjectId}`,
                   query: { menu: "Classwork" as MenuSubject },
                 }}
-                className="flex h-10 w-10 items-center justify-center rounded-full border text-3xl transition hover:bg-gray-300/50 active:scale-105"
+                aria-label="Back to classwork"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xl text-gray-500 transition hover:bg-gray-100 hover:text-icon-color"
               >
-                <IoClose />
+                <IoArrowBack />
               </Link>
-
-              <div className="flex h-10 w-10 items-center justify-center rounded-full border bg-primary-color/30 text-3xl text-primary-color">
-                <MdAssignmentAdd />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-color/10 text-2xl text-primary-color">
+                {typeIcon[assignment.data?.type ?? "Assignment"]}
               </div>
-              <h1 className="min-w-0 max-w-full flex-1 truncate text-lg font-medium">
+              <div className="flex min-w-0 flex-1 items-center gap-3">
                 <input
-                  className="w-full border-b outline-none"
-                  value={assignmentTitle}
-                  onChange={(e) => {
-                    setAssignmentTitle(e.target.value);
-                  }}
+                  aria-label="Classwork title"
+                  placeholder={classworkHeadMenuBarDataLanguage.untitled(
+                    language.data ?? "en",
+                  )}
+                  className="min-w-0 flex-1 border-b-2 border-transparent bg-transparent py-1 text-lg font-semibold text-icon-color outline-none transition focus:border-primary-color md:text-xl"
+                  value={assignmentTitle ?? ""}
+                  onChange={(e) => setAssignmentTitle(e.target.value)}
                 />
-              </h1>
+                <div className="hidden md:block">
+                  <StatusChip status={classwork?.status} />
+                </div>
+              </div>
             </section>
             {selectMenu === "classwork" && (
-              <section className="flex items-center gap-[2px]">
-                {classwork?.status === "Draft" ? (
-                  <button
-                    type="submit"
-                    value={"Published" as SummitValue}
-                    className="gradient-bg h-10 w-max min-w-0 rounded-2xl rounded-r-none p-2 text-base font-medium text-white opacity-85 hover:opacity-100 md:min-w-40"
-                  >
-                    {classworkHeadMenuBarDataLanguage.button.publish(
-                      language.data ?? "en",
-                    )}
-                  </button>
-                ) : (
-                  <button
-                    type="submit"
-                    value={"Save Change" as SummitValue}
-                    className="gradient-bg h-10 w-max min-w-0 rounded-2xl rounded-r-none p-2 text-base font-medium text-white opacity-85 hover:opacity-100 md:min-w-40"
-                  >
-                    {classworkHeadMenuBarDataLanguage.button.saveChange(
-                      language.data ?? "en",
-                    )}
-                  </button>
-                )}
+              <section className="relative flex shrink-0 items-center">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  value={
+                    (classwork?.status === "Draft"
+                      ? "Published"
+                      : "Save Change") as SummitValue
+                  }
+                  className="flex h-10 items-center justify-center gap-2 rounded-l-xl bg-primary-color px-5 text-sm font-semibold text-white transition hover:bg-primary-color-hover disabled:opacity-60"
+                >
+                  {loading && <LoadingSpinner />}
+                  {classwork?.status === "Draft"
+                    ? classworkHeadMenuBarDataLanguage.button.publish(
+                        language.data ?? "en",
+                      )
+                    : classworkHeadMenuBarDataLanguage.button.saveChange(
+                        language.data ?? "en",
+                      )}
+                </button>
                 <button
                   onClick={() => setTriggerOption((prev) => !prev)}
                   type="button"
-                  className="gradient-bg h-10 w-max rounded-2xl rounded-l-none p-2 text-base font-medium text-white"
+                  aria-label="More actions"
+                  className="flex h-10 items-center justify-center rounded-r-xl border-l border-white/20 bg-primary-color px-2.5 text-white transition hover:bg-primary-color-hover"
                 >
                   <IoChevronDownSharp />
                 </button>
@@ -446,7 +469,7 @@ function Index({
                     }}
                     ref={divRef}
                   >
-                    <div className="absolute right-0 top-8 z-40 h-max w-60 max-w-[calc(100vw-2rem)] rounded-2xl border bg-white p-1 drop-shadow md:-right-40">
+                    <div className="absolute right-0 top-10 z-40 w-56 max-w-[calc(100vw-2rem)] rounded-2xl border border-gray-100 bg-white p-1.5 shadow-lg">
                       {menuClassworkList.map((menu, index) => {
                         const disabled =
                           (menu.title === "Mark as Draft" &&
@@ -464,36 +487,41 @@ function Index({
                         if (menu.title === "Publish") {
                           summitValue = "Published";
                         }
+                        const isDelete = menu.title === "Delete";
                         return (
-                          <button
-                            onClick={() => {
-                              if (menu.title === "Delete") {
-                                handleDeleteAssignment();
+                          <React.Fragment key={index}>
+                            {isDelete && (
+                              <div className="my-1 border-t border-gray-100" />
+                            )}
+                            <button
+                              onClick={() => {
+                                if (isDelete) {
+                                  handleDeleteAssignment();
+                                }
+                              }}
+                              disabled={disabled}
+                              type={
+                                menu.title === "Publish" ||
+                                menu.title === "Save Change" ||
+                                menu.title === "Mark as Draft"
+                                  ? "submit"
+                                  : "button"
                               }
-                            }}
-                            disabled={disabled}
-                            type={
-                              menu.title === "Publish" ||
-                              menu.title === "Save Change" ||
-                              menu.title === "Mark as Draft"
-                                ? "submit"
-                                : "button"
-                            }
-                            value={summitValue}
-                            key={index}
-                            className={`flex w-60 items-center justify-start gap-10 p-2 text-base font-medium ${
-                              menu.title === "Delete"
-                                ? "text-red-500 hover:bg-red-500 hover:text-white"
-                                : disabled
-                                  ? "bg-gray-200 text-white"
-                                  : "text-gray-500 hover:bg-primary-color hover:text-white"
-                            } `}
-                          >
-                            {menu.icon}
-                            {classworkHeadMenuBarDataLanguage.button[
-                              menu.value as keyof typeof classworkHeadMenuBarDataLanguage.button
-                            ](language.data ?? "en")}
-                          </button>
+                              value={summitValue}
+                              className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-medium transition ${
+                                isDelete
+                                  ? "text-error-color hover:bg-error-color/10"
+                                  : disabled
+                                    ? "cursor-not-allowed text-gray-300"
+                                    : "text-gray-700 hover:bg-gray-50"
+                              }`}
+                            >
+                              <span className="text-lg">{menu.icon}</span>
+                              {classworkHeadMenuBarDataLanguage.button[
+                                menu.value as keyof typeof classworkHeadMenuBarDataLanguage.button
+                              ](language.data ?? "en")}
+                            </button>
+                          </React.Fragment>
                         );
                       })}
                     </div>
@@ -506,10 +534,10 @@ function Index({
             assignment.isLoading ||
             deleteFileAssignment.isPending ||
             deleteAssignment.isPending) && (
-            <ProgressBar mode="indeterminate" style={{ height: "6px" }} />
+            <ProgressBar mode="indeterminate" style={{ height: "3px" }} />
           )}
 
-          <div className="flex h-14 w-full items-center justify-start overflow-x-auto border-b bg-white px-3 md:px-10">
+          <div className="flex h-12 w-full items-center justify-start gap-1 overflow-x-auto border-b border-gray-100 bg-white px-2 md:h-14 md:px-4">
             {menuLists
               .filter((menu) =>
                 assignment.data?.type === "Material"
@@ -517,6 +545,7 @@ function Index({
                   : true,
               )
               .map((menu, index) => {
+                const active = selectMenu === menu.query;
                 return (
                   <Link
                     href={{
@@ -525,24 +554,19 @@ function Index({
                     }}
                     onClick={() => setSelectMenu(menu.query)}
                     key={index}
-                    className={`flex h-full shrink-0 flex-col justify-center gap-0 px-4 py-2 md:p-2 xl:px-10 ${
-                      selectMenu === menu.query
-                        ? "bg-primary-color text-white hover:bg-primary-color"
-                        : "bg-white text-black hover:bg-gray-100"
-                    } `}
+                    aria-current={active ? "page" : undefined}
+                    className={`flex h-full shrink-0 flex-col justify-center border-b-2 px-3 transition md:px-4 ${
+                      active
+                        ? "border-primary-color text-primary-color"
+                        : "border-transparent text-gray-500 hover:text-icon-color"
+                    }`}
                   >
-                    <h1 className="whitespace-nowrap">
+                    <span className="whitespace-nowrap text-sm font-semibold">
                       {classworkHeadMenuBarDataLanguage.title[
                         menu.query as keyof typeof classworkHeadMenuBarDataLanguage.title
                       ](language.data ?? "en")}
-                    </h1>
-                    <span
-                      className={`hidden whitespace-nowrap text-xs md:block ${
-                        selectMenu === menu.query
-                          ? "text-white"
-                          : "text-gray-400"
-                      } `}
-                    >
+                    </span>
+                    <span className="hidden whitespace-nowrap text-xs text-gray-400 md:block">
                       {classworkHeadMenuBarDataLanguage.description[
                         menu.query as keyof typeof classworkHeadMenuBarDataLanguage.description
                       ](language.data ?? "en")}
