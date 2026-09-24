@@ -157,15 +157,15 @@ export default function AdminIssuesPage() {
           />
         ) : (
           <>
-            <table className="hidden w-full text-sm md:table">
+            <table className="hidden w-full table-fixed text-sm lg:table">
               <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
                 <tr>
                   <th className="px-4 py-2 font-semibold">Issue</th>
-                  <th className="px-4 py-2 font-semibold">Last seen</th>
-                  <th className="px-4 py-2 font-semibold">First seen</th>
-                  <th className="px-4 py-2 text-right font-semibold">Events</th>
-                  <th className="px-4 py-2 text-right font-semibold">Users</th>
-                  <th className="px-4 py-2 font-semibold">Status</th>
+                  <th className="w-36 px-4 py-2 font-semibold">Last seen</th>
+                  <th className="w-36 px-4 py-2 font-semibold">First seen</th>
+                  <th className="w-20 px-4 py-2 text-right font-semibold">Events</th>
+                  <th className="w-20 px-4 py-2 text-right font-semibold">Users</th>
+                  <th className="w-28 px-4 py-2 font-semibold">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -174,7 +174,7 @@ export default function AdminIssuesPage() {
                 ))}
               </tbody>
             </table>
-            <ul className="divide-y md:hidden">
+            <ul className="divide-y lg:hidden">
               {issues.data.items.map((group) => (
                 <IssueCard key={group.id} group={group} />
               ))}
@@ -226,7 +226,7 @@ function IssueRow({ group }: { group: IssueGroup }) {
   const href = `/admin/issues/${group.id}`;
   return (
     <tr className="transition hover:bg-gray-50">
-      <td className="max-w-md px-4 py-3">
+      <td className="px-4 py-3">
         <Link href={href} className="block">
           <IssueSummary group={group} />
         </Link>

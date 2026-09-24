@@ -6,6 +6,15 @@ import {
   IssueStatusFilter,
 } from "../interfaces";
 import { getAccessToken } from "../utils/token";
+// "./auth" and "./api-service" import each other, and auth calls
+// createAxiosInstance() at module top level, so whichever of the two is
+// entered first decides the outcome: auth first works, api-service first
+// throws "Cannot access 'createAxiosInstance' before initialization" while
+// `next build` collects page data. Every other services module is reached
+// through the services barrel (whose first export is "./auth"), but this one
+// is imported directly by ErrorBoundary from _app, so it must enter auth
+// itself before api-service. Keep this side-effect import above the next one.
+import "./auth";
 import createAxiosInstance from "./api-service";
 
 const axiosInstance = createAxiosInstance();
