@@ -5,7 +5,7 @@ import { FaTable } from "react-icons/fa";
 import { IoMdSettings } from "react-icons/io";
 import { MdLeaderboard } from "react-icons/md";
 import { SiMicrosoftexcel } from "react-icons/si";
-import { TbColumns3, TbLayoutColumns } from "react-icons/tb";
+import { TbColumns3, TbLayoutColumns, TbShare } from "react-icons/tb";
 import { gradeData, gradeTableData } from "../../data/languages";
 import {
   Assignment,
@@ -18,6 +18,7 @@ import {
   useGetAssignmentOverview,
   useGetLanguage,
   useGetStudentOnSubject,
+  useGetSubject,
 } from "../../react-query";
 import {
   assignmentMax,
@@ -38,6 +39,7 @@ import GradeSpecialScoreSetting from "./GradeSpecialScoreSetting";
 import GradeSegmentedControl, {
   SECONDARY_BUTTON,
 } from "./grade/GradeSegmentedControl";
+import GradeSharePopup from "./grade/GradeSharePopup";
 import GradeTable from "./grade/GradeTable";
 
 // Per-viewer UI preferences; storage can be unavailable (private mode) —
@@ -79,6 +81,9 @@ function Grade({
   >(null);
 
   const [triggerGradeSetting, setTriggerGradeSetting] = useState(false);
+  const subject = useGetSubject({ subjectId });
+  const [triggerShare, setTriggerShare] = useState(false);
+  const isShared = !!subject.data?.publicProgressToken;
   const [view, setView] = useState<"table" | "leaderboard">("table");
   const lang = language.data ?? "en";
   const modeKey = `grade-view-mode:${subjectId}`;
@@ -221,6 +226,19 @@ function Grade({
         </PopupLayout>
       )}
 
+      {triggerShare && subject.data && (
+        <PopupLayout onClose={() => setTriggerShare(false)}>
+          <GradeSharePopup
+            subject={subject.data}
+            toast={toast}
+            onClose={() => {
+              document.body.style.overflow = "auto";
+              setTriggerShare(false);
+            }}
+          />
+        </PopupLayout>
+      )}
+
       {selectScoreOnSubject && (
         <PopupLayout
           onClose={() => {
@@ -290,6 +308,18 @@ function Grade({
               ]}
             />
           )}
+          <button
+            type="button"
+            onClick={() => setTriggerShare(true)}
+            disabled={!subject.data}
+            className={SECONDARY_BUTTON}
+          >
+            {isShared && (
+              <span className="h-2 w-2 rounded-full bg-success-color" />
+            )}
+            <TbShare />
+            {isShared ? gradeTableData.shared(lang) : gradeTableData.share(lang)}
+          </button>
           <button
             type="button"
             onClick={() => setTriggerGradeSetting(true)}
