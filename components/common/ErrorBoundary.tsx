@@ -219,8 +219,12 @@ function ErrorFallback({ error, componentStack, capturedAt }: FallbackProps) {
                 : "main-button"
             } disabled:cursor-default disabled:opacity-90`}
           >
-            {sendState === "sent" ? "✓ " : ""}
-            {sendLabel[sendState]}
+            {/* One text node inside an element: browser translation swaps bare
+                text nodes for <font> tags, and inserting "✓ " beside one made
+                React throw NotFoundError on this very screen. */}
+            <span>
+              {`${sendState === "sent" ? "✓ " : ""}${sendLabel[sendState]}`}
+            </span>
           </button>
           <button
             type="button"
