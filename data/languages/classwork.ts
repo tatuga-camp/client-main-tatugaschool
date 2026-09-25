@@ -81,6 +81,136 @@ export const classworkCardDataLanguage = {
         return "Reviewed";
     }
   },
+  details: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Details";
+      case "th":
+        return "รายละเอียด";
+      default:
+        return "Details";
+    }
+  },
+  hideDetails: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Hide details";
+      case "th":
+        return "ซ่อนรายละเอียด";
+      default:
+        return "Hide details";
+    }
+  },
+  attachments: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Attachments";
+      case "th":
+        return "ไฟล์แนบ";
+      default:
+        return "Attachments";
+    }
+  },
+  noDescription: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "No description";
+      case "th":
+        return "ไม่มีคำอธิบาย";
+      default:
+        return "No description";
+    }
+  },
+  noAttachments: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "No attachments";
+      case "th":
+        return "ไม่มีไฟล์แนบ";
+      default:
+        return "No attachments";
+    }
+  },
+  postedAt: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Posted";
+      case "th":
+        return "มอบหมายเมื่อ";
+      default:
+        return "Posted";
+    }
+  },
+  files: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "files";
+      case "th":
+        return "ไฟล์";
+      default:
+        return "files";
+    }
+  },
+  pointsShort: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "pts";
+      case "th":
+        return "คะแนน";
+      default:
+        return "pts";
+    }
+  },
+  typeAssignment: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Assignment";
+      case "th":
+        return "งานที่มอบหมาย";
+      default:
+        return "Assignment";
+    }
+  },
+  typeMaterial: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Material";
+      case "th":
+        return "เอกสารประกอบการเรียน";
+      default:
+        return "Material";
+    }
+  },
+  typeVideoQuiz: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Video quiz";
+      case "th":
+        return "แบบทดสอบวิดีโอ";
+      default:
+        return "Video quiz";
+    }
+  },
+  openClasswork: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Open";
+      case "th":
+        return "เปิด";
+      default:
+        return "Open";
+    }
+  },
+  dragToReorder: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Drag to reorder";
+      case "th":
+        return "ลากเพื่อจัดลำดับ";
+      default:
+        return "Drag to reorder";
+    }
+  },
 } as const;
 
 export const classworkHeadMenuBarDataLanguage = {
