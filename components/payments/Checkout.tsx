@@ -102,7 +102,7 @@ function PaymentForm(props: {
           id="submit"
         >
           <span id="button-text">
-            {isLoading ? <LoadingSpinner /> : "Pay now"}
+            {isLoading ? <LoadingSpinner /> : <span>Pay now</span>}
           </span>
         </button>
       </div>

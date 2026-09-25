@@ -633,7 +633,7 @@ function MultipleReview({ selectStudents, maxScore }: MultipleReviewProps) {
                 strokeWidth="8"
               />
             ) : (
-              "Save Change"
+              <span>Save Change</span>
             )}
           </button>
         </form>

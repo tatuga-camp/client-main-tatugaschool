@@ -274,7 +274,7 @@ function InviteTeacher({ subjectId, setTrigger, schoolId }: Props) {
                     strokeWidth="8"
                   />
                 ) : (
-                  "Invite"
+                  <span>Invite</span>
                 )}
               </button>
             </div>

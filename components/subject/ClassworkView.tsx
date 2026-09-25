@@ -473,7 +473,11 @@ function ClassworkView({
                 type="button"
                 className={`${outlineButton} shrink-0 disabled:opacity-60`}
               >
-                {refetchSkill.isPending ? <LoadingSpinner /> : "Update skill"}
+                {refetchSkill.isPending ? (
+                  <LoadingSpinner />
+                ) : (
+                  <span>Update skill</span>
+                )}
               </button>
             </div>
             {skills && skills.length > 0 ? (

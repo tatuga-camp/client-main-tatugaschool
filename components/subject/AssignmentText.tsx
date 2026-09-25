@@ -84,7 +84,7 @@ function AssignmentText({
               strokeWidth="8"
             />
           ) : (
-            "Save"
+            <span>Save</span>
           )}
         </button>
       </div>
