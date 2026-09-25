@@ -11,3 +11,4 @@ export * from "./algorithm";
 export * from "./calculateStudentTotals";
 export * from "./cropImage";
 export * from "./uploadWithRetry";
+export * from "./gradeColumns";
