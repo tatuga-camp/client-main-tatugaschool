@@ -15,6 +15,13 @@ import { classNames } from "primereact/utils";
 import { useGetUser } from "../react-query";
 import { useRouter } from "next/router";
 import ErrorBoundary from "../components/common/ErrorBoundary";
+import { installDomTranslationGuard } from "../utils/domTranslationGuard";
+
+// Before React commits anything: keep browser translation from crashing
+// the app with NotFoundError on removeChild / insertBefore.
+if (typeof window !== "undefined") {
+  installDomTranslationGuard();
+}
 
 const prompt = Prompt({
   subsets: ["latin", "thai"],
