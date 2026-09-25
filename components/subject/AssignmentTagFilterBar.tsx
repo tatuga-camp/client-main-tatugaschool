@@ -34,7 +34,7 @@ function AssignmentTagFilterBar({
   }
 
   return (
-    <ul className="flex w-full flex-wrap items-center gap-2 px-5 md:px-40">
+    <ul className="flex w-full flex-wrap items-center gap-2">
       <li>
         <button
           type="button"

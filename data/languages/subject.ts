@@ -712,4 +712,174 @@ export const classworksDataLanguage = {
         return "You can assign a task to your students here and track their progress";
     }
   },
+  tabClasswork: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Classwork";
+      case "th":
+        return "ชิ้นงาน";
+      default:
+        return "Classwork";
+    }
+  },
+  searchPlaceholder: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Search classwork";
+      case "th":
+        return "ค้นหาชิ้นงาน";
+      default:
+        return "Search classwork";
+    }
+  },
+  clearSearch: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Clear search";
+      case "th":
+        return "ล้างการค้นหา";
+      default:
+        return "Clear search";
+    }
+  },
+  filterAll: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "All";
+      case "th":
+        return "ทั้งหมด";
+      default:
+        return "All";
+    }
+  },
+  filterToReview: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "To review";
+      case "th":
+        return "รอตรวจ";
+      default:
+        return "To review";
+    }
+  },
+  filterPublished: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Published";
+      case "th":
+        return "เผยแพร่แล้ว";
+      default:
+        return "Published";
+    }
+  },
+  filterDraft: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Draft";
+      case "th":
+        return "แบบร่าง";
+      default:
+        return "Draft";
+    }
+  },
+  emptyTitle: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "No classwork yet";
+      case "th":
+        return "ยังไม่มีชิ้นงาน";
+      default:
+        return "No classwork yet";
+    }
+  },
+  emptyDescription: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Create an assignment, material or video quiz, or import one from another subject.";
+      case "th":
+        return "สร้างงาน เอกสาร หรือแบบทดสอบวิดีโอ หรือนำเข้าจากรายวิชาอื่น";
+      default:
+        return "Create an assignment, material or video quiz, or import one from another subject.";
+    }
+  },
+  noResults: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "No classwork matches your search or filters";
+      case "th":
+        return "ไม่พบชิ้นงานที่ตรงกับการค้นหาหรือตัวกรอง";
+      default:
+        return "No classwork matches your search or filters";
+    }
+  },
+  clearFilters: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Clear filters";
+      case "th":
+        return "ล้างตัวกรอง";
+      default:
+        return "Clear filters";
+    }
+  },
+  reorderHint: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Clear search and filters to reorder classwork";
+      case "th":
+        return "ล้างการค้นหาและตัวกรองเพื่อจัดลำดับชิ้นงาน";
+      default:
+        return "Clear search and filters to reorder classwork";
+    }
+  },
+  composerPrompt: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Share an update with your class…";
+      case "th":
+        return "แจ้งข่าวสารให้นักเรียนในรายวิชา…";
+      default:
+        return "Share an update with your class…";
+    }
+  },
+  noAnnouncements: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "No announcements yet";
+      case "th":
+        return "ยังไม่มีประกาศ";
+      default:
+        return "No announcements yet";
+    }
+  },
+  noAnnouncementsDescription: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Post updates, reminders or files for the whole class.";
+      case "th":
+        return "โพสต์ข่าวสาร การแจ้งเตือน หรือไฟล์ให้ทั้งชั้นเรียน";
+      default:
+        return "Post updates, reminders or files for the whole class.";
+    }
+  },
+  importShort: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Import";
+      case "th":
+        return "นำเข้า";
+      default:
+        return "Import";
+    }
+  },
+  rubricsShort: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Rubrics";
+      case "th":
+        return "เกณฑ์รูบิก";
+      default:
+        return "Rubrics";
+    }
+  },
 } as const;

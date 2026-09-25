@@ -1,10 +1,10 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import Link from "next/link";
-import { useRouter } from "next/router";
 import { CSSProperties } from "react";
 import { BiBook } from "react-icons/bi";
 import { FaRegFile, FaRegFileImage } from "react-icons/fa6";
+import { FiCalendar, FiChevronDown, FiPaperclip } from "react-icons/fi";
 import {
   MdAssignment,
   MdChecklist,
@@ -13,624 +13,350 @@ import {
   MdOndemandVideo,
 } from "react-icons/md";
 import {
-  classworkCardDataLanguage,
+  classworkCardDataLanguage as t,
   rubricLanguage,
 } from "../../data/languages";
-import { Assignment, FileOnAssignment } from "../../interfaces";
+import { Assignment, FileOnAssignment, Language } from "../../interfaces";
 import { useGetLanguage, useUpdateAssignment } from "../../react-query";
 import TextEditor from "../common/TextEditor";
 import AssignmentTagEditor from "./AssignmentTagEditor";
 
+type Classwork = Assignment & {
+  files: FileOnAssignment[];
+  studentAssign: number;
+  reviewNumber: number;
+  summitNumber: number;
+  penddingNumber: number;
+};
+
 type PropsClassworkCard = {
-  classwork: Assignment & {
-    files: FileOnAssignment[];
-    studentAssign: number;
-    reviewNumber: number;
-    summitNumber: number;
-    penddingNumber: number;
-  };
+  classwork: Classwork;
+  /** Import dialog: no navigation, no drag, no details; the wrapper selects. */
   disabled?: boolean;
+  /** False hides the drag handle (e.g. while the list is searched/filtered). */
+  reorderable?: boolean;
   selectClasswork: Assignment | null;
   subjectId: string;
   uniqueTags: string[];
   onSelect: (classwork: Assignment) => void;
 };
-function ClassworkCard(props: PropsClassworkCard) {
+
+// Static class maps: Tailwind only generates classes it can see literally.
+const TYPE_TILE: Record<Assignment["type"], string> = {
+  Assignment: "bg-primary-color/10 text-primary-color",
+  VideoQuiz: "bg-rose-50 text-rose-500",
+  Material: "bg-success-color/10 text-success-color",
+};
+
+function TypeIcon({ type }: { type: Assignment["type"] }) {
+  if (type === "Material") return <BiBook />;
+  if (type === "VideoQuiz") return <MdOndemandVideo />;
+  return <MdAssignment />;
+}
+
+function typeLabel(type: Assignment["type"], language: Language) {
+  if (type === "Material") return t.typeMaterial(language);
+  if (type === "VideoQuiz") return t.typeVideoQuiz(language);
+  return t.typeAssignment(language);
+}
+
+function formatDate(value: string | Date, withTime: boolean) {
+  return new Date(value).toLocaleDateString(undefined, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    ...(withTime ? { hour: "2-digit", minute: "2-digit" } : {}),
+  });
+}
+
+function hasText(html: string | null | undefined) {
+  if (!html) return false;
+  if (/<(img|iframe|video|table)\b/i.test(html)) return true;
   return (
-    <>
-      {props.classwork.type === "Assignment" && (
-        <AssignmentCard
-          {...props}
-          assignemnt={props.classwork}
-          selectAssignment={props.selectClasswork}
+    html
+      .replace(/<[^>]+>/g, "")
+      .replace(/&nbsp;/g, " ")
+      .trim() !== ""
+  );
+}
+
+function fileLabel(file: FileOnAssignment) {
+  if (file.type === "LINK") return file.url;
+  if (file.name) return file.name;
+  const last = file.url.split("/").pop() || file.url;
+  try {
+    return decodeURIComponent(last);
+  } catch {
+    return last;
+  }
+}
+
+function ClassworkCard({
+  classwork,
+  disabled = false,
+  reorderable = true,
+  selectClasswork,
+  subjectId,
+  uniqueTags,
+  onSelect,
+}: PropsClassworkCard) {
+  const canDrag = !disabled && reorderable;
+  const sortable = useSortable({ id: classwork.id, disabled: !canDrag });
+  const language = useGetLanguage();
+  const lang: Language = language.data ?? "en";
+  const updateAssignment = useUpdateAssignment();
+
+  const style: CSSProperties = {
+    transform: CSS.Transform.toString(sortable.transform),
+    transition: sortable.transition || undefined,
+    opacity: sortable.isDragging ? 0.5 : 1,
+  };
+  const open =
+    !disabled && selectClasswork?.id === classwork.id && !sortable.isDragging;
+  const isMaterial = classwork.type === "Material";
+  const isDraft = classwork.status === "Draft";
+  const pastDue =
+    !!classwork.dueDate && new Date(classwork.dueDate).getTime() < Date.now();
+  const files = classwork.files ?? [];
+  const panelId = `classwork-details-${classwork.id}`;
+
+  return (
+    <article
+      ref={sortable.setNodeRef}
+      style={style}
+      className={`relative flex w-full flex-col rounded-2xl border bg-white text-left font-Anuphan shadow-sm transition focus-within:z-20 ${
+        open
+          ? "border-primary-color/40 shadow-md"
+          : "border-gray-200 hover:border-primary-color/40 hover:shadow-md"
+      }`}
+    >
+      {/* Stretched link: the whole card opens the classwork. Controls that
+          must keep working on their own sit above it with relative z-10. */}
+      {!disabled && (
+        <Link
+          href={`/subject/${subjectId}/assignment/${classwork.id}`}
+          aria-label={`${t.openClasswork(lang)} ${classwork.title}`}
+          className="absolute inset-0 z-0 rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-color"
         />
       )}
 
-      {props.classwork.type === "Material" && (
-        <MaterialCard
-          {...props}
-          material={props.classwork}
-          selectMaterial={props.selectClasswork}
-        />
-      )}
+      <div className="flex w-full">
+        {canDrag && (
+          <button
+            type="button"
+            ref={sortable.setActivatorNodeRef}
+            {...sortable.listeners}
+            {...sortable.attributes}
+            aria-label={t.dragToReorder(lang)}
+            title={t.dragToReorder(lang)}
+            style={{ cursor: sortable.isDragging ? "grabbing" : "grab" }}
+            className="relative z-10 flex w-7 shrink-0 touch-none items-center justify-center rounded-l-2xl text-lg text-gray-300 transition hover:bg-gray-50 hover:text-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-color"
+          >
+            <MdDragIndicator />
+          </button>
+        )}
 
-      {props.classwork.type === "VideoQuiz" && (
-        <VideoQuizCard
-          {...props}
-          videoQuiz={props.classwork}
-          selectVideoQuiz={props.selectClasswork}
-        />
+        <div
+          className={`min-w-0 flex-1 py-4 pr-4 sm:py-5 sm:pr-5 ${canDrag ? "pl-1" : "pl-4 sm:pl-5"}`}
+        >
+          <header className="flex items-start gap-3">
+            <div
+              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-xl ${
+                isDraft
+                  ? "bg-gray-100 text-gray-400"
+                  : TYPE_TILE[classwork.type]
+              }`}
+            >
+              <TypeIcon type={classwork.type} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <h3 className="line-clamp-2 break-words text-base font-semibold leading-snug text-icon-color sm:text-lg">
+                {classwork.title}
+              </h3>
+              <p className="mt-0.5 text-xs text-gray-400">
+                <span>{typeLabel(classwork.type, lang)}</span>
+                <span aria-hidden> · </span>
+                <span>
+                  {t.postedAt(lang)} {formatDate(classwork.beginDate, true)}
+                </span>
+              </p>
+            </div>
+            <span
+              className={`shrink-0 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-medium ${
+                isDraft
+                  ? "bg-gray-100 text-gray-600"
+                  : "bg-success-color/10 text-success-color"
+              }`}
+            >
+              {isDraft ? t.Draft(lang) : t.Published(lang)}
+            </span>
+          </header>
+
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-medium">
+            {classwork.dueDate && (
+              <span
+                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 ${
+                  pastDue
+                    ? "bg-error-color/10 text-error-color"
+                    : "bg-gray-100 text-gray-700"
+                }`}
+              >
+                <FiCalendar aria-hidden className="shrink-0" />
+                <span>{t.Deadline(lang)}</span>
+                <span aria-hidden>·</span>
+                <span>{formatDate(classwork.dueDate, true)}</span>
+              </span>
+            )}
+            {!isMaterial && (
+              <span className="rounded-full bg-gray-100 px-2.5 py-1 text-gray-700">
+                <span>{(classwork.maxScore ?? 0).toLocaleString()}</span>{" "}
+                <span>{t.pointsShort(lang)}</span>
+              </span>
+            )}
+            {!isMaterial && classwork.weight !== null && (
+              <span className="rounded-full bg-gray-100 px-2.5 py-1 text-gray-700">
+                <span>{classwork.weight}%</span> <span>{t.weight(lang)}</span>
+              </span>
+            )}
+            {classwork.rubricId && (
+              <span className="inline-flex items-center gap-1 rounded-full border border-primary-color/40 bg-primary-color/10 px-2.5 py-1 text-primary-color">
+                <MdChecklist aria-hidden className="text-sm" />
+                <span>{rubricLanguage.rubricBadge(lang)}</span>
+              </span>
+            )}
+          </div>
+
+          <div
+            className="relative z-10 mt-3 w-max max-w-full"
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+            onKeyUp={(e) => e.stopPropagation()}
+          >
+            <AssignmentTagEditor
+              value={classwork.tags ?? []}
+              suggestions={uniqueTags}
+              size="sm"
+              onChange={(next) =>
+                updateAssignment.mutate({
+                  query: { assignmentId: classwork.id },
+                  data: { tags: next },
+                })
+              }
+            />
+          </div>
+
+          <footer className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 pt-3">
+            {isMaterial ? (
+              <span className="inline-flex items-center gap-1.5 text-sm text-gray-500">
+                <FiPaperclip aria-hidden />
+                <span>
+                  {files.length} {t.files(lang)}
+                </span>
+              </span>
+            ) : (
+              <ul className="flex flex-wrap items-center gap-2 text-xs font-medium">
+                <li className="rounded-full bg-gray-100 px-2.5 py-1 text-gray-700">
+                  <span className="font-semibold">
+                    {classwork.penddingNumber ?? 0}
+                  </span>{" "}
+                  <span>{t.NoWork(lang)}</span>
+                </li>
+                <li className="rounded-full bg-warning-color/20 px-2.5 py-1 text-amber-800">
+                  <span className="font-semibold">
+                    {classwork.summitNumber ?? 0}
+                  </span>{" "}
+                  <span>{t.WaitReview(lang)}</span>
+                </li>
+                <li className="rounded-full bg-success-color/10 px-2.5 py-1 text-success-color">
+                  <span className="font-semibold">
+                    {classwork.reviewNumber ?? 0}
+                  </span>{" "}
+                  <span>{t.Reviewed(lang)}</span>
+                </li>
+              </ul>
+            )}
+            {!disabled && (
+              <button
+                type="button"
+                onClick={() => onSelect(classwork)}
+                aria-expanded={open}
+                aria-controls={panelId}
+                className="relative z-10 ml-auto inline-flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium text-primary-color transition hover:bg-primary-color/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-color"
+              >
+                <span>{open ? t.hideDetails(lang) : t.details(lang)}</span>
+                <FiChevronDown
+                  aria-hidden
+                  className={`transition-transform ${open ? "rotate-180" : ""}`}
+                />
+              </button>
+            )}
+          </footer>
+        </div>
+      </div>
+
+      {open && (
+        <section
+          id={panelId}
+          className="relative z-10 flex flex-col gap-4 rounded-b-2xl border-t border-gray-100 bg-background-color p-4 sm:p-5"
+        >
+          {hasText(classwork.description) ? (
+            <div className="h-72 overflow-hidden rounded-xl border border-gray-200 bg-white">
+              <TextEditor
+                schoolId={classwork.schoolId}
+                disabled={true}
+                toolbar={false}
+                menubar={false}
+                onChange={() => {}}
+                value={classwork.description}
+              />
+            </div>
+          ) : (
+            <p className="text-sm text-gray-400">{t.noDescription(lang)}</p>
+          )}
+
+          {classwork.type !== "VideoQuiz" && (
+            <div>
+              <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                {t.attachments(lang)}
+              </h4>
+              {files.length === 0 ? (
+                <p className="text-sm text-gray-400">{t.noAttachments(lang)}</p>
+              ) : (
+                <ul className="grid gap-2 sm:grid-cols-2">
+                  {files.map((file) => {
+                    const isImage = file.type.includes("image");
+                    const isLink = file.type === "LINK";
+                    return (
+                      <li key={file.id} className="min-w-0">
+                        <a
+                          href={file.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex min-w-0 items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 transition hover:border-primary-color/40 hover:text-primary-color"
+                        >
+                          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary-color/10 text-primary-color">
+                            {isLink ? (
+                              <MdLink />
+                            ) : isImage ? (
+                              <FaRegFileImage />
+                            ) : (
+                              <FaRegFile />
+                            )}
+                          </span>
+                          <span className="truncate">{fileLabel(file)}</span>
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+          )}
+        </section>
       )}
-    </>
+    </article>
   );
 }
 
 export default ClassworkCard;
-
-type PropsAssignmentCard = {
-  assignemnt: Assignment & {
-    files: FileOnAssignment[];
-    studentAssign: number;
-    reviewNumber: number;
-    summitNumber: number;
-    penddingNumber: number;
-  };
-  subjectId: string;
-  uniqueTags: string[];
-  selectAssignment: Assignment | null;
-  onSelect: (assignment: Assignment) => void;
-};
-function AssignmentCard({
-  assignemnt,
-  selectAssignment,
-  onSelect,
-  subjectId,
-  uniqueTags,
-}: PropsAssignmentCard) {
-  const sortable = useSortable({ id: assignemnt.id });
-  const style = {
-    transform: CSS.Transform.toString(sortable.transform),
-    transition: sortable.transition || undefined,
-  };
-  const language = useGetLanguage();
-  const updateAssignment = useUpdateAssignment();
-  const inlineStyles: CSSProperties = {
-    opacity: sortable.isDragging ? "0.5" : "1",
-    transformOrigin: "50% 50%",
-
-    ...style,
-  };
-  return (
-    <button
-      ref={sortable.setNodeRef}
-      style={inlineStyles}
-      {...sortable.attributes}
-      className="flex h-max w-full flex-col transition-height"
-      key={assignemnt.id}
-    >
-      <div
-        onClick={() => onSelect(assignemnt)}
-        className={`relative flex h-max w-full items-stretch justify-start gap-2 overflow-hidden rounded-2xl border-2 border-black bg-white hover:ring sm:min-h-40 ${
-          selectAssignment?.id === assignemnt.id &&
-          !sortable.isDragging &&
-          "rounded-b-none"
-        } `}
-      >
-        <div
-          className={`flex h-full w-20 flex-col items-center justify-center gap-2 p-2 text-2xl text-white sm:w-24 ${assignemnt.status === "Draft" ? "bg-gray-400" : "gradient-bg"} `}
-        >
-          <MdAssignment />
-          <span className="text-xs">
-            {classworkCardDataLanguage[
-              assignemnt.status as keyof typeof classworkCardDataLanguage
-            ](language.data ?? "en")}
-          </span>
-        </div>
-        <div className="flex w-full grow flex-col gap-2 p-2 sm:w-9/12">
-          <div className="max-w-[80%] border-b text-start text-lg font-semibold">
-            {assignemnt.title}
-          </div>
-          <div className="flex gap-1 text-xs text-gray-500">
-            {new Date(assignemnt.beginDate).toLocaleDateString(undefined, {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-              minute: "numeric",
-              hour: "numeric",
-            })}
-          </div>
-          <div
-            className="flex w-max max-w-full flex-wrap"
-            onPointerDown={(e) => e.stopPropagation()}
-            onClick={(e) => e.stopPropagation()}
-            onKeyDown={(e) => e.stopPropagation()}
-            onKeyUp={(e) => e.stopPropagation()}
-          >
-            <AssignmentTagEditor
-              value={assignemnt.tags ?? []}
-              suggestions={uniqueTags}
-              size="sm"
-              onChange={(next) =>
-                updateAssignment.mutate({
-                  query: { assignmentId: assignemnt.id },
-                  data: { tags: next },
-                })
-              }
-            />
-          </div>
-          <div className="flex w-full flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
-            <ul className="flex w-full flex-wrap items-end gap-2">
-              <li className="ga-2 flex h-max w-max flex-col items-center justify-start rounded-2xl border bg-gray-50 p-1">
-                <span className="max-w-40 truncate text-base font-medium text-primary-color">
-                  {assignemnt.maxScore.toLocaleString()}
-                </span>
-                <span className="text-xs">
-                  {classworkCardDataLanguage.score(language.data ?? "en")}
-                </span>
-              </li>
-              {assignemnt.rubricId && (
-                <li className="flex h-max w-max items-center justify-center gap-1 rounded-2xl border border-primary-color bg-primary-color/10 px-2 py-1 text-primary-color">
-                  <MdChecklist className="text-base" />
-                  <span className="text-xs font-medium">
-                    {rubricLanguage.rubricBadge(language.data ?? "en")}
-                  </span>
-                </li>
-              )}
-              {assignemnt.weight !== null && (
-                <li className="ga-2 flex h-max w-max flex-col items-center justify-start rounded-2xl border bg-gray-50 p-1">
-                  <span className="max-w-40 truncate text-base font-medium text-primary-color">
-                    {assignemnt.weight}%
-                  </span>
-                  <span className="text-xs">
-                    {classworkCardDataLanguage.weight(language.data ?? "en")}
-                  </span>
-                </li>
-              )}
-              {assignemnt.dueDate && (
-                <li className="flex h-max w-max items-center justify-start gap-1 rounded-2xl border bg-gray-50 p-1">
-                  <span className="truncate text-sm font-medium text-red-700">
-                    {new Date(assignemnt.dueDate).toLocaleDateString(
-                      undefined,
-                      {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                        minute: "numeric",
-                        hour: "numeric",
-                      },
-                    )}
-                  </span>
-                  <span className="text-xs">
-                    {classworkCardDataLanguage.Deadline(language.data ?? "en")}
-                  </span>
-                </li>
-              )}
-            </ul>
-            <ul className="flex gap-2">
-              <li className="flex h-16 w-16 flex-col items-center justify-center gap-1 rounded-2xl border border-black p-2 md:h-16 md:w-16 lg:h-20 lg:w-20">
-                <span className="text-2xl font-semibold">
-                  {assignemnt.penddingNumber}
-                </span>
-                <span className="max-w-[100%] truncate text-center text-xs">
-                  {classworkCardDataLanguage.NoWork(language.data ?? "en")}
-                </span>
-              </li>
-              <li className="flex h-16 w-16 flex-col items-center justify-center gap-1 rounded-2xl border border-yellow-400 p-2 md:h-16 md:w-16 lg:h-20 lg:w-20">
-                <span className="text-2xl font-semibold">
-                  {assignemnt.summitNumber}
-                </span>
-                <span className="max-w-[100%] truncate text-center text-xs">
-                  {classworkCardDataLanguage.WaitReview(language.data ?? "en")}
-                </span>
-              </li>
-              <li className="flex h-16 w-16 flex-col items-center justify-center gap-1 rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 p-2 text-white md:h-16 md:w-16 lg:h-20 lg:w-20">
-                <span className="text-2xl font-semibold">
-                  {assignemnt.reviewNumber}
-                </span>
-                <span className="max-w-[100%] truncate text-center text-xs">
-                  {classworkCardDataLanguage.Reviewed(language.data ?? "en")}
-                </span>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div
-          {...sortable.listeners}
-          style={{ cursor: sortable.isDragging ? "grabbing" : "grab" }}
-          className="absolute right-2 top-2 flex h-10 w-6 items-center justify-center rounded-2xl hover:bg-gray-300/50"
-        >
-          <MdDragIndicator />
-        </div>
-      </div>
-      <div
-        className={`${
-          selectAssignment?.id === assignemnt.id && !sortable.isDragging
-            ? "h-80 border border-t-0"
-            : "h-0"
-        } flex w-full flex-col overflow-hidden rounded-2xl rounded-t-none bg-white text-start transition-height`}
-      >
-        <div className="h-64 overflow-auto p-2">
-          <div className="h-max w-full">
-            <ul className="flex w-full flex-wrap gap-2 p-3">
-              {assignemnt.files?.map((file, index) => {
-                const isImage = file.type.includes("image");
-                const fileName = file.url.split("/").pop();
-                const isLink = file.type === "LINK";
-                return (
-                  <li
-                    onClick={() => window.open(file.url, "_blank")}
-                    key={index}
-                    className="flex h-14 w-max items-center justify-between overflow-hidden rounded-2xl border bg-white pr-2 text-xs transition hover:cursor-pointer hover:bg-gray-100"
-                  >
-                    <div className="flex h-full w-full items-center justify-start gap-2">
-                      <div className="gradient-bg flex h-full w-16 items-center justify-center border-r text-lg text-white">
-                        {isLink ? (
-                          <MdLink />
-                        ) : isImage ? (
-                          <FaRegFileImage />
-                        ) : (
-                          <FaRegFile />
-                        )}
-                      </div>
-                      <div className="flex max-w-40 items-center gap-2 truncate">
-                        <span>{isLink ? file.url : fileName}</span>
-                      </div>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-            <p className="h-96 w-full">
-              <TextEditor
-                schoolId={assignemnt.schoolId}
-                disabled={true}
-                toolbar={false}
-                onChange={() => {}}
-                value={assignemnt.description}
-                menubar={false}
-              />
-            </p>
-          </div>
-        </div>
-        <Link
-          href={`/subject/${subjectId}/assignment/${assignemnt.id}`}
-          className="flex h-14 items-center gap-2 border-t p-2"
-        >
-          <button className="main-button w-40">View</button>
-        </Link>
-      </div>
-    </button>
-  );
-}
-
-type PropsMaterialCard = {
-  material: Assignment & { files: FileOnAssignment[] };
-  subjectId: string;
-  uniqueTags: string[];
-  selectMaterial: Assignment | null;
-  onSelect: (material: Assignment) => void;
-};
-type PropsVideoQuizCard = {
-  videoQuiz: Assignment & {
-    files: FileOnAssignment[];
-    studentAssign: number;
-    reviewNumber: number;
-    summitNumber: number;
-    penddingNumber: number;
-  };
-  disabled?: boolean;
-  subjectId: string;
-  uniqueTags: string[];
-  selectVideoQuiz: Assignment | null;
-  onSelect: (videoQuiz: Assignment) => void;
-};
-function VideoQuizCard({
-  videoQuiz,
-  selectVideoQuiz,
-  onSelect,
-  subjectId,
-  uniqueTags,
-  disabled = false,
-}: PropsVideoQuizCard) {
-  const sortable = useSortable({ id: videoQuiz.id });
-  const style = {
-    transform: CSS.Transform.toString(sortable.transform),
-    transition: sortable.transition || undefined,
-  };
-  const language = useGetLanguage();
-  const updateAssignment = useUpdateAssignment();
-  const router = useRouter();
-  const inlineStyles: CSSProperties = {
-    opacity: sortable.isDragging ? "0.5" : "1",
-    transformOrigin: "50% 50%",
-
-    ...style,
-  };
-  return (
-    <div
-      ref={sortable.setNodeRef}
-      style={inlineStyles}
-      {...sortable.attributes}
-      onClick={() => {
-        if (sortable.isDragging || disabled) return;
-        router.push(`/subject/${subjectId}/assignment/${videoQuiz.id}`);
-      }}
-      className="flex h-max w-full cursor-pointer flex-col transition-height"
-      key={videoQuiz.id}
-    >
-      <div
-        onClick={() => onSelect(videoQuiz)}
-        className={`relative flex h-max w-full items-stretch justify-start gap-2 overflow-hidden rounded-2xl border-2 border-black bg-white hover:ring sm:min-h-40 ${
-          selectVideoQuiz?.id === videoQuiz.id &&
-          !sortable.isDragging &&
-          "rounded-b-none"
-        } `}
-      >
-        <div
-          className={`flex h-full w-20 flex-col items-center justify-center gap-2 p-2 text-2xl text-white sm:w-24 ${videoQuiz.status === "Draft" ? "bg-gray-400" : "bg-gradient-to-b from-pink-400 to-rose-400"} `}
-        >
-          <MdOndemandVideo />
-          <span className="text-center text-xs">
-            {classworkCardDataLanguage[
-              videoQuiz.status as keyof typeof classworkCardDataLanguage
-            ](language.data ?? "en")}
-          </span>
-        </div>
-        <div className="flex w-full grow flex-col gap-2 p-2 sm:w-9/12">
-          <div className="max-w-[80%] border-b text-start text-lg font-semibold">
-            {videoQuiz.title}
-          </div>
-          <div className="flex gap-1 text-xs text-gray-500">
-            {new Date(videoQuiz.beginDate).toLocaleDateString(undefined, {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-              minute: "numeric",
-              hour: "numeric",
-            })}
-          </div>
-          <div
-            className="flex w-max max-w-full flex-wrap"
-            onPointerDown={(e) => e.stopPropagation()}
-            onClick={(e) => e.stopPropagation()}
-            onKeyDown={(e) => e.stopPropagation()}
-            onKeyUp={(e) => e.stopPropagation()}
-          >
-            <AssignmentTagEditor
-              value={videoQuiz.tags ?? []}
-              suggestions={uniqueTags}
-              size="sm"
-              onChange={(next) =>
-                updateAssignment.mutate({
-                  query: { assignmentId: videoQuiz.id },
-                  data: { tags: next },
-                })
-              }
-            />
-          </div>
-          <div className="flex w-full flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
-            <ul className="flex w-full flex-wrap items-end gap-2">
-              <li className="ga-2 flex h-max w-max flex-col items-center justify-start rounded-2xl border bg-gray-50 p-1">
-                <span className="max-w-40 truncate text-base font-medium text-primary-color">
-                  {videoQuiz.maxScore ? videoQuiz.maxScore.toLocaleString() : 0}
-                </span>
-                <span className="text-xs">
-                  {classworkCardDataLanguage.score(language.data ?? "en")}
-                </span>
-              </li>
-              {videoQuiz.weight !== null && (
-                <li className="ga-2 flex h-max w-max flex-col items-center justify-start rounded-2xl border bg-gray-50 p-1">
-                  <span className="max-w-40 truncate text-base font-medium text-primary-color">
-                    {videoQuiz.weight}%
-                  </span>
-                  <span className="text-xs">
-                    {classworkCardDataLanguage.weight(language.data ?? "en")}
-                  </span>
-                </li>
-              )}
-              {videoQuiz.dueDate && (
-                <li className="flex h-max w-max items-center justify-start gap-1 rounded-2xl border bg-gray-50 p-1">
-                  <span className="truncate text-sm font-medium text-red-700">
-                    {new Date(videoQuiz.dueDate).toLocaleDateString(undefined, {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                      minute: "numeric",
-                      hour: "numeric",
-                    })}
-                  </span>
-                  <span className="text-xs">
-                    {classworkCardDataLanguage.Deadline(language.data ?? "en")}
-                  </span>
-                </li>
-              )}
-            </ul>
-            <ul className="flex gap-2">
-              <li className="flex h-16 w-16 flex-col items-center justify-center gap-1 rounded-2xl border border-black p-2 md:h-16 md:w-16 lg:h-20 lg:w-20">
-                <span className="text-2xl font-semibold">
-                  {videoQuiz.penddingNumber}
-                </span>
-                <span className="max-w-[100%] truncate text-center text-xs">
-                  {classworkCardDataLanguage.NoWork(language.data ?? "en")}
-                </span>
-              </li>
-              <li className="flex h-16 w-16 flex-col items-center justify-center gap-1 rounded-2xl border border-yellow-400 p-2 md:h-16 md:w-16 lg:h-20 lg:w-20">
-                <span className="text-2xl font-semibold">
-                  {videoQuiz.summitNumber}
-                </span>
-                <span className="max-w-[100%] truncate text-center text-xs">
-                  {classworkCardDataLanguage.WaitReview(language.data ?? "en")}
-                </span>
-              </li>
-              <li className="flex h-16 w-16 flex-col items-center justify-center gap-1 rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 p-2 text-white md:h-16 md:w-16 lg:h-20 lg:w-20">
-                <span className="text-2xl font-semibold">
-                  {videoQuiz.reviewNumber}
-                </span>
-                <span className="max-w-[100%] truncate text-center text-xs">
-                  {classworkCardDataLanguage.Reviewed(language.data ?? "en")}
-                </span>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div
-          {...sortable.listeners}
-          style={{ cursor: sortable.isDragging ? "grabbing" : "grab" }}
-          className="absolute right-2 top-2 flex h-10 w-6 items-center justify-center rounded-2xl hover:bg-gray-300/50"
-        >
-          <MdDragIndicator />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function MaterialCard({
-  material,
-  subjectId,
-  selectMaterial,
-  onSelect,
-  uniqueTags,
-}: PropsMaterialCard) {
-  const sortable = useSortable({ id: material.id });
-
-  const style = {
-    transform: CSS.Transform.toString(sortable.transform),
-    transition: sortable.transition || undefined,
-  };
-  const language = useGetLanguage();
-  const updateAssignment = useUpdateAssignment();
-
-  const inlineStyles: CSSProperties = {
-    opacity: sortable.isDragging ? "0.5" : "1",
-    transformOrigin: "50% 50%",
-
-    ...style,
-  };
-
-  return (
-    <div
-      ref={sortable.setNodeRef}
-      style={inlineStyles}
-      {...sortable.attributes}
-      className="flex h-full w-full flex-col transition-height"
-      key={material.id}
-    >
-      <button
-        onClick={() => onSelect(material)}
-        className={`relative flex h-max w-full items-stretch justify-start gap-2 overflow-hidden rounded-2xl border-2 border-black hover:ring sm:min-h-40 ${
-          selectMaterial?.id === material.id &&
-          !sortable.isDragging &&
-          "rounded-b-none"
-        } `}
-      >
-        <div
-          className={`flex h-full w-20 flex-col items-center justify-center gap-2 p-2 text-2xl text-white sm:w-24 ${
-            material.status === "Draft"
-              ? "bg-gray-400"
-              : "bg-gradient-to-r from-emerald-400 to-cyan-400"
-          } `}
-        >
-          <BiBook />
-
-          <span className="text-center text-xs">
-            {" "}
-            {classworkCardDataLanguage[
-              material.status as keyof typeof classworkCardDataLanguage
-            ](language.data ?? "en")}
-          </span>
-        </div>
-        <div className="flex h-max w-full flex-col gap-2 p-2 sm:w-9/12">
-          <div className="max-w-[80%] border-b text-start text-lg font-semibold">
-            {material.title}
-          </div>
-          <div className="flex gap-1 text-xs text-gray-500">
-            {new Date(material.beginDate).toLocaleDateString(undefined, {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-              minute: "numeric",
-              hour: "numeric",
-            })}
-          </div>
-          <div
-            className="flex w-max max-w-full flex-wrap px-2"
-            onPointerDown={(e) => e.stopPropagation()}
-            onClick={(e) => e.stopPropagation()}
-            onKeyDown={(e) => e.stopPropagation()}
-            onKeyUp={(e) => e.stopPropagation()}
-          >
-            <AssignmentTagEditor
-              value={material.tags ?? []}
-              suggestions={uniqueTags}
-              size="sm"
-              onChange={(next) =>
-                updateAssignment.mutate({
-                  query: { assignmentId: material.id },
-                  data: { tags: next },
-                })
-              }
-            />
-          </div>
-          <ul className="flex max-h-20 w-full flex-wrap gap-2 overflow-auto p-3">
-            {material.files?.map((file, index) => {
-              const isImage = file.type.includes("image");
-              const fileName = file.url.split("/").pop();
-              return (
-                <li
-                  onClick={() => window.open(file.url, "_blank")}
-                  key={index}
-                  className="flex h-14 w-max items-center justify-between overflow-hidden rounded-2xl border bg-white pr-2 text-xs transition hover:cursor-pointer hover:bg-gray-100"
-                >
-                  <div className="flex h-full w-full items-center justify-start gap-2">
-                    <div className="gradient-bg flex h-full w-16 items-center justify-center border-r text-lg text-white">
-                      {isImage ? <FaRegFileImage /> : <FaRegFile />}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span>{fileName}</span>
-                    </div>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-        <div
-          {...sortable.listeners}
-          style={{ cursor: sortable.isDragging ? "grabbing" : "grab" }}
-          className="absolute right-2 top-2 flex h-10 w-6 items-center justify-center rounded-2xl hover:bg-gray-300/50"
-        >
-          <MdDragIndicator />
-        </div>
-      </button>
-      <div
-        className={`${
-          selectMaterial?.id === material.id && !sortable.isDragging
-            ? "h-80 border border-t-0"
-            : "h-0"
-        } w-full overflow-hidden rounded-2xl rounded-t-none bg-white text-start transition-height`}
-      >
-        <div className="h-64 overflow-auto p-2">
-          <p className="h-96">
-            <TextEditor
-              schoolId={material.schoolId}
-              disabled={true}
-              toolbar={false}
-              onChange={() => {}}
-              value={material.description}
-              menubar={false}
-            />
-          </p>
-        </div>
-        <Link
-          href={`/subject/${subjectId}/assignment/${material.id}`}
-          className="flex h-20 items-center gap-2 border-t p-2"
-        >
-          <button className="main-button w-40">View</button>
-        </Link>
-      </div>
-    </div>
-  );
-}
