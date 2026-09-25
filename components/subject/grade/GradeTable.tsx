@@ -20,7 +20,8 @@ import GradeStudentCell from "./GradeStudentCell";
 // Opaque equivalent of bg-primary-color/5 over white (#2C7CD1 @ 5%) —
 // sticky cells must be opaque or scrolled content shows through.
 const TINT = "bg-[#F4F8FD]";
-const HEAD = "border-b border-r border-gray-100 bg-background-color p-0 text-left align-bottom font-normal";
+const HEAD =
+  "border-b border-r border-gray-100 bg-background-color p-0 text-left align-bottom font-normal";
 
 type Props = {
   subjectId: string;
@@ -172,9 +173,7 @@ function GradeTable({
           <GradeSpecialCell
             entry={column.entry}
             studentOnSubjectId={student.id}
-            onClick={() =>
-              onOpenSpecial(column.entry.scoreOnSubject, student)
-            }
+            onClick={() => onOpenSpecial(column.entry.scoreOnSubject, student)}
           />
         )}
       </td>
@@ -215,7 +214,11 @@ function GradeTable({
                     {segment.collapsed ? <TbChevronRight /> : <TbChevronDown />}
                     <span className="truncate">{segment.tag}</span>
                     <span className="shrink-0 font-normal text-gray-500">
-                      · {gradeTableData.assignmentsCount(language, segment.assignmentCount)}
+                      ·{" "}
+                      {gradeTableData.assignmentsCount(
+                        language,
+                        segment.assignmentCount,
+                      )}
                     </span>
                   </button>
                 </th>

@@ -1,5 +1,9 @@
 import { gradeTableData } from "../../../data/languages";
-import { Language, StudentOnAssignment } from "../../../interfaces";
+import {
+  Language,
+  StudentAssignmentStatus,
+  StudentOnAssignment,
+} from "../../../interfaces";
 import {
   AssignmentEntry,
   assignmentContribution,
@@ -10,7 +14,15 @@ import {
 import GradeStatusPill from "./GradeStatusPill";
 
 const CELL_BUTTON =
-  "flex h-14 w-full flex-col items-center justify-center gap-0.5 px-2 transition-colors hover:bg-primary-color/5";
+  "flex h-14 w-full flex-col items-center justify-center gap-0.5 px-2 transition-colors ";
+
+export type PendingStatus = Exclude<StudentAssignmentStatus, "REVIEWD">;
+
+export const STYLES_GRADE_STATUS: Record<PendingStatus, string> = {
+  SUBMITTED: "bg-info-color/10 text-info-color",
+  IMPROVED: "bg-warning-color/20 text-amber-700",
+  PENDDING: "bg-error-color text-white",
+};
 
 export function GradeAssignmentCell({
   entry,
@@ -35,8 +47,13 @@ export function GradeAssignmentCell({
   }
   const { assignment } = entry;
   const weighted = assignment.weight !== null;
+
   return (
-    <button type="button" onClick={onClick} className={CELL_BUTTON}>
+    <button
+      type="button"
+      onClick={onClick}
+      className={`${CELL_BUTTON} ${studentOnAssignment.status !== "REVIEWD" && STYLES_GRADE_STATUS[studentOnAssignment.status]} `}
+    >
       {studentOnAssignment.status === "REVIEWD" ? (
         <>
           <span className="text-sm font-semibold tabular-nums text-icon-color">
