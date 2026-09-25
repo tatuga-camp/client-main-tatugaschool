@@ -96,7 +96,7 @@ function ClassesCreate({ schoolId, toast, onClose, onSuccess }: Props) {
         disabled={createClassroom.isPending}
         className="main-button rounded-full mt-5 flex items-center justify-center"
       >
-        {createClassroom.isPending ? <LoadingSpinner /> : "Create"}
+        {createClassroom.isPending ? <LoadingSpinner /> : <span>Create</span>}
       </button>
     </form>
   );

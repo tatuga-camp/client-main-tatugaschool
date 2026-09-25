@@ -394,9 +394,9 @@ function ScoreOnSubjectForm({
             {create.isPending || update.isPending ? (
               <LoadingSpinner />
             ) : scoreOnSubject?.id ? (
-              "Update"
+              <span>Update</span>
             ) : (
-              "Create"
+              <span>Create</span>
             )}
           </button>
           {scoreOnSubject?.id && (

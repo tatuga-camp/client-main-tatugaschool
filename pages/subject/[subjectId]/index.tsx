@@ -483,7 +483,11 @@ function Index({ subjectId }: Props) {
                       members={teacherOnSubjects.data}
                     />
                   ) : (
-                    "Loading..."
+                    // Keep this fallback inside an element: browser translation
+                    // (Chrome/Google Translate) re-parents bare text nodes into
+                    // <font> tags, and React then throws NotFoundError when it
+                    // removes the text node to mount ListMemberCircle.
+                    <span>Loading...</span>
                   )}
                   <button
                     onClick={() => setTriggerQRCode((prev) => !prev)}

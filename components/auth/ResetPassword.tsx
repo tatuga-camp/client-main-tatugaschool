@@ -85,7 +85,7 @@ function ResetPassword({ token }: { token: string }) {
           disabled={resetPassword.isPending}
           className="main-button w-full p-2"
         >
-          {resetPassword.isPending ? <LoadingSpinner /> : "Confirm"}
+          {resetPassword.isPending ? <LoadingSpinner /> : <span>Confirm</span>}
         </button>
       </form>
     </div>

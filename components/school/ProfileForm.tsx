@@ -188,7 +188,11 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ school, updateSchool }) => {
             : "bg-primary-color hover:bg-primary-color-hover"
         }`}
       >
-        {updateSchool.isPending ? <LoadingSpinner /> : "Save Changes"}
+        {updateSchool.isPending ? (
+          <LoadingSpinner />
+        ) : (
+          <span>Save Changes</span>
+        )}
       </button>
       {role === "TEACHER" && (
         <span className="text-red-600">

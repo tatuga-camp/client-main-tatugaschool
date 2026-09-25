@@ -106,9 +106,9 @@ function VerifyConnectLine({ verifyLineToken, subjectId }: Props) {
           {verifyLineTokenMutation.isPending ? (
             <FaSpinner className="animate-spin text-xl" />
           ) : language.data === "th" ? (
-            "ยืนยัน"
+            <span>ยืนยัน</span>
           ) : (
-            "Confirm"
+            <span>Confirm</span>
           )}
         </button>
         <button

@@ -442,7 +442,7 @@ const SilderPicker = ({
                       strokeWidth="8"
                     />
                   ) : (
-                    "FAST"
+                    <span>FAST</span>
                   )}
                 </button>
                 <button
@@ -459,7 +459,7 @@ const SilderPicker = ({
                       strokeWidth="8"
                     />
                   ) : (
-                    "SLOW"
+                    <span>SLOW</span>
                   )}
                 </button>
                 <button
@@ -475,7 +475,7 @@ const SilderPicker = ({
                       strokeWidth="8"
                     />
                   ) : (
-                    "RESTART"
+                    <span>RESTART</span>
                   )}
                 </button>
               </div>

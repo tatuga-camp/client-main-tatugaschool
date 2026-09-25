@@ -434,7 +434,7 @@ const CreateSchoolComponent = () => {
                   strokeWidth="8"
                 />
               ) : (
-                "Create"
+                <span>Create</span>
               )}
             </button>
           </section>

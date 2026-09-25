@@ -106,7 +106,7 @@ function CommentSection({ studentOnAssignmentId, schoolId }: Props) {
                 strokeWidth="8"
               />
             ) : (
-              "Comment"
+              <span>Comment</span>
             )}
           </button>
         </div>
