@@ -1,6 +1,7 @@
 import {
   Classroom,
   EducationYear,
+  PublicProgressLevel,
   Subject,
   TeacherOnSubject,
 } from "@/interfaces";
@@ -209,6 +210,63 @@ export async function VerifyLineTokenService(
     return response.data;
   } catch (error: any) {
     console.error("Verify Line Token request failed:", error.response?.data);
+    throw error?.response?.data;
+  }
+}
+
+export type RequestPublicProgressService = {
+  subjectId: string;
+  level: PublicProgressLevel;
+};
+
+export type ResponsePublicProgressService = {
+  token: string | null;
+  level: PublicProgressLevel;
+};
+
+export async function CreatePublicProgressService(
+  input: RequestPublicProgressService,
+): Promise<ResponsePublicProgressService> {
+  try {
+    const response = await axiosInstance({
+      method: "POST",
+      url: `/v1/subjects/${input.subjectId}/public-progress`,
+      data: { level: input.level },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Create progress link failed:", error?.response?.data);
+    throw error?.response?.data;
+  }
+}
+
+export async function UpdatePublicProgressLevelService(
+  input: RequestPublicProgressService,
+): Promise<ResponsePublicProgressService> {
+  try {
+    const response = await axiosInstance({
+      method: "PATCH",
+      url: `/v1/subjects/${input.subjectId}/public-progress`,
+      data: { level: input.level },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Update progress link failed:", error?.response?.data);
+    throw error?.response?.data;
+  }
+}
+
+export async function DeletePublicProgressService(input: {
+  subjectId: string;
+}): Promise<ResponsePublicProgressService> {
+  try {
+    const response = await axiosInstance({
+      method: "DELETE",
+      url: `/v1/subjects/${input.subjectId}/public-progress`,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Stop sharing progress link failed:", error?.response?.data);
     throw error?.response?.data;
   }
 }

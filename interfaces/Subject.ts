@@ -28,6 +28,10 @@ export interface Subject {
   allowSendNotificationMorningSummaryToLine?: boolean;
   allowSendNotificationOnAnnouncementToLine?: boolean;
   isLocked: boolean;
+  publicProgressToken?: string | null;
+  publicProgressLevel?: PublicProgressLevel;
 }
+
+export type PublicProgressLevel = "STATUS" | "SCORE" | "GRADE";
 
 export type EducationYear = `${string}/${string}`;

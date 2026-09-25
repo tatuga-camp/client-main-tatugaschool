@@ -1,6 +1,11 @@
 import { StudentOnSubject } from "../interfaces";
 import { ResponseGetOverviewAssignmentService } from "../services";
 import { calulateGrade, defaultGradeRule } from "./grade";
+import {
+  assignmentContribution,
+  computeGroupTotals,
+  specialContribution,
+} from "./gradeColumns";
 
 export type StudentTotal = {
   student: StudentOnSubject;
@@ -13,6 +18,8 @@ export type StudentTotal = {
   assignmentCount: number;
   /** Round(gradedCount / assignmentCount * 100); null when assignmentCount === 0. */
   completionPercentage: number | null;
+  /** Subtotal per tags[0] group, same math as totalScore. */
+  groupTotals: Record<string, number>;
 };
 
 /**
@@ -31,15 +38,17 @@ export function calculateStudentTotals(
 
   const unranked = activeStudents.map((student) => {
     let totalScore = overview.assignments.reduce((prev, current) => {
-      let score =
-        current.students.find((s) => s.studentOnSubjectId === student.id)
-          ?.score ?? 0;
-      if (current.assignment.weight !== null) {
-        const originalScore = score / current.assignment.maxScore;
-        score = originalScore * current.assignment.weight;
-      }
-
-      return prev + score;
+      const score = current.students.find(
+        (s) => s.studentOnSubjectId === student.id,
+      )?.score;
+      return (
+        prev +
+        assignmentContribution(
+          score,
+          current.assignment.maxScore,
+          current.assignment.weight,
+        )
+      );
     }, 0);
 
     totalScore = overview.scoreOnSubjects.reduce((prev, scoreOnSubject) => {
@@ -53,15 +62,14 @@ export function calculateStudentTotals(
         0,
       );
 
-      let score = sumRawScore;
-      const maxScore = scoreOnSubject.scoreOnSubject.maxScore ?? 100;
-      if (scoreOnSubject.scoreOnSubject.weight !== null) {
-        const originalScore =
-          (sumRawScore > maxScore ? maxScore : sumRawScore) / maxScore;
-        score = originalScore * scoreOnSubject.scoreOnSubject.weight;
-      }
-
-      return (prev += score);
+      return (
+        prev +
+        specialContribution(
+          sumRawScore,
+          scoreOnSubject.scoreOnSubject.maxScore,
+          scoreOnSubject.scoreOnSubject.weight,
+        )
+      );
     }, totalScore);
 
     // Graded-completion: numerator = REVIEWD, denominator = assigned
@@ -96,6 +104,7 @@ export function calculateStudentTotals(
       gradedCount,
       assignmentCount,
       completionPercentage,
+      groupTotals: computeGroupTotals(overview.assignments, student.id),
     };
   });
 

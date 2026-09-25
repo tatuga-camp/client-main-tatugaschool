@@ -7,7 +7,9 @@ import {
 } from "@tanstack/react-query";
 import { EducationYear, Subject, TeacherOnSubject } from "../interfaces";
 import {
+  CreatePublicProgressService,
   CreateSubjectService,
+  DeletePublicProgressService,
   DeleteSubjectService,
   DeleteTeacherOnSubjectService,
   DuplicateSubjectService,
@@ -21,8 +23,11 @@ import {
   RequestDuplicateSubjectService,
   RequestGetSubjectBySchoolsService,
   RequestReorderSubjectsService,
+  RequestPublicProgressService,
   RequestUpdateSubjectService,
   ResponseGetSubjectBySchoolsService,
+  ResponsePublicProgressService,
+  UpdatePublicProgressLevelService,
   UpdateSubjectService,
   VerifyLineTokenService,
 } from "../services";
@@ -295,6 +300,58 @@ export function useVerifyLineToken() {
         ["subject", { id: variables.body.subjectId }],
         data,
       );
+    },
+  });
+}
+
+function writeProgressState(
+  queryClient: QueryClient,
+  subjectId: string,
+  data: ResponsePublicProgressService,
+) {
+  queryClient.setQueryData<Subject>(["subject", { id: subjectId }], (prev) =>
+    prev
+      ? {
+          ...prev,
+          publicProgressToken: data.token,
+          publicProgressLevel: data.level,
+        }
+      : prev,
+  );
+}
+
+export function useCreatePublicProgress() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["create-public-progress"],
+    mutationFn: (input: RequestPublicProgressService) =>
+      CreatePublicProgressService(input),
+    onSuccess(data, variables) {
+      writeProgressState(queryClient, variables.subjectId, data);
+    },
+  });
+}
+
+export function useUpdatePublicProgressLevel() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["update-public-progress-level"],
+    mutationFn: (input: RequestPublicProgressService) =>
+      UpdatePublicProgressLevelService(input),
+    onSuccess(data, variables) {
+      writeProgressState(queryClient, variables.subjectId, data);
+    },
+  });
+}
+
+export function useDeletePublicProgress() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["delete-public-progress"],
+    mutationFn: (input: { subjectId: string }) =>
+      DeletePublicProgressService(input),
+    onSuccess(data, variables) {
+      writeProgressState(queryClient, variables.subjectId, data);
     },
   });
 }

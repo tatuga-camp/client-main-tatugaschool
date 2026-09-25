@@ -1,15 +1,12 @@
 import { ExportAssignmentService } from "@/services";
-import Image from "next/image";
-import Link from "next/link";
 import { Toast } from "primereact/toast";
 import React, { useState } from "react";
-import { FaCheckSquare, FaExclamationTriangle, FaTable } from "react-icons/fa";
-import { FaUser } from "react-icons/fa6";
+import { FaTable } from "react-icons/fa";
 import { IoMdSettings } from "react-icons/io";
-import { MdFileDownload, MdLeaderboard, MdMoodBad } from "react-icons/md";
+import { MdLeaderboard } from "react-icons/md";
 import { SiMicrosoftexcel } from "react-icons/si";
-import { defaultBlurHash } from "../../data";
-import { gradeData } from "../../data/languages";
+import { TbColumns3, TbLayoutColumns, TbShare } from "react-icons/tb";
+import { gradeData, gradeTableData } from "../../data/languages";
 import {
   Assignment,
   ErrorMessages,
@@ -21,21 +18,48 @@ import {
   useGetAssignmentOverview,
   useGetLanguage,
   useGetStudentOnSubject,
+  useGetSubject,
 } from "../../react-query";
 import {
+  assignmentMax,
+  buildGradeColumns,
   calculateStudentTotals,
-  decodeBlurhashToCanvas,
   downloadDataUri,
   getRandomSlateShade,
   getSlateColorStyle,
+  GradeViewMode,
 } from "../../utils";
 import LoadingSpinner from "../common/LoadingSpinner";
 import PopupLayout from "../layout/PopupLayout";
+import GradeLeaderboard from "./GradeLeaderboard";
 import GradePopup from "./GradePopup";
 import GradeSetting from "./GradeSetting";
 import GradeSettingScoreOnSubject from "./GradeSettingScoreOnSubject";
 import GradeSpecialScoreSetting from "./GradeSpecialScoreSetting";
-import GradeLeaderboard from "./GradeLeaderboard";
+import GradeSegmentedControl, {
+  SECONDARY_BUTTON,
+} from "./grade/GradeSegmentedControl";
+import GradeSharePopup from "./grade/GradeSharePopup";
+import GradeTable from "./grade/GradeTable";
+
+// Per-viewer UI preferences; storage can be unavailable (private mode) —
+// fall back silently.
+function readPref<T>(key: string, fallback: T): T {
+  try {
+    const raw = window.localStorage.getItem(key);
+    return raw === null ? fallback : (JSON.parse(raw) as T);
+  } catch {
+    return fallback;
+  }
+}
+
+function writePref(key: string, value: unknown) {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // ignore
+  }
+}
 
 function Grade({
   subjectId,
@@ -57,7 +81,52 @@ function Grade({
   >(null);
 
   const [triggerGradeSetting, setTriggerGradeSetting] = useState(false);
+  const subject = useGetSubject({ subjectId });
+  const [triggerShare, setTriggerShare] = useState(false);
+  const isShared = !!subject.data?.publicProgressToken;
   const [view, setView] = useState<"table" | "leaderboard">("table");
+  const lang = language.data ?? "en";
+  const modeKey = `grade-view-mode:${subjectId}`;
+  const collapsedKey = `grade-collapsed-tags:${subjectId}`;
+  const [mode, setMode] = useState<GradeViewMode>("assignment");
+  const [collapsedTags, setCollapsedTags] = useState<string[]>([]);
+
+  // Read after mount so SSR and the first client render agree.
+  React.useEffect(() => {
+    setMode(readPref<GradeViewMode>(modeKey, "assignment"));
+    setCollapsedTags(readPref<string[]>(collapsedKey, []));
+  }, [modeKey, collapsedKey]);
+
+  const changeMode = (next: GradeViewMode) => {
+    setMode(next);
+    writePref(modeKey, next);
+  };
+
+  const toggleGroup = (tag: string) => {
+    setCollapsedTags((prev) => {
+      const next = prev.includes(tag)
+        ? prev.filter((t) => t !== tag)
+        : [...prev, tag];
+      writePref(collapsedKey, next);
+      return next;
+    });
+  };
+
+  const { segments, columns } = React.useMemo(
+    () =>
+      assignmentsOverview.data
+        ? buildGradeColumns(assignmentsOverview.data, mode, collapsedTags)
+        : { segments: [], columns: [] },
+    [assignmentsOverview.data, mode, collapsedTags],
+  );
+
+  const activeStudents = React.useMemo(
+    () =>
+      (studentOnSubjects.data ?? [])
+        .filter((s) => s.isActive)
+        .sort((a, b) => Number(a.number) - Number(b.number)),
+    [studentOnSubjects.data],
+  );
   const handleExportExcel = async () => {
     try {
       setLoading(true);
@@ -90,7 +159,7 @@ function Grade({
     const assignmentTotal = assignmentsOverview.data.assignments.reduce(
       (acc, item) => {
         // Prefer weight if it exists, otherwise use maxScore
-        return acc + (item.assignment.weight ?? item.assignment.maxScore);
+        return acc + assignmentMax(item.assignment);
       },
       0,
     );
@@ -157,6 +226,19 @@ function Grade({
         </PopupLayout>
       )}
 
+      {triggerShare && subject.data && (
+        <PopupLayout onClose={() => setTriggerShare(false)}>
+          <GradeSharePopup
+            subject={subject.data}
+            toast={toast}
+            onClose={() => {
+              document.body.style.overflow = "auto";
+              setTriggerShare(false);
+            }}
+          />
+        </PopupLayout>
+      )}
+
       {selectScoreOnSubject && (
         <PopupLayout
           onClose={() => {
@@ -186,53 +268,71 @@ function Grade({
         </PopupLayout>
       )}
 
-      <header className="mx-auto flex w-full flex-col justify-between gap-4 p-3 md:max-w-screen-md md:flex-row md:gap-0 md:px-5 xl:max-w-screen-lg">
-        <section className="text-center md:text-left">
-          <h1 className="text-2xl font-semibold md:text-3xl">
-            {gradeData.title(language.data ?? "en")}
+      <header className="mx-auto flex w-full flex-col justify-between gap-4 p-3 md:max-w-screen-md md:px-5 lg:max-w-screen-lg lg:flex-row lg:items-end 2xl:max-w-screen-2xl">
+        <section className="text-center lg:text-left">
+          <h1 className="text-2xl font-semibold text-icon-color md:text-3xl">
+            {gradeData.title(lang)}
           </h1>
           <span className="text-sm text-gray-400 md:text-base">
-            {gradeData.description(language.data ?? "en")}
+            {gradeData.description(lang)}
           </span>
         </section>
-        <section className="flex flex-col items-center gap-2 md:gap-1 xl:flex-row">
-          <div className="flex items-center gap-1 rounded-2xl bg-background-color p-1">
-            <button
-              onClick={() => setView("table")}
-              className={`flex items-center gap-1 rounded-xl px-3 py-1 text-sm font-semibold transition-colors ${
-                view === "table"
-                  ? "bg-primary-color text-white"
-                  : "text-icon-color hover:bg-gray-200"
-              }`}
-            >
-              <FaTable />
-              {gradeData.table(language.data ?? "en")}
-            </button>
-            <button
-              onClick={() => setView("leaderboard")}
-              className={`flex items-center gap-1 rounded-xl px-3 py-1 text-sm font-semibold transition-colors ${
-                view === "leaderboard"
-                  ? "bg-primary-color text-white"
-                  : "text-icon-color hover:bg-gray-200"
-              }`}
-            >
-              <MdLeaderboard />
-              {gradeData.leaderboard(language.data ?? "en")}
-            </button>
-          </div>
+        <section className="flex flex-wrap items-center justify-center gap-2 lg:justify-end">
+          <GradeSegmentedControl
+            value={view}
+            onChange={setView}
+            options={[
+              { value: "table", label: gradeData.table(lang), icon: <FaTable /> },
+              {
+                value: "leaderboard",
+                label: gradeData.leaderboard(lang),
+                icon: <MdLeaderboard />,
+              },
+            ]}
+          />
+          {view === "table" && (
+            <GradeSegmentedControl
+              value={mode}
+              onChange={changeMode}
+              options={[
+                {
+                  value: "assignment",
+                  label: gradeTableData.byAssignment(lang),
+                  icon: <TbColumns3 />,
+                },
+                {
+                  value: "tag",
+                  label: gradeTableData.byTagGroup(lang),
+                  icon: <TbLayoutColumns />,
+                },
+              ]}
+            />
+          )}
           <button
-            onClick={() => setTriggerGradeSetting(true)}
-            className="main-button flex w-max items-center justify-center gap-1 py-1 ring-1 ring-blue-600"
+            type="button"
+            onClick={() => setTriggerShare(true)}
+            disabled={!subject.data}
+            className={SECONDARY_BUTTON}
           >
-            <>
-              <IoMdSettings />
-              {gradeData.setting(language.data ?? "en")}
-            </>
+            {isShared && (
+              <span className="h-2 w-2 rounded-full bg-success-color" />
+            )}
+            <TbShare />
+            {isShared ? gradeTableData.shared(lang) : gradeTableData.share(lang)}
           </button>
           <button
+            type="button"
+            onClick={() => setTriggerGradeSetting(true)}
+            className={SECONDARY_BUTTON}
+          >
+            <IoMdSettings />
+            {gradeData.setting(lang)}
+          </button>
+          <button
+            type="button"
             disabled={loading}
             onClick={handleExportExcel}
-            className="main-button flex w-32 items-center justify-center gap-1 py-1 ring-1 ring-blue-600"
+            className={`${SECONDARY_BUTTON} min-w-28`}
           >
             {loading ? (
               <LoadingSpinner />
@@ -245,428 +345,29 @@ function Grade({
           </button>
         </section>
       </header>
-      <main className="mx-auto mt-5 flex w-full flex-col items-center md:max-w-screen-md md:px-0 lg:max-w-screen-lg 2xl:max-w-screen-2xl">
+      <main className="mx-auto mt-2 flex w-full flex-col items-center px-3 md:max-w-screen-md md:px-0 lg:max-w-screen-lg 2xl:max-w-screen-2xl">
         {view === "table" && (
-          <div className="relative mt-5 h-[30rem] w-full overflow-auto rounded-2xl bg-white 2xl:h-[40rem]">
-            <table className="table-fixed bg-white md:min-w-[640px]">
-              <thead className="">
-                <tr className="sticky top-0 z-30 border-b bg-white">
-                  <th className="sticky left-0 z-30 bg-white text-sm font-semibold">
-                    <div className="flex w-48 items-center justify-start gap-2 pl-4 md:w-96">
-                      <FaUser />
-                      Name
-                    </div>
-                  </th>
-                  {assignmentsOverview.isLoading
-                    ? [...Array(20)].map((_, index) => {
-                        const number = getRandomSlateShade();
-                        const color = getSlateColorStyle(number);
-                        return (
-                          <th key={index} className="text-sm font-semibold">
-                            <div
-                              style={color}
-                              className="h-14 w-40 animate-pulse"
-                            ></div>
-                          </th>
-                        );
-                      })
-                    : [
-                        assignmentsOverview.data?.assignments.map((data) => {
-                          return (
-                            <th
-                              key={data.assignment.id}
-                              className="group text-sm font-semibold"
-                            >
-                              <button
-                                onClick={() =>
-                                  setSelectStudentOnAssignment({
-                                    assignment: data.assignment,
-                                  })
-                                }
-                                className="relative flex w-52 min-w-52 flex-col items-start p-2 hover:bg-gray-100 hover:ring-1 active:bg-gray-200 group-hover:w-max"
-                              >
-                                <span className="w-max max-w-40 truncate group-hover:max-w-none">
-                                  {data.assignment.title}
-                                </span>
-                                <span className="text-xs text-gray-500">
-                                  {data.assignment.maxScore}{" "}
-                                  {gradeData.score(language.data ?? "en")}
-                                  {data.assignment.weight !== null &&
-                                    ` / ${
-                                      data.assignment.weight
-                                    }% ${gradeData.weight(
-                                      language.data ?? "en",
-                                    )}`}
-                                </span>
-                                <div className="rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-2 text-xs text-white">
-                                  {gradeData.assignment_score(
-                                    language.data ?? "en",
-                                  )}{" "}
-                                </div>
-                              </button>
-                            </th>
-                          );
-                        }),
-                        assignmentsOverview.data?.scoreOnSubjects.map(
-                          (data) => {
-                            return (
-                              <th
-                                onClick={() => {
-                                  setSelectScoreOnSubject(data.scoreOnSubject);
-                                }}
-                                key={data.scoreOnSubject.id}
-                                className="group text-sm font-semibold"
-                              >
-                                <button className="relative flex w-max min-w-40 flex-col items-start p-2 hover:bg-gray-100 hover:ring-1 active:bg-gray-200 group-hover:w-max">
-                                  <span className="w-max max-w-40 truncate group-hover:max-w-none">
-                                    {data.scoreOnSubject.title}
-                                  </span>
-                                  {data.scoreOnSubject.maxScore !== null && (
-                                    <span className="text-xs text-gray-500">
-                                      {data.scoreOnSubject.maxScore !== null &&
-                                        `${data.scoreOnSubject.maxScore} ${gradeData.score(language.data ?? "en")} `}{" "}
-                                      /{" "}
-                                      {data.scoreOnSubject.weight !== null &&
-                                        ` ${
-                                          data.scoreOnSubject.weight
-                                        }% ${gradeData.weight(language.data ?? "en")}`}
-                                    </span>
-                                  )}
-
-                                  <div className="gradient-bg rounded-2xl px-2 text-xs text-white">
-                                    {gradeData.speical_score(
-                                      language.data ?? "en",
-                                    )}{" "}
-                                  </div>
-                                </button>
-                              </th>
-                            );
-                          },
-                        ),
-                      ]}
-                  <th className="group text-sm font-semibold">
-                    <div className="relative flex w-40 min-w-40 flex-col items-start p-2 hover:bg-gray-100 hover:ring-1 active:bg-gray-200 group-hover:w-max">
-                      <span className="w-max max-w-40 truncate group-hover:max-w-none">
-                        Total Score
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        ({total_score} {gradeData.score(language.data ?? "en")})
-                      </span>
-                    </div>
-                  </th>
-                  <th className="group text-sm font-semibold">
-                    <div className="relative flex w-40 min-w-40 flex-col items-start p-2 hover:bg-gray-100 hover:ring-1 active:bg-gray-200 group-hover:w-max">
-                      <span className="w-max max-w-40 truncate group-hover:max-w-none">
-                        Grade
-                      </span>
-                    </div>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {studentOnSubjects.data
-                  ?.filter((s) => s.isActive)
-                  ?.sort((a, b) => Number(a.number) - Number(b.number))
-                  ?.map((student, index) => {
-                    const odd = index % 2 === 0;
-                    const { totalScore, grade, completionPercentage } =
-                      totalsByStudentId.get(student.id) ?? {
-                        totalScore: 0,
-                        grade: "N/A",
-                        completionPercentage: null,
-                      };
-                    const gradedLabel = gradeData.graded(language.data ?? "en");
-                    const completionColor =
-                      completionPercentage === null
-                        ? "text-gray-400"
-                        : completionPercentage === 100
-                          ? "bg-success-color text-white"
-                          : completionPercentage >= 50
-                            ? "bg-warning-color text-black"
-                            : "bg-error-color text-white";
-                    return (
-                      <tr
-                        className={` ${
-                          odd ? "bg-gray-200/20" : "bg-white"
-                        } group hover:bg-gray-200/40`}
-                        key={student.id}
-                      >
-                        <td
-                          className={`sticky left-0 z-20 text-sm font-semibold ${
-                            odd ? "bg-gray-100" : "bg-white"
-                          } group-hover:bg-gray-200`}
-                        >
-                          <div className="flex h-14 w-48 items-center justify-between gap-2 px-4 md:w-96">
-                            <div className="flex items-center gap-2">
-                              <div className="relative h-8 w-8 overflow-hidden rounded-2xl ring-1 md:h-10 md:w-10">
-                                <Image
-                                  src={student.photo}
-                                  alt={student.firstName}
-                                  fill
-                                  sizes="(max-width: 768px) 100vw, 33vw"
-                                  placeholder="blur"
-                                  blurDataURL={decodeBlurhashToCanvas(
-                                    student.blurHash ?? defaultBlurHash,
-                                  )}
-                                  className="object-cover"
-                                />
-                              </div>
-                              <div>
-                                <h1 className="text-xs font-semibold md:text-sm">
-                                  {student.firstName} {student.lastName}
-                                </h1>
-                                <p className="text-xs text-gray-500">
-                                  Number {student.number}
-                                </p>
-                                <span
-                                  className={`mt-0.5 inline-block w-max rounded-2xl px-2 text-xs font-normal ${completionColor}`}
-                                >
-                                  {completionPercentage === null
-                                    ? "—"
-                                    : `${completionPercentage}% ${gradedLabel}`}
-                                </span>
-                              </div>
-                            </div>
-                            <Link
-                              href={`/subject/${subjectId}/reports/${student.id}`}
-                              target="_blank"
-                              className="second-button hidden items-center justify-center border text-sm md:flex"
-                            >
-                              Report <MdFileDownload />
-                            </Link>
-                          </div>
-                        </td>
-                        {assignmentsOverview.isLoading
-                          ? [...Array(20)].map((_, index) => {
-                              const number = getRandomSlateShade();
-                              const color = getSlateColorStyle(number);
-                              return (
-                                <td key={index}>
-                                  <div
-                                    style={color}
-                                    className="flex h-14 w-full animate-pulse"
-                                  ></div>
-                                </td>
-                              );
-                            })
-                          : [
-                              assignmentsOverview.data?.assignments
-                                .filter((a) => a.assignment.type !== "Material")
-                                .map((data, index) => {
-                                  const studentOnAssignment =
-                                    data.students.find(
-                                      (a) =>
-                                        a.studentOnSubjectId === student.id,
-                                    );
-                                  if (!studentOnAssignment) {
-                                    return (
-                                      <td key={data.assignment.id + student.id}>
-                                        <button className="relative flex h-14 w-full cursor-pointer select-none flex-col items-center justify-center bg-black text-white ring-black transition hover:ring-1 hover:drop-shadow-md">
-                                          NO DATA
-                                        </button>
-                                      </td>
-                                    );
-                                  }
-
-                                  let score:
-                                    | number
-                                    | "No Work"
-                                    | "Not Graded"
-                                    | string = 0;
-
-                                  if (
-                                    studentOnAssignment.status === "REVIEWD"
-                                  ) {
-                                    score = studentOnAssignment.score;
-                                  }
-                                  if (
-                                    studentOnAssignment.status === "PENDDING"
-                                  ) {
-                                    score = "No Work";
-                                  }
-                                  if (
-                                    studentOnAssignment.status === "SUBMITTED"
-                                  ) {
-                                    score = "Not Graded";
-                                  }
-                                  if (
-                                    studentOnAssignment.status === "IMPROVED"
-                                  ) {
-                                    score = "Need Improvement";
-                                  }
-
-                                  if (
-                                    data.assignment.weight !== null &&
-                                    studentOnAssignment.status === "REVIEWD"
-                                  ) {
-                                    const originalScore =
-                                      studentOnAssignment.score /
-                                      data.assignment.maxScore;
-                                    score = (
-                                      originalScore * data.assignment.weight
-                                    ).toFixed(2);
-                                  }
-                                  return (
-                                    <td
-                                      key={
-                                        data.assignment.id +
-                                        studentOnAssignment.id
-                                      }
-                                      className="text-sm font-semibold"
-                                    >
-                                      <button
-                                        onClick={() => {
-                                          setSelectStudentOnAssignment({
-                                            assignment: data.assignment,
-                                            studentOnAssignment,
-                                          });
-                                        }}
-                                        className="h-14 w-full"
-                                      >
-                                        {score === "No Work" ? (
-                                          <div className="relative flex h-14 w-full cursor-pointer select-none flex-col items-center justify-center bg-red-500 text-white ring-red-500 transition hover:ring-1 hover:drop-shadow-md">
-                                            <MdMoodBad />
-                                            <span>
-                                              {gradeData.no_work(
-                                                language.data ?? "en",
-                                              )}
-                                            </span>
-                                          </div>
-                                        ) : score === "Not Graded" ? (
-                                          <div className="relative flex h-14 w-full cursor-pointer select-none flex-col items-center justify-center bg-orange-500 text-white ring-orange-500 transition hover:ring-1 hover:drop-shadow-md">
-                                            <FaCheckSquare />
-                                            <span>
-                                              {gradeData.wait_reviewed(
-                                                language.data ?? "en",
-                                              )}
-                                            </span>
-                                          </div>
-                                        ) : score === "Need Improvement" ? (
-                                          <div className="relative flex h-14 w-full cursor-pointer select-none flex-col items-center justify-center bg-yellow-500 text-white ring-yellow-500 transition hover:ring-1 hover:drop-shadow-md">
-                                            <FaExclamationTriangle />
-                                            <span>
-                                              {gradeData.need_improvement(
-                                                language.data ?? "en",
-                                              )}
-                                            </span>
-                                          </div>
-                                        ) : (
-                                          <div className="relative flex h-14 w-full cursor-pointer flex-col items-center justify-center ring-black transition hover:ring-1 hover:drop-shadow-md">
-                                            <span className="text-lg">
-                                              {score}
-                                            </span>
-                                            {data.assignment.weight !==
-                                              null && (
-                                              <span className="text-xs text-gray-500">
-                                                (
-                                                {studentOnAssignment.score.toFixed(
-                                                  2,
-                                                )}
-                                                )
-                                              </span>
-                                            )}
-                                          </div>
-                                        )}
-                                      </button>
-                                    </td>
-                                  );
-                                }),
-                              assignmentsOverview.data?.scoreOnSubjects.map(
-                                (data) => {
-                                  const scoreOnStudents = data.students.filter(
-                                    (s) => s.studentOnSubjectId === student.id,
-                                  );
-
-                                  if (scoreOnStudents.length === 0) {
-                                    return (
-                                      <td
-                                        key={
-                                          data.scoreOnSubject.id + student.id
-                                        }
-                                      >
-                                        <button
-                                          onClick={() =>
-                                            setSelectScoreOnSubject({
-                                              ...data.scoreOnSubject,
-                                              studentOnSubject: student,
-                                            })
-                                          }
-                                          className="relative flex h-14 w-full cursor-pointer select-none flex-col items-center justify-center bg-black text-white ring-black transition hover:ring-1 hover:drop-shadow-md"
-                                        >
-                                          NO DATA
-                                        </button>
-                                      </td>
-                                    );
-                                  }
-
-                                  const sumRawScore = scoreOnStudents.reduce(
-                                    (previousValue, current) => {
-                                      return (previousValue += current.score);
-                                    },
-                                    0,
-                                  );
-
-                                  let score = sumRawScore;
-                                  const maxScore =
-                                    data.scoreOnSubject.maxScore ?? 100;
-                                  if (data.scoreOnSubject.weight !== null) {
-                                    const originalScore =
-                                      (sumRawScore > maxScore
-                                        ? maxScore
-                                        : sumRawScore) / maxScore;
-                                    score =
-                                      originalScore *
-                                      data.scoreOnSubject.weight;
-                                  }
-
-                                  return (
-                                    <td
-                                      key={
-                                        data.scoreOnSubject.id +
-                                        scoreOnStudents[0].id
-                                      }
-                                      className="text-sm font-semibold"
-                                    >
-                                      <button
-                                        onClick={() =>
-                                          setSelectScoreOnSubject({
-                                            ...data.scoreOnSubject,
-                                            studentOnSubject: student,
-                                          })
-                                        }
-                                        className="relative flex h-14 w-full cursor-pointer flex-col items-center justify-center ring-black transition hover:ring-1 hover:drop-shadow-md"
-                                      >
-                                        <span className="text-lg">
-                                          {score.toFixed(2)}
-                                        </span>
-                                        {data.scoreOnSubject.weight !==
-                                          null && (
-                                          <span className="text-xs text-gray-500">
-                                            ({sumRawScore.toFixed(2)})
-                                          </span>
-                                        )}
-                                      </button>
-                                    </td>
-                                  );
-                                },
-                              ),
-                            ]}
-                        <td className="text-sm font-semibold">
-                          <div className="relative flex h-14 w-full flex-col items-center justify-center ring-black">
-                            <span>{totalScore.toFixed(2)}</span>
-                          </div>
-                        </td>
-                        <td className="text-sm font-semibold">
-                          <div className="relative flex h-14 w-full flex-col items-center justify-center ring-black">
-                            <span>{grade}</span>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-              </tbody>
-            </table>
-          </div>
+          <GradeTable
+            subjectId={subjectId}
+            language={lang}
+            segments={segments}
+            columns={columns}
+            students={activeStudents}
+            totalsByStudentId={totalsByStudentId}
+            totalMax={total_score}
+            loading={assignmentsOverview.isLoading || studentOnSubjects.isLoading}
+            onToggleGroup={toggleGroup}
+            onOpenAssignment={(assignment, studentOnAssignment) =>
+              setSelectStudentOnAssignment({ assignment, studentOnAssignment })
+            }
+            onOpenSpecial={(scoreOnSubject, student) =>
+              setSelectScoreOnSubject(
+                student
+                  ? { ...scoreOnSubject, studentOnSubject: student }
+                  : scoreOnSubject,
+              )
+            }
+          />
         )}
         {view === "leaderboard" &&
           (assignmentsOverview.isLoading || studentOnSubjects.isLoading ? (
