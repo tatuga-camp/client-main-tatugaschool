@@ -71,6 +71,9 @@ export const gradeData = {
         return "NEED IMPROVEMENT";
     }
   },
+  // Narrow-column (phone) label; "IMPROVEMENT" alone is wider than a cell.
+  need_improvement_short: (language: Language) =>
+    language === "th" ? "ต้องปรับปรุง" : "REVISE",
   speical_score: (language: Language) => {
     switch (language) {
       case "en":
