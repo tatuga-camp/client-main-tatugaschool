@@ -31,7 +31,6 @@ function StudentCreate({ onClose, classId, toast, schoolId }: Props) {
   const [triggerExcel, setTriggerExcel] = React.useState(false);
   const language = useGetLanguage();
   const create = useCreateStudent();
-  const sound = useSound("/sounds/ding.mp3") as HTMLAudioElement;
   const [loading, setLoading] = React.useState(false);
   const [photoFile, setPhotoFile] = React.useState<File | null>(null);
   const [data, setData] = React.useState<{
@@ -60,7 +59,6 @@ function StudentCreate({ onClose, classId, toast, schoolId }: Props) {
         ...(data.photo && { photo: data.photo }),
         ...(data.hash && { hash: data.hash }),
       });
-      sound.play();
       toast.current?.show({
         severity: "success",
         summary: "Success",
@@ -224,7 +222,6 @@ type PropsCreateByExcel = {
 };
 function CreateByExcel({ classId, toast }: PropsCreateByExcel) {
   const language = useGetLanguage();
-  const sound = useSound("/sounds/ding.mp3") as HTMLAudioElement;
   const [textData, setTextData] = React.useState<string>("");
   const tableRef = React.useRef<HTMLUListElement>(null);
   const create = useCreateStudent();
@@ -271,7 +268,6 @@ function CreateByExcel({ classId, toast }: PropsCreateByExcel) {
           number: student.number,
         });
       }
-      sound.play();
       toast.current?.show({
         severity: "success",
         summary: "Success",

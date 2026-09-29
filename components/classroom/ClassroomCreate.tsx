@@ -7,7 +7,6 @@ import { useCreateClassroom } from "../../react-query";
 import LoadingSpinner from "../common/LoadingSpinner";
 import { Classroom, ErrorMessages } from "../../interfaces";
 import Swal from "sweetalert2";
-import { useSound } from "../../hook";
 import { Toast } from "primereact/toast";
 
 type Props = {
@@ -18,7 +17,6 @@ type Props = {
 };
 
 function ClassesCreate({ schoolId, toast, onClose, onSuccess }: Props) {
-  const sound = useSound("/sounds/ding.mp3") as HTMLAudioElement;
   const createClassroom = useCreateClassroom();
   const [data, setData] = React.useState<{
     title: string;
@@ -39,7 +37,6 @@ function ClassesCreate({ schoolId, toast, onClose, onSuccess }: Props) {
         level: data.level,
         schoolId: schoolId,
       });
-      sound.play();
       toast.current?.show({
         severity: "success",
         summary: "Success",
@@ -67,7 +64,7 @@ function ClassesCreate({ schoolId, toast, onClose, onSuccess }: Props) {
   };
 
   return (
-    <form onSubmit={handleCreate} className="w-full flex flex-col gap-1">
+    <form onSubmit={handleCreate} className="flex w-full flex-col gap-1">
       <ClassLevel
         required={true}
         value={data.level}
@@ -94,7 +91,7 @@ function ClassesCreate({ schoolId, toast, onClose, onSuccess }: Props) {
 
       <button
         disabled={createClassroom.isPending}
-        className="main-button rounded-full mt-5 flex items-center justify-center"
+        className="main-button mt-5 flex items-center justify-center rounded-full"
       >
         {createClassroom.isPending ? <LoadingSpinner /> : <span>Create</span>}
       </button>

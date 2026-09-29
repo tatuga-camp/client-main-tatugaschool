@@ -33,7 +33,6 @@ function ClassroomSetting({ classroom, toast }: Props) {
   });
   const user = useGetUser();
   const router = useRouter();
-  const sound = useSound("/sounds/ding.mp3") as HTMLAudioElement;
   const deleteClass = useDeleteClassroom();
   const [classroomData, setClassroomData] =
     React.useState<Classroom>(classroom);
@@ -52,7 +51,6 @@ function ClassroomSetting({ classroom, toast }: Props) {
           isAchieved: classroomData.isAchieved,
         },
       });
-      sound.play();
       toast.current?.show({
         severity: "success",
         summary: "Success",
@@ -87,7 +85,6 @@ function ClassroomSetting({ classroom, toast }: Props) {
       await deleteClass.mutateAsync({
         classId: classId,
       });
-      sound.play();
       Swal.fire({
         title: "Success",
         text: "Classroom Deleted",

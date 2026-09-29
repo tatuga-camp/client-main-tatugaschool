@@ -24,7 +24,6 @@ import UpgradePlanModal from "../payments/UpgradePlanModal";
 import RenewPlanModal from "../payments/RenewPlanModal";
 import Dropdown from "../common/Dropdown";
 import { Toast } from "primereact/toast";
-import { useSound } from "../../hook";
 import { schoolDataLanguage } from "../../data/languages";
 import { RenewDataLanguage } from "../../data/languages/renew";
 import useGetRoleOnSchool from "../../hook/useGetRoleOnSchool";
@@ -35,7 +34,6 @@ const BillingPlanSection = (props: { schoolId: string }) => {
   });
   const router = useRouter();
   const toast = useRef<Toast>(null);
-  const song = useSound("/sounds/ding.mp3") as HTMLAudioElement;
   const school = useGetSchool({ schoolId: props.schoolId });
   const members = useGetMemberOnSchoolBySchool({
     schoolId: props.schoolId,
@@ -254,7 +252,6 @@ const BillingPlanSection = (props: { schoolId: string }) => {
           billingManagerId: data.userId,
         },
       });
-      song.play();
       toast.current?.show({
         severity: "success",
         summary: "Success",
