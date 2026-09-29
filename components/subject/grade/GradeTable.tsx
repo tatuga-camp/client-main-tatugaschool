@@ -68,9 +68,9 @@ function GradeTable({
           <button
             type="button"
             onClick={() => onOpenAssignment(assignment)}
-            className="flex w-40 flex-col items-start gap-0.5 px-3 py-2 text-left transition-colors hover:bg-gray-100"
+            className="flex w-14 flex-col items-start gap-0.5 px-1.5 py-1.5 text-left transition-colors hover:bg-gray-100 md:w-40 md:px-3 md:py-2"
           >
-            <span className="flex w-full items-center gap-1 text-xs font-semibold text-icon-color">
+            <span className="flex w-full items-center gap-1 text-[11px] font-semibold text-icon-color md:text-xs">
               <span className="truncate" title={assignment.title}>
                 {assignment.title}
               </span>
@@ -81,7 +81,7 @@ function GradeTable({
                 />
               )}
             </span>
-            <span className="text-[11px] tabular-nums text-gray-500">
+            <span className="w-full truncate text-[10px] tabular-nums text-gray-500 md:text-[11px]">
               {assignment.maxScore} {gradeTableData.points(language)}
               {assignment.weight !== null && ` · ${assignment.weight}%`}
             </span>
@@ -96,15 +96,15 @@ function GradeTable({
           <button
             type="button"
             onClick={() => onOpenSpecial(scoreOnSubject)}
-            className="flex w-36 flex-col items-start gap-0.5 px-3 py-2 text-left transition-colors hover:bg-gray-100"
+            className="flex w-14 flex-col items-start gap-0.5 px-1.5 py-1.5 text-left transition-colors hover:bg-gray-100 md:w-36 md:px-3 md:py-2"
           >
             <span
-              className="w-full truncate text-xs font-semibold text-icon-color"
+              className="w-full truncate text-[11px] font-semibold text-icon-color md:text-xs"
               title={scoreOnSubject.title}
             >
               {scoreOnSubject.title}
             </span>
-            <span className="text-[11px] text-gray-500">
+            <span className="w-full truncate text-[10px] text-gray-500 md:text-[11px]">
               {gradeTableData.special(language)}
               {scoreOnSubject.maxScore !== null &&
                 ` · ${scoreOnSubject.maxScore} ${gradeTableData.points(language)}`}
@@ -120,14 +120,14 @@ function GradeTable({
         rowSpan={rowSpan}
         className={`border-b border-r border-gray-100 p-0 text-left align-bottom font-normal ${TINT}`}
       >
-        <div className="flex w-32 flex-col items-start gap-0.5 px-3 py-2">
+        <div className="flex w-14 flex-col items-start gap-0.5 px-1.5 py-1.5 md:w-32 md:px-3 md:py-2">
           <span
-            className="w-full truncate text-xs font-semibold text-primary-color"
+            className="w-full truncate text-[11px] font-semibold text-primary-color md:text-xs"
             title={column.tag}
           >
             {column.tag} {gradeTableData.groupTotal(language)}
           </span>
-          <span className="text-[11px] tabular-nums text-gray-500">
+          <span className="w-full truncate text-[10px] tabular-nums text-gray-500 md:text-[11px]">
             {formatScore(column.maxTotal)} {gradeTableData.points(language)}
           </span>
         </div>
@@ -144,7 +144,7 @@ function GradeTable({
           key={column.key}
           className={`border-b border-r border-gray-100 p-0 ${TINT}`}
         >
-          <div className="flex h-14 items-center justify-center text-sm font-semibold tabular-nums text-primary-color">
+          <div className="flex h-11 items-center justify-center text-xs font-semibold tabular-nums text-primary-color md:h-14 md:text-sm">
             {formatScore(value)}
           </div>
         </td>
@@ -187,7 +187,7 @@ function GradeTable({
           <tr>
             <th
               rowSpan={headRowSpan}
-              className={`sticky left-0 z-40 ${HEAD} px-3 py-2 align-middle text-xs font-medium text-gray-500`}
+              className={`sticky left-0 z-40 ${HEAD} px-1.5 py-1.5 align-middle text-[11px] font-medium text-gray-500 md:px-3 md:py-2 md:text-xs`}
             >
               {gradeTableData.student(language)}
             </th>
@@ -226,9 +226,9 @@ function GradeTable({
             )}
             <th
               rowSpan={headRowSpan}
-              className={`z-30 border-b border-r border-gray-100 px-3 py-2 text-left align-bottom font-normal lg:sticky lg:right-20 ${TINT}`}
+              className={`z-30 border-b border-r border-gray-100 px-1.5 py-1.5 text-left align-bottom font-normal md:px-3 md:py-2 lg:sticky lg:right-20 ${TINT}`}
             >
-              <div className="flex w-24 flex-col gap-0.5">
+              <div className="flex w-12 flex-col gap-0.5 md:w-24">
                 <span className="text-xs font-semibold text-icon-color">
                   {gradeTableData.total(language)}
                 </span>
@@ -239,7 +239,7 @@ function GradeTable({
             </th>
             <th
               rowSpan={headRowSpan}
-              className={`z-30 w-20 min-w-20 border-b border-gray-100 px-3 py-2 text-left align-bottom text-xs font-semibold text-icon-color lg:sticky lg:right-0 ${TINT}`}
+              className={`z-30 w-12 min-w-12 border-b border-gray-100 px-1.5 py-1.5 text-left align-bottom text-[11px] font-semibold text-icon-color md:w-20 md:min-w-20 md:px-3 md:py-2 md:text-xs lg:sticky lg:right-0 ${TINT}`}
             >
               {gradeTableData.grade(language)}
             </th>
@@ -283,14 +283,14 @@ function GradeTable({
                     <td
                       className={`z-20 border-b border-r border-gray-100 p-0 lg:sticky lg:right-20 ${TINT}`}
                     >
-                      <div className="flex h-14 w-24 items-center justify-center text-sm font-semibold tabular-nums text-icon-color">
+                      <div className="flex h-11 w-12 items-center justify-center text-xs font-semibold tabular-nums text-icon-color md:h-14 md:w-24 md:text-sm">
                         {formatScore(totals?.totalScore ?? 0)}
                       </div>
                     </td>
                     <td
-                      className={`z-20 w-20 min-w-20 border-b border-gray-100 p-0 lg:sticky lg:right-0 ${TINT}`}
+                      className={`z-20 w-12 min-w-12 border-b border-gray-100 p-0 md:w-20 md:min-w-20 lg:sticky lg:right-0 ${TINT}`}
                     >
-                      <div className="flex h-14 items-center justify-center text-sm font-semibold text-icon-color">
+                      <div className="flex h-11 items-center justify-center text-xs font-semibold text-icon-color md:h-14 md:text-sm">
                         {totals?.grade ?? "N/A"}
                       </div>
                     </td>

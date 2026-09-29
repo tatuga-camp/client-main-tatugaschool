@@ -3,16 +3,24 @@ import Image from "next/image";
 import { ProgressBar } from "primereact/progressbar";
 import { Toast } from "primereact/toast";
 import React, { useEffect } from "react";
-import { CiSaveUp2 } from "react-icons/ci";
-import { IoMdClose } from "react-icons/io";
+import { IoCloseOutline } from "react-icons/io5";
+import { LuCheck } from "react-icons/lu";
 import Swal from "sweetalert2";
+import { defaultBlurHash } from "../../data";
+import { attendanceTableUiLanguage } from "../../data/languages";
 import { useSound } from "../../hook";
 import {
   AttendanceStatusList,
   AttendanceTable,
   ErrorMessages,
 } from "../../interfaces";
-import { useCreateAttendance, useUpdateAttendance } from "../../react-query";
+import {
+  useCreateAttendance,
+  useGetLanguage,
+  useUpdateAttendance,
+} from "../../react-query";
+import { decodeBlurhashToCanvas } from "../../utils";
+import LoadingSpinner from "../common/LoadingSpinner";
 import TextEditor from "../common/TextEditor";
 import { SelectAttendance } from "./Attendance";
 
@@ -29,8 +37,8 @@ function AttendanceView({
   attendanceTable,
   toast,
 }: props) {
-  const sucessSoud = useSound("/sounds/ding.mp3");
   const queryClient = useQueryClient();
+  const { data: language = "en" } = useGetLanguage();
   const [attendanceData, setAttendanceData] =
     React.useState<SelectAttendance | null>();
   const updateAttendance = useUpdateAttendance();
@@ -63,12 +71,12 @@ function AttendanceView({
         },
         queryClient,
       });
-      sucessSoud?.play();
       toast.current?.show({
         severity: "success",
         summary: "Updated",
         detail: "Attendance has been updated",
       });
+      onClose();
     } catch (error) {
       console.log(error);
       let result = error as ErrorMessages;
@@ -86,7 +94,7 @@ function AttendanceView({
   const handleCreate = async () => {
     try {
       if (!attendanceData?.status) {
-        throw new Error("Status is required");
+        throw new Error(attendanceTableUiLanguage.pickStatus(language));
       }
       await createAttendance.mutateAsync({
         request: {
@@ -97,7 +105,6 @@ function AttendanceView({
         },
         queryClient,
       });
-      sucessSoud?.play();
       toast.current?.show({
         severity: "success",
         summary: "created",
@@ -131,134 +138,161 @@ function AttendanceView({
     };
   }, [attendanceData]);
 
+  const isEdit = !!selectAttendance?.id;
+  const isPending = updateAttendance.isPending || createAttendance.isPending;
+  // Hidden statuses stay pickable when the record already uses one.
+  const statusOptions = attendanceTable.statusLists.filter(
+    (s) => !s.isHidden || s.title === selectAttendance.status,
+  );
+  const { student } = selectAttendance;
+
   return (
-    <main className="flex max-h-screen flex-col gap-2 overflow-y-auto">
-      {updateAttendance.isPending && (
-        <ProgressBar mode="indeterminate" style={{ height: "6px" }} />
-      )}
-
-      <section className="flex w-full flex-col justify-between border-b py-2 md:flex-row">
-        <div className="text-lg font-semibold">
-          View Attendance Detail{" "}
-          <span className="text-xs font-normal text-gray-400">
-            ( View / Edit )
-          </span>
-        </div>
-        <div className="flex items-center gap-2 md:order-2">
-          {selectAttendance?.id ? (
-            <button
-              ref={saveRef}
-              disabled={updateAttendance.isPending}
-              onClick={handleUpdate}
-              className="second-button flex items-center justify-center gap-1 border py-1"
-            >
-              <CiSaveUp2 />
-              Save Change
-            </button>
-          ) : (
-            <button
-              ref={saveRef}
-              disabled={createAttendance.isPending}
-              onClick={handleCreate}
-              className="second-button flex items-center justify-center gap-1 border py-1"
-            >
-              <CiSaveUp2 />
-              Create
-            </button>
-          )}
-          <button
-            onClick={() => onClose()}
-            className="flex h-6 w-6 items-center justify-center rounded text-lg font-semibold hover:bg-gray-300/50"
-          >
-            <IoMdClose />
-          </button>
-        </div>
-      </section>
-
-      <div className="flex h-full w-full flex-col overflow-auto md:h-max md:max-h-96 md:flex-row">
-        <div className="flex w-full flex-col items-center justify-center gap-1 overflow-y-auto bg-white md:w-1/4">
-          <div className="relative h-20 w-20">
+    <div className="flex max-h-[92dvh] w-[95vw] max-w-lg flex-col overflow-hidden rounded-2xl bg-white font-Anuphan text-icon-color">
+      <header className="flex items-start justify-between gap-3 border-b p-4 md:px-6">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full ring-1 ring-gray-200">
             <Image
-              src={selectAttendance.student.photo}
-              alt="Student"
+              src={student.photo}
+              alt={student.firstName}
               fill
-              sizes="(max-width: 768px) 100vw, 33vw"
-              className="rounded-full object-contain"
+              sizes="48px"
+              placeholder="blur"
+              blurDataURL={decodeBlurhashToCanvas(
+                student.blurHash ?? defaultBlurHash,
+              )}
+              className="object-cover"
             />
           </div>
-          <div className="flex h-16 w-full flex-col items-center justify-center">
-            <span className="text-sm font-semibold text-gray-800">
-              {selectAttendance.student.firstName}{" "}
-              {selectAttendance.student.lastName}
-            </span>
-            <span className="text-xs text-gray-500">
-              Number {selectAttendance.student.number}
-            </span>
+          <div className="min-w-0">
+            <p className="text-xs text-icon-color/60">
+              {attendanceTableUiLanguage.recordTitle(language)} ·{" "}
+              {attendanceTable.title}
+            </p>
+            <h2 className="truncate text-lg font-bold leading-tight">
+              {student.firstName} {student.lastName}
+            </h2>
+            <p className="text-xs text-icon-color/60">
+              {attendanceTableUiLanguage.number(language)} {student.number}
+              {!isEdit &&
+                ` · ${attendanceTableUiLanguage.notRecorded(language)}`}
+            </p>
           </div>
         </div>
-        <div className="h-full w-full overflow-y-auto md:w-3/4">
-          <div className="flex h-full w-full flex-col gap-2 p-2">
-            <div className="flex flex-col gap-0 border-b">
-              <div className="font-medium leading-4">Attendance Status</div>
-              <span className="text-xs text-gray-400">
-                modify attendance status here
-              </span>
-            </div>
-            <div className="flex-1 overflow-y-auto">
-              {attendanceTable.statusLists
-                .filter((s) => !s.isHidden)
-                .map((status, index) => {
-                  const odd = index % 2 === 0;
-                  return (
-                    <div
-                      onClick={(e) => handleCheck({ key: status.title })}
-                      key={status.id}
-                      className={`flex h-8 w-full items-center justify-between px-2 hover:bg-gray-100 ${
-                        odd ? "bg-white" : "bg-gray-50"
-                      }`}
-                    >
-                      <span
-                        style={{ color: status.color }}
-                        className="font-semibold"
-                      >
-                        {status.title}
-                      </span>
-                      <input
-                        onChange={(e) => handleCheck({ key: status.title })}
-                        type="checkbox"
-                        style={{ accentColor: status.color }}
-                        className="h-5 w-5"
-                        name={status.title}
-                        checked={attendanceData?.status === status.title}
-                      />
-                    </div>
-                  );
-                })}
-            </div>
-            <div className="flex flex-col gap-0 border-b">
-              <div className="font-medium leading-4">Attendance Note</div>
-              <span className="text-xs text-gray-400">
-                Add note or edit note here
-              </span>
-            </div>
-            {attendanceTable && (
-              <div className="h-96 bg-slate-200">
-                <TextEditor
-                  schoolId={attendanceTable.schoolId}
-                  value={attendanceData?.note || ""}
-                  onChange={(value) =>
-                    setAttendanceData((prev) => {
-                      if (!prev) return prev;
-                      return { ...prev, note: value };
-                    })
+        <button
+          type="button"
+          onClick={() => onClose()}
+          aria-label="Close"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-2xl transition hover:bg-background-color"
+        >
+          <IoCloseOutline />
+        </button>
+      </header>
+
+      {isPending && (
+        <ProgressBar
+          mode="indeterminate"
+          style={{ height: "3px", borderRadius: 0 }}
+        />
+      )}
+
+      <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto p-4 md:p-6">
+        <section>
+          <h3 className="mb-2 text-sm font-semibold">
+            {attendanceTableUiLanguage.statusLabel(language)}
+          </h3>
+          <div
+            role="radiogroup"
+            className="grid grid-cols-2 gap-2 sm:grid-cols-3"
+          >
+            {statusOptions.map((status) => {
+              const active = attendanceData?.status === status.title;
+              return (
+                <button
+                  key={status.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={active}
+                  onClick={() => handleCheck({ key: status.title })}
+                  className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-left text-sm font-semibold transition active:scale-[0.98] ${
+                    active
+                      ? "border-transparent"
+                      : "border-gray-200 hover:bg-background-color"
+                  }`}
+                  style={
+                    active
+                      ? {
+                          boxShadow: `inset 0 0 0 2px ${status.color}`,
+                          backgroundColor: `${status.color}1f`,
+                        }
+                      : undefined
                   }
-                />
-              </div>
-            )}
+                >
+                  <span
+                    className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs text-white"
+                    style={{ background: status.color }}
+                  >
+                    {active && <LuCheck />}
+                  </span>
+                  <span className="truncate">{status.title}</span>
+                  {status.isHidden && (
+                    <span className="ml-auto text-[10px] font-normal text-gray-400">
+                      {attendanceTableUiLanguage.hidden(language)}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
-        </div>
+        </section>
+
+        <section>
+          <h3 className="mb-2 flex items-baseline gap-2 text-sm font-semibold">
+            {attendanceTableUiLanguage.noteLabel(language)}
+            <span className="text-xs font-normal text-gray-400">
+              {attendanceTableUiLanguage.noteHint(language)}
+            </span>
+          </h3>
+          <div className="h-64 overflow-hidden rounded-xl border border-gray-200">
+            <TextEditor
+              schoolId={attendanceTable.schoolId}
+              value={attendanceData?.note || ""}
+              onChange={(value) =>
+                setAttendanceData((prev) => {
+                  if (!prev) return prev;
+                  return { ...prev, note: value };
+                })
+              }
+            />
+          </div>
+        </section>
       </div>
-    </main>
+
+      <footer className="flex items-center justify-end gap-2 border-t p-3 md:px-6">
+        <button
+          type="button"
+          onClick={() => onClose()}
+          className="h-10 rounded-lg px-4 text-sm font-semibold transition hover:bg-background-color"
+        >
+          {attendanceTableUiLanguage.cancel(language)}
+        </button>
+        <button
+          ref={saveRef}
+          type="button"
+          disabled={isPending}
+          onClick={isEdit ? handleUpdate : handleCreate}
+          className="flex h-10 min-w-28 items-center justify-center gap-2 rounded-lg bg-primary-color px-5 text-sm font-semibold text-white transition hover:bg-primary-color-hover active:scale-[0.98] disabled:opacity-60"
+        >
+          {isPending ? (
+            <LoadingSpinner />
+          ) : (
+            <>
+              <LuCheck />
+              {attendanceTableUiLanguage.save(language)}
+            </>
+          )}
+        </button>
+      </footer>
+    </div>
   );
 }
 

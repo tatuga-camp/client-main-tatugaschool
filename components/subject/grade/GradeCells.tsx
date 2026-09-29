@@ -14,7 +14,7 @@ import {
 import GradeStatusPill from "./GradeStatusPill";
 
 const CELL_BUTTON =
-  "flex h-14 w-full flex-col items-center justify-center gap-0.5 px-2 transition-colors ";
+  "flex h-11 w-full flex-col items-center justify-center gap-0.5 px-1 transition-colors md:h-14 md:px-2 ";
 
 export type PendingStatus = Exclude<StudentAssignmentStatus, "REVIEWD">;
 
@@ -39,7 +39,7 @@ export function GradeAssignmentCell({
     return (
       <div
         title={gradeTableData.notAssigned(language)}
-        className="flex h-14 items-center justify-center text-sm text-gray-300"
+        className="flex h-11 items-center justify-center text-sm text-gray-300 md:h-14"
       >
         —
       </div>
@@ -56,7 +56,7 @@ export function GradeAssignmentCell({
     >
       {studentOnAssignment.status === "REVIEWD" ? (
         <>
-          <span className="text-sm font-semibold tabular-nums text-icon-color">
+          <span className="text-xs font-semibold tabular-nums text-icon-color md:text-sm">
             {formatScore(
               assignmentContribution(
                 studentOnAssignment.score,
@@ -108,7 +108,7 @@ export function GradeSpecialCell({
   const { maxScore, weight } = entry.scoreOnSubject;
   return (
     <button type="button" onClick={onClick} className={CELL_BUTTON}>
-      <span className="text-sm font-semibold tabular-nums text-icon-color">
+      <span className="text-xs font-semibold tabular-nums text-icon-color md:text-sm">
         {formatScore(specialContribution(sumRaw, maxScore, weight))}
       </span>
       {weight !== null && (
