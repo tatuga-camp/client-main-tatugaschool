@@ -1,8 +1,11 @@
+import Image from "next/image";
 import { useState } from "react";
 import { MdOutlineImageNotSupported } from "react-icons/md";
 import { SiCanva } from "react-icons/si";
 import { TeachingMaterial } from "../../interfaces";
 import { teachingMaterialDataLanguage as L } from "../../data/languages/teaching-material";
+import { defaultBlurHash } from "../../data";
+import { decodeBlurhashToCanvas } from "../../utils";
 
 type Props = {
   teachingMaterial: TeachingMaterial;
@@ -41,12 +44,17 @@ function TeachingMaterialCard({ teachingMaterial, onClick, language }: Props) {
       >
         <div className="relative aspect-[4/3] w-full overflow-hidden border-b bg-gray-50">
           {showImage ? (
-            <img
-              src={teachingMaterial.thumbnail}
+            <Image
+              src={teachingMaterial.thumbnail as string}
               alt=""
-              loading="lazy"
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              placeholder="blur"
+              blurDataURL={decodeBlurhashToCanvas(
+                teachingMaterial.blurHash || defaultBlurHash,
+              )}
               onError={() => setImageFailed(true)}
-              className="h-full w-full object-cover object-top transition duration-300 group-hover:scale-[1.02]"
+              className="object-cover object-top transition duration-300 group-hover:scale-[1.02]"
             />
           ) : (
             <div className="flex h-full w-full flex-col items-center justify-center gap-1 text-gray-400">
