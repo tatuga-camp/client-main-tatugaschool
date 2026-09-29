@@ -9,6 +9,7 @@ import {
   useGetRubricById,
   useGetRubricBreakdown,
   useGradeRubric,
+  useGetAssignmentOverview,
 } from "../../../react-query";
 import { computeRubricScore } from "./rubricMath";
 
@@ -34,6 +35,7 @@ function RubricGradingPanel({
   onGraded,
 }: Props) {
   const rubricQuery = useGetRubricById({ rubricId });
+
   const breakdownQuery = useGetRubricBreakdown({ studentOnAssignmentId });
   const grade = useGradeRubric();
   const language = useGetLanguage();
@@ -116,6 +118,7 @@ function RubricGradingPanel({
         studentOnAssignmentId,
         items,
       });
+
       toast.current?.show({
         severity: "success",
         summary: rubricLanguage.updateSuccess(language.data ?? "en"),

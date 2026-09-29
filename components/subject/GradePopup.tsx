@@ -11,6 +11,7 @@ import {
   StudentOnAssignment,
 } from "../../interfaces";
 import {
+  useGetAssignmentOverview,
   useUpdateAssignmentOverview,
   useUpdateStudentAssignmentOverview,
 } from "../../react-query";
@@ -80,7 +81,7 @@ function GradePopup({
     <div className="h-max w-min rounded-2xl border bg-background-color p-2">
       <form
         onSubmit={handleUpdate}
-        className="flex h-max w-full md:min-w-96 flex-col items-start gap-2"
+        className="flex h-max w-full flex-col items-start gap-2 md:min-w-96"
       >
         <div className="flex w-full items-center justify-end gap-2 border-b pb-2">
           {update.isPending ? (
@@ -182,6 +183,9 @@ function StudentUpdateGrade({
   const [score, setScore] = React.useState<number | undefined>(
     studentOnAssignment.score,
   );
+  const { refetch } = useGetAssignmentOverview({
+    subjectId: assignment.subjectId,
+  });
   const update = useUpdateStudentAssignmentOverview();
 
   // When the assignment has a rubric, grade with the rubric grid instead of
@@ -227,6 +231,7 @@ function StudentUpdateGrade({
                 toast={toast}
                 onGraded={() => {
                   onClose();
+                  refetch();
                 }}
               />
             </div>
@@ -270,7 +275,7 @@ function StudentUpdateGrade({
     <div className="h-max w-min rounded-2xl border bg-background-color p-2">
       <form
         onSubmit={handleUpdate}
-        className="flex h-max w-full md:min-w-96 flex-col items-start gap-2"
+        className="flex h-max w-full flex-col items-start gap-2 md:min-w-96"
       >
         <div className="flex w-full items-center justify-end gap-2 border-b pb-2">
           {update.isPending ? (
@@ -315,7 +320,7 @@ function StudentUpdateGrade({
               </span>
             </div>
           </div>
-          <div className="flex w-full max-w-80 md:w-80 flex-col gap-5">
+          <div className="flex w-full max-w-80 flex-col gap-5 md:w-80">
             <div className="flex flex-col gap-0">
               <h1 className="max-w-60 truncate">{assignment.title}</h1>
               <span className="text-xs text-gray-500">
