@@ -242,3 +242,46 @@ export const groupOnSubjectLanguage = {
     }
   },
 };
+
+const t = (en: string, th: string) => (language: Language) =>
+  language === "th" ? th : en;
+
+// Copy for the redesigned groups board (ShowGroups / SelectGroup / columns).
+export const groupBoardLanguage = {
+  emptyTitle: t("No group sets yet", "ยังไม่มีชุดกลุ่ม"),
+  emptyHint: t(
+    "Split the class into teams, then give points to a whole team at once.",
+    "แบ่งนักเรียนเป็นทีม แล้วให้คะแนนทั้งทีมได้ในครั้งเดียว",
+  ),
+  newGroupSet: t("New group set", "สร้างชุดกลุ่ม"),
+  shuffle: t("Shuffle students", "สุ่มจัดกลุ่มใหม่"),
+  shuffleConfirmTitle: t("Shuffle students?", "สุ่มจัดกลุ่มใหม่?"),
+  shuffleConfirmText: t(
+    "Every student will be placed into a group at random. Current placements will be replaced.",
+    "นักเรียนทุกคนจะถูกสุ่มจัดเข้ากลุ่มใหม่ การจัดกลุ่มปัจจุบันจะถูกแทนที่",
+  ),
+  shuffleConfirmButton: t("Shuffle", "สุ่มเลย"),
+  cancel: t("Cancel", "ยกเลิก"),
+  settings: t("Settings", "ตั้งค่า"),
+  delete: t("Delete set", "ลบชุดกลุ่ม"),
+  ungrouped: t("Not in a group", "ยังไม่มีกลุ่ม"),
+  ungroupedHint: t(
+    "Drag students into a group.",
+    "ลากนักเรียนไปวางในกลุ่ม",
+  ),
+  everyoneGrouped: t("Everyone is in a group.", "นักเรียนทุกคนมีกลุ่มแล้ว"),
+  dropHere: t("Drop students here", "ลากนักเรียนมาวางที่นี่"),
+  addGroup: t("Add group", "เพิ่มกลุ่ม"),
+  givePoints: t("Give points", "ให้คะแนน"),
+  deleteGroup: t("Delete group", "ลบกลุ่มนี้"),
+  dragGroup: t("Drag to reorder", "ลากเพื่อเปลี่ยนลำดับ"),
+  groupName: t("Group name", "ชื่อกลุ่ม"),
+  groupNote: t("Add a note", "เพิ่มคำอธิบาย"),
+  points: t("pts", "คะแนน"),
+  students: (count: number) => (language: Language) =>
+    language === "th" ? `${count} คน` : `${count} ${count === 1 ? "student" : "students"}`,
+  givePointsTo: (group: string, count: number) => (language: Language) =>
+    language === "th"
+      ? `${group} (${count} คน)`
+      : `${group}, ${count} ${count === 1 ? "student" : "students"}`,
+};

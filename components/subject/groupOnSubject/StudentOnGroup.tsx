@@ -1,12 +1,11 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import Image from "next/image";
-import { memo } from "react";
+import React, { memo } from "react";
 import { MdDragIndicator } from "react-icons/md";
-import { CSSProperties } from "styled-components";
 import { decodeBlurhashToCanvas } from "../../../utils";
 import { defaultBlurHash } from "../../../data";
-import { groupOnSubjectLanguage } from "../../../data/languages";
+import { studentPointsLanguage } from "../../../data/languages";
 import { Language } from "../../../interfaces";
 import { SortableIdType } from "./SelectGroup";
 
@@ -50,64 +49,75 @@ function StudentOnGroup({
     attributes,
     listeners,
     setNodeRef,
+    setActivatorNodeRef,
     transform,
     transition,
   } = useSortable({
     id: JSON.stringify(sortableId),
   });
-  const style = {
+  const inlineStyles: React.CSSProperties = {
+    opacity: isDragging ? 0.4 : 1,
     transform: CSS.Transform.toString(transform),
     transition: transition,
   };
-  const inlineStyles: CSSProperties = {
-    opacity: isDragging ? "0.5" : "1",
-    transformOrigin: "50% 50%",
-    ...style,
-  };
+  const points = score ?? student.score ?? 0;
 
   return (
     <li
       ref={setNodeRef}
       style={inlineStyles}
-      {...attributes}
-      className="flex h-10 w-full items-center justify-start gap-2 border-b bg-white px-2"
+      className={`flex h-12 w-full items-center gap-2 bg-white px-2 font-Anuphan ${
+        isDragOver
+          ? "w-72 rounded-xl shadow-lg ring-1 ring-primary-color/30"
+          : "transition-colors hover:bg-background-color"
+      }`}
     >
-      <div
+      <button
+        type="button"
+        ref={setActivatorNodeRef}
         {...listeners}
-        style={{ cursor: isDragging ? "grabbing" : "grab" }}
-        className="flex h-6 w-6 items-center justify-center rounded-2xl text-black hover:bg-gray-300/50"
+        {...attributes}
+        aria-label={`${student.firstName} ${student.lastName}`}
+        style={{ cursor: isDragging || isDragOver ? "grabbing" : "grab" }}
+        className="flex h-8 w-6 shrink-0 touch-none items-center justify-center rounded-lg text-gray-300 transition-colors hover:text-icon-color"
       >
         <MdDragIndicator />
-      </div>
-      <div className="flex h-14 w-full items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          {(isDragOver === undefined || isDragOver === false) && (
-            <div className="relative h-5 w-5 overflow-hidden rounded-2xl ring-1 md:h-6 md:w-6">
-              <Image
-                src={student.photo}
-                alt={student.firstName}
-                quality={50}
-                fill
-                sizes="(max-width: 768px) 100vw, 33vw"
-                className="object-cover"
-              />
-            </div>
+      </button>
+      <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full bg-background-color">
+        <Image
+          src={student.photo}
+          alt=""
+          quality={50}
+          fill
+          sizes="32px"
+          placeholder="blur"
+          blurDataURL={decodeBlurhashToCanvas(
+            student.blurHash ?? defaultBlurHash,
           )}
-          <div className="flex grow flex-col gap-0">
-            <h1
-              className={`text-xs font-semibold ${type === "ungroupStudent" ? "text-red-700" : "text-primary-color"} md:text-base`}
-            >
-              {student.firstName} {student.lastName}
-            </h1>
-            <p className="text-xs text-gray-500">
-              {groupOnSubjectLanguage.number(lang)} {student.number}
-            </p>
-          </div>
-        </div>
-        <div className="gradient-bg flex rounded-sm px-2 text-white">
-          {score ?? student.score}
-        </div>
+          className="object-cover"
+        />
       </div>
+      <div className="flex min-w-0 grow flex-col">
+        <span className="truncate text-sm font-medium leading-tight text-icon-color">
+          {student.firstName} {student.lastName}
+        </span>
+        <span className="text-xs leading-tight text-gray-500">
+          {studentPointsLanguage.number(lang)} {student.number}
+        </span>
+      </div>
+      {type === "studentOnGroup" && (
+        <span
+          className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums ${
+            points > 0
+              ? "bg-success-color/10 text-success-color"
+              : points < 0
+                ? "bg-error-color/10 text-error-color"
+                : "bg-background-color text-gray-500"
+          }`}
+        >
+          {points}
+        </span>
+      )}
     </li>
   );
 }

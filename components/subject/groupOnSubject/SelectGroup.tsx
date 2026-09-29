@@ -18,7 +18,9 @@ import { Toast } from "primereact/toast";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { IoMdSettings } from "react-icons/io";
-import { MdAutoAwesome, MdCreate, MdDelete } from "react-icons/md";
+import { FiPlus } from "react-icons/fi";
+import { MdDelete } from "react-icons/md";
+import { TbArrowsShuffle } from "react-icons/tb";
 import Swal from "sweetalert2";
 import {
   ErrorMessages,
@@ -40,7 +42,11 @@ import {
   useReorderUnitGroup,
   useUpdateStudentOnGroup,
 } from "../../../react-query";
-import { groupOnSubjectLanguage } from "../../../data/languages";
+import {
+  groupBoardLanguage,
+  groupOnSubjectLanguage,
+} from "../../../data/languages";
+import { SECONDARY_BUTTON } from "../grade/GradeSegmentedControl";
 import ConfirmDeleteMessage from "../../common/ConfirmDeleteMessage";
 import LoadingBar from "../../common/LoadingBar";
 import LoadingSpinner from "../../common/LoadingSpinner";
@@ -471,67 +477,73 @@ function ShowSelectGroup({
         </PopupLayout>
       )}
 
-      <header className="mt-2">
+      <header className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         {deleteGroup.isPending && <LoadingBar />}
-
-        <section className="flex w-full justify-between gap-3">
-          <div>
-            <h3 className="max-w-40 truncate text-base font-semibold">
-              {groupOnSubject.data?.title}
-            </h3>
-            <p className="max-w-40 truncate text-sm text-gray-600">
-              {groupOnSubject.data?.description}
-            </p>
-          </div>
-          <div className="flex items-center justify-center gap-3">
-            <button
-              disabled={refetchGroup.isPending}
-              onClick={() => {
-                if (confirm(groupOnSubjectLanguage.confirmAutoRefresh(lang))) {
+        <div className="min-w-0">
+          <h2 className="truncate text-lg font-semibold text-icon-color">
+            {groupOnSubject.data?.title}
+          </h2>
+          <p className="line-clamp-2 text-sm text-gray-500">
+            {groupOnSubject.data?.description}
+          </p>
+        </div>
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          <button
+            type="button"
+            disabled={refetchGroup.isPending}
+            onClick={() => {
+              Swal.fire({
+                title: groupBoardLanguage.shuffleConfirmTitle(lang),
+                text: groupBoardLanguage.shuffleConfirmText(lang),
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonText: groupBoardLanguage.shuffleConfirmButton(lang),
+                cancelButtonText: groupBoardLanguage.cancel(lang),
+                confirmButtonColor: "#2C7CD1",
+              }).then((result) => {
+                if (result.isConfirmed) {
                   handleRefetchGroup();
                 }
-              }}
-              className="second-button flex w-52 items-center justify-center gap-1 border py-1"
-            >
-              {refetchGroup.isPending ? (
-                <LoadingSpinner />
-              ) : (
-                <>
-                  <MdAutoAwesome />
-                  {groupOnSubjectLanguage.autoRefreshGroup(lang)}
-                </>
-              )}
-            </button>
-            <button
-              onClick={() => {
-                setTriggerUpdate(true);
-              }}
-              className="main-button flex w-max items-center justify-center gap-1 py-1 ring-1 ring-blue-600"
-            >
+              });
+            }}
+            className={`${SECONDARY_BUTTON} min-w-36`}
+          >
+            {refetchGroup.isPending ? (
+              <LoadingSpinner />
+            ) : (
               <>
-                <IoMdSettings />
-                {groupOnSubjectLanguage.groupSetting(lang)}
+                <TbArrowsShuffle />
+                {groupBoardLanguage.shuffle(lang)}
               </>
-            </button>
-            <button
-              disabled={deleteGroup.isPending}
-              onClick={() => {
-                ConfirmDeleteMessage({
-                  language: language.data ?? "en",
-                  callback: async () => {
-                    await handleDeleteGroup();
-                  },
-                });
-              }}
-              className="reject-button flex w-max items-center justify-center gap-1 py-1 ring-1 ring-red-600"
-            >
-              <>
-                <MdDelete />
-                {groupOnSubjectLanguage.groupDelete(lang)}
-              </>
-            </button>
-          </div>
-        </section>
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setTriggerUpdate(true);
+            }}
+            className={SECONDARY_BUTTON}
+          >
+            <IoMdSettings />
+            {groupBoardLanguage.settings(lang)}
+          </button>
+          <button
+            type="button"
+            disabled={deleteGroup.isPending}
+            onClick={() => {
+              ConfirmDeleteMessage({
+                language: language.data ?? "en",
+                callback: async () => {
+                  await handleDeleteGroup();
+                },
+              });
+            }}
+            className={`${SECONDARY_BUTTON} text-error-color hover:border-error-color/30 hover:bg-error-color/5`}
+          >
+            <MdDelete />
+            {groupBoardLanguage.delete(lang)}
+          </button>
+        </div>
       </header>
       <DndContext
         sensors={sensors}
@@ -540,9 +552,14 @@ function ShowSelectGroup({
         onDragEnd={handleDragEnd}
       >
         <SortableContext items={unitSortableIds} strategy={rectSortingStrategy}>
-          <ul className="mt-5 grid gap-5 md:grid-cols-2 2xl:grid-cols-3">
+          <ul className="mt-4 grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             {groupOnSubject.isLoading ? (
-              <LoadingBar />
+              [...Array(3)].map((_, index) => (
+                <li
+                  key={index}
+                  className="h-56 animate-pulse rounded-2xl border border-gray-100 bg-white"
+                />
+              ))
             ) : (
               <ColumMemo type="ungroupStudent" students={unGroupStudents} />
             )}
@@ -558,19 +575,23 @@ function ShowSelectGroup({
               );
             })}
 
-            <button
-              onClick={handleCreate}
-              className="flex h-full min-h-40 w-full flex-col items-center justify-center rounded-2xl border border-dashed bg-white text-xl text-gray-500 transition hover:bg-primary-color hover:text-white active:scale-105"
-            >
-              {createColum.isPending ? (
-                <LoadingSpinner />
-              ) : (
-                <>
-                  {groupOnSubjectLanguage.createNewColumn(lang)}
-                  <MdCreate />
-                </>
-              )}
-            </button>
+            <li>
+              <button
+                type="button"
+                disabled={createColum.isPending || !groupOnSubject.data}
+                onClick={handleCreate}
+                className="flex min-h-32 w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-gray-300 text-sm font-semibold text-gray-500 transition-colors hover:border-primary-color hover:bg-primary-color/5 hover:text-primary-color disabled:opacity-60"
+              >
+                {createColum.isPending ? (
+                  <LoadingSpinner />
+                ) : (
+                  <>
+                    <FiPlus />
+                    {groupBoardLanguage.addGroup(lang)}
+                  </>
+                )}
+              </button>
+            </li>
           </ul>
         </SortableContext>
 
