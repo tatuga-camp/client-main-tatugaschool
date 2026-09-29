@@ -2,11 +2,14 @@ import React, { memo, SyntheticEvent, use, useRef, useState } from "react";
 import { Calendar as CalendarPrimereact } from "primereact/calendar";
 import { FormEvent, Nullable } from "primereact/ts-helpers";
 import { CgClose } from "react-icons/cg";
+import { MdOutlineCalendarMonth } from "react-icons/md";
 import { classNames } from "primereact/utils";
 
 type Props = {
   value: Nullable<(Date | null)[]>;
   onValue: (value: Nullable<(Date | null)[]>) => void;
+  placeholder?: string;
+  clearLabel?: string;
 };
 
 const TRANSITIONS = {
@@ -22,14 +25,15 @@ const TRANSITIONS = {
   },
 };
 
-function Calendar({ value, onValue }: Props) {
+function Calendar({ value, onValue, placeholder, clearLabel }: Props) {
   const [data, setData] = useState<Nullable<(Date | null)[]>>(value);
 
   return (
-    <div className="flex h-full w-full flex-col">
-      <label className="text-xs text-gray-500">Select Date</label>
+    <div className="flex w-max flex-col">
       <div className="relative w-max">
+        <MdOutlineCalendarMonth className="pointer-events-none absolute bottom-0 left-3 top-0 z-10 m-auto text-base text-gray-400" />
         <CalendarPrimereact
+          placeholder={placeholder}
           dateFormat="dd/mm/yy"
           value={data}
           onChange={(event) => {
@@ -48,10 +52,10 @@ function Calendar({ value, onValue }: Props) {
             input: (option) => ({
               root: {
                 className: classNames(
-                  "font-sans text-base text-gray-600 w-60  bg-white  p-3 border border-gray-300  transition-colors duration-200 appearance-none",
-                  "hover:border-blue-500",
+                  "font-Anuphan text-sm font-semibold text-icon-color placeholder:text-icon-color w-56 h-10 bg-white pl-9 pr-8 border border-gray-200 transition-colors duration-200 appearance-none cursor-pointer outline-none",
+                  "hover:bg-background-color focus:border-primary-color",
                   {
-                    "rounded-2xl": !option?.props.showIcon,
+                    "rounded-xl": !option?.props.showIcon,
                     "border-r-0 rounded-l-lg": option?.props.showIcon,
                   },
                 ),
@@ -197,15 +201,20 @@ function Calendar({ value, onValue }: Props) {
             transition: TRANSITIONS.overlay,
           }}
         />
-        <button
-          onClick={() => {
-            setData(null);
-            onValue(null);
-          }}
-          className="absolute bottom-0 right-2 top-0 z-20 m-auto flex h-6 w-6 items-center justify-center rounded-2xl text-gray-600 hover:bg-gray-300/50 active:bg-gray-400"
-        >
-          <CgClose />
-        </button>
+        {data?.[0] && (
+          <button
+            type="button"
+            aria-label={clearLabel ?? "Clear"}
+            title={clearLabel ?? "Clear"}
+            onClick={() => {
+              setData(null);
+              onValue(null);
+            }}
+            className="absolute bottom-0 right-2 top-0 z-20 m-auto flex h-6 w-6 items-center justify-center rounded-full text-gray-500 hover:bg-gray-200"
+          >
+            <CgClose />
+          </button>
+        )}
       </div>
     </div>
   );

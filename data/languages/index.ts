@@ -31,3 +31,4 @@ export * from "./group-on-subject";
 export * from "./announcement";
 export * from "./teaching-material";
 export * from "./grade-table";
+export * from "./student-points";
