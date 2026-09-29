@@ -372,3 +372,62 @@ export const attendanceTableSettingLanguage = {
     }
   },
 } as const;
+
+const t = (en: string, th: string) => (language: Language) =>
+  language === "th" ? th : en;
+
+// Table settings, create-table modal and single-record editor
+export const attendanceTableUiLanguage = {
+  // settings
+  generalHint: t(
+    "Name and describe this table so it is easy to find.",
+    "ตั้งชื่อและคำอธิบายเพื่อให้ค้นหาตารางนี้ได้ง่าย",
+  ),
+  statusesHint: t(
+    "Statuses teachers can pick when taking attendance. Changes save automatically.",
+    "สถานะที่เลือกได้ตอนเช็คชื่อ การแก้ไขจะบันทึกอัตโนมัติ",
+  ),
+  valueHint: t(
+    "Value counts toward Total present, e.g. Present = 1, Late = 0.5, Absent = 0.",
+    "ค่าคะแนนใช้คำนวณรวมการมาเรียน เช่น มา = 1, สาย = 0.5, ขาด = 0",
+  ),
+  addStatus: t("Add status", "เพิ่มสถานะ"),
+  newStatusPlaceholder: t("New status name", "ชื่อสถานะใหม่"),
+  chooseColor: t("Choose color", "เลือกสี"),
+  custom: t("Custom", "กำหนดเอง"),
+  hidden: t("Hidden", "ซ่อนอยู่"),
+  saving: t("Saving…", "กำลังบันทึก…"),
+  deleteStatusTitle: t("Delete this status?", "ลบสถานะนี้ใช่ไหม?"),
+  deleteStatusText: t(
+    "Teachers will no longer be able to pick it. This cannot be undone.",
+    "จะไม่สามารถเลือกสถานะนี้ได้อีก และไม่สามารถย้อนกลับได้",
+  ),
+  cancel: t("Cancel", "ยกเลิก"),
+  dangerHint: t(
+    "Deleting a table removes all of its attendance records.",
+    "การลบตารางจะลบข้อมูลการเช็คชื่อทั้งหมดในตารางนี้",
+  ),
+  // create modal
+  createTitle: t("New attendance table", "สร้างตารางเช็คชื่อใหม่"),
+  createDescription: t(
+    "Use separate tables for different kinds of sessions, e.g. Homeroom or Lab.",
+    "แยกตารางตามประเภทของคาบ เช่น โฮมรูม หรือ คาบปฏิบัติการ",
+  ),
+  titleLabel: t("Title", "ชื่อตาราง"),
+  titlePlaceholder: t("e.g. Homeroom", "เช่น โฮมรูม"),
+  descriptionLabel: t("Description", "คำอธิบาย"),
+  descriptionPlaceholder: t(
+    "What is this table for?",
+    "ตารางนี้ใช้สำหรับอะไร?",
+  ),
+  createButton: t("Create table", "สร้างตาราง"),
+  // single record editor
+  recordTitle: t("Attendance record", "ข้อมูลการเช็คชื่อ"),
+  number: t("No.", "เลขที่"),
+  notRecorded: t("Not recorded yet", "ยังไม่ได้เช็คชื่อ"),
+  statusLabel: t("Status", "สถานะ"),
+  noteLabel: t("Note", "โน้ต"),
+  noteHint: t("Optional", "ไม่บังคับ"),
+  save: t("Save", "บันทึก"),
+  pickStatus: t("Pick a status first", "กรุณาเลือกสถานะ"),
+} as const;
