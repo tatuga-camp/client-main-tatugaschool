@@ -16,6 +16,7 @@ export * from "./subjects";
 export * from "./classwork";
 export * from "./grade";
 export * from "./attendance";
+export * from "./attendance-session";
 export * from "./card-picker";
 export * from "./face-picker";
 export * from "./video-config";
