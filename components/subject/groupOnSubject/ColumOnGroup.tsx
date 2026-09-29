@@ -16,7 +16,10 @@ import {
   useGetLanguage,
   useUpdateUnitOnGroup,
 } from "../../../react-query";
-import { groupOnSubjectLanguage } from "../../../data/languages";
+import {
+  groupBoardLanguage,
+  groupOnSubjectLanguage,
+} from "../../../data/languages";
 import ConfirmDeleteMessage from "../../common/ConfirmDeleteMessage";
 import LoadingBar from "../../common/LoadingBar";
 import ListMemberCircle from "../../member/ListMemberCircle";
@@ -94,27 +97,41 @@ function Colum({
     return (
       <li
         ref={setNodeRef}
-        className="flex h-max min-h-full w-full flex-col rounded-2xl"
+        className="flex w-full flex-col overflow-hidden rounded-2xl border border-dashed border-gray-300 bg-background-color"
       >
-        <header className="relative flex h-max w-full items-center justify-between gap-2 rounded-2xl bg-gradient-to-r from-rose-400 to-red-500 px-2 py-2 font-semibold text-white">
-          {groupOnSubjectLanguage.ungroupStudents(lang)}
+        <header className="flex flex-col gap-0.5 px-4 pb-3 pt-4">
+          <div className="flex items-center gap-2">
+            <h3 className="text-base font-semibold text-icon-color">
+              {groupBoardLanguage.ungrouped(lang)}
+            </h3>
+            <span className="rounded-full bg-white px-2 text-xs font-semibold tabular-nums text-gray-500 ring-1 ring-gray-200">
+              {students?.length ?? 0}
+            </span>
+          </div>
+          <p className="text-xs text-gray-500">
+            {students && students.length > 0
+              ? groupBoardLanguage.ungroupedHint(lang)
+              : groupBoardLanguage.everyoneGrouped(lang)}
+          </p>
         </header>
 
-        <ul className="grid min-h-40 grid-cols-1 place-content-start bg-white">
-          {students?.map((studentOnSubject) => {
-            return (
-              <StudentOnGroupMemo
-                key={studentOnSubject.id}
-                student={{ ...studentOnSubject }}
-                unitOnGroupId={null}
-                studentOnGroupId={null}
-                studentOnSubjectId={studentOnSubject.id}
-                type="ungroupStudent"
-                lang={lang}
-              />
-            );
-          })}
-        </ul>
+        {students && students.length > 0 && (
+          <ul className="mx-2 mb-2 flex flex-col divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-200 bg-white">
+            {students.map((studentOnSubject) => {
+              return (
+                <StudentOnGroupMemo
+                  key={studentOnSubject.id}
+                  student={{ ...studentOnSubject }}
+                  unitOnGroupId={null}
+                  studentOnGroupId={null}
+                  studentOnSubjectId={studentOnSubject.id}
+                  type="ungroupStudent"
+                  lang={lang}
+                />
+              );
+            })}
+          </ul>
+        )}
       </li>
     );
   }
@@ -230,108 +247,135 @@ function Colum({
             setTriggerUnitGroupId(null);
           }}
         >
-          <ScorePanel
-            onSelectScore={(data) => {}}
-            onCreateScore={(data) => {
-              handleUpdateScoreOnUnitGroup({
-                unitId: triggerUnitGroupId,
-                points: data.inputScore,
-                scoreOnSubjectId: data.score.id,
-              });
-            }}
-            subjectId={unit.subjectId}
-          />
+          <div className="m-4 w-[min(40rem,calc(100vw-2rem))] overflow-hidden rounded-2xl bg-white shadow-xl">
+            <ScorePanel
+              title={groupBoardLanguage.givePoints(lang)}
+              subtitle={groupBoardLanguage.givePointsTo(
+                unit.title,
+                unit.students.length,
+              )(lang)}
+              onSelectScore={() => {}}
+              onCreateScore={(data) => {
+                handleUpdateScoreOnUnitGroup({
+                  unitId: triggerUnitGroupId,
+                  points: data.inputScore,
+                  scoreOnSubjectId: data.score.id,
+                });
+              }}
+              subjectId={unit.subjectId}
+            />
+          </div>
         </PopupLayout>
       )}
 
       <li
         ref={setNodeRef}
-        className="flex h-max min-h-full w-full flex-col rounded-2xl"
+        style={{ opacity: isDragging ? 0.4 : 1 }}
+        className="flex w-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white font-Anuphan"
       >
         {(update.isPending || deleteColum.isPending || loadingScore) && (
           <LoadingBar />
         )}
-        <header className="gradient-bg relative flex h-max w-full items-center justify-between gap-2 rounded-2xl px-2 py-2">
-          <form ref={formRef} className="flex flex-col">
-            <input
-              disabled={update.isPending}
-              onBlur={handleOnSave}
-              value={data.title}
-              onChange={(e) => {
-                setData((prev) => {
-                  return {
-                    ...prev,
-                    title: e.target.value,
-                  };
-                });
-              }}
-              required
-              className="w-40 bg-transparent font-semibold text-white focus:border-b focus:outline-none"
-            />
-            <input
-              disabled={update.isPending}
-              required
-              onBlur={handleOnSave}
-              value={data.description}
-              onChange={(e) => {
-                setData((prev) => {
-                  return {
-                    ...prev,
-                    description: e.target.value,
-                  };
-                });
-              }}
-              className="w-52 bg-transparent text-xs font-normal text-white focus:border-b focus:outline-none"
-            />
-          </form>
-          <section>
-            <section className="flex items-center justify-end gap-2">
-              <button
-                onClick={() => {
-                  ConfirmDeleteMessage({
-                    language: language.data ?? "en",
-                    callback: async () => {
-                      await handleDelete();
-                    },
+        <header className="flex flex-col gap-3 border-b border-gray-100 px-2 pb-3 pt-3">
+          <div className="flex items-start gap-1">
+            <button
+              type="button"
+              {...listeners}
+              aria-label={groupBoardLanguage.dragGroup(lang)}
+              title={groupBoardLanguage.dragGroup(lang)}
+              style={{ cursor: isDragging ? "grabbing" : "grab" }}
+              className="mt-0.5 flex h-8 w-6 shrink-0 touch-none items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-background-color hover:text-icon-color"
+            >
+              <MdDragIndicator />
+            </button>
+            <form
+              ref={formRef}
+              onSubmit={(e) => e.preventDefault()}
+              className="flex min-w-0 grow flex-col"
+            >
+              <input
+                disabled={update.isPending}
+                onBlur={handleOnSave}
+                value={data.title}
+                aria-label={groupBoardLanguage.groupName(lang)}
+                onChange={(e) => {
+                  setData((prev) => {
+                    return {
+                      ...prev,
+                      title: e.target.value,
+                    };
                   });
                 }}
-                disabled={deleteColum.isPending}
-                className="z-20 flex h-6 w-6 items-center justify-center rounded-2xl text-red-700 hover:bg-white"
-              >
-                <MdDelete />
-              </button>
-              <button
-                {...listeners}
-                style={{ cursor: isDragging ? "grabbing" : "grab" }}
-                className="z-20 flex h-6 w-6 items-center justify-center rounded-2xl text-gray-700 hover:bg-gray-300/50"
-              >
-                <MdDragIndicator />
-              </button>
-            </section>
-            <div className="flex flex-col items-end gap-1">
-              <h1 className="border-b text-center text-xl font-semibold text-white">
-                {unit.totalScore}{" "}
-                <span className="text-sm font-normal">
-                  {groupOnSubjectLanguage.score(lang)}
-                </span>
-              </h1>
-              <ListMemberCircle maxShow={4} members={unit.students} />
-              <button
-                onClick={() => {
-                  setTriggerUnitGroupId(unit.id);
+                required
+                className="w-full truncate rounded-lg bg-transparent px-1.5 py-1 text-base font-semibold text-icon-color transition-colors hover:bg-background-color focus:bg-background-color focus:outline-none focus:ring-1 focus:ring-primary-color"
+              />
+              <input
+                disabled={update.isPending}
+                required
+                onBlur={handleOnSave}
+                value={data.description}
+                aria-label={groupBoardLanguage.groupNote(lang)}
+                placeholder={groupBoardLanguage.groupNote(lang)}
+                onChange={(e) => {
+                  setData((prev) => {
+                    return {
+                      ...prev,
+                      description: e.target.value,
+                    };
+                  });
                 }}
-                disabled={loadingScore}
-                title={groupOnSubjectLanguage.addScoreTooltip(lang)}
-                className="font-Anuphan mt-1 flex items-center justify-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-semibold text-primary-color shadow-sm transition hover:scale-105 active:scale-95 disabled:opacity-60"
-              >
-                <IoStar />
-                {groupOnSubjectLanguage.addScore(lang)}
-              </button>
+                className="w-full truncate rounded-lg bg-transparent px-1.5 py-0.5 text-xs text-gray-500 transition-colors hover:bg-background-color focus:bg-background-color focus:outline-none focus:ring-1 focus:ring-primary-color"
+              />
+            </form>
+            <span className="mt-1 shrink-0 whitespace-nowrap rounded-full bg-primary-color/10 px-2.5 py-0.5 text-sm font-semibold tabular-nums text-primary-color">
+              {unit.totalScore}{" "}
+              <span className="text-xs font-medium">
+                {groupBoardLanguage.points(lang)}
+              </span>
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                ConfirmDeleteMessage({
+                  language: language.data ?? "en",
+                  callback: async () => {
+                    await handleDelete();
+                  },
+                });
+              }}
+              disabled={deleteColum.isPending}
+              aria-label={groupBoardLanguage.deleteGroup(lang)}
+              title={groupBoardLanguage.deleteGroup(lang)}
+              className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-error-color/10 hover:text-error-color"
+            >
+              <MdDelete />
+            </button>
+          </div>
+          <div className="flex items-center justify-between gap-2 pl-7">
+            <div className="flex min-w-0 items-center gap-2">
+              {unit.students.length > 0 && (
+                <ListMemberCircle maxShow={4} members={unit.students} />
+              )}
+              <span className="truncate text-xs text-gray-500">
+                {groupBoardLanguage.students(unit.students.length)(lang)}
+              </span>
             </div>
-          </section>
+            <button
+              type="button"
+              onClick={() => {
+                setTriggerUnitGroupId(unit.id);
+              }}
+              disabled={loadingScore || unit.students.length === 0}
+              title={groupOnSubjectLanguage.addScoreTooltip(lang)}
+              className="flex h-8 shrink-0 items-center justify-center gap-1 rounded-xl bg-primary-color px-3 text-xs font-semibold text-white transition-colors hover:bg-primary-color-hover disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500"
+            >
+              <IoStar />
+              {groupBoardLanguage.givePoints(lang)}
+            </button>
+          </div>
         </header>
         {unit.students.length > 0 ? (
-          <ul className="grid grid-cols-1">
+          <ul className="flex flex-col divide-y divide-gray-100">
             {[...unit.students]
               .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
               .map((studentOnGroup) => {
@@ -354,8 +398,8 @@ function Colum({
               })}
           </ul>
         ) : (
-          <div className="flex w-full grow items-center justify-center bg-white">
-            {groupOnSubjectLanguage.noStudents(lang)}
+          <div className="m-2 flex min-h-20 items-center justify-center rounded-xl border border-dashed border-gray-200 text-xs text-gray-400">
+            {groupBoardLanguage.dropHere(lang)}
           </div>
         )}
       </li>

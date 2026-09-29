@@ -1,10 +1,14 @@
 import React, { memo } from "react";
-import { ScoreOnStudent, Student, StudentOnSubject } from "../../interfaces";
+import { Student, StudentOnSubject } from "../../interfaces";
 import Image from "next/image";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { CSSProperties } from "styled-components";
 import { MdDragIndicator } from "react-icons/md";
+import { FaCheck } from "react-icons/fa";
+import { studentPointsLanguage } from "../../data/languages";
+import { useGetLanguage } from "../../react-query";
+import { decodeBlurhashToCanvas } from "../../utils";
+import { defaultBlurHash } from "../../data";
 
 type Props = {
   student: (StudentOnSubject | Student) & { select?: boolean };
@@ -14,100 +18,130 @@ type Props = {
   ) => void;
   isDragable?: boolean;
 };
+
+// Points bubble colour: green for a positive total, red for negative, neutral
+// at zero so an untouched class doesn't read as a wall of green.
+function pointsTone(points: number) {
+  if (points > 0) return "bg-success-color text-white";
+  if (points < 0) return "bg-error-color text-white";
+  return "bg-white text-gray-500 ring-1 ring-gray-200";
+}
+
 function StudentCard({
   student,
   setSelectStudent,
   isDragable = false,
   showSelect = false,
 }: Props) {
+  const language = useGetLanguage();
+  const lang = language.data ?? "en";
   const {
     isDragging,
     attributes,
     listeners,
     setNodeRef,
+    setActivatorNodeRef,
     transform,
     transition,
-  } = useSortable({ id: student.id });
-  const style = {
+  } = useSortable({ id: student.id, disabled: !isDragable });
+
+  const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition: transition || undefined,
   };
 
-  const inlineStyles: CSSProperties = {
-    opacity: isDragging ? "0.5" : "1",
-    transformOrigin: "50% 50%",
-    boxShadow: isDragging
-      ? "rgb(63 63 68 / 5%) 0px 2px 0px 2px, rgb(34 33 81 / 15%) 0px 2px 3px 2px"
-      : "rgb(63 63 68 / 5%) 0px 0px 0px 1px, rgb(34 33 81 / 15%) 0px 1px 3px 0px",
-    ...style,
-  };
-  return (
-    <button
-      ref={setNodeRef}
-      style={inlineStyles}
-      {...attributes}
-      onClick={() => {
-        setSelectStudent(student);
-      }}
-      className={`group relative flex w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-black p-3 hover:drop-shadow-md active:scale-105 ${
-        student.select && showSelect ? "gradient-bg" : "bg-white"
-      } h-60 overflow-hidden bg-white hover:bg-orange-500 sm:h-60 md:h-60 lg:h-60 xl:h-60`}
-    >
-      {isDragable && (
-        <div
-          {...listeners}
-          style={{ cursor: isDragging ? "grabbing" : "grab" }}
-          className="absolute right-2 top-2 flex h-10 w-6 items-center justify-center rounded-2xl hover:bg-gray-300/50"
-        >
-          <MdDragIndicator />
-        </div>
-      )}
-      {showSelect && (
-        <input
-          checked={student.select}
-          type="checkbox"
-          className="absolute right-2 top-2 h-5 w-5 rounded-full bg-primary-color"
-        />
-      )}
+  const isSelected = showSelect && !!student.select;
+  const points =
+    "totalSpeicalScore" in student ? student.totalSpeicalScore : undefined;
 
-      {"totalSpeicalScore" in student && (
-        <div
-          className={`absolute -top-3 left-0 right-0 h-12 w-max min-w-10 max-w-20 ${
-            student.select && showSelect ? "bg-white" : "bg-primary-color"
-          } m-auto flex items-center justify-center rounded-2xl bg-primary-color text-white group-hover:bg-white`}
-        >
-          <span
-            className={`max-w-14 truncate ${
-              student.select && showSelect ? "text-primary-color" : "text-white"
-            } w-max group-hover:text-primary-color`}
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`group relative h-full w-full ${isDragging ? "z-20 opacity-60" : ""}`}
+    >
+      <button
+        type="button"
+        aria-pressed={showSelect ? isSelected : undefined}
+        onClick={() => setSelectStudent(student)}
+        className={`flex h-full w-full select-none flex-col items-center gap-3 rounded-2xl border px-3 pb-4 pt-5 text-center font-Anuphan transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-color active:scale-[0.98] ${
+          isSelected
+            ? "border-primary-color bg-primary-color/5 ring-1 ring-primary-color"
+            : "border-gray-200 bg-white hover:border-primary-color/40 hover:shadow-sm"
+        } ${isDragging ? "shadow-lg" : ""}`}
+      >
+        <div className="relative">
+          <div
+            className={`relative h-16 w-16 overflow-hidden rounded-full bg-background-color ring-4 sm:h-20 sm:w-20 ${
+              isSelected ? "ring-primary-color/20" : "ring-background-color"
+            }`}
           >
-            {student.totalSpeicalScore}
+            <Image
+              fill
+              sizes="80px"
+              src={student.photo}
+              alt={student.firstName}
+              blurDataURL={decodeBlurhashToCanvas(
+                student.blurHash ?? defaultBlurHash,
+              )}
+              placeholder="blur"
+              className="object-cover"
+            />
+          </div>
+          {points !== undefined && (
+            <span
+              title={`${points} ${studentPointsLanguage.points(lang)}`}
+              className={`absolute -bottom-1 -right-3 flex h-7 min-w-7 max-w-16 items-center justify-center truncate rounded-full px-1.5 text-xs font-semibold tabular-nums shadow-sm ring-2 ring-white ${pointsTone(
+                points,
+              )}`}
+            >
+              {points}
+            </span>
+          )}
+        </div>
+        <div className="flex w-full min-w-0 flex-col items-center">
+          {student.title && (
+            <span className="max-w-full truncate text-xs text-gray-400">
+              {student.title}
+            </span>
+          )}
+          <span className="line-clamp-2 w-full break-words text-sm font-semibold leading-snug text-icon-color">
+            {student.firstName} {student.lastName}
+          </span>
+          <span className="mt-0.5 text-xs text-gray-500">
+            {studentPointsLanguage.number(lang)} {student.number}
           </span>
         </div>
-      )}
-      <div className="relative h-20 w-20 overflow-hidden rounded-full">
-        <Image
-          fill
-          sizes="(max-width: 768px) 100vw, 33vw"
-          src={student.photo}
-          alt="Student"
-          className="h-full w-full object-cover transition group-hover:scale-150"
-        />
-      </div>
-      <div className="flex w-full flex-col items-center justify-center gap-0 text-center">
-        <span className="text-xs text-gray-500">{student.title}</span>
-        <h2
-          className={`text-center text-sm group-hover:text-white ${student.select && showSelect ? "text-white" : "text-primary-color"} w-11/12 truncate text-center font-semibold text-gray-800 sm:text-base md:text-lg lg:text-base`}
-        >
-          {student.firstName} {student.lastName}
-        </h2>
+      </button>
+
+      {showSelect && (
         <span
-          className={`text-xs font-medium ${student.select && showSelect ? "text-white" : "text-gray-500"} text-gray-500 group-hover:text-white sm:text-sm md:text-sm`}
+          aria-hidden
+          className={`pointer-events-none absolute right-2.5 top-2.5 flex h-5 w-5 items-center justify-center rounded-full border text-[10px] transition ${
+            isSelected
+              ? "border-primary-color bg-primary-color text-white"
+              : "border-gray-300 bg-white text-transparent"
+          }`}
         >
-          Number {student.number}
+          <FaCheck />
         </span>
-      </div>
-    </button>
+      )}
+
+      {isDragable && !showSelect && (
+        <button
+          type="button"
+          ref={setActivatorNodeRef}
+          {...listeners}
+          {...attributes}
+          aria-label={studentPointsLanguage.dragToReorder(lang)}
+          title={studentPointsLanguage.dragToReorder(lang)}
+          style={{ cursor: isDragging ? "grabbing" : "grab" }}
+          className="absolute left-1.5 top-1.5 flex h-8 w-6 touch-none items-center justify-center rounded-lg text-gray-400 transition hover:bg-background-color hover:text-icon-color focus-visible:opacity-100 md:opacity-0 md:group-hover:opacity-100"
+        >
+          <MdDragIndicator />
+        </button>
+      )}
+    </div>
   );
 }
 

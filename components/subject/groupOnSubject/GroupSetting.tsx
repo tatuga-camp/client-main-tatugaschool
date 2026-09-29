@@ -103,6 +103,7 @@ function GroupSetting({ subjectId, data, onClose, toast }: GroupSettingProps) {
       });
     }
   };
+  const isSaving = create.isPending || update.isPending;
   return (
     <form
       onSubmit={(e) => {
@@ -112,23 +113,27 @@ function GroupSetting({ subjectId, data, onClose, toast }: GroupSettingProps) {
           handleCreateGroup(e);
         }
       }}
-      className="flex h-96 w-96 flex-col rounded-2xl border bg-white p-5 pb-2"
+      className="m-4 flex w-[min(28rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl bg-white font-Anuphan shadow-xl"
     >
-      <header className="flex w-full items-center justify-start gap-1 border-b text-lg text-black">
-        <MdGroup />{" "}
-        {data
-          ? groupOnSubjectLanguage.updateGroup(lang)
-          : groupOnSubjectLanguage.createGroup(lang)}
+      {isSaving && <LoadingBar />}
+      <header className="flex items-center gap-3 border-b border-gray-100 px-5 pb-3 pt-5">
+        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-color/10 text-lg text-primary-color">
+          <MdGroup />
+        </span>
+        <h2 className="text-lg font-semibold text-icon-color">
+          {data
+            ? groupOnSubjectLanguage.updateGroup(lang)
+            : groupOnSubjectLanguage.createGroup(lang)}
+        </h2>
       </header>
-      {(create.isPending || update.isPending) && <LoadingBar />}
-      <main className="flex grow flex-col gap-2 pb-2">
-        <label className="mt-2 flex w-full flex-col">
-          <span className="text-sm">
+      <main className="flex flex-col gap-4 p-5">
+        <label className="flex w-full flex-col gap-1.5">
+          <span className="text-sm font-medium text-icon-color">
             {groupOnSubjectLanguage.titleLabel(lang)}
           </span>
           <input
             required
-            value={groupOnSubjectData.title}
+            value={groupOnSubjectData.title ?? ""}
             onChange={(e) => {
               setGroupOnSubjectData((prev) => {
                 return {
@@ -138,16 +143,17 @@ function GroupSetting({ subjectId, data, onClose, toast }: GroupSettingProps) {
               });
             }}
             type="text"
-            className="main-input"
+            className="main-input h-10"
           />
         </label>
-        <label className="flex w-full grow flex-col">
-          <span className="text-sm">
+        <label className="flex w-full flex-col gap-1.5">
+          <span className="text-sm font-medium text-icon-color">
             {groupOnSubjectLanguage.descriptionLabel(lang)}
           </span>
           <textarea
             required
-            value={groupOnSubjectData.description}
+            rows={3}
+            value={groupOnSubjectData.description ?? ""}
             onChange={(e) => {
               setGroupOnSubjectData((prev) => {
                 return {
@@ -156,12 +162,12 @@ function GroupSetting({ subjectId, data, onClose, toast }: GroupSettingProps) {
                 };
               });
             }}
-            className="main-input grow resize-none"
+            className="main-input resize-none"
           />
         </label>
         {!data && (
-          <label className="flex w-full grow flex-col">
-            <span className="text-sm">
+          <label className="flex w-full flex-col gap-1.5">
+            <span className="text-sm font-medium text-icon-color">
               {groupOnSubjectLanguage.numberOfGroupsLabel(lang)}
             </span>
             <input
@@ -178,26 +184,26 @@ function GroupSetting({ subjectId, data, onClose, toast }: GroupSettingProps) {
                   };
                 });
               }}
-              className="main-input grow resize-none"
+              className="main-input h-10 w-32"
             />
           </label>
         )}
       </main>
-      <footer className="flex items-center justify-end gap-2 border-t pt-3">
+      <footer className="flex items-center justify-end gap-2 border-t border-gray-100 p-4">
         <button
           onClick={() => onClose()}
-          disabled={create.isPending || update.isPending}
+          disabled={isSaving}
           type="button"
-          className="second-button flex items-center justify-center gap-1 border"
+          className="flex h-10 items-center justify-center rounded-xl border border-gray-200 bg-white px-4 text-sm font-semibold text-icon-color transition-colors hover:bg-background-color"
         >
           {groupOnSubjectLanguage.cancel(lang)}
         </button>
         <button
-          disabled={create.isPending || update.isPending}
+          disabled={isSaving}
           type="submit"
-          className="main-button flex items-center justify-center gap-1"
+          className="flex h-10 items-center justify-center gap-1.5 rounded-xl bg-primary-color px-4 text-sm font-semibold text-white transition-colors hover:bg-primary-color-hover disabled:opacity-60"
         >
-          <FiPlus />{" "}
+          {!data && <FiPlus />}
           {data
             ? groupOnSubjectLanguage.updateGroup(lang)
             : groupOnSubjectLanguage.createGroup(lang)}

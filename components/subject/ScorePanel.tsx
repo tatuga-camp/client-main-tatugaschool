@@ -1,15 +1,14 @@
-import { UseQueryResult } from "@tanstack/react-query";
 import Image from "next/image";
 import { InputNumber } from "primereact/inputnumber";
-import { ProgressSpinner } from "primereact/progressspinner";
 import { Toast } from "primereact/toast";
 import React, { useState } from "react";
-import { BiEdit } from "react-icons/bi";
-import { CiSquarePlus } from "react-icons/ci";
-import { IoStar } from "react-icons/io5";
+import { FiMinus, FiPlus } from "react-icons/fi";
+import { IoArrowBack, IoStar } from "react-icons/io5";
+import { MdEdit } from "react-icons/md";
 import Swal from "sweetalert2";
 import { scoreOnSubjectTitlesDefault } from "../../data/socre";
-import { ErrorMessages, ScoreOnSubject } from "../../interfaces";
+import { studentPointsLanguage } from "../../data/languages";
+import { ErrorMessages, Language, ScoreOnSubject } from "../../interfaces";
 import {
   useCreateScoreOnSubject,
   useDeleteScoreOnSubject,
@@ -34,6 +33,10 @@ type Props = {
   selectScore?: { score?: ScoreOnSubject } & { inputScore: number };
   isLoading?: boolean;
   onCreateScore?: (data: { score: ScoreOnSubject; inputScore: number }) => void;
+  /** Heading override, e.g. the group name when scoring a whole group. */
+  title?: string;
+  /** Who is receiving the points, e.g. "3 selected". */
+  subtitle?: string;
 };
 
 function ScorePanel({
@@ -42,166 +45,221 @@ function ScorePanel({
   selectScore,
   isLoading,
   onCreateScore,
+  title,
+  subtitle,
 }: Props) {
+  const language = useGetLanguage();
+  const lang = language.data ?? "en";
   const scoreOnSubjects = useGetScoreOnSubject({
     subjectId: subjectId,
   });
-  const scoreRef = React.useRef<HTMLButtonElement>(null);
   const [triggerFormScoreOnSubject, setTriggerFormScoreOnSubject] =
     React.useState(false);
   const [selectScoreOnSubject, setSelectScoreOnSubject] =
     React.useState<ScoreOnSubject | null>(selectScore?.score ?? null);
-  const [inputScore, setInputScore] = useState<number | null>(
-    selectScore?.inputScore ?? null,
+  const [editScoreOnSubject, setEditScoreOnSubject] =
+    React.useState<ScoreOnSubject | null>(null);
+  const [inputScore, setInputScore] = useState<number>(
+    selectScore?.inputScore ?? 0,
   );
-  return (
-    <div className="flex h-96 flex-col gap-3 bg-white p-4 sm:p-6 md:p-8 lg:p-10">
-      {triggerFormScoreOnSubject ? (
-        <ScoreOnSubjectForm
-          onClose={() => {
+
+  const changePoints = (value: number) => {
+    setInputScore(value);
+    onSelectScore({
+      score: selectScoreOnSubject ?? undefined,
+      inputScore: value,
+    });
+  };
+
+  if (triggerFormScoreOnSubject) {
+    return (
+      <ScoreOnSubjectForm
+        lang={lang}
+        onClose={(deletedId) => {
+          if (deletedId && deletedId === selectScoreOnSubject?.id) {
             setSelectScoreOnSubject(null);
-            setTriggerFormScoreOnSubject(false);
-          }}
-          subjectId={subjectId}
-          scoreOnSubject={selectScoreOnSubject}
-        />
-      ) : (
-        <>
-          <div className="border-b text-lg font-semibold">
-            Give Your Student A Score!
-          </div>
-          <ul className="grid max-h-48 grid-cols-2 gap-3 overflow-auto p-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4">
+            onSelectScore({ score: undefined, inputScore });
+          }
+          setEditScoreOnSubject(null);
+          setTriggerFormScoreOnSubject(false);
+        }}
+        subjectId={subjectId}
+        scoreOnSubject={editScoreOnSubject}
+      />
+    );
+  }
+
+  return (
+    <div className="flex w-full min-w-0 flex-col bg-white font-Anuphan">
+      <header className="flex flex-col gap-0.5 border-b border-gray-100 px-5 pb-3 pt-5">
+        <h2 className="text-lg font-semibold text-icon-color">
+          {title ?? studentPointsLanguage.panelTitle(lang)}
+        </h2>
+        <p className="text-sm text-gray-500">
+          {subtitle ?? studentPointsLanguage.panelHint(lang)}
+        </p>
+      </header>
+
+      <ul className="grid max-h-[45vh] grid-cols-[repeat(auto-fill,minmax(6.5rem,1fr))] gap-2 overflow-y-auto p-4">
+        {scoreOnSubjects.isLoading
+          ? [...Array(8)].map((_, index) => (
+              <li
+                key={index}
+                className="h-28 animate-pulse rounded-2xl bg-background-color"
+              />
+            ))
+          : scoreOnSubjects.data?.map((score) => {
+              const isSelected = selectScoreOnSubject?.id === score.id;
+              return (
+                <li key={score.id} className="group relative">
+                  <button
+                    type="button"
+                    aria-pressed={isSelected}
+                    onClick={() => {
+                      setSelectScoreOnSubject(score);
+                      setInputScore(score.score);
+                      onSelectScore({
+                        score: score,
+                        inputScore: score.score,
+                      });
+                    }}
+                    className={`flex h-28 w-full flex-col items-center justify-center gap-2 rounded-2xl border p-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-color active:scale-95 ${
+                      isSelected
+                        ? "border-primary-color bg-primary-color/5 ring-1 ring-primary-color"
+                        : "border-gray-200 bg-white hover:border-primary-color/40 hover:bg-background-color"
+                    }`}
+                  >
+                    <span className="relative h-10 w-10">
+                      <Image
+                        src={score.icon}
+                        alt=""
+                        placeholder="blur"
+                        blurDataURL={decodeBlurhashToCanvas(score.blurHash)}
+                        fill
+                        sizes="40px"
+                        className="object-contain"
+                      />
+                    </span>
+                    <span className="line-clamp-2 w-full break-words text-center text-xs font-medium leading-tight text-icon-color">
+                      {score.title}
+                    </span>
+                  </button>
+                  <span
+                    className={`pointer-events-none absolute left-2 top-2 rounded-full px-1.5 text-[11px] font-semibold tabular-nums ${
+                      score.score >= 0
+                        ? "bg-success-color/10 text-success-color"
+                        : "bg-error-color/10 text-error-color"
+                    }`}
+                  >
+                    {score.score > 0 ? `+${score.score}` : score.score}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditScoreOnSubject(score);
+                      setTriggerFormScoreOnSubject(true);
+                    }}
+                    aria-label={studentPointsLanguage.editSkill(lang)}
+                    title={studentPointsLanguage.editSkill(lang)}
+                    className={`absolute right-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full text-gray-400 transition hover:bg-white hover:text-primary-color focus-visible:opacity-100 ${
+                      isSelected
+                        ? "opacity-100"
+                        : "md:opacity-0 md:group-hover:opacity-100"
+                    }`}
+                  >
+                    <MdEdit />
+                  </button>
+                </li>
+              );
+            })}
+        {!scoreOnSubjects.isLoading && (
+          <li>
             <button
+              type="button"
               onClick={() => {
-                setSelectScoreOnSubject(null);
+                setEditScoreOnSubject(null);
                 setTriggerFormScoreOnSubject(true);
               }}
-              className="second-button flex w-full flex-col items-center justify-center gap-1 rounded-2xl border p-2 text-gray-500"
+              className="flex h-28 w-full flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-gray-300 p-2 text-gray-500 transition hover:border-primary-color hover:text-primary-color focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-color"
             >
-              <CiSquarePlus size={50} />
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-background-color text-lg">
+                <FiPlus />
+              </span>
+              <span className="text-xs font-medium">
+                {studentPointsLanguage.addSkill(lang)}
+              </span>
             </button>
-            {scoreOnSubjects.isLoading
-              ? [...Array(12)].map((_, index) => {
-                  return (
-                    <div
-                      key={index}
-                      className="h-20 w-20 animate-pulse rounded-2xl bg-gray-200"
-                    ></div>
-                  );
-                })
-              : scoreOnSubjects.data?.map((score, index) => {
-                  return (
-                    <button
-                      ref={index === 0 ? scoreRef : null}
-                      onClick={() => {
-                        setSelectScoreOnSubject(score);
-                        setInputScore(score.score);
-                        onSelectScore({
-                          score: score,
-                          inputScore: score.score,
-                        });
-                      }}
-                      key={score.id}
-                      className={` ${
-                        selectScoreOnSubject?.id === score.id
-                          ? "gradient-bg"
-                          : "bg-white"
-                      } active:gradient-bg group relative flex w-32 flex-col items-center justify-center gap-2 rounded-2xl p-2 transition hover:bg-secondary-color`}
-                    >
-                      <div className="relative h-10 w-10 rounded-2xl">
-                        <Image
-                          src={score.icon}
-                          alt={score.title}
-                          placeholder="blur"
-                          blurDataURL={decodeBlurhashToCanvas(score.blurHash)}
-                          fill
-                          sizes="(max-width: 768px) 100vw, 33vw"
-                          className="object-contain"
-                        />
-                        <div
-                          className={`absolute -right-2 -top-2 z-20 flex h-5 min-w-5 max-w-10 items-center justify-center truncate rounded-full text-white ${
-                            score.score >= 0 ? "bg-green-400" : "bg-red-500"
-                          } `}
-                        >
-                          {score.score}
-                        </div>
-                      </div>
-                      <span
-                        className={`line-clamp-2 w-20 break-words text-xs text-gray-500 group-hover:text-white ${
-                          selectScoreOnSubject?.id === score.id && "text-white"
-                        }`}
-                      >
-                        {score.title}
-                      </span>
-                    </button>
-                  );
-                })}
-          </ul>
-          <div className="flex flex-col gap-2 sm:flex-row">
+          </li>
+        )}
+        {!scoreOnSubjects.isLoading && scoreOnSubjects.data?.length === 0 && (
+          <li className="col-span-full px-1 text-sm text-gray-500">
+            {studentPointsLanguage.noSkills(lang)}
+          </li>
+        )}
+      </ul>
+
+      <footer className="flex flex-col gap-3 border-t border-gray-100 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium text-gray-500">
+            {studentPointsLanguage.pointsLabel(lang)}
+          </span>
+          <div className="flex items-center rounded-xl border border-gray-200 bg-white">
+            <button
+              type="button"
+              onClick={() => changePoints(inputScore - 1)}
+              aria-label="-1"
+              className="flex h-10 w-10 items-center justify-center rounded-l-xl text-icon-color transition hover:bg-background-color"
+            >
+              <FiMinus />
+            </button>
             <InputNumber
+              value={inputScore}
+              onValueChange={(e) => changePoints(e.value ?? 0)}
               pt={{
+                root: { className: "w-14" },
                 input: {
-                  root: { className: "w-full sm:w-60 main-input h-10" },
+                  root: {
+                    className:
+                      "h-10 w-14 border-x border-gray-200 text-center text-base font-semibold tabular-nums text-icon-color outline-none focus:bg-background-color",
+                  },
                 },
               }}
-              style={{ width: "15rem" }}
-              value={inputScore}
-              onValueChange={(e) => {
-                setInputScore(e.value ?? 0);
-                onSelectScore({
-                  score: selectScore?.score,
-                  inputScore: e.value ?? 0,
-                });
-              }}
             />
-
             <button
-              disabled={isLoading}
-              onClick={() => {
-                if (!selectScoreOnSubject) {
-                  scoreRef.current?.style.setProperty(
-                    "border",
-                    "1px solid red",
-                  );
-                  scoreRef.current?.classList.add("scale-110");
-                  setTimeout(() => {
-                    scoreRef.current?.classList.remove("scale-110");
-                    scoreRef.current?.style.removeProperty("border");
-                  }, 100);
-                  return;
-                }
-                onCreateScore?.({
-                  inputScore: inputScore ?? 0,
-                  score: selectScoreOnSubject,
-                });
-              }}
-              className="main-button flex w-full items-center justify-center sm:w-56"
+              type="button"
+              onClick={() => changePoints(inputScore + 1)}
+              aria-label="+1"
+              className="flex h-10 w-10 items-center justify-center rounded-r-xl text-icon-color transition hover:bg-background-color"
             >
-              {isLoading ? (
-                <ProgressSpinner
-                  animationDuration="1s"
-                  style={{ width: "20px" }}
-                  className="h-5 w-5"
-                  strokeWidth="8"
-                />
-              ) : (
-                <div className="flex items-center justify-center gap-1">
-                  Give Score <IoStar />
-                </div>
-              )}
+              <FiPlus />
             </button>
-            {selectScoreOnSubject && (
-              <button
-                onClick={() => setTriggerFormScoreOnSubject(true)}
-                className="second-button flex w-20 items-center justify-center border"
-              >
-                <BiEdit />
-                Edit
-              </button>
-            )}
           </div>
-        </>
-      )}
+        </div>
+
+        <button
+          type="button"
+          disabled={isLoading || !selectScoreOnSubject}
+          onClick={() => {
+            if (!selectScoreOnSubject) return;
+            onCreateScore?.({
+              inputScore: inputScore,
+              score: selectScoreOnSubject,
+            });
+          }}
+          className="flex h-10 min-w-40 items-center justify-center gap-2 rounded-xl bg-primary-color px-5 text-sm font-semibold text-white transition hover:bg-primary-color-hover active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 disabled:active:scale-100"
+        >
+          {isLoading ? (
+            <LoadingSpinner />
+          ) : selectScoreOnSubject ? (
+            <>
+              <IoStar />
+              {studentPointsLanguage.giveAmount(inputScore)(lang)}
+            </>
+          ) : (
+            studentPointsLanguage.pickSkillFirst(lang)
+          )}
+        </button>
+      </footer>
     </div>
   );
 }
@@ -211,18 +269,20 @@ export default ScorePanel;
 type ScoreOnSubjectFormProps = {
   scoreOnSubject?: ScoreOnSubject | null;
   subjectId: string;
-  onClose: () => void;
+  lang: Language;
+  /** Called with the deleted skill id when the skill was deleted. */
+  onClose: (deletedId?: string) => void;
 };
 function ScoreOnSubjectForm({
   scoreOnSubject,
   subjectId,
+  lang,
   onClose,
 }: ScoreOnSubjectFormProps) {
   const toast = React.useRef<Toast>(null);
   const update = useUpdateScoreOnSubject();
   const create = useCreateScoreOnSubject();
   const remove = useDeleteScoreOnSubject();
-  const language = useGetLanguage();
   const [data, setData] = React.useState<{
     title?: string;
     score?: number;
@@ -235,6 +295,19 @@ function ScoreOnSubjectForm({
       scoreOnSubject?.blurHash ?? scoreOnSubjectTitlesDefault[0].blurHash,
     icon: scoreOnSubject?.icon ?? scoreOnSubjectTitlesDefault[0].icon,
   });
+
+  const showError = (error: unknown) => {
+    console.error(error);
+    let result = error as ErrorMessages;
+    Swal.fire({
+      title: result?.error ? result?.error : "Something Went Wrong",
+      text: result?.message?.toString(),
+      footer: result?.statusCode
+        ? "Code Error: " + result?.statusCode?.toString()
+        : "",
+      icon: "error",
+    });
+  };
 
   const handleSummit = async (e: React.FormEvent<HTMLFormElement>) => {
     try {
@@ -251,8 +324,8 @@ function ScoreOnSubjectForm({
         });
         toast.current?.show({
           severity: "success",
-          summary: "Score Updated",
-          detail: `Score ${data.title} has been updated`,
+          summary: studentPointsLanguage.skillUpdated(lang),
+          detail: data.title,
           life: 3000,
         });
       } else {
@@ -274,8 +347,8 @@ function ScoreOnSubjectForm({
 
         toast.current?.show({
           severity: "success",
-          summary: "Score Created",
-          detail: `Score ${data.title} has been created`,
+          summary: studentPointsLanguage.skillCreated(lang),
+          detail: data.title,
           life: 3000,
         });
       }
@@ -284,16 +357,7 @@ function ScoreOnSubjectForm({
         onClose();
       }, 1000);
     } catch (error) {
-      console.error(error);
-      let result = error as ErrorMessages;
-      Swal.fire({
-        title: result?.error ? result?.error : "Something Went Wrong",
-        text: result?.message?.toString(),
-        footer: result?.statusCode
-          ? "Code Error: " + result?.statusCode?.toString()
-          : "",
-        icon: "error",
-      });
+      showError(error);
     }
   };
 
@@ -304,121 +368,168 @@ function ScoreOnSubjectForm({
       });
       toast.current?.show({
         severity: "success",
-        summary: "Score Deleted",
+        summary: studentPointsLanguage.skillDeleted(lang),
         life: 3000,
       });
       setTimeout(() => {
-        onClose();
+        onClose(id);
       }, 1000);
     } catch (error) {
-      console.error(error);
-      let result = error as ErrorMessages;
-      Swal.fire({
-        title: result?.error ? result?.error : "Something Went Wrong",
-        text: result?.message?.toString(),
-        footer: result?.statusCode
-          ? "Code Error: " + result?.statusCode?.toString()
-          : "",
-        icon: "error",
-      });
+      showError(error);
     }
   };
+
+  const isSaving = create.isPending || update.isPending;
+
   return (
     <>
       <Toast ref={toast} />
-      <form onSubmit={handleSummit} className="flex h-72 w-full max-w-96 flex-col gap-2">
-        <h1 className="flex items-center justify-center gap-2 text-center text-lg font-semibold">
-          {scoreOnSubject?.id ? "Update" : "Create"} Score
-          <IoStar />
-        </h1>
-        <ul className="grid max-h-60 w-full grid-cols-5 gap-2 overflow-auto p-2">
-          {scoreOnSubjectTitlesDefault.map((icon, index) => {
-            return (
-              <li
-                onClick={() =>
-                  setData({ ...data, icon: icon.icon, blurHash: icon.blurHash })
-                }
-                key={index}
-                className={`h-16 w-full ${data?.icon === icon.icon && "ring-1 ring-black"} second-button relative border`}
-              >
-                <Image
-                  src={icon.icon}
-                  alt={"icon"}
-                  placeholder="blur"
-                  blurDataURL={decodeBlurhashToCanvas(icon.blurHash)}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                  className="object-contain"
-                />
-              </li>
-            );
-          })}
-        </ul>
-        <input
-          required
-          value={data?.title}
-          onChange={(e) => setData({ ...data, title: e.target.value })}
-          type="text"
-          placeholder="Title"
-          className="main-input h-10"
-        />
-        <InputNumber
-          pt={{
-            input: {
-              root: { className: "w-full  main-input h-10" },
-            },
-          }}
-          value={data?.score}
-          placeholder="Default Score"
-          onValueChange={(e) =>
-            setData({
-              ...data,
-              score: e.value ?? 0,
-            })
-          }
-        />
-        <div className="flex items-center justify-center gap-2">
+      <form
+        onSubmit={handleSummit}
+        className="flex w-full min-w-0 flex-col bg-white font-Anuphan"
+      >
+        {remove.isPending && <LoadingBar />}
+        <header className="flex items-center gap-2 border-b border-gray-100 px-4 pb-3 pt-4">
           <button
             type="button"
-            onClick={() => {
-              onClose();
-            }}
-            className="second-button w-full border"
+            onClick={() => onClose()}
+            aria-label={studentPointsLanguage.back(lang)}
+            title={studentPointsLanguage.back(lang)}
+            className="flex h-8 w-8 items-center justify-center rounded-full text-icon-color transition hover:bg-background-color"
           >
-            Cancel
+            <IoArrowBack />
           </button>
-          <button
-            disabled={create.isPending || update.isPending}
-            className="main-button flex w-full items-center justify-center"
-          >
-            {create.isPending || update.isPending ? (
-              <LoadingSpinner />
-            ) : scoreOnSubject?.id ? (
-              <span>Update</span>
-            ) : (
-              <span>Create</span>
-            )}
-          </button>
+          <h2 className="text-lg font-semibold text-icon-color">
+            {scoreOnSubject?.id
+              ? studentPointsLanguage.updateSkillTitle(lang)
+              : studentPointsLanguage.createSkillTitle(lang)}
+          </h2>
+        </header>
+
+        <div className="flex flex-col gap-4 p-4">
+          <fieldset className="flex flex-col gap-1.5">
+            <legend className="mb-1.5 text-sm font-medium text-icon-color">
+              {studentPointsLanguage.skillIcon(lang)}
+            </legend>
+            <ul className="grid max-h-44 grid-cols-[repeat(auto-fill,minmax(3.25rem,1fr))] gap-1.5 overflow-y-auto rounded-2xl bg-background-color p-2">
+              {scoreOnSubjectTitlesDefault.map((icon, index) => {
+                const isSelected = data?.icon === icon.icon;
+                return (
+                  <li key={index}>
+                    <button
+                      type="button"
+                      aria-pressed={isSelected}
+                      onClick={() =>
+                        setData({
+                          ...data,
+                          icon: icon.icon,
+                          blurHash: icon.blurHash,
+                        })
+                      }
+                      className={`relative flex aspect-square w-full items-center justify-center rounded-xl border transition ${
+                        isSelected
+                          ? "border-primary-color bg-white ring-1 ring-primary-color"
+                          : "border-transparent hover:bg-white"
+                      }`}
+                    >
+                      <span className="relative h-8 w-8">
+                        <Image
+                          src={icon.icon}
+                          alt=""
+                          placeholder="blur"
+                          blurDataURL={decodeBlurhashToCanvas(icon.blurHash)}
+                          fill
+                          sizes="32px"
+                          className="object-contain"
+                        />
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </fieldset>
+
+          <label className="flex flex-col gap-1.5">
+            <span className="text-sm font-medium text-icon-color">
+              {studentPointsLanguage.skillName(lang)}
+            </span>
+            <input
+              required
+              value={data?.title ?? ""}
+              onChange={(e) => setData({ ...data, title: e.target.value })}
+              type="text"
+              placeholder={studentPointsLanguage.skillNamePlaceholder(lang)}
+              className="main-input h-10"
+            />
+          </label>
+
+          <label className="flex flex-col gap-1.5">
+            <span className="text-sm font-medium text-icon-color">
+              {studentPointsLanguage.defaultPoints(lang)}
+            </span>
+            <InputNumber
+              pt={{
+                root: { className: "w-full" },
+                input: {
+                  root: { className: "w-full main-input h-10" },
+                },
+              }}
+              value={data?.score}
+              onValueChange={(e) =>
+                setData({
+                  ...data,
+                  score: e.value ?? 0,
+                })
+              }
+            />
+            <span className="text-xs text-gray-500">
+              {studentPointsLanguage.defaultPointsHint(lang)}
+            </span>
+          </label>
+        </div>
+
+        <footer className="flex items-center gap-2 border-t border-gray-100 p-4">
           {scoreOnSubject?.id && (
             <button
               type="button"
+              disabled={remove.isPending}
               onClick={() => {
-                if (scoreOnSubject) {
-                  ConfirmDeleteMessage({
-                    language: language.data ?? "en",
-                    callback: async () => {
-                      handleDelete(scoreOnSubject.id);
-                    },
-                  });
-                }
+                ConfirmDeleteMessage({
+                  language: lang,
+                  callback: async () => {
+                    await handleDelete(scoreOnSubject.id);
+                  },
+                });
               }}
-              className="reject-button flex w-full items-center justify-center"
+              className="flex h-10 items-center justify-center rounded-xl px-3 text-sm font-semibold text-error-color transition hover:bg-error-color/10 disabled:opacity-50"
             >
-              Delete
+              {studentPointsLanguage.delete(lang)}
             </button>
           )}
-        </div>
-        {remove.isPending && <LoadingBar />}
+          <div className="ml-auto flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => onClose()}
+              className="flex h-10 items-center justify-center rounded-xl border border-gray-200 bg-white px-4 text-sm font-semibold text-icon-color transition hover:bg-background-color"
+            >
+              {studentPointsLanguage.cancel(lang)}
+            </button>
+            <button
+              type="submit"
+              disabled={isSaving}
+              className="flex h-10 min-w-24 items-center justify-center rounded-xl bg-primary-color px-4 text-sm font-semibold text-white transition hover:bg-primary-color-hover disabled:opacity-60"
+            >
+              {isSaving ? (
+                <LoadingSpinner />
+              ) : scoreOnSubject?.id ? (
+                studentPointsLanguage.save(lang)
+              ) : (
+                studentPointsLanguage.create(lang)
+              )}
+            </button>
+          </div>
+        </footer>
       </form>
     </>
   );

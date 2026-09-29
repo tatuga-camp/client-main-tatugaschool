@@ -69,6 +69,14 @@ export const generateBlurHash = async (
 import { decode } from "blurhash";
 import { defaultBlurHash, defaultCanvas } from "../data";
 
+// Components call this inline in render (e.g. `blurDataURL={...}`), so the
+// same hash is decoded again on every re-render. During a dnd-kit drag every
+// sortable row re-renders per pointer move, which made each frame decode and
+// PNG-encode dozens of canvases. The output is a pure function of the inputs,
+// so cache it.
+const BLURHASH_CACHE_LIMIT = 500;
+const blurhashCache = new Map<string, string>();
+
 // Decode the blurhash into pixels
 export const decodeBlurhashToCanvas = (
   blurhash: string = defaultBlurHash,
@@ -78,6 +86,9 @@ export const decodeBlurhashToCanvas = (
   // Decode the blurhash
   if (typeof window !== "undefined") {
     // client-side-only code
+    const cacheKey = `${blurhash}|${width}|${height}`;
+    const cached = blurhashCache.get(cacheKey);
+    if (cached !== undefined) return cached;
 
     const pixels = decode(blurhash, width, height);
 
@@ -101,7 +112,13 @@ export const decodeBlurhashToCanvas = (
     ctx.putImageData(imageData, 0, 0);
 
     // Convert the canvas to a data URL (Base64 PNG)
-    return canvas.toDataURL();
+    const dataUrl = canvas.toDataURL();
+    if (blurhashCache.size >= BLURHASH_CACHE_LIMIT) {
+      // Drop the oldest entry (Map keeps insertion order).
+      blurhashCache.delete(blurhashCache.keys().next().value as string);
+    }
+    blurhashCache.set(cacheKey, dataUrl);
+    return dataUrl;
   } else {
     return defaultCanvas;
   }
