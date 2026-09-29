@@ -102,3 +102,39 @@ export const attendanceLanguageData = {
     }
   },
 } as const;
+
+const t = (en: string, th: string) => (language: Language) =>
+  language === "th" ? th : en;
+
+// Attendance overview page (Attendance.tsx)
+export const attendanceOverviewData = {
+  student: t("Student", "นักเรียน"),
+  number: t("No.", "เลขที่"),
+  today: t("Today", "วันนี้"),
+  sessions: (count: number) => (language: Language) =>
+    language === "th"
+      ? `${count} ครั้ง`
+      : `${count} ${count === 1 ? "session" : "sessions"}`,
+  total: t("Total", "รวม"),
+  totalPresents: t("Total present", "รวมการมาเรียน"),
+  totalPresentsHint: t("Sum of status values", "ผลรวมคะแนนสถานะ"),
+  notRecorded: t(
+    "Not recorded — click to add",
+    "ยังไม่มีข้อมูล คลิกเพื่อเพิ่ม",
+  ),
+  openSession: t("Open this session", "เปิดการเช็คชื่อนี้"),
+  hasNote: t("Has a note", "มีโน้ต"),
+  scanSession: t("QR code check-in", "เช็คชื่อด้วย QR Code"),
+  noTables: t("No attendance tables yet", "ยังไม่มีตารางเช็คชื่อ"),
+  noTablesHint: t(
+    "Create a table to start taking attendance for this subject.",
+    "สร้างตารางเพื่อเริ่มเช็คชื่อในรายวิชานี้",
+  ),
+  noSessions: t("No attendance taken yet", "ยังไม่มีการเช็คชื่อ"),
+  noSessionsHint: t(
+    "Use Attendance or QR code attendance at the bottom of the subject page to add the first session.",
+    "ใช้ปุ่มเช็คชื่อหรือเช็คชื่อด้วย QR Code ด้านล่างของหน้ารายวิชาเพื่อเริ่มเช็คชื่อครั้งแรก",
+  ),
+  noMatch: t("No students match your search", "ไม่พบนักเรียนที่ค้นหา"),
+  searchStudent: t("Search name or number", "ค้นหาชื่อหรือเลขที่"),
+} as const;
