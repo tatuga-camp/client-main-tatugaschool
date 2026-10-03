@@ -190,7 +190,10 @@ function AttendanceChecker({
         if (!prev) return null;
         return prev?.map((studentOnSubject) =>
           studentOnSubject.id === studentId
-            ? { ...studentOnSubject, status: key }
+            ? {
+                ...studentOnSubject,
+                status: studentOnSubject.status === key ? "UNKNOW" : key,
+              }
             : studentOnSubject,
         );
       });
@@ -397,7 +400,9 @@ function AttendanceChecker({
     () =>
       (selectTable?.statusLists ?? [])
         .filter((s) => !s.isHidden)
-        .sort((a, b) => b.title.localeCompare(a.title)),
+        .sort((a, b) =>
+          b.title.localeCompare(a.title, undefined, { numeric: true }),
+        ),
     [selectTable?.statusLists],
   );
 
