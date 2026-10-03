@@ -1,12 +1,37 @@
 import { ErrorMessages, School } from "@/interfaces";
 import { RequestUpdateSchoolService } from "@/services";
 import { UseMutationResult } from "@tanstack/react-query";
+import Image from "next/image";
 import { Toast } from "primereact/toast";
 import React, { useRef, useState } from "react";
 import { PhoneInput } from "react-international-phone";
 import Swal from "sweetalert2";
+import { countries } from "../../data";
 import useGetRoleOnSchool from "../../hook/useGetRoleOnSchool";
+import Dropdown from "../common/Dropdown";
 import LoadingSpinner from "../common/LoadingSpinner";
+
+type Country = (typeof countries)[number];
+
+const countryTemplate = (
+  country: Country | undefined,
+  props?: { placeholder?: string },
+) =>
+  country ? (
+    <div className="flex items-center gap-5">
+      <Image
+        alt={country.name}
+        src={`/svg/flags/1x1/${country.code.toLowerCase()}.svg`}
+        width={20}
+        height={10}
+        style={{ width: "18px" }}
+      />
+      <div>{country.name}</div>
+    </div>
+  ) : (
+    <span>{props?.placeholder}</span>
+  );
+
 interface ProfileFormProps {
   school: School;
   updateSchool: UseMutationResult<
@@ -32,6 +57,10 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ school, updateSchool }) => {
     description: school.description,
     address: school.address,
   });
+  const selectedCountry = countries.find(
+    (country) =>
+      country.name.toLowerCase() === formData.country?.trim().toLowerCase(),
+  );
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -122,16 +151,19 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ school, updateSchool }) => {
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm text-gray-500" htmlFor="country">
-            Country
-          </label>
-          <input
+          <label className="mb-1 block text-sm text-gray-500">Country</label>
+          <Dropdown<Country | undefined>
+            value={selectedCountry}
+            onChange={(e) => {
+              setFormData((prev) => ({ ...prev, country: e.value.name }));
+              setIsActive(true);
+            }}
+            options={countries}
+            optionLabel="name"
+            placeholder="Select a Country"
+            valueTemplate={countryTemplate}
+            itemTemplate={countryTemplate}
             disabled={role === "TEACHER"}
-            type="text"
-            id="country"
-            value={formData.country}
-            onChange={handleChange}
-            className="main-input w-full"
           />
         </div>
       </div>
