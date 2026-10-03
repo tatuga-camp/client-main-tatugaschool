@@ -24,6 +24,7 @@ import InviteTeacher from "../../../components/subject/InviteTeacher";
 import NoisyDetector from "../../../components/subject/NoisyDetector";
 import PopUpStudent from "../../../components/subject/PopUpStudent";
 import QRCode from "../../../components/subject/QRCode";
+import QRCodeGenerator from "../../../components/subject/QRCodeGenerator";
 import Setting from "../../../components/subject/Setting";
 import SilderPicker from "../../../components/subject/SilderPicker";
 import StopWatch from "../../../components/subject/StopWatch";
@@ -253,6 +254,11 @@ function Index({ subjectId }: Props) {
       {selectFooter === "NoisyDetector" && (
         <PopupLayout onClose={() => setSelectFooter("EMTY")}>
           <NoisyDetector onClose={() => setSelectFooter("EMTY")} />
+        </PopupLayout>
+      )}
+      {selectFooter === "QRCodeGenerator" && (
+        <PopupLayout onClose={() => setSelectFooter("EMTY")}>
+          <QRCodeGenerator onClose={() => setSelectFooter("EMTY")} />
         </PopupLayout>
       )}
       {selectFooter === "WordCloud" && (

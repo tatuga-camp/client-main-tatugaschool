@@ -417,6 +417,16 @@ export const footerOnSubjectDataLangugae = {
         return "Noisy Detector";
     }
   },
+  QRCodeGenerator: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "QR Code Generator";
+      case "th":
+        return "สร้าง QR Code";
+      default:
+        return "QR Code Generator";
+    }
+  },
   Attendance: (language: Language) => {
     switch (language) {
       case "en":
