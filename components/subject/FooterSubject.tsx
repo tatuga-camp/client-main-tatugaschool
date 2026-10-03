@@ -4,7 +4,7 @@ import { FaRandom, FaStopwatch20, FaWpforms } from "react-icons/fa";
 import { TbArrowsRandom } from "react-icons/tb";
 import { GiCardPick } from "react-icons/gi";
 import { LuScanFace } from "react-icons/lu";
-import { MdHeadphones } from "react-icons/md";
+import { MdHeadphones, MdQrCode2 } from "react-icons/md";
 import { PiCloudFog } from "react-icons/pi";
 import {
   footerGroupLanguage,
@@ -22,6 +22,7 @@ type MenuItem = {
     | "CardPicker"
     | "FacePicker"
     | "NoisyDetector"
+    | "QRCodeGenerator"
     | "WordCloud";
   icon: React.ReactNode;
   inactiveClasses: string;
@@ -103,6 +104,13 @@ const menuGroups: MenuGroup[] = [
       {
         title: "NoisyDetector",
         icon: <MdHeadphones />,
+        inactiveClasses:
+          "bg-blue-100 text-blue-700 hover:bg-blue-200 active:bg-blue-500 active:text-white",
+        activeClasses: "bg-blue-500 text-white",
+      },
+      {
+        title: "QRCodeGenerator",
+        icon: <MdQrCode2 />,
         inactiveClasses:
           "bg-blue-100 text-blue-700 hover:bg-blue-200 active:bg-blue-500 active:text-white",
         activeClasses: "bg-blue-500 text-white",
