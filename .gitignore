@@ -41,4 +41,5 @@ next-env.d.ts
 /public/assets/libs/tinymce
 /public/assets/mediapipe/wasm
 .superpowers
+/docs
 
