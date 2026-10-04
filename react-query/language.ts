@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getLocalStorage, setLocalStorage } from "../utils";
+import { getLocalStorage, getRefetchtoken, setLocalStorage } from "../utils";
 import { Language } from "../interfaces";
 import { UpdateUserService } from "../services";
 
@@ -25,8 +25,13 @@ export function useUpdateLanguage() {
     mutationFn: async (request: Language) => {
       setLocalStorage("language", request);
       queryClient.setQueryData(["language"], request);
-      // Best-effort server sync so emails follow the preference. On the
-      // unauthenticated auth pages this 401s — the local switch stands.
+      // Best-effort server sync so emails follow the preference. Skip it when
+      // signed out (auth pages): the axios request interceptor redirects to
+      // sign-in on a missing refresh token before any catch here can help.
+      const { refresh_token } = getRefetchtoken();
+      if (!refresh_token || !queryClient.getQueryData(["user"])) {
+        return request;
+      }
       try {
         const user = await UpdateUserService({ language: request });
         queryClient.setQueryData(["user"], user);
