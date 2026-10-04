@@ -1,6 +1,10 @@
 import Image from "next/image";
 import React, { useEffect } from "react";
-import { useGetLanguage, useUpdateLanguage } from "../../react-query";
+import {
+  useGetLanguage,
+  useGetUser,
+  useUpdateLanguage,
+} from "../../react-query";
 
 const languages = [
   {
