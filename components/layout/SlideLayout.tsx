@@ -34,7 +34,7 @@ function SlideLayout({ children, onClose, loading }: LayoutProps) {
 
   return (
     <div
-      className={`fixed bottom-0 left-0 right-0 top-0 z-40 m-auto flex items-center justify-end`}
+      className={`fixed bottom-0 left-0 right-0 top-0 z-50 m-auto flex items-center justify-end`}
     >
       <div
         className={` ${

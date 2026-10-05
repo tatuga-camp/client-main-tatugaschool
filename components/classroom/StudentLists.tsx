@@ -268,13 +268,6 @@ function StudentLists({ students, classroom }: Props) {
   return (
     <>
       <Toast ref={toast} />
-      {photoFile && (
-        <PhotoEditor
-          file={photoFile}
-          onClose={() => setPhotoFile(null)}
-          onSave={handleSavePhoto}
-        />
-      )}
       {selectStudent && (
         <SlideLayout
           loading={loadingStudent || updateStudent.isPending}
@@ -303,6 +296,14 @@ function StudentLists({ students, classroom }: Props) {
             />
           )}
         </SlideLayout>
+      )}
+      {/* After the panel: same z-index, so later in the DOM stays on top. */}
+      {photoFile && (
+        <PhotoEditor
+          file={photoFile}
+          onClose={() => setPhotoFile(null)}
+          onSave={handleSavePhoto}
+        />
       )}
       {createTab && (
         <PopupLayout onClose={closeCreate}>
