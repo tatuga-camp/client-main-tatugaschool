@@ -5,6 +5,7 @@ import {
   mergeVisibleOrder,
   moveWithinGroup,
   NO_LEVEL_KEY,
+  reorderVisible,
 } from "./classroomGroups";
 
 const c = (id: string, level: string, order: number) => ({ id, level, order });
@@ -67,6 +68,28 @@ test("mergeVisibleOrder keeps hidden classrooms in place", () => {
     mergeVisibleOrder(["a", "h1", "b", "h2", "c"], ["c", "a", "b"]),
     ["c", "h1", "a", "h2", "b"],
   );
+});
+
+test("reorderVisible keeps other grades' order when the filter hides some", () => {
+  // Stored order mixes grades (as the old ungrouped grid left it).
+  const all = [
+    { id: "B", level: "มัธยมศึกษาปีที่ 2/1", order: 0, userId: "X" },
+    { id: "H", level: "มัธยมศึกษาปีที่ 2/2", order: 1, userId: "Y" },
+    { id: "A", level: "มัธยมศึกษาปีที่ 1/1", order: 2, userId: "X" },
+    { id: "C", level: "มัธยมศึกษาปีที่ 1/2", order: 3, userId: "X" },
+  ];
+  const visible = all.filter((c) => c.userId === "X");
+  const ids = reorderVisible(all, visible, "C", "A");
+  assert.ok(ids);
+  const regrouped = groupClassroomsByGrade(
+    ids.map((id, order) => ({ ...all.find((c) => c.id === id)!, order })),
+  );
+  assert.deepEqual(
+    regrouped.map((g) => g.items.map((i) => i.id)),
+    [["C", "A"], ["B", "H"]],
+    "ม.1 changed as dragged, ม.2 kept B before hidden H",
+  );
+  assert.equal(reorderVisible(all, visible, "C", "B"), null, "cross-grade");
 });
 
 test("mergeVisibleOrder with nothing hidden is the new order", () => {

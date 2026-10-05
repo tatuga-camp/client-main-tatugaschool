@@ -29,9 +29,8 @@ import {
 import { fullGradeLabel } from "../../utils/classLevel";
 import {
   groupClassroomsByGrade,
-  mergeVisibleOrder,
-  moveWithinGroup,
   NO_LEVEL_KEY,
+  reorderVisible,
 } from "../../utils/classroomGroups";
 import ClassesCreate from "../classroom/ClassroomCreate";
 import ClassroomCreatedNotification from "../classroom/ClassroomCreatedNotification";
@@ -92,12 +91,13 @@ function Classrooms({ schoolId }: Props) {
 
   const handleDragEnd = async ({ active, over }: DragEndEvent) => {
     if (!over) return;
-    const moved = moveWithinGroup(groups, String(active.id), String(over.id));
-    if (!moved) return;
-    const fullIds = mergeVisibleOrder(
-      classroomData.map((classroom) => classroom.id),
-      moved.flatMap((group) => group.items.map((item) => item.id)),
+    const fullIds = reorderVisible(
+      classroomData,
+      visible,
+      String(active.id),
+      String(over.id),
     );
+    if (!fullIds) return;
     const byId = new Map(classroomData.map((item) => [item.id, item]));
     setClassroomData(
       fullIds.flatMap((id, index) => {

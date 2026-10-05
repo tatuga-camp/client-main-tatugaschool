@@ -64,6 +64,25 @@ export function moveWithinGroup<T extends { id: string }>(
   );
 }
 
+// Full id order to save after dragging `activeId` onto `overId` among the
+// visible (filtered) classrooms, or null when the drop is ignored.
+export function reorderVisible<T extends GroupableClassroom>(
+  all: T[],
+  visible: T[],
+  activeId: string,
+  overId: string,
+): string[] | null {
+  const moved = moveWithinGroup(groupClassroomsByGrade(visible), activeId, overId);
+  if (!moved) return null;
+  // Merge into the full list in *grouped* order: stored order may still mix
+  // grades, and merging into it would move classrooms past hidden ones in
+  // grades the teacher never touched.
+  return mergeVisibleOrder(
+    groupClassroomsByGrade(all).flatMap((group) => group.items.map((item) => item.id)),
+    moved.flatMap((group) => group.items.map((item) => item.id)),
+  );
+}
+
 // The reorder API takes every classroom id. When the teacher filter hides
 // some, put the visible ones back into the slots they already occupy so the
 // hidden ones keep their positions.
