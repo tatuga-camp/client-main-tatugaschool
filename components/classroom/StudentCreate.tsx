@@ -7,6 +7,7 @@ import { PiMicrosoftExcelLogoFill } from "react-icons/pi";
 import Swal from "sweetalert2";
 import {
   classesDataLanguage,
+  classroomUiLanguage,
   studentOnClassDataLanguage,
 } from "../../data/languages";
 import { useSound } from "../../hook";
@@ -26,9 +27,18 @@ type Props = {
   classId: string;
   schoolId: string;
   toast: React.RefObject<Toast>;
+  initialTab?: "single" | "excel";
 };
-function StudentCreate({ onClose, classId, toast, schoolId }: Props) {
-  const [triggerExcel, setTriggerExcel] = React.useState(false);
+function StudentCreate({
+  onClose,
+  classId,
+  toast,
+  schoolId,
+  initialTab = "single",
+}: Props) {
+  const [triggerExcel, setTriggerExcel] = React.useState(
+    initialTab === "excel",
+  );
   const language = useGetLanguage();
   const create = useCreateStudent();
   const [loading, setLoading] = React.useState(false);
@@ -133,7 +143,7 @@ function StudentCreate({ onClose, classId, toast, schoolId }: Props) {
   };
 
   return (
-    <div className="h-[35rem] w-full rounded-2xl border bg-white p-4 md:w-10/12 lg:w-7/12 2xl:w-4/12">
+    <div className="flex max-h-[min(90dvh,48rem)] w-[min(40rem,calc(100vw-2rem))] flex-col rounded-3xl bg-white p-5 font-Anuphan shadow-xl sm:p-6">
       {photoFile && (
         <PhotoEditor
           file={photoFile}
@@ -141,45 +151,61 @@ function StudentCreate({ onClose, classId, toast, schoolId }: Props) {
           onSave={handleSavePhoto}
         />
       )}
-      <div className="flex w-full items-center justify-between border-b pb-3">
-        <h1 className="text-lg font-semibold">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-lg font-bold text-icon-color">
           {studentOnClassDataLanguage.create(language.data ?? "en")}
-        </h1>
-        <div className="flex items-center justify-center gap-2">
-          <button
-            onClick={() => setTriggerExcel((prev) => !prev)}
-            type="button"
-            className="second-button w-60 border"
-          >
-            {triggerExcel ? (
-              studentOnClassDataLanguage.createStudent.cancel(
-                language.data ?? "en",
-              )
-            ) : (
-              <div className="flex items-center justify-center gap-1">
-                <PiMicrosoftExcelLogoFill />
-                {studentOnClassDataLanguage.createStudent.excel(
-                  language.data ?? "en",
-                )}
-              </div>
-            )}
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex h-6 w-6 items-center justify-center rounded text-lg font-semibold hover:bg-gray-300/50"
-          >
-            <IoMdClose />
-          </button>
-        </div>
+        </h2>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label={classroomUiLanguage.close(language.data ?? "en")}
+          className="flex h-10 w-10 items-center justify-center rounded-full text-xl text-icon-color/70 transition-colors hover:bg-background-color"
+        >
+          <IoMdClose aria-hidden />
+        </button>
+      </div>
+      <div
+        role="tablist"
+        className="mt-4 grid grid-cols-2 rounded-xl bg-background-color p-1"
+      >
+        <button
+          type="button"
+          role="tab"
+          aria-selected={!triggerExcel}
+          onClick={() => setTriggerExcel(false)}
+          className={`h-9 rounded-lg text-sm font-semibold transition-colors ${
+            !triggerExcel
+              ? "bg-white text-icon-color shadow-sm"
+              : "text-icon-color/60 hover:text-icon-color"
+          }`}
+        >
+          {classroomUiLanguage.tabOneStudent(language.data ?? "en")}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={triggerExcel}
+          onClick={() => setTriggerExcel(true)}
+          className={`flex h-9 items-center justify-center gap-1.5 rounded-lg text-sm font-semibold transition-colors ${
+            triggerExcel
+              ? "bg-white text-icon-color shadow-sm"
+              : "text-icon-color/60 hover:text-icon-color"
+          }`}
+        >
+          <PiMicrosoftExcelLogoFill aria-hidden />
+          {classroomUiLanguage.tabImportExcel(language.data ?? "en")}
+        </button>
       </div>
       {triggerExcel ? (
-        <CreateByExcel classId={classId} toast={toast} />
+        <div className="mt-5 min-h-0 overflow-auto">
+          <CreateByExcel classId={classId} toast={toast} />
+        </div>
       ) : (
-        <form onSubmit={handleCreate}>
+        <form onSubmit={handleCreate} className="flex min-h-0 flex-1 flex-col">
           {(loading || create.isPending) && <LoadingBar />}
-          <div className="h-96 w-full overflow-auto p-3">
+          <div className="mt-5 min-h-0 overflow-auto pr-1">
             <StudentSection
+              idPrefix="create-student"
               data={data}
               setData={(data) => {
                 setData((prev) => {
@@ -192,20 +218,21 @@ function StudentCreate({ onClose, classId, toast, schoolId }: Props) {
               handleUpload={handleUpload}
             />
           </div>
-          <div className="flex w-full justify-end gap-3 border-t pt-3">
+          <div className="mt-5 grid grid-cols-2 gap-2 border-t border-icon-color/10 pt-4 sm:flex sm:justify-end">
             <button
               type="button"
               onClick={onClose}
-              className="second-button flex items-center justify-center gap-1 border"
+              className="h-11 rounded-xl border border-icon-color/15 px-5 font-semibold text-icon-color transition-colors hover:bg-background-color"
             >
-              Cancel
+              {classroomUiLanguage.cancel(language.data ?? "en")}
             </button>
             <button
               type="submit"
-              className="main-button flex items-center justify-center gap-1"
+              disabled={loading || create.isPending}
+              className="flex h-11 items-center justify-center gap-2 rounded-xl bg-primary-color px-5 font-semibold text-white transition-colors hover:bg-primary-color-hover disabled:cursor-wait disabled:opacity-80"
             >
-              <FiPlus />{" "}
-              {studentOnClassDataLanguage.create(language.data ?? "en")}
+              <FiPlus aria-hidden />
+              {classroomUiLanguage.addStudent(language.data ?? "en")}
             </button>
           </div>
         </form>
