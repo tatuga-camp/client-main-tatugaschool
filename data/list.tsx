@@ -150,6 +150,7 @@ export const menuSchoolList = (): {
 export type MenuClassroom =
   | "Classroom"
   | "SettingClassroom"
+  | "SubjectsClassroom"
   | "GradesSummary"
   | "OverViewClassroom"
   | "School"
@@ -167,6 +168,10 @@ export const menuClassroomList = ({
     {
       title: "Classroom",
       icon: <SiGoogleclassroom />,
+    },
+    {
+      title: "SubjectsClassroom",
+      icon: <MdSubscriptions />,
     },
     {
       title: "GradesSummary",

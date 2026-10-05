@@ -61,6 +61,7 @@ export const classroomUiLanguage = {
 
   // Classroom page
   tabStudents: (l: Language) => pick(l, "Students", "นักเรียน"),
+  tabSubjects: (l: Language) => pick(l, "Subjects", "วิชาเรียน"),
   tabGrades: (l: Language) => pick(l, "Grade summary", "สรุปผลการเรียน"),
   tabSettings: (l: Language) => pick(l, "Settings", "ตั้งค่า"),
   classroomSections: (l: Language) =>

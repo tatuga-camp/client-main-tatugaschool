@@ -23,6 +23,7 @@ function ClassroomHeader({ classroom, selectMenu, onSelectMenu }: Props) {
   const lang = language.data ?? "en";
   const tabs: { menu: MenuClassroom; label: string }[] = [
     { menu: "Classroom", label: classroomUiLanguage.tabStudents(lang) },
+    { menu: "SubjectsClassroom", label: classroomUiLanguage.tabSubjects(lang) },
     { menu: "GradesSummary", label: classroomUiLanguage.tabGrades(lang) },
     { menu: "SettingClassroom", label: classroomUiLanguage.tabSettings(lang) },
   ];

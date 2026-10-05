@@ -21,8 +21,16 @@ type Props = {
   schoolId: string;
   educationYear: EducationYear;
   toast: React.RefObject<Toast>;
+  // Pre-selects this classroom, e.g. when creating from a classroom page.
+  defaultClassId?: string;
 };
-function SubjectCreate({ onClose, schoolId, educationYear, toast }: Props) {
+function SubjectCreate({
+  onClose,
+  schoolId,
+  educationYear,
+  toast,
+  defaultClassId,
+}: Props) {
   const sound = useSound("/sounds/ding.mp3") as HTMLAudioElement;
   const create = useCreateSubject();
   const language = useGetLanguage();
@@ -37,11 +45,14 @@ function SubjectCreate({ onClose, schoolId, educationYear, toast }: Props) {
     classId?: string;
   }>({
     educationYear: educationYear,
+    classId: defaultClassId,
   });
 
   useEffect(() => {
     if (classrooms.data && classrooms.data?.length > 0) {
-      setData((prev) => ({ ...prev, classId: classrooms.data[0].id }));
+      setData((prev) =>
+        prev.classId ? prev : { ...prev, classId: classrooms.data[0].id },
+      );
     }
   }, [classrooms.data]);
 

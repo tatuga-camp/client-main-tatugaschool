@@ -6,6 +6,7 @@ import { Toast } from "primereact/toast";
 import React from "react";
 import ClassroomHeader from "../../components/classroom/ClassroomHeader";
 import ClassroomSetting from "../../components/classroom/ClassroomSetting";
+import ClassroomSubjects from "../../components/classroom/ClassroomSubjects";
 import GradeSummaryReport from "../../components/classroom/GradeSummaryReport";
 import StudentSection from "../../components/classroom/StudentLists";
 import ClassroomLayout from "../../components/layout/ClassroomLayout";
@@ -98,6 +99,9 @@ function Index({ classroomId }: { classroomId: string }) {
               students={classroom.data.students}
               classroom={classroom.data}
             />
+          )}
+          {selectMenu === "SubjectsClassroom" && (
+            <ClassroomSubjects classroom={classroom.data} />
           )}
           {selectMenu === "SettingClassroom" && (
             <ClassroomSetting classroom={classroom.data} toast={toast} />
