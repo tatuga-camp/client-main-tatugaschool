@@ -29,6 +29,7 @@ import {
 } from "../../react-query/memberOnSchool";
 import { ListSchoolRoles } from "../../data";
 import { createSchoolDataLanguage } from "../../data/languages";
+import { fieldInputClass, FormField } from "../common/FormField";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -163,28 +164,33 @@ function InviteJoinSchool({ schoolId, hideFinishButton }: Props) {
   return (
     <div>
       <section className="flex w-full flex-col gap-2">
-        <label className="w-full border-b border-b-gray-300 pb-2">
-          {createSchoolDataLanguage.inviteTitle(language.data ?? "en")}{" "}
-        </label>
-        <div className="relative flex w-full flex-col bg-slate-200">
-          <input
-            type="email"
-            value={query}
-            className="rounded-2xl border px-6 py-4"
-            placeholder="Enter Email"
-            onChange={(e) => {
-              setQuery(e.target.value);
-            }}
-          />
-          {getUsers.isLoading && (
-            <ProgressSpinner
-              animationDuration="0.5s"
-              style={{ width: "20px", position: "absolute" }}
-              className="bottom-0 right-5 top-0 m-auto h-5 w-5"
-              strokeWidth="8"
+        <FormField
+          id="invite-teacher-email"
+          label={createSchoolDataLanguage.inviteTitle(language.data ?? "en")}
+        >
+          <div className="relative">
+            <input
+              id="invite-teacher-email"
+              type="email"
+              inputMode="email"
+              autoComplete="off"
+              value={query}
+              className={`${fieldInputClass()} pr-12`}
+              placeholder="teacher@school.ac.th"
+              onChange={(e) => {
+                setQuery(e.target.value);
+              }}
             />
-          )}
-        </div>
+            {getUsers.isLoading && (
+              <ProgressSpinner
+                animationDuration="0.5s"
+                style={{ width: "20px", position: "absolute" }}
+                className="bottom-0 right-4 top-0 m-auto h-5 w-5"
+                strokeWidth="8"
+              />
+            )}
+          </div>
+        </FormField>
         {memberOnSchools.data && user.data && (
           <ListMembers
             listRoles={ListSchoolRoles}
@@ -201,13 +207,16 @@ function InviteJoinSchool({ schoolId, hideFinishButton }: Props) {
           />
         )}
       </section>
-      <div className="mt-5 flex w-full justify-center">
-        {!hideFinishButton && (
-          <Link href="/" className="main-button w-40 text-center">
+      {!hideFinishButton && (
+        <div className="mt-8 flex justify-end border-t border-icon-color/10 pt-6">
+          <Link
+            href={`/school/${schoolId}`}
+            className="flex h-12 w-full items-center justify-center rounded-xl bg-primary-color px-6 font-semibold text-white transition-colors hover:bg-primary-color-hover focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-color/30 sm:w-auto sm:min-w-44"
+          >
             {createSchoolDataLanguage.inviteDone(language.data ?? "en")}
           </Link>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

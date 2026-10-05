@@ -1,6 +1,7 @@
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { AuthFooter } from "@/components/auth/AuthFooter";
 import { SignUpForm } from "@/components/auth/SignUpForm";
+import { SignUpJourneyPanel } from "@/components/auth/SignUpJourneyPanel";
 import Head from "next/head";
 import { GetServerSideProps } from "next";
 import axios from "axios";
@@ -29,7 +30,7 @@ function SignUpPage(data: Props) {
   return (
     <>
       <Head>
-        <title>Create Teacher Account</title>
+        <title>Create a Teacher Account - Tatuga School</title>
         <meta
           name="description"
           content="Create Teacher Account To Join Tatuga School"
@@ -53,13 +54,24 @@ function SignUpPage(data: Props) {
         <meta property="twitter:image" content="/icon.svg" />
         <meta name="twitter:card" content="summary" />
       </Head>
-      <AuthLayout>
-        <SignUpForm
-          {...data?.googleSignUpData}
-          invitation={data?.invitation ?? null}
-          invitationError={data?.invitationError ?? null}
-        />
-        <AuthFooter />
+      <AuthLayout contentClassName="flex min-h-0 w-full flex-1 flex-col overflow-x-hidden pb-safe">
+        <div className="flex min-h-0 w-full flex-1 flex-col md:flex-row">
+          <SignUpJourneyPanel
+            invitedSchool={data?.invitation?.schoolTitle ?? null}
+          />
+          <div className="flex min-h-0 w-full min-w-0 flex-1 flex-col items-center px-4 py-4 sm:px-6 sm:py-6 md:justify-center md:px-6 md:py-8 lg:px-10 lg:py-10 xl:px-12 2xl:px-16 2xl:py-12">
+            <div className="my-auto flex w-full flex-col items-center md:my-0">
+              <SignUpForm
+                {...data?.googleSignUpData}
+                invitation={data?.invitation ?? null}
+                invitationError={data?.invitationError ?? null}
+              />
+              <div className="w-full md:hidden">
+                <AuthFooter />
+              </div>
+            </div>
+          </div>
+        </div>
       </AuthLayout>
     </>
   );
