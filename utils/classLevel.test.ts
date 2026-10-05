@@ -47,3 +47,15 @@ test("fullGradeLabel uses English names in English only", () => {
   assert.equal(fullGradeLabel("มัธยมศึกษาปีที่ 1", "th"), "มัธยมศึกษาปีที่ 1");
   assert.equal(fullGradeLabel("Custom", "en"), "Custom");
 });
+
+test("shortGradeLabel works without Intl.Segmenter (older browsers)", () => {
+  const original = Intl.Segmenter;
+  // @ts-expect-error simulate a browser without Intl.Segmenter
+  delete Intl.Segmenter;
+  try {
+    assert.equal(shortGradeLabel("Grade Twelve", "en"), "Grad…");
+    assert.equal(shortGradeLabel("Y7", "en"), "Y7");
+  } finally {
+    Intl.Segmenter = original;
+  }
+});

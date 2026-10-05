@@ -22,11 +22,15 @@ const NUMBERED_GRADES = [
   { prefix: "ปวส.", th: "ปวส.", en: "HVC" },
 ];
 
+// Intl.Segmenter keeps Thai vowel/tone marks with their consonant; older
+// browsers without it (e.g. Firefox < 125) fall back to code points.
 const graphemes = (text: string) =>
-  Array.from(
-    new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(text),
-    (part) => part.segment,
-  );
+  typeof Intl.Segmenter === "function"
+    ? Array.from(
+        new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(text),
+        (part) => part.segment,
+      )
+    : Array.from(text);
 
 export function shortGradeLabel(grade: string, language: Language): string {
   const value = grade.trim();
