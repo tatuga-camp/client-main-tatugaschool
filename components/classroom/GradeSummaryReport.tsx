@@ -1,21 +1,21 @@
-import React, { useEffect, useState } from "react";
-import { SiMicrosoftexcel } from "react-icons/si";
-import { Classroom, EducationYear, Student } from "../../interfaces";
-import { FaUser } from "react-icons/fa6";
 import Image from "next/image";
-import { decodeBlurhashToCanvas, getDefaultSubjectFilter } from "../../utils";
+import Link from "next/link";
+import React, { useEffect, useMemo, useState } from "react";
 import { defaultBlurHash } from "../../data";
+import {
+  classroomUiLanguage,
+  gradeOnClassroomDataLanguage,
+  subjectsDataLanguage,
+} from "../../data/languages";
+import { Classroom, EducationYear, Student } from "../../interfaces";
 import {
   useGetGradeSummaryReportOnClassroom,
   useGetLanguage,
 } from "../../react-query";
-import {
-  gradeOnClassroomDataLanguage,
-  subjectsDataLanguage,
-} from "../../data/languages";
+import { decodeBlurhashToCanvas, getDefaultSubjectFilter } from "../../utils";
+import { sortStudents } from "../../utils/studentRoster";
 import InputEducationYear from "../common/InputEducationYear";
 import LoadingBar from "../common/LoadingBar";
-import Link from "next/link";
 
 function GradeSummaryReport({
   students,
@@ -24,151 +24,154 @@ function GradeSummaryReport({
   students: Student[];
   classroom: Classroom;
 }) {
-  const defaultFilter = getDefaultSubjectFilter({
-    schoolId: classroom.schoolId,
-  });
-
-  const langugae = useGetLanguage();
-  const [educationYear, setEducationYear] = useState<
-    EducationYear | undefined
-  >();
+  const language = useGetLanguage();
+  const lang = language.data ?? "en";
+  const [educationYear, setEducationYear] = useState<EducationYear | undefined>();
   const grades = useGetGradeSummaryReportOnClassroom({
     classId: classroom.id,
     educationYear: educationYear as EducationYear,
   });
+  const sortedStudents = useMemo(
+    () => sortStudents(students, "Default"),
+    [students],
+  );
 
   useEffect(() => {
+    const defaultFilter = getDefaultSubjectFilter({
+      schoolId: classroom.schoolId,
+    });
     if (defaultFilter) {
       setEducationYear(defaultFilter.educationYear);
     } else {
-      const year = new Date().getFullYear();
-      setEducationYear(() => `1/${year}`);
+      setEducationYear(`1/${new Date().getFullYear()}` as EducationYear);
     }
-  }, []);
+  }, [classroom.schoolId]);
+
+  const subjects = grades.data ?? [];
 
   return (
-    <>
-      <header className="mx-auto flex w-full flex-col justify-between gap-4 p-3 md:max-w-screen-md md:flex-row md:gap-0 md:px-5 xl:max-w-screen-lg">
-        <section className="text-center md:text-left">
-          <h1 className="text-2xl font-semibold md:text-3xl">
-            {gradeOnClassroomDataLanguage.title(langugae.data ?? "en")}
-          </h1>
-          <p className="max-w-96 break-words text-sm text-gray-400 md:text-base">
-            {gradeOnClassroomDataLanguage.description(langugae.data ?? "en")}
+    <section className="flex w-full flex-col gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
+          <h2 className="text-xl font-bold text-icon-color">
+            {gradeOnClassroomDataLanguage.title(lang)}
+          </h2>
+          <p className="mt-1 max-w-xl text-sm text-icon-color/70">
+            {gradeOnClassroomDataLanguage.description(lang)}
           </p>
-        </section>
-        <section className="flex flex-col items-center gap-2 md:gap-1 xl:flex-row">
-          {/* <button className="main-button w-full xl:w-auto flex items-center justify-center gap-1 py-1 ring-1 ring-blue-600">
-            <SiMicrosoftexcel />
-            Export
-          </button> */}
-          <div>
-            <span>
-              {subjectsDataLanguage.educationYear(langugae.data ?? "en")}
+        </div>
+        {educationYear && (
+          <div className="flex flex-col gap-1.5">
+            <span className="text-sm font-medium text-icon-color">
+              {subjectsDataLanguage.educationYear(lang)}
             </span>
-            {educationYear && (
-              <InputEducationYear
-                value={educationYear}
-                onChange={(v) => setEducationYear(v as EducationYear)}
-                required
-              />
-            )}
+            <InputEducationYear
+              value={educationYear}
+              onChange={(value) => setEducationYear(value as EducationYear)}
+              required
+            />
           </div>
-        </section>
-      </header>
+        )}
+      </div>
+
       {grades.isLoading && <LoadingBar />}
-      <main className="mx-auto flex w-full flex-col justify-between gap-4 rounded-2xl bg-white p-3 md:max-w-screen-md md:flex-row md:gap-0 xl:max-w-screen-lg">
-        <div className="relative mt-5 h-[30rem] w-full overflow-auto rounded-2xl">
-          <table className="table-fixed bg-white md:min-w-[640px]">
-            <thead className="">
-              <tr className="sticky top-0 z-40 border-b bg-white">
-                <th className="sticky left-0 z-40 bg-white text-sm font-semibold">
-                  <div className="flex w-48 items-center justify-start gap-2 md:w-96">
-                    <FaUser />
-                    Name
-                  </div>
-                </th>
-                {grades.data?.map((grade) => {
-                  return (
-                    <th key={grade.id}>
-                      <div className="flex w-44 flex-col items-start gap-1 truncate hover:w-max">
+
+      <div className="overflow-hidden rounded-2xl bg-white shadow-[0_12px_24px_rgba(145,158,171,0.12)]">
+        {!grades.isLoading && subjects.length === 0 ? (
+          <p className="px-6 py-10 text-center text-icon-color/70">
+            {classroomUiLanguage.noGrades(lang)}
+          </p>
+        ) : (
+          <div className="max-h-[calc(100dvh-12rem)] min-h-[20rem] overflow-auto">
+            <table className="w-max min-w-full border-separate border-spacing-0 text-sm">
+              <thead>
+                <tr>
+                  <th
+                    scope="col"
+                    className="sticky left-0 top-0 z-30 border-b border-icon-color/10 bg-white px-4 py-3 text-left font-semibold text-icon-color"
+                  >
+                    {classroomUiLanguage.studentColumn(lang)}
+                  </th>
+                  {subjects.map((subject) => (
+                    <th
+                      key={subject.id}
+                      scope="col"
+                      className="sticky top-0 z-20 border-b border-icon-color/10 bg-white px-4 py-3 text-left align-bottom font-normal"
+                    >
+                      <div className="w-40">
                         <Link
-                          href={`/subject/${grade.id}`}
-                          className="w-40 truncate text-start text-xs font-semibold text-blue-700 underline md:text-sm"
+                          href={`/subject/${subject.id}`}
+                          className="line-clamp-2 font-semibold text-primary-color hover:underline"
                         >
-                          {grade.title}
+                          {subject.title}
                         </Link>
-                        <p className="line-clamp-2 text-start text-xs font-normal text-gray-500 hover:line-clamp-none">
-                          {grade.description}
-                        </p>
+                        {subject.description && (
+                          <p className="mt-0.5 line-clamp-2 text-xs text-icon-color/60">
+                            {subject.description}
+                          </p>
+                        )}
                       </div>
                     </th>
-                  );
-                })}
-              </tr>
-            </thead>
-            <tbody>
-              {students
-                ?.sort((a, b) => Number(a.number) - Number(b.number))
-                ?.map((student, index) => {
-                  const odd = index % 2 === 0;
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {sortedStudents.map((student, index) => {
+                  const zebra = index % 2 === 1 ? "bg-background-color" : "bg-white";
                   return (
-                    <tr
-                      className={` ${
-                        odd ? "bg-gray-200/20" : "bg-white"
-                      } group hover:bg-gray-200/40`}
-                      key={student.id}
-                    >
-                      <td
-                        className={`sticky left-0 z-30 text-sm font-semibold ${odd ? "bg-gray-100" : "bg-white"} group-hover:bg-gray-200`}
+                    <tr key={student.id}>
+                      <th
+                        scope="row"
+                        className={`sticky left-0 z-10 px-4 py-2 text-left font-normal ${zebra}`}
                       >
-                        <div className="flex h-14 items-center gap-2">
-                          <div className="relative h-8 w-8 overflow-hidden rounded-2xl ring-1 md:h-10 md:w-10">
-                            <Image
-                              src={student.photo}
-                              alt={student.firstName}
-                              fill
-                              sizes="(max-width: 768px) 100vw, 33vw"
-                              placeholder="blur"
-                              blurDataURL={decodeBlurhashToCanvas(
-                                student.blurHash ?? defaultBlurHash,
-                              )}
-                              className="object-cover"
-                            />
-                          </div>
-                          <div>
-                            <h1 className="text-xs font-semibold md:text-sm">
+                        <div className="flex w-44 items-center gap-2 sm:w-60">
+                          <span className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full bg-background-color ring-1 ring-icon-color/10">
+                            {student.photo && (
+                              <Image
+                                src={student.photo}
+                                alt=""
+                                fill
+                                sizes="32px"
+                                placeholder="blur"
+                                blurDataURL={decodeBlurhashToCanvas(
+                                  student.blurHash ?? defaultBlurHash,
+                                )}
+                                className="object-cover"
+                              />
+                            )}
+                          </span>
+                          <span className="min-w-0">
+                            <span className="block truncate font-medium text-icon-color">
                               {student.firstName} {student.lastName}
-                            </h1>
-                            <p className="text-xs text-gray-500">
-                              Number {student.number}
-                            </p>
-                          </div>
+                            </span>
+                            <span className="text-xs text-icon-color/60">
+                              {classroomUiLanguage.studentNumber(lang, student.number)}
+                            </span>
+                          </span>
                         </div>
-                      </td>
-                      {grades.data?.map((grades) => {
-                        const studentGrade = grades.students.find(
-                          (s) => s.id === student.id,
-                        );
+                      </th>
+                      {subjects.map((subject) => {
+                        const score = subject.students.find(
+                          (item) => item.id === student.id,
+                        )?.totalScore;
                         return (
                           <td
-                            key={grades.id + student.id}
-                            className={`text-center text-sm font-normal group-hover:bg-gray-200 ${odd ? "bg-gray-100" : "bg-white"} `}
+                            key={subject.id + student.id}
+                            className={`px-4 py-2 tabular-nums text-icon-color ${zebra}`}
                           >
-                            <div className="w-44 text-center">
-                              {studentGrade?.totalScore?.toFixed(2) ?? "-"}
-                            </div>
+                            {typeof score === "number" ? score.toFixed(2) : "–"}
                           </td>
                         );
                       })}
                     </tr>
                   );
                 })}
-            </tbody>
-          </table>
-        </div>
-      </main>
-    </>
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
 

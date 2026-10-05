@@ -1,13 +1,12 @@
 import React from "react";
-import { SiGoogleclassroom } from "react-icons/si";
-import InputWithIcon from "../common/InputWithIcon";
-import { TbFileDescription } from "react-icons/tb";
-import ClassLevel from "../common/InputClassLevel";
-import { useCreateClassroom } from "../../react-query";
-import LoadingSpinner from "../common/LoadingSpinner";
-import { Classroom, ErrorMessages } from "../../interfaces";
-import Swal from "sweetalert2";
 import { Toast } from "primereact/toast";
+import Swal from "sweetalert2";
+import { classroomUiLanguage } from "../../data/languages";
+import { Classroom, ErrorMessages } from "../../interfaces";
+import { useCreateClassroom, useGetLanguage } from "../../react-query";
+import { fieldInputClass, FormField } from "../common/FormField";
+import InputClassLevel from "../common/InputClassLevel";
+import ClassLevelBadge from "./ClassLevelBadge";
 
 type Props = {
   schoolId: string;
@@ -17,46 +16,39 @@ type Props = {
 };
 
 function ClassesCreate({ schoolId, toast, onClose, onSuccess }: Props) {
+  const language = useGetLanguage();
+  const lang = language.data ?? "en";
   const createClassroom = useCreateClassroom();
-  const [data, setData] = React.useState<{
-    title: string;
-    description: string;
-    level: string;
-  }>({
+  const [data, setData] = React.useState({
     title: "",
     description: "",
     level: "",
   });
 
   const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
-      e.preventDefault();
       const created = await createClassroom.mutateAsync({
-        title: data.title,
-        description: data.description,
+        title: data.title.trim(),
+        description: data.description.trim(),
         level: data.level,
-        schoolId: schoolId,
+        schoolId,
       });
       toast.current?.show({
         severity: "success",
-        summary: "Success",
-        detail: "Classroom created",
+        summary: classroomUiLanguage.created(lang),
         life: 3000,
       });
-      setData({
-        title: "",
-        description: "",
-        level: "",
-      });
+      setData({ title: "", description: "", level: "" });
       onClose?.();
       onSuccess?.(created);
     } catch (error) {
-      let result = error as ErrorMessages;
+      const result = error as ErrorMessages | undefined;
       Swal.fire({
-        title: result.error ? result.error : "Something Went Wrong",
-        text: result.message.toString(),
-        footer: result.statusCode
-          ? "Code Error: " + result.statusCode?.toString()
+        title: result?.error ? result.error : "Something Went Wrong",
+        text: result?.message?.toString(),
+        footer: result?.statusCode
+          ? "Code Error: " + result.statusCode.toString()
           : "",
         icon: "error",
       });
@@ -64,37 +56,68 @@ function ClassesCreate({ schoolId, toast, onClose, onSuccess }: Props) {
   };
 
   return (
-    <form onSubmit={handleCreate} className="flex w-full flex-col gap-1">
-      <ClassLevel
-        required={true}
-        value={data.level}
-        onChange={(value) => setData((prev) => ({ ...prev, level: value }))}
-      />
-      <InputWithIcon
-        value={data.title}
-        onChange={(value) => setData((prev) => ({ ...prev, title: value }))}
-        title="Title"
-        icon={<SiGoogleclassroom />}
-        required
-        placeholder="Enter class title"
-      />
-      <InputWithIcon
-        required
-        value={data.description}
-        onChange={(value) =>
-          setData((prev) => ({ ...prev, description: value }))
-        }
-        title="Description"
-        icon={<TbFileDescription />}
-        placeholder="Enter class description"
-      />
-
-      <button
-        disabled={createClassroom.isPending}
-        className="main-button mt-5 flex items-center justify-center rounded-full"
+    <form onSubmit={handleCreate} className="flex w-full flex-col gap-5">
+      <div className="flex items-end gap-3">
+        <div className="min-w-0 flex-1">
+          <InputClassLevel
+            required
+            title={classroomUiLanguage.fieldLevel(lang)}
+            value={data.level}
+            onChange={(value) => setData((prev) => ({ ...prev, level: value }))}
+          />
+        </div>
+        <ClassLevelBadge level={data.level} />
+      </div>
+      <FormField id="classroom-create-title" label={classroomUiLanguage.fieldTitle(lang)}>
+        <input
+          id="classroom-create-title"
+          required
+          value={data.title}
+          onChange={(e) => setData((prev) => ({ ...prev, title: e.target.value }))}
+          placeholder={classroomUiLanguage.titlePlaceholder(lang)}
+          className={fieldInputClass()}
+        />
+      </FormField>
+      <FormField
+        id="classroom-create-description"
+        label={classroomUiLanguage.fieldDescription(lang)}
       >
-        {createClassroom.isPending ? <LoadingSpinner /> : <span>Create</span>}
-      </button>
+        <input
+          id="classroom-create-description"
+          required
+          value={data.description}
+          onChange={(e) =>
+            setData((prev) => ({ ...prev, description: e.target.value }))
+          }
+          placeholder={classroomUiLanguage.descriptionPlaceholder(lang)}
+          className={fieldInputClass()}
+        />
+      </FormField>
+      <div className="mt-1 grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={onClose}
+          className="h-12 rounded-xl border border-icon-color/15 font-semibold text-icon-color transition-colors hover:bg-background-color"
+        >
+          {classroomUiLanguage.cancel(lang)}
+        </button>
+        <button
+          type="submit"
+          disabled={createClassroom.isPending}
+          aria-busy={createClassroom.isPending}
+          className="flex h-12 items-center justify-center gap-2 rounded-xl bg-primary-color font-semibold text-white transition-colors hover:bg-primary-color-hover disabled:cursor-wait disabled:opacity-80"
+        >
+          {createClassroom.isPending && (
+            <span
+              aria-hidden
+              className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white motion-reduce:animate-none"
+            />
+          )}
+          {createClassroom.isPending
+            ? classroomUiLanguage.creating(lang)
+            : classroomUiLanguage.createClassroom(lang)}
+        </button>
+      </div>
     </form>
   );
 }

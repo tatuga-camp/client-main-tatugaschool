@@ -26,6 +26,11 @@ function SlideLayout({ children, onClose, loading }: LayoutProps) {
 
   React.useEffect(() => {
     document.body.style.overflow = "hidden";
+    // Restore scrolling however the panel closes, including when a parent
+    // unmounts it directly (e.g. a Cancel button) instead of via handleClose.
+    return () => {
+      document.body.style.overflow = "auto";
+    };
   }, []);
 
   useEscKey(() => {
@@ -34,7 +39,7 @@ function SlideLayout({ children, onClose, loading }: LayoutProps) {
 
   return (
     <div
-      className={`fixed bottom-0 left-0 right-0 top-0 z-40 m-auto flex items-center justify-end`}
+      className={`fixed bottom-0 left-0 right-0 top-0 z-50 m-auto flex items-center justify-end`}
     >
       <div
         className={` ${

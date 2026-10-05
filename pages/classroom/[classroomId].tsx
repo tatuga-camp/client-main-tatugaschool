@@ -1,163 +1,107 @@
 import { GetServerSideProps } from "next";
 import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
-import { ProgressSpinner } from "primereact/progressspinner";
 import { Toast } from "primereact/toast";
 import React from "react";
-import { CiCircleInfo } from "react-icons/ci";
-import { FaUsers } from "react-icons/fa6";
+import ClassroomHeader from "../../components/classroom/ClassroomHeader";
 import ClassroomSetting from "../../components/classroom/ClassroomSetting";
+import ClassroomSubjects from "../../components/classroom/ClassroomSubjects";
 import GradeSummaryReport from "../../components/classroom/GradeSummaryReport";
 import StudentSection from "../../components/classroom/StudentLists";
 import ClassroomLayout from "../../components/layout/ClassroomLayout";
 import DefaultLayout from "../../components/layout/DefaultLayout";
 import { MenuClassroom } from "../../data";
-import { classroomDataLanguage } from "../../data/languages";
+import { classroomUiLanguage } from "../../data/languages";
 import { useGetClassroom, useGetLanguage } from "../../react-query";
-import { timeAgo, validateMongodbId } from "../../utils";
+import { validateMongodbId } from "../../utils";
 
 function Index({ classroomId }: { classroomId: string }) {
   const toast = React.useRef<Toast>(null);
   const language = useGetLanguage();
+  const lang = language.data ?? "en";
   const router = useRouter();
   const selectMenu = (router.query.menu as MenuClassroom) || "Classroom";
+  const classroom = useGetClassroom({ classId: classroomId });
 
-  const classroom = useGetClassroom({
-    classId: classroomId,
-  });
+  const selectTab = (menu: MenuClassroom) => {
+    router.replace({ query: { ...router.query, menu } }, undefined, {
+      shallow: true,
+    });
+  };
 
   if (classroom.isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <ProgressSpinner />
+      <div className="min-h-screen bg-background-color font-Anuphan">
+        <div className="border-b border-icon-color/10 bg-white">
+          <div className="mx-auto flex max-w-5xl animate-pulse items-start gap-4 px-4 py-8 sm:px-6">
+            <div className="h-16 w-16 rounded-2xl bg-background-color" />
+            <div className="flex-1 space-y-3">
+              <div className="h-7 w-1/2 rounded bg-background-color" />
+              <div className="h-4 w-1/3 rounded bg-background-color" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
-  if (classroom.error) {
+  if (classroom.error || !classroom.data) {
     return (
       <DefaultLayout>
-        <div className="flex h-screen flex-col items-center justify-center gap-3">
-          <h1 className="text-4xl text-red-500">
-            {classroom.error.message || "Something went wrong"}
+        <div className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center gap-3 px-4 text-center">
+          <h1 className="text-2xl font-bold text-icon-color">
+            {classroom.error
+              ? classroomUiLanguage.loadError(lang)
+              : classroomUiLanguage.classroomNotFound(lang)}
           </h1>
-          <button
-            onClick={() => router.back()}
-            className="w-40 rounded-2xl bg-primary-color px-4 py-2 text-white"
-          >
-            Back
-          </button>
+          <p className="text-icon-color/70">
+            {classroom.error?.message ||
+              classroomUiLanguage.classroomNotFoundBody(lang)}
+          </p>
+          <div className="mt-2 flex gap-2">
+            {classroom.error && (
+              <button
+                type="button"
+                onClick={() => classroom.refetch()}
+                className="h-11 rounded-xl bg-primary-color px-5 font-semibold text-white transition-colors hover:bg-primary-color-hover"
+              >
+                {classroomUiLanguage.tryAgain(lang)}
+              </button>
+            )}
+            <Link
+              href="/"
+              className="flex h-11 items-center rounded-xl border border-icon-color/15 px-5 font-semibold text-icon-color transition-colors hover:bg-white"
+            >
+              {classroomUiLanguage.backHome(lang)}
+            </Link>
+          </div>
         </div>
       </DefaultLayout>
     );
   }
-  if (!classroom.data) {
-    return (
-      <DefaultLayout>
-        <div className="flex h-screen flex-col items-center justify-center gap-3">
-          <h1 className="text-4xl text-red-500">No School Found</h1>
-          <button
-            onClick={() => router.push("/")}
-            className="w-40 rounded-2xl bg-primary-color px-4 py-2 text-white"
-          >
-            Back
-          </button>
-        </div>
-      </DefaultLayout>
-    );
-  }
-  const dateMonth = new Date(classroom.data.createAt).toLocaleDateString(
-    undefined,
-    {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    },
-  );
 
   return (
     <>
       <Head>
-        <title>Classroom</title>
+        <title>{`${classroom.data.title} - Tatuga School`}</title>
       </Head>
       <Toast ref={toast} />
-
-      <ClassroomLayout
-        classroomId={classroomId}
-        schoolId={classroom.data?.schoolId}
-      >
-        <header
-          className={`flex flex-col p-5 pb-20 md:p-12 md:pb-20 text-white ${
-            classroom.data.isAchieved ? "gradient-bg-success" : "gradient-bg"
-          } `}
-        >
-          {/* Top Section */}
-          <div className="flex gap-2">
-            <div className="mb-5 flex w-max items-center justify-center gap-1 rounded-full border border-white px-2 py-1 text-xs text-white">
-              {classroomDataLanguage.title(language.data ?? "en")}
-            </div>
-            {classroom.data.isAchieved && (
-              <div className="mb-5 flex w-max items-center justify-center gap-1 rounded-full border border-white px-2 py-1 text-xs text-white">
-                {classroomDataLanguage.achieved(language.data ?? "en")}
-              </div>
-            )}
-          </div>
-
-          <div className="flex w-full items-start justify-between">
-            <div className="w-max border-b border-b-white pb-2">
-              <h1 className="max-w-[60rem] break-words text-2xl font-bold md:text-4xl">
-                ชั้นเรียน - {classroom.data.title}{" "}
-              </h1>
-              <p className="text-xl">{classroom.data.level}</p>
-              <p className="max-w-[60rem] break-words text-gray-300">
-                {classroom.data.description}
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => {
-                  router.replace({
-                    query: {
-                      ...router.query,
-                      menu: "SettingClassroom",
-                    },
-                  });
-                }}
-                className="flex w-max items-center justify-center gap-1 rounded-2xl bg-white px-2 py-1 text-primary-color hover:bg-primary-color hover:text-white active:scale-110"
-              >
-                <CiCircleInfo />
-                {classroomDataLanguage.info(language.data ?? "en")}
-              </button>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-3 pt-5">
-            <div className="flex w-max items-center justify-center gap-1 rounded-full border bg-white px-2 py-1 text-black">
-              <FaUsers />
-              <span className="text-xs">
-                {classroom.data.students.length}{" "}
-                {classroomDataLanguage.student(language.data ?? "en")}
-              </span>
-            </div>
-            <div className="flex w-max items-center justify-center gap-1 rounded-full border bg-white px-2 py-1 text-xs text-black">
-              {classroomDataLanguage.createAt(language.data ?? "en")}:{" "}
-              {dateMonth}
-            </div>
-            <div className="flex w-max items-center justify-center gap-1 rounded-full border bg-white px-2 py-1 text-xs text-black">
-              {classroomDataLanguage.updateAt(language.data ?? "en")}:{" "}
-              {timeAgo({
-                pastTime: new Date(classroom.data.updateAt).toISOString(),
-              })}{" "}
-              ago
-            </div>
-          </div>
-        </header>
-
-        <main className="flex w-full flex-col items-center pb-20 pt-20">
+      <ClassroomLayout classroomId={classroomId} schoolId={classroom.data.schoolId}>
+        <ClassroomHeader
+          classroom={classroom.data}
+          selectMenu={selectMenu}
+          onSelectMenu={selectTab}
+        />
+        <main className="mx-auto w-full max-w-5xl px-4 pb-24 pt-6 sm:px-6">
           {selectMenu === "Classroom" && (
             <StudentSection
               students={classroom.data.students}
               classroom={classroom.data}
             />
+          )}
+          {selectMenu === "SubjectsClassroom" && (
+            <ClassroomSubjects classroom={classroom.data} />
           )}
           {selectMenu === "SettingClassroom" && (
             <ClassroomSetting classroom={classroom.data} toast={toast} />

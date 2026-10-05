@@ -32,3 +32,5 @@ export * from "./announcement";
 export * from "./teaching-material";
 export * from "./grade-table";
 export * from "./student-points";
+export * from "./classroom-ui";
+export * from "./subject-ui";

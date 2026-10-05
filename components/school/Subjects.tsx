@@ -1,5 +1,30 @@
-import React, { useCallback, useEffect, useState } from "react";
+import {
+  closestCenter,
+  DndContext,
+  DragEndEvent,
+  KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  rectSortingStrategy,
+  SortableContext,
+  sortableKeyboardCoordinates,
+} from "@dnd-kit/sortable";
+import { Toast } from "primereact/toast";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { FiPlus, FiSearch } from "react-icons/fi";
 import { SortByOption, sortByOptions } from "../../data";
+import {
+  classroomUiLanguage,
+  sortByOptionsDataLanguage,
+  subjectsDataLanguage,
+  subjectUiLanguage,
+} from "../../data/languages";
+import { EducationYear, Subject } from "../../interfaces";
 import {
   useGetLanguage,
   useGetMemberOnSchoolBySchool,
@@ -7,246 +32,283 @@ import {
   useGetUser,
   useReorderSubjects,
 } from "../../react-query";
-import {
-  Classroom,
-  EducationYear,
-  Subject,
-  TeacherOnSubject,
-} from "../../interfaces";
-import SubjectCard from "../subject/SubjectCard";
-import {
-  closestCenter,
-  DndContext,
-  DragEndEvent,
-  MouseSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
 import { ResponseGetSubjectBySchoolsService } from "../../services";
+import { getDefaultSubjectFilter, setDefaultSubjectFilter } from "../../utils";
+import { fullGradeLabel } from "../../utils/classLevel";
 import {
-  arrayMove,
-  rectSortingStrategy,
-  SortableContext,
-} from "@dnd-kit/sortable";
+  groupClassroomsByGrade,
+  mergeVisibleOrder,
+  NO_LEVEL_KEY,
+} from "../../utils/classroomGroups";
+import {
+  canReorderSubjects,
+  filterSubjects,
+  sortSubjects,
+} from "../../utils/subjectList";
+import { fieldInputClass } from "../common/FormField";
 import InputEducationYear from "../common/InputEducationYear";
 import PopupLayout from "../layout/PopupLayout";
-import SubjectCreate from "../subject/SubjectCreate";
-import { Toast } from "primereact/toast";
-import LoadingBar from "../common/LoadingBar";
-import {
-  sortByOptionsDataLanguage,
-  subjectsDataLanguage,
-} from "../../data/languages";
-import LoadingSpinner from "../common/LoadingSpinner";
 import DuplicateSubject from "../subject/DuplicateSubject";
-import { getDefaultSubjectFilter, setDefaultSubjectFilter } from "../../utils";
+import SubjectCard from "../subject/SubjectCard";
+import SubjectCreate from "../subject/SubjectCreate";
+
+type SubjectItem = ResponseGetSubjectBySchoolsService[number];
+
+// Stored filters from older versions use "show-all" for every teacher.
+const ALL_TEACHERS = "show-all";
+
+const panelClass =
+  "rounded-2xl bg-white shadow-[0_12px_24px_rgba(145,158,171,0.12)]";
 
 type Props = {
   schoolId: string;
 };
 function Subjects({ schoolId }: Props) {
-  const toast = React.useRef<Toast>(null);
-  const reorder = useReorderSubjects();
-  const memberOnSchools = useGetMemberOnSchoolBySchool({
-    schoolId,
-  });
-  const [educationYear, setEducationYear] = React.useState<
-    EducationYear | undefined
-  >();
-  const user = useGetUser();
-  const [selectFilterUserId, setSelectFilterUserId] = React.useState<
-    string | "show-all"
-  >(user.data?.id ?? "show-all");
   const language = useGetLanguage();
+  const lang = language.data ?? "en";
+  const toast = useRef<Toast>(null);
+  const reorder = useReorderSubjects();
+  const user = useGetUser();
+  const memberOnSchools = useGetMemberOnSchoolBySchool({ schoolId });
+  const [educationYear, setEducationYear] = useState<EducationYear>();
+  const [teacherId, setTeacherId] = useState<string>();
+  const [sortBy, setSortBy] = useState<SortByOption>("Default");
+  const [search, setSearch] = useState("");
+  const [classId, setClassId] = useState<string>("all");
+  const [triggerCreateSubject, setTriggerCreateSubject] = useState(false);
   const [selectDuplicate, setSelectDuplicate] = useState<Subject | null>(null);
-  const [triggerCreateSubject, setTriggerCreateSubject] = React.useState(false);
-  const [sortBy, setSortBy] = React.useState<SortByOption>("Default");
-  const defaultFilter = getDefaultSubjectFilter({ schoolId: schoolId });
-  const [search, setSearch] = React.useState("");
+  const [subjectData, setSubjectData] = useState<SubjectItem[]>([]);
   const subjects = useGetSubjectFromSchool({
-    schoolId: schoolId,
+    schoolId,
     educationYear: educationYear as EducationYear,
   });
-  const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
-  const hasInitialized = React.useRef(false);
-
-  useEffect(() => {
-    if (defaultFilter) {
-      setEducationYear(defaultFilter.educationYear);
-      setSelectFilterUserId(defaultFilter.userId);
-    } else {
-      const year = new Date().getFullYear();
-      setEducationYear(() => `1/${year}`);
-    }
-  }, []);
-
-  const [subjectData, setSubjectData] = React.useState<
-    (Subject & {
-      teachers: TeacherOnSubject[];
-      class: Classroom;
-    })[]
-  >([]);
-
-  const handleDragEnd = useCallback(
-    async (event: DragEndEvent) => {
-      if (!educationYear) {
-        console.error("Education year is not set");
-        return;
-      }
-      const { active, over } = event;
-      if (!over) {
-        return;
-      }
-      let newSort: ResponseGetSubjectBySchoolsService = [];
-      if (active.id !== over?.id) {
-        setSubjectData((prevs) => {
-          const oldIndex = prevs.findIndex((item) => item.id === active.id);
-          const newIndex = prevs.findIndex((item) => item.id === over!.id);
-          newSort = arrayMove(prevs, oldIndex, newIndex);
-          return newSort;
-        });
-      }
-      if (newSort.length > 0) {
-        await reorder.mutateAsync({
-          subjectIds: newSort.map((item) => item.id),
-          schoolId: schoolId,
-          educationYear: educationYear,
-        });
-      }
-    },
-    [educationYear],
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 150, tolerance: 5 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
   );
 
-  React.useEffect(() => {
-    if (!subjects.data) return;
-
-    if (!hasInitialized.current && user.data) {
-      setSelectFilterUserId(user.data.id);
-      handleFilterByUser(user.data.id);
-      hasInitialized.current = true;
-    } else if (hasInitialized.current) {
-      handleFilterByUser(selectFilterUserId);
+  // Restore the teacher's last education year and teacher filter.
+  useEffect(() => {
+    const saved = getDefaultSubjectFilter({ schoolId });
+    if (saved) {
+      setEducationYear(saved.educationYear);
+      setTeacherId(saved.userId);
+    } else {
+      setEducationYear(`1/${new Date().getFullYear()}` as EducationYear);
     }
-  }, [subjects.data, user.data]);
+  }, [schoolId]);
 
-  const handleSearch = (search: string) => {
-    if (!subjects.data) {
-      return;
-    }
-    setSearch(search);
-    if (search === "") return setSubjectData(subjects.data);
-    setSubjectData(() =>
-      subjects.data?.filter(
-        (classroom) =>
-          classroom.title.toLowerCase().includes(search.toLowerCase()) ||
-          classroom.description?.toLowerCase().includes(search.toLowerCase()) ||
-          classroom.educationYear
-            .toLowerCase()
-            .includes(search.toLowerCase()) ||
-          classroom.teachers.some(
-            (teacher) =>
-              teacher.firstName.toLowerCase().includes(search.toLowerCase()) ||
-              teacher.lastName.toLowerCase().includes(search.toLowerCase()) ||
-              teacher.email.toLowerCase().includes(search.toLowerCase()),
-          ) ||
-          classroom.class.title.toLowerCase().includes(search.toLowerCase()) ||
-          classroom.class.level.toLowerCase().includes(search.toLowerCase()) ||
-          classroom.class.description
-            ?.toLowerCase()
-            .includes(search.toLowerCase()),
-      ),
-    );
-  };
+  // Default to "my subjects" once we know who is signed in.
+  useEffect(() => {
+    if (teacherId === undefined && user.data) setTeacherId(user.data.id);
+  }, [teacherId, user.data]);
 
-  const handleSortBy = (sortBy: SortByOption) => {
-    switch (sortBy) {
-      case "Default":
-        setSubjectData((prev) =>
-          prev?.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)),
-        );
-        break;
-      case "Newest":
-        setSubjectData((prev) =>
-          prev?.sort(
-            (a, b) =>
-              new Date(b.createAt).getTime() - new Date(a.createAt).getTime(),
-          ),
-        );
-        break;
-      case "Oldest":
-        setSubjectData((prev) =>
-          prev?.sort(
-            (a, b) =>
-              new Date(a.createAt).getTime() - new Date(b.createAt).getTime(),
-          ),
-        );
-        break;
-      case "AZ":
-        setSubjectData((prev) =>
-          prev?.sort((a, b) => a.title.localeCompare(b.title)),
-        );
-        break;
-      case "ZA":
-        setSubjectData((prev) =>
-          prev?.sort((a, b) => b.title.localeCompare(a.title)),
-        );
-        break;
-      default:
-        break;
-    }
-  };
+  useEffect(() => {
+    if (subjects.data) setSubjectData(sortSubjects(subjects.data, "Default"));
+  }, [subjects.data]);
 
-  const handleFilterByUser = (userId: string | "show-all") => {
-    if (!subjects.data) {
-      return;
-    }
-
-    setSelectFilterUserId(userId);
-    setSubjectData((prev) => {
-      if (!prev) {
-        return [];
-      }
-      if (userId !== "show-all") {
-        return subjects.data
-          .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-          .filter((subject) =>
-            subject.teachers.some((t) => t.userId === userId),
-          );
-      } else {
-        return subjects.data.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-      }
+  const saveFilter = (next: { educationYear?: EducationYear; userId?: string }) => {
+    const year = next.educationYear ?? educationYear;
+    if (!year) return;
+    setDefaultSubjectFilter({
+      schoolId,
+      educationYear: year,
+      userId: next.userId ?? teacherId ?? ALL_TEACHERS,
     });
   };
+
+  const activeTeacher = teacherId ?? ALL_TEACHERS;
+  const visible = useMemo(
+    () =>
+      sortSubjects(
+        filterSubjects(subjectData, {
+          query: search,
+          teacherId: activeTeacher === ALL_TEACHERS ? "all" : activeTeacher,
+          classId: classId === "all" ? undefined : classId,
+        }),
+        sortBy,
+      ),
+    [subjectData, search, activeTeacher, classId, sortBy],
+  );
+  const draggable = canReorderSubjects(sortBy);
+
+  // Classrooms that have subjects this year, grouped by grade for the filter.
+  const classroomGroups = useMemo(() => {
+    const unique = new Map(subjectData.map((item) => [item.class.id, item.class]));
+    return groupClassroomsByGrade([...unique.values()]);
+  }, [subjectData]);
+  // A classroom chosen in another year may not exist in this one.
+  useEffect(() => {
+    if (
+      classId !== "all" &&
+      subjectData.length > 0 &&
+      !subjectData.some((item) => item.classId === classId)
+    ) {
+      setClassId("all");
+    }
+  }, [subjectData, classId]);
+
+  const handleDragEnd = async ({ active, over }: DragEndEvent) => {
+    if (!over || active.id === over.id || !educationYear) return;
+    const from = visible.findIndex((item) => item.id === active.id);
+    const to = visible.findIndex((item) => item.id === over.id);
+    if (from === -1 || to === -1) return;
+    const visibleIds = arrayMove(visible, from, to).map((item) => item.id);
+    // Subjects hidden by search or the teacher filter keep their slots.
+    const fullIds = mergeVisibleOrder(
+      subjectData.map((item) => item.id),
+      visibleIds,
+    );
+    const byId = new Map(subjectData.map((item) => [item.id, item]));
+    setSubjectData(
+      fullIds.flatMap((id, order) => {
+        const item = byId.get(id);
+        return item ? [{ ...item, order }] : [];
+      }),
+    );
+    try {
+      await reorder.mutateAsync({
+        subjectIds: fullIds,
+        schoolId,
+        educationYear,
+      });
+    } catch (error) {
+      console.log(error);
+      if (subjects.data) setSubjectData(sortSubjects(subjects.data, "Default"));
+      toast.current?.show({
+        severity: "error",
+        summary: classroomUiLanguage.reorderFailed(lang),
+        life: 4000,
+      });
+    }
+  };
+
+  const closeCreate = () => {
+    document.body.style.overflow = "auto";
+    setTriggerCreateSubject(false);
+  };
+
+  const createButton = (
+    <button
+      type="button"
+      onClick={() => setTriggerCreateSubject(true)}
+      disabled={!educationYear}
+      className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary-color px-5 font-semibold text-white transition-colors hover:bg-primary-color-hover focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-color/30 active:bg-primary-color-focus disabled:opacity-60 sm:w-auto"
+    >
+      <FiPlus aria-hidden />
+      {subjectsDataLanguage.create(lang)}
+    </button>
+  );
+
+  const yearLabel = educationYear ?? "";
+  let content: React.ReactNode;
+  if (subjects.isLoading || !educationYear) {
+    content = (
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {[0, 1, 2].map((index) => (
+          <div key={index} className={`${panelClass} animate-pulse overflow-hidden`}>
+            <div className="h-28 bg-background-color" />
+            <div className="space-y-2 p-4">
+              <div className="h-4 w-2/3 rounded bg-background-color" />
+              <div className="h-3 w-1/3 rounded bg-background-color" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  } else if (subjectData.length === 0) {
+    content = (
+      <div className={`${panelClass} flex flex-col items-center gap-3 px-6 py-12 text-center`}>
+        <p className="text-lg font-semibold text-icon-color">
+          {subjectUiLanguage.emptyYear(lang, yearLabel)}
+        </p>
+        <p className="max-w-sm text-sm text-icon-color/70">
+          {subjectUiLanguage.emptyYearBody(lang)}
+        </p>
+        {createButton}
+      </div>
+    );
+  } else if (visible.length === 0) {
+    const filteredByTeacher = activeTeacher !== ALL_TEACHERS;
+    const filteredByClassroom = classId !== "all";
+    content = (
+      <div className={`${panelClass} flex flex-col items-center gap-3 px-6 py-12 text-center`}>
+        <p className="font-semibold text-icon-color">
+          {search.trim()
+            ? subjectUiLanguage.noMatch(lang, search.trim())
+            : subjectUiLanguage.emptyTeacher(lang, yearLabel)}
+        </p>
+        {filteredByClassroom && (
+          <button
+            type="button"
+            onClick={() => setClassId("all")}
+            className="h-10 rounded-xl border border-icon-color/15 px-4 text-sm font-semibold text-icon-color transition-colors hover:bg-background-color"
+          >
+            {subjectUiLanguage.showAllClassrooms(lang)}
+          </button>
+        )}
+        {filteredByTeacher && (
+          <button
+            type="button"
+            onClick={() => {
+              setTeacherId(ALL_TEACHERS);
+              saveFilter({ userId: ALL_TEACHERS });
+            }}
+            className="h-10 rounded-xl border border-icon-color/15 px-4 text-sm font-semibold text-icon-color transition-colors hover:bg-background-color"
+          >
+            {classroomUiLanguage.showAllTeachers(lang)}
+          </button>
+        )}
+      </div>
+    );
+  } else {
+    content = (
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={visible.map((item) => item.id)}
+          strategy={rectSortingStrategy}
+        >
+          <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {visible.map((subject) => (
+              <SubjectCard
+                key={subject.id}
+                subject={subject}
+                teachers={subject.teachers}
+                classroom={subject.class}
+                draggable={draggable}
+                onDuplicate={() => setSelectDuplicate(subject)}
+              />
+            ))}
+          </ul>
+        </SortableContext>
+      </DndContext>
+    );
+  }
+
   return (
     <>
       <Toast ref={toast} />
-      {triggerCreateSubject && (
-        <PopupLayout
-          onClose={() => {
-            setTriggerCreateSubject(false);
-          }}
-        >
-          {educationYear && (
-            <SubjectCreate
-              toast={toast}
-              educationYear={educationYear}
-              schoolId={schoolId}
-              onClose={() => {
-                document.body.style.overflow = "auto";
-                setTriggerCreateSubject(false);
-              }}
-            />
-          )}
+      {triggerCreateSubject && educationYear && (
+        <PopupLayout onClose={closeCreate}>
+          <SubjectCreate
+            toast={toast}
+            educationYear={educationYear}
+            schoolId={schoolId}
+            onClose={closeCreate}
+          />
         </PopupLayout>
       )}
-
       {selectDuplicate !== null && (
-        <PopupLayout
-          onClose={() => {
-            setSelectDuplicate(null);
-          }}
-        >
+        <PopupLayout onClose={() => setSelectDuplicate(null)}>
           <DuplicateSubject
             subject={selectDuplicate}
             toast={toast}
@@ -257,137 +319,123 @@ function Subjects({ schoolId }: Props) {
           />
         </PopupLayout>
       )}
-      <div className="flex w-full flex-col justify-center bg-white">
-        <header className="mx-auto flex w-full flex-col justify-between gap-4 p-3 md:max-w-screen-md md:flex-row md:gap-0 md:px-5 xl:max-w-screen-lg">
-          <section className="text-center md:text-left">
-            <h1 className="text-2xl font-semibold md:text-3xl">
-              {subjectsDataLanguage.title(language.data ?? "en")}
-            </h1>
-            <p className="max-w-96 break-words text-sm text-gray-400 md:text-base">
-              {subjectsDataLanguage.descriptiom(language.data ?? "en")}
-            </p>
-          </section>
-          <section className="flex flex-col items-center gap-2 md:gap-1 xl:flex-row">
-            <button
-              onClick={() => setTriggerCreateSubject(true)}
-              className="main-button flex w-full items-center justify-center gap-1 py-1 ring-1 ring-blue-600 xl:w-auto"
-            >
-              {subjectsDataLanguage.create(language.data ?? "en")}
-            </button>
-          </section>
-        </header>
-        <main className="mx-auto flex min-h-screen w-full flex-col gap-4 p-3 md:max-w-screen-md md:gap-0 md:px-5 xl:max-w-screen-lg">
-          <div className="flex flex-wrap items-center justify-start gap-2">
-            <label className="flex flex-col">
-              <span className="text-sm text-gray-400">
-                {subjectsDataLanguage.search(language.data ?? "en")}
+      <div className="w-full bg-background-color">
+        <div className="mx-auto w-full max-w-6xl px-4 pb-24 pt-6 sm:px-6 sm:pt-10">
+          <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="min-w-0">
+              <h1 className="text-2xl font-bold text-icon-color sm:text-3xl">
+                {subjectsDataLanguage.title(lang)}
+              </h1>
+              <p className="mt-1 max-w-xl text-sm leading-relaxed text-icon-color/70 sm:text-base">
+                {subjectsDataLanguage.descriptiom(lang)}
+              </p>
+            </div>
+            {createButton}
+          </header>
+
+          <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-[minmax(0,1fr)_auto_13rem_13rem_10rem] lg:items-end">
+            <label className="relative col-span-2 flex min-w-0 flex-col gap-1.5 text-sm font-medium text-icon-color lg:col-span-1">
+              {subjectsDataLanguage.search(lang)}
+              <span className="relative">
+                <FiSearch
+                  aria-hidden
+                  className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-icon-color/40"
+                />
+                <input
+                  type="search"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder={subjectsDataLanguage.searchPlaceholder(lang)}
+                  className={`${fieldInputClass()} pl-11`}
+                />
               </span>
-              <input
-                value={search}
-                onChange={(e) => handleSearch(e.target.value)}
-                type="text"
-                className="w-full rounded-2xl border border-gray-300 p-2 md:w-96"
-                placeholder={subjectsDataLanguage.searchPlaceholder(
-                  language.data ?? "en",
-                )}
-              />
             </label>
             {educationYear && (
-              <label className="flex flex-col">
-                <span className="text-sm text-gray-400">
-                  {subjectsDataLanguage.educationYear(language.data ?? "en")}
-                </span>
+              <div className="flex flex-col gap-1.5 text-sm font-medium text-icon-color">
+                {subjectsDataLanguage.educationYear(lang)}
                 <InputEducationYear
                   value={educationYear}
                   onChange={(value) => {
-                    const education = value as EducationYear;
-                    setEducationYear(education);
-                    setDefaultSubjectFilter({
-                      schoolId,
-                      userId: selectFilterUserId,
-                      educationYear: education,
-                    });
+                    const year = value as EducationYear;
+                    setEducationYear(year);
+                    saveFilter({ educationYear: year });
                   }}
-                  required={true}
+                  required
                 />
-              </label>
+              </div>
             )}
-            <label className="flex w-full max-w-80 flex-col">
-              <span className="text-sm text-gray-400">
-                ค้นหาตามรายชื่อคุณครูในโรงเรียน
-              </span>
-              {memberOnSchools.isLoading ? (
-                <LoadingSpinner />
-              ) : (
-                <select
-                  value={selectFilterUserId}
-                  onChange={(e) => {
-                    handleFilterByUser(e.target.value);
-                  }}
-                  className="second-button w-full max-w-80 border"
-                >
-                  {[
-                    ...(memberOnSchools.data ?? []),
-                    {
-                      firstName: "Show All",
-                      lastName: "",
-                      email: "subjects",
-                      userId: "show-all",
-                    },
-                  ].map((option) => (
-                    <option key={option.userId} value={option.userId}>
-                      {option.firstName} {option.lastName} : {option.email}
-                    </option>
-                  ))}
-                </select>
-              )}
+            <label className="flex min-w-0 flex-col gap-1.5 text-sm font-medium text-icon-color">
+              {subjectUiLanguage.classroomFilter(lang)}
+              <select
+                value={classId}
+                onChange={(e) => setClassId(e.target.value)}
+                className={`${fieldInputClass()} cursor-pointer`}
+              >
+                <option value="all">{subjectUiLanguage.allClassrooms(lang)}</option>
+                {classroomGroups.map((group) => (
+                  <optgroup
+                    key={group.key}
+                    label={
+                      group.key === NO_LEVEL_KEY
+                        ? classroomUiLanguage.noLevel(lang)
+                        : fullGradeLabel(group.key, lang)
+                    }
+                  >
+                    {group.items.map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.title}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
             </label>
-            <label className="flex flex-col">
-              <span className="text-sm text-gray-400">
-                {subjectsDataLanguage.sortBy(language.data ?? "en")}
-              </span>
+            <label className="flex min-w-0 flex-col gap-1.5 text-sm font-medium text-icon-color">
+              {subjectUiLanguage.teacherFilter(lang)}
+              <select
+                value={activeTeacher}
+                disabled={memberOnSchools.isLoading}
+                onChange={(e) => {
+                  setTeacherId(e.target.value);
+                  saveFilter({ userId: e.target.value });
+                }}
+                className={`${fieldInputClass()} cursor-pointer`}
+              >
+                <option value={ALL_TEACHERS}>
+                  {classroomUiLanguage.allTeachers(lang)}
+                </option>
+                {(memberOnSchools.data ?? []).map((member) => (
+                  <option key={member.userId} value={member.userId}>
+                    {member.firstName} {member.lastName}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1.5 text-sm font-medium text-icon-color">
+              {subjectsDataLanguage.sortBy(lang)}
               <select
                 value={sortBy}
-                onChange={(e) => {
-                  handleSortBy(e.target.value as SortByOption);
-                  setSortBy(e.target.value as SortByOption);
-                }}
-                className="second-button w-40 border"
+                onChange={(e) => setSortBy(e.target.value as SortByOption)}
+                className={`${fieldInputClass()} cursor-pointer`}
               >
                 {sortByOptions.map((option) => (
                   <option key={option.title} value={option.title}>
                     {sortByOptionsDataLanguage[
                       option.title.toLowerCase() as keyof typeof sortByOptionsDataLanguage
-                    ](language.data ?? "en")}
+                    ](lang)}
                   </option>
                 ))}
               </select>
             </label>
           </div>
-          {subjects.isLoading && <LoadingBar />}
+          {!draggable && visible.length > 1 && (
+            <p className="mt-3 text-sm text-icon-color/60">
+              {subjectUiLanguage.reorderOff(lang)}
+            </p>
+          )}
 
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
-            <SortableContext items={subjectData} strategy={rectSortingStrategy}>
-              <ul className="mt-5 grid w-full gap-3 pb-40 md:grid-cols-2 xl:grid-cols-3">
-                {subjectData.map((subject) => {
-                  return (
-                    <SubjectCard
-                      onDuplicate={() => setSelectDuplicate(subject)}
-                      key={subject.id}
-                      subject={subject}
-                      teachers={subject.teachers}
-                      classroom={subject.class}
-                    />
-                  );
-                })}
-              </ul>
-            </SortableContext>
-          </DndContext>
-        </main>
+          <div className="mt-6">{content}</div>
+        </div>
       </div>
     </>
   );

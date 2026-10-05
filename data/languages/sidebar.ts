@@ -141,6 +141,16 @@ export const sidebarDataLanguage = {
         return "Grade Summary";
     }
   },
+  subjectsclassroom: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "Subjects";
+      case "th":
+        return "วิชาเรียน";
+      default:
+        return "Subjects";
+    }
+  },
   settingclassroom: (language: Language) => {
     switch (language) {
       case "en":

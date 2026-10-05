@@ -2,11 +2,12 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { Toast } from "primereact/toast";
 import React from "react";
-import { SiGoogleclassroom } from "react-icons/si";
-import { TbFileDescription } from "react-icons/tb";
 import Swal from "sweetalert2";
-import { settingOnClassroomDataLangugae } from "../../data/languages";
-import { useSound } from "../../hook";
+import {
+  classroomUiLanguage,
+  settingOnClassroomDataLangugae,
+} from "../../data/languages";
+import useGetRoleOnSchool from "../../hook/useGetRoleOnSchool";
 import { Classroom, ErrorMessages } from "../../interfaces";
 import {
   useDeleteClassroom,
@@ -15,35 +16,47 @@ import {
   useUpdateClassroom,
 } from "../../react-query";
 import ConfirmDeleteMessage from "../common/ConfirmDeleteMessage";
+import { fieldInputClass, FormField } from "../common/FormField";
 import InputClassLevel from "../common/InputClassLevel";
-import InputWithIcon from "../common/InputWithIcon";
-import LoadingSpinner from "../common/LoadingSpinner";
 import Switch from "../common/Switch";
-import useGetRoleOnSchool from "../../hook/useGetRoleOnSchool";
+import ClassLevelBadge from "./ClassLevelBadge";
 
 type Props = {
   classroom: Classroom;
   toast: React.RefObject<Toast>;
 };
-function ClassroomSetting({ classroom, toast }: Props) {
-  const lanague = useGetLanguage();
-  const update = useUpdateClassroom();
-  const role = useGetRoleOnSchool({
-    schoolId: classroom.schoolId,
+
+const showError = (error: unknown) => {
+  console.log(error);
+  const result = error as ErrorMessages | undefined;
+  Swal.fire({
+    title: result?.error ? result.error : "Something Went Wrong",
+    text: result?.message?.toString(),
+    footer: result?.statusCode
+      ? "Code Error: " + result.statusCode.toString()
+      : "",
+    icon: "error",
   });
+};
+
+function ClassroomSetting({ classroom, toast }: Props) {
+  const language = useGetLanguage();
+  const lang = language.data ?? "en";
+  const text = settingOnClassroomDataLangugae;
+  const update = useUpdateClassroom();
+  const deleteClass = useDeleteClassroom();
+  const role = useGetRoleOnSchool({ schoolId: classroom.schoolId });
   const user = useGetUser();
   const router = useRouter();
-  const deleteClass = useDeleteClassroom();
-  const [classroomData, setClassroomData] =
-    React.useState<Classroom>(classroom);
+  const [classroomData, setClassroomData] = React.useState<Classroom>(classroom);
+  const cannotDelete =
+    role === "TEACHER" && !!user.data && user.data.id !== classroom.userId;
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await update.mutateAsync({
-        query: {
-          classId: classroomData.id,
-        },
+        query: { classId: classroomData.id },
         body: {
           title: classroomData.title,
           description: classroomData.description,
@@ -53,247 +66,160 @@ function ClassroomSetting({ classroom, toast }: Props) {
       });
       toast.current?.show({
         severity: "success",
-        summary: "Success",
-        detail: "Classroom updated",
+        summary: classroomUiLanguage.classroomUpdated(lang),
         life: 3000,
       });
     } catch (error) {
-      let result = error as ErrorMessages;
-      Swal.fire({
-        title: result.error ? result.error : "Something Went Wrong",
-        text: result.message.toString(),
-        footer: result.statusCode
-          ? "Code Error: " + result.statusCode?.toString()
-          : "",
-        icon: "error",
-      });
+      showError(error);
     }
   };
 
-  const handleDeleteClassroom = async ({ classId }: { classId: string }) => {
+  const handleDeleteClassroom = async () => {
     try {
       Swal.fire({
         title: "Deleting...",
-        html: "Loading....",
         allowEscapeKey: false,
         allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
+        didOpen: () => Swal.showLoading(),
       });
-
-      await deleteClass.mutateAsync({
-        classId: classId,
-      });
-      Swal.fire({
-        title: "Success",
-        text: "Classroom Deleted",
-        icon: "success",
-      });
-      router.push({
-        pathname: `/school/${classroomData.schoolId}`,
-        query: { selectMenu: "Classes" },
-      });
+      await deleteClass.mutateAsync({ classId: classroomData.id });
+      Swal.close();
+      // The school page reads ?menu=, not ?selectMenu= (old bug).
+      router.push(`/school/${classroomData.schoolId}?menu=Classes`);
     } catch (error) {
-      console.log(error);
-      let result = error as ErrorMessages;
-      Swal.fire({
-        title: result.error ? result.error : "Something Went Wrong",
-        text: result.message.toString(),
-        footer: result.statusCode
-          ? "Code Error: " + result.statusCode?.toString()
-          : "",
-        icon: "error",
-      });
+      showError(error);
     }
   };
+
   return (
-    <main className="flex w-full flex-col items-center gap-5 px-4 sm:px-6 lg:px-8">
-      <section className="w-full sm:w-10/12 lg:w-8/12">
-        <h1 className="text-lg font-medium sm:text-xl">
-          {settingOnClassroomDataLangugae.general(lanague.data ?? "en")}
-        </h1>
-        <h4 className="text-xs text-gray-500 sm:text-sm">
-          {settingOnClassroomDataLangugae.geernalDescription(
-            lanague.data ?? "en",
-          )}
-        </h4>
-
-        <form
-          onSubmit={handleUpdate}
-          className="mt-5 flex min-h-80 flex-col gap-5 rounded-2xl border bg-white p-4"
-        >
-          <h2 className="border-b py-3 text-lg font-medium">
-            {settingOnClassroomDataLangugae.classroomInfo(lanague.data ?? "en")}
-          </h2>
-          <div className="grid w-full grid-cols-1">
-            <div className="grid grid-cols-1 gap-5 bg-gray-200/20 p-2 py-4">
-              <label className="grid w-full md:grid-cols-2 md:gap-10">
-                <span className="text-base text-black">
-                  {settingOnClassroomDataLangugae.classroomId(
-                    lanague.data ?? "en",
-                  )}
-                  :
-                </span>
-                <Link
-                  target="_blank"
-                  href={`/classroom/${classroomData.id}`}
-                  className="text-base font-semibold text-blue-600 underline"
-                >
-                  {classroomData.id}
-                </Link>
-              </label>
+    <section className="flex w-full flex-col gap-6">
+      <form
+        onSubmit={handleUpdate}
+        className="rounded-2xl bg-white p-5 shadow-[0_12px_24px_rgba(145,158,171,0.12)] sm:p-6"
+      >
+        <h2 className="text-lg font-bold text-icon-color">{text.general(lang)}</h2>
+        <p className="mt-1 text-sm text-icon-color/70">
+          {text.geernalDescription(lang)}
+        </p>
+        <div className="mt-6 flex flex-col gap-5">
+          <FormField id="classroom-setting-title" label={text.title(lang)}>
+            <input
+              id="classroom-setting-title"
+              required
+              value={classroomData.title}
+              onChange={(e) =>
+                setClassroomData((prev) => ({ ...prev, title: e.target.value }))
+              }
+              className={fieldInputClass()}
+            />
+          </FormField>
+          <FormField
+            id="classroom-setting-description"
+            label={text.description(lang)}
+          >
+            <input
+              id="classroom-setting-description"
+              required
+              value={classroomData.description ?? ""}
+              onChange={(e) =>
+                setClassroomData((prev) => ({
+                  ...prev,
+                  description: e.target.value,
+                }))
+              }
+              className={fieldInputClass()}
+            />
+          </FormField>
+          <div className="flex items-end gap-3">
+            <div className="min-w-0 flex-1">
+              <InputClassLevel
+                required
+                title={text.classLevel(lang)}
+                value={classroomData.level}
+                onChange={(value) =>
+                  setClassroomData((prev) => ({ ...prev, level: value }))
+                }
+              />
             </div>
-            <div className="grid grid-cols-1 gap-5 p-2 py-4">
-              <label className="grid w-full items-center md:grid-cols-2 md:gap-10">
-                <span className="text-base text-black">
-                  {settingOnClassroomDataLangugae.title(lanague.data ?? "en")}
-                </span>
-                <InputWithIcon
-                  required
-                  placeholder={settingOnClassroomDataLangugae.title(
-                    lanague.data ?? "en",
-                  )}
-                  value={classroomData.title}
-                  onChange={(value) => {
-                    setClassroomData({
-                      ...classroomData,
-                      title: value,
-                    });
-                  }}
-                  icon={<SiGoogleclassroom />}
-                />
-              </label>
-            </div>
-            <div className="grid grid-cols-1 gap-5 bg-gray-200/20 p-2 py-4">
-              <label className="grid w-full items-center md:grid-cols-2 md:gap-10">
-                <span className="text-base text-black">
-                  {settingOnClassroomDataLangugae.description(
-                    lanague.data ?? "en",
-                  )}
-                  :
-                </span>
-                <InputWithIcon
-                  required
-                  placeholder={settingOnClassroomDataLangugae.description(
-                    lanague.data ?? "en",
-                  )}
-                  value={classroomData.description ?? ""}
-                  onChange={(value) => {
-                    setClassroomData({
-                      ...classroomData,
-                      description: value,
-                    });
-                  }}
-                  icon={<TbFileDescription />}
-                />
-              </label>
-            </div>
-            <div className="grid grid-cols-1 gap-5 p-2 py-4">
-              <label className="grid w-full items-center md:grid-cols-2 md:gap-10">
-                <span className="text-base text-black">
-                  {settingOnClassroomDataLangugae.classLevel(
-                    lanague.data ?? "en",
-                  )}
-                  :
-                </span>
-                <InputClassLevel
-                  value={classroomData.level}
-                  onChange={(value) => {
-                    setClassroomData({
-                      ...classroomData,
-                      level: value,
-                    });
-                  }}
-                  required
-                />
-              </label>
-            </div>
+            <ClassLevelBadge
+              level={classroomData.level}
+              archived={classroomData.isAchieved}
+            />
           </div>
-
-          <div className="grid grid-cols-1 gap-5 bg-gray-200/20 p-2 py-4">
-            <label className="grid w-full items-center md:grid-cols-2 md:gap-10">
-              <span className="text-base text-black">
-                {settingOnClassroomDataLangugae.achieved(lanague.data ?? "en")}
-              </span>
-              <div className="flex w-full justify-start">
-                <Switch
-                  checked={classroomData.isAchieved}
-                  setChecked={(data) =>
-                    setClassroomData((prev) => {
-                      return {
-                        ...prev,
-                        isAchieved: data,
-                      };
-                    })
-                  }
-                />
-              </div>
-            </label>
-            <h4 className="text-xs text-blue-600 sm:text-sm">
-              {settingOnClassroomDataLangugae.acheveidDescription(
-                lanague.data ?? "en",
-              )}
-            </h4>
+          <div className="flex items-start justify-between gap-4 rounded-xl bg-background-color p-4">
+            <div className="min-w-0">
+              <p className="font-medium text-icon-color">{text.achieved(lang)}</p>
+              <p className="mt-0.5 text-sm text-icon-color/70">
+                {classroomUiLanguage.archiveHint(lang)}
+              </p>
+            </div>
+            <Switch
+              checked={classroomData.isAchieved}
+              setChecked={(checked) =>
+                setClassroomData((prev) => ({ ...prev, isAchieved: checked }))
+              }
+            />
           </div>
+          <p className="break-all text-sm text-icon-color/60">
+            {text.classroomId(lang)}:{" "}
+            <Link
+              href={`/classroom/${classroomData.id}`}
+              className="font-medium text-primary-color hover:underline"
+            >
+              {classroomData.id}
+            </Link>
+          </p>
+        </div>
+        <div className="mt-6 flex justify-end border-t border-icon-color/10 pt-5">
           <button
+            type="submit"
             disabled={update.isPending}
-            className="main-button mt-5 flex w-60 items-center justify-center"
+            aria-busy={update.isPending}
+            className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary-color px-6 font-semibold text-white transition-colors hover:bg-primary-color-hover disabled:cursor-wait disabled:opacity-80 sm:w-auto"
           >
-            {update.isPending ? (
-              <LoadingSpinner />
-            ) : (
-              settingOnClassroomDataLangugae.saveButton(lanague.data ?? "en")
-            )}
+            {update.isPending
+              ? classroomUiLanguage.saving(lang)
+              : text.saveButton(lang)}
           </button>
-        </form>
+        </div>
+      </form>
 
-        <h1 className="mt-10 text-lg font-medium sm:text-xl">
-          {settingOnClassroomDataLangugae.danger(lanague.data ?? "en")}
-        </h1>
-        <h4 className="text-xs text-gray-500 sm:text-sm">
-          {settingOnClassroomDataLangugae.dangerDescription(
-            lanague.data ?? "en",
-          )}
-        </h4>
-        <div className="mt-5 flex flex-col items-start gap-5 rounded-2xl border bg-white p-4">
-          <h2 className="border-b py-3 text-base font-medium sm:text-lg">
-            {settingOnClassroomDataLangugae.deleteTitle(lanague.data ?? "en")}
-          </h2>
-          <h4 className="text-xs text-red-700 sm:text-sm">
-            {settingOnClassroomDataLangugae.deleteDescription(
-              lanague.data ?? "en",
+      <section
+        aria-labelledby="classroom-danger-zone"
+        className="rounded-2xl border border-error-color/30 bg-white p-5 sm:p-6"
+      >
+        <h2 id="classroom-danger-zone" className="text-lg font-bold text-error-color">
+          {text.danger(lang)}
+        </h2>
+        <p className="mt-1 text-sm text-icon-color/70">{text.dangerDescription(lang)}</p>
+        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <p className="font-medium text-icon-color">{text.deleteTitle(lang)}</p>
+            <p className="mt-0.5 text-sm text-icon-color/70">
+              {text.deleteDescription(lang)}
+            </p>
+            {cannotDelete && (
+              <p className="mt-1 text-sm text-error-color">
+                {classroomUiLanguage.deleteOnlyOwner(lang)}
+              </p>
             )}
-          </h4>
+          </div>
           <button
-            disabled={
-              role === "TEACHER" &&
-              user.data &&
-              user.data.id !== classroom.userId
-            }
-            onClick={() => {
+            type="button"
+            disabled={cannotDelete}
+            onClick={() =>
               ConfirmDeleteMessage({
-                language: lanague.data ?? "en",
-                callback: async () => {
-                  await handleDeleteClassroom({ classId: classroomData.id });
-                },
-              });
-            }}
-            className="reject-button mt-5 w-60"
+                language: lang,
+                callback: handleDeleteClassroom,
+              })
+            }
+            className="h-11 shrink-0 rounded-xl border border-error-color px-5 font-semibold text-error-color transition-colors hover:bg-error-color hover:text-white disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-error-color"
           >
-            {settingOnClassroomDataLangugae.deleteButton(lanague.data ?? "en")}
+            {text.deleteButton(lang)}
           </button>
-          {role === "TEACHER" &&
-            user.data &&
-            user.data.id !== classroom.userId && (
-              <div className="text-red-700">
-                Only the school admin and the creator of this classroom can
-                delete them
-              </div>
-            )}
         </div>
       </section>
-    </main>
+    </section>
   );
 }
 
