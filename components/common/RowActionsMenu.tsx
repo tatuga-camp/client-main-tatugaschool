@@ -19,6 +19,8 @@ type Props = {
 
 function RowActionsMenu({ label, actions, disabled }: Props) {
   const [open, setOpen] = useState(false);
+  // Rows near the bottom of the screen open the menu upward instead.
+  const [openUp, setOpenUp] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -70,7 +72,17 @@ function RowActionsMenu({ label, actions, disabled }: Props) {
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
         disabled={disabled}
-        onClick={() => setOpen((value) => !value)}
+        onClick={() => {
+          const rect = buttonRef.current?.getBoundingClientRect();
+          if (rect) {
+            const menuHeight = actions.length * 44 + 16;
+            setOpenUp(
+              window.innerHeight - rect.bottom < menuHeight &&
+                rect.top > menuHeight,
+            );
+          }
+          setOpen((value) => !value);
+        }}
         className="flex h-10 w-10 items-center justify-center rounded-full text-xl text-icon-color/60 transition-colors hover:bg-background-color hover:text-icon-color focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-color/30 disabled:cursor-wait disabled:opacity-50"
       >
         <MdMoreHoriz aria-hidden />
@@ -81,7 +93,9 @@ function RowActionsMenu({ label, actions, disabled }: Props) {
           role="menu"
           aria-label={label}
           onKeyDown={handleMenuKeyDown}
-          className="absolute right-0 top-full z-30 mt-1 w-56 rounded-2xl bg-white py-1 shadow-lg ring-1 ring-icon-color/10"
+          className={`absolute right-0 z-30 w-56 rounded-2xl bg-white py-1 shadow-lg ring-1 ring-icon-color/10 ${
+            openUp ? "bottom-full mb-1" : "top-full mt-1"
+          }`}
         >
           {actions.map((action, index) => (
             <button
