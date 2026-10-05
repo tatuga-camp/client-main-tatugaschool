@@ -2,207 +2,249 @@ import {
   closestCenter,
   DndContext,
   DragEndEvent,
+  KeyboardSensor,
   MouseSensor,
   TouchSensor,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
 import {
-  arrayMove,
-  rectSortingStrategy,
   SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import Link from "next/link";
 import { Toast } from "primereact/toast";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { FiPlus } from "react-icons/fi";
 import { IoMdClose } from "react-icons/io";
-import { ClassLevelList, SortByOption, sortByOptions } from "../../data";
-import {
-  classesDataLanguage,
-  sortByOptionsDataLanguage,
-} from "../../data/languages";
-import { Classroom, Language, User } from "../../interfaces";
+import { classesDataLanguage, classroomUiLanguage } from "../../data/languages";
+import { Classroom } from "../../interfaces";
 import {
   useGetClassrooms,
   useGetLanguage,
   useGetMemberOnSchoolBySchool,
-  useGetUser,
   useReorderClassrooms,
 } from "../../react-query";
-import { ResponseGetClassesBySchoolIdService } from "../../services";
-import ClassesCard from "../classroom/ClassroomCard";
+import { fullGradeLabel } from "../../utils/classLevel";
+import {
+  groupClassroomsByGrade,
+  mergeVisibleOrder,
+  moveWithinGroup,
+  NO_LEVEL_KEY,
+} from "../../utils/classroomGroups";
 import ClassesCreate from "../classroom/ClassroomCreate";
 import ClassroomCreatedNotification from "../classroom/ClassroomCreatedNotification";
-import LoadingBar from "../common/LoadingBar";
+import ClassroomRow, { ClassroomItem } from "../classroom/ClassroomRow";
+import { fieldInputClass } from "../common/FormField";
 import PopupLayout from "../layout/PopupLayout";
-import LoadingSpinner from "../common/LoadingSpinner";
-import Link from "next/link";
-import InputClassLevel from "../common/InputClassLevel";
+
+const byOrder = (a: ClassroomItem, b: ClassroomItem) =>
+  (a.order ?? 0) - (b.order ?? 0);
+
+const panelClass =
+  "rounded-2xl bg-white shadow-[0_12px_24px_rgba(145,158,171,0.12)]";
 
 type Props = {
   schoolId: string;
 };
 function Classrooms({ schoolId }: Props) {
-  const reorder = useReorderClassrooms();
   const language = useGetLanguage();
-  const user = useGetUser();
-  const memberOnSchools = useGetMemberOnSchoolBySchool({
-    schoolId: schoolId,
-  });
-  const [classroomData, setClassroomData] = React.useState<
-    (Classroom & {
-      studentNumbers: number;
-      creator: User | null;
-    })[]
-  >([]);
-  const [selectFilterUserId, setSelectFilterUserId] = useState<
-    string | "show-all"
-  >("show-all");
-  const [selectFilterLevel, setSelectFilterLevel] = useState<
-    string | "show-all"
-  >("show-all");
-  const [triggerCreateClass, setTriggerCreateClass] = React.useState(false);
-  const [notifiedClassroom, setNotifiedClassroom] =
-    React.useState<Classroom | null>(null);
-  const [triggerActiveClasses, setTriggerActiveClasses] = React.useState(true);
-  const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
+  const lang = language.data ?? "en";
+  const reorder = useReorderClassrooms();
+  const memberOnSchools = useGetMemberOnSchoolBySchool({ schoolId });
+  const [showArchived, setShowArchived] = useState(false);
+  const [teacherId, setTeacherId] = useState<string>("all");
+  const [classroomData, setClassroomData] = useState<ClassroomItem[]>([]);
+  const [triggerCreateClass, setTriggerCreateClass] = useState(false);
+  const [notifiedClassroom, setNotifiedClassroom] = useState<Classroom | null>(
+    null,
+  );
   const toast = useRef<Toast>(null);
-  const classrooms = useGetClassrooms({
-    schoolId: schoolId,
-    isAchieved: !triggerActiveClasses,
-  });
+  const classrooms = useGetClassrooms({ schoolId, isAchieved: showArchived });
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 150, tolerance: 5 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
 
-  const handleDragEnd = useCallback(async (event: DragEndEvent) => {
-    const { active, over } = event;
-    let newSort: ResponseGetClassesBySchoolIdService = [];
-    if (!over) {
-      return;
-    }
-    if (active.id !== over?.id) {
-      setClassroomData((prevs) => {
-        const oldIndex = prevs.findIndex((item) => item.id === active.id);
-        const newIndex = prevs.findIndex((item) => item.id === over!.id);
-        newSort = arrayMove(prevs, oldIndex, newIndex);
-        return newSort;
-      });
-    }
-
-    if (newSort.length > 0) {
-      await reorder.mutateAsync({
-        classIds: newSort.map((item) => item.id),
-        schoolId: schoolId,
-        isAchieved: !triggerActiveClasses,
-      });
-    }
-  }, []);
-
-  const getGrade = (level: string | null | undefined) =>
-    (level ?? "").split("/")[0].trim();
-
-  const uniqueLevels = useMemo(() => {
-    if (!classrooms.data) return [];
-    const grades = new Set<string>();
-    for (const c of classrooms.data) {
-      const g = getGrade(c.level);
-      if (g) grades.add(g);
-    }
-    const predefinedOrder: readonly string[] = ClassLevelList.map(
-      (l) => l.title,
-    );
-    const predefined: string[] = [];
-    const custom: string[] = [];
-    for (const g of grades) {
-      if (predefinedOrder.includes(g)) {
-        predefined.push(g);
-      } else {
-        custom.push(g);
-      }
-    }
-    predefined.sort(
-      (a, b) => predefinedOrder.indexOf(a) - predefinedOrder.indexOf(b),
-    );
-    custom.sort((a, b) => a.localeCompare(b));
-    return [...predefined, ...custom];
+  useEffect(() => {
+    if (classrooms.data) setClassroomData([...classrooms.data].sort(byOrder));
   }, [classrooms.data]);
 
-  const displayLevelLabel = (level: string, lang: Language) => {
-    if (lang !== "en") return level;
-    const match = ClassLevelList.find((l) => l.title === level);
-    return match ? match.titleEn : level;
+  const visible = useMemo(
+    () =>
+      teacherId === "all"
+        ? classroomData
+        : classroomData.filter((classroom) => classroom.userId === teacherId),
+    [classroomData, teacherId],
+  );
+  const groups = useMemo(() => groupClassroomsByGrade(visible), [visible]);
+
+  const closeCreate = () => {
+    setTriggerCreateClass(false);
+    document.body.style.overflow = "auto";
   };
 
-  const applyFilters = (
-    userId: string | "show-all",
-    level: string | "show-all",
-  ) => {
-    if (!classrooms.data) return;
-    setSelectFilterUserId(userId);
-    setSelectFilterLevel(level);
-    const sorted = [...classrooms.data].sort(
-      (a, b) => (a.order ?? 0) - (b.order ?? 0),
+  const handleDragEnd = async ({ active, over }: DragEndEvent) => {
+    if (!over) return;
+    const moved = moveWithinGroup(groups, String(active.id), String(over.id));
+    if (!moved) return;
+    const fullIds = mergeVisibleOrder(
+      classroomData.map((classroom) => classroom.id),
+      moved.flatMap((group) => group.items.map((item) => item.id)),
     );
-    const filtered = sorted.filter((classroom) => {
-      const userMatch =
-        userId === "show-all" || classroom.userId === userId;
-      const levelMatch =
-        level === "show-all" || getGrade(classroom.level) === level;
-      return userMatch && levelMatch;
-    });
-    setClassroomData(filtered);
+    const byId = new Map(classroomData.map((item) => [item.id, item]));
+    setClassroomData(
+      fullIds.flatMap((id, index) => {
+        const item = byId.get(id);
+        return item ? [{ ...item, order: index }] : [];
+      }),
+    );
+    try {
+      await reorder.mutateAsync({
+        classIds: fullIds,
+        schoolId,
+        isAchieved: showArchived,
+      });
+    } catch (error) {
+      console.log(error);
+      if (classrooms.data) setClassroomData([...classrooms.data].sort(byOrder));
+      toast.current?.show({
+        severity: "error",
+        summary: classroomUiLanguage.reorderFailed(lang),
+        life: 4000,
+      });
+    }
   };
 
-  useEffect(() => {
-    if (classrooms.data && user.data) {
-      applyFilters("show-all", "show-all");
-    }
-  }, [classrooms.data, user.data]);
+  const createButton = (
+    <button
+      type="button"
+      onClick={() => setTriggerCreateClass(true)}
+      className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary-color px-5 font-semibold text-white transition-colors hover:bg-primary-color-hover focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-color/30 active:bg-primary-color-focus sm:w-auto"
+    >
+      <FiPlus aria-hidden />
+      {classroomUiLanguage.createClassroom(lang)}
+    </button>
+  );
 
-  useEffect(() => {
-    if (
-      selectFilterLevel !== "show-all" &&
-      uniqueLevels.length > 0 &&
-      !uniqueLevels.includes(selectFilterLevel)
-    ) {
-      applyFilters(selectFilterUserId, "show-all");
-    }
-  }, [uniqueLevels]);
+  let content: React.ReactNode;
+  if (classrooms.isLoading) {
+    content = (
+      <div className={`${panelClass} divide-y divide-icon-color/10`}>
+        {[0, 1, 2].map((index) => (
+          <div key={index} className="flex animate-pulse items-center gap-4 p-4">
+            <div className="h-12 w-12 rounded-2xl bg-background-color" />
+            <div className="flex-1 space-y-2">
+              <div className="h-4 w-1/3 rounded bg-background-color" />
+              <div className="h-3 w-1/2 rounded bg-background-color" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  } else if (classroomData.length === 0) {
+    content = (
+      <div className={`${panelClass} flex flex-col items-center gap-3 px-6 py-12 text-center`}>
+        <p className="text-lg font-semibold text-icon-color">
+          {showArchived
+            ? classroomUiLanguage.emptyArchived(lang)
+            : classroomUiLanguage.emptyActiveTitle(lang)}
+        </p>
+        {!showArchived && (
+          <>
+            <p className="max-w-sm text-sm text-icon-color/70">
+              {classroomUiLanguage.emptyActiveBody(lang)}
+            </p>
+            {createButton}
+          </>
+        )}
+      </div>
+    );
+  } else if (visible.length === 0) {
+    content = (
+      <div className={`${panelClass} flex flex-col items-center gap-3 px-6 py-12 text-center`}>
+        <p className="font-semibold text-icon-color">
+          {classroomUiLanguage.emptyTeacher(lang)}
+        </p>
+        <button
+          type="button"
+          onClick={() => setTeacherId("all")}
+          className="h-10 rounded-xl border border-icon-color/15 px-4 text-sm font-semibold text-icon-color transition-colors hover:bg-background-color"
+        >
+          {classroomUiLanguage.showAllTeachers(lang)}
+        </button>
+      </div>
+    );
+  } else {
+    content = (
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <div className="flex flex-col gap-8">
+          {groups.map((group) => {
+            const headingId = `grade-${group.key}`;
+            return (
+              <section key={group.key} aria-labelledby={headingId}>
+                <h2
+                  id={headingId}
+                  className="mb-3 flex items-baseline gap-2 text-base font-bold text-icon-color"
+                >
+                  {group.key === NO_LEVEL_KEY
+                    ? classroomUiLanguage.noLevel(lang)
+                    : fullGradeLabel(group.key, lang)}
+                  <span className="text-sm font-normal text-icon-color/50">
+                    {classroomUiLanguage.classroomCount(lang, group.items.length)}
+                  </span>
+                </h2>
+                <SortableContext
+                  items={group.items.map((item) => item.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <ul className={`${panelClass} divide-y divide-icon-color/10`}>
+                    {group.items.map((classroom) => (
+                      <ClassroomRow key={classroom.id} classroom={classroom} />
+                    ))}
+                  </ul>
+                </SortableContext>
+              </section>
+            );
+          })}
+        </div>
+      </DndContext>
+    );
+  }
 
   return (
     <>
+      <Toast ref={toast} />
       {triggerCreateClass && (
-        <PopupLayout
-          onClose={() => {
-            setTriggerCreateClass(false);
-          }}
-        >
-          <Toast ref={toast} />
-          <div className="h-max w-full max-w-96 rounded-2xl border bg-white p-3">
-            <div className="flex w-full justify-between border-b pb-1">
-              <h1 className="text-lg font-semibold">
-                {classesDataLanguage.create(language.data ?? "en")}
-              </h1>
+        <PopupLayout onClose={closeCreate}>
+          <div className="w-[min(28rem,calc(100vw-2rem))] rounded-3xl bg-white p-5 font-Anuphan shadow-xl sm:p-6">
+            <div className="mb-5 flex items-center justify-between gap-4">
+              <h2 className="text-lg font-bold text-icon-color">
+                {classroomUiLanguage.createClassroom(lang)}
+              </h2>
               <button
-                onClick={() => {
-                  setTriggerCreateClass(false);
-                  document.body.style.overflow = "auto";
-                }}
-                className="flex h-6 w-6 items-center justify-center rounded text-lg font-semibold hover:bg-gray-300/50"
+                type="button"
+                onClick={closeCreate}
+                aria-label={classroomUiLanguage.close(lang)}
+                className="flex h-10 w-10 items-center justify-center rounded-full text-xl text-icon-color/70 transition-colors hover:bg-background-color"
               >
-                <IoMdClose />
+                <IoMdClose aria-hidden />
               </button>
             </div>
             <ClassesCreate
               schoolId={schoolId}
               toast={toast}
-              onClose={() => {
-                setTriggerCreateClass(false);
-                document.body.style.overflow = "auto";
-              }}
+              onClose={closeCreate}
               onSuccess={(created) => setNotifiedClassroom(created)}
             />
           </div>
@@ -225,136 +267,73 @@ function Classrooms({ schoolId }: Props) {
           />
         </PopupLayout>
       )}
-      <div className="flex w-full flex-col justify-center bg-white">
-        <header className="mx-auto flex w-full flex-col justify-between gap-4 p-3 md:max-w-screen-md md:flex-row md:gap-0 md:px-5 xl:max-w-screen-lg">
-          <section className="text-center md:text-left">
-            <h1 className="text-2xl font-semibold md:text-3xl">
-              {classesDataLanguage.title(language.data ?? "en")}
-            </h1>
-            <p className="max-w-96 break-words text-sm text-gray-400 md:text-base">
-              {classesDataLanguage.description(language.data ?? "en")}
-            </p>
-            <Link
-              href={`/school/${schoolId}?menu=Subjects`}
-              className="max-w group mt-4 flex items-start gap-3 rounded-xl border border-indigo-100 bg-white/80 p-3 shadow-sm backdrop-blur-sm hover:bg-primary-color hover:text-white md:items-center"
-            >
-              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xl">
-                💡
-              </div>
-              <span className="text-sm font-medium text-indigo-900 group-hover:text-white">
-                {classesDataLanguage.notify(language.data ?? "en")}
-              </span>
-            </Link>
-          </section>
-          <section className="flex flex-col items-center gap-2 md:gap-1 xl:flex-row">
-            <button
-              onClick={() => setTriggerCreateClass(true)}
-              className="main-button flex w-full items-center justify-center gap-1 py-1 ring-1 ring-blue-600 xl:w-auto"
-            >
-              {classesDataLanguage.create(language.data ?? "en")}{" "}
-            </button>
-          </section>
-        </header>
-        <main className="mx-auto flex min-h-screen w-full flex-col gap-4 p-3 md:max-w-screen-md md:gap-0 md:px-5 xl:max-w-screen-lg">
-          <div className="flex flex-wrap items-center justify-start gap-2">
-            <label className="flex flex-col">
-              <span className="text-sm text-gray-400">Select</span>
-              <button
-                onClick={() => setTriggerActiveClasses(!triggerActiveClasses)}
-                className={`${
-                  triggerActiveClasses ? "main-button" : "second-button"
-                } w-60 border`}
-              >
-                {triggerActiveClasses
-                  ? classesDataLanguage.activeClass(language.data ?? "en")
-                  : classesDataLanguage.inactiveClass(language.data ?? "en")}
-              </button>
-            </label>
-            <label className="flex w-full max-w-80 flex-col">
-              <span className="text-sm text-gray-400">
-                ค้นหาตามรายชื่อคุณครูในโรงเรียน
-              </span>
-              {memberOnSchools.isLoading ? (
-                <LoadingSpinner />
-              ) : (
-                <select
-                  value={selectFilterUserId}
-                  onChange={(e) => {
-                    applyFilters(e.target.value, selectFilterLevel);
-                  }}
-                  className="second-button w-full max-w-80 border"
+      <div className="w-full bg-background-color">
+        <div className="mx-auto w-full max-w-5xl px-4 pb-24 pt-6 sm:px-6 sm:pt-10">
+          <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="min-w-0">
+              <h1 className="text-2xl font-bold text-icon-color sm:text-3xl">
+                {classroomUiLanguage.classroomsTitle(lang)}
+              </h1>
+              <p className="mt-1 max-w-xl text-sm leading-relaxed text-icon-color/70 sm:text-base">
+                {classesDataLanguage.description(lang)}
+              </p>
+              <p className="mt-2 text-sm text-icon-color/70">
+                {classroomUiLanguage.subjectsHint(lang)}{" "}
+                <Link
+                  href={`/school/${schoolId}?menu=Subjects`}
+                  className="font-semibold text-primary-color underline-offset-4 hover:underline"
                 >
-                  {[
-                    ...(memberOnSchools.data ?? []),
-                    {
-                      firstName: "Show All",
-                      lastName: "",
-                      email: "Classrooms",
-                      userId: "show-all",
-                    },
-                  ].map((option) => (
-                    <option key={option.userId} value={option.userId}>
-                      {option.firstName} {option.lastName} : {option.email}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </label>
-          </div>
-          {uniqueLevels.length > 0 && (
-            <div className="mt-3 flex flex-col gap-1">
-              <span className="text-sm text-gray-400">
-                {classesDataLanguage.filterByLevel(language.data ?? "en")}
-              </span>
-              <div className="flex flex-wrap items-center gap-2">
+                  {classroomUiLanguage.openSubjects(lang)}
+                </Link>
+              </p>
+            </div>
+            {createButton}
+          </header>
+
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div
+              role="group"
+              aria-label={classroomUiLanguage.classroomStatus(lang)}
+              className="inline-flex w-full rounded-xl bg-white p-1 shadow-sm ring-1 ring-icon-color/10 sm:w-auto"
+            >
+              {[false, true].map((archived) => (
                 <button
-                  onClick={() =>
-                    applyFilters(selectFilterUserId, "show-all")
-                  }
-                  className={`rounded-full px-3 py-1 text-sm transition ${
-                    selectFilterLevel === "show-all"
+                  key={String(archived)}
+                  type="button"
+                  aria-pressed={showArchived === archived}
+                  onClick={() => setShowArchived(archived)}
+                  className={`h-9 flex-1 rounded-lg px-4 text-sm font-semibold transition-colors sm:flex-none ${
+                    showArchived === archived
                       ? "bg-primary-color text-white"
-                      : "border bg-white text-gray-700 hover:bg-gray-100"
+                      : "text-icon-color/70 hover:bg-background-color"
                   }`}
                 >
-                  {classesDataLanguage.showAll(language.data ?? "en")}
+                  {archived
+                    ? classroomUiLanguage.archived(lang)
+                    : classroomUiLanguage.active(lang)}
                 </button>
-                {uniqueLevels.map((lvl) => (
-                  <button
-                    key={lvl}
-                    onClick={() => applyFilters(selectFilterUserId, lvl)}
-                    className={`rounded-full px-3 py-1 text-sm transition ${
-                      selectFilterLevel === lvl
-                        ? "bg-primary-color text-white"
-                        : "border bg-white text-gray-700 hover:bg-gray-100"
-                    }`}
-                  >
-                    {displayLevelLabel(lvl, language.data ?? "en")}
-                  </button>
-                ))}
-              </div>
+              ))}
             </div>
-          )}
-          {classrooms.isLoading && <LoadingBar />}
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
-            <SortableContext
-              items={classroomData}
-              strategy={rectSortingStrategy}
-            >
-              <ul className="mt-5 grid w-full gap-3 pb-40 md:grid-cols-2 xl:grid-cols-3">
-                {classroomData?.map((classroom) => {
-                  return (
-                    <ClassesCard classroom={classroom} key={classroom.id} />
-                  );
-                })}
-              </ul>
-            </SortableContext>
-          </DndContext>
-        </main>
+            <label className="flex w-full flex-col gap-1.5 text-sm font-medium text-icon-color sm:w-64">
+              {classroomUiLanguage.teacherFilter(lang)}
+              <select
+                value={teacherId}
+                onChange={(e) => setTeacherId(e.target.value)}
+                disabled={memberOnSchools.isLoading}
+                className={`${fieldInputClass()} cursor-pointer`}
+              >
+                <option value="all">{classroomUiLanguage.allTeachers(lang)}</option>
+                {(memberOnSchools.data ?? []).map((member) => (
+                  <option key={member.userId} value={member.userId}>
+                    {member.firstName} {member.lastName}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <div className="mt-8">{content}</div>
+        </div>
       </div>
     </>
   );
