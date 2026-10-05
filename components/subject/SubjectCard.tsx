@@ -11,6 +11,7 @@ import { Classroom, Subject, TeacherOnSubject } from "../../interfaces";
 import { useGetLanguage } from "../../react-query";
 import { decodeBlurhashToCanvas } from "../../utils";
 import { shortGradeLabel, splitLevel } from "../../utils/classLevel";
+import { subjectEmoji, subjectTint } from "../../utils/subjectList";
 import RowActionsMenu from "../common/RowActionsMenu";
 import ListMemberCircle from "../member/ListMemberCircle";
 
@@ -52,9 +53,14 @@ function SubjectCard({
   const levelLabel = `${shortGradeLabel(grade, lang)}${room ? `/${room}` : ""}`;
 
   const body: ReactNode = (
-    <>
-      <div className="relative h-28 w-full overflow-hidden rounded-t-2xl bg-gradient-to-r from-primary-color to-secondary-color">
-        {subject.backgroundImage && (
+    <div className="flex grow flex-col p-3 pb-0">
+      {/* Soft inset header: the subject's photo, or a friendly emoji. */}
+      <div
+        className={`relative flex h-28 items-center justify-center overflow-hidden rounded-2xl ${
+          subject.backgroundImage ? "bg-background-color" : subjectTint(subject.id)
+        }`}
+      >
+        {subject.backgroundImage ? (
           <Image
             src={subject.backgroundImage}
             fill
@@ -66,36 +72,40 @@ function SubjectCard({
             alt=""
             className="object-cover"
           />
+        ) : (
+          <span
+            aria-hidden
+            className="text-5xl transition-transform duration-200 group-hover:scale-110 motion-reduce:transition-none"
+          >
+            {subjectEmoji(subject.title)}
+          </span>
         )}
         {subject.isLocked && (
-          <div aria-hidden className="absolute inset-0 bg-icon-color/50" />
-        )}
-        {subject.isLocked && (
-          <span className="absolute bottom-2 left-3 flex items-center gap-1 rounded-full bg-white/95 px-2 py-0.5 text-xs font-semibold text-icon-color">
+          <span className="absolute bottom-2 left-2 flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-icon-color shadow-sm">
             <MdLock aria-hidden />
             {subjectUiLanguage.locked(lang)}
           </span>
         )}
       </div>
-      <div className="flex grow flex-col gap-1 p-4 pb-3">
-        <h3 className="line-clamp-2 break-words font-bold leading-snug text-icon-color group-hover:text-primary-color">
+      <div className="flex grow flex-col gap-1 px-1 pb-3 pt-3">
+        <h3 className="line-clamp-2 break-words text-base font-bold leading-snug text-icon-color transition-colors group-hover:text-primary-color">
           {subject.title}
         </h3>
-        <p className="text-xs font-medium text-icon-color/60">
-          {subjectUiLanguage.educationYear(lang, subject.educationYear)}
-        </p>
         {subject.description && (
-          <p className="mt-1 line-clamp-2 break-words text-sm text-icon-color/70">
+          <p className="line-clamp-2 break-words text-sm text-icon-color/60">
             {subject.description}
           </p>
         )}
+        <p className="mt-auto pt-1 text-xs text-icon-color/50">
+          {subjectUiLanguage.educationYear(lang, subject.educationYear)}
+        </p>
       </div>
-    </>
+    </div>
   );
 
-  const classroomLabel = (
+  const classroomChip = (
     <>
-      <span className="shrink-0 rounded-md bg-primary-color/10 px-1.5 py-0.5 text-xs font-bold text-primary-color">
+      <span className="shrink-0 rounded-lg bg-primary-color/10 px-1.5 py-0.5 text-xs font-bold text-primary-color">
         {levelLabel}
       </span>
       <span className="truncate">{classroom.title}</span>
@@ -107,70 +117,64 @@ function SubjectCard({
       ref={setNodeRef}
       style={style}
       onClick={() => onClick?.()}
-      className={`group relative flex h-full min-w-0 flex-col rounded-2xl bg-white shadow-[0_12px_24px_rgba(145,158,171,0.12)] ring-1 ring-icon-color/5 transition-shadow hover:shadow-[0_16px_32px_rgba(145,158,171,0.22)] ${
+      // focus-within lifts the card so its open menu sits above neighbours.
+      className={`group relative flex h-full min-w-0 flex-col rounded-3xl bg-white shadow-[0_12px_24px_rgba(145,158,171,0.12)] transition-shadow focus-within:z-10 hover:shadow-[0_16px_32px_rgba(145,158,171,0.24)] ${
         onClick ? "cursor-pointer" : ""
-      } ${isDragging ? "z-20 opacity-70 ring-2 ring-primary-color/40" : ""}`}
+      } ${isDragging ? "z-20 opacity-80 ring-2 ring-primary-color/40" : ""}`}
     >
       {onClick ? (
-        <div className="flex grow flex-col">{body}</div>
+        body
       ) : (
         <Link
           href={`/subject/${subject.id}`}
           style={{ pointerEvents: isDragging ? "none" : "auto" }}
-          className="flex grow flex-col rounded-2xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-color/30"
+          className="flex grow flex-col rounded-3xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-color/30"
         >
           {body}
         </Link>
       )}
 
-      <div className="flex items-center justify-between gap-3 border-t border-icon-color/10 px-4 py-2.5">
+      <div className="flex items-center gap-2 border-t border-icon-color/10 px-4 py-2.5">
         {onClick ? (
-          <span className="flex min-w-0 items-center gap-2 text-sm text-icon-color/70">
-            {classroomLabel}
+          <span className="flex min-w-0 flex-1 items-center gap-2 text-sm text-icon-color/70">
+            {classroomChip}
           </span>
         ) : (
           <Link
             href={`/classroom/${classroom.id}`}
-            className="flex min-w-0 items-center gap-2 text-sm text-icon-color/70 hover:text-primary-color"
+            className="flex min-w-0 flex-1 items-center gap-2 text-sm text-icon-color/70 transition-colors hover:text-primary-color"
           >
-            {classroomLabel}
+            {classroomChip}
           </Link>
         )}
         <ListMemberCircle members={teachers} />
+        {draggable && (
+          <button
+            type="button"
+            ref={setActivatorNodeRef}
+            {...attributes}
+            {...listeners}
+            aria-label={classroomUiLanguage.dragToReorder(lang)}
+            title={classroomUiLanguage.dragToReorder(lang)}
+            className="flex h-9 w-7 shrink-0 cursor-grab touch-none items-center justify-center rounded-lg text-lg text-icon-color/40 transition-colors hover:bg-background-color hover:text-icon-color active:cursor-grabbing"
+          >
+            <MdDragIndicator aria-hidden />
+          </button>
+        )}
+        {onDuplicate && (
+          <RowActionsMenu
+            label={classroomUiLanguage.moreActions(lang, subject.title)}
+            actions={[
+              {
+                key: "duplicate",
+                label: subjectUiLanguage.duplicate(lang),
+                icon: <IoDuplicate />,
+                onSelect: onDuplicate,
+              },
+            ]}
+          />
+        )}
       </div>
-
-      {(draggable || onDuplicate) && (
-        <div className="absolute right-2 top-2 flex items-center gap-1">
-          {draggable && (
-            <button
-              type="button"
-              ref={setActivatorNodeRef}
-              {...attributes}
-              {...listeners}
-              aria-label={classroomUiLanguage.dragToReorder(lang)}
-              title={classroomUiLanguage.dragToReorder(lang)}
-              className="flex h-9 w-9 cursor-grab touch-none items-center justify-center rounded-full bg-white/90 text-lg text-icon-color/70 shadow-sm transition-colors hover:text-icon-color active:cursor-grabbing"
-            >
-              <MdDragIndicator aria-hidden />
-            </button>
-          )}
-          {onDuplicate && (
-            <span className="rounded-full bg-white/90 shadow-sm">
-              <RowActionsMenu
-                label={classroomUiLanguage.moreActions(lang, subject.title)}
-                actions={[
-                  {
-                    key: "duplicate",
-                    label: subjectUiLanguage.duplicate(lang),
-                    icon: <IoDuplicate />,
-                    onSelect: onDuplicate,
-                  },
-                ]}
-              />
-            </span>
-          )}
-        </div>
-      )}
     </li>
   );
 }

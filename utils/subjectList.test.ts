@@ -1,6 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { canReorderSubjects, filterSubjects, sortSubjects } from "./subjectList";
+import {
+  canReorderSubjects,
+  filterSubjects,
+  sortSubjects,
+  subjectEmoji,
+  subjectTint,
+} from "./subjectList";
 
 const subject = (
   id: string,
@@ -61,4 +67,27 @@ test("canReorderSubjects only while the list is in stored order", () => {
   assert.equal(canReorderSubjects("Default"), true);
   assert.equal(canReorderSubjects("AZ"), false);
   assert.equal(canReorderSubjects("Newest"), false);
+});
+
+test("subjectEmoji guesses from English and Thai titles, with a default", () => {
+  assert.equal(subjectEmoji("Mathematics 1"), "📐");
+  assert.equal(subjectEmoji("คณิตศาสตร์พื้นฐาน"), "📐");
+  assert.equal(subjectEmoji("General Science"), "🔬");
+  assert.equal(subjectEmoji("วิทยาศาสตร์"), "🔬");
+  assert.equal(subjectEmoji("English for Communication"), "🔤");
+  assert.equal(subjectEmoji("ภาษาไทย 1"), "📖");
+  assert.equal(subjectEmoji("ภาษาจีน"), "🗣️");
+  assert.equal(subjectEmoji("Visual Art"), "🎨");
+  assert.equal(subjectEmoji("ดนตรี"), "🎵");
+  assert.equal(subjectEmoji("สุขศึกษาและพลศึกษา"), "⚽");
+  assert.equal(subjectEmoji("วิทยาการคำนวณ"), "💻");
+  assert.equal(subjectEmoji("สังคมศึกษา"), "🌏");
+  assert.equal(subjectEmoji("Homeroom"), "📚");
+});
+
+test("subjectTint is stable per id and stays in range", () => {
+  assert.equal(subjectTint("abc"), subjectTint("abc"));
+  const tints = new Set(["a", "b", "c", "d", "e", "f", "g", "h"].map(subjectTint));
+  assert.ok(tints.size > 1, "different ids spread across colors");
+  for (const t of tints) assert.match(t, /^bg-/);
 });

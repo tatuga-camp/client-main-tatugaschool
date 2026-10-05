@@ -71,3 +71,39 @@ export function sortSubjects<T extends ListSubject>(
 export function canReorderSubjects(sortBy: string): boolean {
   return sortBy === "Default";
 }
+
+// A friendly icon guessed from the subject title (English or Thai). Order
+// matters: "วิทยาการคำนวณ" (computing) contains "วิทยา" (science).
+const SUBJECT_EMOJI: { pattern: RegExp; emoji: string }[] = [
+  { pattern: /\b(computer|computing|coding|programming|technology|ict)\b|คอมพิวเตอร์|วิทยาการคำนวณ|เทคโนโลยี/i, emoji: "💻" },
+  { pattern: /\b(math|maths|mathematics|algebra|geometry|calculus)\b|คณิต/i, emoji: "📐" },
+  { pattern: /\b(science|physics|chemistry|biology)\b|วิทยาศาสตร์|ฟิสิกส์|เคมี|ชีว/i, emoji: "🔬" },
+  { pattern: /\b(english|reading|writing|grammar)\b|ภาษาอังกฤษ/i, emoji: "🔤" },
+  { pattern: /\bthai\b|ภาษาไทย/i, emoji: "📖" },
+  { pattern: /\b(chinese|japanese|korean|french|german|spanish)\b|ภาษาจีน|ภาษาญี่ปุ่น|ภาษาเกาหลี|ภาษาฝรั่งเศส/i, emoji: "🗣️" },
+  { pattern: /\b(art|arts|drawing|painting|design)\b|ศิลป|ทัศนศิลป์/i, emoji: "🎨" },
+  { pattern: /\b(music|band|choir)\b|ดนตรี|นาฏศิลป์/i, emoji: "🎵" },
+  { pattern: /\b(pe|physical education|sport|sports|health)\b|พลศึกษา|สุขศึกษา|กีฬา/i, emoji: "⚽" },
+  { pattern: /\b(social|history|geography|civics)\b|สังคม|ประวัติศาสตร์|ภูมิศาสตร์/i, emoji: "🌏" },
+  { pattern: /\b(career|cooking|home economics)\b|การงานอาชีพ/i, emoji: "🧰" },
+];
+
+export function subjectEmoji(title: string): string {
+  return SUBJECT_EMOJI.find((rule) => rule.pattern.test(title))?.emoji ?? "📚";
+}
+
+// Soft header tints from the theme palette; stable for a given subject.
+const SUBJECT_TINTS = [
+  "bg-primary-color/10",
+  "bg-success-color/15",
+  "bg-warning-color/25",
+  "bg-secondary-color/20",
+  "bg-error-color/10",
+  "bg-icon-color/10",
+];
+
+export function subjectTint(id: string): string {
+  let hash = 0;
+  for (const char of id) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
+  return SUBJECT_TINTS[hash % SUBJECT_TINTS.length];
+}

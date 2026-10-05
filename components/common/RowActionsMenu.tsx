@@ -93,7 +93,7 @@ function RowActionsMenu({ label, actions, disabled }: Props) {
           role="menu"
           aria-label={label}
           onKeyDown={handleMenuKeyDown}
-          className={`absolute right-0 z-30 w-56 rounded-2xl bg-white py-1 shadow-lg ring-1 ring-icon-color/10 ${
+          className={`absolute right-0 z-30 w-56 rounded-2xl bg-white p-1.5 shadow-[0_16px_40px_rgba(56,55,103,0.18)] ring-1 ring-icon-color/10 ${
             openUp ? "bottom-full mb-1" : "top-full mt-1"
           }`}
         >
@@ -110,7 +110,7 @@ function RowActionsMenu({ label, actions, disabled }: Props) {
                 close(false);
                 action.onSelect();
               }}
-              className={`flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm font-medium transition-colors focus:outline-none ${
+              className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-colors focus:outline-none ${
                 action.danger
                   ? "text-error-color hover:bg-error-color/10 focus:bg-error-color/10"
                   : "text-icon-color hover:bg-background-color focus:bg-background-color"
