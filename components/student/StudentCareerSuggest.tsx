@@ -76,7 +76,9 @@ function StudentCareerSuggest({ studentId, studentName, onClose }: Props) {
   );
 
   const shell = (children: React.ReactNode) => (
-    <div className="flex min-h-0 grow flex-col gap-5 overflow-auto px-4 pb-10 sm:px-6">
+    // shrink-0 on children: the overflow-hidden picture card would otherwise
+    // be squeezed to zero height inside this scrolling flex column.
+    <div className="flex min-h-0 grow flex-col gap-5 overflow-auto px-4 pb-10 sm:px-6 [&>*]:shrink-0">
       {backLink}
       {children}
     </div>
