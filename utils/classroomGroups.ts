@@ -94,3 +94,26 @@ export function mergeVisibleOrder(
   const queue = [...visibleNewOrderIds];
   return fullOrderIds.map((id) => (visible.has(id) ? (queue.shift() ?? id) : id));
 }
+
+// Classroom search for pickers: title, level, description or creator name.
+export function filterClassrooms<
+  T extends {
+    title: string;
+    level: string | null | undefined;
+    description?: string | null;
+    creator?: { firstName: string; lastName: string } | null;
+  },
+>(classrooms: T[], query: string): T[] {
+  const q = query.trim().toLowerCase();
+  if (!q) return classrooms;
+  return classrooms.filter((classroom) =>
+    [
+      classroom.title,
+      classroom.level ?? "",
+      classroom.description ?? "",
+      classroom.creator
+        ? `${classroom.creator.firstName} ${classroom.creator.lastName}`
+        : "",
+    ].some((value) => value.toLowerCase().includes(q)),
+  );
+}

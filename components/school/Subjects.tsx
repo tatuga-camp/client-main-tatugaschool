@@ -34,7 +34,12 @@ import {
 } from "../../react-query";
 import { ResponseGetSubjectBySchoolsService } from "../../services";
 import { getDefaultSubjectFilter, setDefaultSubjectFilter } from "../../utils";
-import { mergeVisibleOrder } from "../../utils/classroomGroups";
+import { fullGradeLabel } from "../../utils/classLevel";
+import {
+  groupClassroomsByGrade,
+  mergeVisibleOrder,
+  NO_LEVEL_KEY,
+} from "../../utils/classroomGroups";
 import {
   canReorderSubjects,
   filterSubjects,
@@ -69,6 +74,7 @@ function Subjects({ schoolId }: Props) {
   const [teacherId, setTeacherId] = useState<string>();
   const [sortBy, setSortBy] = useState<SortByOption>("Default");
   const [search, setSearch] = useState("");
+  const [classId, setClassId] = useState<string>("all");
   const [triggerCreateSubject, setTriggerCreateSubject] = useState(false);
   const [selectDuplicate, setSelectDuplicate] = useState<Subject | null>(null);
   const [subjectData, setSubjectData] = useState<SubjectItem[]>([]);
@@ -123,12 +129,29 @@ function Subjects({ schoolId }: Props) {
         filterSubjects(subjectData, {
           query: search,
           teacherId: activeTeacher === ALL_TEACHERS ? "all" : activeTeacher,
+          classId: classId === "all" ? undefined : classId,
         }),
         sortBy,
       ),
-    [subjectData, search, activeTeacher, sortBy],
+    [subjectData, search, activeTeacher, classId, sortBy],
   );
   const draggable = canReorderSubjects(sortBy);
+
+  // Classrooms that have subjects this year, grouped by grade for the filter.
+  const classroomGroups = useMemo(() => {
+    const unique = new Map(subjectData.map((item) => [item.class.id, item.class]));
+    return groupClassroomsByGrade([...unique.values()]);
+  }, [subjectData]);
+  // A classroom chosen in another year may not exist in this one.
+  useEffect(() => {
+    if (
+      classId !== "all" &&
+      subjectData.length > 0 &&
+      !subjectData.some((item) => item.classId === classId)
+    ) {
+      setClassId("all");
+    }
+  }, [subjectData, classId]);
 
   const handleDragEnd = async ({ active, over }: DragEndEvent) => {
     if (!over || active.id === over.id || !educationYear) return;
@@ -212,6 +235,7 @@ function Subjects({ schoolId }: Props) {
     );
   } else if (visible.length === 0) {
     const filteredByTeacher = activeTeacher !== ALL_TEACHERS;
+    const filteredByClassroom = classId !== "all";
     content = (
       <div className={`${panelClass} flex flex-col items-center gap-3 px-6 py-12 text-center`}>
         <p className="font-semibold text-icon-color">
@@ -219,6 +243,15 @@ function Subjects({ schoolId }: Props) {
             ? subjectUiLanguage.noMatch(lang, search.trim())
             : subjectUiLanguage.emptyTeacher(lang, yearLabel)}
         </p>
+        {filteredByClassroom && (
+          <button
+            type="button"
+            onClick={() => setClassId("all")}
+            className="h-10 rounded-xl border border-icon-color/15 px-4 text-sm font-semibold text-icon-color transition-colors hover:bg-background-color"
+          >
+            {subjectUiLanguage.showAllClassrooms(lang)}
+          </button>
+        )}
         {filteredByTeacher && (
           <button
             type="button"
@@ -300,7 +333,7 @@ function Subjects({ schoolId }: Props) {
             {createButton}
           </header>
 
-          <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-[minmax(0,1fr)_auto_14rem_11rem] lg:items-end">
+          <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-[minmax(0,1fr)_auto_13rem_13rem_10rem] lg:items-end">
             <label className="relative col-span-2 flex min-w-0 flex-col gap-1.5 text-sm font-medium text-icon-color lg:col-span-1">
               {subjectsDataLanguage.search(lang)}
               <span className="relative">
@@ -331,7 +364,33 @@ function Subjects({ schoolId }: Props) {
                 />
               </div>
             )}
-            <label className="order-last col-span-2 flex flex-col gap-1.5 text-sm font-medium text-icon-color lg:order-none lg:col-span-1">
+            <label className="flex min-w-0 flex-col gap-1.5 text-sm font-medium text-icon-color">
+              {subjectUiLanguage.classroomFilter(lang)}
+              <select
+                value={classId}
+                onChange={(e) => setClassId(e.target.value)}
+                className={`${fieldInputClass()} cursor-pointer`}
+              >
+                <option value="all">{subjectUiLanguage.allClassrooms(lang)}</option>
+                {classroomGroups.map((group) => (
+                  <optgroup
+                    key={group.key}
+                    label={
+                      group.key === NO_LEVEL_KEY
+                        ? classroomUiLanguage.noLevel(lang)
+                        : fullGradeLabel(group.key, lang)
+                    }
+                  >
+                    {group.items.map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.title}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+            </label>
+            <label className="flex min-w-0 flex-col gap-1.5 text-sm font-medium text-icon-color">
               {subjectUiLanguage.teacherFilter(lang)}
               <select
                 value={activeTeacher}

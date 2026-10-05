@@ -6,6 +6,7 @@ import {
   moveWithinGroup,
   NO_LEVEL_KEY,
   reorderVisible,
+  filterClassrooms,
 } from "./classroomGroups";
 
 const c = (id: string, level: string, order: number) => ({ id, level, order });
@@ -94,4 +95,17 @@ test("reorderVisible keeps other grades' order when the filter hides some", () =
 
 test("mergeVisibleOrder with nothing hidden is the new order", () => {
   assert.deepEqual(mergeVisibleOrder(["a", "b"], ["b", "a"]), ["b", "a"]);
+});
+
+test("filterClassrooms matches title, level, description and creator; trims", () => {
+  const rooms = [
+    { id: "1", title: "Room 1", level: "มัธยมศึกษาปีที่ 1/1", description: "Science track", creator: { firstName: "Kanya", lastName: "Srisuk" } },
+    { id: "2", title: "Gifted", level: "ประถมศึกษาปีที่ 4/2", description: null, creator: null },
+  ];
+  assert.deepEqual(filterClassrooms(rooms, "  ").map((r) => r.id), ["1", "2"]);
+  assert.deepEqual(filterClassrooms(rooms, "room").map((r) => r.id), ["1"]);
+  assert.deepEqual(filterClassrooms(rooms, "ประถม").map((r) => r.id), ["2"]);
+  assert.deepEqual(filterClassrooms(rooms, "science").map((r) => r.id), ["1"]);
+  assert.deepEqual(filterClassrooms(rooms, "srisuk").map((r) => r.id), ["1"]);
+  assert.deepEqual(filterClassrooms(rooms, "zzz"), []);
 });
