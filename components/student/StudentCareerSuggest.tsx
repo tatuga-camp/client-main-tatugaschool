@@ -102,6 +102,7 @@ const getSkillStyles = (skillTitle: string) => {
 
 type Props = {
   studentId: string;
+  studentName: string;
   onClose: () => void;
 };
 
