@@ -14,6 +14,12 @@ type Props = {
   onChange?: ChangeEventHandler<HTMLInputElement> | undefined;
   name?: string;
   placeholder?: string;
+  inputId?: string;
+  autoComplete?: HTMLInputAutoCompleteAttribute;
+  // Replaces the default `main-input` look, e.g. to match FormField inputs.
+  inputClassName?: string;
+  ariaDescribedBy?: string;
+  invalid?: boolean;
 };
 
 const TRANSITIONS = {
@@ -31,6 +37,7 @@ function Password(props: Props) {
       placeholder={props.placeholder}
       name={props.name}
       title="Password"
+      inputId={props.inputId}
       required
       value={props.value}
       feedback={props.feedback}
@@ -52,8 +59,11 @@ function Password(props: Props) {
           className: "p-5 bg-white  text-gray-700  shadow-md rounded-2xl",
         },
         input: {
-          className: "main-input w-full",
-        },
+          className: props.inputClassName ?? "main-input w-full",
+          autoComplete: props.autoComplete,
+          "aria-describedby": props.ariaDescribedBy,
+          "aria-invalid": props.invalid || undefined,
+        } as any,
         meter: {
           className: "mb-2 bg-gray-300  h-3",
         },

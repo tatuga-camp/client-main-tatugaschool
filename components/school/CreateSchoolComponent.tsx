@@ -1,449 +1,717 @@
-import { ErrorMessages, School } from "@/interfaces";
-import {
-  CreateSchoolService,
-  getSignedURLTeacherService,
-  RequestCreateSchoolService,
-  UploadSignURLService,
-} from "@/services";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { ErrorMessages } from "@/interfaces";
+import { getSignedURLTeacherService, UploadSignURLService } from "@/services";
 import Image from "next/image";
-import { useRouter } from "next/router";
-import { ProgressBar } from "primereact/progressbar";
-import { ProgressSpinner } from "primereact/progressspinner";
-import { Toast } from "primereact/toast";
-import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
-import { FaRegAddressCard, FaUserPlus } from "react-icons/fa";
-import { LuSchool } from "react-icons/lu";
+import { useRef, useState } from "react";
+import { LuImagePlus, LuMapPin, LuPhone } from "react-icons/lu";
+import { MdCheck, MdErrorOutline } from "react-icons/md";
 import { PhoneInput } from "react-international-phone";
-import styles from "@/styles/input-phone.module.css";
 import Swal from "sweetalert2";
 import { countries, defaultBlurHash } from "../../data";
 import { decodeBlurhashToCanvas, generateBlurHash } from "../../utils";
-import Dropdown from "../common/Dropdown";
 import InviteJoinSchool from "./InviteJoinSchool";
 import { useCreateSchool, useGetLanguage } from "../../react-query";
 import { createSchoolDataLanguage } from "../../data/languages";
+import {
+  describedBy,
+  fieldInputClass,
+  FormField,
+} from "../common/FormField";
+
+type ProfileField = "logo" | "school" | "description";
+type AddressField = "country" | "address" | "city" | "zipCode" | "phoneNumber";
+
+const PROFILE_FIELDS: ProfileField[] = ["logo", "school", "description"];
+const ADDRESS_FIELDS: AddressField[] = [
+  "country",
+  "address",
+  "city",
+  "zipCode",
+  "phoneNumber",
+];
 
 const CreateSchoolComponent = () => {
   const language = useGetLanguage();
-  const menuItems: { title: string; icon: ReactNode }[] = [
-    {
-      title: createSchoolDataLanguage.profile(language.data ?? "en"),
-      icon: <LuSchool />,
-    },
-    {
-      title: createSchoolDataLanguage.address(language.data ?? "en"),
-      icon: <FaRegAddressCard />,
-    },
-    {
-      title: createSchoolDataLanguage.invite(language.data ?? "en"),
-      icon: <FaUserPlus />,
-    },
-  ];
+  const lang = language.data ?? "en";
   const createSchool = useCreateSchool();
-  const toast = useRef<Toast>(null);
-  const [loading, setLoading] = useState(false);
-  const formRef = useRef<HTMLFormElement>(null);
-  const [activeIndex, setActiveIndex] = useState<number>(0);
-  const inputClasses = "border rounded-2xl px-6 py-4";
-  const [profile, setProfile] = useState<{
-    school?: string;
-    description?: string;
-    logo?: string;
-    blurHash?: string;
-  }>();
-  const [address, setAddress] = useState<{
-    city?: string;
-    address?: string;
-    zipCode?: string;
-    phoneNumber?: string;
-  }>();
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+  // Errors appear once a field is left or its step is submitted.
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [submittedSteps, setSubmittedSteps] = useState<number[]>([]);
 
-  const [country, setCountry] = useState<{
-    name: string;
-    code: string;
-  }>();
+  const [profile, setProfile] = useState({
+    school: "",
+    description: "",
+    logo: "",
+    blurHash: "",
+  });
+  const [address, setAddress] = useState({
+    // Almost every Tatuga school is in Thailand; start there.
+    country: "Thailand",
+    city: "",
+    address: "",
+    zipCode: "",
+    phoneNumber: "",
+  });
 
-  const show = () => {
-    toast.current?.show({
-      severity: "info",
-      summary: "Created",
-      detail: "School has been created",
-    });
+  const steps = [
+    createSchoolDataLanguage.profile(lang),
+    createSchoolDataLanguage.address(lang),
+    createSchoolDataLanguage.invite(lang),
+  ];
+  const created = createSchool.isSuccess && !!createSchool.data;
+
+  const required = (value: string) =>
+    value.trim() ? null : createSchoolDataLanguage.required(lang);
+  const errors: Record<ProfileField | AddressField, string | null> = {
+    logo: profile.logo ? null : createSchoolDataLanguage.logoRequired(lang),
+    school: required(profile.school),
+    description: required(profile.description),
+    country: required(address.country),
+    address: required(address.address),
+    city: required(address.city),
+    zipCode: required(address.zipCode),
+    // The phone value always carries the dial code, so count digits.
+    phoneNumber:
+      address.phoneNumber.replace(/\D/g, "").length >= 8
+        ? null
+        : createSchoolDataLanguage.invalidPhone(lang),
   };
+  const visibleError = (field: ProfileField | AddressField, step: number) =>
+    submittedSteps.includes(step) || touched[field] ? errors[field] : null;
+  const touch = (field: string) => () =>
+    setTouched((prev) => ({ ...prev, [field]: true }));
+
+  const focusField = (field: ProfileField | AddressField) =>
+    document
+      .getElementById(field === "logo" ? "school-logo-button" : `school-${field}`)
+      ?.focus();
+
+  // Returns true when every field of the step is valid; otherwise reveals the
+  // step's errors and moves focus to the first problem.
+  const validateStep = (step: number) => {
+    setSubmittedSteps((prev) => (prev.includes(step) ? prev : [...prev, step]));
+    const fields = step === 0 ? PROFILE_FIELDS : ADDRESS_FIELDS;
+    const firstInvalid = fields.find((field) => errors[field]);
+    if (firstInvalid) {
+      focusField(firstInvalid);
+      return false;
+    }
+    return true;
+  };
+
   const handleUploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    // Clear the input so choosing the same file again still fires onChange.
+    e.target.value = "";
+    if (!file) return;
     try {
-      const file = e.target.files?.[0];
-      if (!file) {
-        throw new Error("File not found");
-      }
-      setLoading(true);
+      setUploading(true);
       const signURL = await getSignedURLTeacherService({
         fileName: file.name,
         fileType: file.type,
         fileSize: file.size,
       });
-
       const blurHash = await generateBlurHash(file);
       await UploadSignURLService({
         file: file,
         signURL: signURL.signURL,
         contentType: file.type,
       });
-
-      setProfile((prev) => {
-        return { ...prev, logo: signURL.originalURL, blurHash: blurHash };
-      });
-      setLoading(false);
+      setProfile((prev) => ({
+        ...prev,
+        logo: signURL.originalURL,
+        blurHash: blurHash,
+      }));
     } catch (error) {
-      setLoading(false);
       console.log(error);
       let result = error as ErrorMessages;
       Swal.fire({
-        title: result.error ? result.error : "Something Went Wrong",
-        text: result.message.toString(),
-        footer: result.statusCode
+        title: result?.error ? result.error : "Something Went Wrong",
+        text: result?.message?.toString(),
+        footer: result?.statusCode
           ? "Code Error: " + result.statusCode?.toString()
           : "",
         icon: "error",
       });
+    } finally {
+      setUploading(false);
     }
   };
 
-  const handleSubmit = async (e: { preventDefault: () => void }) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      if (
-        !profile?.school ||
-        !profile?.description ||
-        !country ||
-        !address?.city ||
-        !address?.address ||
-        !address?.zipCode ||
-        !address?.phoneNumber
-      ) {
-        throw new Error(
-          language.data === "en"
-            ? "Please fill the form"
-            : "โปรดกรอกข้อมูลให้ครบถ้วน",
-        );
-      }
-      if (!profile?.logo) {
-        throw new Error(
-          language.data === "en"
-            ? "Please upload logo of your school"
-            : "กรุณาอัพโหลดรูปภาพ",
-        );
-      }
-
-      await createSchool.mutateAsync({
-        title: profile?.school,
-        description: profile?.description,
-        logo: profile?.logo,
-        country: country?.name,
-        city: address?.city,
-        address: address?.address,
-        zipCode: address?.zipCode,
-        phoneNumber: address?.phoneNumber,
-        blurHash: profile?.blurHash ?? defaultBlurHash,
-      });
-      show();
-    } catch (error) {
-      console.log(error);
-      let result = error as ErrorMessages;
-      Swal.fire({
-        title: result.error ? result.error : "Something Went Wrong",
-        text: result.message.toString(),
-        footer: result.statusCode
-          ? "Code Error: " + result.statusCode?.toString()
-          : "",
-        icon: "error",
-      });
-    }
-  };
-
-  const selectedCountryTemplate = (
-    option: { name: string; code: string } | undefined,
-    props: any,
-  ) => {
-    if (option) {
-      return (
-        <div className="align-items-center flex gap-5">
-          <Image
-            alt={option.name}
-            src={`/svg/flags/1x1/${option.code.toLowerCase()}.svg`}
-            width={20}
-            height={10}
-            style={{ width: "18px" }}
-          />
-          <div>{option.name}</div>
-        </div>
-      );
-    }
-
-    return <span>{props.placeholder}</span>;
-  };
-
-  const countryOptionTemplate = (
-    option: { name: string; code: string } | undefined,
-  ) => {
-    if (!option) {
+    if (activeIndex === 0) {
+      if (validateStep(0)) setActiveIndex(1);
       return;
     }
-    return (
-      <div className="align-items-center flex gap-5">
-        <Image
-          alt={option.name}
-          src={`/svg/flags/1x1/${option.code.toLowerCase()}.svg`}
-          width={20}
-          height={10}
-          style={{ width: "18px" }}
-        />
-        <div>{option.name}</div>
-      </div>
-    );
+    if (!validateStep(1) || createSchool.isPending) return;
+    // The profile step can't be skipped, but re-check in case a field changed.
+    if (PROFILE_FIELDS.some((field) => errors[field])) {
+      setActiveIndex(0);
+      return;
+    }
+    try {
+      await createSchool.mutateAsync({
+        title: profile.school.trim(),
+        description: profile.description.trim(),
+        logo: profile.logo,
+        country: address.country,
+        city: address.city.trim(),
+        address: address.address.trim(),
+        zipCode: address.zipCode.trim(),
+        phoneNumber: address.phoneNumber,
+        blurHash: profile.blurHash || defaultBlurHash,
+      });
+      setActiveIndex(2);
+    } catch (error) {
+      console.log(error);
+      let result = error as ErrorMessages;
+      Swal.fire({
+        title: result?.error ? result.error : "Something Went Wrong",
+        text: result?.message?.toString(),
+        footer: result?.statusCode
+          ? "Code Error: " + result.statusCode?.toString()
+          : "",
+        icon: "error",
+      });
+    }
   };
 
-  const handleChangeActiveIndex = useCallback(
-    (index: number) => {
-      if (createSchool.isSuccess) {
-        setActiveIndex(2);
-      } else if (!createSchool.data && index === 2) {
-        return null;
-      } else {
-        setActiveIndex(index);
-      }
-    },
-    [createSchool.isSuccess, createSchool.data],
-  );
+  const hasPhone = address.phoneNumber.replace(/\D/g, "").length > 3;
+  const location = [address.city.trim(), address.country]
+    .filter(Boolean)
+    .join(", ");
 
-  useEffect(() => {
-    if (createSchool.status === "success") {
-      handleChangeActiveIndex(2);
-    }
-  }, [createSchool.status, handleChangeActiveIndex]);
   return (
-    <div className="mx-auto mb-10 flex w-full max-w-xl flex-col gap-2 rounded-3xl bg-white p-12 shadow-md">
-      <Toast ref={toast}></Toast>
-      <h2 className="text-center text-xl font-semibold text-black">
-        {createSchoolDataLanguage.title(language.data ?? "en")}
-      </h2>
-      <ul className="flex items-center justify-center gap-x-10 py-5">
-        {menuItems.map((item, index) => (
-          <li
-            key={index}
-            className={`flex cursor-pointer flex-col items-center justify-center gap-2 ${
-              activeIndex === index
-                ? "text-primary-color"
-                : "text-gray-400 hover:text-primary-color"
-            } `}
-            onClick={() => handleChangeActiveIndex(index)}
-          >
-            <div className="flex h-10 w-10 items-center justify-center rounded-full border text-2xl">
-              {item.icon}
-            </div>
-            <span className="text-sm font-semibold">{item.title}</span>
-          </li>
-        ))}
-      </ul>
+    <div className="mx-auto w-full max-w-5xl px-4 pb-16 pt-8 sm:px-6 sm:pt-12">
+      <header className="max-w-2xl">
+        <h1 className="text-3xl font-bold leading-tight text-icon-color sm:text-4xl">
+          {createSchoolDataLanguage.title(lang)}
+        </h1>
+        <p className="mt-2 leading-relaxed text-icon-color/70">
+          {createSchoolDataLanguage.subtitle(lang)}
+        </p>
+      </header>
 
-      <form ref={formRef} onSubmit={handleSubmit}>
-        {activeIndex === 0 && (
-          <section className="flex flex-col gap-2">
-            <div className="flex w-full items-center justify-center">
-              <label
-                className={`flex h-64 w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 ${loading && "animate-pulse"}`}
+      <nav aria-label={createSchoolDataLanguage.title(lang)} className="mt-8">
+        <ol className="flex items-start">
+          {steps.map((label, index) => {
+            const done = index < activeIndex || (created && index < 2);
+            const current = index === activeIndex;
+            // Completed steps stay reachable until the school exists.
+            const canVisit = !created && index < activeIndex;
+            const marker = (
+              <span
+                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold transition-colors ${
+                  done
+                    ? "bg-primary-color text-white"
+                    : current
+                      ? "border-2 border-primary-color bg-white text-primary-color"
+                      : "border border-icon-color/20 bg-white text-icon-color/50"
+                }`}
               >
-                {profile?.logo ? (
-                  <div className="relative h-full w-full p-5">
-                    <Image
-                      src={profile?.logo}
-                      layout="fill"
-                      blurDataURL={decodeBlurhashToCanvas(
-                        profile?.blurHash || defaultBlurHash,
-                      )}
-                      placeholder="blur"
-                      objectFit="contain"
-                      alt="School Icon"
-                    />
-                  </div>
+                {done ? <MdCheck aria-hidden className="text-lg" /> : index + 1}
+              </span>
+            );
+            const text = (
+              <span
+                className={`text-xs leading-snug sm:text-sm ${
+                  current
+                    ? "font-semibold text-icon-color"
+                    : done
+                      ? "font-medium text-icon-color/80"
+                      : "text-icon-color/50"
+                }`}
+              >
+                {label}
+              </span>
+            );
+            return (
+              <li
+                key={label}
+                aria-current={current ? "step" : undefined}
+                className="relative flex flex-1 flex-col items-center text-center sm:flex-row sm:gap-3 sm:text-left sm:last:flex-none"
+              >
+                {index > 0 && (
+                  <span
+                    aria-hidden
+                    className={`absolute right-[calc(50%+1.5rem)] top-[1.125rem] h-0.5 w-[calc(100%-3rem)] rounded-full sm:hidden ${
+                      done || current ? "bg-primary-color" : "bg-icon-color/15"
+                    }`}
+                  />
+                )}
+                {canVisit ? (
+                  <button
+                    type="button"
+                    onClick={() => setActiveIndex(index)}
+                    className="flex flex-col items-center gap-2 rounded-xl sm:flex-row sm:gap-3 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-color/20"
+                  >
+                    {marker}
+                    {text}
+                  </button>
                 ) : (
-                  <div className="flex flex-col items-center justify-center pb-6 pt-5">
-                    <svg
-                      className="mb-4 h-8 w-8 text-gray-500"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 20 16"
-                    >
-                      <path
-                        stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                  <span className="flex flex-col items-center gap-2 sm:flex-row sm:gap-3">
+                    {marker}
+                    {text}
+                  </span>
+                )}
+                {index < steps.length - 1 && (
+                  <span
+                    aria-hidden
+                    className={`mx-3 hidden h-0.5 flex-1 rounded-full sm:block ${
+                      done ? "bg-primary-color" : "bg-icon-color/15"
+                    }`}
+                  />
+                )}
+              </li>
+            );
+          })}
+        </ol>
+      </nav>
+
+      <div className="mt-8 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-8">
+        <section className="rounded-3xl bg-white p-5 shadow-[0_12px_24px_rgba(145,158,171,0.12)] sm:p-8">
+          <p className="text-sm text-icon-color/60">
+            {createSchoolDataLanguage.stepOf(lang, activeIndex + 1, steps.length)}
+          </p>
+          <h2 className="mt-1 text-xl font-bold text-icon-color">
+            {steps[activeIndex]}
+          </h2>
+
+          {activeIndex < 2 && (
+            <form noValidate onSubmit={handleSubmit} className="mt-6">
+              {activeIndex === 0 && (
+                <div className="flex flex-col gap-5">
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-sm font-medium text-icon-color">
+                      {createSchoolDataLanguage.logo(lang)}
+                    </span>
+                    <div className="flex items-center gap-4">
+                      <button
+                        type="button"
+                        tabIndex={-1}
+                        aria-hidden
+                        onClick={() => logoInputRef.current?.click()}
+                        className={`relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed bg-background-color text-3xl text-icon-color/40 transition-colors hover:border-primary-color hover:text-primary-color ${
+                          visibleError("logo", 0)
+                            ? "border-error-color"
+                            : profile.logo
+                              ? "border-transparent"
+                              : "border-icon-color/20"
+                        } ${uploading ? "animate-pulse" : ""}`}
+                      >
+                        {profile.logo ? (
+                          <Image
+                            src={profile.logo}
+                            fill
+                            sizes="96px"
+                            placeholder="blur"
+                            blurDataURL={decodeBlurhashToCanvas(
+                              profile.blurHash || defaultBlurHash,
+                            )}
+                            className="object-cover"
+                            alt=""
+                          />
+                        ) : (
+                          <LuImagePlus />
+                        )}
+                      </button>
+                      <div className="flex min-w-0 flex-col items-start gap-1.5">
+                        <button
+                          id="school-logo-button"
+                          type="button"
+                          disabled={uploading}
+                          onClick={() => logoInputRef.current?.click()}
+                          aria-describedby={
+                            visibleError("logo", 0)
+                              ? "school-logo-error"
+                              : "school-logo-hint"
+                          }
+                          className="h-10 rounded-xl border border-icon-color/15 px-4 text-sm font-semibold text-icon-color transition-colors hover:bg-background-color focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-color/20 disabled:cursor-wait disabled:opacity-70"
+                        >
+                          {uploading
+                            ? createSchoolDataLanguage.uploadingLogo(lang)
+                            : profile.logo
+                              ? createSchoolDataLanguage.replaceLogo(lang)
+                              : createSchoolDataLanguage.uploadTitle(lang)}
+                        </button>
+                        {visibleError("logo", 0) ? (
+                          <p
+                            id="school-logo-error"
+                            role="alert"
+                            className="flex items-start gap-1.5 text-sm text-error-color"
+                          >
+                            <MdErrorOutline
+                              aria-hidden
+                              className="mt-0.5 shrink-0"
+                            />
+                            {visibleError("logo", 0)}
+                          </p>
+                        ) : (
+                          <p
+                            id="school-logo-hint"
+                            className="text-sm text-icon-color/60"
+                          >
+                            {createSchoolDataLanguage.logoHint(lang)}
+                          </p>
+                        )}
+                      </div>
+                      <input
+                        ref={logoInputRef}
+                        accept="image/*"
+                        onChange={handleUploadImage}
+                        type="file"
+                        className="hidden"
                       />
-                    </svg>
-                    <p className="mb-2 text-sm text-gray-500">
-                      {createSchoolDataLanguage.uploadTitle(
-                        language.data ?? "en",
+                    </div>
+                  </div>
+
+                  <FormField
+                    id="school-school"
+                    label={createSchoolDataLanguage.school(lang)}
+                    error={visibleError("school", 0)}
+                  >
+                    <input
+                      id="school-school"
+                      type="text"
+                      autoComplete="organization"
+                      placeholder={createSchoolDataLanguage.schoolPlaceholder(
+                        lang,
                       )}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      SVG, PNG, JPG or GIF (MAX. 800x400px)
-                    </p>
+                      value={profile.school}
+                      onChange={(e) =>
+                        setProfile((prev) => ({
+                          ...prev,
+                          school: e.target.value,
+                        }))
+                      }
+                      onBlur={touch("school")}
+                      aria-invalid={!!visibleError("school", 0)}
+                      aria-describedby={describedBy(
+                        "school-school",
+                        visibleError("school", 0),
+                      )}
+                      className={fieldInputClass(!!visibleError("school", 0))}
+                    />
+                  </FormField>
+
+                  <FormField
+                    id="school-description"
+                    label={createSchoolDataLanguage.description(lang)}
+                    error={visibleError("description", 0)}
+                  >
+                    <textarea
+                      id="school-description"
+                      rows={3}
+                      placeholder={createSchoolDataLanguage.descriptionPlaceholder(
+                        lang,
+                      )}
+                      value={profile.description}
+                      onChange={(e) =>
+                        setProfile((prev) => ({
+                          ...prev,
+                          description: e.target.value,
+                        }))
+                      }
+                      onBlur={touch("description")}
+                      aria-invalid={!!visibleError("description", 0)}
+                      aria-describedby={describedBy(
+                        "school-description",
+                        visibleError("description", 0),
+                      )}
+                      className={`${fieldInputClass(
+                        !!visibleError("description", 0),
+                      )} h-auto resize-y py-3 leading-relaxed`}
+                    />
+                  </FormField>
+                </div>
+              )}
+
+              {activeIndex === 1 && (
+                <div className="flex flex-col gap-5">
+                  <FormField
+                    id="school-country"
+                    label={createSchoolDataLanguage.country(lang)}
+                    error={visibleError("country", 1)}
+                  >
+                    <select
+                      id="school-country"
+                      autoComplete="country-name"
+                      value={address.country}
+                      onChange={(e) =>
+                        setAddress((prev) => ({
+                          ...prev,
+                          country: e.target.value,
+                        }))
+                      }
+                      onBlur={touch("country")}
+                      aria-invalid={!!visibleError("country", 1)}
+                      className={`${fieldInputClass(
+                        !!visibleError("country", 1),
+                      )} cursor-pointer`}
+                    >
+                      <option value="" disabled>
+                        {createSchoolDataLanguage.countryPlaceholder(lang)}
+                      </option>
+                      {countries.map((country) => (
+                        <option key={country.code} value={country.name}>
+                          {country.name}
+                        </option>
+                      ))}
+                    </select>
+                  </FormField>
+
+                  <FormField
+                    id="school-address"
+                    label={createSchoolDataLanguage.streetAddress(lang)}
+                    error={visibleError("address", 1)}
+                  >
+                    <input
+                      id="school-address"
+                      type="text"
+                      autoComplete="street-address"
+                      placeholder={createSchoolDataLanguage.streetAddressPlaceholder(
+                        lang,
+                      )}
+                      value={address.address}
+                      onChange={(e) =>
+                        setAddress((prev) => ({
+                          ...prev,
+                          address: e.target.value,
+                        }))
+                      }
+                      onBlur={touch("address")}
+                      aria-invalid={!!visibleError("address", 1)}
+                      aria-describedby={describedBy(
+                        "school-address",
+                        visibleError("address", 1),
+                      )}
+                      className={fieldInputClass(!!visibleError("address", 1))}
+                    />
+                  </FormField>
+
+                  <div className="grid gap-5 sm:grid-cols-[minmax(0,1fr)_11rem] sm:gap-4">
+                    <FormField
+                      id="school-city"
+                      label={createSchoolDataLanguage.city(lang)}
+                      error={visibleError("city", 1)}
+                    >
+                      <input
+                        id="school-city"
+                        type="text"
+                        autoComplete="address-level1"
+                        value={address.city}
+                        onChange={(e) =>
+                          setAddress((prev) => ({
+                            ...prev,
+                            city: e.target.value,
+                          }))
+                        }
+                        onBlur={touch("city")}
+                        aria-invalid={!!visibleError("city", 1)}
+                        aria-describedby={describedBy(
+                          "school-city",
+                          visibleError("city", 1),
+                        )}
+                        className={fieldInputClass(!!visibleError("city", 1))}
+                      />
+                    </FormField>
+                    <FormField
+                      id="school-zipCode"
+                      label={createSchoolDataLanguage.zipCode(lang)}
+                      error={visibleError("zipCode", 1)}
+                    >
+                      <input
+                        id="school-zipCode"
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete="postal-code"
+                        value={address.zipCode}
+                        onChange={(e) =>
+                          setAddress((prev) => ({
+                            ...prev,
+                            zipCode: e.target.value,
+                          }))
+                        }
+                        onBlur={touch("zipCode")}
+                        aria-invalid={!!visibleError("zipCode", 1)}
+                        aria-describedby={describedBy(
+                          "school-zipCode",
+                          visibleError("zipCode", 1),
+                        )}
+                        className={fieldInputClass(!!visibleError("zipCode", 1))}
+                      />
+                    </FormField>
+                  </div>
+
+                  <FormField
+                    id="school-phoneNumber"
+                    label={createSchoolDataLanguage.phone(lang)}
+                    error={visibleError("phoneNumber", 1)}
+                  >
+                    <PhoneInput
+                      defaultCountry="th"
+                      value={address.phoneNumber}
+                      onChange={(phone) =>
+                        setAddress((prev) => ({ ...prev, phoneNumber: phone }))
+                      }
+                      className="w-full"
+                      inputClassName="!h-12 flex-1 !text-base !text-icon-color"
+                      inputProps={{
+                        id: "school-phoneNumber",
+                        autoComplete: "tel",
+                        onBlur: touch("phoneNumber"),
+                        "aria-invalid": !!visibleError("phoneNumber", 1),
+                        "aria-describedby": describedBy(
+                          "school-phoneNumber",
+                          visibleError("phoneNumber", 1),
+                        ),
+                      }}
+                      style={
+                        {
+                          "--react-international-phone-height": "3rem",
+                          "--react-international-phone-border-radius":
+                            "0.75rem",
+                          "--react-international-phone-border-color":
+                            visibleError("phoneNumber", 1)
+                              ? "#F04438"
+                              : "rgba(56, 55, 103, 0.15)",
+                          "--react-international-phone-font-size": "1rem",
+                        } as React.CSSProperties
+                      }
+                    />
+                  </FormField>
+                </div>
+              )}
+
+              <div className="mt-8 flex flex-col-reverse gap-3 border-t border-icon-color/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
+                {activeIndex === 1 ? (
+                  <button
+                    type="button"
+                    onClick={() => setActiveIndex(0)}
+                    className="h-12 rounded-xl px-5 font-semibold text-icon-color transition-colors hover:bg-background-color focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-color/20"
+                  >
+                    {createSchoolDataLanguage.back(lang)}
+                  </button>
+                ) : (
+                  <span aria-hidden className="hidden sm:block" />
+                )}
+                <button
+                  type="submit"
+                  disabled={uploading || createSchool.isPending}
+                  aria-busy={createSchool.isPending}
+                  className="flex h-12 items-center justify-center gap-2 rounded-xl bg-primary-color px-6 font-semibold text-white transition-colors hover:bg-primary-color-hover focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-color/30 active:bg-primary-color-focus disabled:cursor-not-allowed disabled:opacity-70 sm:min-w-44"
+                >
+                  {createSchool.isPending && (
+                    <span
+                      aria-hidden
+                      className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white motion-reduce:animate-none"
+                    />
+                  )}
+                  {activeIndex === 0
+                    ? createSchoolDataLanguage.button(lang)
+                    : createSchool.isPending
+                      ? createSchoolDataLanguage.creating(lang)
+                      : createSchoolDataLanguage.create(lang)}
+                </button>
+              </div>
+            </form>
+          )}
+
+          {activeIndex === 2 && createSchool.data && (
+            <div className="mt-6">
+              <div
+                role="status"
+                className="mb-6 flex gap-3 rounded-2xl bg-success-color/10 p-4"
+              >
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-success-color text-lg text-white">
+                  <MdCheck aria-hidden />
+                </span>
+                <div>
+                  <p className="font-semibold text-icon-color">
+                    {createSchoolDataLanguage.created(lang)}
+                  </p>
+                  <p className="mt-0.5 text-sm leading-relaxed text-icon-color/70">
+                    {createSchoolDataLanguage.createdDetail(lang)}
+                  </p>
+                </div>
+              </div>
+              <InviteJoinSchool schoolId={createSchool.data.id} />
+            </div>
+          )}
+        </section>
+
+        <aside
+          aria-label={createSchoolDataLanguage.preview(lang)}
+          className="hidden lg:sticky lg:top-6 lg:block"
+        >
+          <p className="mb-3 text-sm font-medium text-icon-color/60">
+            {createSchoolDataLanguage.preview(lang)}
+          </p>
+          <div className="overflow-hidden rounded-3xl bg-white shadow-[0_12px_24px_rgba(145,158,171,0.12)]">
+            <div className="h-16 bg-gradient-to-r from-primary-color to-secondary-color" />
+            <div className="px-5 pb-5">
+              <div className="relative -mt-8 h-16 w-16 overflow-hidden rounded-2xl bg-white ring-4 ring-white">
+                {profile.logo ? (
+                  <Image
+                    src={profile.logo}
+                    fill
+                    sizes="64px"
+                    placeholder="blur"
+                    blurDataURL={decodeBlurhashToCanvas(
+                      profile.blurHash || defaultBlurHash,
+                    )}
+                    className="object-cover"
+                    alt=""
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-background-color text-2xl text-icon-color/30">
+                    <LuImagePlus aria-hidden />
                   </div>
                 )}
-
-                <input
-                  accept="image/*"
-                  id="dropzone-file"
-                  onChange={handleUploadImage}
-                  type="file"
-                  className="hidden"
-                />
-              </label>
-            </div>
-            {loading && (
-              <ProgressBar mode="indeterminate" style={{ height: "6px" }} />
-            )}
-            <div className="flex flex-col">
-              <input
-                required
-                type="text"
-                className={inputClasses}
-                placeholder={createSchoolDataLanguage.school(
-                  language.data ?? "en",
-                )}
-                aria-label="School Name"
-                value={profile?.school}
-                onChange={(e) =>
-                  setProfile((prev) => {
-                    return { ...prev, school: e.target.value };
-                  })
-                }
-              />
-            </div>
-            <div className="flex flex-col">
-              <input
-                type="text"
-                required
-                className={inputClasses}
-                placeholder={createSchoolDataLanguage.description(
-                  language.data ?? "en",
-                )}
-                aria-label="School Description"
-                value={profile?.description}
-                onChange={(e) =>
-                  setProfile((prev) => {
-                    return { ...prev, description: e.target.value };
-                  })
-                }
-              />
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                if (formRef.current?.reportValidity()) {
-                  handleChangeActiveIndex(1);
-                }
-              }}
-              className="flex h-10 w-full items-center justify-center rounded-2xl bg-secondary-color py-2 font-semibold text-white transition duration-150 hover:bg-primary-color active:drop-shadow-md"
-            >
-              {createSchoolDataLanguage.button(language.data ?? "en")}
-            </button>
-          </section>
-        )}
-
-        {activeIndex === 1 && (
-          <section className="flex w-full flex-col gap-2">
-            <Dropdown<{ name: string; code: string } | undefined>
-              value={country}
-              onChange={(e) => setCountry(e.value)}
-              options={countries}
-              optionLabel="name"
-              placeholder="Select a Country"
-              valueTemplate={selectedCountryTemplate}
-              itemTemplate={countryOptionTemplate}
-            />
-            <div className="flex flex-col">
-              <input
-                type="text"
-                required
-                className={inputClasses}
-                placeholder="City"
-                value={address?.city}
-                onChange={(e) =>
-                  setAddress((prev) => {
-                    return { ...prev, city: e.target.value };
-                  })
-                }
-              />
-            </div>
-            <div className="flex flex-col">
-              <input
-                type="text"
-                required
-                className={inputClasses}
-                placeholder="Address"
-                value={address?.address}
-                onChange={(e) =>
-                  setAddress((prev) => {
-                    return { ...prev, address: e.target.value };
-                  })
-                }
-              />
-            </div>
-            <div className="flex flex-col">
-              <input
-                type="text"
-                required
-                className={inputClasses}
-                placeholder="Zip Code"
-                value={address?.zipCode}
-                onChange={(e) =>
-                  setAddress((prev) => {
-                    return { ...prev, zipCode: e.target.value };
-                  })
-                }
-              />
-            </div>
-            <PhoneInput
-              required
-              defaultCountry="th"
-              value={address?.phoneNumber}
-              onChange={(phone) =>
-                setAddress((prev) => {
-                  return { ...prev, phoneNumber: phone as string };
-                })
-              }
-            />
-            <button
-              disabled={createSchool.isPending}
-              className={`w-full ${
-                createSchool.isPending
-                  ? "bg-white ring-1 ring-primary-color"
-                  : "bg-secondary-color"
-              } flex h-10 items-center justify-center rounded-2xl py-2 font-semibold text-white transition duration-150 hover:bg-primary-color active:drop-shadow-md`}
-            >
-              {createSchool.isPending ? (
-                <ProgressSpinner
-                  animationDuration="1s"
-                  style={{ width: "20px" }}
-                  className="h-5 w-5"
-                  strokeWidth="8"
-                />
-              ) : (
-                <span>Create</span>
+              </div>
+              <p
+                className={`mt-3 break-words text-lg font-bold leading-snug ${
+                  profile.school.trim()
+                    ? "text-icon-color"
+                    : "text-icon-color/30"
+                }`}
+              >
+                {profile.school.trim() ||
+                  createSchoolDataLanguage.previewName(lang)}
+              </p>
+              <p
+                className={`mt-1 line-clamp-3 break-words text-sm leading-relaxed ${
+                  profile.description.trim()
+                    ? "text-icon-color/70"
+                    : "text-icon-color/30"
+                }`}
+              >
+                {profile.description.trim() ||
+                  createSchoolDataLanguage.previewDescription(lang)}
+              </p>
+              {(address.city.trim() || hasPhone) && (
+                <ul className="mt-4 flex flex-col gap-2 border-t border-icon-color/10 pt-4 text-sm text-icon-color/70">
+                  {address.city.trim() && (
+                    <li className="flex items-center gap-2">
+                      <LuMapPin aria-hidden className="shrink-0" />
+                      <span className="truncate">{location}</span>
+                    </li>
+                  )}
+                  {hasPhone && (
+                    <li className="flex items-center gap-2">
+                      <LuPhone aria-hidden className="shrink-0" />
+                      <span className="truncate">{address.phoneNumber}</span>
+                    </li>
+                  )}
+                </ul>
               )}
-            </button>
-          </section>
-        )}
-      </form>
-
-      {activeIndex === 2 && createSchool.data && (
-        <InviteJoinSchool schoolId={createSchool.data.id} />
-      )}
+            </div>
+          </div>
+        </aside>
+      </div>
     </div>
   );
 };
