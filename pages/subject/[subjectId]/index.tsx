@@ -271,20 +271,12 @@ function Index({ subjectId }: Props) {
       )}
       {selectFooter === "SlidePicker" && randomStudents && (
         <PopupLayout onClose={() => setSelectFooter("EMTY")}>
-          <div className="h-full w-full bg-white p-5 md:h-max md:w-max md:rounded-2xl md:border">
-            <SilderPicker
-              students={randomStudents
-                .filter((s) => s.isActive)
-                .map((student, index) => {
-                  return {
-                    ...student,
-                  };
-                })}
-              toast={toast}
-              subjectId={subjectId}
-              setSelectFooter={setSelectFooter}
-            />
-          </div>
+          <SilderPicker
+            students={studentOnSubjects.data ?? []}
+            toast={toast}
+            subjectId={subjectId}
+            onClose={() => setSelectFooter("EMTY")}
+          />
         </PopupLayout>
       )}
       {selectFooter === "CardPicker" && randomStudents && (

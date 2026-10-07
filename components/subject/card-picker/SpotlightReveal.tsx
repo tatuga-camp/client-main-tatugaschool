@@ -26,6 +26,10 @@ type Props = {
   onPutBack: () => void;
   onGivePoints: () => void;
   onBackToDeck: () => void;
+  /** The card arrives already face up (slider reel): fly in, no flip. */
+  faceUp?: boolean;
+  /** Override the deck wording for pickers that aren't a deck of cards. */
+  labels?: { putBack?: string; backToDeck?: string };
 };
 
 export default function SpotlightReveal({
@@ -39,6 +43,8 @@ export default function SpotlightReveal({
   onPutBack,
   onGivePoints,
   onBackToDeck,
+  faceUp = false,
+  labels,
 }: Props) {
   const slotRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -59,6 +65,8 @@ export default function SpotlightReveal({
       setShown(true);
       onRevealed();
     };
+
+    if (faceUp) flip.style.transform = "rotateY(180deg)";
 
     if (reducedMotion) {
       flip.style.transform = "rotateY(180deg)";
@@ -91,6 +99,10 @@ export default function SpotlightReveal({
         await fly;
       }
       if (cancelled) return;
+      if (faceUp) {
+        finish();
+        return;
+      }
       onFlipStart();
       const turn = animate(
         flip,
@@ -186,7 +198,7 @@ export default function SpotlightReveal({
           onClick={onPutBack}
           className={GHOST}
         >
-          <IoArrowUndo /> {CardPickerLanguage.put_back(lang)}
+          <IoArrowUndo /> {labels?.putBack ?? CardPickerLanguage.put_back(lang)}
         </button>
         <button
           type="button"
@@ -204,7 +216,7 @@ export default function SpotlightReveal({
         >
           {isLast
             ? CardPickerLanguage.finish(lang)
-            : CardPickerLanguage.back_to_deck(lang)}{" "}
+            : (labels?.backToDeck ?? CardPickerLanguage.back_to_deck(lang))}{" "}
           <IoArrowForward />
         </button>
       </motion.div>

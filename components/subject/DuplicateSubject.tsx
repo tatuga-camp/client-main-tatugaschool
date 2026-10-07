@@ -22,7 +22,6 @@ type Props = {
   toast: RefObject<Toast>;
 };
 function DuplicateSubject({ onClose, subject, toast }: Props) {
-  const sound = useSound("/sounds/ding.mp3") as HTMLAudioElement;
   const duplicate = useDuplicateSubject();
   const language = useGetLanguage();
   const classrooms = useGetClassrooms({
@@ -58,7 +57,6 @@ function DuplicateSubject({ onClose, subject, toast }: Props) {
         }),
       });
 
-      sound.play();
       toast.current?.show({
         severity: "success",
         summary: "Success",

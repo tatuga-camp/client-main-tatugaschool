@@ -14,6 +14,8 @@ type Props = {
   lang: Language;
   onMoveToPicked: (id: string) => void;
   onMoveToDeck: (id: string) => void;
+  /** Override the deck wording for pickers that aren't a deck of cards. */
+  labels?: { pool?: string; moveToPool?: string };
 };
 
 // Roster order, not deck order — listing deck order would reveal who's next.
@@ -29,6 +31,7 @@ export default function DeckDrawer({
   lang,
   onMoveToPicked,
   onMoveToDeck,
+  labels,
 }: Props) {
   const [tab, setTab] = useState<"deck" | "picked">("deck");
   const deckRows = [...deck].sort(byNumber);
@@ -69,7 +72,7 @@ export default function DeckDrawer({
                     }`}
                   >
                     {key === "deck"
-                      ? `${CardPickerLanguage.in_deck(lang)} · ${deck.length}`
+                      ? `${labels?.pool ?? CardPickerLanguage.in_deck(lang)} · ${deck.length}`
                       : `${CardPickerLanguage.picked(lang)} · ${pickedCount}`}
                   </button>
                 ))}
@@ -125,7 +128,7 @@ export default function DeckDrawer({
                     <span className="shrink-0 text-xs font-semibold text-primary-color opacity-0 transition group-hover:opacity-100">
                       {tab === "deck"
                         ? CardPickerLanguage.move_to_picked(lang)
-                        : CardPickerLanguage.move_to_deck(lang)}
+                        : (labels?.moveToPool ?? CardPickerLanguage.move_to_deck(lang))}
                     </span>
                   </button>
                 </li>
