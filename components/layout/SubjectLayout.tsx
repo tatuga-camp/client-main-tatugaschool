@@ -53,7 +53,7 @@ function SubjectLayout({
       <div ref={navbarRef} className="sticky top-0 z-40">
         {subject.data && (
           <Navbar
-            menuLists={menuSubjectList({ schoolId: subject.data.schoolId })}
+            menuLists={menuSubjectList()}
             trigger={active}
             breadcrumbs={[
               {

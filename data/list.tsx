@@ -6,7 +6,6 @@ import { IoHome } from "react-icons/io5";
 import { LuSchool } from "react-icons/lu";
 import {
   MdAssignmentAdd,
-  MdGridView,
   MdSettings,
   MdSubscriptions,
 } from "react-icons/md";
@@ -41,56 +40,23 @@ export const ListSchoolRoles: { title: MemberRole; describe: string }[] = [
 ];
 
 export type MenuSubject =
-  | "School"
   | "Subject"
   | "Classwork"
   | "Attendance"
   | "Grade"
-  | "SettingSubject"
-  | "Subjects";
+  | "SettingSubject";
 
-export const menuSubjectList = ({
-  schoolId,
-  subjectId,
-}: {
-  schoolId?: string;
-  subjectId?: string;
-}): {
+export const menuSubjectList = (): {
   title: MenuSubject;
   icon: ReactNode;
   url?: string | undefined;
 }[] => {
   return [
-    {
-      title: "Subject",
-      icon: <SiGoogleclassroom />,
-    },
-    {
-      title: "Classwork",
-      icon: <MdAssignmentAdd />,
-    },
-    {
-      title: "Attendance",
-      icon: <FaUserGroup />,
-    },
-    {
-      title: "Grade",
-      icon: <FaStarHalfStroke />,
-    },
-    {
-      title: "SettingSubject",
-      icon: <CiSettings />,
-    },
-    {
-      title: "Subjects",
-      icon: <MdGridView />,
-      url: `/school/${schoolId}?menu=Subjects`,
-    },
-    {
-      title: "School",
-      icon: <LuSchool />,
-      url: `/school/${schoolId}?menu=School`,
-    },
+    { title: "Subject", icon: <SiGoogleclassroom /> },
+    { title: "Classwork", icon: <MdAssignmentAdd /> },
+    { title: "Attendance", icon: <FaUserGroup /> },
+    { title: "Grade", icon: <FaStarHalfStroke /> },
+    { title: "SettingSubject", icon: <CiSettings /> },
   ];
 };
 
@@ -152,45 +118,17 @@ export type MenuClassroom =
   | "SettingClassroom"
   | "SubjectsClassroom"
   | "GradesSummary"
-  | "OverViewClassroom"
-  | "School"
-  | "Classes";
-export const menuClassroomList = ({
-  schoolId,
-}: {
-  schoolId: string;
-}): {
+  | "OverViewClassroom";
+export const menuClassroomList = (): {
   title: MenuClassroom;
   icon: ReactNode;
   url?: string | undefined;
 }[] => {
   return [
-    {
-      title: "Classroom",
-      icon: <SiGoogleclassroom />,
-    },
-    {
-      title: "SubjectsClassroom",
-      icon: <MdSubscriptions />,
-    },
-    {
-      title: "GradesSummary",
-      icon: <TbReportAnalytics />,
-    },
-    {
-      title: "SettingClassroom",
-      icon: <CiSettings />,
-    },
-    {
-      title: "Classes",
-      icon: <MdGridView />,
-      url: `/school/${schoolId}?menu=Classes`,
-    },
-    {
-      title: "School",
-      icon: <LuSchool />,
-      url: `/school/${schoolId}?menu=School`,
-    },
+    { title: "Classroom", icon: <SiGoogleclassroom /> },
+    { title: "SubjectsClassroom", icon: <MdSubscriptions /> },
+    { title: "GradesSummary", icon: <TbReportAnalytics /> },
+    { title: "SettingClassroom", icon: <CiSettings /> },
   ];
 };
 
