@@ -1,26 +1,83 @@
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
+import type { Dispatch, SetStateAction } from "react";
+import {
+  createOpenStore,
+  readStoredOpen,
+  shouldCloseAfterNavigate,
+  shouldLockBodyScroll,
+  writeStoredOpen,
+} from "../utils/sidebarState";
 
 /** Matches Tailwind `xl` — the school shell sidebar is persistent from this width up. */
 export const SIDEBAR_PERSISTENT_MQ = "(min-width: 3072px )";
+
+/** From Tailwind `md` up the drawer stays open after navigating. */
+export const SIDEBAR_KEEP_OPEN_MQ = "(min-width: 768px)";
+
+/** Tailwind `xl`: the backdrop is hidden and content is offset beside the open sidebar. */
+export const SIDEBAR_RAIL_MQ = "(min-width: 1280px)";
+
+export function shouldLockScrollForSidebar(): boolean {
+  return shouldLockBodyScroll({
+    persistent: isSidebarPersistent(),
+    backdropVisible: !window.matchMedia(SIDEBAR_RAIL_MQ).matches,
+  });
+}
 
 export function isSidebarPersistent(): boolean {
   return window.matchMedia(SIDEBAR_PERSISTENT_MQ).matches;
 }
 
+export function shouldCloseOnNavigate(): boolean {
+  return shouldCloseAfterNavigate({
+    persistent: isSidebarPersistent(),
+    wide: window.matchMedia(SIDEBAR_KEEP_OPEN_MQ).matches,
+  });
+}
+
+function sessionStore(): Storage | null {
+  try {
+    return window.sessionStorage;
+  } catch {
+    return null;
+  }
+}
+
+// One store for the whole tab: survives the layout remount on navigation.
+const openStore = createOpenStore((open) => {
+  if (typeof window !== "undefined") writeStoredOpen(sessionStore(), open);
+});
+
+const getServerSnapshot = () => null;
+
 /**
- * Overlay/drawer below `xl`, persistent from `xl` up.
+ * Overlay/drawer below the persistent breakpoint, rail above it.
  * `null` until mount so SSR markup can use CSS defaults without a hydration mismatch.
+ * The open state is shared across pages (and persisted per tab in sessionStorage).
  */
 export function useResponsiveSidebar() {
-  const [active, setActive] = useState<boolean | null>(null);
+  const active = useSyncExternalStore(
+    openStore.subscribe,
+    openStore.get,
+    getServerSnapshot,
+  );
 
   useEffect(() => {
     const mq = window.matchMedia(SIDEBAR_PERSISTENT_MQ);
-    const sync = () => setActive(mq.matches);
-    sync();
+    if (openStore.get() === null) {
+      openStore.set(mq.matches || readStoredOpen(sessionStore()));
+    }
+    const sync = () => {
+      if (mq.matches) openStore.set(true);
+    };
     mq.addEventListener("change", sync);
     return () => mq.removeEventListener("change", sync);
   }, []);
+
+  const setActive: Dispatch<SetStateAction<boolean | null>> = (next) =>
+    openStore.set((prev) =>
+      Boolean(typeof next === "function" ? next(prev) : next),
+    );
 
   return [active, setActive] as const;
 }

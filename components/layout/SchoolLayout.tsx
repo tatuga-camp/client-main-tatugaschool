@@ -43,6 +43,8 @@ function SchoolLayout({ children, selectMenu, schoolId }: LayoutProps) {
           ]}
           setTrigger={setActive}
           trigger={active}
+          sidebarTrail={[{ kind: "school", id: schoolId }]}
+          sidebarDefaultMenu="School"
         />
       </div>
       <div className={sidebarContentOffsetClass(active)}>{children}</div>

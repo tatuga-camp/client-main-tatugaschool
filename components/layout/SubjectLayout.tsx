@@ -39,7 +39,7 @@ function SubjectLayout({
       setActive(false);
     }
   });
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     document.body.style.overflow = "auto";
   }, []);
 
@@ -53,7 +53,7 @@ function SubjectLayout({
       <div ref={navbarRef} className="sticky top-0 z-40">
         {subject.data && (
           <Navbar
-            menuLists={menuSubjectList({ schoolId: subject.data.schoolId })}
+            menuLists={menuSubjectList()}
             trigger={active}
             breadcrumbs={[
               {
@@ -75,6 +75,12 @@ function SubjectLayout({
             ]}
             setTrigger={setActive}
             schoolId={subject.data?.schoolId}
+            sidebarTrail={[
+              { kind: "school", id: subject.data.schoolId },
+              { kind: "classroom", id: subject.data.classId },
+              { kind: "subject", id: subject.data.id },
+            ]}
+            sidebarDefaultMenu="Subject"
           />
         )}
       </div>

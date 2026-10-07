@@ -32,7 +32,7 @@ function ClassroomLayout({ children, classroomId, schoolId }: LayoutProps) {
       <div ref={navbarRef} className="sticky top-0 z-50">
         {classroom.data && (
           <Navbar
-            menuLists={menuClassroomList({ schoolId: schoolId })}
+            menuLists={menuClassroomList()}
             schoolId={schoolId}
             breadcrumbs={[
               {
@@ -50,6 +50,11 @@ function ClassroomLayout({ children, classroomId, schoolId }: LayoutProps) {
             ]}
             setTrigger={setActive}
             trigger={active}
+            sidebarTrail={[
+              { kind: "school", id: classroom.data.schoolId },
+              { kind: "classroom", id: classroom.data.id },
+            ]}
+            sidebarDefaultMenu="Classroom"
           />
         )}
       </div>

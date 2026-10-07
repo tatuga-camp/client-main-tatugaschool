@@ -5,7 +5,11 @@ import { IoMdNotifications } from "react-icons/io";
 import { IoMenu } from "react-icons/io5";
 import { defaultCanvas } from "../data";
 import { navbarLanguageData } from "../data/languages";
-import { isSidebarPersistent } from "../hook/useResponsiveSidebar";
+import {
+  isSidebarPersistent,
+  shouldCloseOnNavigate,
+  shouldLockScrollForSidebar,
+} from "../hook/useResponsiveSidebar";
 import useClickOutside from "../hook/useClickOutside";
 import {
   useGetLanguage,
@@ -17,6 +21,7 @@ import ButtonProfile from "./common/ButtonProfile";
 import Breadcrumbs from "./common/Breadcrumbs";
 import Notification from "./common/Notification";
 import Sidebar from "./Sidebar";
+import type { TrailNode } from "./sidebar/SidebarTrail";
 import PopupLayout from "./layout/PopupLayout";
 import Feedback from "./common/Feedback";
 
@@ -26,6 +31,8 @@ type Props = {
   trigger: boolean | null;
   breadcrumbs?: { label: string; href: string }[];
   menuLists: { title: string; icon: ReactNode; url?: string }[];
+  sidebarTrail?: TrailNode[];
+  sidebarDefaultMenu?: string;
 };
 function Navbar({
   schoolId,
@@ -33,6 +40,8 @@ function Navbar({
   trigger,
   menuLists,
   breadcrumbs,
+  sidebarTrail,
+  sidebarDefaultMenu,
 }: Props) {
   const user = useGetUser();
   const language = useGetLanguage();
@@ -67,7 +76,7 @@ function Navbar({
 
   useEffect(() => {
     if (!overlayOpen) return;
-    if (isSidebarPersistent()) return;
+    if (!shouldLockScrollForSidebar()) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
@@ -203,8 +212,10 @@ function Navbar({
           menuList={menuLists}
           active={trigger}
           schoolId={schoolId}
+          trail={sidebarTrail ?? [{ kind: "school", id: schoolId }]}
+          defaultMenu={sidebarDefaultMenu ?? menuLists[0]?.title ?? ""}
           onNavigate={() => {
-            if (!isSidebarPersistent()) {
+            if (shouldCloseOnNavigate()) {
               setTrigger(false);
             }
           }}
