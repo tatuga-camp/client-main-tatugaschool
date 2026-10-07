@@ -8,6 +8,7 @@ import { navbarLanguageData } from "../data/languages";
 import {
   isSidebarPersistent,
   shouldCloseOnNavigate,
+  shouldLockScrollForSidebar,
 } from "../hook/useResponsiveSidebar";
 import useClickOutside from "../hook/useClickOutside";
 import {
@@ -75,7 +76,7 @@ function Navbar({
 
   useEffect(() => {
     if (!overlayOpen) return;
-    if (isSidebarPersistent()) return;
+    if (!shouldLockScrollForSidebar()) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {

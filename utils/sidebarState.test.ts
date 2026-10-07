@@ -6,6 +6,7 @@ import {
   highlightedMenu,
   readStoredOpen,
   shouldCloseAfterNavigate,
+  shouldLockBodyScroll,
   writeStoredOpen,
 } from "./sidebarState";
 
@@ -92,4 +93,11 @@ test("createOpenStore skips notify when value is unchanged", () => {
   store.set(false);
   store.set(false);
   assert.equal(calls, 1);
+});
+
+test("shouldLockBodyScroll: only while the dimming backdrop is visible", () => {
+  assert.equal(shouldLockBodyScroll({ persistent: false, backdropVisible: true }), true);
+  // xl..3071px: open sidebar sits beside content as a rail, page must scroll
+  assert.equal(shouldLockBodyScroll({ persistent: false, backdropVisible: false }), false);
+  assert.equal(shouldLockBodyScroll({ persistent: true, backdropVisible: true }), false);
 });

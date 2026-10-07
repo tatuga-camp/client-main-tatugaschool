@@ -33,6 +33,17 @@ export function shouldCloseAfterNavigate({
   return !persistent && !wide;
 }
 
+/** Lock page scroll only while the dimming backdrop covers the content. */
+export function shouldLockBodyScroll({
+  persistent,
+  backdropVisible,
+}: {
+  persistent: boolean;
+  backdropVisible: boolean;
+}): boolean {
+  return !persistent && backdropVisible;
+}
+
 /** The menu item to highlight: `?menu=` when present, else the page default. */
 export function highlightedMenu(
   queryMenu: string | string[] | undefined,

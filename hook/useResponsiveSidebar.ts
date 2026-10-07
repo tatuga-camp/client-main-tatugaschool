@@ -4,6 +4,7 @@ import {
   createOpenStore,
   readStoredOpen,
   shouldCloseAfterNavigate,
+  shouldLockBodyScroll,
   writeStoredOpen,
 } from "../utils/sidebarState";
 
@@ -12,6 +13,16 @@ export const SIDEBAR_PERSISTENT_MQ = "(min-width: 3072px )";
 
 /** From Tailwind `md` up the drawer stays open after navigating. */
 export const SIDEBAR_KEEP_OPEN_MQ = "(min-width: 768px)";
+
+/** Tailwind `xl`: the backdrop is hidden and content is offset beside the open sidebar. */
+export const SIDEBAR_RAIL_MQ = "(min-width: 1280px)";
+
+export function shouldLockScrollForSidebar(): boolean {
+  return shouldLockBodyScroll({
+    persistent: isSidebarPersistent(),
+    backdropVisible: !window.matchMedia(SIDEBAR_RAIL_MQ).matches,
+  });
+}
 
 export function isSidebarPersistent(): boolean {
   return window.matchMedia(SIDEBAR_PERSISTENT_MQ).matches;
