@@ -1,22 +1,36 @@
-import { animated, interpolate, useSprings } from "@react-spring/web";
-import { useDrag } from "@use-gesture/react";
-import Image from "next/image";
-import React, { useEffect, useRef, useState } from "react";
-import { IoMdClose } from "react-icons/io";
-import { useWindowSize } from "react-use";
-import Swal from "sweetalert2";
-import { defaultBlurHash } from "../../data";
-import { StudentOnSubject } from "../../interfaces";
-import {
-  decodeBlurhashToCanvas,
-  localStorageGetRemoveRandomStudents,
-  localStorageSetRemoveRandomStudents,
-} from "../../utils";
-import { useGetLanguage } from "../../react-query";
-import { CardPickerLanguage } from "../../data/languages";
-import PopupLayout from "../layout/PopupLayout";
-import PopUpStudent from "./PopUpStudent";
+import confetti from "canvas-confetti";
+import { AnimatePresence, useReducedMotion } from "framer-motion";
 import { Toast } from "primereact/toast";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  IoClose,
+  IoMenu,
+  IoPeopleOutline,
+  IoRefresh,
+  IoShuffle,
+  IoSparkles,
+  IoVolumeHigh,
+  IoVolumeMute,
+} from "react-icons/io5";
+import { CardPickerLanguage } from "../../data/languages";
+import { useSound } from "../../hook";
+import { StudentOnSubject } from "../../interfaces";
+import { useGetLanguage } from "../../react-query";
+import PopupLayout from "../layout/PopupLayout";
+import CardFan, {
+  rectToOrigin,
+  type CardOrigin,
+} from "./card-picker/CardFan";
+import DeckDrawer from "./card-picker/DeckDrawer";
+import SpotlightReveal from "./card-picker/SpotlightReveal";
+import { useCardDeck } from "./card-picker/useCardDeck";
+import PopUpStudent from "./PopUpStudent";
 
 interface StudentCardPickerProps {
   students: StudentOnSubject[];
@@ -25,409 +39,462 @@ interface StudentCardPickerProps {
   onClose: () => void;
   toast: React.RefObject<Toast>;
 }
-const to = (i: number) => ({
-  x: 0,
-  y: i * -4,
-  scale: 1,
-  rot: -10 + Math.random() * 20,
-  delay: i * 100,
-});
-const from = (_i: number) => ({ x: 0, rot: 0, scale: 1.5, y: -1000 });
-// This is being used down there in the view, it interpolates rotation and scale into a css transform
-const trans = (r: number, s: number) =>
-  `perspective(1500px) rotateX(30deg) rotateY(${r / 10}deg) rotateZ(${r}deg) scale(${s})`;
 
-function Deck({
-  students,
-  onNominate,
-  toast,
-  subjectId,
-}: StudentCardPickerProps) {
-  const language = useGetLanguage();
-  const sound = {
-    cards: "https://storage.googleapis.com/tatugacamp.com/sound/card.mp3",
-    sheer: "https://storage.googleapis.com/tatugacamp.com/sound/sheer.mp3",
-    shuffle: "https://storage.googleapis.com/tatugacamp.com/sound/shuffle.aac",
-  };
-  const [gone] = useState<Set<string>>(() => new Set());
-  const [shuffledStudents, setShuffledStudents] = useState<StudentOnSubject[]>(
-    [],
-  );
+const MUTE_KEY = "card-picker:muted";
 
-  const [loading, setLoading] = useState(false);
-  const { width, height } = useWindowSize();
-  const [selectedStudent, setSelectedStudent] =
-    useState<StudentOnSubject | null>(null);
-  const prevSelectedStudent = useRef<StudentOnSubject | null>(null);
-  const [activeCongrest, setActiveCongrest] = useState(false);
-  const [audioSheer] = useState<HTMLAudioElement>(() => new Audio(sound.sheer));
-  const [audioCard] = useState<HTMLAudioElement>(() => new Audio(sound.cards));
-  const [audioShuffle] = useState<HTMLAudioElement>(
-    () => new Audio(sound.shuffle),
-  );
-
-  function shuffleArray(array: StudentOnSubject[]) {
-    const newArray = [...array];
-    for (let i = newArray.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-    }
-
-    return newArray;
+const readMuted = () => {
+  try {
+    return localStorage.getItem(MUTE_KEY) === "1";
+  } catch {
+    return false;
   }
+};
 
-  const handleTakeOff = () => {
-    setShuffledStudents((prev) => prev.filter((a) => !gone.has(a.id)));
-    localStorageSetRemoveRandomStudents({
-      subjectId: subjectId,
-      studentIds: Array.from(gone.values()).map((a) => ({ id: a })),
-    });
-  };
+const PILL_LIGHT =
+  "border-gray-200 bg-white text-icon-color hover:border-primary-color hover:text-primary-color";
+const PILL_DARK = "border-white/25 bg-white/10 text-white hover:bg-white/20";
+const SECONDARY =
+  "flex h-11 items-center gap-2 rounded-full border border-gray-200 bg-white px-4 text-sm font-semibold text-icon-color transition hover:border-primary-color hover:text-primary-color active:scale-95 disabled:opacity-50 md:h-12 md:px-5";
+const PRIMARY =
+  "flex h-12 items-center gap-2 rounded-full bg-primary-color px-6 text-base font-bold text-white shadow-[0_6px_14px_rgba(44,124,209,0.35)] transition hover:bg-primary-color-hover active:scale-95 disabled:opacity-50 md:h-14 md:px-8";
 
-  const handleTakeIn = (student: StudentOnSubject) => {
-    setShuffledStudents((prev) => [...prev, student]);
-       localStorageSetRemoveRandomStudents({
-      subjectId: subjectId,
-      studentIds: Array.from(gone.values()).map((a) => ({ id: a })),
-    });
-  };
-
-  const [props, api] = useSprings(shuffledStudents.length, (i) => ({
-    ...to(i),
-    from: from(i),
-  })); // Create a bunch of springs using the helpers above
-  // Create a gesture, we're interested in down-state, delta (current-pos - click-pos), direction and velocity
-  const bind = useDrag(
-    ({
-      args: [number, student],
-      down,
-      movement: [mx],
-      direction: [xDir],
-      velocity,
-      event,
-      first,
-      last,
-    }) => {
-      const index = number as number;
-      const value = student as StudentOnSubject;
-
-      if (first) {
-        audioCard.play();
-      } else if (last) {
-        audioCard.pause();
-        audioCard.currentTime = 0;
-      }
-      const triggerThreshold = 200; // Trigger if dragged 200px left or right
-      const trigger = Math.abs(mx) > triggerThreshold;
-      const dir = xDir < 0 ? -1 : 1; // Direction should either point left or right
-      if (!down && trigger) {
-        handleShowSweetAleart(value);
-      } // If button/finger's up and trigger velocity is reached, we flag the card ready to fly out
-      api.start((i) => {
-        // Only animate the card being interacted with
-        if (index !== i) return;
-
-        // A card is "gone" if it's in the set OR if it just met the trigger
-        const isGone = gone.has(value.id) || (!down && trigger);
-
-        // When a card is gone, it flies out. Otherwise, it follows the mouse or returns to 0
-        const x = isGone ? (200 + window.innerWidth) * dir : down ? mx : 0;
-        const rot =
-          mx / 100 + (isGone ? dir * 10 * (velocity[0] + velocity[1]) : 0);
-        const scale = down ? 1.1 : 1; // Active cards lift up a bit
-        return {
-          x,
-          rot,
-          scale,
-          delay: undefined,
-          config: { friction: 50, tension: down ? 800 : isGone ? 200 : 500 },
-        };
-      });
-    },
-  );
-  const handleShowSweetAleart = (student: StudentOnSubject) => {
-    setActiveCongrest(true);
-    Swal.fire({
-      title: `เลขที่ ${student.number} ${student.firstName} ${student.lastName}`,
-      text: "ยินดีด้วยย คุณคือผู้ถูกเลือก",
-      showCancelButton: true,
-      showDenyButton: true,
-      denyButtonText: CardPickerLanguage.give_score(language.data ?? "en"),
-      cancelButtonText: CardPickerLanguage.cancel(language.data ?? "en"),
-      confirmButtonText: CardPickerLanguage.delete_name(language.data ?? "en"),
-      confirmButtonColor: "#eb4034",
-      cancelButtonColor: "#1be4f2",
-      denyButtonColor: "#1bf278",
-      width: "max-content",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        fadeOut(audioSheer, 2000);
-        moveStudentOutOfDeck(student);
-        setActiveCongrest(() => false);
-      } else if (result.dismiss) {
-        fadeOut(audioSheer, 2000);
-        setActiveCongrest(() => false);
-      } else if (result.isDenied) {
-        fadeOut(audioSheer, 2000);
-        setActiveCongrest(() => false);
-        setSelectedStudent(student);
-      }
-    });
-  };
-
-  function fadeOut(audioElement: HTMLAudioElement, duration: number) {
-    const initialVolume = audioElement.volume;
-    const volumeStep = initialVolume / (duration / 100); // Adjust the division factor for the desired fade-out duration
-
-    const fadeOutInterval = setInterval(() => {
-      if (audioElement.volume > 0) {
-        audioElement.volume = Math.max(audioElement.volume - volumeStep, 0);
-      } else {
-        audioElement.pause();
-        audioElement.currentTime = 0;
-        clearInterval(fadeOutInterval);
-      }
-    }, 100); // Adjust the interval for smoother fading
-  }
-  const moveStudentToDeck = (student: StudentOnSubject) => {
-    gone.delete(student.id);
-    handleTakeIn(student);
-    const studentIndex = shuffledStudents.findIndex((s) => s.id === student.id);
-
-    if (studentIndex !== -1) {
-      api.start((i) => {
-        if (i === studentIndex) {
-          return to(i);
-        }
-      });
-    }
-  };
-
-  const moveStudentOutOfDeck = (student: StudentOnSubject) => {
-    gone.add(student.id);
-    handleTakeOff();
-
-    const studentIndex = shuffledStudents.findIndex((s) => s.id === student.id);
-
-    if (studentIndex !== -1) {
-      api.start((i) => {
-        if (i === studentIndex) {
-          return {
-            x: window.innerWidth + 200, // Fly out to the right
-            rot: 30, // Give it some rotation
-            config: { friction: 50, tension: 200 }, // Use the 'isGone' config
-          };
-        }
-      });
-    }
-  };
-  const restart = () => {
-    setShuffledStudents(() => shuffleArray(students));
-    gone.clear();
-    api.start((i) => {
-      return from(i);
-    });
-    api.start((i) => {
-      return to(i);
-    });
-    localStorageSetRemoveRandomStudents({
-      subjectId: subjectId,
-      studentIds: [],
-    });
-  };
-  const shuffle = () => {
-    setShuffledStudents((prev) => shuffleArray(prev));
-    audioShuffle.play();
-    setTimeout(() => {
-      audioShuffle.pause();
-      audioShuffle.currentTime = 0;
-    }, 500);
-    api.start((i) => from(i));
-    api.start((i) => to(i));
-  };
-
-  //set random card with the first render only
-  useEffect(() => {
-    setShuffledStudents(() => {
-      return shuffleArray(students);
-    });
-    const remove_studnets =
-      localStorageGetRemoveRandomStudents({ subjectId: subjectId }) ?? [];
-    for (const studentId of remove_studnets) {
-      const studnet = students.find((a) => a.id === studentId.id);
-      if (!studnet) continue;
-      moveStudentOutOfDeck(studnet);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (prevSelectedStudent.current && !selectedStudent) {
-      handleShowSweetAleart(prevSelectedStudent.current);
-    }
-
-    prevSelectedStudent.current = selectedStudent;
-  }, [selectedStudent]);
-
-  return (
-    <>
-      {selectedStudent && (
-        <PopupLayout
-          onClose={() => {
-            setSelectedStudent(null);
-          }}
-        >
-          <PopUpStudent
-            student={selectedStudent}
-            toast={toast}
-            onClose={() => {
-              setSelectedStudent(null);
-            }}
-          />
-        </PopupLayout>
-      )}
-      <div className="relative h-screen w-screen">
-        <div className="absolute left-5 top-5 flex h-[calc(100vh-2.5rem)] w-80 flex-col gap-5 text-white">
-          <div className="flex h-60 w-full flex-col items-center rounded-lg bg-green-500 p-3">
-            <h2 className="text-lg font-semibold">
-              In Deck (
-              {
-                shuffledStudents.filter((student) => !gone.has(student.id))
-                  .length
-              }
-              )
-            </h2>
-            <ul className="flex h-60 w-full flex-col items-start justify-start gap-2 overflow-auto p-2">
-              {shuffledStudents
-                .filter((student) => !gone.has(student.id))
-                .map((student, index) => {
-                  return (
-                    <li
-                      className="flex w-full cursor-pointer items-center justify-between rounded-lg bg-white p-2 text-black transition hover:bg-slate-200"
-                      key={student.id}
-                      onClick={() => moveStudentOutOfDeck(student)}
-                    >
-                      <span>
-                        {student.firstName} {student.lastName}
-                      </span>
-                    </li>
-                  );
-                })}
-            </ul>
-          </div>
-          <div className="flex h-60 w-full flex-col items-center rounded-lg bg-red-500 p-3">
-            <h2 className="text-lg font-semibold">Out of Deck ({gone.size})</h2>
-            <ul className="flex h-60 w-full flex-col items-start justify-start gap-2 overflow-auto p-2">
-              {Array.from(gone).map((studentId, index) => {
-                const student = students.find((s) => s.id === studentId);
-                if (!student) return null;
-                return (
-                  <li
-                    className="flex w-full cursor-pointer items-center justify-between rounded-lg bg-white p-2 text-black transition hover:bg-slate-200"
-                    key={student.id}
-                    onClick={() => moveStudentToDeck(student)}
-                  >
-                    <span>
-                      {student.firstName} {student.lastName}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        </div>
-        <div className="card-container">
-          {props.map(({ x, y, rot, scale }, i) => (
-            <animated.div className="card-deck" key={i} style={{ x, y }}>
-              <animated.div
-                {...bind(i, shuffledStudents[i])}
-                className="group relative flex h-60 w-40 touch-none select-none flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl border-2 border-black bg-white p-3 text-black hover:drop-shadow-md active:scale-105 sm:h-60 md:h-60 lg:h-60 xl:h-60"
-                style={{
-                  transform: interpolate([rot, scale], trans),
-                }}
-              >
-                <button className="absolute z-20 h-full w-full bg-white/20 backdrop-blur-md group-hover:bg-white/0 group-hover:backdrop-blur-none group-active:bg-white/0 group-active:backdrop-blur-none"></button>
-                <div className="absolute -top-3 left-0 right-0 m-auto flex h-12 w-max min-w-10 max-w-20 select-none items-center justify-center rounded-2xl bg-primary-color text-white group-hover:bg-white">
-                  <span className="w-max max-w-14 truncate text-black group-hover:text-primary-color">
-                    {shuffledStudents[i].totalSpeicalScore}
-                  </span>
-                </div>
-
-                <div className="relative h-20 w-20 overflow-hidden rounded-full">
-                  <Image
-                    fill
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                    src={shuffledStudents[i].photo}
-                    alt="Student"
-                    className="pointer-events-none h-full w-full object-cover transition group-hover:scale-150"
-                  />
-                </div>
-                <div className="flex w-full select-none flex-col items-center justify-center gap-0 text-center">
-                  <span className="text-xs text-gray-500">
-                    {shuffledStudents[i].title}
-                  </span>
-                  <h2 className="group-hover:text-blacksm:text-base w-11/12 truncate text-center text-sm font-semibold text-gray-800 md:text-lg lg:text-base">
-                    {shuffledStudents[i].firstName}{" "}
-                    {shuffledStudents[i].lastName}
-                  </h2>
-                  <span className="group-hover:text-blacksm:text-sm text-xs font-medium text-gray-500 md:text-sm">
-                    Number {shuffledStudents[i].number}
-                  </span>
-                </div>
-              </animated.div>
-            </animated.div>
-          ))}
-        </div>
-        <div className="absolute bottom-5 w-full">
-          <div className="flex w-full items-center justify-center gap-5">
-            <button
-              disabled={loading}
-              className="w-40 rounded-full bg-blue-500 p-3 text-xl font-semibold text-white drop-shadow-lg transition hover:scale-105 active:scale-95"
-              onClick={restart}
-            >
-              {CardPickerLanguage.restart(language.data ?? "en")}
-            </button>
-            <button
-              disabled={loading}
-              onClick={shuffle}
-              className="w-40 rounded-full bg-orange-500 p-3 text-xl font-semibold text-white drop-shadow-lg transition hover:scale-105 active:scale-95"
-            >
-              {CardPickerLanguage.shuffle(language.data ?? "en")}
-            </button>
-          </div>
-        </div>
-      </div>
-    </>
-  );
-}
+const isTypingTarget = (target: EventTarget | null) =>
+  target instanceof HTMLElement &&
+  (target.isContentEditable ||
+    ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName));
 
 const StudentCardPicker: React.FC<StudentCardPickerProps> = ({
   students,
-  onNominate,
   subjectId,
-  toast,
   onClose,
+  toast,
 }) => {
+  const language = useGetLanguage();
+  const lang = language.data ?? "en";
+  const reducedMotion = useReducedMotion() ?? false;
+
+  const activeStudents = useMemo(
+    () => students.filter((s) => s.isActive),
+    [students],
+  );
+  const activeIds = useMemo(
+    () => activeStudents.map((s) => s.id),
+    [activeStudents],
+  );
+  const byId = useMemo(
+    () => new Map(activeStudents.map((s) => [s.id, s])),
+    [activeStudents],
+  );
+
+  const { state, actions } = useCardDeck(subjectId, activeIds);
+  const [origin, setOrigin] = useState<CardOrigin | null>(null);
+  const [revealing, setRevealing] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [scoreStudentId, setScoreStudentId] = useState<string | null>(null);
+  const [shuffleTick, setShuffleTick] = useState(0);
+  // Unique per draw: redrawing the same student while the previous spotlight
+  // is still exiting must mount a fresh reveal, not revive the exiting one.
+  const [drawSeq, setDrawSeq] = useState(0);
+  const [muted, setMuted] = useState(readMuted);
+
+  const cardRefs = useRef(new Map<string, HTMLDivElement>());
+  // Synchronous guards: state updates land a render later, refs don't.
+  const revealingRef = useRef(false);
+  const stateRef = useRef(state);
+  stateRef.current = state;
+
+  const ding = useSound("/sounds/ding.mp3");
+  const cheering = useSound("/sounds/cheering.mp3");
+  const play = useCallback(
+    (audio: HTMLAudioElement | null) => {
+      if (muted || !audio) return;
+      audio.currentTime = 0;
+      audio.play().catch(() => {});
+    },
+    [muted],
+  );
+
+  const revealedStudent = state.revealedId
+    ? (byId.get(state.revealedId) ?? null)
+    : null;
+  const scoreStudent = scoreStudentId
+    ? (byId.get(scoreStudentId) ?? null)
+    : null;
+  const deckStudents = state.deck
+    .map((id) => byId.get(id))
+    .filter((s): s is StudentOnSubject => !!s);
+  const pickedStudents = state.picked
+    .map((id) => byId.get(id))
+    .filter((s): s is StudentOnSubject => !!s);
+  const pickedCount = state.picked.length + (state.revealedId ? 1 : 0);
+  const isRevealed = state.revealedId !== null;
+
+  // Lock page scroll while open; stop confetti on close.
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      confetti.reset();
+      document.body.style.overflow = "auto";
+    };
+  }, []);
+
+  // If the revealed student vanishes (deactivated mid-reveal), the spotlight
+  // unmounts before onRevealed fires — release the busy guard so we never
+  // get stuck.
+  useEffect(() => {
+    if (state.revealedId === null) {
+      revealingRef.current = false;
+      setRevealing(false);
+    }
+  }, [state.revealedId]);
+
+  const drawId = useCallback(
+    (id: string, from: CardOrigin | null) => {
+      const current = stateRef.current;
+      if (
+        revealingRef.current ||
+        current.revealedId !== null ||
+        !current.deck.includes(id)
+      ) {
+        return;
+      }
+      revealingRef.current = true;
+      setRevealing(true);
+      setDrawSeq((n) => n + 1);
+      setOrigin(from);
+      actions.draw(id);
+    },
+    [actions],
+  );
+
+  // Button / Space: any card from the fan, launched from where it sits.
+  const drawRandom = useCallback(() => {
+    const { deck } = stateRef.current;
+    if (deck.length === 0) return;
+    const id = deck[Math.floor(Math.random() * deck.length)];
+    const rect = cardRefs.current.get(id)?.getBoundingClientRect();
+    drawId(id, rect ? rectToOrigin(rect) : null);
+  }, [drawId]);
+
+  const handleRevealed = useCallback(() => {
+    revealingRef.current = false;
+    setRevealing(false);
+    play(cheering);
+    if (!reducedMotion) {
+      confetti({ particleCount: 160, spread: 80, origin: { y: 0.5 } });
+    }
+  }, [play, cheering, reducedMotion]);
+
+  // Keep the student picked and return to the fan; the teacher chooses the
+  // next card themselves (no automatic draw).
+  const backToDeck = useCallback(() => {
+    if (revealingRef.current || stateRef.current.revealedId === null) return;
+    actions.confirm();
+  }, [actions]);
+
+  const putBack = useCallback(() => {
+    if (revealingRef.current || stateRef.current.revealedId === null) return;
+    actions.putBack();
+  }, [actions]);
+
+  const givePoints = useCallback(() => {
+    if (revealingRef.current || stateRef.current.revealedId === null) return;
+    setScoreStudentId(stateRef.current.revealedId);
+  }, []);
+
+  const closeScore = useCallback(() => setScoreStudentId(null), []);
+
+  // PopUpStudent and PopupLayout reset overflow to "auto" synchronously after
+  // calling onClose; re-lock in an effect, which runs after those writes.
+  useEffect(() => {
+    if (scoreStudentId === null) document.body.style.overflow = "hidden";
+  }, [scoreStudentId]);
+
+  const shuffle = () => {
+    actions.shuffle();
+    setShuffleTick((t) => t + 1);
+  };
+
+  const restart = () => {
+    actions.restart();
+    setShuffleTick((t) => t + 1);
+  };
+
+  const toggleMute = () => {
+    setMuted((m) => {
+      const next = !m;
+      try {
+        localStorage.setItem(MUTE_KEY, next ? "1" : "0");
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  };
+
+  const close = () => {
+    document.body.style.overflow = "auto";
+    onClose();
+  };
+
+  // Keyboard: capture phase on document so Esc can be consumed before the
+  // page-level PopupLayout's window listener closes the whole picker.
+  const keys = useRef({
+    scoreOpen: false,
+    drawerOpen: false,
+    isRevealed: false,
+    closeScore,
+    closeDrawer: () => setDrawerOpen(false),
+    drawRandom,
+    backToDeck,
+    putBack,
+    givePoints,
+  });
+  keys.current = {
+    scoreOpen: scoreStudentId !== null,
+    drawerOpen,
+    isRevealed,
+    closeScore,
+    closeDrawer: () => setDrawerOpen(false),
+    drawRandom,
+    backToDeck,
+    putBack,
+    givePoints,
+  };
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const k = keys.current;
+      if (event.key === "Escape") {
+        if (k.scoreOpen) {
+          event.stopPropagation();
+          k.closeScore();
+        } else if (k.drawerOpen) {
+          event.stopPropagation();
+          k.closeDrawer();
+        }
+        return; // otherwise the page PopupLayout closes the picker
+      }
+      if (k.scoreOpen || k.drawerOpen || isTypingTarget(event.target)) return;
+      if (event.code === "Space" || event.key === " ") {
+        event.preventDefault();
+        if (event.repeat) return;
+        if (k.isRevealed) k.backToDeck();
+        else k.drawRandom();
+        return;
+      }
+      if (!k.isRevealed) return;
+      // Match physical keys: on a Thai layout `event.key` is "ย" / "ิ".
+      if (event.code === "KeyP") {
+        event.preventDefault();
+        k.givePoints();
+      } else if (event.code === "KeyB") {
+        event.preventDefault();
+        k.putBack();
+      }
+    };
+    // A focused button would also "click" on Space keyup — suppress that.
+    const onKeyUp = (event: KeyboardEvent) => {
+      const k = keys.current;
+      if (
+        (event.code === "Space" || event.key === " ") &&
+        !k.scoreOpen &&
+        !k.drawerOpen &&
+        !isTypingTarget(event.target)
+      ) {
+        event.preventDefault();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown, true);
+    document.addEventListener("keyup", onKeyUp, true);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown, true);
+      document.removeEventListener("keyup", onKeyUp, true);
+    };
+  }, []);
+
+  const pill = isRevealed ? PILL_DARK : PILL_LIGHT;
+  const deckEmpty = state.deck.length === 0;
+
   return (
-    <div className="flex h-screen w-screen flex-col items-center justify-center bg-slate-200">
-      <button
-        type="button"
-        onClick={() => {
-          document.body.style.overflow = "auto";
-          onClose();
-        }}
-        className="fixed right-3 top-3 z-40 flex h-6 w-6 items-center justify-center rounded border-2 border-black bg-white text-lg font-semibold hover:bg-gray-300/50"
-      >
-        <IoMdClose />
-      </button>
-      <Deck
-        toast={toast}
-        onClose={() => {}}
-        students={students}
-        onNominate={() => {}}
-        subjectId={subjectId}
+    <div className="relative h-dvh w-screen overflow-hidden bg-background-color font-Anuphan text-icon-color">
+      {/* Top bar — stays above the spotlight and switches to glass on dark. */}
+      <div className="absolute inset-x-3 top-3 z-30 flex items-center justify-between gap-2 md:inset-x-5 md:top-5">
+        <button
+          type="button"
+          onClick={() => setDrawerOpen(true)}
+          aria-label={CardPickerLanguage.open_list(lang)}
+          className={`flex h-10 min-w-0 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition ${pill}`}
+        >
+          <IoMenu className="shrink-0 text-lg" />
+          <span className="truncate">
+            {CardPickerLanguage.in_deck(lang)}{" "}
+            <b className={isRevealed ? "text-white" : "text-primary-color"}>
+              {state.deck.length}
+            </b>
+            <span className="mx-1.5 opacity-40">·</span>
+            {CardPickerLanguage.picked(lang)}{" "}
+            <b className={isRevealed ? "text-white" : "text-primary-color"}>
+              {pickedCount}
+            </b>
+          </span>
+        </button>
+        <div className="flex shrink-0 gap-2">
+          <button
+            type="button"
+            onClick={toggleMute}
+            aria-label={
+              muted
+                ? CardPickerLanguage.sound_on(lang)
+                : CardPickerLanguage.sound_off(lang)
+            }
+            title={
+              muted
+                ? CardPickerLanguage.sound_on(lang)
+                : CardPickerLanguage.sound_off(lang)
+            }
+            className={`flex h-10 w-10 items-center justify-center rounded-full border text-lg transition ${pill}`}
+          >
+            {muted ? <IoVolumeMute /> : <IoVolumeHigh />}
+          </button>
+          <button
+            type="button"
+            onClick={close}
+            aria-label={CardPickerLanguage.close(lang)}
+            className={`flex h-10 w-10 items-center justify-center rounded-full border text-xl transition ${pill}`}
+          >
+            <IoClose />
+          </button>
+        </div>
+      </div>
+
+      {/* Stage */}
+      <div className="flex h-full w-full flex-col items-center justify-center gap-6 px-4 pb-28 pt-20">
+        {activeStudents.length === 0 ? (
+          <EmptyState
+            icon={<IoPeopleOutline />}
+            title={CardPickerLanguage.no_students_title(lang)}
+            hint={CardPickerLanguage.no_students_hint(lang)}
+          />
+        ) : deckEmpty && !isRevealed ? (
+          <EmptyState
+            icon={<IoSparkles />}
+            title={CardPickerLanguage.empty_deck_title(lang)}
+            hint={CardPickerLanguage.empty_deck_hint(lang)}
+          />
+        ) : (
+          <>
+            <CardFan
+              deckIds={state.deck}
+              revealedId={state.revealedId}
+              canDrag={!isRevealed && !revealing}
+              shuffleTick={shuffleTick}
+              cardRefs={cardRefs}
+              onDraw={drawId}
+            />
+            <p className="hidden items-center gap-1.5 text-xs text-icon-color/55 sm:flex">
+              {CardPickerLanguage.drag_hint(lang)}
+              <kbd className="rounded-md border border-b-2 border-gray-300 bg-white px-1.5 font-Anuphan text-[10px]">
+                Space
+              </kbd>
+            </p>
+          </>
+        )}
+      </div>
+
+      {/* Idle action bar */}
+      {!isRevealed && activeStudents.length > 0 && (
+        <div className="absolute inset-x-0 bottom-5 z-10 flex flex-wrap items-center justify-center gap-2 px-4 md:bottom-8 md:gap-3">
+          {deckEmpty ? (
+            <button type="button" onClick={restart} className={PRIMARY}>
+              <IoRefresh /> {CardPickerLanguage.restart(lang)}
+            </button>
+          ) : (
+            <>
+              <button type="button" onClick={restart} className={SECONDARY}>
+                <IoRefresh /> {CardPickerLanguage.restart(lang)}
+              </button>
+              <button
+                type="button"
+                onClick={shuffle}
+                disabled={state.deck.length < 2 || revealing}
+                className={SECONDARY}
+              >
+                <IoShuffle /> {CardPickerLanguage.shuffle(lang)}
+              </button>
+              <button
+                type="button"
+                onClick={drawRandom}
+                disabled={revealing}
+                className={PRIMARY}
+              >
+                {CardPickerLanguage.draw_card(lang)}
+              </button>
+            </>
+          )}
+        </div>
+      )}
+
+      <AnimatePresence>
+        {revealedStudent && (
+          <SpotlightReveal
+            key={`${revealedStudent.id}:${drawSeq}`}
+            student={revealedStudent}
+            origin={origin}
+            lang={lang}
+            isLast={deckEmpty}
+            reducedMotion={reducedMotion}
+            onFlipStart={() => play(ding)}
+            onRevealed={handleRevealed}
+            onPutBack={putBack}
+            onGivePoints={givePoints}
+            onBackToDeck={backToDeck}
+          />
+        )}
+      </AnimatePresence>
+
+      <DeckDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        deck={deckStudents}
+        picked={pickedStudents}
+        revealed={revealedStudent}
+        lang={lang}
+        onMoveToPicked={actions.moveToPicked}
+        onMoveToDeck={actions.moveToDeck}
       />
+
+      {scoreStudent && (
+        <PopupLayout onClose={closeScore}>
+          <PopUpStudent
+            student={scoreStudent}
+            toast={toast}
+            onClose={closeScore}
+          />
+        </PopupLayout>
+      )}
     </div>
   );
 };
+
+function EmptyState({
+  icon,
+  title,
+  hint,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  hint: string;
+}) {
+  return (
+    <div className="flex max-w-sm flex-col items-center text-center">
+      <span className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-primary-color/10 text-2xl text-primary-color">
+        {icon}
+      </span>
+      <h3 className="text-lg font-bold text-icon-color">{title}</h3>
+      <p className="mt-1 text-sm text-icon-color/60">{hint}</p>
+    </div>
+  );
+}
 
 export default StudentCardPicker;
