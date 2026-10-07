@@ -4,21 +4,21 @@ export const CardPickerLanguage = {
   restart: (language: Language) => {
     switch (language) {
       case "en":
-        return "restart";
+        return "Restart";
       case "th":
         return "เริ่มใหม่";
       default:
-        return "restart";
+        return "Restart";
     }
   },
   shuffle: (language: Language) => {
     switch (language) {
       case "en":
-        return "shuffle";
+        return "Shuffle";
       case "th":
         return "สับการ์ด";
       default:
-        return "shuffle";
+        return "Shuffle";
     }
   },
   delete_name: (language: Language) => {

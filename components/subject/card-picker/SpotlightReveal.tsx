@@ -40,6 +40,7 @@ export default function SpotlightReveal({
   onGivePoints,
   onDrawNext,
 }: Props) {
+  const slotRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const flipRef = useRef<HTMLDivElement>(null);
   const [shown, setShown] = useState(false);
@@ -47,9 +48,10 @@ export default function SpotlightReveal({
   // Fly from where the card actually was (drag release or top of the pile)
   // to the resting slot, then flip. Measured before paint, so no flash.
   useLayoutEffect(() => {
+    const slot = slotRef.current;
     const card = cardRef.current;
     const flip = flipRef.current;
-    if (!card || !flip) return;
+    if (!slot || !card || !flip) return;
     let cancelled = false;
 
     const finish = () => {
@@ -66,31 +68,40 @@ export default function SpotlightReveal({
       };
     }
 
+    // Track running animations so a re-run (StrictMode) or unmount stops
+    // them instead of letting two sequences fight over the same element.
+    const running: { stop: () => void }[] = [];
+
     const run = async () => {
       if (origin) {
-        const rest = card.getBoundingClientRect();
+        const rest = slot.getBoundingClientRect();
         const dx = origin.x - (rest.left + rest.width / 2);
         const dy = origin.y - (rest.top + rest.height / 2);
         const scale = rest.width > 0 ? origin.width / rest.width : 1;
-        await animate(
+        const fly = animate(
           card,
           { x: [dx, 0], y: [dy, 0], scale: [scale, 1], rotate: [0, -3] },
           { duration: 0.45, ease: [0.22, 1, 0.36, 1] },
         );
+        running.push(fly);
+        await fly;
       }
       if (cancelled) return;
       onFlipStart();
-      await animate(
+      const turn = animate(
         flip,
         { rotateY: [0, 180] },
         { duration: 0.5, ease: "easeInOut" },
       );
+      running.push(turn);
+      await turn;
       finish();
     };
     run();
 
     return () => {
       cancelled = true;
+      running.forEach((a) => a.stop());
     };
     // Runs once per mounted student (the parent keys us by student id).
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -112,19 +123,24 @@ export default function SpotlightReveal({
         exit={{ opacity: 0, scale: 0.92 }}
         transition={{ duration: 0.2 }}
       >
-        <div
-          ref={cardRef}
-          className={`${CARD_SIZE} shrink-0 [perspective:1200px]`}
-        >
+        {/* The slot never moves, so it is a stable "resting place" to measure
+            even if the effect re-runs (StrictMode) mid-animation. */}
+        <div ref={slotRef} className={`${CARD_SIZE} shrink-0`}>
           <div
-            ref={flipRef}
-            className="relative h-full w-full [transform-style:preserve-3d]"
+            ref={cardRef}
+            data-testid="spotlight-card"
+            className="h-full w-full [perspective:1200px]"
           >
-            <div className="absolute inset-0 [backface-visibility:hidden]">
-              <CardBack />
-            </div>
-            <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)]">
-              <CardFace student={student} lang={lang} />
+            <div
+              ref={flipRef}
+              className="relative h-full w-full [transform-style:preserve-3d]"
+            >
+              <div className="absolute inset-0 [backface-visibility:hidden]">
+                <CardBack />
+              </div>
+              <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                <CardFace student={student} lang={lang} />
+              </div>
             </div>
           </div>
         </div>

@@ -24,7 +24,8 @@ export function StudentPhoto({
         />
       ) : (
         <span className="flex h-full w-full items-center justify-center font-bold text-primary-color">
-          {student.firstName.charAt(0)}
+          {/* Skip Thai leading vowels (เ แ โ ใ ไ) so the initial is a consonant. */}
+          {student.firstName.replace(/^[เแโใไ]/, "").charAt(0)}
         </span>
       )}
     </div>
