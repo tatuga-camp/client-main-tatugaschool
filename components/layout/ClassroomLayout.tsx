@@ -50,6 +50,11 @@ function ClassroomLayout({ children, classroomId, schoolId }: LayoutProps) {
             ]}
             setTrigger={setActive}
             trigger={active}
+            sidebarTrail={[
+              { kind: "school", id: classroom.data.schoolId },
+              { kind: "classroom", id: classroom.data.id },
+            ]}
+            sidebarDefaultMenu="Classroom"
           />
         )}
       </div>

@@ -75,6 +75,12 @@ function SubjectLayout({
             ]}
             setTrigger={setActive}
             schoolId={subject.data?.schoolId}
+            sidebarTrail={[
+              { kind: "school", id: subject.data.schoolId },
+              { kind: "classroom", id: subject.data.classId },
+              { kind: "subject", id: subject.data.id },
+            ]}
+            sidebarDefaultMenu="Subject"
           />
         )}
       </div>
