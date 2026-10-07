@@ -39,7 +39,7 @@ function SubjectLayout({
       setActive(false);
     }
   });
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     document.body.style.overflow = "auto";
   }, []);
 

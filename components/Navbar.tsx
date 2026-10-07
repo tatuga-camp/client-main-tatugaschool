@@ -5,7 +5,10 @@ import { IoMdNotifications } from "react-icons/io";
 import { IoMenu } from "react-icons/io5";
 import { defaultCanvas } from "../data";
 import { navbarLanguageData } from "../data/languages";
-import { isSidebarPersistent } from "../hook/useResponsiveSidebar";
+import {
+  isSidebarPersistent,
+  shouldCloseOnNavigate,
+} from "../hook/useResponsiveSidebar";
 import useClickOutside from "../hook/useClickOutside";
 import {
   useGetLanguage,
@@ -204,7 +207,7 @@ function Navbar({
           active={trigger}
           schoolId={schoolId}
           onNavigate={() => {
-            if (!isSidebarPersistent()) {
+            if (shouldCloseOnNavigate()) {
               setTrigger(false);
             }
           }}

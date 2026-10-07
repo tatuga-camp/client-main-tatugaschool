@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { useRouter } from "next/router";
-import React, { memo, ReactNode } from "react";
+import React, { memo, ReactNode, useEffect, useState } from "react";
 import { defaultBlurHash } from "../data";
 import { sidebarDataLanguage } from "../data/languages/sidebar";
 import { useGetLanguage, useGetSchool } from "../react-query";
@@ -19,6 +19,13 @@ function Sidebar({ active, schoolId, menuList, onNavigate }: Props) {
   const router = useRouter();
   const selectMenu = router.query.menu;
 
+  // Restored-open state on a fresh mount should appear, not slide in.
+  const [animate, setAnimate] = useState(false);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setAnimate(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
   const school = useGetSchool({
     schoolId: schoolId,
   });
@@ -34,7 +41,7 @@ function Sidebar({ active, schoolId, menuList, onNavigate }: Props) {
     <aside
       id="school-sidebar"
       aria-hidden={active === false}
-      className={`fixed left-0 top-20 z-40 flex h-[calc(100vh-5rem)] w-72 max-w-[min(18rem,85vw)] flex-col items-center justify-start gap-3 overflow-y-auto overflow-x-hidden border-r-2 border-black bg-white p-4 text-black shadow-lg transition-transform duration-200 xl:w-60 xl:max-w-none xl:p-5 xl:shadow-none 2xl:w-72 ${visibilityClass}`}
+      className={`fixed left-0 top-20 z-40 flex h-[calc(100vh-5rem)] w-72 max-w-[min(18rem,85vw)] flex-col items-center justify-start gap-3 overflow-y-auto overflow-x-hidden border-r-2 border-black bg-white p-4 text-black shadow-lg ${animate ? "transition-transform duration-200" : ""} xl:w-60 xl:max-w-none xl:p-5 xl:shadow-none 2xl:w-72 ${visibilityClass}`}
     >
       <header className="flex min-h-28 w-full flex-col items-center justify-center gap-1 rounded-2xl bg-background-color p-2 2xl:min-h-36">
         <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-white">
