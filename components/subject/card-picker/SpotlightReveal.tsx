@@ -25,7 +25,7 @@ type Props = {
   onRevealed: () => void;
   onPutBack: () => void;
   onGivePoints: () => void;
-  onDrawNext: () => void;
+  onBackToDeck: () => void;
 };
 
 export default function SpotlightReveal({
@@ -38,7 +38,7 @@ export default function SpotlightReveal({
   onRevealed,
   onPutBack,
   onGivePoints,
-  onDrawNext,
+  onBackToDeck,
 }: Props) {
   const slotRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -199,12 +199,12 @@ export default function SpotlightReveal({
         <button
           type="button"
           disabled={!shown}
-          onClick={onDrawNext}
+          onClick={onBackToDeck}
           className={GHOST}
         >
           {isLast
             ? CardPickerLanguage.finish(lang)
-            : CardPickerLanguage.draw_next(lang)}{" "}
+            : CardPickerLanguage.back_to_deck(lang)}{" "}
           <IoArrowForward />
         </button>
       </motion.div>

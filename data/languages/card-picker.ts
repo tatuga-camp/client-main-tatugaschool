@@ -59,12 +59,12 @@ export const CardPickerLanguage = {
         return "Draw a card";
     }
   },
-  draw_next: (language: Language) => {
+  back_to_deck: (language: Language) => {
     switch (language) {
       case "th":
-        return "จั่วใบต่อไป";
+        return "กลับไปที่สำรับ";
       default:
-        return "Draw next";
+        return "Back to deck";
     }
   },
   finish: (language: Language) => {

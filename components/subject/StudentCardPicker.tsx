@@ -100,7 +100,6 @@ const StudentCardPicker: React.FC<StudentCardPickerProps> = ({
   const cardRefs = useRef(new Map<string, HTMLDivElement>());
   // Synchronous guards: state updates land a render later, refs don't.
   const revealingRef = useRef(false);
-  const pendingDrawRef = useRef(false);
   const stateRef = useRef(state);
   stateRef.current = state;
 
@@ -186,11 +185,10 @@ const StudentCardPicker: React.FC<StudentCardPickerProps> = ({
     }
   }, [play, cheering, reducedMotion]);
 
-  const drawNext = useCallback(() => {
+  // Keep the student picked and return to the fan; the teacher chooses the
+  // next card themselves (no automatic draw).
+  const backToDeck = useCallback(() => {
     if (revealingRef.current || stateRef.current.revealedId === null) return;
-    // Draw the next card only after the spotlight has faded out, so it can
-    // launch from the real top-of-pile position.
-    pendingDrawRef.current = stateRef.current.deck.length > 0;
     actions.confirm();
   }, [actions]);
 
@@ -218,7 +216,6 @@ const StudentCardPicker: React.FC<StudentCardPickerProps> = ({
   };
 
   const restart = () => {
-    pendingDrawRef.current = false;
     actions.restart();
     setShuffleTick((t) => t + 1);
   };
@@ -249,7 +246,7 @@ const StudentCardPicker: React.FC<StudentCardPickerProps> = ({
     closeScore,
     closeDrawer: () => setDrawerOpen(false),
     drawRandom,
-    drawNext,
+    backToDeck,
     putBack,
     givePoints,
   });
@@ -260,7 +257,7 @@ const StudentCardPicker: React.FC<StudentCardPickerProps> = ({
     closeScore,
     closeDrawer: () => setDrawerOpen(false),
     drawRandom,
-    drawNext,
+    backToDeck,
     putBack,
     givePoints,
   };
@@ -282,7 +279,7 @@ const StudentCardPicker: React.FC<StudentCardPickerProps> = ({
       if (event.code === "Space" || event.key === " ") {
         event.preventDefault();
         if (event.repeat) return;
-        if (k.isRevealed) k.drawNext();
+        if (k.isRevealed) k.backToDeck();
         else k.drawRandom();
         return;
       }
@@ -438,14 +435,7 @@ const StudentCardPicker: React.FC<StudentCardPickerProps> = ({
         </div>
       )}
 
-      <AnimatePresence
-        onExitComplete={() => {
-          if (pendingDrawRef.current) {
-            pendingDrawRef.current = false;
-            drawRandom();
-          }
-        }}
-      >
+      <AnimatePresence>
         {revealedStudent && (
           <SpotlightReveal
             key={`${revealedStudent.id}:${drawSeq}`}
@@ -458,7 +448,7 @@ const StudentCardPicker: React.FC<StudentCardPickerProps> = ({
             onRevealed={handleRevealed}
             onPutBack={putBack}
             onGivePoints={givePoints}
-            onDrawNext={drawNext}
+            onBackToDeck={backToDeck}
           />
         )}
       </AnimatePresence>
