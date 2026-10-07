@@ -5,7 +5,7 @@ import { CardPickerLanguage } from "../../../data/languages";
 import { Language, StudentOnSubject } from "../../../interfaces";
 import CardBack, { CARD_SIZE } from "./CardBack";
 import CardFace from "./CardFace";
-import type { CardOrigin } from "./CardStack";
+import type { CardOrigin } from "./CardFan";
 
 const SPOTLIGHT_BG =
   "radial-gradient(ellipse 60% 65% at 50% 45%, #2C7CD1 0%, #275d96 45%, #1b3f68 100%)";

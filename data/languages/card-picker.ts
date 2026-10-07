@@ -118,9 +118,9 @@ export const CardPickerLanguage = {
   drag_hint: (language: Language) => {
     switch (language) {
       case "th":
-        return "ลากการ์ดใบบนสุดออก หรือกด";
+        return "ลากการ์ดใบไหนก็ได้ออกมา หรือกด";
       default:
-        return "Drag the top card out, or press";
+        return "Drag any card out, or press";
     }
   },
   empty_deck_title: (language: Language) => {

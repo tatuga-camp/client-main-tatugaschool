@@ -23,10 +23,10 @@ import { useSound } from "../../hook";
 import { StudentOnSubject } from "../../interfaces";
 import { useGetLanguage } from "../../react-query";
 import PopupLayout from "../layout/PopupLayout";
-import CardStack, {
+import CardFan, {
   rectToOrigin,
   type CardOrigin,
-} from "./card-picker/CardStack";
+} from "./card-picker/CardFan";
 import DeckDrawer from "./card-picker/DeckDrawer";
 import SpotlightReveal from "./card-picker/SpotlightReveal";
 import { useCardDeck } from "./card-picker/useCardDeck";
@@ -97,7 +97,7 @@ const StudentCardPicker: React.FC<StudentCardPickerProps> = ({
   const [drawSeq, setDrawSeq] = useState(0);
   const [muted, setMuted] = useState(readMuted);
 
-  const topCardRef = useRef<HTMLDivElement | null>(null);
+  const cardRefs = useRef(new Map<string, HTMLDivElement>());
   // Synchronous guards: state updates land a render later, refs don't.
   const revealingRef = useRef(false);
   const pendingDrawRef = useRef(false);
@@ -168,10 +168,12 @@ const StudentCardPicker: React.FC<StudentCardPickerProps> = ({
     [actions],
   );
 
-  const drawTop = useCallback(() => {
-    const id = stateRef.current.deck[0];
-    if (!id) return;
-    const rect = topCardRef.current?.getBoundingClientRect();
+  // Button / Space: any card from the fan, launched from where it sits.
+  const drawRandom = useCallback(() => {
+    const { deck } = stateRef.current;
+    if (deck.length === 0) return;
+    const id = deck[Math.floor(Math.random() * deck.length)];
+    const rect = cardRefs.current.get(id)?.getBoundingClientRect();
     drawId(id, rect ? rectToOrigin(rect) : null);
   }, [drawId]);
 
@@ -246,7 +248,7 @@ const StudentCardPicker: React.FC<StudentCardPickerProps> = ({
     isRevealed: false,
     closeScore,
     closeDrawer: () => setDrawerOpen(false),
-    drawTop,
+    drawRandom,
     drawNext,
     putBack,
     givePoints,
@@ -257,7 +259,7 @@ const StudentCardPicker: React.FC<StudentCardPickerProps> = ({
     isRevealed,
     closeScore,
     closeDrawer: () => setDrawerOpen(false),
-    drawTop,
+    drawRandom,
     drawNext,
     putBack,
     givePoints,
@@ -281,7 +283,7 @@ const StudentCardPicker: React.FC<StudentCardPickerProps> = ({
         event.preventDefault();
         if (event.repeat) return;
         if (k.isRevealed) k.drawNext();
-        else k.drawTop();
+        else k.drawRandom();
         return;
       }
       if (!k.isRevealed) return;
@@ -385,12 +387,12 @@ const StudentCardPicker: React.FC<StudentCardPickerProps> = ({
           />
         ) : (
           <>
-            <CardStack
+            <CardFan
               deckIds={state.deck}
               revealedId={state.revealedId}
               canDrag={!isRevealed && !revealing}
               shuffleTick={shuffleTick}
-              topCardRef={topCardRef}
+              cardRefs={cardRefs}
               onDraw={drawId}
             />
             <p className="hidden items-center gap-1.5 text-xs text-icon-color/55 sm:flex">
@@ -425,7 +427,7 @@ const StudentCardPicker: React.FC<StudentCardPickerProps> = ({
               </button>
               <button
                 type="button"
-                onClick={drawTop}
+                onClick={drawRandom}
                 disabled={revealing}
                 className={PRIMARY}
               >
@@ -440,7 +442,7 @@ const StudentCardPicker: React.FC<StudentCardPickerProps> = ({
         onExitComplete={() => {
           if (pendingDrawRef.current) {
             pendingDrawRef.current = false;
-            drawTop();
+            drawRandom();
           }
         }}
       >
