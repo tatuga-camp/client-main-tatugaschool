@@ -78,6 +78,10 @@ export default function SpotlightReveal({
         const dx = origin.x - (rest.left + rest.width / 2);
         const dy = origin.y - (rest.top + rest.height / 2);
         const scale = rest.width > 0 ? origin.width / rest.width : 1;
+        // animate() applies its first keyframe on the next frame; pin the
+        // start pose now (we're before paint) so the card never flashes at
+        // its resting spot first.
+        card.style.transform = `translateX(${dx}px) translateY(${dy}px) scale(${scale})`;
         const fly = animate(
           card,
           { x: [dx, 0], y: [dy, 0], scale: [scale, 1], rotate: [0, -3] },

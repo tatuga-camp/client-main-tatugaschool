@@ -92,6 +92,9 @@ const StudentCardPicker: React.FC<StudentCardPickerProps> = ({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [scoreStudentId, setScoreStudentId] = useState<string | null>(null);
   const [shuffleTick, setShuffleTick] = useState(0);
+  // Unique per draw: redrawing the same student while the previous spotlight
+  // is still exiting must mount a fresh reveal, not revive the exiting one.
+  const [drawSeq, setDrawSeq] = useState(0);
   const [muted, setMuted] = useState(readMuted);
 
   const topCardRef = useRef<HTMLDivElement | null>(null);
@@ -158,6 +161,7 @@ const StudentCardPicker: React.FC<StudentCardPickerProps> = ({
       }
       revealingRef.current = true;
       setRevealing(true);
+      setDrawSeq((n) => n + 1);
       setOrigin(from);
       actions.draw(id);
     },
@@ -198,11 +202,13 @@ const StudentCardPicker: React.FC<StudentCardPickerProps> = ({
     setScoreStudentId(stateRef.current.revealedId);
   }, []);
 
-  const closeScore = useCallback(() => {
-    setScoreStudentId(null);
-    // PopupLayout's backdrop resets overflow to auto; we're still open.
-    document.body.style.overflow = "hidden";
-  }, []);
+  const closeScore = useCallback(() => setScoreStudentId(null), []);
+
+  // PopUpStudent and PopupLayout reset overflow to "auto" synchronously after
+  // calling onClose; re-lock in an effect, which runs after those writes.
+  useEffect(() => {
+    if (scoreStudentId === null) document.body.style.overflow = "hidden";
+  }, [scoreStudentId]);
 
   const shuffle = () => {
     actions.shuffle();
@@ -279,11 +285,11 @@ const StudentCardPicker: React.FC<StudentCardPickerProps> = ({
         return;
       }
       if (!k.isRevealed) return;
-      const key = event.key.toLowerCase();
-      if (key === "p") {
+      // Match physical keys: on a Thai layout `event.key` is "ย" / "ิ".
+      if (event.code === "KeyP") {
         event.preventDefault();
         k.givePoints();
-      } else if (key === "b") {
+      } else if (event.code === "KeyB") {
         event.preventDefault();
         k.putBack();
       }
@@ -440,7 +446,7 @@ const StudentCardPicker: React.FC<StudentCardPickerProps> = ({
       >
         {revealedStudent && (
           <SpotlightReveal
-            key={revealedStudent.id}
+            key={`${revealedStudent.id}:${drawSeq}`}
             student={revealedStudent}
             origin={origin}
             lang={lang}
