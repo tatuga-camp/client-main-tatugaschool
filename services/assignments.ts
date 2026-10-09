@@ -7,6 +7,7 @@ import {
   QuestionOnVideo,
   ScoreOnStudent,
   ScoreOnSubject,
+  QuizSettings,
   Skill,
   StudentOnAssignment,
 } from "../interfaces";
@@ -29,6 +30,7 @@ export type RequestCreateAssignmentService = {
   assignAll?: boolean;
   order?: number;
   tags?: string[];
+  quizSettings?: Partial<QuizSettings>;
 };
 
 type ResponseCreateAssignmentService = Assignment;
@@ -140,6 +142,7 @@ export type RequestUpdateAssignmentService = {
     preventFastForward?: boolean;
     allowStudentViewScore?: boolean;
     tags?: string[];
+    quizSettings?: Partial<QuizSettings>;
     rubricId?: string | null;
   };
 };

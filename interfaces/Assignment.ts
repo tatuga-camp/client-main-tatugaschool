@@ -19,6 +19,7 @@ export interface Assignment {
   allowStudentViewScore?: boolean;
   tags: string[];
   rubricId?: string | null;
+  quizSettings?: QuizSettings | null;
 }
 
 export type AssignmentStatus = "Published" | "Draft";
