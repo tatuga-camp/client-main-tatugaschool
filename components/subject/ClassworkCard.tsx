@@ -11,6 +11,7 @@ import {
   MdDragIndicator,
   MdLink,
   MdOndemandVideo,
+  MdQuiz,
 } from "react-icons/md";
 import {
   classworkCardDataLanguage as t,
@@ -18,6 +19,10 @@ import {
 } from "../../data/languages";
 import { Assignment, FileOnAssignment, Language } from "../../interfaces";
 import { useGetLanguage, useUpdateAssignment } from "../../react-query";
+import {
+  classworkHref,
+  classworkShowsAttachments,
+} from "../../utils/classworkLinks";
 import TextEditor from "../common/TextEditor";
 import AssignmentTagEditor from "./AssignmentTagEditor";
 
@@ -46,17 +51,20 @@ const TYPE_TILE: Record<Assignment["type"], string> = {
   Assignment: "bg-primary-color/10 text-primary-color",
   VideoQuiz: "bg-rose-50 text-rose-500",
   Material: "bg-success-color/10 text-success-color",
+  Quiz: "bg-warning-color/10 text-warning-color",
 };
 
 function TypeIcon({ type }: { type: Assignment["type"] }) {
   if (type === "Material") return <BiBook />;
   if (type === "VideoQuiz") return <MdOndemandVideo />;
+  if (type === "Quiz") return <MdQuiz />;
   return <MdAssignment />;
 }
 
 function typeLabel(type: Assignment["type"], language: Language) {
   if (type === "Material") return t.typeMaterial(language);
   if (type === "VideoQuiz") return t.typeVideoQuiz(language);
+  if (type === "Quiz") return t.typeQuiz(language);
   return t.typeAssignment(language);
 }
 
@@ -134,7 +142,7 @@ function ClassworkCard({
           must keep working on their own sit above it with relative z-10. */}
       {!disabled && (
         <Link
-          href={`/subject/${subjectId}/assignment/${classwork.id}`}
+          href={classworkHref(subjectId, classwork)}
           aria-label={`${t.openClasswork(lang)} ${classwork.title}`}
           className="absolute inset-0 z-0 rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-color"
         />
@@ -315,7 +323,7 @@ function ClassworkCard({
             <p className="text-sm text-gray-400">{t.noDescription(lang)}</p>
           )}
 
-          {classwork.type !== "VideoQuiz" && (
+          {classworkShowsAttachments(classwork.type) && (
             <div>
               <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
                 {t.attachments(lang)}

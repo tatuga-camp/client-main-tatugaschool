@@ -40,3 +40,4 @@ export * from "./WordCloud";
 export * from "./Rubric";
 export * from "./Analytics";
 export * from "./Issue";
+export * from "./Quiz";

@@ -1,0 +1,386 @@
+import { GetServerSideProps } from "next";
+import Head from "next/head";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { IoArrowBack } from "react-icons/io5";
+import { MdDeleteOutline, MdQuiz } from "react-icons/md";
+import Swal from "sweetalert2";
+import QuestionList from "../../../../components/quiz/QuestionList";
+import QuizMonitor from "../../../../components/quiz/QuizMonitor";
+import QuizSettingsPanel from "../../../../components/quiz/QuizSettingsPanel";
+import useUnsavedQuizGuard from "../../../../hook/useUnsavedQuizGuard";
+import LoadingSpinner from "../../../../components/common/LoadingSpinner";
+import { MenuSubject } from "../../../../data";
+import { quizLanguage } from "../../../../data/languages";
+import { ErrorMessages } from "../../../../interfaces";
+import {
+  useDeleteAssignment,
+  useGetAssignment,
+  useGetLanguage,
+  useGetQuizMonitor,
+  useGetQuizQuestions,
+  useUpdateAssignment,
+  forgetDeletedAssignment,
+} from "../../../../react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  deleteConfirmOptions,
+  runIfConfirmed,
+} from "../../../../utils/confirmDelete";
+import { withDirtyId } from "../../../../utils/quizDraft";
+import {
+  editorLockState,
+  quizEditorLoadState,
+} from "../../../../utils/quizMonitor";
+
+type Tab = "questions" | "settings" | "monitor";
+const TABS: Tab[] = ["questions", "settings", "monitor"];
+
+export default function QuizEditorPage({
+  subjectId,
+  assignmentId,
+}: {
+  subjectId: string;
+  assignmentId: string;
+}) {
+  const router = useRouter();
+  const language = useGetLanguage();
+  const lang = language.data ?? "en";
+  const assignment = useGetAssignment({ id: assignmentId });
+  const questions = useGetQuizQuestions({ assignmentId });
+  const update = useUpdateAssignment();
+  const remove = useDeleteAssignment();
+  const queryClient = useQueryClient();
+  const [tab, setTab] = useState<Tab>("questions");
+  const [title, setTitle] = useState("");
+  // Lock state comes from the monitor (any started attempt locks questions).
+  const monitor = useGetQuizMonitor({
+    assignmentId,
+    enabled: tab === "questions",
+    poll: false,
+  });
+  // Read-only until the first lock check returns, so a locked quiz never flashes editable.
+  const { locked, readOnly } = editorLockState(
+    monitor.data?.locked,
+    monitor.isLoading,
+  );
+  // Question cards with unsaved edits; leaving the tab or publishing asks first.
+  const [dirtyIds, setDirtyIds] = useState<Set<string>>(() => new Set());
+  const onDirtyChange = useCallback(
+    (questionId: string, dirty: boolean) =>
+      setDirtyIds((ids) => withDirtyId(ids, questionId, dirty)),
+    [],
+  );
+
+  useEffect(() => {
+    if (!router.isReady) return;
+    const q = router.query.tab as Tab | undefined;
+    if (q && TABS.includes(q)) setTab(q);
+  }, [router.isReady]);
+
+  useEffect(() => {
+    if (assignment.data) setTitle(assignment.data.title);
+  }, [assignment.data?.title]);
+
+  // Every question card registers "save now"; leaving saves first and only
+  // asks when something still can't be saved.
+  const saveAllRef = useRef<(() => Promise<number>) | null>(null);
+  const saveAll = async () => (saveAllRef.current ? saveAllRef.current() : 0);
+  const { allowNextNavigation, requestLeave } = useUnsavedQuizGuard({
+    enabled: dirtyIds.size > 0,
+    saveAll,
+    language: lang,
+  });
+
+  /** True when everything saved, or the teacher chose to go on anyway. */
+  const confirmUnsaved = async (text: string, confirmButtonText: string) => {
+    if (dirtyIds.size === 0) return true;
+    const remaining = await saveAll();
+    if (remaining === 0) return true;
+    const answer = await Swal.fire({
+      title: quizLanguage.unsavedCount(lang, remaining),
+      text,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText,
+      cancelButtonText: quizLanguage.keepEditing(lang),
+    });
+    return answer.isConfirmed;
+  };
+
+  const selectTab = async (next: Tab) => {
+    if (next === tab) return;
+    if (tab === "questions") {
+      const ok = await confirmUnsaved(
+        quizLanguage.unsavedText(lang),
+        quizLanguage.leaveAnyway(lang),
+      );
+      if (!ok) return;
+    }
+    setTab(next);
+    router.replace({ query: { ...router.query, tab: next } }, undefined, {
+      shallow: true,
+    });
+  };
+
+  const fail = (error: unknown) => {
+    const result = error as ErrorMessages;
+    Swal.fire({
+      title: result?.error ?? "Error",
+      text: result?.message?.toString(),
+      icon: "error",
+    });
+  };
+
+  const saveTitle = async () => {
+    if (!assignment.data) return;
+    const next = title.trim();
+    if (!next || next === assignment.data.title) {
+      setTitle(assignment.data.title);
+      return;
+    }
+    try {
+      await update.mutateAsync({
+        query: { assignmentId },
+        data: { title: next },
+      });
+      setTitle(next);
+    } catch (error) {
+      fail(error);
+    }
+  };
+
+  const toggleStatus = async () => {
+    if (!assignment.data) return;
+    const next = assignment.data.status === "Published" ? "Draft" : "Published";
+    if (next === "Published") {
+      const ok = await confirmUnsaved(
+        quizLanguage.unsavedPublishText(lang),
+        quizLanguage.publishAnyway(lang),
+      );
+      if (!ok) return;
+    }
+    try {
+      await update.mutateAsync({
+        query: { assignmentId },
+        data: { status: next },
+      });
+    } catch (error) {
+      fail(error);
+    }
+  };
+
+  const deleteQuiz = async () => {
+    try {
+      return await runIfConfirmed(
+        () => Swal.fire(deleteConfirmOptions("quiz", lang)),
+        async () => {
+          await remove.mutateAsync({ assignmentId });
+          allowNextNavigation();
+          await router.push(backHref);
+          forgetDeletedAssignment(queryClient, assignmentId);
+          Swal.fire({
+            icon: "success",
+            title: quizLanguage.deleted(lang),
+            timer: 1500,
+            showConfirmButton: false,
+          });
+        },
+      );
+    } catch (error) {
+      fail(error);
+    }
+  };
+
+  const loadState = quizEditorLoadState({
+    data: assignment.data,
+    isError: assignment.isError,
+  });
+  const backHref = {
+    pathname: `/subject/${subjectId}`,
+    query: { menu: "Classwork" as MenuSubject },
+  };
+
+  if (loadState === "error" || loadState === "notQuiz") {
+    // The server's own message (e.g. "Assignment not found"), shown under the localized heading.
+    const detail =
+      loadState === "error"
+        ? (assignment.error as ErrorMessages | null)?.message?.toString()
+        : undefined;
+    return (
+      <div className="flex h-dvh items-center justify-center bg-background-color p-4 font-Anuphan">
+        <div
+          role="alert"
+          className="flex w-full max-w-md flex-col items-center gap-3 rounded-2xl border border-gray-100 bg-white p-8 text-center"
+        >
+          <MdQuiz className="text-4xl text-error-color/70" />
+          <p className="font-semibold text-icon-color">
+            {loadState === "error"
+              ? quizLanguage.loadQuizFailed(lang)
+              : quizLanguage.notAQuiz(lang)}
+          </p>
+          {detail && <p className="text-sm text-icon-color/60">{detail}</p>}
+          <Link
+            href={backHref}
+            className="mt-2 flex items-center gap-2 rounded-2xl bg-primary-color px-4 py-2 text-sm font-medium text-white hover:bg-primary-color-hover"
+          >
+            <IoArrowBack /> {quizLanguage.backToClasswork(lang)}
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (!assignment.data) {
+    return (
+      <div className="flex h-dvh items-center justify-center bg-background-color">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  const isPublished = assignment.data.status === "Published";
+  const questionCount = questions.data?.length ?? 0;
+  const tabLabel = (t: Tab) =>
+    t === "questions"
+      ? quizLanguage.tabQuestions(lang)
+      : t === "settings"
+        ? quizLanguage.tabSettings(lang)
+        : quizLanguage.tabMonitor(lang);
+
+  return (
+    <>
+      <Head>
+        <title>{assignment.data.title}</title>
+      </Head>
+      <div className="flex h-dvh flex-col bg-background-color font-Anuphan">
+        <header className="shrink-0 border-b border-gray-100 bg-white">
+          <nav className="flex min-h-16 flex-wrap items-center gap-3 px-4 py-2 md:px-6">
+            <Link
+              href={backHref}
+              onClick={(e) => {
+                if (dirtyIds.size === 0) return;
+                // Save first (and warn only if needed) instead of letting the
+                // router start a navigation the guard would have to cancel.
+                e.preventDefault();
+                requestLeave(`/subject/${subjectId}?menu=Classwork`);
+              }}
+              aria-label={quizLanguage.backToClasswork(lang)}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xl text-gray-500 hover:bg-gray-100 hover:text-icon-color"
+            >
+              <IoArrowBack />
+            </Link>
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-warning-color/10 text-2xl text-warning-color">
+              <MdQuiz />
+            </div>
+            <input
+              aria-label="Quiz title"
+              value={title}
+              placeholder={quizLanguage.untitled(lang)}
+              onChange={(e) => setTitle(e.target.value)}
+              onBlur={saveTitle}
+              className="min-w-0 flex-1 border-b-2 border-transparent bg-transparent py-1 text-lg font-semibold text-icon-color outline-none focus:border-primary-color md:text-xl"
+            />
+            <span className="hidden text-sm text-icon-color/60 sm:inline">
+              {quizLanguage.totalPoints(lang, assignment.data.maxScore ?? 0)}
+            </span>
+            <span
+              className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                isPublished
+                  ? "bg-success-color/10 text-success-color"
+                  : "bg-gray-100 text-gray-600"
+              }`}
+            >
+              {isPublished
+                ? quizLanguage.published(lang)
+                : quizLanguage.draft(lang)}
+            </span>
+            <button
+              type="button"
+              onClick={toggleStatus}
+              disabled={
+                update.isPending || (!isPublished && questionCount === 0)
+              }
+              title={
+                !isPublished && questionCount === 0
+                  ? quizLanguage.needQuestionsToPublish(lang)
+                  : undefined
+              }
+              className={`rounded-2xl px-4 py-2 text-sm font-medium disabled:opacity-40 ${
+                isPublished
+                  ? "border border-gray-200 text-icon-color hover:bg-gray-50"
+                  : "gradient-bg text-white"
+              }`}
+            >
+              {isPublished
+                ? quizLanguage.unpublish(lang)
+                : quizLanguage.publish(lang)}
+            </button>
+            <button
+              type="button"
+              onClick={deleteQuiz}
+              disabled={remove.isPending}
+              aria-label={quizLanguage.deleteQuiz(lang)}
+              className="flex items-center gap-1.5 rounded-2xl border border-error-color/40 px-3 py-2 text-sm font-medium text-error-color hover:bg-error-color/10 disabled:opacity-40"
+            >
+              <MdDeleteOutline className="text-lg" />
+              <span className="hidden sm:inline">
+                {quizLanguage.deleteQuiz(lang)}
+              </span>
+            </button>
+          </nav>
+          <div className="flex items-center gap-1 overflow-x-auto px-4 md:px-6">
+            {TABS.map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => selectTab(t)}
+                className={`border-b-2 px-3 py-2 text-sm font-medium ${
+                  tab === t
+                    ? "border-primary-color text-primary-color"
+                    : "border-transparent text-icon-color/60 hover:text-icon-color"
+                }`}
+              >
+                {tabLabel(t)}
+              </button>
+            ))}
+            <Link
+              href={{
+                pathname: `/subject/${subjectId}/assignment/${assignmentId}`,
+                query: { menu: "manageassigning" },
+              }}
+              className="ml-auto whitespace-nowrap px-3 py-2 text-sm text-primary-color hover:underline"
+            >
+              {quizLanguage.assignStudents(lang)}
+            </Link>
+          </div>
+        </header>
+        <main className="flex-1 overflow-auto">
+          {tab === "questions" && (
+            <QuestionList
+              assignmentId={assignmentId}
+              subjectId={subjectId}
+              locked={locked}
+              readOnly={readOnly}
+              onDirtyChange={onDirtyChange}
+              saveAllRef={saveAllRef}
+            />
+          )}
+          {tab === "settings" && (
+            <QuizSettingsPanel assignment={assignment.data} />
+          )}
+          {tab === "monitor" && <QuizMonitor assignmentId={assignmentId} />}
+        </main>
+      </div>
+    </>
+  );
+}
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const params = ctx.params;
+  if (!params?.subjectId || !params?.assignmentId) return { notFound: true };
+  return {
+    props: { subjectId: params.subjectId, assignmentId: params.assignmentId },
+  };
+};

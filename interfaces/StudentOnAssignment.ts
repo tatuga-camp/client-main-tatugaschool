@@ -1,3 +1,4 @@
+import { QuizAttempt } from "./Quiz";
 export interface StudentOnAssignment {
   id: string;
   createAt: Date;
@@ -19,6 +20,7 @@ export interface StudentOnAssignment {
   studentOnSubjectId: string;
   schoolId: string;
   subjectId: string;
+  quizAttempt?: QuizAttempt | null;
 }
 
 export type StudentAssignmentStatus =

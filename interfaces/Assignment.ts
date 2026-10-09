@@ -1,3 +1,4 @@
+import { QuizSettings } from "./Quiz";
 export interface Assignment {
   id: string;
   createAt: Date;
@@ -18,7 +19,8 @@ export interface Assignment {
   allowStudentViewScore?: boolean;
   tags: string[];
   rubricId?: string | null;
+  quizSettings?: QuizSettings | null;
 }
 
 export type AssignmentStatus = "Published" | "Draft";
-export type AssignmentType = "Assignment" | "Material" | "VideoQuiz";
+export type AssignmentType = "Assignment" | "Material" | "VideoQuiz" | "Quiz";

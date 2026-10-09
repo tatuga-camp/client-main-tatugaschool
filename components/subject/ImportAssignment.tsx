@@ -3,6 +3,7 @@ import {
   useCreateAssignment,
   useCreateFileOnAssignment,
   useCreateQuestionOnVideo,
+  useDuplicateQuiz,
   useGetAssignments,
   useGetLanguage,
   useGetMemberOnSchoolBySchool,
@@ -268,6 +269,7 @@ function AssignmentLists({
     subjectId: subjectId,
   });
   const createQuestions = useCreateQuestionOnVideo();
+  const duplicateQuiz = useDuplicateQuiz();
   const [selectClasswork, setSelectClasswork] = useState<
     | (Assignment & {
         files?: FileOnAssignment[];
@@ -285,6 +287,15 @@ function AssignmentLists({
       }
 
       setLoading(true);
+      if (selectClasswork.type === "Quiz") {
+        const copy = await duplicateQuiz.mutateAsync({
+          assignmentId: selectClasswork.id,
+          targetSubjectId,
+        });
+        setLoading(false);
+        router.push(`/subject/${targetSubjectId}/quiz/${copy.id}`);
+        return;
+      }
       const classwork = await create.mutateAsync({
         subjectId: targetSubjectId,
         title: selectClasswork.title,

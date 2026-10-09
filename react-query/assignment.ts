@@ -127,14 +127,23 @@ export function useDeleteAssignment() {
           return oldData?.filter((assignment) => assignment.id !== data.id);
         },
       );
-      queryClient.invalidateQueries({
-        queryKey: ["assignment", { id: data.id }],
-      });
+      // The cached ["assignment", { id }] is left alone here: the page that
+      // deleted it is still mounted, and removing or invalidating it now makes
+      // that page refetch (404) and show its spinner until navigation ends.
+      // Callers drop it with forgetDeletedAssignment once they have left.
       queryClient.invalidateQueries({
         queryKey: ["assignment-overview", { subjectId: data.subjectId }],
       });
     },
   });
+}
+
+/** Drop a deleted assignment's cache once no page is watching it any more. */
+export function forgetDeletedAssignment(
+  queryClient: ReturnType<typeof useQueryClient>,
+  assignmentId: string,
+) {
+  queryClient.removeQueries({ queryKey: ["assignment", { id: assignmentId }] });
 }
 
 export function useReoderAssignment() {

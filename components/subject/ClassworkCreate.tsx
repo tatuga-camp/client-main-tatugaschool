@@ -11,7 +11,10 @@ import {
   MdUnpublished,
 } from "react-icons/md";
 import Swal from "sweetalert2";
-import { classworkHeadMenuBarDataLanguage } from "../../data/languages";
+import {
+  classworkHeadMenuBarDataLanguage,
+  quizLanguage,
+} from "../../data/languages";
 import useClickOutside from "../../hook/useClickOutside";
 import useAdjustPosition from "../../hook/useWindow";
 import {
@@ -283,6 +286,32 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
     }
   };
 
+  const handleCreateClassworkForQuiz = async (): Promise<void> => {
+    try {
+      setLoading(true);
+      const response = await create.mutateAsync({
+        title: quizLanguage.untitled(language.data ?? "en"),
+        beginDate: new Date().toISOString(),
+        type: "Quiz",
+        status: "Draft",
+        subjectId: subjectId,
+        assignAll: true,
+      });
+      router.push(`/subject/${subjectId}/quiz/${response.id}`);
+    } catch (error) {
+      setLoading(false);
+      const result = error as ErrorMessages;
+      Swal.fire({
+        title: result.error ? result.error : "Something Went Wrong",
+        text: result.message?.toString(),
+        footer: result.statusCode
+          ? "Code Error: " + result.statusCode?.toString()
+          : "",
+        icon: "error",
+      });
+    }
+  };
+
   return (
     <form onSubmit={handleCreateClasswork} className="flex h-full flex-col">
       <nav className="flex min-h-20 w-full flex-wrap items-center justify-between gap-y-2 border-b bg-white px-5 py-2 md:h-20 md:flex-nowrap md:py-0">
@@ -384,6 +413,10 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
           subjectId={subjectId}
           schoolId={schoolId}
           onChange={async (d) => {
+            if (d.type === "Quiz") {
+              await handleCreateClassworkForQuiz();
+              return;
+            }
             if (d.type === "VideoQuiz") {
               await handleCreateClassworkForVideoQuiz();
               return;

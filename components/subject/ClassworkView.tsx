@@ -10,6 +10,7 @@ import {
   MdEdit,
   MdLink,
   MdOutlineFileUpload,
+  MdQuiz,
   MdSettings,
   MdVideoLibrary,
 } from "react-icons/md";
@@ -54,6 +55,11 @@ export const classworkLists = [
     title: "Video Quiz",
     value: "VideoQuiz",
     icon: <MdVideoLibrary />,
+  },
+  {
+    title: "Quiz",
+    value: "Quiz",
+    icon: <MdQuiz />,
   },
 ] as const;
 
@@ -413,9 +419,14 @@ function ClassworkView({
                 )}
               </span>
               <div className="flex flex-wrap justify-center gap-2">
-                <label htmlFor="upload" className={`${outlineButton} cursor-pointer`}>
+                <label
+                  htmlFor="upload"
+                  className={`${outlineButton} cursor-pointer`}
+                >
                   <MdOutlineFileUpload className="text-lg" />
-                  {classworkViewDataLanguage.uploadButton(language.data ?? "en")}
+                  {classworkViewDataLanguage.uploadButton(
+                    language.data ?? "en",
+                  )}
                   <input
                     onChange={(e) => {
                       const files = e.target.files;
@@ -460,7 +471,8 @@ function ClassworkView({
                   Suggest Skills for Classwork by AI
                 </h2>
                 <span className="text-xs text-gray-400">
-                  Suggest the skill that related to your classwork for evaluation
+                  Suggest the skill that related to your classwork for
+                  evaluation
                 </span>
               </div>
               <button
@@ -519,7 +531,9 @@ function ClassworkView({
           )}
           <button
             type="button"
-            aria-label={triggerSildeOption ? "Expand settings" : "Collapse settings"}
+            aria-label={
+              triggerSildeOption ? "Expand settings" : "Collapse settings"
+            }
             onClick={() => setTriggerSildeOption((prev) => !prev)}
             className="hidden shrink-0 rounded-full p-2 text-xl text-gray-400 transition hover:bg-gray-100 hover:text-icon-color lg:block"
           >

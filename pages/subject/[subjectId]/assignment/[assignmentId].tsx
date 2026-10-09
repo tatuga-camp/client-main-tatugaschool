@@ -5,8 +5,17 @@ import { useRouter } from "next/router";
 import { ProgressBar } from "primereact/progressbar";
 import React, { useEffect, useMemo, useState } from "react";
 import { IoArrowBack, IoChevronDownSharp } from "react-icons/io5";
-import { MdAssignment, MdMenuBook, MdVideoLibrary } from "react-icons/md";
+import {
+  MdAssignment,
+  MdMenuBook,
+  MdQuiz,
+  MdVideoLibrary,
+} from "react-icons/md";
 import Swal from "sweetalert2";
+import {
+  deleteConfirmOptions,
+  runIfConfirmed,
+} from "../../../../utils/confirmDelete";
 import ClassStudentAssignWork from "../../../../components/subject/ClassStudentAssignWork";
 import ClassStudentWork from "../../../../components/subject/ClassStudentWork";
 import { menuClassworkList } from "../../../../components/subject/ClassworkCreate";
@@ -35,7 +44,9 @@ import {
   useGetLanguage,
   useGetSubject,
   useUpdateAssignment,
+  forgetDeletedAssignment,
 } from "../../../../react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   getSignedURLTeacherService,
   UploadSignURLService,
@@ -78,6 +89,7 @@ const typeIcon: Record<string, React.ReactNode> = {
   Assignment: <MdAssignment />,
   Material: <MdMenuBook />,
   VideoQuiz: <MdVideoLibrary />,
+  Quiz: <MdQuiz />,
 };
 
 function StatusChip({
@@ -139,6 +151,7 @@ function Index({
   const deleteFileAssignment = useDeleteFileOnAssignment();
   const createFileAssignment = useCreateFileOnAssignment();
   const deleteAssignment = useDeleteAssignment();
+  const queryClient = useQueryClient();
   const [assignmentTitle, setAssignmentTitle] = useState(
     assignment.data?.title,
   );
@@ -163,6 +176,14 @@ function Index({
       document.body.style.overflow = "hidden";
     }
   }, [router.isReady]);
+
+  // Quizzes are edited on their own page; only assigning and export stay here.
+  useEffect(() => {
+    if (!router.isReady || assignment.data?.type !== "Quiz") return;
+    const menu = router.query.menu as MenuAssignmentQuery | undefined;
+    if (menu === "manageassigning" || menu === "exportclasswork") return;
+    router.replace(`/subject/${subjectId}/quiz/${assignmentId}`);
+  }, [router.isReady, router.query.menu, assignment.data?.type]);
 
   useEffect(() => {
     if (assignment.data) {
@@ -250,15 +271,27 @@ function Index({
 
   const handleDeleteAssignment = async () => {
     try {
-      await deleteAssignment.mutateAsync({
-        assignmentId: assignmentId,
-      });
-      router.push(`/subject/${subjectId}?menu=Classwork`);
-      Swal.fire({
-        title: "Success",
-        text: "Assignment has been deleted",
-        icon: "success",
-      });
+      await runIfConfirmed(
+        () =>
+          Swal.fire(
+            deleteConfirmOptions(
+              assignment.data?.type === "Quiz" ? "quiz" : "assignment",
+              language.data ?? "en",
+            ),
+          ),
+        async () => {
+          await deleteAssignment.mutateAsync({
+            assignmentId: assignmentId,
+          });
+          await router.push(`/subject/${subjectId}?menu=Classwork`);
+          forgetDeletedAssignment(queryClient, assignmentId);
+          Swal.fire({
+            title: "Success",
+            text: "Assignment has been deleted",
+            icon: "success",
+          });
+        },
+      );
     } catch (error) {
       let result = error as ErrorMessages;
       Swal.fire({
@@ -479,60 +512,60 @@ function Index({
                     ref={divRef}
                     className="absolute right-4 top-full z-40 mt-1 w-56 max-w-[calc(100vw-2rem)] rounded-2xl border border-gray-100 bg-white p-1.5 shadow-lg md:right-0 md:mt-2"
                   >
-                      {menuClassworkList.map((menu, index) => {
-                        const disabled =
-                          (menu.title === "Mark as Draft" &&
-                            classwork?.status === "Draft") ||
-                          (menu.title === "Publish" &&
-                            classwork?.status === "Published");
-                        let summitValue: SummitValue = "Published";
+                    {menuClassworkList.map((menu, index) => {
+                      const disabled =
+                        (menu.title === "Mark as Draft" &&
+                          classwork?.status === "Draft") ||
+                        (menu.title === "Publish" &&
+                          classwork?.status === "Published");
+                      let summitValue: SummitValue = "Published";
 
-                        if (menu.title === "Save Change") {
-                          summitValue = "Save Change";
-                        }
-                        if (menu.title === "Mark as Draft") {
-                          summitValue = "Mark as Draft";
-                        }
-                        if (menu.title === "Publish") {
-                          summitValue = "Published";
-                        }
-                        const isDelete = menu.title === "Delete";
-                        return (
-                          <React.Fragment key={index}>
-                            {isDelete && (
-                              <div className="my-1 border-t border-gray-100" />
-                            )}
-                            <button
-                              onClick={() => {
-                                if (isDelete) {
-                                  handleDeleteAssignment();
-                                }
-                              }}
-                              disabled={disabled}
-                              type={
-                                menu.title === "Publish" ||
-                                menu.title === "Save Change" ||
-                                menu.title === "Mark as Draft"
-                                  ? "submit"
-                                  : "button"
+                      if (menu.title === "Save Change") {
+                        summitValue = "Save Change";
+                      }
+                      if (menu.title === "Mark as Draft") {
+                        summitValue = "Mark as Draft";
+                      }
+                      if (menu.title === "Publish") {
+                        summitValue = "Published";
+                      }
+                      const isDelete = menu.title === "Delete";
+                      return (
+                        <React.Fragment key={index}>
+                          {isDelete && (
+                            <div className="my-1 border-t border-gray-100" />
+                          )}
+                          <button
+                            onClick={() => {
+                              if (isDelete) {
+                                handleDeleteAssignment();
                               }
-                              value={summitValue}
-                              className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-medium transition ${
-                                isDelete
-                                  ? "text-error-color hover:bg-error-color/10"
-                                  : disabled
-                                    ? "cursor-not-allowed text-gray-300"
-                                    : "text-gray-700 hover:bg-gray-50"
-                              }`}
-                            >
-                              <span className="text-lg">{menu.icon}</span>
-                              {classworkHeadMenuBarDataLanguage.button[
-                                menu.value as keyof typeof classworkHeadMenuBarDataLanguage.button
-                              ](language.data ?? "en")}
-                            </button>
-                          </React.Fragment>
-                        );
-                      })}
+                            }}
+                            disabled={disabled}
+                            type={
+                              menu.title === "Publish" ||
+                              menu.title === "Save Change" ||
+                              menu.title === "Mark as Draft"
+                                ? "submit"
+                                : "button"
+                            }
+                            value={summitValue}
+                            className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-medium transition ${
+                              isDelete
+                                ? "text-error-color hover:bg-error-color/10"
+                                : disabled
+                                  ? "cursor-not-allowed text-gray-300"
+                                  : "text-gray-700 hover:bg-gray-50"
+                            }`}
+                          >
+                            <span className="text-lg">{menu.icon}</span>
+                            {classworkHeadMenuBarDataLanguage.button[
+                              menu.value as keyof typeof classworkHeadMenuBarDataLanguage.button
+                            ](language.data ?? "en")}
+                          </button>
+                        </React.Fragment>
+                      );
+                    })}
                   </div>
                 )}
               </section>
