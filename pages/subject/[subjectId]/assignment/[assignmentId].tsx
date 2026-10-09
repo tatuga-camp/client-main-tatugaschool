@@ -5,7 +5,12 @@ import { useRouter } from "next/router";
 import { ProgressBar } from "primereact/progressbar";
 import React, { useEffect, useMemo, useState } from "react";
 import { IoArrowBack, IoChevronDownSharp } from "react-icons/io5";
-import { MdAssignment, MdMenuBook, MdVideoLibrary } from "react-icons/md";
+import {
+  MdAssignment,
+  MdMenuBook,
+  MdQuiz,
+  MdVideoLibrary,
+} from "react-icons/md";
 import Swal from "sweetalert2";
 import ClassStudentAssignWork from "../../../../components/subject/ClassStudentAssignWork";
 import ClassStudentWork from "../../../../components/subject/ClassStudentWork";
@@ -78,6 +83,7 @@ const typeIcon: Record<string, React.ReactNode> = {
   Assignment: <MdAssignment />,
   Material: <MdMenuBook />,
   VideoQuiz: <MdVideoLibrary />,
+  Quiz: <MdQuiz />,
 };
 
 function StatusChip({
@@ -163,6 +169,14 @@ function Index({
       document.body.style.overflow = "hidden";
     }
   }, [router.isReady]);
+
+  // Quizzes are edited on their own page; only assigning and export stay here.
+  useEffect(() => {
+    if (!router.isReady || assignment.data?.type !== "Quiz") return;
+    const menu = router.query.menu as MenuAssignmentQuery | undefined;
+    if (menu === "manageassigning" || menu === "exportclasswork") return;
+    router.replace(`/subject/${subjectId}/quiz/${assignmentId}`);
+  }, [router.isReady, router.query.menu, assignment.data?.type]);
 
   useEffect(() => {
     if (assignment.data) {

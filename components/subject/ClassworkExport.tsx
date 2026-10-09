@@ -3,6 +3,7 @@ import {
   useCreateAssignment,
   useCreateFileOnAssignment,
   useCreateQuestionOnVideo,
+  useDuplicateQuiz,
   useGetLanguage,
   useGetMemberOnSchoolBySchool,
   useGetSubjectFromSchool,
@@ -75,6 +76,7 @@ function ClassworkExport({
   const create = useCreateAssignment();
   const createFiles = useCreateFileOnAssignment();
   const createQuestions = useCreateQuestionOnVideo();
+  const duplicateQuiz = useDuplicateQuiz();
   const [loading, setLoading] = useState(false);
   const updateSkill = useUpdateSkillToAssignment();
 
@@ -177,6 +179,13 @@ function ClassworkExport({
 
       await Promise.allSettled(
         selectSubjects.map(async (targetSubject) => {
+          if (assignment.type === "Quiz") {
+            await duplicateQuiz.mutateAsync({
+              assignmentId: assignment.id,
+              targetSubjectId: targetSubject.id,
+            });
+            return;
+          }
           const classwork = await create.mutateAsync({
             subjectId: targetSubject.id,
             title: assignment.title,

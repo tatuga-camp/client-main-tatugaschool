@@ -10,6 +10,7 @@ import {
   MdEdit,
   MdLink,
   MdOutlineFileUpload,
+  MdQuiz,
   MdSettings,
   MdVideoLibrary,
 } from "react-icons/md";
@@ -54,6 +55,11 @@ export const classworkLists = [
     title: "Video Quiz",
     value: "VideoQuiz",
     icon: <MdVideoLibrary />,
+  },
+  {
+    title: "Quiz",
+    value: "Quiz",
+    icon: <MdQuiz />,
   },
 ] as const;
 
