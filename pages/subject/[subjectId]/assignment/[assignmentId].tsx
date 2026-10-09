@@ -12,6 +12,7 @@ import {
   MdVideoLibrary,
 } from "react-icons/md";
 import Swal from "sweetalert2";
+import { deleteConfirmOptions, runIfConfirmed } from "../../../../utils/confirmDelete";
 import ClassStudentAssignWork from "../../../../components/subject/ClassStudentAssignWork";
 import ClassStudentWork from "../../../../components/subject/ClassStudentWork";
 import { menuClassworkList } from "../../../../components/subject/ClassworkCreate";
@@ -264,15 +265,26 @@ function Index({
 
   const handleDeleteAssignment = async () => {
     try {
-      await deleteAssignment.mutateAsync({
-        assignmentId: assignmentId,
-      });
-      router.push(`/subject/${subjectId}?menu=Classwork`);
-      Swal.fire({
-        title: "Success",
-        text: "Assignment has been deleted",
-        icon: "success",
-      });
+      await runIfConfirmed(
+        () =>
+          Swal.fire(
+            deleteConfirmOptions(
+              assignment.data?.type === "Quiz" ? "quiz" : "assignment",
+              language.data ?? "en",
+            ),
+          ),
+        async () => {
+          await deleteAssignment.mutateAsync({
+            assignmentId: assignmentId,
+          });
+          router.push(`/subject/${subjectId}?menu=Classwork`);
+          Swal.fire({
+            title: "Success",
+            text: "Assignment has been deleted",
+            icon: "success",
+          });
+        },
+      );
     } catch (error) {
       let result = error as ErrorMessages;
       Swal.fire({

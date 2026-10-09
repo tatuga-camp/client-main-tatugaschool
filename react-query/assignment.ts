@@ -127,7 +127,8 @@ export function useDeleteAssignment() {
           return oldData?.filter((assignment) => assignment.id !== data.id);
         },
       );
-      queryClient.invalidateQueries({
+      // A refetch of a deleted assignment would 404 and flash the editor's error screen.
+      queryClient.removeQueries({
         queryKey: ["assignment", { id: data.id }],
       });
       queryClient.invalidateQueries({

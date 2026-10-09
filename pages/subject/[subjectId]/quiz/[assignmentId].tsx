@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useState } from "react";
 import { IoArrowBack } from "react-icons/io5";
-import { MdQuiz } from "react-icons/md";
+import { MdDeleteOutline, MdQuiz } from "react-icons/md";
 import Swal from "sweetalert2";
 import QuestionList from "../../../../components/quiz/QuestionList";
 import QuizMonitor from "../../../../components/quiz/QuizMonitor";
@@ -14,12 +14,17 @@ import { MenuSubject } from "../../../../data";
 import { quizLanguage } from "../../../../data/languages";
 import { ErrorMessages } from "../../../../interfaces";
 import {
+  useDeleteAssignment,
   useGetAssignment,
   useGetLanguage,
   useGetQuizMonitor,
   useGetQuizQuestions,
   useUpdateAssignment,
 } from "../../../../react-query";
+import {
+  deleteConfirmOptions,
+  runIfConfirmed,
+} from "../../../../utils/confirmDelete";
 import { withDirtyId } from "../../../../utils/quizDraft";
 import {
   editorLockState,
@@ -42,6 +47,7 @@ export default function QuizEditorPage({
   const assignment = useGetAssignment({ id: assignmentId });
   const questions = useGetQuizQuestions({ assignmentId });
   const update = useUpdateAssignment();
+  const remove = useDeleteAssignment();
   const [tab, setTab] = useState<Tab>("questions");
   const [title, setTitle] = useState("");
   // Lock state comes from the monitor (any started attempt locks questions).
@@ -144,6 +150,26 @@ export default function QuizEditorPage({
         query: { assignmentId },
         data: { status: next },
       });
+    } catch (error) {
+      fail(error);
+    }
+  };
+
+  const deleteQuiz = async () => {
+    try {
+      return await runIfConfirmed(
+        () => Swal.fire(deleteConfirmOptions("quiz", lang)),
+        async () => {
+          await remove.mutateAsync({ assignmentId });
+          await router.push(backHref);
+          Swal.fire({
+            icon: "success",
+            title: quizLanguage.deleted(lang),
+            timer: 1500,
+            showConfirmButton: false,
+          });
+        },
+      );
     } catch (error) {
       fail(error);
     }
@@ -265,6 +291,18 @@ export default function QuizEditorPage({
               {isPublished
                 ? quizLanguage.unpublish(lang)
                 : quizLanguage.publish(lang)}
+            </button>
+            <button
+              type="button"
+              onClick={deleteQuiz}
+              disabled={remove.isPending}
+              aria-label={quizLanguage.deleteQuiz(lang)}
+              className="flex items-center gap-1.5 rounded-2xl border border-error-color/40 px-3 py-2 text-sm font-medium text-error-color hover:bg-error-color/10 disabled:opacity-40"
+            >
+              <MdDeleteOutline className="text-lg" />
+              <span className="hidden sm:inline">
+                {quizLanguage.deleteQuiz(lang)}
+              </span>
             </button>
           </nav>
           <div className="flex items-center gap-1 overflow-x-auto px-4 md:px-6">
