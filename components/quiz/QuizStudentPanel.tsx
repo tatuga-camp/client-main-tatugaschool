@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { MdCheck, MdClose } from "react-icons/md";
 import Swal from "sweetalert2";
 import { quizLanguage } from "../../data/languages";
-import { AssignmentOnQuiz, ErrorMessages, Language, StudentOnQuiz } from "../../interfaces";
+import { AssignmentOnQuiz, Language, StudentOnQuiz } from "../../interfaces";
 import { useGetLanguage, useGetQuizReview, useOverrideQuizScore, useResetQuizAttempt } from "../../react-query";
 import { promptSegments } from "../../utils/quizDraft";
 import { formatDuration, scoreToSave } from "../../utils/quizMonitor";
@@ -123,6 +123,15 @@ export default function QuizStudentPanel({
   const attempt = data?.studentOnAssignment.quizAttempt ?? null;
   const summary = attempt?.integritySummary;
 
+  // Close on Escape, unless a SweetAlert dialog is open on top (it handles Escape itself).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !Swal.isVisible()) onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
   const confirmReset = async () => {
     const answer = await Swal.fire({
       title: quizLanguage.resetAttempt(lang),
@@ -135,8 +144,7 @@ export default function QuizStudentPanel({
     try {
       await reset.mutateAsync({ studentOnAssignmentId });
     } catch (error) {
-      const result = error as ErrorMessages;
-      Swal.fire({ title: result?.error ?? "Error", text: result?.message?.toString(), icon: "error" });
+      showQuizError(error, lang);
     }
   };
 
@@ -210,6 +218,17 @@ export default function QuizStudentPanel({
                 </ol>
               )}
             </section>
+          )}
+
+          {!data && review.isError && (
+            <p role="alert" className="rounded-2xl bg-error-color/5 p-4 text-center text-sm text-error-color">
+              {quizLanguage.loadFailed(lang)}
+            </p>
+          )}
+          {!data && !review.isError && (
+            <div className="flex justify-center py-10" aria-busy="true">
+              <span className="h-8 w-8 animate-spin rounded-full border-4 border-primary-color/20 border-t-primary-color" />
+            </div>
           )}
 
           <section className="flex flex-col gap-3">

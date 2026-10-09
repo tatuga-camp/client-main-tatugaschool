@@ -145,3 +145,29 @@ test("Student panel: a graded answer gets a score input capped at the question's
   assert.ok(!html.includes("Not graded yet"));
   assert.match(html, /<input[^>]*type="number"[^>]*max="2"[^>]*value="1"/);
 });
+
+test("Monitor: a failed fetch shows an error, not 'No students'", () => {
+  const c = client();
+  // Without this, mounting over an errored query with no data optimistically reports "pending" (a refetch).
+  c.setDefaultOptions({ queries: { staleTime: Infinity, retry: false, retryOnMount: false } });
+  c.getQueryCache()
+    .build(c, { queryKey: keyQuiz.monitor("quiz1") })
+    .setState({ status: "error", error: new Error("403"), data: undefined, fetchStatus: "idle" });
+  const html = renderToStaticMarkup(
+    <QueryClientProvider client={c}>
+      <QuizMonitor assignmentId="quiz1" />
+    </QueryClientProvider>,
+  );
+  assert.ok(html.includes("Could not load this quiz"));
+  assert.ok(!html.includes("No students are assigned yet"));
+});
+
+test("Student panel: shows a spinner while the review loads", () => {
+  const c = client();
+  const html = renderToStaticMarkup(
+    <QueryClientProvider client={c}>
+      <QuizStudentPanel assignmentId="quiz1" studentOnAssignmentId="a" onClose={() => {}} />
+    </QueryClientProvider>,
+  );
+  assert.ok(html.includes('aria-busy="true"'));
+});

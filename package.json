@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start -p 8181",
     "lint": "next lint",
-    "test": "tsx --test \"utils/**/*.test.ts\" \"components/**/*.test.tsx\""
+    "test": "tsx --test \"utils/**/*.test.ts\" \"components/**/*.test.tsx\" \"components/**/*.test.ts\""
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

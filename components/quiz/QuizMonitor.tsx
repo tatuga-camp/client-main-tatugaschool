@@ -65,7 +65,11 @@ export default function QuizMonitor({ assignmentId }: { assignmentId: string }) 
       </div>
       <p className="text-xs text-icon-color/50">{quizLanguage.refreshing(lang)}</p>
 
-      {rows.length === 0 && !monitor.isLoading ? (
+      {monitor.isError && !view ? (
+        <div role="alert" className="rounded-2xl border border-error-color/30 bg-error-color/5 p-10 text-center text-error-color">
+          {quizLanguage.loadFailed(lang)}
+        </div>
+      ) : rows.length === 0 && !monitor.isLoading ? (
         <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-10 text-center text-icon-color/60">
           {quizLanguage.noStudents(lang)}
         </div>

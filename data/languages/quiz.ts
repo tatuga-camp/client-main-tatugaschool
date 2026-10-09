@@ -87,6 +87,7 @@ export const quizLanguage = {
   colRisk: t("Risk", "ความเสี่ยง"),
   colLastSeen: t("Last seen", "เห็นล่าสุด"),
   noStudents: t("No students are assigned yet", "ยังไม่มีนักเรียนที่ได้รับมอบหมาย"),
+  loadFailed: t("Could not load this quiz. It will retry automatically.", "โหลดข้อมูลแบบทดสอบไม่สำเร็จ ระบบจะลองใหม่อัตโนมัติ"),
   status: (l: Language, s: QuizMonitorStatus) =>
     ({
       NOT_STARTED: t("Not started", "ยังไม่เริ่ม"),
