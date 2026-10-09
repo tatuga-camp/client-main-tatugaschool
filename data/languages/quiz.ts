@@ -139,6 +139,7 @@ export const quizLanguage = {
     })[type](l),
   answers: t("Answers", "คำตอบ"),
   notAnswered: t("Not answered", "ไม่ได้ตอบ"),
+  notGradedYet: t("Not graded yet", "ยังไม่ได้ตรวจ"),
   studentAnswer: t("Student", "นักเรียน"),
   key: t("Key", "เฉลย"),
   scoreOf: (l: Language, max: number) => (l === "th" ? `จาก ${max}` : `of ${max}`),

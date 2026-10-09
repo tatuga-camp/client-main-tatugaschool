@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { MdCheck, MdClose } from "react-icons/md";
 import Swal from "sweetalert2";
 import { quizLanguage } from "../../data/languages";
 import { AssignmentOnQuiz, ErrorMessages, Language, StudentOnQuiz } from "../../interfaces";
 import { useGetLanguage, useGetQuizReview, useOverrideQuizScore, useResetQuizAttempt } from "../../react-query";
 import { promptSegments } from "../../utils/quizDraft";
-import { formatDuration } from "../../utils/quizMonitor";
+import { formatDuration, scoreToSave } from "../../utils/quizMonitor";
+import { showQuizError } from "./quizErrorAlert";
 import { RiskBadge } from "./QuizMonitor";
 
 function AnswerView({ question, answer, language }: { question: AssignmentOnQuiz; answer: StudentOnQuiz | null; language: Language }) {
@@ -51,18 +52,33 @@ function AnswerView({ question, answer, language }: { question: AssignmentOnQuiz
   );
 }
 
-function ScoreInput({ answer, max, assignmentId, language }: { answer: StudentOnQuiz; max: number; assignmentId: string; language: Language }) {
+/** Rendered only for graded answers (score not null). Saves on blur only when the teacher actually edited the value. */
+export function ScoreInput({ answer, max, assignmentId, language }: { answer: StudentOnQuiz; max: number; assignmentId: string; language: Language }) {
   const override = useOverrideQuizScore(assignmentId);
   const [value, setValue] = useState(String(answer.score ?? 0));
+  const focused = useRef(false);
+  const dirty = useRef(false);
+
+  // The review polls; follow refreshed grades unless the teacher is mid-edit.
+  useEffect(() => {
+    if (!focused.current) setValue(String(answer.score ?? 0));
+  }, [answer.score]);
+
   const save = async () => {
-    const score = Math.min(max, Math.max(0, Number(value) || 0));
+    focused.current = false;
+    const edited = dirty.current;
+    dirty.current = false;
+    const score = edited ? scoreToSave(value, max, answer.score) : null;
+    if (score === null) {
+      setValue(String(answer.score ?? 0));
+      return;
+    }
     setValue(String(score));
-    if (score === answer.score) return;
     try {
       await override.mutateAsync({ studentOnQuizId: answer.id, score });
     } catch (error) {
-      const result = error as ErrorMessages;
-      Swal.fire({ title: result?.error ?? "Error", text: result?.message?.toString(), icon: "error" });
+      setValue(String(answer.score ?? 0));
+      showQuizError(error, language);
     }
   };
   return (
@@ -73,9 +89,16 @@ function ScoreInput({ answer, max, assignmentId, language }: { answer: StudentOn
         max={max}
         step={0.5}
         value={value}
-        onChange={(e) => setValue(e.target.value)}
+        disabled={override.isPending}
+        onFocus={() => {
+          focused.current = true;
+        }}
+        onChange={(e) => {
+          dirty.current = true;
+          setValue(e.target.value);
+        }}
         onBlur={save}
-        className="w-16 rounded-lg border border-gray-200 px-2 py-0.5 text-right"
+        className="w-16 rounded-lg border border-gray-200 px-2 py-0.5 text-right disabled:opacity-60"
       />
       <span className="text-icon-color/60">{quizLanguage.scoreOf(language, max)}</span>
       {answer.teacherOverridden && <span className="text-xs text-warning-color">· {quizLanguage.overridden(language)}</span>}
@@ -195,8 +218,10 @@ export default function QuizStudentPanel({
               <div key={question.id} className="rounded-2xl border border-gray-100 p-3">
                 <div className="mb-2 flex items-center justify-between gap-2">
                   <span className="text-xs font-medium text-icon-color/60">{quizLanguage.questionLabel(lang, i + 1)}</span>
-                  {answer ? (
+                  {answer && answer.score !== null ? (
                     <ScoreInput answer={answer} max={question.points} assignmentId={assignmentId} language={lang} />
+                  ) : answer ? (
+                    <span className="text-xs text-icon-color/50">{quizLanguage.notGradedYet(lang)}</span>
                   ) : (
                     <span className="text-xs text-icon-color/50">{quizLanguage.notAnswered(lang)}</span>
                   )}

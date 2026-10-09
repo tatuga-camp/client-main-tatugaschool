@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { QuizMonitorRow } from "../interfaces";
-import { editorLockState, formatDuration, monitorStats, riskBand, sortMonitorRows } from "./quizMonitor";
+import { editorLockState, formatDuration, monitorStats, riskBand, scoreToSave, sortMonitorRows } from "./quizMonitor";
 
 const row = (id: string, o: Partial<QuizMonitorRow> = {}): QuizMonitorRow => ({
   studentOnAssignmentId: id,
@@ -72,4 +72,19 @@ test("editorLockState: started attempt locks, loading is read-only without the b
     locked: true,
     readOnly: true,
   });
+});
+
+test("scoreToSave clamps to the question's points and skips no-op saves", () => {
+  assert.equal(scoreToSave("5", 2, 1), 2); // capped at max
+  assert.equal(scoreToSave("-3", 2, 1), 0); // floored at 0
+  assert.equal(scoreToSave("1.5", 2, 1), 1.5);
+  assert.equal(scoreToSave("1", 2, 1), null); // unchanged
+  assert.equal(scoreToSave("9", 2, 2), null); // clamps to the current value
+  assert.equal(scoreToSave("", 2, 1), null); // blank never saves 0
+  assert.equal(scoreToSave("abc", 2, 1), null);
+});
+
+test("scoreToSave never overrides an ungraded answer", () => {
+  assert.equal(scoreToSave("0", 2, null), null);
+  assert.equal(scoreToSave("2", 2, null), null);
 });

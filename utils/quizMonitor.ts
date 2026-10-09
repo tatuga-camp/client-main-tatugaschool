@@ -69,3 +69,18 @@ export function editorLockState(
   const locked = (rows ?? []).some((r) => r.status !== "NOT_STARTED");
   return { locked, readOnly: locked || isLoading };
 }
+
+/**
+ * What a score override should send when the teacher leaves the score input, or null to send nothing.
+ * Nothing is sent for an ungraded answer (score null: the student is still answering, and an override
+ * would stop auto-grading at submit), for blank/invalid input, or when the clamped value is unchanged.
+ * The value is clamped to 0..max so the request never exceeds the question's points.
+ */
+export function scoreToSave(raw: string, max: number, current: number | null): number | null {
+  if (current === null) return null;
+  const trimmed = raw.trim();
+  const n = Number(trimmed);
+  if (trimmed === "" || !Number.isFinite(n)) return null;
+  const score = Math.min(max, Math.max(0, n));
+  return score === current ? null : score;
+}
