@@ -15,6 +15,9 @@ export const quizLanguage = {
   tabSettings: t("Settings", "ตั้งค่า"),
   tabMonitor: t("Monitor", "ติดตามการสอบ"),
   assignStudents: t("Assign students", "มอบหมายนักเรียน"),
+  tabQuestionsDescription: t("Write and arrange the quiz questions", "เขียนและจัดลำดับคำถามในแบบทดสอบ"),
+  tabSettingsDescription: t("Schedule, time limit, scoring and test mode", "กำหนดเวลา เวลาทำ การให้คะแนน และโหมดสอบ"),
+  tabMonitorDescription: t("Follow students while they take the quiz", "ติดตามนักเรียนระหว่างทำแบบทดสอบ"),
   deleteQuiz: t("Delete", "ลบ"),
   deleteQuizTitle: t("Delete this quiz?", "ลบแบบทดสอบนี้?"),
   deleteQuizText: t(
