@@ -59,14 +59,15 @@ export function formatDuration(ms: number): string {
 }
 
 /**
- * Lock state for the question editor. Any started attempt locks questions.
- * While the monitor is still loading, the editor is read-only but shows no banner yet.
+ * Lock state for the question editor. The server decides (`locked` on the monitor view): any started
+ * attempt locks questions, assigned or not. While the monitor is still loading, the editor is
+ * read-only but shows no banner yet.
  */
 export function editorLockState(
-  rows: QuizMonitorRow[] | undefined,
+  serverLocked: boolean | undefined,
   isLoading: boolean,
 ): { locked: boolean; readOnly: boolean } {
-  const locked = (rows ?? []).some((r) => r.status !== "NOT_STARTED");
+  const locked = serverLocked === true;
   return { locked, readOnly: locked || isLoading };
 }
 

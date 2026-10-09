@@ -37,7 +37,7 @@ export default function QuizEditorPage({ subjectId, assignmentId }: { subjectId:
   // Lock state comes from the monitor (any started attempt locks questions).
   const monitor = useGetQuizMonitor({ assignmentId, enabled: tab === "questions", poll: false });
   // Read-only until the first lock check returns, so a locked quiz never flashes editable.
-  const { locked, readOnly } = editorLockState(monitor.data?.rows, monitor.isLoading);
+  const { locked, readOnly } = editorLockState(monitor.data?.locked, monitor.isLoading);
 
   useEffect(() => {
     if (!router.isReady) return;

@@ -64,14 +64,12 @@ test("formatDuration", () => {
   assert.equal(formatDuration(3_720_000), "1h 02m");
 });
 
-test("editorLockState: started attempt locks, loading is read-only without the banner", () => {
+test("editorLockState: server locked flag locks, loading is read-only without the banner", () => {
   assert.deepEqual(editorLockState(undefined, true), { locked: false, readOnly: true });
   assert.deepEqual(editorLockState(undefined, false), { locked: false, readOnly: false });
-  assert.deepEqual(editorLockState([row("a", { status: "NOT_STARTED" })], false), { locked: false, readOnly: false });
-  assert.deepEqual(editorLockState([row("a", { status: "NOT_STARTED" }), row("b", { status: "SUBMITTED" })], false), {
-    locked: true,
-    readOnly: true,
-  });
+  assert.deepEqual(editorLockState(false, false), { locked: false, readOnly: false });
+  assert.deepEqual(editorLockState(true, false), { locked: true, readOnly: true });
+  assert.deepEqual(editorLockState(true, true), { locked: true, readOnly: true });
 });
 
 test("scoreToSave clamps to the question's points and skips no-op saves", () => {

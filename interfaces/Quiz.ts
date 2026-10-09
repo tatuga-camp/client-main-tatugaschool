@@ -119,6 +119,8 @@ export type QuizMonitorView = {
   assignmentId: string;
   testMode: boolean;
   questionCount: number;
+  /** True when any student has started an attempt (server-side, includes unassigned students). */
+  locked: boolean;
   serverNow: string;
   rows: QuizMonitorRow[];
 };

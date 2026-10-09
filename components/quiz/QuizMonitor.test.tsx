@@ -49,6 +49,7 @@ function renderMonitor(testMode: boolean) {
     assignmentId: "quiz1",
     testMode,
     questionCount: 2,
+    locked: false,
     serverNow: "2026-10-09T00:00:30.000Z",
     rows: [row("a")],
   };
