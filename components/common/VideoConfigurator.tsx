@@ -1,19 +1,17 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   MdAdd,
+  MdCheckBox,
+  MdCheckBoxOutlineBlank,
   MdCheckCircle,
-  MdClose,
-  MdCloudUpload,
   MdDelete,
   MdEdit,
-  MdHelpOutline,
-  MdLock,
-  MdPlayCircleOutline,
-  MdQuiz,
-  MdSave,
-  MdTune,
+  MdOutlineFileUpload,
+  MdOutlineVideoLibrary,
+  MdSchedule,
 } from "react-icons/md";
-import { videoConfigLanguage } from "../../data/languages";
+import { SiYoutube } from "react-icons/si";
+import { videoConfigLanguage as t } from "../../data/languages";
 import { Assignment, QuestionOnVideo } from "../../interfaces";
 import {
   useCreateQuestionOnVideo,
@@ -27,16 +25,51 @@ import {
   getSignedURLTeacherService,
   UploadSignURLWithProgressService,
 } from "../../services";
+import {
+  parseYouTubeId,
+  youTubeErrorKind,
+  youTubeWatchUrl,
+} from "../../utils/youtube";
+import GradeSegmentedControl from "../subject/grade/GradeSegmentedControl";
 import Switch from "./Switch";
+import YouTubeEmbed, { YouTubeEmbedHandle } from "./YouTubeEmbed";
 
 type Props = {
   assignment: Assignment;
-  onClose: () => void;
+  onClose?: () => void;
 };
 
-const VideoConfigurator = ({ assignment, onClose }: Props) => {
+type Draft = {
+  id: string | null;
+  timestamp: number;
+  question: string;
+  options: string[];
+  correctOptions: number[];
+};
+
+const MAX_VIDEO_BYTES = 2 * 1024 * 1024 * 1024;
+
+const card = "rounded-2xl border border-gray-100 bg-white p-5 shadow-sm";
+const iconButton =
+  "rounded-full p-2 text-lg text-gray-400 transition hover:bg-gray-100 hover:text-icon-color focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-color/40";
+const outlineButton =
+  "flex items-center justify-center gap-1.5 rounded-xl border border-primary-color/30 px-4 py-2 text-sm font-medium text-primary-color transition hover:bg-primary-color/5 active:scale-[0.98]";
+
+const formatTime = (seconds: number) => {
+  const safe = Number.isFinite(seconds) && seconds > 0 ? seconds : 0;
+  const hrs = Math.floor(safe / 3600);
+  const mins = Math.floor((safe % 3600) / 60);
+  const secs = Math.floor(safe % 60);
+  const mm = hrs > 0 ? mins.toString().padStart(2, "0") : mins.toString();
+  return `${hrs > 0 ? `${hrs}:` : ""}${mm}:${secs.toString().padStart(2, "0")}`;
+};
+
+const VideoConfigurator = ({ assignment }: Props) => {
   const { data: language = "en" } = useGetLanguage();
   const videoRef = useRef<HTMLVideoElement>(null);
+  const ytRef = useRef<YouTubeEmbedHandle>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const rowRefs = useRef<Record<string, HTMLLIElement | null>>({});
   const updateAssignment = useUpdateAssignment();
   const createQuestion = useCreateQuestionOnVideo();
   const updateQuestion = useUpdateQuestionOnVideo();
@@ -44,119 +77,161 @@ const VideoConfigurator = ({ assignment, onClose }: Props) => {
   const getQuestions = useGetQuestionOnVideoByAssignmentId({
     assignmentId: assignment.id,
   });
+
   const [preventFastForward, setPreventFastForward] = useState(
     assignment?.preventFastForward || false,
   );
-  const [questions, setQuestions] = useState<QuestionOnVideo[]>([]);
   const [videoURL, setVideoURL] = useState<string | null>(
     assignment?.videoURL || null,
   );
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [estimatedTime, setEstimatedTime] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
-  // New question form state
-  const [isAddingQuestion, setIsAddingQuestion] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [currentTimestamp, setCurrentTimestamp] = useState(0);
-  const [questionText, setQuestionText] = useState("");
-  const [options, setOptions] = useState<string[]>(["", ""]);
-  const [correctOptions, setCorrectOptions] = useState<number[]>([0]);
+  const youTubeId = useMemo(
+    () => (videoURL ? parseYouTubeId(videoURL) : null),
+    [videoURL],
+  );
+  const [changingSource, setChangingSource] = useState(false);
+  const [sourceTab, setSourceTab] = useState<"upload" | "youtube">(
+    youTubeId ? "youtube" : "upload",
+  );
+  const [linkInput, setLinkInput] = useState("");
+  const [linkError, setLinkError] = useState<string | null>(null);
+  const [savingLink, setSavingLink] = useState(false);
+  const [playerError, setPlayerError] = useState<string | null>(null);
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [draft, setDraft] = useState<Draft | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [focusedId, setFocusedId] = useState<string | null>(null);
 
+  const questions = useMemo(
+    () =>
+      [...(getQuestions.data ?? [])].sort((a, b) => a.timestamp - b.timestamp),
+    [getQuestions.data],
+  );
+
+  // A video swap resets the clock; stale duration would misplace the pins.
   useEffect(() => {
-    if (getQuestions.data) {
-      setQuestions(getQuestions.data);
-    }
-  }, [getQuestions.data]);
+    setCurrentTime(0);
+    setDuration(0);
+    setPlayerError(null);
+  }, [videoURL]);
+
+  // One surface over the uploaded <video> and the YouTube player.
+  const player = {
+    pause: () =>
+      youTubeId ? ytRef.current?.pause() : videoRef.current?.pause(),
+    seek: (seconds: number) => {
+      if (youTubeId) ytRef.current?.seek(seconds);
+      else if (videoRef.current) videoRef.current.currentTime = seconds;
+    },
+    time: () =>
+      (youTubeId
+        ? ytRef.current?.getTime()
+        : videoRef.current?.currentTime) ?? currentTime,
+  };
 
   const seekTo = (seconds: number) => {
-    if (videoRef.current) {
-      videoRef.current.currentTime = seconds;
-      videoRef.current.pause();
-    }
+    player.pause();
+    player.seek(seconds);
+    setCurrentTime(seconds);
   };
 
-  const handleAddQuestion = () => {
-    if (videoRef.current) {
-      videoRef.current.pause();
-      setCurrentTimestamp(videoRef.current.currentTime);
-      setIsAddingQuestion(true);
-      setEditingId(null);
-      resetForm();
-    }
+  const openNewQuestion = () => {
+    player.pause();
+    setSaveError(null);
+    setDraft({
+      id: null,
+      timestamp: player.time(),
+      question: "",
+      options: ["", ""],
+      correctOptions: [0],
+    });
   };
 
-  const handleEditQuestion = (q: QuestionOnVideo) => {
-    setEditingId(q.id);
-    setQuestionText(q.question);
-    setOptions(q.options);
-    setCorrectOptions(q.correctOptions);
-    setCurrentTimestamp(q.timestamp);
-    setIsAddingQuestion(true);
+  const openEditQuestion = (q: QuestionOnVideo) => {
+    setSaveError(null);
+    seekTo(q.timestamp);
+    setDraft({
+      id: q.id,
+      timestamp: q.timestamp,
+      question: q.question,
+      options: [...q.options],
+      correctOptions: [...q.correctOptions],
+    });
   };
 
-  const saveQuestion = async () => {
-    if (!questionText) return;
+  const focusQuestion = (q: QuestionOnVideo) => {
+    seekTo(q.timestamp);
+    setFocusedId(q.id);
+    rowRefs.current[q.id]?.scrollIntoView({
+      block: "nearest",
+      behavior: "smooth",
+    });
+  };
 
+  const draftProblem = (() => {
+    if (!draft) return null;
+    if (draft.options.some((o) => !o.trim())) return t.needOptions(language);
+    if (draft.correctOptions.length === 0) return t.needCorrect(language);
+    return null;
+  })();
+
+  const saveDraft = async () => {
+    if (!draft || !draft.question.trim() || draftProblem) return;
+    setSaveError(null);
+    const data = {
+      question: draft.question.trim(),
+      options: draft.options.map((o) => o.trim()),
+      correctOptions: draft.correctOptions,
+      timestamp: draft.timestamp,
+    };
     try {
-      if (editingId) {
-        await updateQuestion.mutateAsync({
-          id: editingId,
-          data: {
-            question: questionText,
-            options,
-            correctOptions,
-          },
-        });
+      if (draft.id) {
+        await updateQuestion.mutateAsync({ id: draft.id, data });
       } else {
-        await createQuestion.mutateAsync({
-          assignmentId: assignment.id,
-          question: questionText,
-          options,
-          correctOptions,
-          timestamp: currentTimestamp,
-        });
+        await createQuestion.mutateAsync({ assignmentId: assignment.id, ...data });
       }
-      setIsAddingQuestion(false);
-      resetForm();
+      setDraft(null);
     } catch (error) {
       console.error(error);
+      setSaveError(
+        (error as { message?: string })?.message?.toString() ||
+          t.saveFailed(language),
+      );
     }
-  };
-
-  const resetForm = () => {
-    setQuestionText("");
-    setOptions(["", ""]);
-    setCorrectOptions([0]);
-    setEditingId(null);
   };
 
   const handleDeleteQuestion = async (id: string) => {
+    if (!confirm(t.deleteConfirm(language))) return;
     try {
       await deleteQuestion.mutateAsync({ id });
+      if (draft?.id === id) setDraft(null);
     } catch (error) {
       console.error(error);
     }
   };
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 2 * 1024 * 1024 * 1024) {
-      alert("File size limit is 2GB");
+  const uploadVideo = async (file: File) => {
+    setUploadError(null);
+    if (!file.type.startsWith("video/")) {
+      setUploadError(t.notAVideo(language));
+      return;
+    }
+    if (file.size > MAX_VIDEO_BYTES) {
+      setUploadError(t.fileTooLarge(language));
       return;
     }
 
     try {
       setIsUploading(true);
       setUploadProgress(0);
+      setEstimatedTime(null);
 
       const signURL = await getSignedURLTeacherService({
         schoolId: assignment.schoolId,
@@ -175,18 +250,10 @@ const VideoConfigurator = ({ assignment, onClose }: Props) => {
           setUploadProgress(percentComplete);
 
           const elapsedTime = (Date.now() - startTime) / 1000;
-          if (elapsedTime > 0) {
+          if (elapsedTime > 0 && event.loaded > 0) {
             const uploadSpeed = event.loaded / elapsedTime;
-            const remainingBytes = event.total - event.loaded;
-            const remainingSeconds = remainingBytes / uploadSpeed;
-
-            if (remainingSeconds < 60) {
-              setEstimatedTime(`${Math.round(remainingSeconds)}s`);
-            } else {
-              setEstimatedTime(
-                `${Math.round(remainingSeconds / 60)}m ${Math.round(remainingSeconds % 60)}s`,
-              );
-            }
+            const remainingSeconds = (event.total - event.loaded) / uploadSpeed;
+            setEstimatedTime(formatTime(remainingSeconds));
           }
         },
       });
@@ -200,397 +267,758 @@ const VideoConfigurator = ({ assignment, onClose }: Props) => {
         },
       });
       setVideoURL(signURL.originalURL);
-      setIsUploading(false);
-      setEstimatedTime(null);
+      setChangingSource(false);
     } catch (error) {
       console.error(error);
+      setUploadError(t.uploadFailed(language));
+    } finally {
       setIsUploading(false);
       setEstimatedTime(null);
     }
   };
 
-  const isSaving = updateQuestion.isPending || createQuestion.isPending;
+  const saveYouTubeLink = async () => {
+    const id = parseYouTubeId(linkInput);
+    if (!id) {
+      setLinkError(t.notYouTubeLink(language));
+      return;
+    }
+    setLinkError(null);
+    setSavingLink(true);
+    try {
+      const url = youTubeWatchUrl(id);
+      await updateAssignment.mutateAsync({
+        query: { assignmentId: assignment.id },
+        data: { videoURL: url },
+      });
+      setVideoURL(url);
+      setLinkInput("");
+      setChangingSource(false);
+    } catch (error) {
+      console.error(error);
+      setLinkError(t.linkSaveFailed(language));
+    } finally {
+      setSavingLink(false);
+    }
+  };
 
-  return (
-    <div className="flex h-[90vh] w-full max-w-6xl flex-col gap-5 p-5 md:flex-row">
-      {/* Left Side: Video Preview / Upload */}
-      {videoURL ? (
-        <div className="flex h-full w-full flex-col gap-3 md:w-2/3">
-          <div className="relative flex h-96 items-center justify-center overflow-hidden rounded-2xl bg-black shadow-[0_18px_40px_-20px_rgba(15,23,42,0.5)] ring-1 ring-slate-200 2xl:grow">
-            <video
-              ref={videoRef}
-              src={videoURL}
-              controls
-              className="h-full w-full"
+  const openSourcePicker = () => {
+    player.pause();
+    setDraft(null);
+    setUploadError(null);
+    setLinkError(null);
+    setSourceTab(youTubeId ? "youtube" : "upload");
+    setChangingSource(true);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    // Reset so choosing the same file again still fires onChange.
+    e.target.value = "";
+    if (file) uploadVideo(file);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file && !isUploading) uploadVideo(file);
+  };
+
+  const isSaving = updateQuestion.isPending || createQuestion.isPending;
+  const pct = (seconds: number) =>
+    duration > 0 ? Math.min(100, Math.max(0, (seconds / duration) * 100)) : 0;
+
+  const fileInput = (
+    <input
+      ref={fileInputRef}
+      type="file"
+      accept="video/*"
+      className="hidden"
+      onChange={handleFileSelect}
+    />
+  );
+
+  const renderEditor = (d: Draft) => {
+    const moved = Math.abs(currentTime - d.timestamp) >= 1;
+    return (
+      <div className="flex flex-col gap-4 rounded-2xl border border-primary-color/30 bg-primary-color/[0.03] p-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="flex items-center gap-1.5 text-sm font-semibold text-icon-color">
+            <MdSchedule className="text-base text-primary-color" />
+            {t.editQuestionAt(language)}
+            <span className="rounded-lg bg-white px-2 py-0.5 tabular-nums text-primary-color ring-1 ring-primary-color/20">
+              {formatTime(d.timestamp)}
+            </span>
+          </span>
+          {moved && (
+            <button
+              type="button"
+              onClick={() => {
+                player.pause();
+                setDraft({ ...d, timestamp: currentTime });
+              }}
+              className="rounded-lg px-2 py-0.5 text-sm font-medium text-primary-color transition hover:bg-primary-color/10"
+            >
+              {t.useCurrentTime(language)}{" "}
+              <span className="tabular-nums">{formatTime(currentTime)}</span>
+            </button>
+          )}
+        </div>
+
+        <textarea
+          autoFocus
+          rows={3}
+          placeholder={t.questionTextPlaceholder(language)}
+          className="main-input w-full resize-y"
+          value={d.question}
+          onChange={(e) => setDraft({ ...d, question: e.target.value })}
+        />
+
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-col">
+            <span className="text-sm font-medium text-icon-color">
+              {t.options(language)}
+            </span>
+            <span className="text-xs text-gray-400">
+              {t.correctHint(language)}
+            </span>
+          </div>
+          <ul className="flex flex-col gap-2">
+            {d.options.map((opt, idx) => {
+              const isCorrect = d.correctOptions.includes(idx);
+              return (
+                <li key={idx} className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    role="checkbox"
+                    aria-checked={isCorrect}
+                    aria-label={t.markCorrect(language)}
+                    title={t.markCorrect(language)}
+                    onClick={() =>
+                      setDraft({
+                        ...d,
+                        correctOptions: isCorrect
+                          ? d.correctOptions.filter((o) => o !== idx)
+                          : [...d.correctOptions, idx].sort((a, b) => a - b),
+                      })
+                    }
+                    className={`text-2xl transition ${
+                      isCorrect
+                        ? "text-success-color"
+                        : "text-icon-color/30 hover:text-icon-color/60"
+                    }`}
+                  >
+                    {isCorrect ? <MdCheckBox /> : <MdCheckBoxOutlineBlank />}
+                  </button>
+                  <input
+                    type="text"
+                    placeholder={`${t.optionPlaceholder(language)} ${idx + 1}`}
+                    className={`main-input min-w-0 flex-1 ${
+                      isCorrect ? "border-success-color/50" : ""
+                    }`}
+                    value={opt}
+                    onChange={(e) => {
+                      const options = [...d.options];
+                      options[idx] = e.target.value;
+                      setDraft({ ...d, options });
+                    }}
+                  />
+                  {d.options.length > 2 && (
+                    <button
+                      type="button"
+                      aria-label={t.removeOption(language)}
+                      onClick={() =>
+                        setDraft({
+                          ...d,
+                          options: d.options.filter((_, i) => i !== idx),
+                          correctOptions: d.correctOptions
+                            .filter((c) => c !== idx)
+                            .map((c) => (c > idx ? c - 1 : c)),
+                        })
+                      }
+                      className="text-xl text-icon-color/40 transition hover:text-error-color"
+                    >
+                      <MdDelete />
+                    </button>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+          <button
+            type="button"
+            onClick={() => setDraft({ ...d, options: [...d.options, ""] })}
+            className="w-max text-sm font-medium text-primary-color hover:underline"
+          >
+            {t.addOption(language)}
+          </button>
+        </div>
+
+        <footer className="flex flex-wrap items-center justify-end gap-2 border-t border-primary-color/10 pt-3">
+          {(saveError || (d.question.trim() && draftProblem)) && (
+            <span
+              className={`mr-auto text-xs ${saveError ? "text-error-color" : "text-gray-400"}`}
+              role="status"
+            >
+              {saveError || draftProblem}
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={() => setDraft(null)}
+            className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
+          >
+            {t.cancel(language)}
+          </button>
+          <button
+            type="button"
+            disabled={isSaving || !d.question.trim() || !!draftProblem}
+            onClick={saveDraft}
+            className="rounded-xl bg-primary-color px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-color-hover disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {isSaving ? t.saving(language) : t.saveQuestion(language)}
+          </button>
+        </footer>
+      </div>
+    );
+  };
+
+  const uploadPanel = (
+    <div
+      onDragOver={(e) => {
+        e.preventDefault();
+        if (!isUploading) setIsDragging(true);
+      }}
+      onDragLeave={() => setIsDragging(false)}
+      onDrop={handleDrop}
+      className={`flex aspect-video max-h-[28rem] w-full flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed p-6 text-center transition ${
+        isDragging
+          ? "border-primary-color bg-primary-color/5"
+          : "border-gray-200"
+      }`}
+    >
+      {isUploading ? (
+        <div className="flex w-full max-w-sm flex-col gap-3">
+          <span className="text-sm font-medium text-icon-color">
+            {t.uploading(language)}
+          </span>
+          <div
+            className="h-2 w-full overflow-hidden rounded-full bg-gray-100"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.round(uploadProgress)}
+          >
+            <div
+              className="h-full rounded-full bg-primary-color transition-[width] duration-300"
+              style={{ width: `${uploadProgress}%` }}
             />
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-white/70 p-3 shadow-sm backdrop-blur">
-            <button
-              onClick={handleAddQuestion}
-              className="gradient-bg flex items-center gap-2 rounded-xl px-4 py-2 font-medium text-white shadow-md transition hover:opacity-90 hover:shadow-lg active:scale-95"
-            >
-              <MdAdd className="text-lg" />
-              {videoConfigLanguage.addQuestionAtCurrentTime(language)}
-            </button>
-            <div className="flex items-center gap-2 text-xs text-slate-500">
-              <MdHelpOutline className="text-base text-slate-400" />
-              {videoConfigLanguage.pauseVideoTip(language)}
-            </div>
+          <div className="flex justify-between text-xs tabular-nums text-gray-400">
+            <span className="font-semibold text-primary-color">
+              {Math.round(uploadProgress)}%
+            </span>
+            <span>
+              {estimatedTime
+                ? `${estimatedTime} ${t.timeLeft(language)}`
+                : t.calculating(language)}
+            </span>
           </div>
         </div>
       ) : (
-        <div className="flex h-full w-full flex-col gap-2 md:w-2/3">
-          <h2 className="flex items-center gap-2 text-xl font-semibold text-slate-800">
-            <MdCloudUpload className="text-blue-500" />
-            Upload Video
-          </h2>
-          <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-3xl border-2 border-dashed border-blue-200 bg-gradient-to-br from-blue-50/70 via-white to-purple-50/60 p-10 transition-all hover:border-blue-300 hover:from-blue-50">
-            <div className="pointer-events-none absolute -top-10 -right-10 h-40 w-40 rounded-full bg-blue-200/40 blur-3xl" />
-            <div className="pointer-events-none absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-purple-200/40 blur-3xl" />
-
-            {isUploading ? (
-              <div className="relative flex w-full max-w-md flex-col items-center gap-5">
-                <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-500 to-purple-500 text-white shadow-lg">
-                  <MdCloudUpload className="animate-pulse text-4xl" />
-                </div>
-                <div className="text-xl font-bold text-slate-700">
-                  Uploading Video...
-                </div>
-                <div className="relative h-3 w-full overflow-hidden rounded-full bg-slate-100 ring-1 ring-slate-200">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 transition-all duration-300"
-                    style={{ width: `${uploadProgress}%` }}
-                  />
-                  <div
-                    className="vc-shimmer absolute inset-y-0"
-                    style={{ width: `${uploadProgress}%` }}
-                  />
-                </div>
-                <div className="flex w-full justify-between text-sm font-medium text-slate-500">
-                  <span className="font-bold text-blue-600">
-                    {Math.round(uploadProgress)}%
-                  </span>
-                  <span>
-                    {estimatedTime
-                      ? `Remaining: ${estimatedTime}`
-                      : "Calculating..."}
-                  </span>
-                </div>
-              </div>
-            ) : (
-              <label className="relative flex cursor-pointer flex-col items-center justify-center gap-5">
-                <div className="relative">
-                  <div className="absolute inset-0 animate-ping rounded-full bg-blue-400/30" />
-                  <div className="vc-float relative flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 text-white shadow-xl shadow-blue-300/50 transition-transform hover:scale-110">
-                    <MdCloudUpload className="text-5xl" />
-                  </div>
-                </div>
-                <div className="text-center">
-                  <h3 className="text-2xl font-bold text-slate-800">
-                    Upload Video
-                  </h3>
-                  <p className="mt-1 text-sm text-slate-500">
-                    Click to browse or drag a file here
-                  </p>
-                  <p className="mt-3 inline-block rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-600">
-                    Max Size: 2GB
-                  </p>
-                </div>
-                <input
-                  type="file"
-                  accept="video/*"
-                  className="hidden"
-                  onChange={handleFileSelect}
-                />
-              </label>
-            )}
+        <>
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-color/10 text-3xl text-primary-color">
+            <MdOutlineVideoLibrary />
           </div>
-        </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-base font-semibold text-icon-color">
+              {t.uploadTitle(language)}
+            </span>
+            <span className="text-sm text-gray-400">
+              {t.uploadHint(language)}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className={outlineButton}
+          >
+            <MdOutlineFileUpload className="text-lg" />
+            {t.chooseVideo(language)}
+          </button>
+        </>
       )}
+      {uploadError && !isUploading && (
+        <span className="text-sm text-error-color" role="alert">
+          {uploadError}
+        </span>
+      )}
+    </div>
+  );
 
-      {/* Right Side: Configuration */}
-      <div className="flex h-full w-full flex-col gap-4 overflow-y-auto pl-0 md:w-1/3 md:border-l md:pl-5">
-        {/* Settings */}
-        <section className="flex flex-col gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-          <h3 className="flex items-center gap-2 font-semibold text-slate-700">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-blue-500 text-white">
-              <MdTune className="text-sm" />
-            </span>
-            {videoConfigLanguage.playbackSettings(language)}
+  const linkLooksWrong = !!linkInput.trim() && !parseYouTubeId(linkInput);
+  const howToSteps = [
+    t.howToStep1(language),
+    t.howToStep2(language),
+    t.howToStep3(language),
+    t.howToStep4(language),
+  ];
+
+  const youTubePanel = (
+    <div className="flex flex-col gap-4">
+      <form
+        className="flex flex-col gap-1.5"
+        onSubmit={(e) => {
+          e.preventDefault();
+          saveYouTubeLink();
+        }}
+      >
+        <label
+          htmlFor="video-quiz-youtube-link"
+          className="text-sm font-medium text-icon-color"
+        >
+          {t.youTubeLabel(language)}
+        </label>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <input
+            id="video-quiz-youtube-link"
+            type="url"
+            inputMode="url"
+            autoComplete="off"
+            value={linkInput}
+            onChange={(e) => {
+              setLinkInput(e.target.value);
+              setLinkError(null);
+            }}
+            placeholder={t.youTubePlaceholder(language)}
+            aria-invalid={linkLooksWrong || !!linkError}
+            aria-describedby="video-quiz-youtube-error"
+            className="main-input min-w-0 flex-1"
+          />
+          <button
+            type="submit"
+            disabled={savingLink || !parseYouTubeId(linkInput)}
+            className="flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-primary-color px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-color-hover disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <SiYoutube className="text-base" />
+            {savingLink ? t.saving(language) : t.useThisVideo(language)}
+          </button>
+        </div>
+        <span
+          id="video-quiz-youtube-error"
+          role="status"
+          className="min-h-4 text-xs text-error-color"
+        >
+          {linkError || (linkLooksWrong ? t.notYouTubeLink(language) : "")}
+        </span>
+      </form>
+
+      <div className="grid gap-5 rounded-xl bg-background-color p-4 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+        <section className="flex flex-col gap-3">
+          <h3 className="text-sm font-semibold text-icon-color">
+            {t.howToTitle(language)}
           </h3>
-          <div className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 px-3 py-2">
-            <div className="flex items-center gap-2 text-sm text-slate-700">
-              <MdLock className="text-base text-slate-400" />
-              {videoConfigLanguage.preventFastForward(language)}
-            </div>
-            <Switch
-              checked={preventFastForward}
-              setChecked={(data) => {
-                setPreventFastForward(data);
-                updateAssignment.mutate({
-                  query: {
-                    assignmentId: assignment.id,
-                  },
-                  data: {
-                    preventFastForward: data,
-                  },
-                });
-              }}
-            />
-          </div>
+          <ol className="flex flex-col gap-2.5">
+            {howToSteps.map((step, i) => (
+              <li key={i} className="flex items-start gap-2.5 text-sm text-icon-color">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary-color/10 text-[11px] font-semibold tabular-nums text-primary-color">
+                  {i + 1}
+                </span>
+                <span className="min-w-0">{step}</span>
+              </li>
+            ))}
+          </ol>
         </section>
-
-        {/* Questions List */}
-        <section className="flex flex-grow flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <h3 className="flex items-center gap-2 font-semibold text-slate-700">
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-fuchsia-500 to-pink-500 text-white">
-                <MdQuiz className="text-sm" />
-              </span>
-              {videoConfigLanguage.popupQuestions(language)}
-            </h3>
-            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
-              {questions.length}
-            </span>
-          </div>
-
-          {isAddingQuestion ? (
-            <div className="flex flex-col gap-3 rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50/60 p-4 shadow-sm">
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 text-sm font-semibold text-blue-800">
-                  <MdPlayCircleOutline className="text-base" />
-                  {videoConfigLanguage.newQuestionAt(language)}{" "}
-                  <span className="rounded-md bg-white px-2 py-0.5 font-mono text-xs text-blue-700 shadow-sm ring-1 ring-blue-200">
-                    {formatTime(currentTimestamp)}
-                  </span>
-                </span>
-                <button
-                  onClick={() => setIsAddingQuestion(false)}
-                  className="flex h-11 w-11 md:h-7 md:w-7 items-center justify-center rounded-full text-slate-400 transition hover:bg-white hover:text-rose-500"
-                  aria-label="Close"
-                >
-                  <MdClose />
-                </button>
-              </div>
-
-              <input
-                type="text"
-                placeholder={videoConfigLanguage.questionTextPlaceholder(
-                  language,
-                )}
-                className="main-input w-full"
-                value={questionText}
-                onChange={(e) => setQuestionText(e.target.value)}
-              />
-
-              <div className="flex flex-col gap-2">
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  {videoConfigLanguage.options(language)}
-                </span>
-                {options.map((opt, idx) => {
-                  const isCorrect = correctOptions.includes(idx);
-                  return (
-                    <div
-                      key={idx}
-                      className={`flex items-center gap-2 rounded-xl border bg-white p-1.5 transition ${
-                        isCorrect
-                          ? "border-emerald-300 ring-2 ring-emerald-200/60"
-                          : "border-slate-200"
-                      }`}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (isCorrect) {
-                            setCorrectOptions(
-                              correctOptions.filter((o) => o !== idx),
-                            );
-                          } else {
-                            setCorrectOptions([...correctOptions, idx]);
-                          }
-                        }}
-                        className={`flex h-11 w-11 md:h-7 md:w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold transition ${
-                          isCorrect
-                            ? "bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow"
-                            : "bg-slate-100 text-slate-500 hover:bg-slate-200"
-                        }`}
-                        aria-label={isCorrect ? "Correct" : "Mark correct"}
-                      >
-                        {isCorrect ? (
-                          <MdCheckCircle className="text-base" />
-                        ) : (
-                          String.fromCharCode(65 + idx)
-                        )}
-                      </button>
-                      <input
-                        type="text"
-                        placeholder={`${videoConfigLanguage.optionPlaceholder(language)} ${idx + 1}`}
-                        className="w-full border-0 bg-transparent px-1 py-1 text-sm outline-none focus:ring-0"
-                        value={opt}
-                        onChange={(e) => {
-                          const newOptions = [...options];
-                          newOptions[idx] = e.target.value;
-                          setOptions(newOptions);
-                        }}
-                      />
-                      <button
-                        onClick={() => {
-                          const newOptions = options.filter(
-                            (_, i) => i !== idx,
-                          );
-                          setOptions(newOptions);
-                          setCorrectOptions(
-                            correctOptions
-                              .filter((c) => c !== idx)
-                              .map((c) => (c > idx ? c - 1 : c)),
-                          );
-                        }}
-                        className="flex h-11 w-11 md:h-7 md:w-7 items-center justify-center rounded-lg text-slate-400 transition hover:bg-rose-50 hover:text-rose-500 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent"
-                        disabled={options.length <= 2}
-                        aria-label="Delete option"
-                      >
-                        <MdDelete />
-                      </button>
-                    </div>
-                  );
-                })}
-                <button
-                  onClick={() => setOptions([...options, ""])}
-                  className="flex items-center gap-1 self-start rounded-lg px-2 py-1 text-xs font-semibold text-blue-600 transition hover:bg-blue-50"
-                >
-                  <MdAdd /> {videoConfigLanguage.addOption(language)}
-                </button>
-              </div>
-
-              <button
-                disabled={isSaving || !questionText}
-                onClick={saveQuestion}
-                className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 py-2.5 font-semibold text-white shadow-md shadow-blue-200 transition hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {isSaving ? (
-                  <>
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
-                    Loading..
-                  </>
-                ) : (
-                  <>
-                    <MdSave />
-                    {videoConfigLanguage.saveQuestion(language)}
-                  </>
-                )}
-              </button>
-            </div>
-          ) : (
-            <div className="flex max-h-[400px] flex-col gap-2 overflow-y-auto pr-1">
-              {questions.length === 0 && (
-                <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 py-10 text-center">
-                  <MdHelpOutline className="text-3xl text-slate-300" />
-                  <p className="text-sm text-slate-400">
-                    {videoConfigLanguage.noQuestions(language)}
-                  </p>
-                </div>
-              )}
-              {questions.map((q) => (
-                <div
-                  key={q.id}
-                  className="group relative flex flex-col gap-2 rounded-2xl border border-slate-100 bg-white p-3 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md"
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <button
-                      onClick={() => seekTo(q.timestamp)}
-                      className="flex items-center gap-1 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 px-2 py-0.5 text-xs font-bold text-white shadow-sm transition hover:brightness-110"
-                      title="Jump to timestamp"
-                    >
-                      <MdPlayCircleOutline className="text-sm" />
-                      {formatTime(q.timestamp)}
-                    </button>
-                    <div className="flex items-center gap-1 opacity-70 transition group-hover:opacity-100">
-                      <button
-                        onClick={() => handleEditQuestion(q)}
-                        className="flex h-11 w-11 md:h-7 md:w-7 items-center justify-center rounded-lg text-slate-400 transition hover:bg-blue-50 hover:text-blue-500"
-                        aria-label="Edit"
-                      >
-                        <MdEdit />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteQuestion(q.id)}
-                        className="flex h-11 w-11 md:h-7 md:w-7 items-center justify-center rounded-lg text-slate-400 transition hover:bg-rose-50 hover:text-rose-500"
-                        aria-label="Delete"
-                      >
-                        <MdDelete />
-                      </button>
-                    </div>
-                  </div>
-                  <p className="text-sm font-semibold text-slate-700">
-                    {q.question}
-                  </p>
-                  <ul className="flex flex-col gap-1 text-xs">
-                    {q.options.map((opt, i) => {
-                      const isCorrect = q.correctOptions.some((a) => a === i);
-                      return (
-                        <li
-                          key={i}
-                          className={`flex items-center gap-2 rounded-md px-2 py-1 ${
-                            isCorrect
-                              ? "bg-emerald-50 text-emerald-700"
-                              : "text-slate-500"
-                          }`}
-                        >
-                          <span
-                            className={`flex h-4 w-4 shrink-0 items-center justify-center rounded text-[10px] font-bold ${
-                              isCorrect
-                                ? "bg-emerald-500 text-white"
-                                : "bg-slate-200 text-slate-500"
-                            }`}
-                          >
-                            {isCorrect ? "✓" : String.fromCharCode(65 + i)}
-                          </span>
-                          <span className={isCorrect ? "font-semibold" : ""}>
-                            {opt}
-                          </span>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          )}
+        <section className="flex flex-col gap-3 md:border-l md:border-gray-200 md:pl-5">
+          <h3 className="text-sm font-semibold text-icon-color">
+            {t.goodToKnow(language)}
+          </h3>
+          <ul className="flex list-disc flex-col gap-2 pl-4 text-xs leading-relaxed text-gray-500 marker:text-gray-300">
+            <li>{t.noteControls(language)}</li>
+            <li>{t.noteAds(language)}</li>
+            <li>{t.noteAvailability(language)}</li>
+          </ul>
         </section>
       </div>
+    </div>
+  );
 
-      <style jsx>{`
-        .vc-shimmer {
-          background: linear-gradient(
-            90deg,
-            transparent 0%,
-            rgba(255, 255, 255, 0.5) 50%,
-            transparent 100%
-          );
-          background-size: 200% 100%;
-          animation: vc-shimmer 1.6s linear infinite;
-        }
-        @keyframes vc-shimmer {
-          0% {
-            background-position: -200% 0;
-          }
-          100% {
-            background-position: 200% 0;
-          }
-        }
-        .vc-float {
-          animation: vc-float 3s ease-in-out infinite;
-        }
-        @keyframes vc-float {
-          0%,
-          100% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-6px);
-          }
-        }
-      `}</style>
+  const showSourcePicker = !videoURL || isUploading || changingSource;
+
+  const sourcePicker = (
+    <div className="flex flex-col gap-4">
+      {!isUploading && (
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <GradeSegmentedControl
+            value={sourceTab}
+            onChange={setSourceTab}
+            options={[
+              {
+                value: "upload",
+                label: t.sourceUpload(language),
+                icon: <MdOutlineFileUpload className="text-base" />,
+              },
+              {
+                value: "youtube",
+                label: t.sourceYouTube(language),
+                icon: <SiYoutube className="text-base" />,
+              },
+            ]}
+          />
+          {changingSource && videoURL && (
+            <button
+              type="button"
+              onClick={() => setChangingSource(false)}
+              className="rounded-xl border border-gray-200 px-4 py-1.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
+            >
+              {t.cancel(language)}
+            </button>
+          )}
+        </div>
+      )}
+      {isUploading || sourceTab === "upload" ? uploadPanel : youTubePanel}
+    </div>
+  );
+
+  return (
+    <div className="flex flex-col gap-5">
+      {fileInput}
+
+      {/* Video + question track */}
+      <section className={card}>
+        <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+          <div className="flex min-w-0 flex-col">
+            <h2 className="text-base font-semibold text-icon-color">
+              {t.videoTitle(language)}
+            </h2>
+            <span className="text-xs text-gray-400">
+              {t.videoHelper(language)}
+            </span>
+          </div>
+          {videoURL && !isUploading && !changingSource && (
+            <button
+              type="button"
+              onClick={openSourcePicker}
+              className={`${outlineButton} shrink-0`}
+            >
+              <MdOutlineVideoLibrary className="text-lg" />
+              {t.changeVideo(language)}
+            </button>
+          )}
+        </div>
+
+        {showSourcePicker ? (
+          sourcePicker
+        ) : (
+          <>
+            {uploadError && (
+              <p className="mb-3 rounded-lg bg-error-color/10 px-3 py-2 text-sm text-error-color">
+                {uploadError}
+              </p>
+            )}
+            {playerError && (
+              <p
+                role="alert"
+                className="mb-3 rounded-lg bg-error-color/10 px-3 py-2 text-sm text-error-color"
+              >
+                {playerError}
+              </p>
+            )}
+            <div className="overflow-hidden rounded-xl bg-black">
+              {youTubeId ? (
+                <YouTubeEmbed
+                  ref={ytRef}
+                  videoId={youTubeId}
+                  className="aspect-video max-h-[32rem] w-full"
+                  onReady={(d) => {
+                    setPlayerError(null);
+                    setDuration(d);
+                  }}
+                  onTime={(time, d) => {
+                    setCurrentTime((prev) =>
+                      Math.abs(prev - time) < 0.05 ? prev : time,
+                    );
+                    if (d > 0) setDuration((prev) => (prev === d ? prev : d));
+                  }}
+                  onError={(code) => {
+                    const kind = youTubeErrorKind(code);
+                    setPlayerError(
+                      kind === "embedBlocked"
+                        ? t.ytEmbedBlocked(language)
+                        : kind === "notFound"
+                          ? t.ytNotFound(language)
+                          : t.ytOther(language),
+                    );
+                  }}
+                  onLoadFailed={() => setPlayerError(t.ytLoadFailed(language))}
+                />
+              ) : (
+                <video
+                  ref={videoRef}
+                  src={videoURL ?? undefined}
+                  controls
+                  playsInline
+                  className="aspect-video max-h-[32rem] w-full"
+                  onLoadedMetadata={(e) =>
+                    setDuration(e.currentTarget.duration || 0)
+                  }
+                  onDurationChange={(e) =>
+                    setDuration(e.currentTarget.duration || 0)
+                  }
+                  onTimeUpdate={(e) =>
+                    setCurrentTime(e.currentTarget.currentTime)
+                  }
+                  onSeeked={(e) => setCurrentTime(e.currentTarget.currentTime)}
+                />
+              )}
+            </div>
+            {youTubeId && (
+              <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-gray-400">
+                <span className="flex items-center gap-1.5">
+                  <SiYoutube className="text-sm text-[#FF0000]" />
+                  {t.fromYouTube(language)}
+                </span>
+                <a
+                  href={youTubeWatchUrl(youTubeId)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-medium text-primary-color hover:underline"
+                >
+                  {t.openOnYouTube(language)}
+                </a>
+              </div>
+            )}
+
+            {/* Question track: where each question interrupts the video */}
+            <div className="mt-4 flex flex-col gap-3">
+              <div className="relative h-9 select-none">
+                <button
+                  type="button"
+                  aria-label={t.jumpTo(language)}
+                  tabIndex={-1}
+                  disabled={duration <= 0}
+                  onClick={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const ratio = (e.clientX - rect.left) / rect.width;
+                    seekTo(Math.max(0, Math.min(1, ratio)) * duration);
+                  }}
+                  className="absolute inset-x-0 top-1/2 h-4 -translate-y-1/2 cursor-pointer disabled:cursor-default"
+                >
+                  <span className="absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-gray-100" />
+                  <span
+                    className="absolute left-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-primary-color/30"
+                    style={{ width: `${pct(currentTime)}%` }}
+                  />
+                </button>
+                {duration > 0 && (
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute top-1/2 h-4 w-0.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary-color"
+                    style={{ left: `${pct(currentTime)}%` }}
+                  />
+                )}
+                {duration > 0 &&
+                  questions.map((q, i) => {
+                    const active = draft?.id === q.id || focusedId === q.id;
+                    return (
+                      <button
+                        key={q.id}
+                        type="button"
+                        onClick={() => focusQuestion(q)}
+                        title={`${formatTime(q.timestamp)} · ${q.question}`}
+                        aria-label={`${t.jumpTo(language)} ${formatTime(q.timestamp)}: ${q.question}`}
+                        className={`absolute top-1/2 flex h-6 min-w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 px-1 text-[11px] font-semibold tabular-nums transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-color/40 ${
+                          active
+                            ? "z-10 scale-110 border-primary-color bg-primary-color text-white"
+                            : "border-primary-color bg-white text-primary-color hover:bg-primary-color/10"
+                        }`}
+                        style={{ left: `${pct(q.timestamp)}%` }}
+                      >
+                        {i + 1}
+                      </button>
+                    );
+                  })}
+                {duration > 0 && draft && !draft.id && (
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute top-1/2 z-10 flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-dashed border-primary-color bg-white text-sm text-primary-color"
+                    style={{ left: `${pct(draft.timestamp)}%` }}
+                  >
+                    <MdAdd />
+                  </span>
+                )}
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <span className="text-sm tabular-nums text-gray-400">
+                  <span className="font-medium text-icon-color">
+                    {formatTime(currentTime)}
+                  </span>{" "}
+                  / {formatTime(duration)}
+                </span>
+                <button
+                  type="button"
+                  onClick={openNewQuestion}
+                  disabled={!!draft && !draft.id}
+                  className="flex items-center gap-1.5 rounded-xl bg-primary-color px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-color-hover active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <MdAdd className="text-lg" />
+                  {t.addQuestionAt(language)}{" "}
+                  <span className="tabular-nums">{formatTime(currentTime)}</span>
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+
+        <label className="mt-5 flex items-center justify-between gap-4 border-t border-gray-100 pt-4">
+          <span className="flex min-w-0 flex-col">
+            <span className="text-sm font-medium text-icon-color">
+              {t.preventFastForward(language)}
+            </span>
+            <span className="text-xs text-gray-400">
+              {t.preventFastForwardHelper(language)}
+            </span>
+          </span>
+          <Switch
+            checked={preventFastForward}
+            setChecked={(data) => {
+              setPreventFastForward(data);
+              updateAssignment.mutate({
+                query: {
+                  assignmentId: assignment.id,
+                },
+                data: {
+                  preventFastForward: data,
+                },
+              });
+            }}
+          />
+        </label>
+      </section>
+
+      {/* Questions */}
+      {videoURL && (
+        <section className={card}>
+          <div className="mb-3 flex items-start justify-between gap-3">
+            <div className="flex min-w-0 flex-col">
+              <h2 className="flex items-center gap-2 text-base font-semibold text-icon-color">
+                {t.popupQuestions(language)}
+                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium tabular-nums text-gray-600">
+                  {questions.length}
+                </span>
+              </h2>
+              <span className="text-xs text-gray-400">
+                {t.questionsHelper(language)}
+              </span>
+            </div>
+          </div>
+
+          {draft && !draft.id && <div className="mb-3">{renderEditor(draft)}</div>}
+
+          {questions.length === 0 && !draft && (
+            <div className="flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-gray-200 p-6 text-center">
+              <span className="text-sm text-gray-400">
+                {t.noQuestions(language)}
+              </span>
+              <button
+                type="button"
+                onClick={openNewQuestion}
+                className={outlineButton}
+              >
+                <MdAdd className="text-lg" />
+                {t.addQuestionAt(language)}{" "}
+                <span className="tabular-nums">{formatTime(currentTime)}</span>
+              </button>
+            </div>
+          )}
+
+          <ol className="flex flex-col gap-2">
+            {questions.map((q, i) =>
+              draft?.id === q.id ? (
+                <li
+                  key={q.id}
+                  ref={(el) => {
+                    rowRefs.current[q.id] = el;
+                  }}
+                >
+                  {renderEditor(draft)}
+                </li>
+              ) : (
+                <li
+                  key={q.id}
+                  ref={(el) => {
+                    rowRefs.current[q.id] = el;
+                  }}
+                  className={`flex items-start gap-3 rounded-xl border p-3 transition ${
+                    focusedId === q.id
+                      ? "border-primary-color/40 bg-primary-color/[0.03]"
+                      : "border-gray-100"
+                  }`}
+                >
+                  <span className="mt-0.5 flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full border-2 border-primary-color px-1 text-[11px] font-semibold tabular-nums text-primary-color">
+                    {i + 1}
+                  </span>
+                  <div className="flex min-w-0 flex-1 flex-col gap-2">
+                    <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                      <button
+                        type="button"
+                        onClick={() => focusQuestion(q)}
+                        aria-label={`${t.jumpTo(language)} ${formatTime(q.timestamp)}`}
+                        className="rounded-md bg-primary-color/10 px-1.5 py-0.5 text-xs font-semibold tabular-nums text-primary-color transition hover:bg-primary-color/20"
+                      >
+                        {formatTime(q.timestamp)}
+                      </button>
+                      <p className="min-w-0 break-words text-sm font-medium text-icon-color">
+                        {q.question}
+                      </p>
+                    </div>
+                    <ul className="flex flex-wrap gap-1.5">
+                      {q.options.map((opt, oi) => {
+                        const isCorrect = q.correctOptions.includes(oi);
+                        return (
+                          <li
+                            key={oi}
+                            className={`flex max-w-full items-center gap-1 rounded-full px-2.5 py-0.5 text-xs ${
+                              isCorrect
+                                ? "bg-success-color/10 font-medium text-success-color"
+                                : "bg-gray-100 text-gray-500"
+                            }`}
+                          >
+                            {isCorrect && (
+                              <MdCheckCircle className="shrink-0 text-sm" />
+                            )}
+                            <span className="truncate">{opt}</span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                  <div className="flex shrink-0 items-center">
+                    <button
+                      type="button"
+                      aria-label={t.edit(language)}
+                      onClick={() => openEditQuestion(q)}
+                      className={iconButton}
+                    >
+                      <MdEdit />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={t.remove(language)}
+                      onClick={() => handleDeleteQuestion(q.id)}
+                      className="rounded-full p-2 text-lg text-gray-400 transition hover:bg-error-color/10 hover:text-error-color focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error-color/40"
+                    >
+                      <MdDelete />
+                    </button>
+                  </div>
+                </li>
+              ),
+            )}
+          </ol>
+        </section>
+      )}
     </div>
   );
 };

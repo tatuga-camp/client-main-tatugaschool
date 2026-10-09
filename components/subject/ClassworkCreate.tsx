@@ -255,7 +255,6 @@ function ClassworkCreate({ onClose, toast, subjectId, schoolId }: Props) {
     try {
       const response = await create.mutateAsync({
         title: "Draft Video Quize",
-        description: "Draft Video Quize",
         beginDate: new Date().toISOString(),
         type: "VideoQuiz",
         status: "Draft",
