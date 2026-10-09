@@ -1,3 +1,4 @@
+import { QuizSettings } from "./Quiz";
 export interface Assignment {
   id: string;
   createAt: Date;
@@ -21,4 +22,4 @@ export interface Assignment {
 }
 
 export type AssignmentStatus = "Published" | "Draft";
-export type AssignmentType = "Assignment" | "Material" | "VideoQuiz";
+export type AssignmentType = "Assignment" | "Material" | "VideoQuiz" | "Quiz";

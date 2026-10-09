@@ -1,3 +1,4 @@
+import { QuizAttempt } from "./Quiz";
 export interface StudentOnAssignment {
   id: string;
   createAt: Date;
