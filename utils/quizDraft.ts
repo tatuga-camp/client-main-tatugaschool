@@ -135,3 +135,20 @@ export function reorderByIds<T extends { id: string }>(list: T[], ids: string[])
   const rest = list.filter((q) => !ids.includes(q.id));
   return [...ordered, ...rest];
 }
+
+/** Largest question image the editor uploads. */
+export const QUESTION_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
+
+export type QuestionImageCheck = "ok" | "notImage" | "tooLarge";
+
+/** Checks a picked file before it is uploaded as a question image. */
+export function validateQuestionImage(file: { type: string; size: number }): QuestionImageCheck {
+  if (!file.type.startsWith("image/") || file.size <= 0) return "notImage";
+  if (file.size > QUESTION_IMAGE_MAX_BYTES) return "tooLarge";
+  return "ok";
+}
+
+/** Sets (or, with null, removes) the question's image in the draft. */
+export function setQuestionImage(draft: QuizQuestionInput, imageUrl: string | null): QuizQuestionInput {
+  return { ...draft, imageUrl };
+}

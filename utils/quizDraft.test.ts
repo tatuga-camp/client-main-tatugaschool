@@ -13,6 +13,9 @@ import {
   newQuizId,
   promptSegments,
   syncBlanksWithPrompt,
+  QUESTION_IMAGE_MAX_BYTES,
+  setQuestionImage,
+  validateQuestionImage,
 } from "./quizDraft";
 
 test("newQuizId is 8 url-safe chars and varies", () => {
@@ -137,4 +140,30 @@ test("reorderByIds follows ids and keeps unknown items at the end", () => {
   const list = [{ id: "a" }, { id: "b" }, { id: "c" }];
   assert.deepEqual(reorderByIds(list, ["c", "a", "b"]).map((q) => q.id), ["c", "a", "b"]);
   assert.deepEqual(reorderByIds(list, ["b", "a"]).map((q) => q.id), ["b", "a", "c"]);
+});
+
+test("validateQuestionImage accepts images up to 5 MB", () => {
+  assert.equal(QUESTION_IMAGE_MAX_BYTES, 5 * 1024 * 1024);
+  assert.equal(validateQuestionImage({ type: "image/png", size: 1024 }), "ok");
+  assert.equal(validateQuestionImage({ type: "image/jpeg", size: QUESTION_IMAGE_MAX_BYTES }), "ok");
+});
+
+test("validateQuestionImage rejects files over 5 MB", () => {
+  assert.equal(validateQuestionImage({ type: "image/png", size: QUESTION_IMAGE_MAX_BYTES + 1 }), "tooLarge");
+});
+
+test("validateQuestionImage rejects non-image and empty files", () => {
+  assert.equal(validateQuestionImage({ type: "application/pdf", size: 1024 }), "notImage");
+  assert.equal(validateQuestionImage({ type: "", size: 1024 }), "notImage");
+  assert.equal(validateQuestionImage({ type: "image/png", size: 0 }), "notImage");
+});
+
+test("an image change makes the draft differ from the server copy; removing it restores equality", () => {
+  const base = defaultQuestion("SINGLE");
+  const withImage = setQuestionImage({ ...base, imageUrl: null }, "https://storage.example.com/a.png");
+  assert.equal(withImage.imageUrl, "https://storage.example.com/a.png");
+  assert.notEqual(JSON.stringify(withImage), JSON.stringify({ ...base, imageUrl: null }));
+  const removed = setQuestionImage(withImage, null);
+  assert.equal(removed.imageUrl, null);
+  assert.deepEqual(removed, { ...base, imageUrl: null });
 });

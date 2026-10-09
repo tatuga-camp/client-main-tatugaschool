@@ -4,8 +4,16 @@ import Swal from "sweetalert2";
 import { quizLanguage } from "../../data/languages";
 import { AssignmentOnQuiz, QuizQuestionInput, QuizQuestionType } from "../../interfaces";
 import { useDeleteQuizQuestion, useGetLanguage, useUpdateQuizQuestion } from "../../react-query";
-import { convertQuestionType, newQuizId, rebaseDraft, toQuestionInput, toQuestionPayload } from "../../utils/quizDraft";
+import {
+  convertQuestionType,
+  newQuizId,
+  rebaseDraft,
+  setQuestionImage,
+  toQuestionInput,
+  toQuestionPayload,
+} from "../../utils/quizDraft";
 import BlankEditor from "./BlankEditor";
+import QuestionImageField from "./QuestionImageField";
 import { showQuizError } from "./quizErrorAlert";
 
 type Props = {
@@ -82,6 +90,16 @@ export default function QuestionCard({ question, index, locked, dragHandle }: Pr
       ),
     }));
 
+  const imageField = (
+    <QuestionImageField
+      imageUrl={draft.imageUrl}
+      schoolId={question.schoolId}
+      disabled={locked}
+      language={lang}
+      onChange={(imageUrl) => setDraft((d) => setQuestionImage(d, imageUrl))}
+    />
+  );
+
   return (
     <article className="flex flex-col gap-4 rounded-2xl border border-gray-100 bg-white p-4 font-Anuphan">
       <header className="flex flex-wrap items-center gap-2">
@@ -114,7 +132,10 @@ export default function QuestionCard({ question, index, locked, dragHandle }: Pr
       </header>
 
       {draft.type === "FILL_BLANK" ? (
-        <BlankEditor value={draft} onChange={setDraft} language={lang} disabled={locked} />
+        <>
+          <BlankEditor value={draft} onChange={setDraft} language={lang} disabled={locked} />
+          {imageField}
+        </>
       ) : (
         <>
           <textarea
@@ -125,6 +146,7 @@ export default function QuestionCard({ question, index, locked, dragHandle }: Pr
             onChange={(e) => setDraft((d) => ({ ...d, prompt: e.target.value }))}
             className="main-input w-full resize-y"
           />
+          {imageField}
           <ul className="flex flex-col gap-2">
             {draft.options.map((option, i) => (
               <li key={option.id} className="flex items-center gap-2">
