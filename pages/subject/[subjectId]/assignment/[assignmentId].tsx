@@ -493,60 +493,60 @@ function Index({
                     ref={divRef}
                     className="absolute right-4 top-full z-40 mt-1 w-56 max-w-[calc(100vw-2rem)] rounded-2xl border border-gray-100 bg-white p-1.5 shadow-lg md:right-0 md:mt-2"
                   >
-                      {menuClassworkList.map((menu, index) => {
-                        const disabled =
-                          (menu.title === "Mark as Draft" &&
-                            classwork?.status === "Draft") ||
-                          (menu.title === "Publish" &&
-                            classwork?.status === "Published");
-                        let summitValue: SummitValue = "Published";
+                    {menuClassworkList.map((menu, index) => {
+                      const disabled =
+                        (menu.title === "Mark as Draft" &&
+                          classwork?.status === "Draft") ||
+                        (menu.title === "Publish" &&
+                          classwork?.status === "Published");
+                      let summitValue: SummitValue = "Published";
 
-                        if (menu.title === "Save Change") {
-                          summitValue = "Save Change";
-                        }
-                        if (menu.title === "Mark as Draft") {
-                          summitValue = "Mark as Draft";
-                        }
-                        if (menu.title === "Publish") {
-                          summitValue = "Published";
-                        }
-                        const isDelete = menu.title === "Delete";
-                        return (
-                          <React.Fragment key={index}>
-                            {isDelete && (
-                              <div className="my-1 border-t border-gray-100" />
-                            )}
-                            <button
-                              onClick={() => {
-                                if (isDelete) {
-                                  handleDeleteAssignment();
-                                }
-                              }}
-                              disabled={disabled}
-                              type={
-                                menu.title === "Publish" ||
-                                menu.title === "Save Change" ||
-                                menu.title === "Mark as Draft"
-                                  ? "submit"
-                                  : "button"
+                      if (menu.title === "Save Change") {
+                        summitValue = "Save Change";
+                      }
+                      if (menu.title === "Mark as Draft") {
+                        summitValue = "Mark as Draft";
+                      }
+                      if (menu.title === "Publish") {
+                        summitValue = "Published";
+                      }
+                      const isDelete = menu.title === "Delete";
+                      return (
+                        <React.Fragment key={index}>
+                          {isDelete && (
+                            <div className="my-1 border-t border-gray-100" />
+                          )}
+                          <button
+                            onClick={() => {
+                              if (isDelete) {
+                                handleDeleteAssignment();
                               }
-                              value={summitValue}
-                              className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-medium transition ${
-                                isDelete
-                                  ? "text-error-color hover:bg-error-color/10"
-                                  : disabled
-                                    ? "cursor-not-allowed text-gray-300"
-                                    : "text-gray-700 hover:bg-gray-50"
-                              }`}
-                            >
-                              <span className="text-lg">{menu.icon}</span>
-                              {classworkHeadMenuBarDataLanguage.button[
-                                menu.value as keyof typeof classworkHeadMenuBarDataLanguage.button
-                              ](language.data ?? "en")}
-                            </button>
-                          </React.Fragment>
-                        );
-                      })}
+                            }}
+                            disabled={disabled}
+                            type={
+                              menu.title === "Publish" ||
+                              menu.title === "Save Change" ||
+                              menu.title === "Mark as Draft"
+                                ? "submit"
+                                : "button"
+                            }
+                            value={summitValue}
+                            className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-medium transition ${
+                              isDelete
+                                ? "text-error-color hover:bg-error-color/10"
+                                : disabled
+                                  ? "cursor-not-allowed text-gray-300"
+                                  : "text-gray-700 hover:bg-gray-50"
+                            }`}
+                          >
+                            <span className="text-lg">{menu.icon}</span>
+                            {classworkHeadMenuBarDataLanguage.button[
+                              menu.value as keyof typeof classworkHeadMenuBarDataLanguage.button
+                            ](language.data ?? "en")}
+                          </button>
+                        </React.Fragment>
+                      );
+                    })}
                   </div>
                 )}
               </section>

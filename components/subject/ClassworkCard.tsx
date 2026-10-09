@@ -19,7 +19,10 @@ import {
 } from "../../data/languages";
 import { Assignment, FileOnAssignment, Language } from "../../interfaces";
 import { useGetLanguage, useUpdateAssignment } from "../../react-query";
-import { classworkHref, classworkShowsAttachments } from "../../utils/classworkLinks";
+import {
+  classworkHref,
+  classworkShowsAttachments,
+} from "../../utils/classworkLinks";
 import TextEditor from "../common/TextEditor";
 import AssignmentTagEditor from "./AssignmentTagEditor";
 

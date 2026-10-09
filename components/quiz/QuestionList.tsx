@@ -44,13 +44,24 @@ function SortableQuestion({
   onDirtyChange?: (questionId: string, dirty: boolean) => void;
 }) {
   const language = useGetLanguage();
-  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } =
-    useSortable({ id: question.id, disabled: locked });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: question.id, disabled: locked });
   return (
     <li
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={isDragging ? "z-10 rounded-2xl shadow-lg ring-2 ring-primary-color/30" : ""}
+      className={
+        isDragging
+          ? "z-10 rounded-2xl shadow-lg ring-2 ring-primary-color/30"
+          : ""
+      }
     >
       <QuestionCard
         question={question}
@@ -102,8 +113,12 @@ export default function QuestionList({
   const [menuOpen, setMenuOpen] = useState(false);
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 4 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 150, tolerance: 5 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
   );
 
   const list = questions.data ?? [];
@@ -161,13 +176,24 @@ export default function QuestionList({
       {list.length === 0 && !questions.isLoading && (
         <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-gray-200 bg-white p-10 text-center">
           <MdQuiz className="text-4xl text-primary-color/60" />
-          <p className="font-semibold text-icon-color">{quizLanguage.emptyTitle(lang)}</p>
-          <p className="text-sm text-icon-color/60">{quizLanguage.emptyHint(lang)}</p>
+          <p className="font-semibold text-icon-color">
+            {quizLanguage.emptyTitle(lang)}
+          </p>
+          <p className="text-sm text-icon-color/60">
+            {quizLanguage.emptyHint(lang)}
+          </p>
         </div>
       )}
 
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-        <SortableContext items={list.map((q) => q.id)} strategy={verticalListSortingStrategy}>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={onDragEnd}
+      >
+        <SortableContext
+          items={list.map((q) => q.id)}
+          strategy={verticalListSortingStrategy}
+        >
           <ol className="flex flex-col gap-4">
             {list.map((question, index) => (
               <SortableQuestion
@@ -194,20 +220,22 @@ export default function QuestionList({
           </button>
           {menuOpen && (
             <div className="absolute left-1/2 top-full z-20 mt-2 flex w-64 -translate-x-1/2 flex-col rounded-2xl border border-gray-100 bg-white p-1 shadow-lg">
-              {(["SINGLE", "MULTIPLE", "FILL_BLANK"] as QuizQuestionType[]).map((type) => (
-                <button
-                  key={type}
-                  type="button"
-                  onClick={() => add(type)}
-                  className="rounded-xl px-3 py-2 text-left text-sm text-icon-color hover:bg-primary-color/10"
-                >
-                  {type === "SINGLE"
-                    ? quizLanguage.typeSingle(lang)
-                    : type === "MULTIPLE"
-                      ? quizLanguage.typeMultiple(lang)
-                      : quizLanguage.typeFillBlank(lang)}
-                </button>
-              ))}
+              {(["SINGLE", "MULTIPLE", "FILL_BLANK"] as QuizQuestionType[]).map(
+                (type) => (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => add(type)}
+                    className="rounded-xl px-3 py-2 text-left text-sm text-icon-color hover:bg-primary-color/10"
+                  >
+                    {type === "SINGLE"
+                      ? quizLanguage.typeSingle(lang)
+                      : type === "MULTIPLE"
+                        ? quizLanguage.typeMultiple(lang)
+                        : quizLanguage.typeFillBlank(lang)}
+                  </button>
+                ),
+              )}
             </div>
           )}
         </div>

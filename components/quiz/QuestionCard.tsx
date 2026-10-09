@@ -1,9 +1,21 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { MdCheckCircle, MdDelete, MdRadioButtonUnchecked } from "react-icons/md";
+import {
+  MdCheckCircle,
+  MdDelete,
+  MdRadioButtonUnchecked,
+} from "react-icons/md";
 import Swal from "sweetalert2";
 import { quizLanguage } from "../../data/languages";
-import { AssignmentOnQuiz, QuizQuestionInput, QuizQuestionType } from "../../interfaces";
-import { useDeleteQuizQuestion, useGetLanguage, useUpdateQuizQuestion } from "../../react-query";
+import {
+  AssignmentOnQuiz,
+  QuizQuestionInput,
+  QuizQuestionType,
+} from "../../interfaces";
+import {
+  useDeleteQuizQuestion,
+  useGetLanguage,
+  useUpdateQuizQuestion,
+} from "../../react-query";
 import {
   blanksMissingAnswers,
   commitPendingAnswers,
@@ -30,12 +42,20 @@ type Props = {
 
 const TYPES: QuizQuestionType[] = ["SINGLE", "MULTIPLE", "FILL_BLANK"];
 
-export default function QuestionCard({ question, index, locked, dragHandle, onDirtyChange }: Props) {
+export default function QuestionCard({
+  question,
+  index,
+  locked,
+  dragHandle,
+  onDirtyChange,
+}: Props) {
   const language = useGetLanguage();
   const lang = language.data ?? "en";
   const update = useUpdateQuizQuestion();
   const remove = useDeleteQuizQuestion();
-  const [draft, setDraft] = useState<QuizQuestionInput>(() => toQuestionInput(question));
+  const [draft, setDraft] = useState<QuizQuestionInput>(() =>
+    toQuestionInput(question),
+  );
   const serverInput = useMemo(() => toQuestionInput(question), [question]);
   const serverKey = JSON.stringify(serverInput);
   const baseRef = useRef(serverInput);
@@ -50,7 +70,10 @@ export default function QuestionCard({ question, index, locked, dragHandle, onDi
 
   const [pending, setPending] = useState<PendingAnswers>({});
   // Typed-but-not-added answers count as edits and are included in what Save sends.
-  const committed = useMemo(() => commitPendingAnswers(draft, pending), [draft, pending]);
+  const committed = useMemo(
+    () => commitPendingAnswers(draft, pending),
+    [draft, pending],
+  );
   const dirty = JSON.stringify(draft) !== serverKey || committed !== draft;
   const payload = useMemo(() => toQuestionPayload(committed), [committed]);
   const missingAnswers = blanksMissingAnswers(payload);
@@ -60,7 +83,10 @@ export default function QuestionCard({ question, index, locked, dragHandle, onDi
   useEffect(() => {
     reportDirty.current?.(question.id, dirty);
   }, [dirty, question.id]);
-  useEffect(() => () => reportDirty.current?.(question.id, false), [question.id]);
+  useEffect(
+    () => () => reportDirty.current?.(question.id, false),
+    [question.id],
+  );
 
   const typeLabel = (type: QuizQuestionType) =>
     type === "SINGLE"
@@ -73,7 +99,10 @@ export default function QuestionCard({ question, index, locked, dragHandle, onDi
 
   const save = async () => {
     try {
-      const saved = await update.mutateAsync({ id: question.id, data: payload });
+      const saved = await update.mutateAsync({
+        id: question.id,
+        data: payload,
+      });
       setDraft(toQuestionInput(saved));
       setPending({});
     } catch (error) {
@@ -122,11 +151,17 @@ export default function QuestionCard({ question, index, locked, dragHandle, onDi
     <article className="flex flex-col gap-4 rounded-2xl border border-gray-100 bg-white p-4 font-Anuphan">
       <header className="flex flex-wrap items-center gap-2">
         {dragHandle}
-        <h3 className="font-semibold text-icon-color">{quizLanguage.questionLabel(lang, index + 1)}</h3>
+        <h3 className="font-semibold text-icon-color">
+          {quizLanguage.questionLabel(lang, index + 1)}
+        </h3>
         <select
           disabled={locked}
           value={draft.type}
-          onChange={(e) => setDraft((d) => convertQuestionType(d, e.target.value as QuizQuestionType))}
+          onChange={(e) =>
+            setDraft((d) =>
+              convertQuestionType(d, e.target.value as QuizQuestionType),
+            )
+          }
           className="rounded-xl border border-gray-200 px-2 py-1 text-sm"
         >
           {TYPES.map((type) => (
@@ -143,7 +178,12 @@ export default function QuestionCard({ question, index, locked, dragHandle, onDi
             step={0.5}
             disabled={locked}
             value={draft.points}
-            onChange={(e) => setDraft((d) => ({ ...d, points: Math.max(0, Number(e.target.value) || 0) }))}
+            onChange={(e) =>
+              setDraft((d) => ({
+                ...d,
+                points: Math.max(0, Number(e.target.value) || 0),
+              }))
+            }
             className="w-20 rounded-xl border border-gray-200 px-2 py-1 text-right"
           />
         </label>
@@ -168,7 +208,9 @@ export default function QuestionCard({ question, index, locked, dragHandle, onDi
             value={draft.prompt}
             rows={2}
             placeholder={quizLanguage.promptPlaceholder(lang)}
-            onChange={(e) => setDraft((d) => ({ ...d, prompt: e.target.value }))}
+            onChange={(e) =>
+              setDraft((d) => ({ ...d, prompt: e.target.value }))
+            }
             className="main-input w-full resize-y"
           />
           {imageField}
@@ -183,7 +225,11 @@ export default function QuestionCard({ question, index, locked, dragHandle, onDi
                   onClick={() => setCorrect(option.id)}
                   className={`text-2xl ${option.isCorrect ? "text-success-color" : "text-icon-color/30 hover:text-icon-color/60"}`}
                 >
-                  {option.isCorrect ? <MdCheckCircle /> : <MdRadioButtonUnchecked />}
+                  {option.isCorrect ? (
+                    <MdCheckCircle />
+                  ) : (
+                    <MdRadioButtonUnchecked />
+                  )}
                 </button>
                 <input
                   disabled={locked}
@@ -192,7 +238,9 @@ export default function QuestionCard({ question, index, locked, dragHandle, onDi
                   onChange={(e) =>
                     setDraft((d) => ({
                       ...d,
-                      options: d.options.map((o) => (o.id === option.id ? { ...o, text: e.target.value } : o)),
+                      options: d.options.map((o) =>
+                        o.id === option.id ? { ...o, text: e.target.value } : o,
+                      ),
                     }))
                   }
                   className={`main-input flex-1 ${option.isCorrect ? "border-success-color/50" : ""}`}
@@ -201,7 +249,12 @@ export default function QuestionCard({ question, index, locked, dragHandle, onDi
                   <button
                     type="button"
                     aria-label={quizLanguage.removeOption(lang)}
-                    onClick={() => setDraft((d) => ({ ...d, options: d.options.filter((o) => o.id !== option.id) }))}
+                    onClick={() =>
+                      setDraft((d) => ({
+                        ...d,
+                        options: d.options.filter((o) => o.id !== option.id),
+                      }))
+                    }
                     className="text-xl text-icon-color/40 hover:text-error-color"
                   >
                     <MdDelete />
@@ -216,7 +269,15 @@ export default function QuestionCard({ question, index, locked, dragHandle, onDi
               onClick={() =>
                 setDraft((d) => ({
                   ...d,
-                  options: [...d.options, { id: newQuizId(), text: "", imageUrl: null, isCorrect: false }],
+                  options: [
+                    ...d.options,
+                    {
+                      id: newQuizId(),
+                      text: "",
+                      imageUrl: null,
+                      isCorrect: false,
+                    },
+                  ],
                 }))
               }
               className="w-max text-sm font-medium text-primary-color hover:underline"
@@ -234,7 +295,9 @@ export default function QuestionCard({ question, index, locked, dragHandle, onDi
               {quizLanguage.blankNeedsAnswer(lang)}
             </span>
           ) : (
-            <span className={`mr-auto text-xs ${dirty ? "text-warning-color" : "text-icon-color/50"}`}>
+            <span
+              className={`mr-auto text-xs ${dirty ? "text-warning-color" : "text-icon-color/50"}`}
+            >
               {dirty ? quizLanguage.unsaved(lang) : quizLanguage.saved(lang)}
             </span>
           )}
@@ -247,7 +310,12 @@ export default function QuestionCard({ question, index, locked, dragHandle, onDi
           </button>
           <button
             type="button"
-            disabled={!dirty || update.isPending || !draft.prompt.trim() || missingAnswers > 0}
+            disabled={
+              !dirty ||
+              update.isPending ||
+              !draft.prompt.trim() ||
+              missingAnswers > 0
+            }
             onClick={save}
             className="rounded-xl bg-primary-color px-4 py-1.5 text-sm font-medium text-white hover:bg-primary-color-hover disabled:opacity-40"
           >

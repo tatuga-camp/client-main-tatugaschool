@@ -77,7 +77,11 @@ export function editorLockState(
  * would stop auto-grading at submit), for blank/invalid input, or when the clamped value is unchanged.
  * The value is clamped to 0..max so the request never exceeds the question's points.
  */
-export function scoreToSave(raw: string, max: number, current: number | null): number | null {
+export function scoreToSave(
+  raw: string,
+  max: number,
+  current: number | null,
+): number | null {
   if (current === null) return null;
   const trimmed = raw.trim();
   const n = Number(trimmed);

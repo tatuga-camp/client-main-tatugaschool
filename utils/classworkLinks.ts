@@ -1,7 +1,10 @@
 import { AssignmentType } from "../interfaces";
 
 /** Where a classwork card opens: a quiz goes straight to its editor. */
-export function classworkHref(subjectId: string, classwork: { id: string; type: AssignmentType }): string {
+export function classworkHref(
+  subjectId: string,
+  classwork: { id: string; type: AssignmentType },
+): string {
   return classwork.type === "Quiz"
     ? `/subject/${subjectId}/quiz/${classwork.id}`
     : `/subject/${subjectId}/assignment/${classwork.id}`;

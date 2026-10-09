@@ -1,11 +1,17 @@
-import { AssignmentOnQuiz, QuizBlank, QuizQuestionInput, QuizQuestionType } from "../interfaces";
+import {
+  AssignmentOnQuiz,
+  QuizBlank,
+  QuizQuestionInput,
+  QuizQuestionType,
+} from "../interfaces";
 
 const TOKEN = /\{\{([A-Za-z0-9_-]{1,32})\}\}/g;
 
 export function newQuizId(): string {
   const alphabet = "abcdefghijklmnopqrstuvwxyz0123456789";
   let id = "";
-  for (let i = 0; i < 8; i++) id += alphabet[Math.floor(Math.random() * alphabet.length)];
+  for (let i = 0; i < 8; i++)
+    id += alphabet[Math.floor(Math.random() * alphabet.length)];
   return id;
 }
 
@@ -25,21 +31,39 @@ export function defaultQuestion(type: QuizQuestionType): QuizQuestionInput {
       blanks: [{ id, acceptedAnswers: ["answer"] }],
     };
   }
-  return { type, prompt: "New question", points: 1, options: twoOptions(), blanks: [] };
+  return {
+    type,
+    prompt: "New question",
+    points: 1,
+    options: twoOptions(),
+    blanks: [],
+  };
 }
 
-export function convertQuestionType(q: QuizQuestionInput, to: QuizQuestionType): QuizQuestionInput {
+export function convertQuestionType(
+  q: QuizQuestionInput,
+  to: QuizQuestionType,
+): QuizQuestionInput {
   if (q.type === to) return q;
   if (to === "FILL_BLANK") {
     const id = newQuizId();
     const hasToken = /\{\{[A-Za-z0-9_-]{1,32}\}\}/.test(q.prompt);
     const prompt = hasToken ? q.prompt : `${q.prompt.trimEnd()} {{${id}}}`;
-    return { ...q, type: to, prompt, options: [], blanks: syncBlanksWithPrompt(prompt, q.blanks) };
+    return {
+      ...q,
+      type: to,
+      prompt,
+      options: [],
+      blanks: syncBlanksWithPrompt(prompt, q.blanks),
+    };
   }
   const prompt = q.prompt.replace(TOKEN, "____").trim() || "New question";
   const options = q.options.length >= 2 ? q.options : twoOptions();
   if (to === "SINGLE") {
-    const firstCorrect = Math.max(0, options.findIndex((o) => o.isCorrect));
+    const firstCorrect = Math.max(
+      0,
+      options.findIndex((o) => o.isCorrect),
+    );
     return {
       ...q,
       type: to,
@@ -51,28 +75,42 @@ export function convertQuestionType(q: QuizQuestionInput, to: QuizQuestionType):
   return { ...q, type: to, prompt, blanks: [], options };
 }
 
-export function insertBlankToken(prompt: string, cursor: number, id: string): { prompt: string; cursor: number } {
+export function insertBlankToken(
+  prompt: string,
+  cursor: number,
+  id: string,
+): { prompt: string; cursor: number } {
   const at = Math.max(0, Math.min(cursor, prompt.length));
   const token = `{{${id}}}`;
-  return { prompt: prompt.slice(0, at) + token + prompt.slice(at), cursor: at + token.length };
+  return {
+    prompt: prompt.slice(0, at) + token + prompt.slice(at),
+    cursor: at + token.length,
+  };
 }
 
-export type PromptSegment = { kind: "text"; text: string } | { kind: "blank"; blankId: string };
+export type PromptSegment =
+  | { kind: "text"; text: string }
+  | { kind: "blank"; blankId: string };
 
 export function promptSegments(prompt: string): PromptSegment[] {
   const segments: PromptSegment[] = [];
   let last = 0;
   for (const match of prompt.matchAll(TOKEN)) {
     const index = match.index ?? 0;
-    if (index > last) segments.push({ kind: "text", text: prompt.slice(last, index) });
+    if (index > last)
+      segments.push({ kind: "text", text: prompt.slice(last, index) });
     segments.push({ kind: "blank", blankId: match[1] });
     last = index + match[0].length;
   }
-  if (last < prompt.length) segments.push({ kind: "text", text: prompt.slice(last) });
+  if (last < prompt.length)
+    segments.push({ kind: "text", text: prompt.slice(last) });
   return segments;
 }
 
-export function syncBlanksWithPrompt(prompt: string, blanks: QuizBlank[]): QuizBlank[] {
+export function syncBlanksWithPrompt(
+  prompt: string,
+  blanks: QuizBlank[],
+): QuizBlank[] {
   const byId = new Map(blanks.map((b) => [b.id, b]));
   const seen = new Set<string>();
   const out: QuizBlank[] = [];
@@ -88,7 +126,8 @@ export function syncBlanksWithPrompt(prompt: string, blanks: QuizBlank[]): QuizB
 export function addAcceptedAnswer(list: string[], value: string): string[] {
   const trimmed = value.trim();
   if (!trimmed) return list;
-  if (list.some((a) => a.toLocaleLowerCase() === trimmed.toLocaleLowerCase())) return list;
+  if (list.some((a) => a.toLocaleLowerCase() === trimmed.toLocaleLowerCase()))
+    return list;
   return [...list, trimmed];
 }
 
@@ -99,13 +138,23 @@ export function toQuestionInput(q: AssignmentOnQuiz): QuizQuestionInput {
     imageUrl: q.imageUrl,
     points: q.points,
     options: q.options.map((o) => ({ ...o })),
-    blanks: q.blanks.map((b) => ({ ...b, acceptedAnswers: [...b.acceptedAnswers] })),
+    blanks: q.blanks.map((b) => ({
+      ...b,
+      acceptedAnswers: [...b.acceptedAnswers],
+    })),
   };
 }
 
 /** A prompt edit in the blank editor: blanks follow the {{tokens}} left in the prompt. */
-export function applyPromptEdit(value: QuizQuestionInput, prompt: string): QuizQuestionInput {
-  return { ...value, prompt, blanks: syncBlanksWithPrompt(prompt, value.blanks) };
+export function applyPromptEdit(
+  value: QuizQuestionInput,
+  prompt: string,
+): QuizQuestionInput {
+  return {
+    ...value,
+    prompt,
+    blanks: syncBlanksWithPrompt(prompt, value.blanks),
+  };
 }
 
 /** What the card sends on save. Fill-blank blanks are re-synced so a hand-deleted token never leaves an orphan. */
@@ -124,12 +173,18 @@ export function rebaseDraft<T>(draft: T, prevBase: T, nextBase: T): T {
 
 /** The server's 409 when a student has already started the quiz. */
 export function isQuizLockedError(error: unknown): boolean {
-  const e = error as { statusCode?: number; message?: unknown } | null | undefined;
+  const e = error as
+    | { statusCode?: number; message?: unknown }
+    | null
+    | undefined;
   return !!e && e.statusCode === 409 && e.message === "QUIZ_LOCKED";
 }
 
 /** Reorder a question list to match `ids`; anything not in `ids` keeps its place at the end. */
-export function reorderByIds<T extends { id: string }>(list: T[], ids: string[]): T[] {
+export function reorderByIds<T extends { id: string }>(
+  list: T[],
+  ids: string[],
+): T[] {
   const byId = new Map(list.map((q) => [q.id, q]));
   const ordered = ids.map((id) => byId.get(id)).filter((q): q is T => !!q);
   const rest = list.filter((q) => !ids.includes(q.id));
@@ -142,14 +197,20 @@ export const QUESTION_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
 export type QuestionImageCheck = "ok" | "notImage" | "tooLarge";
 
 /** Checks a picked file before it is uploaded as a question image. */
-export function validateQuestionImage(file: { type: string; size: number }): QuestionImageCheck {
+export function validateQuestionImage(file: {
+  type: string;
+  size: number;
+}): QuestionImageCheck {
   if (!file.type.startsWith("image/") || file.size <= 0) return "notImage";
   if (file.size > QUESTION_IMAGE_MAX_BYTES) return "tooLarge";
   return "ok";
 }
 
 /** Sets (or, with null, removes) the question's image in the draft. */
-export function setQuestionImage(draft: QuizQuestionInput, imageUrl: string | null): QuizQuestionInput {
+export function setQuestionImage(
+  draft: QuizQuestionInput,
+  imageUrl: string | null,
+): QuizQuestionInput {
   return { ...draft, imageUrl };
 }
 
@@ -157,7 +218,10 @@ export function setQuestionImage(draft: QuizQuestionInput, imageUrl: string | nu
 export type PendingAnswers = Record<string, string>;
 
 /** Adds each blank's pending text to its accepted answers. Returns `draft` itself when nothing changes. */
-export function commitPendingAnswers(draft: QuizQuestionInput, pending: PendingAnswers): QuizQuestionInput {
+export function commitPendingAnswers(
+  draft: QuizQuestionInput,
+  pending: PendingAnswers,
+): QuizQuestionInput {
   let changed = false;
   const blanks = draft.blanks.map((b) => {
     const next = addAcceptedAnswer(b.acceptedAnswers, pending[b.id] ?? "");
@@ -175,7 +239,11 @@ export function blanksMissingAnswers(draft: QuizQuestionInput): number {
 }
 
 /** The set of question ids with unsaved edits, updated immutably (same set when nothing changes). */
-export function withDirtyId(ids: ReadonlySet<string>, id: string, dirty: boolean): Set<string> {
+export function withDirtyId(
+  ids: ReadonlySet<string>,
+  id: string,
+  dirty: boolean,
+): Set<string> {
   if (ids.has(id) === dirty) return ids as Set<string>;
   const next = new Set(ids);
   if (dirty) next.add(id);

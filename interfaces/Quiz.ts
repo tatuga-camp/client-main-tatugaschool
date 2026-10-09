@@ -1,8 +1,16 @@
 export type QuizScoringMode = "ALL_OR_NOTHING" | "PARTIAL";
 export type QuizQuestionType = "SINGLE" | "MULTIPLE" | "FILL_BLANK";
 export type QuizRiskSource = "RULE" | "JEV";
-export type QuizRiskPattern = "NORMAL" | "CONNECTIVITY" | "DISTRACTED" | "OUTSIDE_HELP";
-export type QuizMonitorStatus = "NOT_STARTED" | "ANSWERING" | "AWAY" | "SUBMITTED";
+export type QuizRiskPattern =
+  | "NORMAL"
+  | "CONNECTIVITY"
+  | "DISTRACTED"
+  | "OUTSIDE_HELP";
+export type QuizMonitorStatus =
+  | "NOT_STARTED"
+  | "ANSWERING"
+  | "AWAY"
+  | "SUBMITTED";
 export type QuizIntegrityEventType =
   | "HIDDEN"
   | "VISIBLE"
@@ -26,7 +34,12 @@ export type QuizSettings = {
   showAnswersAfterSubmit: boolean;
 };
 
-export type QuizOption = { id: string; text: string; imageUrl: string | null; isCorrect: boolean };
+export type QuizOption = {
+  id: string;
+  text: string;
+  imageUrl: string | null;
+  isCorrect: boolean;
+};
 export type QuizBlank = { id: string; acceptedAnswers: string[] };
 
 export type AssignmentOnQuiz = {
@@ -50,7 +63,12 @@ export type QuizQuestionInput = {
   prompt: string;
   imageUrl?: string | null;
   points: number;
-  options: { id: string; text: string; imageUrl?: string | null; isCorrect: boolean }[];
+  options: {
+    id: string;
+    text: string;
+    imageUrl?: string | null;
+    isCorrect: boolean;
+  }[];
   blanks: QuizBlank[];
 };
 

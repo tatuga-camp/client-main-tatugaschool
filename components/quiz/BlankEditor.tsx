@@ -21,10 +21,18 @@ type Props = {
   onPendingChange: React.Dispatch<React.SetStateAction<PendingAnswers>>;
 };
 
-export default function BlankEditor({ value, onChange, language, disabled, pending, onPendingChange }: Props) {
+export default function BlankEditor({
+  value,
+  onChange,
+  language,
+  disabled,
+  pending,
+  onPendingChange,
+}: Props) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const setPrompt = (prompt: string) => onChange(applyPromptEdit(value, prompt));
+  const setPrompt = (prompt: string) =>
+    onChange(applyPromptEdit(value, prompt));
 
   const addBlank = () => {
     const el = textareaRef.current;
@@ -40,7 +48,9 @@ export default function BlankEditor({ value, onChange, language, disabled, pendi
   const setAnswers = (blankId: string, answers: string[]) =>
     onChange({
       ...value,
-      blanks: value.blanks.map((b) => (b.id === blankId ? { ...b, acceptedAnswers: answers } : b)),
+      blanks: value.blanks.map((b) =>
+        b.id === blankId ? { ...b, acceptedAnswers: answers } : b,
+      ),
     });
 
   // Enter and blur both add the typed text, so an answer is never silently dropped.
@@ -94,7 +104,8 @@ export default function BlankEditor({ value, onChange, language, disabled, pendi
       {value.blanks.map((blank, index) => (
         <div key={blank.id} className="rounded-xl border border-gray-100 p-3">
           <div className="mb-2 text-sm font-semibold text-icon-color">
-            {quizLanguage.blankLabel(language, index + 1)} · {quizLanguage.acceptedAnswers(language)}
+            {quizLanguage.blankLabel(language, index + 1)} ·{" "}
+            {quizLanguage.acceptedAnswers(language)}
           </div>
           <div className="flex flex-wrap gap-2">
             {blank.acceptedAnswers.map((answer) => (
@@ -107,7 +118,12 @@ export default function BlankEditor({ value, onChange, language, disabled, pendi
                   <button
                     type="button"
                     aria-label={quizLanguage.delete(language)}
-                    onClick={() => setAnswers(blank.id, blank.acceptedAnswers.filter((a) => a !== answer))}
+                    onClick={() =>
+                      setAnswers(
+                        blank.id,
+                        blank.acceptedAnswers.filter((a) => a !== answer),
+                      )
+                    }
                   >
                     <MdClose />
                   </button>
@@ -131,7 +147,9 @@ export default function BlankEditor({ value, onChange, language, disabled, pendi
               className="min-w-40 flex-1 rounded-full border border-gray-200 px-3 py-1 text-sm outline-none focus:border-primary-color"
             />
           </div>
-          <p className="mt-1 text-xs text-icon-color/60">{quizLanguage.acceptedHint(language)}</p>
+          <p className="mt-1 text-xs text-icon-color/60">
+            {quizLanguage.acceptedHint(language)}
+          </p>
         </div>
       ))}
     </div>

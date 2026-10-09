@@ -3,7 +3,12 @@ import React, { useState } from "react";
 import { quizLanguage } from "../../data/languages";
 import { Language, QuizMonitorRow, QuizMonitorStatus } from "../../interfaces";
 import { useGetLanguage, useGetQuizMonitor } from "../../react-query";
-import { formatDuration, monitorStats, riskBand, sortMonitorRows } from "../../utils/quizMonitor";
+import {
+  formatDuration,
+  monitorStats,
+  riskBand,
+  sortMonitorRows,
+} from "../../utils/quizMonitor";
 import QuizStudentPanel from "./QuizStudentPanel";
 
 const STATUS_CLASS: Record<QuizMonitorStatus, string> = {
@@ -13,9 +18,16 @@ const STATUS_CLASS: Record<QuizMonitorStatus, string> = {
   SUBMITTED: "bg-success-color/10 text-success-color",
 };
 
-export function RiskBadge({ score, language }: { score: number | null; language: Language }) {
+export function RiskBadge({
+  score,
+  language,
+}: {
+  score: number | null;
+  language: Language;
+}) {
   const band = riskBand(score);
-  if (band === null) return <span className="text-sm text-icon-color/40">–</span>;
+  if (band === null)
+    return <span className="text-sm text-icon-color/40">–</span>;
   const cls =
     band === "HIGH"
       ? "bg-error-color/10 text-error-color"
@@ -23,9 +35,15 @@ export function RiskBadge({ score, language }: { score: number | null; language:
         ? "bg-warning-color/10 text-warning-color"
         : "bg-success-color/10 text-success-color";
   const label =
-    band === "HIGH" ? quizLanguage.riskHigh(language) : band === "MEDIUM" ? quizLanguage.riskMedium(language) : quizLanguage.riskLow(language);
+    band === "HIGH"
+      ? quizLanguage.riskHigh(language)
+      : band === "MEDIUM"
+        ? quizLanguage.riskMedium(language)
+        : quizLanguage.riskLow(language);
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${cls}`}>
+    <span
+      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${cls}`}
+    >
       {Math.round(score as number)}% · {label}
     </span>
   );
@@ -33,13 +51,23 @@ export function RiskBadge({ score, language }: { score: number | null; language:
 
 function lastSeen(row: QuizMonitorRow, serverNow: string): string {
   if (!row.lastSeenAt) return "–";
-  return formatDuration(new Date(serverNow).getTime() - new Date(row.lastSeenAt).getTime());
+  return formatDuration(
+    new Date(serverNow).getTime() - new Date(row.lastSeenAt).getTime(),
+  );
 }
 
-export default function QuizMonitor({ assignmentId }: { assignmentId: string }) {
+export default function QuizMonitor({
+  assignmentId,
+}: {
+  assignmentId: string;
+}) {
   const language = useGetLanguage();
   const lang = language.data ?? "en";
-  const monitor = useGetQuizMonitor({ assignmentId, enabled: true, poll: true });
+  const monitor = useGetQuizMonitor({
+    assignmentId,
+    enabled: true,
+    poll: true,
+  });
   const [selected, setSelected] = useState<string | null>(null);
 
   const view = monitor.data;
@@ -56,17 +84,45 @@ export default function QuizMonitor({ assignmentId }: { assignmentId: string }) 
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 p-4 font-Anuphan md:p-6">
-      <div className={`grid grid-cols-2 gap-3 ${testMode ? "md:grid-cols-5" : "md:grid-cols-3"}`}>
-        {stat(quizLanguage.statStarted(lang), `${stats.started}/${stats.total}`)}
-        {stat(quizLanguage.statAnswering(lang), String(stats.answering), "text-primary-color")}
-        {testMode && stat(quizLanguage.statAway(lang), String(stats.away), "text-error-color")}
-        {stat(quizLanguage.statSubmitted(lang), String(stats.submitted), "text-success-color")}
-        {testMode && stat(quizLanguage.statHighRisk(lang), String(stats.highRisk), "text-error-color")}
+      <div
+        className={`grid grid-cols-2 gap-3 ${testMode ? "md:grid-cols-5" : "md:grid-cols-3"}`}
+      >
+        {stat(
+          quizLanguage.statStarted(lang),
+          `${stats.started}/${stats.total}`,
+        )}
+        {stat(
+          quizLanguage.statAnswering(lang),
+          String(stats.answering),
+          "text-primary-color",
+        )}
+        {testMode &&
+          stat(
+            quizLanguage.statAway(lang),
+            String(stats.away),
+            "text-error-color",
+          )}
+        {stat(
+          quizLanguage.statSubmitted(lang),
+          String(stats.submitted),
+          "text-success-color",
+        )}
+        {testMode &&
+          stat(
+            quizLanguage.statHighRisk(lang),
+            String(stats.highRisk),
+            "text-error-color",
+          )}
       </div>
-      <p className="text-xs text-icon-color/50">{quizLanguage.refreshing(lang)}</p>
+      <p className="text-xs text-icon-color/50">
+        {quizLanguage.refreshing(lang)}
+      </p>
 
       {monitor.isError && !view ? (
-        <div role="alert" className="rounded-2xl border border-error-color/30 bg-error-color/5 p-10 text-center text-error-color">
+        <div
+          role="alert"
+          className="rounded-2xl border border-error-color/30 bg-error-color/5 p-10 text-center text-error-color"
+        >
           {quizLanguage.loadFailed(lang)}
         </div>
       ) : rows.length === 0 && !monitor.isLoading ? (
@@ -83,7 +139,9 @@ export default function QuizMonitor({ assignmentId }: { assignmentId: string }) 
             <span>{quizLanguage.colLastSeen(lang)}</span>
           </li>
           {rows.map((row) => {
-            const pct = row.questionCount ? Math.round((row.answeredCount / row.questionCount) * 100) : 0;
+            const pct = row.questionCount
+              ? Math.round((row.answeredCount / row.questionCount) * 100)
+              : 0;
             return (
               <li key={row.studentOnAssignmentId}>
                 <button
@@ -103,24 +161,37 @@ export default function QuizMonitor({ assignmentId }: { assignmentId: string }) 
                       <span className="block truncate font-medium text-icon-color">
                         {row.firstName} {row.lastName}
                       </span>
-                      <span className="text-xs text-icon-color/50">#{row.number}</span>
+                      <span className="text-xs text-icon-color/50">
+                        #{row.number}
+                      </span>
                     </span>
                   </span>
                   <span>
-                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_CLASS[row.status]}`}>
+                    <span
+                      className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_CLASS[row.status]}`}
+                    >
                       {quizLanguage.status(lang, row.status)}
                     </span>
                   </span>
                   <span className="col-span-2 flex items-center gap-2 md:col-span-1">
                     <span className="h-2 flex-1 overflow-hidden rounded-full bg-gray-100">
-                      <span className="block h-full rounded-full bg-primary-color" style={{ width: `${pct}%` }} />
+                      <span
+                        className="block h-full rounded-full bg-primary-color"
+                        style={{ width: `${pct}%` }}
+                      />
                     </span>
                     <span className="w-12 text-right text-xs text-icon-color/60">
                       {row.answeredCount}/{row.questionCount}
                     </span>
                   </span>
-                  <span>{testMode && <RiskBadge score={row.riskScore} language={lang} />}</span>
-                  <span className="text-sm text-icon-color/60">{view ? lastSeen(row, view.serverNow) : "–"}</span>
+                  <span>
+                    {testMode && (
+                      <RiskBadge score={row.riskScore} language={lang} />
+                    )}
+                  </span>
+                  <span className="text-sm text-icon-color/60">
+                    {view ? lastSeen(row, view.serverNow) : "–"}
+                  </span>
                 </button>
               </li>
             );

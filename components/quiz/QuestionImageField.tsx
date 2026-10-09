@@ -2,7 +2,10 @@ import React, { useEffect, useRef, useState } from "react";
 import { MdAddPhotoAlternate, MdDelete } from "react-icons/md";
 import { quizLanguage } from "../../data/languages";
 import { Language } from "../../interfaces";
-import { getSignedURLTeacherService, UploadSignURLWithProgressService } from "../../services";
+import {
+  getSignedURLTeacherService,
+  UploadSignURLWithProgressService,
+} from "../../services";
 import { validateQuestionImage } from "../../utils/quizDraft";
 import { showQuizError } from "./quizErrorAlert";
 
@@ -15,7 +18,13 @@ type Props = {
 };
 
 /** The question's optional image: pick, upload through a signed URL, preview, remove. */
-export default function QuestionImageField({ imageUrl, schoolId, disabled, language, onChange }: Props) {
+export default function QuestionImageField({
+  imageUrl,
+  schoolId,
+  disabled,
+  language,
+  onChange,
+}: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const mountedRef = useRef(true);
   const [progress, setProgress] = useState<number | null>(null);
@@ -33,7 +42,10 @@ export default function QuestionImageField({ imageUrl, schoolId, disabled, langu
     if (check !== "ok") {
       showQuizError(
         {
-          error: check === "tooLarge" ? quizLanguage.imageTooLarge(language) : quizLanguage.imageNotSupported(language),
+          error:
+            check === "tooLarge"
+              ? quizLanguage.imageTooLarge(language)
+              : quizLanguage.imageNotSupported(language),
         },
         language,
       );
@@ -86,7 +98,11 @@ export default function QuestionImageField({ imageUrl, schoolId, disabled, langu
         </div>
       )}
       {uploading ? (
-        <div className="flex w-full max-w-xs flex-col gap-1" role="status" aria-live="polite">
+        <div
+          className="flex w-full max-w-xs flex-col gap-1"
+          role="status"
+          aria-live="polite"
+        >
           <span className="text-xs text-icon-color/70">
             {quizLanguage.uploadingImage(language)} {Math.round(progress ?? 0)}%
           </span>

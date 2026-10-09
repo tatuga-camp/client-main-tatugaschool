@@ -1,7 +1,15 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { QuizMonitorRow } from "../interfaces";
-import { editorLockState, formatDuration, monitorStats, quizEditorLoadState, riskBand, scoreToSave, sortMonitorRows } from "./quizMonitor";
+import {
+  editorLockState,
+  formatDuration,
+  monitorStats,
+  quizEditorLoadState,
+  riskBand,
+  scoreToSave,
+  sortMonitorRows,
+} from "./quizMonitor";
 
 const row = (id: string, o: Partial<QuizMonitorRow> = {}): QuizMonitorRow => ({
   studentOnAssignmentId: id,
@@ -44,7 +52,10 @@ test("sortMonitorRows: risk desc, nulls last, then status, then number numerical
     row("d", { riskScore: null, status: "AWAY", number: "10" }),
     row("e", { riskScore: null, status: "AWAY", number: "9" }),
   ];
-  assert.deepEqual(sortMonitorRows(rows).map((r) => r.studentOnAssignmentId), ["c", "b", "e", "d", "a"]);
+  assert.deepEqual(
+    sortMonitorRows(rows).map((r) => r.studentOnAssignmentId),
+    ["c", "b", "e", "d", "a"],
+  );
 });
 
 test("monitorStats counts", () => {
@@ -54,7 +65,14 @@ test("monitorStats counts", () => {
     row("c", { status: "AWAY" }),
     row("d", { status: "SUBMITTED", riskScore: 10 }),
   ]);
-  assert.deepEqual(stats, { total: 4, started: 3, answering: 1, away: 1, submitted: 1, highRisk: 1 });
+  assert.deepEqual(stats, {
+    total: 4,
+    started: 3,
+    answering: 1,
+    away: 1,
+    submitted: 1,
+    highRisk: 1,
+  });
 });
 
 test("formatDuration", () => {
@@ -65,11 +83,26 @@ test("formatDuration", () => {
 });
 
 test("editorLockState: server locked flag locks, loading is read-only without the banner", () => {
-  assert.deepEqual(editorLockState(undefined, true), { locked: false, readOnly: true });
-  assert.deepEqual(editorLockState(undefined, false), { locked: false, readOnly: false });
-  assert.deepEqual(editorLockState(false, false), { locked: false, readOnly: false });
-  assert.deepEqual(editorLockState(true, false), { locked: true, readOnly: true });
-  assert.deepEqual(editorLockState(true, true), { locked: true, readOnly: true });
+  assert.deepEqual(editorLockState(undefined, true), {
+    locked: false,
+    readOnly: true,
+  });
+  assert.deepEqual(editorLockState(undefined, false), {
+    locked: false,
+    readOnly: false,
+  });
+  assert.deepEqual(editorLockState(false, false), {
+    locked: false,
+    readOnly: false,
+  });
+  assert.deepEqual(editorLockState(true, false), {
+    locked: true,
+    readOnly: true,
+  });
+  assert.deepEqual(editorLockState(true, true), {
+    locked: true,
+    readOnly: true,
+  });
 });
 
 test("scoreToSave clamps to the question's points and skips no-op saves", () => {
@@ -88,10 +121,25 @@ test("scoreToSave never overrides an ungraded answer", () => {
 });
 
 test("quizEditorLoadState: loading, error, not a quiz, ready", () => {
-  assert.equal(quizEditorLoadState({ data: undefined, isError: false }), "loading");
-  assert.equal(quizEditorLoadState({ data: undefined, isError: true }), "error");
-  assert.equal(quizEditorLoadState({ data: { type: "Assignment" }, isError: false }), "notQuiz");
-  assert.equal(quizEditorLoadState({ data: { type: "Quiz" }, isError: false }), "ready");
+  assert.equal(
+    quizEditorLoadState({ data: undefined, isError: false }),
+    "loading",
+  );
+  assert.equal(
+    quizEditorLoadState({ data: undefined, isError: true }),
+    "error",
+  );
+  assert.equal(
+    quizEditorLoadState({ data: { type: "Assignment" }, isError: false }),
+    "notQuiz",
+  );
+  assert.equal(
+    quizEditorLoadState({ data: { type: "Quiz" }, isError: false }),
+    "ready",
+  );
   // A background refetch error keeps showing the loaded quiz.
-  assert.equal(quizEditorLoadState({ data: { type: "Quiz" }, isError: true }), "ready");
+  assert.equal(
+    quizEditorLoadState({ data: { type: "Quiz" }, isError: true }),
+    "ready",
+  );
 });

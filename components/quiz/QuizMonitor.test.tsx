@@ -6,7 +6,13 @@ import assert from "node:assert/strict";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AssignmentOnQuiz, QuizMonitorRow, QuizMonitorView, QuizReviewView, StudentOnQuiz } from "../../interfaces";
+import {
+  AssignmentOnQuiz,
+  QuizMonitorRow,
+  QuizMonitorView,
+  QuizReviewView,
+  StudentOnQuiz,
+} from "../../interfaces";
 import { keyQuiz } from "../../react-query/quiz";
 import QuizMonitor from "./QuizMonitor";
 import QuizStudentPanel from "./QuizStudentPanel";
@@ -36,12 +42,15 @@ const row = (id: string, o: Partial<QuizMonitorRow> = {}): QuizMonitorRow => ({
 });
 
 function client() {
-  const c = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, retry: false } } });
+  const c = new QueryClient({
+    defaultOptions: { queries: { staleTime: Infinity, retry: false } },
+  });
   c.setQueryData(["language"], "en");
   return c;
 }
 
-const statLabel = (label: string) => `<div class="text-xs text-icon-color/60">${label}</div>`;
+const statLabel = (label: string) =>
+  `<div class="text-xs text-icon-color/60">${label}</div>`;
 
 function renderMonitor(testMode: boolean) {
   const c = client();
@@ -130,7 +139,11 @@ function renderPanel(score: number | null) {
   c.setQueryData(keyQuiz.review("a"), review);
   return renderToStaticMarkup(
     <QueryClientProvider client={c}>
-      <QuizStudentPanel assignmentId="quiz1" studentOnAssignmentId="a" onClose={() => {}} />
+      <QuizStudentPanel
+        assignmentId="quiz1"
+        studentOnAssignmentId="a"
+        onClose={() => {}}
+      />
     </QueryClientProvider>,
   );
 }
@@ -150,10 +163,17 @@ test("Student panel: a graded answer gets a score input capped at the question's
 test("Monitor: a failed fetch shows an error, not 'No students'", () => {
   const c = client();
   // Without this, mounting over an errored query with no data optimistically reports "pending" (a refetch).
-  c.setDefaultOptions({ queries: { staleTime: Infinity, retry: false, retryOnMount: false } });
+  c.setDefaultOptions({
+    queries: { staleTime: Infinity, retry: false, retryOnMount: false },
+  });
   c.getQueryCache()
     .build(c, { queryKey: keyQuiz.monitor("quiz1") })
-    .setState({ status: "error", error: new Error("403"), data: undefined, fetchStatus: "idle" });
+    .setState({
+      status: "error",
+      error: new Error("403"),
+      data: undefined,
+      fetchStatus: "idle",
+    });
   const html = renderToStaticMarkup(
     <QueryClientProvider client={c}>
       <QuizMonitor assignmentId="quiz1" />
@@ -167,7 +187,11 @@ test("Student panel: shows a spinner while the review loads", () => {
   const c = client();
   const html = renderToStaticMarkup(
     <QueryClientProvider client={c}>
-      <QuizStudentPanel assignmentId="quiz1" studentOnAssignmentId="a" onClose={() => {}} />
+      <QuizStudentPanel
+        assignmentId="quiz1"
+        studentOnAssignmentId="a"
+        onClose={() => {}}
+      />
     </QueryClientProvider>,
   );
   assert.ok(html.includes('aria-busy="true"'));

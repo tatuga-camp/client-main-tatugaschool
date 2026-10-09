@@ -21,12 +21,21 @@ import {
   useUpdateAssignment,
 } from "../../../../react-query";
 import { withDirtyId } from "../../../../utils/quizDraft";
-import { editorLockState, quizEditorLoadState } from "../../../../utils/quizMonitor";
+import {
+  editorLockState,
+  quizEditorLoadState,
+} from "../../../../utils/quizMonitor";
 
 type Tab = "questions" | "settings" | "monitor";
 const TABS: Tab[] = ["questions", "settings", "monitor"];
 
-export default function QuizEditorPage({ subjectId, assignmentId }: { subjectId: string; assignmentId: string }) {
+export default function QuizEditorPage({
+  subjectId,
+  assignmentId,
+}: {
+  subjectId: string;
+  assignmentId: string;
+}) {
   const router = useRouter();
   const language = useGetLanguage();
   const lang = language.data ?? "en";
@@ -36,13 +45,21 @@ export default function QuizEditorPage({ subjectId, assignmentId }: { subjectId:
   const [tab, setTab] = useState<Tab>("questions");
   const [title, setTitle] = useState("");
   // Lock state comes from the monitor (any started attempt locks questions).
-  const monitor = useGetQuizMonitor({ assignmentId, enabled: tab === "questions", poll: false });
+  const monitor = useGetQuizMonitor({
+    assignmentId,
+    enabled: tab === "questions",
+    poll: false,
+  });
   // Read-only until the first lock check returns, so a locked quiz never flashes editable.
-  const { locked, readOnly } = editorLockState(monitor.data?.locked, monitor.isLoading);
+  const { locked, readOnly } = editorLockState(
+    monitor.data?.locked,
+    monitor.isLoading,
+  );
   // Question cards with unsaved edits; leaving the tab or publishing asks first.
   const [dirtyIds, setDirtyIds] = useState<Set<string>>(() => new Set());
   const onDirtyChange = useCallback(
-    (questionId: string, dirty: boolean) => setDirtyIds((ids) => withDirtyId(ids, questionId, dirty)),
+    (questionId: string, dirty: boolean) =>
+      setDirtyIds((ids) => withDirtyId(ids, questionId, dirty)),
     [],
   );
 
@@ -73,16 +90,25 @@ export default function QuizEditorPage({ subjectId, assignmentId }: { subjectId:
   const selectTab = async (next: Tab) => {
     if (next === tab) return;
     if (tab === "questions") {
-      const ok = await confirmUnsaved(quizLanguage.unsavedText(lang), quizLanguage.leaveAnyway(lang));
+      const ok = await confirmUnsaved(
+        quizLanguage.unsavedText(lang),
+        quizLanguage.leaveAnyway(lang),
+      );
       if (!ok) return;
     }
     setTab(next);
-    router.replace({ query: { ...router.query, tab: next } }, undefined, { shallow: true });
+    router.replace({ query: { ...router.query, tab: next } }, undefined, {
+      shallow: true,
+    });
   };
 
   const fail = (error: unknown) => {
     const result = error as ErrorMessages;
-    Swal.fire({ title: result?.error ?? "Error", text: result?.message?.toString(), icon: "error" });
+    Swal.fire({
+      title: result?.error ?? "Error",
+      text: result?.message?.toString(),
+      icon: "error",
+    });
   };
 
   const saveTitle = async () => {
@@ -93,7 +119,10 @@ export default function QuizEditorPage({ subjectId, assignmentId }: { subjectId:
       return;
     }
     try {
-      await update.mutateAsync({ query: { assignmentId }, data: { title: next } });
+      await update.mutateAsync({
+        query: { assignmentId },
+        data: { title: next },
+      });
       setTitle(next);
     } catch (error) {
       fail(error);
@@ -104,22 +133,37 @@ export default function QuizEditorPage({ subjectId, assignmentId }: { subjectId:
     if (!assignment.data) return;
     const next = assignment.data.status === "Published" ? "Draft" : "Published";
     if (next === "Published") {
-      const ok = await confirmUnsaved(quizLanguage.unsavedPublishText(lang), quizLanguage.publishAnyway(lang));
+      const ok = await confirmUnsaved(
+        quizLanguage.unsavedPublishText(lang),
+        quizLanguage.publishAnyway(lang),
+      );
       if (!ok) return;
     }
     try {
-      await update.mutateAsync({ query: { assignmentId }, data: { status: next } });
+      await update.mutateAsync({
+        query: { assignmentId },
+        data: { status: next },
+      });
     } catch (error) {
       fail(error);
     }
   };
 
-  const loadState = quizEditorLoadState({ data: assignment.data, isError: assignment.isError });
-  const backHref = { pathname: `/subject/${subjectId}`, query: { menu: "Classwork" as MenuSubject } };
+  const loadState = quizEditorLoadState({
+    data: assignment.data,
+    isError: assignment.isError,
+  });
+  const backHref = {
+    pathname: `/subject/${subjectId}`,
+    query: { menu: "Classwork" as MenuSubject },
+  };
 
   if (loadState === "error" || loadState === "notQuiz") {
     // The server's own message (e.g. "Assignment not found"), shown under the localized heading.
-    const detail = loadState === "error" ? (assignment.error as ErrorMessages | null)?.message?.toString() : undefined;
+    const detail =
+      loadState === "error"
+        ? (assignment.error as ErrorMessages | null)?.message?.toString()
+        : undefined;
     return (
       <div className="flex h-dvh items-center justify-center bg-background-color p-4 font-Anuphan">
         <div
@@ -128,7 +172,9 @@ export default function QuizEditorPage({ subjectId, assignmentId }: { subjectId:
         >
           <MdQuiz className="text-4xl text-error-color/70" />
           <p className="font-semibold text-icon-color">
-            {loadState === "error" ? quizLanguage.loadQuizFailed(lang) : quizLanguage.notAQuiz(lang)}
+            {loadState === "error"
+              ? quizLanguage.loadQuizFailed(lang)
+              : quizLanguage.notAQuiz(lang)}
           </p>
           {detail && <p className="text-sm text-icon-color/60">{detail}</p>}
           <Link
@@ -153,7 +199,11 @@ export default function QuizEditorPage({ subjectId, assignmentId }: { subjectId:
   const isPublished = assignment.data.status === "Published";
   const questionCount = questions.data?.length ?? 0;
   const tabLabel = (t: Tab) =>
-    t === "questions" ? quizLanguage.tabQuestions(lang) : t === "settings" ? quizLanguage.tabSettings(lang) : quizLanguage.tabMonitor(lang);
+    t === "questions"
+      ? quizLanguage.tabQuestions(lang)
+      : t === "settings"
+        ? quizLanguage.tabSettings(lang)
+        : quizLanguage.tabMonitor(lang);
 
   return (
     <>
@@ -186,21 +236,35 @@ export default function QuizEditorPage({ subjectId, assignmentId }: { subjectId:
             </span>
             <span
               className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                isPublished ? "bg-success-color/10 text-success-color" : "bg-gray-100 text-gray-600"
+                isPublished
+                  ? "bg-success-color/10 text-success-color"
+                  : "bg-gray-100 text-gray-600"
               }`}
             >
-              {isPublished ? quizLanguage.published(lang) : quizLanguage.draft(lang)}
+              {isPublished
+                ? quizLanguage.published(lang)
+                : quizLanguage.draft(lang)}
             </span>
             <button
               type="button"
               onClick={toggleStatus}
-              disabled={update.isPending || (!isPublished && questionCount === 0)}
-              title={!isPublished && questionCount === 0 ? quizLanguage.needQuestionsToPublish(lang) : undefined}
+              disabled={
+                update.isPending || (!isPublished && questionCount === 0)
+              }
+              title={
+                !isPublished && questionCount === 0
+                  ? quizLanguage.needQuestionsToPublish(lang)
+                  : undefined
+              }
               className={`rounded-2xl px-4 py-2 text-sm font-medium disabled:opacity-40 ${
-                isPublished ? "border border-gray-200 text-icon-color hover:bg-gray-50" : "gradient-bg text-white"
+                isPublished
+                  ? "border border-gray-200 text-icon-color hover:bg-gray-50"
+                  : "gradient-bg text-white"
               }`}
             >
-              {isPublished ? quizLanguage.unpublish(lang) : quizLanguage.publish(lang)}
+              {isPublished
+                ? quizLanguage.unpublish(lang)
+                : quizLanguage.publish(lang)}
             </button>
           </nav>
           <div className="flex items-center gap-1 overflow-x-auto px-4 md:px-6">
@@ -210,14 +274,19 @@ export default function QuizEditorPage({ subjectId, assignmentId }: { subjectId:
                 type="button"
                 onClick={() => selectTab(t)}
                 className={`border-b-2 px-3 py-2 text-sm font-medium ${
-                  tab === t ? "border-primary-color text-primary-color" : "border-transparent text-icon-color/60 hover:text-icon-color"
+                  tab === t
+                    ? "border-primary-color text-primary-color"
+                    : "border-transparent text-icon-color/60 hover:text-icon-color"
                 }`}
               >
                 {tabLabel(t)}
               </button>
             ))}
             <Link
-              href={{ pathname: `/subject/${subjectId}/assignment/${assignmentId}`, query: { menu: "manageassigning" } }}
+              href={{
+                pathname: `/subject/${subjectId}/assignment/${assignmentId}`,
+                query: { menu: "manageassigning" },
+              }}
               className="ml-auto whitespace-nowrap px-3 py-2 text-sm text-primary-color hover:underline"
             >
               {quizLanguage.assignStudents(lang)}
@@ -234,7 +303,9 @@ export default function QuizEditorPage({ subjectId, assignmentId }: { subjectId:
               onDirtyChange={onDirtyChange}
             />
           )}
-          {tab === "settings" && <QuizSettingsPanel assignment={assignment.data} />}
+          {tab === "settings" && (
+            <QuizSettingsPanel assignment={assignment.data} />
+          )}
           {tab === "monitor" && <QuizMonitor assignmentId={assignmentId} />}
         </main>
       </div>
@@ -245,5 +316,7 @@ export default function QuizEditorPage({ subjectId, assignmentId }: { subjectId:
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const params = ctx.params;
   if (!params?.subjectId || !params?.assignmentId) return { notFound: true };
-  return { props: { subjectId: params.subjectId, assignmentId: params.assignmentId } };
+  return {
+    props: { subjectId: params.subjectId, assignmentId: params.assignmentId },
+  };
 };

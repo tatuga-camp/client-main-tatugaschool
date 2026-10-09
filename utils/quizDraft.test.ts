@@ -41,13 +41,19 @@ test("defaultQuestion builds a server-valid shape for each type", () => {
 test("convertQuestionType SINGLE→MULTIPLE keeps options; MULTIPLE→SINGLE keeps one correct", () => {
   const multi = convertQuestionType(defaultQuestion("SINGLE"), "MULTIPLE");
   assert.equal(multi.type, "MULTIPLE");
-  const both = { ...multi, options: multi.options.map((o) => ({ ...o, isCorrect: true })) };
+  const both = {
+    ...multi,
+    options: multi.options.map((o) => ({ ...o, isCorrect: true })),
+  };
   const single = convertQuestionType(both, "SINGLE");
   assert.equal(single.options.filter((o) => o.isCorrect).length, 1);
 });
 
 test("convertQuestionType to FILL_BLANK appends a blank token; back to choice adds options", () => {
-  const fill = convertQuestionType({ ...defaultQuestion("SINGLE"), prompt: "Capital of Thailand" }, "FILL_BLANK");
+  const fill = convertQuestionType(
+    { ...defaultQuestion("SINGLE"), prompt: "Capital of Thailand" },
+    "FILL_BLANK",
+  );
   assert.equal(fill.options.length, 0);
   assert.equal(fill.blanks.length, 1);
   assert.ok(fill.prompt.startsWith("Capital of Thailand "));
@@ -58,7 +64,10 @@ test("convertQuestionType to FILL_BLANK appends a blank token; back to choice ad
 });
 
 test("insertBlankToken inserts at the caret, also inside Thai text", () => {
-  assert.deepEqual(insertBlankToken("abc", 1, "x1"), { prompt: "a{{x1}}bc", cursor: 7 });
+  assert.deepEqual(insertBlankToken("abc", 1, "x1"), {
+    prompt: "a{{x1}}bc",
+    cursor: 7,
+  });
   const thai = "เมืองหลวงคือ";
   const out = insertBlankToken(thai, thai.length, "b");
   assert.equal(out.prompt, "เมืองหลวงคือ{{b}}");
@@ -87,7 +96,10 @@ test("syncBlanksWithPrompt keeps known blanks in prompt order, drops removed, ad
 test("addAcceptedAnswer trims, ignores empty and case-insensitive duplicates", () => {
   assert.deepEqual(addAcceptedAnswer(["Bangkok"], "  bangkok "), ["Bangkok"]);
   assert.deepEqual(addAcceptedAnswer(["Bangkok"], "   "), ["Bangkok"]);
-  assert.deepEqual(addAcceptedAnswer(["Bangkok"], " กรุงเทพ "), ["Bangkok", "กรุงเทพ"]);
+  assert.deepEqual(addAcceptedAnswer(["Bangkok"], " กรุงเทพ "), [
+    "Bangkok",
+    "กรุงเทพ",
+  ]);
 });
 
 test("applyPromptEdit: hand-deleting a {{token}} drops its blank from the edit", () => {
@@ -118,7 +130,9 @@ test("toQuestionPayload: save path sends blanks synced with the prompt", () => {
       { id: "b2", acceptedAnswers: ["y"] },
     ],
   };
-  assert.deepEqual(toQuestionPayload(draft).blanks, [{ id: "b2", acceptedAnswers: ["y"] }]);
+  assert.deepEqual(toQuestionPayload(draft).blanks, [
+    { id: "b2", acceptedAnswers: ["y"] },
+  ]);
   const single = defaultQuestion("SINGLE");
   assert.equal(toQuestionPayload(single), single);
 });
@@ -128,44 +142,90 @@ test("rebaseDraft: clean drafts follow the server, dirty drafts are kept", () =>
   const next = { prompt: "a", points: 1 };
   assert.equal(rebaseDraft({ prompt: "a", points: 1 }, prev, next), next);
   const dirty = { prompt: "edited", points: 1 };
-  assert.equal(rebaseDraft(dirty, prev, { prompt: "server", points: 1 }), dirty);
+  assert.equal(
+    rebaseDraft(dirty, prev, { prompt: "server", points: 1 }),
+    dirty,
+  );
 });
 
 test("isQuizLockedError matches only the 409 QUIZ_LOCKED shape", () => {
-  assert.equal(isQuizLockedError({ statusCode: 409, message: "QUIZ_LOCKED", error: "Conflict" }), true);
-  assert.equal(isQuizLockedError({ statusCode: 409, message: "Other", error: "Conflict" }), false);
-  assert.equal(isQuizLockedError({ statusCode: 400, message: "QUIZ_LOCKED" }), false);
+  assert.equal(
+    isQuizLockedError({
+      statusCode: 409,
+      message: "QUIZ_LOCKED",
+      error: "Conflict",
+    }),
+    true,
+  );
+  assert.equal(
+    isQuizLockedError({ statusCode: 409, message: "Other", error: "Conflict" }),
+    false,
+  );
+  assert.equal(
+    isQuizLockedError({ statusCode: 400, message: "QUIZ_LOCKED" }),
+    false,
+  );
   assert.equal(isQuizLockedError(undefined), false);
   assert.equal(isQuizLockedError(new Error("x")), false);
 });
 
 test("reorderByIds follows ids and keeps unknown items at the end", () => {
   const list = [{ id: "a" }, { id: "b" }, { id: "c" }];
-  assert.deepEqual(reorderByIds(list, ["c", "a", "b"]).map((q) => q.id), ["c", "a", "b"]);
-  assert.deepEqual(reorderByIds(list, ["b", "a"]).map((q) => q.id), ["b", "a", "c"]);
+  assert.deepEqual(
+    reorderByIds(list, ["c", "a", "b"]).map((q) => q.id),
+    ["c", "a", "b"],
+  );
+  assert.deepEqual(
+    reorderByIds(list, ["b", "a"]).map((q) => q.id),
+    ["b", "a", "c"],
+  );
 });
 
 test("validateQuestionImage accepts images up to 5 MB", () => {
   assert.equal(QUESTION_IMAGE_MAX_BYTES, 5 * 1024 * 1024);
   assert.equal(validateQuestionImage({ type: "image/png", size: 1024 }), "ok");
-  assert.equal(validateQuestionImage({ type: "image/jpeg", size: QUESTION_IMAGE_MAX_BYTES }), "ok");
+  assert.equal(
+    validateQuestionImage({
+      type: "image/jpeg",
+      size: QUESTION_IMAGE_MAX_BYTES,
+    }),
+    "ok",
+  );
 });
 
 test("validateQuestionImage rejects files over 5 MB", () => {
-  assert.equal(validateQuestionImage({ type: "image/png", size: QUESTION_IMAGE_MAX_BYTES + 1 }), "tooLarge");
+  assert.equal(
+    validateQuestionImage({
+      type: "image/png",
+      size: QUESTION_IMAGE_MAX_BYTES + 1,
+    }),
+    "tooLarge",
+  );
 });
 
 test("validateQuestionImage rejects non-image and empty files", () => {
-  assert.equal(validateQuestionImage({ type: "application/pdf", size: 1024 }), "notImage");
+  assert.equal(
+    validateQuestionImage({ type: "application/pdf", size: 1024 }),
+    "notImage",
+  );
   assert.equal(validateQuestionImage({ type: "", size: 1024 }), "notImage");
-  assert.equal(validateQuestionImage({ type: "image/png", size: 0 }), "notImage");
+  assert.equal(
+    validateQuestionImage({ type: "image/png", size: 0 }),
+    "notImage",
+  );
 });
 
 test("an image change makes the draft differ from the server copy; removing it restores equality", () => {
   const base = defaultQuestion("SINGLE");
-  const withImage = setQuestionImage({ ...base, imageUrl: null }, "https://storage.example.com/a.png");
+  const withImage = setQuestionImage(
+    { ...base, imageUrl: null },
+    "https://storage.example.com/a.png",
+  );
   assert.equal(withImage.imageUrl, "https://storage.example.com/a.png");
-  assert.notEqual(JSON.stringify(withImage), JSON.stringify({ ...base, imageUrl: null }));
+  assert.notEqual(
+    JSON.stringify(withImage),
+    JSON.stringify({ ...base, imageUrl: null }),
+  );
   const removed = setQuestionImage(withImage, null);
   assert.equal(removed.imageUrl, null);
   assert.deepEqual(removed, { ...base, imageUrl: null });
@@ -182,7 +242,11 @@ test("commitPendingAnswers adds typed-but-not-entered answers to their blanks", 
       { id: "b2", acceptedAnswers: [] },
     ],
   };
-  const next = commitPendingAnswers(draft, { b1: " Dog ", b2: "แมว", gone: "x" });
+  const next = commitPendingAnswers(draft, {
+    b1: " Dog ",
+    b2: "แมว",
+    gone: "x",
+  });
   assert.deepEqual(next.blanks, [
     { id: "b1", acceptedAnswers: ["cat", "Dog"] },
     { id: "b2", acceptedAnswers: ["แมว"] },
@@ -196,11 +260,32 @@ test("commitPendingAnswers adds typed-but-not-entered answers to their blanks", 
 test("blanksMissingAnswers counts fill-blank blanks with no accepted answer", () => {
   const base = { prompt: "x {{b1}} {{b2}}", points: 1, options: [] };
   assert.equal(
-    blanksMissingAnswers({ ...base, type: "FILL_BLANK", blanks: [{ id: "b1", acceptedAnswers: [] }, { id: "b2", acceptedAnswers: ["a"] }] }),
+    blanksMissingAnswers({
+      ...base,
+      type: "FILL_BLANK",
+      blanks: [
+        { id: "b1", acceptedAnswers: [] },
+        { id: "b2", acceptedAnswers: ["a"] },
+      ],
+    }),
     1,
   );
-  assert.equal(blanksMissingAnswers({ ...base, type: "FILL_BLANK", blanks: [{ id: "b1", acceptedAnswers: ["a"] }] }), 0);
-  assert.equal(blanksMissingAnswers({ ...base, type: "SINGLE", blanks: [{ id: "b1", acceptedAnswers: [] }] }), 0);
+  assert.equal(
+    blanksMissingAnswers({
+      ...base,
+      type: "FILL_BLANK",
+      blanks: [{ id: "b1", acceptedAnswers: ["a"] }],
+    }),
+    0,
+  );
+  assert.equal(
+    blanksMissingAnswers({
+      ...base,
+      type: "SINGLE",
+      blanks: [{ id: "b1", acceptedAnswers: [] }],
+    }),
+    0,
+  );
 });
 
 test("withDirtyId adds and removes ids, returning the same set when nothing changes", () => {
