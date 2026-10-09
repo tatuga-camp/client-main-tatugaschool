@@ -19,6 +19,7 @@ import {
   useGetQuizQuestions,
   useUpdateAssignment,
 } from "../../../../react-query";
+import { editorLockState } from "../../../../utils/quizMonitor";
 
 type Tab = "questions" | "settings" | "monitor";
 const TABS: Tab[] = ["questions", "settings", "monitor"];
@@ -34,7 +35,8 @@ export default function QuizEditorPage({ subjectId, assignmentId }: { subjectId:
   const [title, setTitle] = useState("");
   // Lock state comes from the monitor (any started attempt locks questions).
   const monitor = useGetQuizMonitor({ assignmentId, enabled: tab === "questions", poll: false });
-  const locked = (monitor.data?.rows ?? []).some((r) => r.status !== "NOT_STARTED");
+  // Read-only until the first lock check returns, so a locked quiz never flashes editable.
+  const { locked, readOnly } = editorLockState(monitor.data?.rows, monitor.isLoading);
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -57,9 +59,15 @@ export default function QuizEditorPage({ subjectId, assignmentId }: { subjectId:
   };
 
   const saveTitle = async () => {
-    if (!assignment.data || !title.trim() || title === assignment.data.title) return;
+    if (!assignment.data) return;
+    const next = title.trim();
+    if (!next || next === assignment.data.title) {
+      setTitle(assignment.data.title);
+      return;
+    }
     try {
-      await update.mutateAsync({ query: { assignmentId }, data: { title: title.trim() } });
+      await update.mutateAsync({ query: { assignmentId }, data: { title: next } });
+      setTitle(next);
     } catch (error) {
       fail(error);
     }
@@ -158,7 +166,7 @@ export default function QuizEditorPage({ subjectId, assignmentId }: { subjectId:
           </div>
         </header>
         <main className="flex-1 overflow-auto">
-          {tab === "questions" && <QuestionList assignmentId={assignmentId} subjectId={subjectId} locked={locked} />}
+          {tab === "questions" && <QuestionList assignmentId={assignmentId} subjectId={subjectId} locked={locked} readOnly={readOnly} />}
           {tab === "settings" && <QuizSettingsPanel assignment={assignment.data} />}
           {tab === "monitor" && <div />}
         </main>

@@ -57,3 +57,15 @@ export function formatDuration(ms: number): string {
   if (m > 0) return `${m}m ${String(s).padStart(2, "0")}s`;
   return `${s}s`;
 }
+
+/**
+ * Lock state for the question editor. Any started attempt locks questions.
+ * While the monitor is still loading, the editor is read-only but shows no banner yet.
+ */
+export function editorLockState(
+  rows: QuizMonitorRow[] | undefined,
+  isLoading: boolean,
+): { locked: boolean; readOnly: boolean } {
+  const locked = (rows ?? []).some((r) => r.status !== "NOT_STARTED");
+  return { locked, readOnly: locked || isLoading };
+}

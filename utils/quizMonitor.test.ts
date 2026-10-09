@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { QuizMonitorRow } from "../interfaces";
-import { formatDuration, monitorStats, riskBand, sortMonitorRows } from "./quizMonitor";
+import { editorLockState, formatDuration, monitorStats, riskBand, sortMonitorRows } from "./quizMonitor";
 
 const row = (id: string, o: Partial<QuizMonitorRow> = {}): QuizMonitorRow => ({
   studentOnAssignmentId: id,
@@ -62,4 +62,14 @@ test("formatDuration", () => {
   assert.equal(formatDuration(45_000), "45s");
   assert.equal(formatDuration(125_000), "2m 05s");
   assert.equal(formatDuration(3_720_000), "1h 02m");
+});
+
+test("editorLockState: started attempt locks, loading is read-only without the banner", () => {
+  assert.deepEqual(editorLockState(undefined, true), { locked: false, readOnly: true });
+  assert.deepEqual(editorLockState(undefined, false), { locked: false, readOnly: false });
+  assert.deepEqual(editorLockState([row("a", { status: "NOT_STARTED" })], false), { locked: false, readOnly: false });
+  assert.deepEqual(editorLockState([row("a", { status: "NOT_STARTED" }), row("b", { status: "SUBMITTED" })], false), {
+    locked: true,
+    readOnly: true,
+  });
 });

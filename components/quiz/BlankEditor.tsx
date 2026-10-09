@@ -4,10 +4,10 @@ import { quizLanguage } from "../../data/languages";
 import { Language, QuizQuestionInput } from "../../interfaces";
 import {
   addAcceptedAnswer,
+  applyPromptEdit,
   insertBlankToken,
   newQuizId,
   promptSegments,
-  syncBlanksWithPrompt,
 } from "../../utils/quizDraft";
 
 type Props = {
@@ -21,8 +21,7 @@ export default function BlankEditor({ value, onChange, language, disabled }: Pro
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
 
-  const setPrompt = (prompt: string) =>
-    onChange({ ...value, prompt, blanks: syncBlanksWithPrompt(prompt, value.blanks) });
+  const setPrompt = (prompt: string) => onChange(applyPromptEdit(value, prompt));
 
   const addBlank = () => {
     const el = textareaRef.current;

@@ -55,6 +55,7 @@ export const quizLanguage = {
   beginDate: t("Opens at", "เปิดให้ทำเมื่อ"),
   dueDate: t("Due at", "กำหนดส่ง"),
   noDueDate: t("No due date", "ไม่มีกำหนดส่ง"),
+  beginDateRequired: t("Choose when the quiz opens", "กรุณาเลือกวันเวลาที่เปิดให้ทำ"),
   scoring: t("Scoring", "การให้คะแนน"),
   allOrNothing: t("All or nothing", "ถูกทั้งหมดจึงได้คะแนน"),
   allOrNothingHint: t("Full points only when the answer is exactly right.", "ได้คะแนนเต็มเมื่อตอบถูกทั้งหมดเท่านั้น"),

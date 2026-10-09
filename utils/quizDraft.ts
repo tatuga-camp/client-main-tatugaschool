@@ -102,3 +102,36 @@ export function toQuestionInput(q: AssignmentOnQuiz): QuizQuestionInput {
     blanks: q.blanks.map((b) => ({ ...b, acceptedAnswers: [...b.acceptedAnswers] })),
   };
 }
+
+/** A prompt edit in the blank editor: blanks follow the {{tokens}} left in the prompt. */
+export function applyPromptEdit(value: QuizQuestionInput, prompt: string): QuizQuestionInput {
+  return { ...value, prompt, blanks: syncBlanksWithPrompt(prompt, value.blanks) };
+}
+
+/** What the card sends on save. Fill-blank blanks are re-synced so a hand-deleted token never leaves an orphan. */
+export function toQuestionPayload(draft: QuizQuestionInput): QuizQuestionInput {
+  if (draft.type !== "FILL_BLANK") return draft;
+  return { ...draft, blanks: syncBlanksWithPrompt(draft.prompt, draft.blanks) };
+}
+
+/**
+ * When the server copy changes, take it only if the local draft has no unsaved edits
+ * (it still equals the previous server copy). Otherwise keep the user's edits.
+ */
+export function rebaseDraft<T>(draft: T, prevBase: T, nextBase: T): T {
+  return JSON.stringify(draft) === JSON.stringify(prevBase) ? nextBase : draft;
+}
+
+/** The server's 409 when a student has already started the quiz. */
+export function isQuizLockedError(error: unknown): boolean {
+  const e = error as { statusCode?: number; message?: unknown } | null | undefined;
+  return !!e && e.statusCode === 409 && e.message === "QUIZ_LOCKED";
+}
+
+/** Reorder a question list to match `ids`; anything not in `ids` keeps its place at the end. */
+export function reorderByIds<T extends { id: string }>(list: T[], ids: string[]): T[] {
+  const byId = new Map(list.map((q) => [q.id, q]));
+  const ordered = ids.map((id) => byId.get(id)).filter((q): q is T => !!q);
+  const rest = list.filter((q) => !ids.includes(q.id));
+  return [...ordered, ...rest];
+}

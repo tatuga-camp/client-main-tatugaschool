@@ -12,6 +12,7 @@ import {
   ResetQuizAttemptService,
   UpdateQuizQuestionService,
 } from "../services/quiz";
+import { isQuizLockedError, reorderByIds } from "../utils/quizDraft";
 
 export const keyQuiz = {
   questions: (assignmentId: string) => ["quiz-questions", { assignmentId }] as const,
@@ -24,6 +25,14 @@ export function useGetQuizQuestions(input: { assignmentId: string }) {
     queryKey: keyQuiz.questions(input.assignmentId),
     queryFn: () => GetQuizQuestionsService(input),
   });
+}
+
+/** A 409 QUIZ_LOCKED means a student started meanwhile: refetch the monitor so the editor locks and shows the banner. */
+function useLockRefresh() {
+  const queryClient = useQueryClient();
+  return (error: unknown) => {
+    if (isQuizLockedError(error)) queryClient.invalidateQueries({ queryKey: ["quiz-monitor"] });
+  };
 }
 
 function useQuestionCache() {
@@ -39,8 +48,10 @@ function useQuestionCache() {
 
 export function useCreateQuizQuestion() {
   const setQuestions = useQuestionCache();
+  const refreshLock = useLockRefresh();
   return useMutation({
     mutationKey: ["create-quiz-question"],
+    onError: refreshLock,
     mutationFn: CreateQuizQuestionService,
     onSuccess: (data) => setQuestions(data.assignmentId, (prev) => [...prev, data]),
   });
@@ -48,8 +59,10 @@ export function useCreateQuizQuestion() {
 
 export function useUpdateQuizQuestion() {
   const setQuestions = useQuestionCache();
+  const refreshLock = useLockRefresh();
   return useMutation({
     mutationKey: ["update-quiz-question"],
+    onError: refreshLock,
     mutationFn: UpdateQuizQuestionService,
     onSuccess: (data) =>
       setQuestions(data.assignmentId, (prev) => prev.map((q) => (q.id === data.id ? data : q))),
@@ -58,8 +71,10 @@ export function useUpdateQuizQuestion() {
 
 export function useDeleteQuizQuestion() {
   const setQuestions = useQuestionCache();
+  const refreshLock = useLockRefresh();
   return useMutation({
     mutationKey: ["delete-quiz-question"],
+    onError: refreshLock,
     mutationFn: DeleteQuizQuestionService,
     onSuccess: (data) => setQuestions(data.assignmentId, (prev) => prev.filter((q) => q.id !== data.id)),
   });
@@ -67,9 +82,22 @@ export function useDeleteQuizQuestion() {
 
 export function useReorderQuizQuestions() {
   const queryClient = useQueryClient();
+  const refreshLock = useLockRefresh();
   return useMutation({
     mutationKey: ["reorder-quiz-questions"],
     mutationFn: ReorderQuizQuestionsService,
+    // Optimistic: move the card now, roll back if the server refuses.
+    onMutate: async (variables) => {
+      const key = keyQuiz.questions(variables.assignmentId);
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous = queryClient.getQueryData<AssignmentOnQuiz[]>(key);
+      if (previous) queryClient.setQueryData(key, reorderByIds(previous, variables.ids));
+      return { previous };
+    },
+    onError: (error, variables, context) => {
+      if (context?.previous) queryClient.setQueryData(keyQuiz.questions(variables.assignmentId), context.previous);
+      refreshLock(error);
+    },
     onSuccess: (data, variables) => {
       queryClient.setQueryData(keyQuiz.questions(variables.assignmentId), data);
     },

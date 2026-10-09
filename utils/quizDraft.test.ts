@@ -2,6 +2,11 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   addAcceptedAnswer,
+  applyPromptEdit,
+  isQuizLockedError,
+  rebaseDraft,
+  reorderByIds,
+  toQuestionPayload,
   convertQuestionType,
   defaultQuestion,
   insertBlankToken,
@@ -77,4 +82,59 @@ test("addAcceptedAnswer trims, ignores empty and case-insensitive duplicates", (
   assert.deepEqual(addAcceptedAnswer(["Bangkok"], "  bangkok "), ["Bangkok"]);
   assert.deepEqual(addAcceptedAnswer(["Bangkok"], "   "), ["Bangkok"]);
   assert.deepEqual(addAcceptedAnswer(["Bangkok"], " กรุงเทพ "), ["Bangkok", "กรุงเทพ"]);
+});
+
+test("applyPromptEdit: hand-deleting a {{token}} drops its blank from the edit", () => {
+  const value = {
+    type: "FILL_BLANK" as const,
+    prompt: "A {{a1}} and {{b2}}",
+    points: 1,
+    options: [],
+    blanks: [
+      { id: "a1", acceptedAnswers: ["x"] },
+      { id: "b2", acceptedAnswers: ["y"] },
+    ],
+  };
+  const next = applyPromptEdit(value, "A {{a1}} and ");
+  assert.equal(next.prompt, "A {{a1}} and ");
+  assert.deepEqual(next.blanks, [{ id: "a1", acceptedAnswers: ["x"] }]);
+  assert.equal(next.points, 1);
+});
+
+test("toQuestionPayload: save path sends blanks synced with the prompt", () => {
+  const draft = {
+    type: "FILL_BLANK" as const,
+    prompt: "Only {{b2}} left",
+    points: 2,
+    options: [],
+    blanks: [
+      { id: "a1", acceptedAnswers: ["x"] },
+      { id: "b2", acceptedAnswers: ["y"] },
+    ],
+  };
+  assert.deepEqual(toQuestionPayload(draft).blanks, [{ id: "b2", acceptedAnswers: ["y"] }]);
+  const single = defaultQuestion("SINGLE");
+  assert.equal(toQuestionPayload(single), single);
+});
+
+test("rebaseDraft: clean drafts follow the server, dirty drafts are kept", () => {
+  const prev = { prompt: "a", points: 1 };
+  const next = { prompt: "a", points: 1 };
+  assert.equal(rebaseDraft({ prompt: "a", points: 1 }, prev, next), next);
+  const dirty = { prompt: "edited", points: 1 };
+  assert.equal(rebaseDraft(dirty, prev, { prompt: "server", points: 1 }), dirty);
+});
+
+test("isQuizLockedError matches only the 409 QUIZ_LOCKED shape", () => {
+  assert.equal(isQuizLockedError({ statusCode: 409, message: "QUIZ_LOCKED", error: "Conflict" }), true);
+  assert.equal(isQuizLockedError({ statusCode: 409, message: "Other", error: "Conflict" }), false);
+  assert.equal(isQuizLockedError({ statusCode: 400, message: "QUIZ_LOCKED" }), false);
+  assert.equal(isQuizLockedError(undefined), false);
+  assert.equal(isQuizLockedError(new Error("x")), false);
+});
+
+test("reorderByIds follows ids and keeps unknown items at the end", () => {
+  const list = [{ id: "a" }, { id: "b" }, { id: "c" }];
+  assert.deepEqual(reorderByIds(list, ["c", "a", "b"]).map((q) => q.id), ["c", "a", "b"]);
+  assert.deepEqual(reorderByIds(list, ["b", "a"]).map((q) => q.id), ["b", "a", "c"]);
 });

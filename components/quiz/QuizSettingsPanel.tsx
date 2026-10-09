@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Swal from "sweetalert2";
 import Switch from "../common/Switch";
 import { quizLanguage } from "../../data/languages";
 import { Assignment, ErrorMessages, QuizScoringMode, QuizSettings } from "../../interfaces";
 import { useGetLanguage, useUpdateAssignment } from "../../react-query";
 import { convertToDateTimeLocalString } from "../../utils";
+import { rebaseDraft } from "../../utils/quizDraft";
 
 const DEFAULTS: QuizSettings = {
   scoringMode: "ALL_OR_NOTHING",
@@ -36,15 +37,27 @@ export default function QuizSettingsPanel({ assignment }: { assignment: Assignme
   const lang = language.data ?? "en";
   const update = useUpdateAssignment();
   const [form, setForm] = useState<Form>(() => toForm(assignment));
+  const serverForm = useMemo(() => toForm(assignment), [assignment]);
+  const serverKey = JSON.stringify(serverForm);
+  const baseRef = useRef({ id: assignment.id, form: serverForm });
 
-  useEffect(() => setForm(toForm(assignment)), [assignment.id, assignment.updateAt]);
+  // The header's title save and Publish button also update the assignment. Follow those
+  // changes only while the form has no unsaved edits; a different quiz always resets.
+  useEffect(() => {
+    const prev = baseRef.current;
+    baseRef.current = { id: assignment.id, form: serverForm };
+    setForm((f) => (prev.id !== assignment.id ? serverForm : rebaseDraft(f, prev.form, serverForm)));
+  }, [assignment.id, serverKey]);
+
+  const beginDateMissing = !form.beginDate;
 
   const setSetting = <K extends keyof QuizSettings>(key: K, value: QuizSettings[K]) =>
     setForm((f) => ({ ...f, settings: { ...f.settings, [key]: value } }));
 
   const save = async () => {
+    if (beginDateMissing) return;
     try {
-      await update.mutateAsync({
+      const saved = await update.mutateAsync({
         query: { assignmentId: assignment.id },
         data: {
           description: form.description,
@@ -54,6 +67,7 @@ export default function QuizSettingsPanel({ assignment }: { assignment: Assignme
           quizSettings: form.settings,
         },
       });
+      setForm(toForm({ ...assignment, ...saved }));
       Swal.fire({ icon: "success", title: quizLanguage.saved(lang), timer: 1200, showConfirmButton: false });
     } catch (error) {
       const result = error as ErrorMessages;
@@ -105,8 +119,12 @@ export default function QuizSettingsPanel({ assignment }: { assignment: Assignme
               type="datetime-local"
               value={form.beginDate}
               onChange={(e) => setForm((f) => ({ ...f, beginDate: e.target.value }))}
-              className="main-input"
+              aria-invalid={beginDateMissing}
+              className={`main-input ${beginDateMissing ? "border-error-color" : ""}`}
             />
+            {beginDateMissing && (
+              <span className="text-xs font-normal text-error-color">{quizLanguage.beginDateRequired(lang)}</span>
+            )}
           </label>
           <label className="flex flex-col gap-1 text-sm font-medium text-icon-color">
             {quizLanguage.dueDate(lang)}
@@ -154,7 +172,7 @@ export default function QuizSettingsPanel({ assignment }: { assignment: Assignme
       <button
         type="button"
         onClick={save}
-        disabled={update.isPending}
+        disabled={update.isPending || beginDateMissing}
         className="self-end rounded-2xl bg-primary-color px-6 py-2 font-medium text-white hover:bg-primary-color-hover disabled:opacity-50"
       >
         {quizLanguage.saveSettings(lang)}

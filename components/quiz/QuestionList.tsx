@@ -19,9 +19,8 @@ import { CSS } from "@dnd-kit/utilities";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { MdContentCopy, MdDragIndicator, MdLock, MdQuiz } from "react-icons/md";
-import Swal from "sweetalert2";
 import { quizLanguage } from "../../data/languages";
-import { AssignmentOnQuiz, ErrorMessages, QuizQuestionType } from "../../interfaces";
+import { AssignmentOnQuiz, QuizQuestionType } from "../../interfaces";
 import {
   useCreateQuizQuestion,
   useDuplicateQuiz,
@@ -31,6 +30,7 @@ import {
 } from "../../react-query";
 import { defaultQuestion } from "../../utils/quizDraft";
 import QuestionCard from "./QuestionCard";
+import { showQuizError } from "./quizErrorAlert";
 
 function SortableQuestion({ question, index, locked }: { question: AssignmentOnQuiz; index: number; locked: boolean }) {
   const language = useGetLanguage();
@@ -69,10 +69,14 @@ export default function QuestionList({
   assignmentId,
   subjectId,
   locked,
+  readOnly = locked,
 }: {
   assignmentId: string;
   subjectId: string;
+  /** A student has started: show the banner and Duplicate. */
   locked: boolean;
+  /** Cards cannot be edited (locked, or the lock check is still loading). */
+  readOnly?: boolean;
 }) {
   const router = useRouter();
   const language = useGetLanguage();
@@ -90,10 +94,7 @@ export default function QuestionList({
 
   const list = questions.data ?? [];
 
-  const fail = (error: unknown) => {
-    const result = error as ErrorMessages;
-    Swal.fire({ title: result?.error ?? "Error", text: result?.message?.toString(), icon: "error" });
-  };
+  const fail = (error: unknown) => showQuizError(error, lang);
 
   const add = async (type: QuizQuestionType) => {
     setMenuOpen(false);
@@ -105,11 +106,12 @@ export default function QuestionList({
   };
 
   const onDragEnd = async ({ active, over }: DragEndEvent) => {
-    if (!over || active.id === over.id) return;
+    if (readOnly || !over || active.id === over.id) return;
     const from = list.findIndex((q) => q.id === active.id);
     const to = list.findIndex((q) => q.id === over.id);
     const ids = arrayMove(list, from, to).map((q) => q.id);
     try {
+      // The hook moves the card in the cache right away and rolls back on error.
       await reorder.mutateAsync({ assignmentId, ids });
     } catch (error) {
       fail(error);
@@ -154,13 +156,13 @@ export default function QuestionList({
         <SortableContext items={list.map((q) => q.id)} strategy={verticalListSortingStrategy}>
           <ol className="flex flex-col gap-4">
             {list.map((question, index) => (
-              <SortableQuestion key={question.id} question={question} index={index} locked={locked} />
+              <SortableQuestion key={question.id} question={question} index={index} locked={readOnly} />
             ))}
           </ol>
         </SortableContext>
       </DndContext>
 
-      {!locked && (
+      {!readOnly && (
         <div className="relative">
           <button
             type="button"

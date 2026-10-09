@@ -1,11 +1,12 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { MdCheckCircle, MdDelete, MdRadioButtonUnchecked } from "react-icons/md";
 import Swal from "sweetalert2";
 import { quizLanguage } from "../../data/languages";
-import { AssignmentOnQuiz, ErrorMessages, QuizQuestionInput, QuizQuestionType } from "../../interfaces";
+import { AssignmentOnQuiz, QuizQuestionInput, QuizQuestionType } from "../../interfaces";
 import { useDeleteQuizQuestion, useGetLanguage, useUpdateQuizQuestion } from "../../react-query";
-import { convertQuestionType, newQuizId, toQuestionInput } from "../../utils/quizDraft";
+import { convertQuestionType, newQuizId, rebaseDraft, toQuestionInput, toQuestionPayload } from "../../utils/quizDraft";
 import BlankEditor from "./BlankEditor";
+import { showQuizError } from "./quizErrorAlert";
 
 type Props = {
   question: AssignmentOnQuiz;
@@ -22,13 +23,19 @@ export default function QuestionCard({ question, index, locked, dragHandle }: Pr
   const update = useUpdateQuizQuestion();
   const remove = useDeleteQuizQuestion();
   const [draft, setDraft] = useState<QuizQuestionInput>(() => toQuestionInput(question));
+  const serverInput = useMemo(() => toQuestionInput(question), [question]);
+  const serverKey = JSON.stringify(serverInput);
+  const baseRef = useRef(serverInput);
 
-  useEffect(() => setDraft(toQuestionInput(question)), [question.updateAt]);
+  // Follow server changes to the question's own fields only (a reorder bumps updateAt
+  // on every question), and never over unsaved edits.
+  useEffect(() => {
+    const prev = baseRef.current;
+    baseRef.current = serverInput;
+    setDraft((d) => rebaseDraft(d, prev, serverInput));
+  }, [serverKey]);
 
-  const dirty = useMemo(
-    () => JSON.stringify(draft) !== JSON.stringify(toQuestionInput(question)),
-    [draft, question],
-  );
+  const dirty = JSON.stringify(draft) !== serverKey;
 
   const typeLabel = (type: QuizQuestionType) =>
     type === "SINGLE"
@@ -37,14 +44,12 @@ export default function QuestionCard({ question, index, locked, dragHandle }: Pr
         ? quizLanguage.typeMultiple(lang)
         : quizLanguage.typeFillBlank(lang);
 
-  const showError = (error: unknown) => {
-    const result = error as ErrorMessages;
-    Swal.fire({ title: result?.error ?? "Error", text: result?.message?.toString(), icon: "error" });
-  };
+  const showError = (error: unknown) => showQuizError(error, lang);
 
   const save = async () => {
     try {
-      await update.mutateAsync({ id: question.id, data: draft });
+      const saved = await update.mutateAsync({ id: question.id, data: toQuestionPayload(draft) });
+      setDraft(toQuestionInput(saved));
     } catch (error) {
       showError(error);
     }
