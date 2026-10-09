@@ -278,12 +278,7 @@ function ClassworkView({
       {/* Left column */}
       <section className="flex min-w-0 flex-col gap-5 pb-24">
         {assignmentType === "VideoQuiz" && classwork && (
-          <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-            <VideoConfigurator
-              assignment={classwork}
-              onClose={() => setConfiguringVideo(null)}
-            />
-          </div>
+          <VideoConfigurator assignment={classwork} />
         )}
 
         {assignmentType !== "VideoQuiz" && (
