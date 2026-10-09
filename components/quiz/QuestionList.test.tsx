@@ -103,6 +103,29 @@ test("QuestionList: a blank with no accepted answer shows the hint and disables 
       </QueryClientProvider>
     </RouterContext.Provider>,
   );
-  assert.ok(html.includes("Every blank needs at least one accepted answer"));
+  assert.ok(html.includes("give every blank an accepted answer"));
   assert.match(html, /<button[^>]*disabled[^>]*>Save</);
+});
+
+test("QuestionList: shows the student preview with the first question", () => {
+  const client = new QueryClient({
+    defaultOptions: { queries: { staleTime: Infinity, retry: false } },
+  });
+  client.setQueryData(["language"], "en");
+  client.setQueryData(keyQuiz.questions("quiz1"), [
+    question("q1", 0),
+    question("q2", 1),
+  ]);
+  const router = { query: {}, push: async () => true } as unknown as NextRouter;
+  const html = renderToStaticMarkup(
+    <RouterContext.Provider value={router}>
+      <QueryClientProvider client={client}>
+        <QuestionList assignmentId="quiz1" subjectId="s1" locked={false} />
+      </QueryClientProvider>
+    </RouterContext.Provider>,
+  );
+  assert.ok(html.includes('aria-label="Student preview"'));
+  assert.ok(html.includes("Question 1 of 2"));
+  assert.ok(html.includes("Check answer"));
+  assert.match(html, /role="radio"[^>]*aria-checked="false"/);
 });

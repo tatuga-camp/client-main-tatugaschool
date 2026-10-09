@@ -2,13 +2,14 @@ import { GetServerSideProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { IoArrowBack } from "react-icons/io5";
 import { MdDeleteOutline, MdQuiz } from "react-icons/md";
 import Swal from "sweetalert2";
 import QuestionList from "../../../../components/quiz/QuestionList";
 import QuizMonitor from "../../../../components/quiz/QuizMonitor";
 import QuizSettingsPanel from "../../../../components/quiz/QuizSettingsPanel";
+import useUnsavedQuizGuard from "../../../../hook/useUnsavedQuizGuard";
 import LoadingSpinner from "../../../../components/common/LoadingSpinner";
 import { MenuSubject } from "../../../../data";
 import { quizLanguage } from "../../../../data/languages";
@@ -82,11 +83,23 @@ export default function QuizEditorPage({
     if (assignment.data) setTitle(assignment.data.title);
   }, [assignment.data?.title]);
 
-  /** True when nothing is unsaved, or the teacher chose to go on anyway. */
+  // Every question card registers "save now"; leaving saves first and only
+  // asks when something still can't be saved.
+  const saveAllRef = useRef<(() => Promise<number>) | null>(null);
+  const saveAll = async () => (saveAllRef.current ? saveAllRef.current() : 0);
+  const { allowNextNavigation, requestLeave } = useUnsavedQuizGuard({
+    enabled: dirtyIds.size > 0,
+    saveAll,
+    language: lang,
+  });
+
+  /** True when everything saved, or the teacher chose to go on anyway. */
   const confirmUnsaved = async (text: string, confirmButtonText: string) => {
     if (dirtyIds.size === 0) return true;
+    const remaining = await saveAll();
+    if (remaining === 0) return true;
     const answer = await Swal.fire({
-      title: quizLanguage.unsavedTitle(lang),
+      title: quizLanguage.unsavedCount(lang, remaining),
       text,
       icon: "warning",
       showCancelButton: true,
@@ -164,6 +177,7 @@ export default function QuizEditorPage({
         () => Swal.fire(deleteConfirmOptions("quiz", lang)),
         async () => {
           await remove.mutateAsync({ assignmentId });
+          allowNextNavigation();
           await router.push(backHref);
           forgetDeletedAssignment(queryClient, assignmentId);
           Swal.fire({
@@ -245,6 +259,13 @@ export default function QuizEditorPage({
           <nav className="flex min-h-16 flex-wrap items-center gap-3 px-4 py-2 md:px-6">
             <Link
               href={backHref}
+              onClick={(e) => {
+                if (dirtyIds.size === 0) return;
+                // Save first (and warn only if needed) instead of letting the
+                // router start a navigation the guard would have to cancel.
+                e.preventDefault();
+                requestLeave(`/subject/${subjectId}?menu=Classwork`);
+              }}
               aria-label={quizLanguage.backToClasswork(lang)}
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xl text-gray-500 hover:bg-gray-100 hover:text-icon-color"
             >
@@ -343,6 +364,7 @@ export default function QuizEditorPage({
               locked={locked}
               readOnly={readOnly}
               onDirtyChange={onDirtyChange}
+              saveAllRef={saveAllRef}
             />
           )}
           {tab === "settings" && (

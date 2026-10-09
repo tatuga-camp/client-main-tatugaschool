@@ -261,4 +261,86 @@ export const quizLanguage = {
     "การรีเซ็ตจะลบคำตอบและบันทึกของนักเรียน เพื่อให้เริ่มทำใหม่ได้",
   ),
   close: t("Close", "ปิด"),
+
+  // Autosave
+  autosaveWaiting: t("Unsaved changes", "ยังไม่ได้บันทึก"),
+  autosaveSaving: t("Saving…", "กำลังบันทึก…"),
+  autosaveSaved: t("Saved", "บันทึกแล้ว"),
+  autosaveRetrying: t(
+    "Couldn't save, retrying…",
+    "บันทึกไม่สำเร็จ กำลังลองใหม่…",
+  ),
+  autosaveError: t(
+    "Couldn't save. Check your connection and press Save.",
+    "บันทึกไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วกดบันทึก",
+  ),
+  notSavedBecause: (l: Language, reason: string) =>
+    l === "th" ? `ยังไม่บันทึก: ${reason}` : `Not saved: ${reason}`,
+  needsAttention: (l: Language, reason: string) =>
+    l === "th" ? `ต้องแก้ไข: ${reason}` : `Needs attention: ${reason}`,
+  blockPrompt: t("write the question", "พิมพ์คำถาม"),
+  blockTwoOptions: t("add at least 2 options", "เพิ่มตัวเลือกอย่างน้อย 2 ข้อ"),
+  blockOptionText: t("fill in every option", "กรอกตัวเลือกให้ครบ"),
+  blockPickOne: t(
+    "mark exactly one correct answer",
+    "เลือกคำตอบที่ถูกต้อง 1 ข้อ",
+  ),
+  blockPickAtLeastOne: t(
+    "mark at least one correct answer",
+    "เลือกคำตอบที่ถูกต้องอย่างน้อย 1 ข้อ",
+  ),
+  blockNeedBlank: t("add a blank to the sentence", "เพิ่มช่องว่างในประโยค"),
+  blockBlankAnswer: t(
+    "give every blank an accepted answer",
+    "ใส่คำตอบที่ยอมรับให้ทุกช่องว่าง",
+  ),
+  unsavedCount: (l: Language, n: number) =>
+    l === "th"
+      ? `มีคำถาม ${n} ข้อที่ยังบันทึกไม่ได้`
+      : `${n} ${n === 1 ? "question isn't" : "questions aren't"} saved`,
+  unsavedFixText: t(
+    "Fix the highlighted questions or leave without those changes.",
+    "แก้ไขคำถามที่ไฮไลต์ไว้ หรือออกโดยไม่บันทึกการแก้ไขเหล่านั้น",
+  ),
+
+  // Student preview
+  studentPreview: t("Student preview", "มุมมองนักเรียน"),
+  previewHint: t(
+    "Try the quiz like a student. Nothing here is sent or graded for real.",
+    "ลองทำแบบทดสอบแบบนักเรียน ไม่มีการส่งหรือบันทึกคะแนนจริง",
+  ),
+  previewUnsaved: t("Unsaved", "ยังไม่บันทึก"),
+  previewEmpty: t(
+    "Add a question to see the preview.",
+    "เพิ่มคำถามเพื่อดูตัวอย่าง",
+  ),
+  previewQuestionOf: (l: Language, i: number, n: number) =>
+    l === "th" ? `ข้อ ${i} จาก ${n}` : `Question ${i} of ${n}`,
+  previewPrev: t("Previous", "ก่อนหน้า"),
+  previewNext: t("Next", "ถัดไป"),
+  previewCheck: t("Check answer", "ตรวจคำตอบ"),
+  previewCheckAll: t("Check all", "ตรวจทั้งหมด"),
+  previewReset: t("Reset", "เริ่มใหม่"),
+  previewCorrect: t("Correct", "ถูกต้อง"),
+  previewIncorrect: t("Not quite", "ยังไม่ถูก"),
+  previewPartly: t("Partly right", "ถูกบางส่วน"),
+  previewPointsEarned: (l: Language, got: number, max: number) =>
+    l === "th" ? `ได้ ${got} จาก ${max} คะแนน` : `${got} / ${max} points`,
+  previewAnswerKey: t("Answer", "เฉลย"),
+  previewAccepted: t("Accepted answers", "คำตอบที่ยอมรับ"),
+  previewScore: t("Preview score", "คะแนนจากการลองทำ"),
+  previewShuffleNote: t(
+    "Students see the questions or options in a shuffled order.",
+    "นักเรียนจะเห็นคำถามหรือตัวเลือกแบบสลับลำดับ",
+  ),
+  previewTimerNote: (l: Language, minutes: number) =>
+    l === "th"
+      ? `นักเรียนมีเวลา ${minutes} นาที (ไม่จับเวลาในตัวอย่าง)`
+      : `Students get ${minutes} minutes (no timer in the preview).`,
+  previewTestModeNote: t(
+    "Test mode is on for students.",
+    "นักเรียนจะทำในโหมดสอบ",
+  ),
+  previewChooseOne: t("Choose one answer", "เลือกคำตอบเดียว"),
+  previewChooseAll: t("Choose all that apply", "เลือกได้หลายคำตอบ"),
 };

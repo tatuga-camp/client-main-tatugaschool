@@ -17,7 +17,13 @@ import {
   useUpdateQuizQuestion,
 } from "../../react-query";
 import {
-  blanksMissingAnswers,
+  AutosaveQueue,
+  AutosaveStatus,
+  QUESTION_AUTOSAVE_DELAY_MS,
+  QUESTION_AUTOSAVE_RETRY_MS,
+} from "../../utils/questionAutosave";
+import { isSavedAs, saveBlocker, SaveBlocker } from "../../utils/quizPreview";
+import {
   commitPendingAnswers,
   convertQuestionType,
   newQuizId,
@@ -38,7 +44,19 @@ type Props = {
   dragHandle?: React.ReactNode;
   /** Reports whether this card has unsaved edits (false again when it unmounts). */
   onDirtyChange?: (questionId: string, dirty: boolean) => void;
+  /** Reports the live draft for the student preview (undefined when it matches the server). */
+  onDraftChange?: (
+    questionId: string,
+    draft: QuizQuestionInput | undefined,
+  ) => void;
+  /** Registers "save this card now"; resolves true when it is on the server. */
+  registerSave?: (
+    questionId: string,
+    save: (() => Promise<boolean>) | null,
+  ) => void;
 };
+
+const BUSY: AutosaveStatus[] = ["waiting", "saving", "retrying"];
 
 const TYPES: QuizQuestionType[] = ["SINGLE", "MULTIPLE", "FILL_BLANK"];
 
@@ -48,6 +66,8 @@ export default function QuestionCard({
   locked,
   dragHandle,
   onDirtyChange,
+  onDraftChange,
+  registerSave,
 }: Props) {
   const language = useGetLanguage();
   const lang = language.data ?? "en";
@@ -74,9 +94,69 @@ export default function QuestionCard({
     () => commitPendingAnswers(draft, pending),
     [draft, pending],
   );
-  const dirty = JSON.stringify(draft) !== serverKey || committed !== draft;
   const payload = useMemo(() => toQuestionPayload(committed), [committed]);
-  const missingAnswers = blanksMissingAnswers(payload);
+
+  // Autosave: 2 s after the last valid edit. Typed-but-not-added blank answers
+  // are left out until the teacher adds them (Enter / blur) or presses Save.
+  const saveRef = useRef(update.mutateAsync);
+  saveRef.current = update.mutateAsync;
+  const [autoStatus, setAutoStatus] = useState<AutosaveStatus>("idle");
+  const queueRef = useRef<AutosaveQueue<QuizQuestionInput> | null>(null);
+  if (!queueRef.current) {
+    queueRef.current = new AutosaveQueue<QuizQuestionInput>({
+      save: async (data) => {
+        await saveRef.current({ id: question.id, data });
+      },
+      delayMs: QUESTION_AUTOSAVE_DELAY_MS,
+      retryDelaysMs: QUESTION_AUTOSAVE_RETRY_MS,
+      setTimer: (fn, ms) => window.setTimeout(fn, ms),
+      clearTimer: (timer) => window.clearTimeout(timer as number),
+      onStatus: setAutoStatus,
+    });
+  }
+  const queue = queueRef.current;
+  useEffect(() => () => queue.dispose(), [queue]);
+
+  const draftKey = JSON.stringify(draft);
+  const draftSaved = isSavedAs(draft, question);
+  const blocker: SaveBlocker | null = saveBlocker(committed);
+  useEffect(() => {
+    if (locked || draftSaved || saveBlocker(draft)) {
+      queue.cancel();
+      return;
+    }
+    queue.edit(toQuestionPayload(draft));
+  }, [draftKey, draftSaved, locked]);
+
+  const unsaved = !isSavedAs(committed, question);
+  const dirty = unsaved || BUSY.includes(autoStatus) || autoStatus === "error";
+
+  /** Save now, including typed-but-not-added answers. True when on the server. */
+  const saveNow = async (): Promise<boolean> => {
+    if (locked) return !unsaved;
+    if (!unsaved) return queue.flush();
+    if (saveBlocker(committed)) return false;
+    queue.edit(payload);
+    const ok = await queue.flush();
+    if (ok) setPending({});
+    return ok;
+  };
+  const saveNowRef = useRef(saveNow);
+  saveNowRef.current = saveNow;
+  useEffect(() => {
+    registerSave?.(question.id, () => saveNowRef.current());
+    return () => registerSave?.(question.id, null);
+  }, [question.id]);
+
+  const reportDraft = useRef(onDraftChange);
+  reportDraft.current = onDraftChange;
+  useEffect(() => {
+    reportDraft.current?.(question.id, draftSaved ? undefined : draft);
+  }, [draftKey, draftSaved, question.id]);
+  useEffect(
+    () => () => reportDraft.current?.(question.id, undefined),
+    [question.id],
+  );
 
   const reportDirty = useRef(onDirtyChange);
   reportDirty.current = onDirtyChange;
@@ -98,17 +178,52 @@ export default function QuestionCard({
   const showError = (error: unknown) => showQuizError(error, lang);
 
   const save = async () => {
-    try {
-      const saved = await update.mutateAsync({
-        id: question.id,
-        data: payload,
-      });
-      setDraft(toQuestionInput(saved));
-      setPending({});
-    } catch (error) {
-      showError(error);
-    }
+    const ok = await saveNow();
+    if (!ok && update.error) showError(update.error);
   };
+
+  const blockerText = (b: SaveBlocker) =>
+    ({
+      prompt: quizLanguage.blockPrompt(lang),
+      twoOptions: quizLanguage.blockTwoOptions(lang),
+      optionText: quizLanguage.blockOptionText(lang),
+      pickOne: quizLanguage.blockPickOne(lang),
+      pickAtLeastOne: quizLanguage.blockPickAtLeastOne(lang),
+      needBlank: quizLanguage.blockNeedBlank(lang),
+      blankAnswer: quizLanguage.blockBlankAnswer(lang),
+    })[b];
+
+  const status: { text: string; tone: string } = blocker
+    ? {
+        text: unsaved
+          ? quizLanguage.notSavedBecause(lang, blockerText(blocker))
+          : quizLanguage.needsAttention(lang, blockerText(blocker)),
+        tone: "text-error-color",
+      }
+    : autoStatus === "saving"
+      ? {
+          text: quizLanguage.autosaveSaving(lang),
+          tone: "text-icon-color/60",
+        }
+      : autoStatus === "retrying"
+        ? {
+            text: quizLanguage.autosaveRetrying(lang),
+            tone: "text-warning-color",
+          }
+        : autoStatus === "error"
+          ? {
+              text: quizLanguage.autosaveError(lang),
+              tone: "text-error-color",
+            }
+          : unsaved
+            ? {
+                text: quizLanguage.autosaveWaiting(lang),
+                tone: "text-warning-color",
+              }
+            : {
+                text: `✓ ${quizLanguage.autosaveSaved(lang)}`,
+                tone: "text-success-color",
+              };
 
   const confirmDelete = async () => {
     const answer = await Swal.fire({
@@ -148,7 +263,13 @@ export default function QuestionCard({
   );
 
   return (
-    <article className="flex flex-col gap-4 rounded-2xl border border-gray-100 bg-white p-4 font-Anuphan">
+    <article
+      className={`flex flex-col gap-4 rounded-2xl border bg-white p-4 font-Anuphan ${
+        !locked && (blocker || autoStatus === "error")
+          ? "border-error-color/40"
+          : "border-gray-100"
+      }`}
+    >
       <header className="flex flex-wrap items-center gap-2">
         {dragHandle}
         <h3 className="font-semibold text-icon-color">
@@ -290,17 +411,13 @@ export default function QuestionCard({
 
       {!locked && (
         <footer className="flex items-center justify-end gap-2 border-t border-gray-100 pt-3">
-          {missingAnswers > 0 ? (
-            <span role="status" className="mr-auto text-xs text-error-color">
-              {quizLanguage.blankNeedsAnswer(lang)}
-            </span>
-          ) : (
-            <span
-              className={`mr-auto text-xs ${dirty ? "text-warning-color" : "text-icon-color/50"}`}
-            >
-              {dirty ? quizLanguage.unsaved(lang) : quizLanguage.saved(lang)}
-            </span>
-          )}
+          <span
+            role="status"
+            aria-live="polite"
+            className={`mr-auto text-xs ${status.tone}`}
+          >
+            {status.text}
+          </span>
           <button
             type="button"
             onClick={confirmDelete}
@@ -310,14 +427,11 @@ export default function QuestionCard({
           </button>
           <button
             type="button"
-            disabled={
-              !dirty ||
-              update.isPending ||
-              !draft.prompt.trim() ||
-              missingAnswers > 0
-            }
+            disabled={!dirty || update.isPending || !!blocker}
             onClick={save}
-            className="rounded-xl bg-primary-color px-4 py-1.5 text-sm font-medium text-white hover:bg-primary-color-hover disabled:opacity-40"
+            className={`rounded-xl bg-primary-color px-4 py-1.5 text-sm font-medium text-white hover:bg-primary-color-hover disabled:opacity-40 ${
+              autoStatus === "error" ? "ring-2 ring-error-color/50" : ""
+            }`}
           >
             {quizLanguage.save(lang)}
           </button>
