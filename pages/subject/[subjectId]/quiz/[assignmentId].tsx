@@ -7,6 +7,7 @@ import { IoArrowBack } from "react-icons/io5";
 import { MdQuiz } from "react-icons/md";
 import Swal from "sweetalert2";
 import QuestionList from "../../../../components/quiz/QuestionList";
+import QuizMonitor from "../../../../components/quiz/QuizMonitor";
 import QuizSettingsPanel from "../../../../components/quiz/QuizSettingsPanel";
 import LoadingSpinner from "../../../../components/common/LoadingSpinner";
 import { MenuSubject } from "../../../../data";
@@ -168,7 +169,7 @@ export default function QuizEditorPage({ subjectId, assignmentId }: { subjectId:
         <main className="flex-1 overflow-auto">
           {tab === "questions" && <QuestionList assignmentId={assignmentId} subjectId={subjectId} locked={locked} readOnly={readOnly} />}
           {tab === "settings" && <QuizSettingsPanel assignment={assignment.data} />}
-          {tab === "monitor" && <div />}
+          {tab === "monitor" && <QuizMonitor assignmentId={assignmentId} />}
         </main>
       </div>
     </>
