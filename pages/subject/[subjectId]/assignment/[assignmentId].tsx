@@ -177,12 +177,16 @@ function Index({
     }
   }, [router.isReady]);
 
-  // Quizzes are edited on their own page; only assigning and export stay here.
+  // Quizzes are edited (and assigned) on their own page; only export stays here.
   useEffect(() => {
     if (!router.isReady || assignment.data?.type !== "Quiz") return;
     const menu = router.query.menu as MenuAssignmentQuery | undefined;
-    if (menu === "manageassigning" || menu === "exportclasswork") return;
-    router.replace(`/subject/${subjectId}/quiz/${assignmentId}`);
+    if (menu === "exportclasswork") return;
+    router.replace(
+      menu === "manageassigning"
+        ? `/subject/${subjectId}/quiz/${assignmentId}?tab=manageassigning`
+        : `/subject/${subjectId}/quiz/${assignmentId}`,
+    );
   }, [router.isReady, router.query.menu, assignment.data?.type]);
 
   useEffect(() => {
