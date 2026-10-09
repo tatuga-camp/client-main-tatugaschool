@@ -172,3 +172,12 @@ test("Student panel: shows a spinner while the review loads", () => {
   );
   assert.ok(html.includes('aria-busy="true"'));
 });
+
+test("Student panel: is a modal dialog labelled by the student's name", () => {
+  const html = renderPanel(1);
+  assert.match(html, /role="dialog"/);
+  assert.match(html, /aria-modal="true"/);
+  const labelledBy = html.match(/aria-labelledby="([^"]+)"/)?.[1];
+  assert.ok(labelledBy);
+  assert.match(html, new RegExp(`id="${labelledBy}"[^>]*>Ann B<`));
+});

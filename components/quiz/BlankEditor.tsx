@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import { MdClose, MdShortText } from "react-icons/md";
 import { quizLanguage } from "../../data/languages";
 import { Language, QuizQuestionInput } from "../../interfaces";
@@ -7,6 +7,7 @@ import {
   applyPromptEdit,
   insertBlankToken,
   newQuizId,
+  PendingAnswers,
   promptSegments,
 } from "../../utils/quizDraft";
 
@@ -15,11 +16,13 @@ type Props = {
   onChange: (next: QuizQuestionInput) => void;
   language: Language;
   disabled: boolean;
+  /** Answer text typed per blank but not added yet. The card owns it so Save can include it. */
+  pending: PendingAnswers;
+  onPendingChange: React.Dispatch<React.SetStateAction<PendingAnswers>>;
 };
 
-export default function BlankEditor({ value, onChange, language, disabled }: Props) {
+export default function BlankEditor({ value, onChange, language, disabled, pending, onPendingChange }: Props) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [drafts, setDrafts] = useState<Record<string, string>>({});
 
   const setPrompt = (prompt: string) => onChange(applyPromptEdit(value, prompt));
 
@@ -39,6 +42,14 @@ export default function BlankEditor({ value, onChange, language, disabled }: Pro
       ...value,
       blanks: value.blanks.map((b) => (b.id === blankId ? { ...b, acceptedAnswers: answers } : b)),
     });
+
+  // Enter and blur both add the typed text, so an answer is never silently dropped.
+  const commitPending = (blankId: string, acceptedAnswers: string[]) => {
+    const text = pending[blankId] ?? "";
+    if (!text.trim()) return;
+    setAnswers(blankId, addAcceptedAnswer(acceptedAnswers, text));
+    onPendingChange((d) => ({ ...d, [blankId]: "" }));
+  };
 
   const blankNumber = new Map(value.blanks.map((b, i) => [b.id, i + 1]));
 
@@ -105,15 +116,18 @@ export default function BlankEditor({ value, onChange, language, disabled }: Pro
             ))}
             <input
               disabled={disabled}
-              value={drafts[blank.id] ?? ""}
+              value={pending[blank.id] ?? ""}
               placeholder={quizLanguage.addAnswerPlaceholder(language)}
-              onChange={(e) => setDrafts((d) => ({ ...d, [blank.id]: e.target.value }))}
+              onChange={(e) => {
+                const text = e.target.value;
+                onPendingChange((d) => ({ ...d, [blank.id]: text }));
+              }}
               onKeyDown={(e) => {
                 if (e.key !== "Enter" || e.nativeEvent.isComposing) return;
                 e.preventDefault();
-                setAnswers(blank.id, addAcceptedAnswer(blank.acceptedAnswers, drafts[blank.id] ?? ""));
-                setDrafts((d) => ({ ...d, [blank.id]: "" }));
+                commitPending(blank.id, blank.acceptedAnswers);
               }}
+              onBlur={() => commitPending(blank.id, blank.acceptedAnswers)}
               className="min-w-40 flex-1 rounded-full border border-gray-200 px-3 py-1 text-sm outline-none focus:border-primary-color"
             />
           </div>

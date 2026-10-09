@@ -32,7 +32,17 @@ import { defaultQuestion } from "../../utils/quizDraft";
 import QuestionCard from "./QuestionCard";
 import { showQuizError } from "./quizErrorAlert";
 
-function SortableQuestion({ question, index, locked }: { question: AssignmentOnQuiz; index: number; locked: boolean }) {
+function SortableQuestion({
+  question,
+  index,
+  locked,
+  onDirtyChange,
+}: {
+  question: AssignmentOnQuiz;
+  index: number;
+  locked: boolean;
+  onDirtyChange?: (questionId: string, dirty: boolean) => void;
+}) {
   const language = useGetLanguage();
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } =
     useSortable({ id: question.id, disabled: locked });
@@ -46,6 +56,7 @@ function SortableQuestion({ question, index, locked }: { question: AssignmentOnQ
         question={question}
         index={index}
         locked={locked}
+        onDirtyChange={onDirtyChange}
         dragHandle={
           !locked && (
             <button
@@ -70,6 +81,7 @@ export default function QuestionList({
   subjectId,
   locked,
   readOnly = locked,
+  onDirtyChange,
 }: {
   assignmentId: string;
   subjectId: string;
@@ -77,6 +89,8 @@ export default function QuestionList({
   locked: boolean;
   /** Cards cannot be edited (locked, or the lock check is still loading). */
   readOnly?: boolean;
+  /** Lifts each card's unsaved state so the page can warn before leaving the tab or publishing. */
+  onDirtyChange?: (questionId: string, dirty: boolean) => void;
 }) {
   const router = useRouter();
   const language = useGetLanguage();
@@ -156,7 +170,13 @@ export default function QuestionList({
         <SortableContext items={list.map((q) => q.id)} strategy={verticalListSortingStrategy}>
           <ol className="flex flex-col gap-4">
             {list.map((question, index) => (
-              <SortableQuestion key={question.id} question={question} index={index} locked={readOnly} />
+              <SortableQuestion
+                key={question.id}
+                question={question}
+                index={index}
+                locked={readOnly}
+                onDirtyChange={onDirtyChange}
+              />
             ))}
           </ol>
         </SortableContext>

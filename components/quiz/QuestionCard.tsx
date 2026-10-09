@@ -5,8 +5,11 @@ import { quizLanguage } from "../../data/languages";
 import { AssignmentOnQuiz, QuizQuestionInput, QuizQuestionType } from "../../interfaces";
 import { useDeleteQuizQuestion, useGetLanguage, useUpdateQuizQuestion } from "../../react-query";
 import {
+  blanksMissingAnswers,
+  commitPendingAnswers,
   convertQuestionType,
   newQuizId,
+  PendingAnswers,
   rebaseDraft,
   setQuestionImage,
   toQuestionInput,
@@ -21,11 +24,13 @@ type Props = {
   index: number;
   locked: boolean;
   dragHandle?: React.ReactNode;
+  /** Reports whether this card has unsaved edits (false again when it unmounts). */
+  onDirtyChange?: (questionId: string, dirty: boolean) => void;
 };
 
 const TYPES: QuizQuestionType[] = ["SINGLE", "MULTIPLE", "FILL_BLANK"];
 
-export default function QuestionCard({ question, index, locked, dragHandle }: Props) {
+export default function QuestionCard({ question, index, locked, dragHandle, onDirtyChange }: Props) {
   const language = useGetLanguage();
   const lang = language.data ?? "en";
   const update = useUpdateQuizQuestion();
@@ -43,7 +48,19 @@ export default function QuestionCard({ question, index, locked, dragHandle }: Pr
     setDraft((d) => rebaseDraft(d, prev, serverInput));
   }, [serverKey]);
 
-  const dirty = JSON.stringify(draft) !== serverKey;
+  const [pending, setPending] = useState<PendingAnswers>({});
+  // Typed-but-not-added answers count as edits and are included in what Save sends.
+  const committed = useMemo(() => commitPendingAnswers(draft, pending), [draft, pending]);
+  const dirty = JSON.stringify(draft) !== serverKey || committed !== draft;
+  const payload = useMemo(() => toQuestionPayload(committed), [committed]);
+  const missingAnswers = blanksMissingAnswers(payload);
+
+  const reportDirty = useRef(onDirtyChange);
+  reportDirty.current = onDirtyChange;
+  useEffect(() => {
+    reportDirty.current?.(question.id, dirty);
+  }, [dirty, question.id]);
+  useEffect(() => () => reportDirty.current?.(question.id, false), [question.id]);
 
   const typeLabel = (type: QuizQuestionType) =>
     type === "SINGLE"
@@ -56,8 +73,9 @@ export default function QuestionCard({ question, index, locked, dragHandle }: Pr
 
   const save = async () => {
     try {
-      const saved = await update.mutateAsync({ id: question.id, data: toQuestionPayload(draft) });
+      const saved = await update.mutateAsync({ id: question.id, data: payload });
       setDraft(toQuestionInput(saved));
+      setPending({});
     } catch (error) {
       showError(error);
     }
@@ -133,7 +151,14 @@ export default function QuestionCard({ question, index, locked, dragHandle }: Pr
 
       {draft.type === "FILL_BLANK" ? (
         <>
-          <BlankEditor value={draft} onChange={setDraft} language={lang} disabled={locked} />
+          <BlankEditor
+            value={draft}
+            onChange={setDraft}
+            language={lang}
+            disabled={locked}
+            pending={pending}
+            onPendingChange={setPending}
+          />
           {imageField}
         </>
       ) : (
@@ -204,9 +229,15 @@ export default function QuestionCard({ question, index, locked, dragHandle }: Pr
 
       {!locked && (
         <footer className="flex items-center justify-end gap-2 border-t border-gray-100 pt-3">
-          <span className={`mr-auto text-xs ${dirty ? "text-warning-color" : "text-icon-color/50"}`}>
-            {dirty ? quizLanguage.unsaved(lang) : quizLanguage.saved(lang)}
-          </span>
+          {missingAnswers > 0 ? (
+            <span role="status" className="mr-auto text-xs text-error-color">
+              {quizLanguage.blankNeedsAnswer(lang)}
+            </span>
+          ) : (
+            <span className={`mr-auto text-xs ${dirty ? "text-warning-color" : "text-icon-color/50"}`}>
+              {dirty ? quizLanguage.unsaved(lang) : quizLanguage.saved(lang)}
+            </span>
+          )}
           <button
             type="button"
             onClick={confirmDelete}
@@ -216,7 +247,7 @@ export default function QuestionCard({ question, index, locked, dragHandle }: Pr
           </button>
           <button
             type="button"
-            disabled={!dirty || update.isPending || !draft.prompt.trim()}
+            disabled={!dirty || update.isPending || !draft.prompt.trim() || missingAnswers > 0}
             onClick={save}
             className="rounded-xl bg-primary-color px-4 py-1.5 text-sm font-medium text-white hover:bg-primary-color-hover disabled:opacity-40"
           >

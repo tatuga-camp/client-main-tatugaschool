@@ -76,3 +76,26 @@ test("QuestionList while the lock check loads: read-only without the banner", ()
   assert.ok(!html.includes("New question"));
   assert.equal((html.match(/<textarea[^>]*disabled/g) ?? []).length, 2);
 });
+
+test("QuestionList: a blank with no accepted answer shows the hint and disables Save", () => {
+  const client = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, retry: false } } });
+  client.setQueryData(["language"], "en");
+  const blank: AssignmentOnQuiz = {
+    ...question("q3", 0),
+    type: "FILL_BLANK",
+    prompt: "A {{b1}}",
+    options: [],
+    blanks: [{ id: "b1", acceptedAnswers: [] }],
+  };
+  client.setQueryData(keyQuiz.questions("quiz1"), [blank]);
+  const router = { query: {}, push: async () => true } as unknown as NextRouter;
+  const html = renderToStaticMarkup(
+    <RouterContext.Provider value={router}>
+      <QueryClientProvider client={client}>
+        <QuestionList assignmentId="quiz1" subjectId="s1" locked={false} />
+      </QueryClientProvider>
+    </RouterContext.Provider>,
+  );
+  assert.ok(html.includes("Every blank needs at least one accepted answer"));
+  assert.match(html, /<button[^>]*disabled[^>]*>Save</);
+});

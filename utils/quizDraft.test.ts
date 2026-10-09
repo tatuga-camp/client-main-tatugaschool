@@ -16,6 +16,9 @@ import {
   QUESTION_IMAGE_MAX_BYTES,
   setQuestionImage,
   validateQuestionImage,
+  blanksMissingAnswers,
+  commitPendingAnswers,
+  withDirtyId,
 } from "./quizDraft";
 
 test("newQuizId is 8 url-safe chars and varies", () => {
@@ -166,4 +169,48 @@ test("an image change makes the draft differ from the server copy; removing it r
   const removed = setQuestionImage(withImage, null);
   assert.equal(removed.imageUrl, null);
   assert.deepEqual(removed, { ...base, imageUrl: null });
+});
+
+test("commitPendingAnswers adds typed-but-not-entered answers to their blanks", () => {
+  const draft = {
+    type: "FILL_BLANK" as const,
+    prompt: "A {{b1}} and {{b2}}",
+    points: 1,
+    options: [],
+    blanks: [
+      { id: "b1", acceptedAnswers: ["cat"] },
+      { id: "b2", acceptedAnswers: [] },
+    ],
+  };
+  const next = commitPendingAnswers(draft, { b1: " Dog ", b2: "แมว", gone: "x" });
+  assert.deepEqual(next.blanks, [
+    { id: "b1", acceptedAnswers: ["cat", "Dog"] },
+    { id: "b2", acceptedAnswers: ["แมว"] },
+  ]);
+  // Nothing pending (or only blanks/duplicates): the same object comes back.
+  assert.equal(commitPendingAnswers(draft, {}), draft);
+  assert.equal(commitPendingAnswers(draft, { b1: "  ", b2: "" }), draft);
+  assert.equal(commitPendingAnswers(draft, { b1: "CAT" }), draft);
+});
+
+test("blanksMissingAnswers counts fill-blank blanks with no accepted answer", () => {
+  const base = { prompt: "x {{b1}} {{b2}}", points: 1, options: [] };
+  assert.equal(
+    blanksMissingAnswers({ ...base, type: "FILL_BLANK", blanks: [{ id: "b1", acceptedAnswers: [] }, { id: "b2", acceptedAnswers: ["a"] }] }),
+    1,
+  );
+  assert.equal(blanksMissingAnswers({ ...base, type: "FILL_BLANK", blanks: [{ id: "b1", acceptedAnswers: ["a"] }] }), 0);
+  assert.equal(blanksMissingAnswers({ ...base, type: "SINGLE", blanks: [{ id: "b1", acceptedAnswers: [] }] }), 0);
+});
+
+test("withDirtyId adds and removes ids, returning the same set when nothing changes", () => {
+  const empty = new Set<string>();
+  const one = withDirtyId(empty, "q1", true);
+  assert.deepEqual([...one], ["q1"]);
+  assert.notEqual(one, empty);
+  assert.equal(withDirtyId(one, "q1", true), one);
+  assert.equal(withDirtyId(one, "q2", false), one);
+  const none = withDirtyId(one, "q1", false);
+  assert.deepEqual([...none], []);
+  assert.deepEqual([...one], ["q1"]); // not mutated
 });

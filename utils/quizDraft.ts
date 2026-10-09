@@ -152,3 +152,33 @@ export function validateQuestionImage(file: { type: string; size: number }): Que
 export function setQuestionImage(draft: QuizQuestionInput, imageUrl: string | null): QuizQuestionInput {
   return { ...draft, imageUrl };
 }
+
+/** Accepted-answer text typed per blank (keyed by blank id) but not yet added with Enter. */
+export type PendingAnswers = Record<string, string>;
+
+/** Adds each blank's pending text to its accepted answers. Returns `draft` itself when nothing changes. */
+export function commitPendingAnswers(draft: QuizQuestionInput, pending: PendingAnswers): QuizQuestionInput {
+  let changed = false;
+  const blanks = draft.blanks.map((b) => {
+    const next = addAcceptedAnswer(b.acceptedAnswers, pending[b.id] ?? "");
+    if (next === b.acceptedAnswers) return b;
+    changed = true;
+    return { ...b, acceptedAnswers: next };
+  });
+  return changed ? { ...draft, blanks } : draft;
+}
+
+/** How many fill-in-the-blank blanks have no accepted answer (the server rejects those). */
+export function blanksMissingAnswers(draft: QuizQuestionInput): number {
+  if (draft.type !== "FILL_BLANK") return 0;
+  return draft.blanks.filter((b) => b.acceptedAnswers.length === 0).length;
+}
+
+/** The set of question ids with unsaved edits, updated immutably (same set when nothing changes). */
+export function withDirtyId(ids: ReadonlySet<string>, id: string, dirty: boolean): Set<string> {
+  if (ids.has(id) === dirty) return ids as Set<string>;
+  const next = new Set(ids);
+  if (dirty) next.add(id);
+  else next.delete(id);
+  return next;
+}

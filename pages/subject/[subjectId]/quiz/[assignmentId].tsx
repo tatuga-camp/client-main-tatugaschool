@@ -2,7 +2,7 @@ import { GetServerSideProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { IoArrowBack } from "react-icons/io5";
 import { MdQuiz } from "react-icons/md";
 import Swal from "sweetalert2";
@@ -20,7 +20,8 @@ import {
   useGetQuizQuestions,
   useUpdateAssignment,
 } from "../../../../react-query";
-import { editorLockState } from "../../../../utils/quizMonitor";
+import { withDirtyId } from "../../../../utils/quizDraft";
+import { editorLockState, quizEditorLoadState } from "../../../../utils/quizMonitor";
 
 type Tab = "questions" | "settings" | "monitor";
 const TABS: Tab[] = ["questions", "settings", "monitor"];
@@ -38,6 +39,12 @@ export default function QuizEditorPage({ subjectId, assignmentId }: { subjectId:
   const monitor = useGetQuizMonitor({ assignmentId, enabled: tab === "questions", poll: false });
   // Read-only until the first lock check returns, so a locked quiz never flashes editable.
   const { locked, readOnly } = editorLockState(monitor.data?.locked, monitor.isLoading);
+  // Question cards with unsaved edits; leaving the tab or publishing asks first.
+  const [dirtyIds, setDirtyIds] = useState<Set<string>>(() => new Set());
+  const onDirtyChange = useCallback(
+    (questionId: string, dirty: boolean) => setDirtyIds((ids) => withDirtyId(ids, questionId, dirty)),
+    [],
+  );
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -49,7 +56,26 @@ export default function QuizEditorPage({ subjectId, assignmentId }: { subjectId:
     if (assignment.data) setTitle(assignment.data.title);
   }, [assignment.data?.title]);
 
-  const selectTab = (next: Tab) => {
+  /** True when nothing is unsaved, or the teacher chose to go on anyway. */
+  const confirmUnsaved = async (text: string, confirmButtonText: string) => {
+    if (dirtyIds.size === 0) return true;
+    const answer = await Swal.fire({
+      title: quizLanguage.unsavedTitle(lang),
+      text,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText,
+      cancelButtonText: quizLanguage.keepEditing(lang),
+    });
+    return answer.isConfirmed;
+  };
+
+  const selectTab = async (next: Tab) => {
+    if (next === tab) return;
+    if (tab === "questions") {
+      const ok = await confirmUnsaved(quizLanguage.unsavedText(lang), quizLanguage.leaveAnyway(lang));
+      if (!ok) return;
+    }
     setTab(next);
     router.replace({ query: { ...router.query, tab: next } }, undefined, { shallow: true });
   };
@@ -77,12 +103,44 @@ export default function QuizEditorPage({ subjectId, assignmentId }: { subjectId:
   const toggleStatus = async () => {
     if (!assignment.data) return;
     const next = assignment.data.status === "Published" ? "Draft" : "Published";
+    if (next === "Published") {
+      const ok = await confirmUnsaved(quizLanguage.unsavedPublishText(lang), quizLanguage.publishAnyway(lang));
+      if (!ok) return;
+    }
     try {
       await update.mutateAsync({ query: { assignmentId }, data: { status: next } });
     } catch (error) {
       fail(error);
     }
   };
+
+  const loadState = quizEditorLoadState({ data: assignment.data, isError: assignment.isError });
+  const backHref = { pathname: `/subject/${subjectId}`, query: { menu: "Classwork" as MenuSubject } };
+
+  if (loadState === "error" || loadState === "notQuiz") {
+    // The server's own message (e.g. "Assignment not found"), shown under the localized heading.
+    const detail = loadState === "error" ? (assignment.error as ErrorMessages | null)?.message?.toString() : undefined;
+    return (
+      <div className="flex h-dvh items-center justify-center bg-background-color p-4 font-Anuphan">
+        <div
+          role="alert"
+          className="flex w-full max-w-md flex-col items-center gap-3 rounded-2xl border border-gray-100 bg-white p-8 text-center"
+        >
+          <MdQuiz className="text-4xl text-error-color/70" />
+          <p className="font-semibold text-icon-color">
+            {loadState === "error" ? quizLanguage.loadQuizFailed(lang) : quizLanguage.notAQuiz(lang)}
+          </p>
+          {detail && <p className="text-sm text-icon-color/60">{detail}</p>}
+          <Link
+            href={backHref}
+            className="mt-2 flex items-center gap-2 rounded-2xl bg-primary-color px-4 py-2 text-sm font-medium text-white hover:bg-primary-color-hover"
+          >
+            <IoArrowBack /> {quizLanguage.backToClasswork(lang)}
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   if (!assignment.data) {
     return (
@@ -106,8 +164,8 @@ export default function QuizEditorPage({ subjectId, assignmentId }: { subjectId:
         <header className="shrink-0 border-b border-gray-100 bg-white">
           <nav className="flex min-h-16 flex-wrap items-center gap-3 px-4 py-2 md:px-6">
             <Link
-              href={{ pathname: `/subject/${subjectId}`, query: { menu: "Classwork" as MenuSubject } }}
-              aria-label="Back to classwork"
+              href={backHref}
+              aria-label={quizLanguage.backToClasswork(lang)}
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xl text-gray-500 hover:bg-gray-100 hover:text-icon-color"
             >
               <IoArrowBack />
@@ -167,7 +225,15 @@ export default function QuizEditorPage({ subjectId, assignmentId }: { subjectId:
           </div>
         </header>
         <main className="flex-1 overflow-auto">
-          {tab === "questions" && <QuestionList assignmentId={assignmentId} subjectId={subjectId} locked={locked} readOnly={readOnly} />}
+          {tab === "questions" && (
+            <QuestionList
+              assignmentId={assignmentId}
+              subjectId={subjectId}
+              locked={locked}
+              readOnly={readOnly}
+              onDirtyChange={onDirtyChange}
+            />
+          )}
           {tab === "settings" && <QuizSettingsPanel assignment={assignment.data} />}
           {tab === "monitor" && <QuizMonitor assignmentId={assignmentId} />}
         </main>

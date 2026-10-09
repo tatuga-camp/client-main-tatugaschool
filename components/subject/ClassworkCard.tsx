@@ -19,6 +19,7 @@ import {
 } from "../../data/languages";
 import { Assignment, FileOnAssignment, Language } from "../../interfaces";
 import { useGetLanguage, useUpdateAssignment } from "../../react-query";
+import { classworkHref, classworkShowsAttachments } from "../../utils/classworkLinks";
 import TextEditor from "../common/TextEditor";
 import AssignmentTagEditor from "./AssignmentTagEditor";
 
@@ -138,7 +139,7 @@ function ClassworkCard({
           must keep working on their own sit above it with relative z-10. */}
       {!disabled && (
         <Link
-          href={`/subject/${subjectId}/assignment/${classwork.id}`}
+          href={classworkHref(subjectId, classwork)}
           aria-label={`${t.openClasswork(lang)} ${classwork.title}`}
           className="absolute inset-0 z-0 rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-color"
         />
@@ -319,7 +320,7 @@ function ClassworkCard({
             <p className="text-sm text-gray-400">{t.noDescription(lang)}</p>
           )}
 
-          {classwork.type !== "VideoQuiz" && (
+          {classworkShowsAttachments(classwork.type) && (
             <div>
               <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
                 {t.attachments(lang)}

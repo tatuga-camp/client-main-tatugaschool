@@ -85,3 +85,14 @@ export function scoreToSave(raw: string, max: number, current: number | null): n
   const score = Math.min(max, Math.max(0, n));
   return score === current ? null : score;
 }
+
+export type QuizEditorLoadState = "loading" | "error" | "notQuiz" | "ready";
+
+/** What the quiz editor page shows for its assignment query: never spin forever on an error or a non-quiz. */
+export function quizEditorLoadState(query: {
+  data: { type: string } | undefined;
+  isError: boolean;
+}): QuizEditorLoadState {
+  if (query.data) return query.data.type === "Quiz" ? "ready" : "notQuiz";
+  return query.isError ? "error" : "loading";
+}

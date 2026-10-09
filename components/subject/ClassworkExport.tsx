@@ -11,7 +11,7 @@ import {
   useGetQuestionOnVideoByAssignmentId,
   useUpdateSkillToAssignment,
 } from "../../react-query";
-import { subjectsDataLanguage } from "../../data/languages";
+import { quizLanguage, subjectsDataLanguage } from "../../data/languages";
 import InputEducationYear from "../common/InputEducationYear";
 import LoadingSpinner from "../common/LoadingSpinner";
 import {
@@ -28,6 +28,7 @@ import Swal from "sweetalert2";
 import SubjectCard from "./SubjectCard";
 import LoadingBar from "../common/LoadingBar";
 import { getDefaultSubjectFilter } from "../../utils";
+import { countExportResults } from "../../utils/classworkExport";
 
 type Props = {
   assignment: Assignment;
@@ -177,7 +178,7 @@ function ClassworkExport({
       }
       setLoading(true);
 
-      await Promise.allSettled(
+      const results = await Promise.allSettled(
         selectSubjects.map(async (targetSubject) => {
           if (assignment.type === "Quiz") {
             await duplicateQuiz.mutateAsync({
@@ -236,10 +237,25 @@ function ClassworkExport({
 
       setLoading(false);
       setSelectSubjects([]);
+      const lang = language.data ?? "en";
+      const { succeeded, total } = countExportResults(results);
+      const isQuiz = assignment.type === "Quiz";
       Swal.fire({
-        title: "Success",
-        text: `Classwork exported to ${selectSubjects.length} subjects`,
-        icon: "success",
+        title:
+          succeeded === 0
+            ? quizLanguage.exportFailedTitle(lang)
+            : quizLanguage.exportDone(lang),
+        text: quizLanguage.exportResult(lang, succeeded, total),
+        footer:
+          isQuiz && succeeded > 0
+            ? quizLanguage.exportQuizDraftNote(lang)
+            : undefined,
+        icon:
+          succeeded === total
+            ? "success"
+            : succeeded === 0
+              ? "error"
+              : "warning",
       });
     } catch (error) {
       setLoading(false);

@@ -55,6 +55,39 @@ export const quizLanguage = {
     "มีนักเรียนเริ่มทำแบบทดสอบแล้ว จึงแก้ไขคำถามไม่ได้ ให้ทำสำเนาเพื่อแก้ไข",
   ),
   duplicate: t("Duplicate quiz", "ทำสำเนาแบบทดสอบ"),
+  blankNeedsAnswer: t(
+    "Every blank needs at least one accepted answer before you can save.",
+    "ทุกช่องว่างต้องมีคำตอบที่ยอมรับอย่างน้อย 1 คำตอบก่อนบันทึก",
+  ),
+  unsavedTitle: t("You have unsaved questions", "มีคำถามที่ยังไม่ได้บันทึก"),
+  unsavedText: t(
+    "Changes you have not saved will be lost.",
+    "การแก้ไขที่ยังไม่ได้บันทึกจะหายไป",
+  ),
+  unsavedPublishText: t(
+    "Students will get the last saved version. Changes you have not saved are not included.",
+    "นักเรียนจะได้รับฉบับที่บันทึกล่าสุด การแก้ไขที่ยังไม่ได้บันทึกจะไม่ถูกรวมไปด้วย",
+  ),
+  leaveAnyway: t("Leave without saving", "ออกโดยไม่บันทึก"),
+  publishAnyway: t("Publish anyway", "เผยแพร่ต่อ"),
+  keepEditing: t("Keep editing", "แก้ไขต่อ"),
+
+  // Page load
+  loadQuizFailed: t("Could not load this quiz.", "โหลดแบบทดสอบไม่สำเร็จ"),
+  notAQuiz: t("This classwork is not a quiz.", "งานนี้ไม่ใช่แบบทดสอบ"),
+  backToClasswork: t("Back to classwork", "กลับไปที่หน้างาน"),
+
+  // Export to other subjects
+  exportDone: t("Export finished", "ส่งออกเสร็จแล้ว"),
+  exportFailedTitle: t("Export failed", "ส่งออกไม่สำเร็จ"),
+  exportResult: (l: Language, succeeded: number, total: number) =>
+    l === "th"
+      ? `ส่งออกไปยัง ${succeeded} จาก ${total} วิชา`
+      : `Exported to ${succeeded} of ${total} subject${total === 1 ? "" : "s"}`,
+  exportQuizDraftNote: t(
+    "Quiz copies are created as Draft. Publish them in each subject when ready.",
+    "สำเนาแบบทดสอบถูกสร้างเป็นแบบร่าง ให้เผยแพร่ในแต่ละวิชาเมื่อพร้อม",
+  ),
 
   // Settings tab
   description: t("Instructions", "คำชี้แจง"),

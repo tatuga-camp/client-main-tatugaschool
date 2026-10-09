@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useId, useRef, useState } from "react";
 import { MdCheck, MdClose } from "react-icons/md";
 import Swal from "sweetalert2";
 import { quizLanguage } from "../../data/languages";
@@ -122,6 +122,13 @@ export default function QuizStudentPanel({
   const data = review.data;
   const attempt = data?.studentOnAssignment.quizAttempt ?? null;
   const summary = attempt?.integritySummary;
+  const titleId = useId();
+  const panelRef = useRef<HTMLElement>(null);
+
+  // Move focus into the panel when it opens, so keyboard and screen-reader users land in it.
+  useEffect(() => {
+    panelRef.current?.focus();
+  }, []);
 
   // Close on Escape, unless a SweetAlert dialog is open on top (it handles Escape itself).
   useEffect(() => {
@@ -158,12 +165,17 @@ export default function QuizStudentPanel({
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-end bg-black/30 md:items-stretch" onClick={onClose}>
       <aside
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
-        className="flex max-h-[85dvh] w-full flex-col overflow-hidden rounded-t-3xl bg-white font-Anuphan md:max-h-none md:w-[28rem] md:rounded-none md:rounded-l-3xl"
+        className="flex max-h-[85dvh] outline-none w-full flex-col overflow-hidden rounded-t-3xl bg-white font-Anuphan md:max-h-none md:w-[28rem] md:rounded-none md:rounded-l-3xl"
       >
         <header className="flex items-center gap-3 border-b border-gray-100 px-4 py-3">
           <div className="min-w-0 flex-1">
-            <div className="truncate font-semibold text-icon-color">
+            <div id={titleId} className="truncate font-semibold text-icon-color">
               {data ? `${data.studentOnAssignment.firstName} ${data.studentOnAssignment.lastName}` : "…"}
             </div>
             {data && (
@@ -257,7 +269,7 @@ export default function QuizStudentPanel({
               type="button"
               onClick={confirmReset}
               disabled={reset.isPending}
-              className="w-full rounded-2xl border border-error-color/30 py-2 text-sm font-medium text-error-color hover:bg-error-color/10"
+              className="w-full rounded-2xl border border-error-color/30 py-2 text-sm font-medium text-error-color hover:bg-error-color/10 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent"
             >
               {quizLanguage.resetAttempt(lang)}
             </button>

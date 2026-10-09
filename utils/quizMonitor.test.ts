@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { QuizMonitorRow } from "../interfaces";
-import { editorLockState, formatDuration, monitorStats, riskBand, scoreToSave, sortMonitorRows } from "./quizMonitor";
+import { editorLockState, formatDuration, monitorStats, quizEditorLoadState, riskBand, scoreToSave, sortMonitorRows } from "./quizMonitor";
 
 const row = (id: string, o: Partial<QuizMonitorRow> = {}): QuizMonitorRow => ({
   studentOnAssignmentId: id,
@@ -85,4 +85,13 @@ test("scoreToSave clamps to the question's points and skips no-op saves", () => 
 test("scoreToSave never overrides an ungraded answer", () => {
   assert.equal(scoreToSave("0", 2, null), null);
   assert.equal(scoreToSave("2", 2, null), null);
+});
+
+test("quizEditorLoadState: loading, error, not a quiz, ready", () => {
+  assert.equal(quizEditorLoadState({ data: undefined, isError: false }), "loading");
+  assert.equal(quizEditorLoadState({ data: undefined, isError: true }), "error");
+  assert.equal(quizEditorLoadState({ data: { type: "Assignment" }, isError: false }), "notQuiz");
+  assert.equal(quizEditorLoadState({ data: { type: "Quiz" }, isError: false }), "ready");
+  // A background refetch error keeps showing the loaded quiz.
+  assert.equal(quizEditorLoadState({ data: { type: "Quiz" }, isError: true }), "ready");
 });
