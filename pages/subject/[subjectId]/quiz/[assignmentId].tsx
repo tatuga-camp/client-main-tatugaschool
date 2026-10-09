@@ -20,7 +20,9 @@ import {
   useGetQuizMonitor,
   useGetQuizQuestions,
   useUpdateAssignment,
+  forgetDeletedAssignment,
 } from "../../../../react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   deleteConfirmOptions,
   runIfConfirmed,
@@ -48,6 +50,7 @@ export default function QuizEditorPage({
   const questions = useGetQuizQuestions({ assignmentId });
   const update = useUpdateAssignment();
   const remove = useDeleteAssignment();
+  const queryClient = useQueryClient();
   const [tab, setTab] = useState<Tab>("questions");
   const [title, setTitle] = useState("");
   // Lock state comes from the monitor (any started attempt locks questions).
@@ -162,6 +165,7 @@ export default function QuizEditorPage({
         async () => {
           await remove.mutateAsync({ assignmentId });
           await router.push(backHref);
+          forgetDeletedAssignment(queryClient, assignmentId);
           Swal.fire({
             icon: "success",
             title: quizLanguage.deleted(lang),

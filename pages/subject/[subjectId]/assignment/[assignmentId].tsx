@@ -12,7 +12,10 @@ import {
   MdVideoLibrary,
 } from "react-icons/md";
 import Swal from "sweetalert2";
-import { deleteConfirmOptions, runIfConfirmed } from "../../../../utils/confirmDelete";
+import {
+  deleteConfirmOptions,
+  runIfConfirmed,
+} from "../../../../utils/confirmDelete";
 import ClassStudentAssignWork from "../../../../components/subject/ClassStudentAssignWork";
 import ClassStudentWork from "../../../../components/subject/ClassStudentWork";
 import { menuClassworkList } from "../../../../components/subject/ClassworkCreate";
@@ -41,7 +44,9 @@ import {
   useGetLanguage,
   useGetSubject,
   useUpdateAssignment,
+  forgetDeletedAssignment,
 } from "../../../../react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   getSignedURLTeacherService,
   UploadSignURLService,
@@ -146,6 +151,7 @@ function Index({
   const deleteFileAssignment = useDeleteFileOnAssignment();
   const createFileAssignment = useCreateFileOnAssignment();
   const deleteAssignment = useDeleteAssignment();
+  const queryClient = useQueryClient();
   const [assignmentTitle, setAssignmentTitle] = useState(
     assignment.data?.title,
   );
@@ -277,7 +283,8 @@ function Index({
           await deleteAssignment.mutateAsync({
             assignmentId: assignmentId,
           });
-          router.push(`/subject/${subjectId}?menu=Classwork`);
+          await router.push(`/subject/${subjectId}?menu=Classwork`);
+          forgetDeletedAssignment(queryClient, assignmentId);
           Swal.fire({
             title: "Success",
             text: "Assignment has been deleted",
