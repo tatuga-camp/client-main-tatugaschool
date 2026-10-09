@@ -191,6 +191,14 @@ export const classworkCardDataLanguage = {
         return "Video quiz";
     }
   },
+  typeQuiz: (language: Language) => {
+    switch (language) {
+      case "th":
+        return "แบบทดสอบ";
+      default:
+        return "Quiz";
+    }
+  },
   openClasswork: (language: Language) => {
     switch (language) {
       case "en":

@@ -35,3 +35,4 @@ export * from "./grade-table";
 export * from "./student-points";
 export * from "./classroom-ui";
 export * from "./subject-ui";
+export * from "./quiz";
