@@ -450,11 +450,11 @@ export const footerOnSubjectDataLangugae = {
   WheelOfName: (language: Language) => {
     switch (language) {
       case "en":
-        return "Wheel Of Name";
+        return "Wheel of Names";
       case "th":
-        return "วงเวียนสุ่มชื่อ";
+        return "วงล้อสุ่มชื่อ";
       default:
-        return "Wheel Of Name";
+        return "Wheel of Names";
     }
   },
   SlidePicker: (language: Language) => {

@@ -29,6 +29,7 @@ import Setting from "../../../components/subject/Setting";
 import SilderPicker from "../../../components/subject/SilderPicker";
 import StopWatch from "../../../components/subject/StopWatch";
 import StudentCardPicker from "../../../components/subject/StudentCardPicker";
+import WheelPicker from "../../../components/subject/WheelPicker";
 import FacePicker from "../../../components/subject/FacePicker";
 import Subject from "../../../components/subject/Subject";
 import { defaultBlurHash, MenuSubject } from "../../../data";
@@ -103,29 +104,7 @@ function Index({ subjectId }: Props) {
   });
 
   useEffect(() => {
-    if (
-      selectFooter === "WheelOfName" &&
-      subject.data &&
-      subject.data.wheelOfNamePath
-    ) {
-      window.open(
-        `https://wheelofnames.com/${subject?.data.wheelOfNamePath}`,
-        "_blank",
-      );
-      setSelectFooter("EMTY");
-    } else if (
-      selectFooter === "WheelOfName" &&
-      subject.data &&
-      !subject.data.wheelOfNamePath
-    ) {
-      Swal.fire({
-        title: "Not Ready",
-        text: "Wheel of name not ready yet, please try again later in a few minutes",
-        footer: "We will notify you when it's ready on your email",
-        icon: "info",
-      });
-      setSelectFooter("EMTY");
-    } else if (selectFooter === "StopWatch") {
+    if (selectFooter === "StopWatch") {
       setTriggerStopWatch(true);
     } else {
       setTriggerStopWatch(false);
@@ -264,6 +243,16 @@ function Index({ subjectId }: Props) {
       {selectFooter === "WordCloud" && (
         <PopupLayout onClose={() => setSelectFooter("EMTY")}>
           <WordCloudPanel
+            subjectId={subjectId}
+            onClose={() => setSelectFooter("EMTY")}
+          />
+        </PopupLayout>
+      )}
+      {selectFooter === "WheelOfName" && (
+        <PopupLayout onClose={() => setSelectFooter("EMTY")}>
+          <WheelPicker
+            students={studentOnSubjects.data ?? []}
+            toast={toast}
             subjectId={subjectId}
             onClose={() => setSelectFooter("EMTY")}
           />

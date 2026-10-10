@@ -19,6 +19,7 @@ export * from "./attendance";
 export * from "./attendance-session";
 export * from "./card-picker";
 export * from "./slider-picker";
+export * from "./wheel-picker";
 export * from "./face-picker";
 export * from "./video-config";
 export * from "./attendance-table-setting";
