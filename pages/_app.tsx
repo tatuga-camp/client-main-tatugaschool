@@ -16,11 +16,16 @@ import { useGetUser } from "../react-query";
 import { useRouter } from "next/router";
 import ErrorBoundary from "../components/common/ErrorBoundary";
 import { installDomTranslationGuard } from "../utils/domTranslationGuard";
+import Swal from "sweetalert2";
+import RateLimitNotice from "../components/common/RateLimitNotice";
+import { installSwalRateLimitGuard, isRateLimitError } from "../utils/rateLimit";
 
 // Before React commits anything: keep browser translation from crashing
 // the app with NotFoundError on removeChild / insertBefore.
 if (typeof window !== "undefined") {
   installDomTranslationGuard();
+  // Pages' own error alerts would stack on the rate-limit popup.
+  installSwalRateLimitGuard(Swal);
 }
 
 const prompt = Prompt({
@@ -46,7 +51,9 @@ function MyApp({ Component, pageProps }: AppProps) {
                 (errorResponse?.statusCode === 403 &&
                   errorResponse?.message === "Email not verified") ||
                 errorObj?.message === "Session expired" ||
-                errorObj?.message === "Token not found"
+                errorObj?.message === "Token not found" ||
+                // Retrying a 429 right away only fails again.
+                isRateLimitError(error)
               ) {
                 return false;
               }
@@ -257,6 +264,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           <ErrorBoundary>
             <Component {...pageProps} />
           </ErrorBoundary>
+          <RateLimitNotice />
         </div>
       </PrimeReactProvider>
     </QueryClientProvider>
