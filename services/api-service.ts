@@ -7,6 +7,12 @@ import {
   removeRefreshToken,
   setAccessToken,
 } from "../utils";
+import {
+  isRateLimitError,
+  localRateLimitError,
+  reportRateLimit,
+  waitForRateLimit,
+} from "../utils/rateLimit";
 
 const createAxiosInstance = () => {
   const instance = axios.create({
@@ -18,6 +24,13 @@ const createAxiosInstance = () => {
   instance.interceptors.request.use(
     async (config) => {
       const request = config.url;
+
+      // While the server's rate limit is in force, hold the request until
+      // the wait is over instead of sending one it would reject. Auth calls
+      // still go out: the token refresh below must not be held back.
+      if (!request?.startsWith("/v1/auth/")) {
+        await waitForRateLimit();
+      }
 
       // Bypass auth service endpoints
       if (request?.startsWith("/v1/auth/")) {
@@ -56,6 +69,11 @@ const createAxiosInstance = () => {
           setAccessToken({ access_token: accessToken });
           access_token = accessToken;
         } catch (error) {
+          // A rate-limited refresh is not an expired session: keep the user
+          // signed in and let the popup explain the wait.
+          if (isRateLimitError(error)) {
+            throw localRateLimitError((error as any)?.retryAfter ?? 30);
+          }
           console.log("Refresh token failed", error);
           removeAccessToken();
           removeRefreshToken();
@@ -82,6 +100,10 @@ const createAxiosInstance = () => {
     (response) => response,
     async (error) => {
       const originalRequest = error.config;
+      if (error.response?.status === 429) {
+        reportRateLimit(error.response.data);
+        return Promise.reject(error);
+      }
       if (
         error.response?.status === 403 &&
         error.response?.data?.message === "Email not verified"
@@ -132,6 +154,9 @@ const createAxiosInstance = () => {
 
           return instance(originalRequest);
         } catch (refreshError) {
+          if (isRateLimitError(refreshError)) {
+            return Promise.reject(refreshError);
+          }
           console.log("refreshError", refreshError);
           removeAccessToken();
           removeRefreshToken();
