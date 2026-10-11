@@ -64,6 +64,7 @@ export type YTPlayer = {
   setVolume(volume: number): void;
   mute(): void;
   unMute(): void;
+  isMuted(): boolean;
   destroy(): void;
 };
 

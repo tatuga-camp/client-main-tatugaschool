@@ -1,4 +1,9 @@
-import React, { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+} from "react";
 import { loadYouTubeApi, YT_STATE, YTPlayer } from "../../utils/youtube";
 
 export type YouTubeEmbedHandle = {
@@ -31,9 +36,15 @@ const YouTubeEmbed = forwardRef<YouTubeEmbedHandle, Props>(
     const hostRef = useRef<HTMLDivElement>(null);
     const playerRef = useRef<YTPlayer | null>(null);
     const readyRef = useRef(false);
-    // YouTube starts playback when you seek a video that isn't playing yet;
-    // this pauses it again the moment it does.
-    const holdPausedRef = useRef(false);
+    // Seeking a video that has never played makes YouTube start it. Pausing
+    // straight away — or the browser blocking unmuted autoplay — leaves the
+    // iframe black because no frame was ever decoded. So "prime" instead:
+    // let it start muted, and on the first PLAYING pause, land on the exact
+    // target and restore the sound.
+    const primingRef = useRef<{ target: number; wasMuted: boolean } | null>(
+      null,
+    );
+    const startedRef = useRef(false);
     // Latest callbacks without re-creating the player on every render.
     const cb = useRef(callbacks);
     cb.current = callbacks;
@@ -42,17 +53,46 @@ const YouTubeEmbed = forwardRef<YouTubeEmbedHandle, Props>(
       const p = () => (readyRef.current ? playerRef.current : null);
       return {
         play: () => {
-          holdPausedRef.current = false;
-          p()?.playVideo();
+          const player = p();
+          if (!player) return;
+          const priming = primingRef.current;
+          if (priming) {
+            primingRef.current = null;
+            if (!priming.wasMuted) player.unMute();
+          }
+          player.playVideo();
         },
-        pause: () => p()?.pauseVideo(),
+        pause: () => {
+          const player = p();
+          if (!player) return;
+          // Pausing mid-prime: keep priming so it still settles on a frame.
+          if (primingRef.current) return;
+          player.pauseVideo();
+        },
         seek: (seconds) => {
           const player = p();
           if (!player) return;
-          const playing = player.getPlayerState() === YT_STATE.PLAYING;
-          holdPausedRef.current = !playing;
+          const state = player.getPlayerState();
+          // A started video that is playing or paused keeps its state.
+          if (
+            !primingRef.current &&
+            startedRef.current &&
+            state !== YT_STATE.ENDED
+          ) {
+            player.seekTo(seconds, true);
+            return;
+          }
+          if (primingRef.current) {
+            primingRef.current.target = seconds;
+          } else {
+            primingRef.current = {
+              target: seconds,
+              wasMuted: player.isMuted(),
+            };
+            player.mute();
+          }
           player.seekTo(seconds, true);
-          if (!playing) player.pauseVideo();
+          player.playVideo();
         },
         getTime: () => p()?.getCurrentTime() ?? 0,
         getDuration: () => p()?.getDuration() ?? 0,
@@ -102,9 +142,13 @@ const YouTubeEmbed = forwardRef<YouTubeEmbedHandle, Props>(
                 }, POLL_MS);
               },
               onStateChange: (e) => {
-                if (e.data === YT_STATE.PLAYING && holdPausedRef.current) {
-                  holdPausedRef.current = false;
+                if (e.data === YT_STATE.PLAYING) startedRef.current = true;
+                const priming = primingRef.current;
+                if (e.data === YT_STATE.PLAYING && priming) {
+                  primingRef.current = null;
                   e.target.pauseVideo();
+                  e.target.seekTo(priming.target, true);
+                  if (!priming.wasMuted) e.target.unMute();
                   return;
                 }
                 cb.current.onStateChange?.(e.data);
@@ -120,6 +164,8 @@ const YouTubeEmbed = forwardRef<YouTubeEmbedHandle, Props>(
       return () => {
         cancelled = true;
         readyRef.current = false;
+        startedRef.current = false;
+        primingRef.current = null;
         if (timer) clearInterval(timer);
         try {
           playerRef.current?.destroy();
