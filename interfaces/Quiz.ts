@@ -42,6 +42,15 @@ export type QuizOption = {
 };
 export type QuizBlank = { id: string; acceptedAnswers: string[] };
 
+export type QuizAttachmentKind = "IMAGE" | "PDF" | "VIDEO" | "AUDIO";
+export type QuizAttachment = {
+  url: string;
+  name: string;
+  kind: QuizAttachmentKind;
+  mimeType: string;
+  size: number;
+};
+
 export type AssignmentOnQuiz = {
   id: string;
   createAt: string;
@@ -49,7 +58,7 @@ export type AssignmentOnQuiz = {
   order: number;
   type: QuizQuestionType;
   prompt: string;
-  imageUrl: string | null;
+  attachment: QuizAttachment | null;
   points: number;
   options: QuizOption[];
   blanks: QuizBlank[];
@@ -61,7 +70,7 @@ export type AssignmentOnQuiz = {
 export type QuizQuestionInput = {
   type: QuizQuestionType;
   prompt: string;
-  imageUrl?: string | null;
+  attachment?: QuizAttachment | null;
   points: number;
   options: {
     id: string;

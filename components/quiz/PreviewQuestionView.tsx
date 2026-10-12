@@ -15,6 +15,7 @@ import {
   PreviewAnswer,
   PreviewQuestion,
 } from "../../utils/quizPreview";
+import QuestionAttachment from "./QuestionAttachment";
 
 type Props = {
   question: PreviewQuestion;
@@ -58,11 +59,11 @@ export default function PreviewQuestionView({
     };
     return (
       <div className="flex flex-col gap-3">
-        {question.imageUrl && (
-          <img
-            src={question.imageUrl}
-            alt=""
-            className="max-h-48 rounded-2xl object-contain"
+        {question.attachment && (
+          <QuestionAttachment
+            key={question.attachment.url}
+            attachment={question.attachment}
+            language={language}
           />
         )}
         <p className="text-base leading-[2.6rem] text-icon-color">
@@ -134,11 +135,11 @@ export default function PreviewQuestionView({
       <p className="whitespace-pre-line text-base text-icon-color">
         {question.prompt}
       </p>
-      {question.imageUrl && (
-        <img
-          src={question.imageUrl}
-          alt=""
-          className="max-h-48 rounded-2xl object-contain"
+      {question.attachment && (
+        <QuestionAttachment
+          key={question.attachment.url}
+          attachment={question.attachment}
+          language={language}
         />
       )}
       <ul

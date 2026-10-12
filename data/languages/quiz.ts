@@ -67,6 +67,40 @@ export const quizLanguage = {
   ),
   addAnswerPlaceholder: t("Add an accepted answer", "เพิ่มคำตอบที่ยอมรับ"),
   addImage: t("Add image", "เพิ่มรูปภาพ"),
+  attachFile: t("Attach file", "แนบไฟล์"),
+  attachHint: t("PDF, video or audio · up to 200 MB", "PDF วิดีโอ หรือเสียง · ไม่เกิน 200 MB"),
+  replace: t("Replace", "เปลี่ยน"),
+  remove: t("Remove", "ลบ"),
+  uploadingFile: (l: Language, percent: number, loaded: string, total: string) =>
+    l === "th"
+      ? `กำลังอัปโหลด ${percent}% · ${loaded} จาก ${total}`
+      : `Uploading ${percent}% · ${loaded} of ${total}`,
+  cancelUpload: t("Cancel upload", "ยกเลิกการอัปโหลด"),
+  fileTooLarge: (l: Language, kind: string, limit: string, actual: string) =>
+    l === "th"
+      ? `ไฟล์${kind}นี้มีขนาด ${actual} เกินขีดจำกัด ${limit}`
+      : `This ${kind.toLowerCase()} is ${actual}. The limit is ${limit}.`,
+  fileNotSupported: t(
+    "This file type isn't supported. Use PDF, MP4/WebM/MOV video, or MP3/M4A/WAV/OGG/AAC audio.",
+    "ไม่รองรับไฟล์ประเภทนี้ ใช้ไฟล์ PDF วิดีโอ MP4/WebM/MOV หรือเสียง MP3/M4A/WAV/OGG/AAC",
+  ),
+  fileEmpty: t("This file is empty", "ไฟล์นี้ว่างเปล่า"),
+  kindLabel: (l: Language, kind: "IMAGE" | "PDF" | "VIDEO" | "AUDIO") =>
+    ({
+      IMAGE: l === "th" ? "รูปภาพ" : "Image",
+      PDF: "PDF",
+      VIDEO: l === "th" ? "วิดีโอ" : "Video",
+      AUDIO: l === "th" ? "เสียง" : "Audio",
+    })[kind],
+  openPdf: t("Open", "เปิด"),
+  closePdf: t("Close", "ปิด"),
+  pdfPage: (l: Language, n: number, total: number) =>
+    l === "th" ? `หน้า ${n} จาก ${total}` : `Page ${n} of ${total}`,
+  zoomIn: t("Zoom in", "ขยาย"),
+  zoomOut: t("Zoom out", "ย่อ"),
+  pdfLoadError: t("Couldn't open this PDF", "เปิดไฟล์ PDF นี้ไม่ได้"),
+  retry: t("Try again", "ลองอีกครั้ง"),
+  mediaLoadError: t("Couldn't load this file", "โหลดไฟล์นี้ไม่ได้"),
   removeImage: t("Remove image", "ลบรูปภาพ"),
   imageTooLarge: t(
     "The image must be 5 MB or smaller",

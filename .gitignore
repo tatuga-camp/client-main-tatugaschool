@@ -43,3 +43,5 @@ next-env.d.ts
 .superpowers
 /docs
 
+
+/public/pdf.worker.min.mjs

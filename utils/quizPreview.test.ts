@@ -10,6 +10,7 @@ import {
   sumPreviewScores,
 } from "./quizPreview";
 import type { AssignmentOnQuiz, QuizQuestionInput } from "../interfaces";
+import { toQuestionInput } from "./quizDraft";
 
 // Grading cases are copied from the server's src/quiz/grading.spec.ts so the
 // preview scores exactly like the real quiz.
@@ -123,7 +124,7 @@ const saved = (over: Partial<AssignmentOnQuiz> = {}): AssignmentOnQuiz => ({
   order: 0,
   type: "SINGLE",
   prompt: "Capital?",
-  imageUrl: null,
+  attachment: null,
   points: 1,
   options: [opt("a", true), opt("b", false)],
   blanks: [],
@@ -178,7 +179,7 @@ test("saveBlocker mirrors the server's question rules", () => {
   const ok: QuizQuestionInput = {
     type: "SINGLE",
     prompt: "Q",
-    imageUrl: null,
+    attachment: null,
     points: 1,
     options: [opt("a", true), opt("b", false)],
     blanks: [],
@@ -212,7 +213,7 @@ test("saveBlocker mirrors the server's question rules", () => {
   const fillQ: QuizQuestionInput = {
     type: "FILL_BLANK",
     prompt: "A {{x}}",
-    imageUrl: null,
+    attachment: null,
     points: 1,
     options: [],
     blanks: [{ id: "x", acceptedAnswers: ["a"] }],
@@ -233,4 +234,14 @@ test("EMPTY_PREVIEW_ANSWER is blank", () => {
     selectedOptionIds: [],
     blankAnswers: [],
   });
+});
+
+test("isSavedAs sees an attachment change as unsaved", () => {
+  const server = { ...saved(), attachment: null };
+  const draft = {
+    ...toQuestionInput(server),
+    attachment: { url: "https://s/a.mp3", name: "a.mp3", kind: "AUDIO" as const, mimeType: "audio/mpeg", size: 5 },
+  };
+  assert.equal(isSavedAs(draft, server), false);
+  assert.equal(isSavedAs(toQuestionInput(server), server), true);
 });

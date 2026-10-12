@@ -1,5 +1,6 @@
 import {
   AssignmentOnQuiz,
+  QuizAttachment,
   QuizBlank,
   QuizQuestionInput,
   QuizQuestionType,
@@ -135,7 +136,7 @@ export function toQuestionInput(q: AssignmentOnQuiz): QuizQuestionInput {
   return {
     type: q.type,
     prompt: q.prompt,
-    imageUrl: q.imageUrl,
+    attachment: q.attachment,
     points: q.points,
     options: q.options.map((o) => ({ ...o })),
     blanks: q.blanks.map((b) => ({
@@ -191,27 +192,12 @@ export function reorderByIds<T extends { id: string }>(
   return [...ordered, ...rest];
 }
 
-/** Largest question image the editor uploads. */
-export const QUESTION_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
-
-export type QuestionImageCheck = "ok" | "notImage" | "tooLarge";
-
-/** Checks a picked file before it is uploaded as a question image. */
-export function validateQuestionImage(file: {
-  type: string;
-  size: number;
-}): QuestionImageCheck {
-  if (!file.type.startsWith("image/") || file.size <= 0) return "notImage";
-  if (file.size > QUESTION_IMAGE_MAX_BYTES) return "tooLarge";
-  return "ok";
-}
-
-/** Sets (or, with null, removes) the question's image in the draft. */
-export function setQuestionImage(
+/** Sets (or, with null, removes) the question's attachment in the draft. */
+export function setQuestionAttachment(
   draft: QuizQuestionInput,
-  imageUrl: string | null,
+  attachment: QuizAttachment | null,
 ): QuizQuestionInput {
-  return { ...draft, imageUrl };
+  return { ...draft, attachment };
 }
 
 /** Accepted-answer text typed per blank (keyed by blank id) but not yet added with Enter. */
