@@ -123,7 +123,7 @@ export function previewQuestions(
         id: q.id,
         type: q.type,
         prompt: q.prompt,
-        imageUrl: q.imageUrl,
+        attachment: q.attachment,
         points: q.points,
         options: q.options,
         blanks: q.blanks,
@@ -144,7 +144,7 @@ function asStored(q: QuizQuestionInput) {
   return {
     type: p.type,
     prompt: p.prompt,
-    imageUrl: p.imageUrl ?? null,
+    attachment: p.attachment ?? null,
     points: p.points,
     options: p.options.map((o) => ({
       id: o.id,

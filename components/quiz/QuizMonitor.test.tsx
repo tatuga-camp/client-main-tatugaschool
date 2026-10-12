@@ -94,7 +94,7 @@ const question = (id: string, points: number): AssignmentOnQuiz => ({
   order: 0,
   type: "SINGLE",
   prompt: `Prompt ${id}`,
-  imageUrl: null,
+  attachment: null,
   points,
   options: [
     { id: `${id}-a`, text: "A", imageUrl: null, isCorrect: true },
