@@ -5,6 +5,7 @@
   "scripts": {
     "postinstall": "node scripts/copy-tinymce.js && node scripts/copy-mediapipe.js && node scripts/copy-pdf-worker.mjs",
     "dev": "next dev -p 8181 --turbo",
+    "prebuild": "node scripts/copy-pdf-worker.mjs",
     "build": "next build",
     "start": "next start -p 8181",
     "lint": "next lint",

@@ -62,13 +62,18 @@ export const QUIZ_FILE_ACCEPT = [
   ".aac",
 ].join(",");
 
-/** The file's MIME type, normalised; from the extension when the browser gives none. */
+/**
+ * The file's MIME type, normalised. Falls back to the extension when the
+ * browser gives none, or gives one we do not allow (audio/mp3, video/x-m4v,
+ * audio/vnd.wave) for an extension we do.
+ */
 export function fileMimeType(file: { name: string; type: string }): string {
   const fromBrowser = file.type.split(";")[0].trim().toLowerCase();
-  if (fromBrowser) return fromBrowser;
+  if (fromBrowser && kindForMime(fromBrowser)) return fromBrowser;
   const dot = file.name.lastIndexOf(".");
-  if (dot < 0) return "";
-  return MIME_BY_EXTENSION[file.name.slice(dot + 1).toLowerCase()] ?? "";
+  const fromExtension =
+    dot < 0 ? "" : (MIME_BY_EXTENSION[file.name.slice(dot + 1).toLowerCase()] ?? "");
+  return fromExtension || fromBrowser;
 }
 
 export function kindForMime(mime: string): QuizAttachmentKind | null {

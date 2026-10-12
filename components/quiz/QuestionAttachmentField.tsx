@@ -214,7 +214,7 @@ export default function QuestionAttachmentField({
       {picker(fileInput, QUIZ_FILE_ACCEPT, "file")}
       {attachment ? (
         <>
-          <QuestionAttachment attachment={attachment} language={language} />
+          <QuestionAttachment key={attachment.url} attachment={attachment} language={language} />
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"

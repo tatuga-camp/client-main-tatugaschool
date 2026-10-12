@@ -4,6 +4,7 @@ import { MdAdd, MdClose, MdRemove } from "react-icons/md";
 import { Document, Page, pdfjs } from "react-pdf";
 import { quizLanguage } from "../../data/languages";
 import { Language } from "../../interfaces";
+import { pdfPageAtScroll } from "../../utils/pdfPageAtScroll";
 
 pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 
@@ -53,7 +54,7 @@ export default function PdfViewerSheet({ url, name, language, onClose }: Props) 
     return () => observer.disconnect();
   }, []);
 
-  // Render pages as they approach the viewport; track the most visible one.
+  // Lazy rendering only: render pages as they come within 600px of the viewport.
   useEffect(() => {
     const root = scrollRef.current;
     if (!root || numPages === 0) return;
@@ -66,16 +67,45 @@ export default function PdfViewerSheet({ url, name, language, onClose }: Props) 
           }
           return next;
         });
-        const top = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        if (top) setCurrent(Number((top.target as HTMLElement).dataset.page));
       },
-      { root, rootMargin: "600px 0px", threshold: [0, 0.5] },
+      { root, rootMargin: "600px 0px" },
     );
     root.querySelectorAll("[data-page]").forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, [numPages, attempt]);
+
+  // The page counter, from the scroll position (rAF-throttled), independent of
+  // the pre-render band above.
+  useEffect(() => {
+    const root = scrollRef.current;
+    if (!root || numPages === 0) return;
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const rootTop = root.getBoundingClientRect().top;
+      const pages = Array.from(root.querySelectorAll<HTMLElement>("[data-page]")).map((el) => {
+        const rect = el.getBoundingClientRect();
+        return { top: rect.top - rootTop + root.scrollTop, height: rect.height };
+      });
+      setCurrent(
+        pdfPageAtScroll({
+          pages,
+          scrollTop: root.scrollTop,
+          viewportHeight: root.clientHeight,
+          scrollHeight: root.scrollHeight,
+        }),
+      );
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    update();
+    root.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      root.removeEventListener("scroll", onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, [numPages, attempt, zoomIndex, width]);
 
   const zoom = ZOOMS[zoomIndex];
   const pageWidth = Math.max(width, 200) * zoom;

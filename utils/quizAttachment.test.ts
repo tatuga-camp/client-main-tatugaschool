@@ -20,6 +20,18 @@ test("fileMimeType falls back to the extension when the browser gives none", () 
   assert.equal(fileMimeType({ name: "noext", type: "" }), "");
 });
 
+test("fileMimeType uses the extension when the browser type is not an allowed one", () => {
+  assert.equal(fileMimeType({ name: "song.mp3", type: "audio/mp3" }), "audio/mpeg");
+  assert.equal(fileMimeType({ name: "clip.m4v", type: "video/x-m4v" }), "video/mp4");
+  assert.equal(fileMimeType({ name: "take.wav", type: "audio/vnd.wave" }), "audio/wav");
+  assert.equal(checkAttachmentFile({ name: "song.mp3", type: "audio/mp3", size: 10 }, "file").ok, true);
+});
+
+test("fileMimeType keeps an unsupported type when the extension is unknown too", () => {
+  assert.equal(fileMimeType({ name: "pack.zip", type: "application/zip" }), "application/zip");
+  assert.equal(kindForMime(fileMimeType({ name: "pack.zip", type: "application/zip" })), null);
+});
+
 test("kindForMime maps the allowed types only", () => {
   assert.equal(kindForMime("image/heic"), "IMAGE");
   assert.equal(kindForMime("application/pdf"), "PDF");

@@ -61,6 +61,7 @@ export default function PreviewQuestionView({
       <div className="flex flex-col gap-3">
         {question.attachment && (
           <QuestionAttachment
+            key={question.attachment.url}
             attachment={question.attachment}
             language={language}
           />
@@ -136,6 +137,7 @@ export default function PreviewQuestionView({
       </p>
       {question.attachment && (
         <QuestionAttachment
+          key={question.attachment.url}
           attachment={question.attachment}
           language={language}
         />

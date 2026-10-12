@@ -36,6 +36,7 @@ function AnswerView({
         {question.attachment && (
           <div className="mb-2">
             <QuestionAttachment
+              key={question.attachment.url}
               attachment={question.attachment}
               language={language}
               compact
@@ -67,6 +68,7 @@ function AnswerView({
       {question.attachment && (
         <div className="mb-2">
           <QuestionAttachment
+            key={question.attachment.url}
             attachment={question.attachment}
             language={language}
             compact
