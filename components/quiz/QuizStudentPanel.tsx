@@ -12,6 +12,7 @@ import {
 import { promptSegments } from "../../utils/quizDraft";
 import { formatDuration, scoreToSave } from "../../utils/quizMonitor";
 import { showQuizError } from "./quizErrorAlert";
+import QuestionAttachment from "./QuestionAttachment";
 import { RiskBadge } from "./QuizMonitor";
 
 function AnswerView({
@@ -31,27 +32,47 @@ function AnswerView({
       question.blanks.map((b) => [b.id, b.acceptedAnswers]),
     );
     return (
-      <p className="text-sm leading-8 text-icon-color">
-        {promptSegments(question.prompt).map((s, i) =>
-          s.kind === "text" ? (
-            <span key={i}>{s.text}</span>
-          ) : (
-            <span key={i} className="mx-1 inline-flex flex-col align-middle">
-              <span className="rounded-md bg-primary-color/10 px-2 text-primary-color">
-                {given.get(s.blankId) || quizLanguage.notAnswered(language)}
-              </span>
-              <span className="text-[11px] text-success-color">
-                {(accepted.get(s.blankId) ?? []).join(" / ")}
-              </span>
-            </span>
-          ),
+      <>
+        {question.attachment && (
+          <div className="mb-2">
+            <QuestionAttachment
+              attachment={question.attachment}
+              language={language}
+              compact
+            />
+          </div>
         )}
-      </p>
+        <p className="text-sm leading-8 text-icon-color">
+          {promptSegments(question.prompt).map((s, i) =>
+            s.kind === "text" ? (
+              <span key={i}>{s.text}</span>
+            ) : (
+              <span key={i} className="mx-1 inline-flex flex-col align-middle">
+                <span className="rounded-md bg-primary-color/10 px-2 text-primary-color">
+                  {given.get(s.blankId) || quizLanguage.notAnswered(language)}
+                </span>
+                <span className="text-[11px] text-success-color">
+                  {(accepted.get(s.blankId) ?? []).join(" / ")}
+                </span>
+              </span>
+            ),
+          )}
+        </p>
+      </>
     );
   }
   const picked = new Set(answer?.selectedOptionIds ?? []);
   return (
     <>
+      {question.attachment && (
+        <div className="mb-2">
+          <QuestionAttachment
+            attachment={question.attachment}
+            language={language}
+            compact
+          />
+        </div>
+      )}
       <p className="mb-2 text-sm text-icon-color">{question.prompt}</p>
       <ul className="flex flex-col gap-1">
         {question.options.map((o) => (

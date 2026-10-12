@@ -29,12 +29,12 @@ import {
   newQuizId,
   PendingAnswers,
   rebaseDraft,
-  setQuestionImage,
+  setQuestionAttachment,
   toQuestionInput,
   toQuestionPayload,
 } from "../../utils/quizDraft";
 import BlankEditor from "./BlankEditor";
-import QuestionImageField from "./QuestionImageField";
+import QuestionAttachmentField from "./QuestionAttachmentField";
 import { showQuizError } from "./quizErrorAlert";
 
 type Props = {
@@ -101,6 +101,7 @@ export default function QuestionCard({
   const saveRef = useRef(update.mutateAsync);
   saveRef.current = update.mutateAsync;
   const [autoStatus, setAutoStatus] = useState<AutosaveStatus>("idle");
+  const [uploading, setUploading] = useState(false);
   const queueRef = useRef<AutosaveQueue<QuizQuestionInput> | null>(null);
   if (!queueRef.current) {
     queueRef.current = new AutosaveQueue<QuizQuestionInput>({
@@ -129,10 +130,11 @@ export default function QuestionCard({
   }, [draftKey, draftSaved, locked]);
 
   const unsaved = !isSavedAs(committed, question);
-  const dirty = unsaved || BUSY.includes(autoStatus) || autoStatus === "error";
+  const dirty = uploading || unsaved || BUSY.includes(autoStatus) || autoStatus === "error";
 
   /** Save now, including typed-but-not-added answers. True when on the server. */
   const saveNow = async (): Promise<boolean> => {
+    if (uploading) return false;
     if (locked) return !unsaved;
     if (!unsaved) return queue.flush();
     if (saveBlocker(committed)) return false;
@@ -252,13 +254,14 @@ export default function QuestionCard({
       ),
     }));
 
-  const imageField = (
-    <QuestionImageField
-      imageUrl={draft.imageUrl}
+  const attachmentField = (
+    <QuestionAttachmentField
+      attachment={draft.attachment}
       schoolId={question.schoolId}
       disabled={locked}
       language={lang}
-      onChange={(imageUrl) => setDraft((d) => setQuestionImage(d, imageUrl))}
+      onChange={(attachment) => setDraft((d) => setQuestionAttachment(d, attachment))}
+      onUploadingChange={setUploading}
     />
   );
 
@@ -320,7 +323,7 @@ export default function QuestionCard({
             pending={pending}
             onPendingChange={setPending}
           />
-          {imageField}
+          {attachmentField}
         </>
       ) : (
         <>
@@ -334,7 +337,7 @@ export default function QuestionCard({
             }
             className="main-input w-full resize-y"
           />
-          {imageField}
+          {attachmentField}
           <ul className="flex flex-col gap-2">
             {draft.options.map((option, i) => (
               <li key={option.id} className="flex items-center gap-2">
