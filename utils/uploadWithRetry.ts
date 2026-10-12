@@ -36,6 +36,13 @@ export class UnreadableFileError extends Error {
   }
 }
 
+export class UploadAbortedError extends Error {
+  constructor() {
+    super("Upload cancelled");
+    this.name = "UploadAbortedError";
+  }
+}
+
 export type UploadFileToSignURLInput = {
   signURL: string;
   contentType: string;
@@ -44,6 +51,7 @@ export type UploadFileToSignURLInput = {
   maxAttempts?: number;
   createXhr?: () => XMLHttpRequest;
   delay?: (ms: number) => Promise<void>;
+  signal?: AbortSignal;
 };
 
 const defaultDelay = (ms: number) =>
@@ -53,6 +61,10 @@ function attemptUpload(
   input: UploadFileToSignURLInput,
 ): Promise<{ message: "success" }> {
   return new Promise((resolve, reject) => {
+    if (input.signal?.aborted) {
+      reject(new UploadAbortedError());
+      return;
+    }
     const xhr = input.createXhr ? input.createXhr() : new XMLHttpRequest();
     xhr.open("PUT", input.signURL, true);
     xhr.setRequestHeader("Content-Type", input.contentType);
@@ -77,6 +89,9 @@ function attemptUpload(
     xhr.onerror = () => reject(new UploadNetworkError(1));
     xhr.ontimeout = () => reject(new UploadNetworkError(1));
 
+    xhr.onabort = () => reject(new UploadAbortedError());
+    input.signal?.addEventListener("abort", () => xhr.abort(), { once: true });
+
     xhr.send(input.file);
   });
 }
@@ -99,6 +114,7 @@ export async function uploadFileToSignURL(
         throw new UploadNetworkError(attempt);
       }
       await delay(1000 * attempt);
+      if (input.signal?.aborted) throw new UploadAbortedError();
     }
   }
 }

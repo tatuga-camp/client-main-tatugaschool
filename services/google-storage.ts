@@ -8,6 +8,7 @@ type RequestGetSignedURL = {
   fileType: string;
   fileSize: number;
   schoolId?: string;
+  purpose?: "quiz-attachment";
 };
 
 type ResponseGetSignedURL = {
@@ -38,6 +39,7 @@ export type RequestUploadSignURLService = {
   contentType: string;
   file: Blob;
   signURL: string;
+  signal?: AbortSignal;
 };
 export async function UploadSignURLService(
   input: RequestUploadSignURLService,
