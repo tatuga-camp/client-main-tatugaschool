@@ -52,7 +52,8 @@ export function useCreateSchool() {
       const prevsData = queryClient.getQueryData(["schools"]);
       if (prevsData) {
         queryClient.setQueryData(["schools"], (old: School[] | undefined) => {
-          return [...(old || []), data];
+          if (!old) return old;
+          return [...old, data];
         });
       }
     },

@@ -94,6 +94,7 @@ export function useUpdateAssignmentOverview() {
         (
           oldData: ResponseGetOverviewAssignmentService,
         ): ResponseGetOverviewAssignmentService => {
+          if (!oldData) return oldData;
           return {
             grade: oldData.grade,
             scoreOnSubjects: oldData.scoreOnSubjects,
@@ -126,6 +127,7 @@ export function useUpdateStudentAssignmentOverview() {
         (
           oldData: ResponseGetOverviewAssignmentService,
         ): ResponseGetOverviewAssignmentService => {
+          if (!oldData) return oldData;
           return {
             grade: oldData.grade,
             assignments: oldData?.assignments.map((prevAssignment) => {

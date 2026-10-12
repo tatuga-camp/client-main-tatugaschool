@@ -88,7 +88,8 @@ export function useCreateGroupOnSubject() {
         (
           prev: ResponseGetGroupOnSubjectsService
         ): ResponseGetGroupOnSubjectsService => {
-          return [...(prev ?? []), data];
+          if (!prev) return prev;
+          return [...prev, data];
         }
       );
     },
@@ -107,6 +108,7 @@ export function useUpdateGroupOnSubject() {
         (
           prev: ResponseGetGroupOnSubjectsService
         ): ResponseGetGroupOnSubjectsService => {
+          if (!prev) return prev;
           return prev.map((group) => {
             if (group.id !== data.id) {
               return group;
@@ -132,6 +134,7 @@ export function useDeleteGroupOnSubject() {
         (
           prev: ResponseGetGroupOnSubjectsService
         ): ResponseGetGroupOnSubjectsService => {
+          if (!prev) return prev;
           return prev.filter((g) => g.id !== data.id);
         }
       );
@@ -175,6 +178,7 @@ export function useCreateUnitOnGroup() {
         (
           prev: ResponseGetGroupOnSubjectService
         ): ResponseGetGroupOnSubjectService => {
+          if (!prev) return prev;
           return { ...prev, units: [...prev.units, { ...data, students: [] }] };
         }
       );
@@ -199,6 +203,7 @@ export function useUpdateUnitOnGroup() {
         (
           prev: ResponseGetGroupOnSubjectService
         ): ResponseGetGroupOnSubjectService => {
+          if (!prev) return prev;
           return {
             ...prev,
             units: prev.units.map((u) => {
@@ -231,6 +236,7 @@ export function useReorderUnitGroup() {
         (
           prev: ResponseGetGroupOnSubjectService
         ): ResponseGetGroupOnSubjectService => {
+          if (!prev) return prev;
           return {
             ...prev,
             units: data.map((u) => {
@@ -258,6 +264,7 @@ export function useDeleteUnitOnGroup() {
         (
           prev: ResponseGetGroupOnSubjectService
         ): ResponseGetGroupOnSubjectService => {
+          if (!prev) return prev;
           return {
             ...prev,
             units: prev.units.filter((u) => u.id !== data.id),
@@ -285,6 +292,7 @@ export function useCreateStudentOnGroup() {
         (
           prev: ResponseGetGroupOnSubjectService
         ): ResponseGetGroupOnSubjectService => {
+          if (!prev) return prev;
           const oldStudent = prev.units
             .flatMap((u) => u.students)
             .find((s) => s.id === variables.studentOnSubjectId);
@@ -320,6 +328,7 @@ export function useUpdateStudentOnGroup() {
         (
           prev: ResponseGetGroupOnSubjectService
         ): ResponseGetGroupOnSubjectService => {
+          if (!prev) return prev;
           // Idempotent move: the student must end up exactly once, in the
           // target unit. Appending blindly duplicated it when this write
           // raced the reorder write (or fired twice under StrictMode),
@@ -361,6 +370,7 @@ export function useReorderStudentOnGroup() {
         (
           prev: ResponseGetGroupOnSubjectService
         ): ResponseGetGroupOnSubjectService => {
+          if (!prev) return prev;
           return {
             ...prev,
             units: prev.units.map((unit) => {
@@ -389,6 +399,7 @@ export function useDeleteStudentOnGroup() {
         (
           prev: ResponseGetGroupOnSubjectService
         ): ResponseGetGroupOnSubjectService => {
+          if (!prev) return prev;
           return {
             ...prev,
             units: prev.units.map((unit) => {
