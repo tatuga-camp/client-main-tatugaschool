@@ -19,6 +19,7 @@ export function useCreateStudent() {
       queryClient.setQueryData(
         ["classroom", { id: data.classId }],
         (oldData: ResponseGetClassByIdService): ResponseGetClassByIdService => {
+          if (!oldData) return oldData;
           return {
             ...oldData,
             students: [data, ...oldData.students],
@@ -47,6 +48,7 @@ export function useUpdateStudent() {
       queryClient.setQueryData(
         ["classroom", { id: data.classId }],
         (oldData: ResponseGetClassByIdService): ResponseGetClassByIdService => {
+          if (!oldData) return oldData;
           return {
             ...oldData,
             students: oldData.students.map((student) =>
@@ -68,6 +70,7 @@ export function useDeleteStudent() {
       queryClient.setQueryData(
         ["classroom", { id: data.classId }],
         (oldData: ResponseGetClassByIdService): ResponseGetClassByIdService => {
+          if (!oldData) return oldData;
           return {
             ...oldData,
             students: oldData.students.filter(

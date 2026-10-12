@@ -234,6 +234,7 @@ export function useDeleteRowAttendance() {
       queryClient.setQueryData(
         ["attendance-rows", { attendanceTableId: data.attendanceTableId }],
         (oldData: (AttendanceRow & { attendances: Attendance[] })[]) => {
+          if (!oldData) return oldData;
           return oldData.filter((row) => row.id !== data.id);
         },
       );
@@ -252,7 +253,8 @@ export function useCreateAttendanceTable() {
       variables.queryClient.setQueryData(
         ["attendance-tables", { subjectId: data.subjectId }],
         (oldData: ResponseGetAttendanceTablesService) => {
-          return [...(oldData ?? []), data];
+          if (!oldData) return oldData;
+          return [...oldData, data];
         },
       );
     },

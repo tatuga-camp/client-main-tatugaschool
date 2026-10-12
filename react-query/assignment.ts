@@ -85,6 +85,7 @@ export function useUpdateAssignment() {
         (
           prev: ResponseGetAssignmentByIdService,
         ): ResponseGetAssignmentByIdService => {
+          if (!prev) return prev;
           return {
             ...data,
             files: prev?.files,
@@ -205,6 +206,7 @@ export function useCreateFileOnAssignment() {
         queryClient.setQueryData(
           ["assignment", { id: data.assignmentId }],
           (oldData: ResponseGetAssignmentByIdService) => {
+            if (!oldData) return oldData;
             return {
               ...oldData,
               files: [...oldData.files, data],
@@ -220,6 +222,7 @@ export function useCreateFileOnAssignment() {
       queryClient.setQueryData(
         ["assignments", { subjectId: data.subjectId }],
         (oldData: ResponseGetAssignmentsService) => {
+          if (!oldData) return oldData;
           return oldData.map((prevAssignment) => {
             if (prevAssignment.id === data.assignmentId) {
               return {
@@ -252,6 +255,7 @@ export function useUpdateFileOnAssignment() {
         queryClient.setQueryData(
           ["assignment", { id: data.assignmentId }],
           (oldData: ResponseGetAssignmentByIdService) => {
+            if (!oldData) return oldData;
             return {
               ...oldData,
               files: oldData.files.map((old) => {
@@ -272,6 +276,7 @@ export function useUpdateFileOnAssignment() {
       queryClient.setQueryData(
         ["assignments", { subjectId: data.subjectId }],
         (oldData: ResponseGetAssignmentsService) => {
+          if (!oldData) return oldData;
           return oldData.map((prevAssignment) => {
             if (prevAssignment.id === data.assignmentId) {
               return {
@@ -307,6 +312,7 @@ export function useDeleteFileOnAssignment() {
         queryClient.setQueryData(
           ["assignment", { id: data.assignmentId }],
           (oldData: ResponseGetAssignmentByIdService) => {
+            if (!oldData) return oldData;
             return {
               ...oldData,
               files: oldData.files.filter((file) => file.id !== data.id),
@@ -323,6 +329,7 @@ export function useDeleteFileOnAssignment() {
       queryClient.setQueryData(
         ["assignments", { subjectId: data.subjectId }],
         (oldData: ResponseGetAssignmentsService) => {
+          if (!oldData) return oldData;
           return oldData.map((prevAssignment) => {
             if (prevAssignment.id === data.assignmentId) {
               return {

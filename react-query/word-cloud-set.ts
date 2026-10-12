@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { WordCloudSet } from "../interfaces";
 import {
   AppendWordCloudQuestionService,
   CreateWordCloudSetService,
@@ -51,7 +52,7 @@ export function useCreateWordCloudSet() {
     onSuccess(data) {
       queryClient.setQueryData(
         ["word-cloud-sets", { subjectId: data.subjectId }],
-        (old: any) => [data, ...(old ?? [])],
+        (old: WordCloudSet[] | undefined) => (old ? [data, ...old] : old),
       );
     },
   });
@@ -69,8 +70,8 @@ export function useUpdateWordCloudSet() {
       });
       queryClient.setQueryData(
         ["word-cloud-sets", { subjectId: data.subjectId }],
-        (old: any) =>
-          (old ?? []).map((s: any) => (s.id === data.id ? data : s)),
+        (old: WordCloudSet[] | undefined) =>
+          old?.map((s) => (s.id === data.id ? data : s)),
       );
     },
   });
@@ -99,7 +100,8 @@ export function useDeleteWordCloudSet() {
     onSuccess(data) {
       queryClient.setQueryData(
         ["word-cloud-sets", { subjectId: data.subjectId }],
-        (old: any) => (old ?? []).filter((s: any) => s.id !== data.id),
+        (old: WordCloudSet[] | undefined) =>
+          old?.filter((s) => s.id !== data.id),
       );
     },
   });

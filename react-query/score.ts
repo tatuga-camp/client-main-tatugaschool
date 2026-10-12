@@ -208,6 +208,7 @@ export function useDeleteScoreOnSubject() {
       queryClient.setQueryData(
         ["scoreOnSubjects", { subjectId: data.subjectId }],
         (prev: ScoreOnSubject[]) => {
+          if (!prev) return prev;
           return prev.filter((p) => p.id !== data.id);
         },
       );

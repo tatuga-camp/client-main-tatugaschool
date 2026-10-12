@@ -39,7 +39,8 @@ export function useCreateQuestionOnVideo() {
           assignmentId: data.assignmentId,
         }),
         (prev: QuestionOnVideo[]): QuestionOnVideo[] => {
-          return [...(prev ?? []), data];
+          if (!prev) return prev;
+          return [...prev, data];
         },
       );
     },

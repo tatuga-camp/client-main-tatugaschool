@@ -58,6 +58,7 @@ export function useUpdateStudentOnSubject() {
       queryClient.setQueryData(
         ["studentOnSubjects", { subjectId: data.subjectId }],
         (prev: StudentOnSubject[]) => {
+          if (!prev) return prev;
           return prev.map((student) => {
             if (student.id === data.id) {
               return data;

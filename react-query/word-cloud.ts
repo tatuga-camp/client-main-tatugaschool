@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { WordCloud, WordCloudDetail } from "../interfaces";
 import {
   CreateWordCloudService,
   DeleteWordCloudService,
@@ -41,7 +42,7 @@ export function useCreateWordCloud() {
     onSuccess(data) {
       queryClient.setQueryData(
         ["word-clouds", { subjectId: data.subjectId }],
-        (old: any) => [data, ...(old ?? [])],
+        (old: WordCloud[] | undefined) => (old ? [data, ...old] : old),
       );
     },
   });
@@ -56,11 +57,13 @@ export function useUpdateWordCloud() {
     onSuccess(data) {
       queryClient.setQueryData(
         ["word-clouds", { subjectId: data.subjectId }],
-        (old: any) =>
-          (old ?? []).map((w: any) => (w.id === data.id ? data : w)),
+        (old: WordCloud[] | undefined) =>
+          old?.map((w) => (w.id === data.id ? data : w)),
       );
-      queryClient.setQueryData(["word-cloud", { wordCloudId: data.id }], (old: any) =>
-        old ? { ...old, wordCloud: data } : old,
+      queryClient.setQueryData(
+        ["word-cloud", { wordCloudId: data.id }],
+        (old: WordCloudDetail | undefined) =>
+          old ? { ...old, wordCloud: data } : old,
       );
     },
   });
@@ -75,7 +78,7 @@ export function useDeleteWordCloud() {
     onSuccess(data) {
       queryClient.setQueryData(
         ["word-clouds", { subjectId: data.subjectId }],
-        (old: any) => (old ?? []).filter((w: any) => w.id !== data.id),
+        (old: WordCloud[] | undefined) => old?.filter((w) => w.id !== data.id),
       );
     },
   });

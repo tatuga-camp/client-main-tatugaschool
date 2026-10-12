@@ -80,9 +80,9 @@ export function useGradeRubric() {
       qc.invalidateQueries({ queryKey: ["student-assignments"] });
       qc.invalidateQueries({ queryKey: ["rubric-breakdown"] });
 
-      const gradeOverviewCache = qc.getQueryData([
+      const gradeOverviewCache = qc.getQueryData(
         gradeKey.overview({ subjectId: updateData.subjectId }),
-      ]);
+      );
 
       if (!gradeOverviewCache) {
         return;

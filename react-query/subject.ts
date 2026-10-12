@@ -87,6 +87,7 @@ export function useReorderSubjects() {
         (
           prevs: ResponseGetSubjectBySchoolsService,
         ): ResponseGetSubjectBySchoolsService => {
+          if (!prevs) return prevs;
           return prevs.map((subject) => {
             const newOrder = data.find((d) => d.id === subject.id);
             if (newOrder) {
@@ -190,6 +191,7 @@ export function useDeleteTeacherOnSubject() {
       variables.queryClient.setQueryData(
         ["teacherOnSubject", { subjectId: variables.subjectId }],
         (oldData: TeacherOnSubject[]) => {
+          if (!oldData) return oldData;
           return oldData.filter(
             (teacher) => teacher.id !== variables.request.teacherOnSubjectId,
           );

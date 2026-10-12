@@ -12,6 +12,8 @@ export interface WordCloud {
   subjectId: string;
   schoolId: string;
   userId: string;
+  wordCloudSetId?: string | null; // set by session (WordCloudSet) questions
+  order?: number;
 }
 
 export interface WordCount {

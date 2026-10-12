@@ -42,6 +42,7 @@ export function useCreateMemberOnSchool() {
       queryClient.setQueryData(
         ["member-on-schools", { schoolId: data.schoolId }],
         (oldData: MemberOnSchool[]) => {
+          if (!oldData) return oldData;
           return [...oldData, data];
         }
       );
@@ -67,6 +68,7 @@ export function useUpdateMemberOnSchool() {
       queryClient.setQueryData(
         ["member-on-schools", { schoolId: data.schoolId }],
         (oldData: MemberOnSchool[]) => {
+          if (!oldData) return oldData;
           return oldData.map((member) => {
             if (member.id === data.id) {
               return data;
@@ -105,6 +107,7 @@ export function useDeleteMemberOnSchool() {
       queryClient.setQueryData(
         ["member-on-schools", { schoolId: data.schoolId }],
         (oldData: MemberOnSchool[]) => {
+          if (!oldData) return oldData;
           return oldData.filter((member) => member.id !== data.id);
         }
       );

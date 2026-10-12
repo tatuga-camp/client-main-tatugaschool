@@ -58,6 +58,7 @@ export function useUpdateClassroom() {
       queryClient.setQueryData(
         ["classroom", { id: variables.query.classId }],
         (oldData: ResponseGetClassByIdService): ResponseGetClassByIdService => {
+          if (!oldData) return oldData;
           return { ...data, students: oldData.students };
         }
       );
@@ -77,6 +78,7 @@ export function useCreateClassroom() {
       queryClient.setQueryData(
         ["classrooms", { schoolId: variables.schoolId, isAchieved: false }],
         (oldData: ResponseGetClassesBySchoolIdService) => {
+          if (!oldData) return oldData;
           return [data, ...oldData];
         }
       );
@@ -101,6 +103,7 @@ export function useReorderClassrooms() {
           { schoolId: variables.schoolId, isAchieved: variables.isAchieved },
         ],
         (oldData: ResponseGetClassesBySchoolIdService) => {
+          if (!oldData) return oldData;
           return oldData.map((classroom) => {
             const newData = data.find((d) => d.id === classroom.id);
             if (newData) {
