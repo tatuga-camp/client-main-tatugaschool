@@ -23,10 +23,7 @@ import { useSound } from "../../hook";
 import { StudentOnSubject } from "../../interfaces";
 import { useGetLanguage } from "../../react-query";
 import PopupLayout from "../layout/PopupLayout";
-import CardFan, {
-  rectToOrigin,
-  type CardOrigin,
-} from "./card-picker/CardFan";
+import CardFan, { rectToOrigin, type CardOrigin } from "./card-picker/CardFan";
 import DeckDrawer from "./card-picker/DeckDrawer";
 import SpotlightReveal from "./card-picker/SpotlightReveal";
 import { useCardDeck } from "./card-picker/useCardDeck";

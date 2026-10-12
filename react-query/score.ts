@@ -59,7 +59,8 @@ export function useCreateScoreOnSubject() {
     onSuccess(data, variables, context) {
       queryClient.setQueryData(
         ["scoreOnSubjects", { subjectId: variables.subjectId }],
-        (prev: ScoreOnSubject[]) => {
+        (prev: ScoreOnSubject[] | undefined) => {
+          if (!prev) return prev;
           return [...prev, data];
         },
       );
@@ -140,7 +141,8 @@ export function useCreateScoreOnStudent() {
     onSuccess(data, variables, context) {
       queryClient.setQueryData(
         scoretKey.getScoreOnStudentBySubjectId(data.subjectId),
-        (prev: ScoreOnStudent[]) => {
+        (prev: ScoreOnStudent[] | undefined) => {
+          if (!prev) return prev;
           return [...prev, data];
         },
       );

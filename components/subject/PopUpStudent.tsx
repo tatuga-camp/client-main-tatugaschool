@@ -52,11 +52,7 @@ function PopUpStudent({ student, onClose, toast }: Props) {
       });
 
       setTotalScore((prev) => prev + data.score);
-      // Play a detached, fire-and-forget sound. The modal unmounts immediately
-      // via handleCloseModal(), and useSound()'s cleanup pauses its pooled audio
-      // element on unmount — which would cut the sound off. A one-shot Audio that
-      // isn't tied to this component's lifecycle survives the unmount and plays
-      // to completion. (Safe here: this is a discrete click, not a hot render path.)
+
       const oneShotSound = new Audio(
         data.score >= 0 ? "/sounds/ding.mp3" : "/sounds/fail.mp3",
       );
