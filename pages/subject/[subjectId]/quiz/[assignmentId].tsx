@@ -10,6 +10,7 @@ import QuestionList from "../../../../components/quiz/QuestionList";
 import QuizMonitor from "../../../../components/quiz/QuizMonitor";
 import QuizSettingsPanel from "../../../../components/quiz/QuizSettingsPanel";
 import ClassStudentAssignWork from "../../../../components/subject/ClassStudentAssignWork";
+import ClassworkExport from "../../../../components/subject/ClassworkExport";
 import useClickOutside from "../../../../hook/useClickOutside";
 import useUnsavedQuizGuard from "../../../../hook/useUnsavedQuizGuard";
 import { menuClassworkList } from "../../../../components/subject/ClassworkCreate";
@@ -40,8 +41,19 @@ import {
   quizEditorLoadState,
 } from "../../../../utils/quizMonitor";
 
-type Tab = "questions" | "settings" | "monitor" | "manageassigning";
-const TABS: Tab[] = ["questions", "settings", "monitor", "manageassigning"];
+type Tab =
+  | "questions"
+  | "settings"
+  | "monitor"
+  | "manageassigning"
+  | "exportclasswork";
+const TABS: Tab[] = [
+  "questions",
+  "settings",
+  "monitor",
+  "manageassigning",
+  "exportclasswork",
+];
 
 export default function QuizEditorPage({
   subjectId,
@@ -290,6 +302,11 @@ export default function QuizEditorPage({
       description:
         classworkHeadMenuBarDataLanguage.description.manageassigning(lang),
     },
+    exportclasswork: {
+      title: classworkHeadMenuBarDataLanguage.title.exportclasswork(lang),
+      description:
+        classworkHeadMenuBarDataLanguage.description.exportclasswork(lang),
+    },
   };
 
   return (
@@ -470,6 +487,14 @@ export default function QuizEditorPage({
             <ClassStudentAssignWork
               assignmentId={assignmentId}
               subjectId={subjectId}
+            />
+          )}
+          {tab === "exportclasswork" && (
+            <ClassworkExport
+              assignment={assignment.data}
+              files={assignment.data.files ?? []}
+              schoolId={assignment.data.schoolId}
+              currentSubjectId={subjectId}
             />
           )}
         </main>

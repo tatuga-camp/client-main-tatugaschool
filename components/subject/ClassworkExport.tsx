@@ -1,34 +1,34 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import { FiShare } from "react-icons/fi";
+import Swal from "sweetalert2";
+import {
+  classworkTransferLanguage as t,
+  quizLanguage,
+} from "../../data/languages";
+import {
+  Assignment,
+  ErrorMessages,
+  FileOnAssignment,
+} from "../../interfaces";
 import {
   useCreateAssignment,
   useCreateFileOnAssignment,
   useCreateQuestionOnVideo,
   useDuplicateQuiz,
   useGetLanguage,
-  useGetMemberOnSchoolBySchool,
-  useGetSubjectFromSchool,
-  useGetUser,
   useGetQuestionOnVideoByAssignmentId,
   useUpdateSkillToAssignment,
 } from "../../react-query";
-import { quizLanguage, subjectsDataLanguage } from "../../data/languages";
-import InputEducationYear from "../common/InputEducationYear";
+import { countExportResults } from "../../utils/classworkExport";
 import LoadingSpinner from "../common/LoadingSpinner";
 import {
-  Assignment,
-  Classroom,
-  EducationYear,
-  ErrorMessages,
-  FileOnAssignment,
-  Subject,
-  TeacherOnSubject,
-} from "../../interfaces";
-import { FiShare } from "react-icons/fi";
-import Swal from "sweetalert2";
-import SubjectCard from "./SubjectCard";
-import LoadingBar from "../common/LoadingBar";
-import { getDefaultSubjectFilter } from "../../utils";
-import { countExportResults } from "../../utils/classworkExport";
+  PickerSubject,
+  SubjectPickerEmpty,
+  SubjectPickerFilters,
+  SubjectPickRow,
+  SubjectRowsSkeleton,
+  useSubjectPicker,
+} from "./SubjectPicker";
 
 type Props = {
   assignment: Assignment;
@@ -44,143 +44,53 @@ function ClassworkExport({
   currentSubjectId,
 }: Props) {
   const language = useGetLanguage();
-  const user = useGetUser();
-  const memberOnSchools = useGetMemberOnSchoolBySchool({
+  const lang = language.data ?? "en";
+  const isQuiz = assignment.type === "Quiz";
+  const picker = useSubjectPicker({
     schoolId,
+    excludeSubjectId: currentSubjectId,
   });
-  const defaultFilter = getDefaultSubjectFilter({ schoolId: schoolId });
-
-  const [selectSubjects, setSelectSubjects] = useState<Subject[]>([]);
-  const [selectFilterUserId, setSelectFilterUserId] = React.useState<
-    string | "show-all"
-  >(user.data?.id ?? "show-all");
-  const [educationYear, setEducationYear] = React.useState<
-    EducationYear | undefined
-  >();
-  const [search, setSearch] = React.useState("");
-  const [subjectData, setSubjectData] = React.useState<
-    (Subject & {
-      teachers: TeacherOnSubject[];
-      class: Classroom;
-    })[]
-  >([]);
-
-  const subjects = useGetSubjectFromSchool({
-    schoolId,
-    educationYear: educationYear as EducationYear,
-  });
+  // Selections survive filter changes, so a teacher can pick across years.
+  const [selected, setSelected] = useState<PickerSubject[]>([]);
+  const selectedIds = new Set(selected.map((s) => s.id));
 
   const questions = useGetQuestionOnVideoByAssignmentId({
     assignmentId: assignment.id,
   });
-
   const create = useCreateAssignment();
   const createFiles = useCreateFileOnAssignment();
   const createQuestions = useCreateQuestionOnVideo();
   const duplicateQuiz = useDuplicateQuiz();
-  const [loading, setLoading] = useState(false);
   const updateSkill = useUpdateSkillToAssignment();
+  const [loading, setLoading] = useState(false);
 
-  React.useEffect(() => {
-    if (subjects.data && user.data) {
-      setSelectFilterUserId(user.data.id);
-      handleFilterByUser(user.data.id);
-    }
-  }, [subjects.data, user.data]);
-
-  useEffect(() => {
-    if (defaultFilter) {
-      setEducationYear(defaultFilter.educationYear);
-      setSelectFilterUserId(defaultFilter.userId);
-    } else {
-      const year = new Date().getFullYear();
-      setEducationYear(() => `1/${year}`);
-    }
-  }, []);
-
-  const handleSearch = (search: string) => {
-    if (!subjects.data) {
-      return;
-    }
-    setSearch(search);
-    if (search === "")
-      return setSubjectData(
-        subjects.data.filter((s) => s.id !== currentSubjectId),
-      );
-    setSubjectData(() =>
-      subjects.data?.filter(
-        (classroom) =>
-          classroom.id !== currentSubjectId &&
-          (classroom.title.toLowerCase().includes(search.toLowerCase()) ||
-            classroom.description
-              ?.toLowerCase()
-              .includes(search.toLowerCase()) ||
-            classroom.educationYear
-              .toLowerCase()
-              .includes(search.toLowerCase()) ||
-            classroom.teachers.some(
-              (teacher) =>
-                teacher.firstName
-                  .toLowerCase()
-                  .includes(search.toLowerCase()) ||
-                teacher.lastName.toLowerCase().includes(search.toLowerCase()) ||
-                teacher.email.toLowerCase().includes(search.toLowerCase()),
-            ) ||
-            classroom.class.title
-              .toLowerCase()
-              .includes(search.toLowerCase()) ||
-            classroom.class.level
-              .toLowerCase()
-              .includes(search.toLowerCase()) ||
-            classroom.class.description
-              ?.toLowerCase()
-              .includes(search.toLowerCase())),
-      ),
+  const toggle = (subject: PickerSubject) =>
+    setSelected((prev) =>
+      prev.some((s) => s.id === subject.id)
+        ? prev.filter((s) => s.id !== subject.id)
+        : [...prev, subject],
     );
-  };
 
-  const handleFilterByUser = (userId: string | "show-all") => {
-    if (!subjects.data) {
-      return;
-    }
-
-    setSelectFilterUserId(userId);
-    setSubjectData((prev) => {
-      if (!prev) {
-        return [];
-      }
-      let filtered =
-        subjects.data?.filter((s) => s.id !== currentSubjectId) || [];
-      if (userId !== "show-all") {
-        return filtered.filter((subject) =>
-          subject.teachers.some((t) => t.userId === userId),
-        );
-      } else {
-        return filtered;
-      }
-    });
-  };
-
-  const handleSelectSubject = (subject: Subject) => {
-    setSelectSubjects((prev) => {
-      if (prev.find((s) => s.id === subject.id)) {
-        return prev.filter((s) => s.id !== subject.id);
-      } else {
-        return [...prev, subject];
-      }
-    });
-  };
+  const allShownSelected =
+    picker.visible.length > 0 &&
+    picker.visible.every((s) => selectedIds.has(s.id));
+  const toggleAllShown = () =>
+    setSelected((prev) =>
+      allShownSelected
+        ? prev.filter((s) => !picker.visible.some((v) => v.id === s.id))
+        : [
+            ...prev,
+            ...picker.visible.filter((v) => !prev.some((s) => s.id === v.id)),
+          ],
+    );
 
   const handleExport = async () => {
+    if (selected.length === 0) return;
     try {
-      if (selectSubjects.length === 0) {
-        throw new Error("Please select at least one subject");
-      }
       setLoading(true);
-
       const results = await Promise.allSettled(
-        selectSubjects.map(async (targetSubject) => {
-          if (assignment.type === "Quiz") {
+        selected.map(async (targetSubject) => {
+          if (isQuiz) {
             await duplicateQuiz.mutateAsync({
               assignmentId: assignment.id,
               targetSubjectId: targetSubject.id,
@@ -236,10 +146,8 @@ function ClassworkExport({
       );
 
       setLoading(false);
-      setSelectSubjects([]);
-      const lang = language.data ?? "en";
+      setSelected([]);
       const { succeeded, total } = countExportResults(results);
-      const isQuiz = assignment.type === "Quiz";
       Swal.fire({
         title:
           succeeded === 0
@@ -259,7 +167,7 @@ function ClassworkExport({
       });
     } catch (error) {
       setLoading(false);
-      let result = error as ErrorMessages;
+      const result = error as ErrorMessages;
       Swal.fire({
         title: result.error ? result.error : "Something Went Wrong",
         text: result.message?.toString() || (error as Error).message,
@@ -272,110 +180,103 @@ function ClassworkExport({
   };
 
   return (
-    <div className="flex h-full w-full flex-col gap-5 p-5 font-Anuphan">
-      <header className="flex flex-wrap items-center justify-start gap-5 pb-5">
-        <label className="flex flex-col">
-          <span className="text-sm text-gray-400">
-            {subjectsDataLanguage.search(language.data ?? "en")}
+    <div className="flex min-h-full flex-col font-Anuphan">
+      <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 p-4 md:p-6">
+        <section className="flex gap-4 rounded-2xl border border-gray-100 bg-white p-4">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-color/10 text-xl text-primary-color">
+            <FiShare aria-hidden />
           </span>
-          <input
-            value={search}
-            onChange={(e) => handleSearch(e.target.value)}
-            type="text"
-            className="main-input w-60"
-            placeholder={subjectsDataLanguage.searchPlaceholder(
-              language.data ?? "en",
+          <div className="min-w-0">
+            <h2 className="font-semibold text-icon-color">
+              {t.exportHeading(lang)}
+            </h2>
+            <p className="mt-1 max-w-prose text-sm text-icon-color/60">
+              {isQuiz ? t.exportBodyQuiz(lang) : t.exportBody(lang)}
+            </p>
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-gray-100 bg-white p-4">
+          <SubjectPickerFilters picker={picker} lang={lang} />
+
+          <div className="mb-3 mt-5 flex items-center justify-between gap-3">
+            <h3 className="font-semibold text-icon-color">
+              {t.subjects(lang)}
+              {!picker.isLoading && (
+                <span className="ml-2 rounded-full bg-background-color px-2 py-0.5 text-xs font-medium text-icon-color/60">
+                  {picker.visible.length}
+                </span>
+              )}
+            </h3>
+            {picker.visible.length > 1 && (
+              <label className="flex cursor-pointer items-center gap-2 text-sm text-icon-color/70">
+                <input
+                  type="checkbox"
+                  checked={allShownSelected}
+                  onChange={toggleAllShown}
+                  className="h-4 w-4 accent-primary-color"
+                />
+                {t.selectAllShown(lang)}
+              </label>
             )}
-          />
-        </label>
-        {educationYear && (
-          <label className="flex flex-col">
-            <span className="text-sm text-gray-400">
-              {subjectsDataLanguage.educationYear(language.data ?? "en")}
-            </span>
-            <InputEducationYear
-              value={educationYear}
-              onChange={(value) => setEducationYear(value as EducationYear)}
-              required={true}
-            />
-          </label>
-        )}
-        <label className="flex w-60 flex-col">
-          <span className="text-sm text-gray-400">
-            ค้นหาตามรายชื่อคุณครูในโรงเรียน
-          </span>
-          {memberOnSchools.isLoading ? (
-            <LoadingSpinner />
+          </div>
+
+          {picker.isLoading ? (
+            <SubjectRowsSkeleton />
+          ) : picker.visible.length === 0 ? (
+            <SubjectPickerEmpty picker={picker} lang={lang} />
           ) : (
-            <select
-              value={selectFilterUserId}
-              onChange={(e) => {
-                handleFilterByUser(e.target.value);
-              }}
-              className="second-button w-60 border"
-            >
-              {[
-                ...(memberOnSchools.data ?? []),
-                {
-                  firstName: "Show All",
-                  lastName: "",
-                  email: "subjects",
-                  userId: "show-all",
-                },
-              ].map((option) => (
-                <option key={option.userId} value={option.userId}>
-                  {option.firstName} {option.lastName} : {option.email}
-                </option>
+            <ul className="flex flex-col gap-2">
+              {picker.visible.map((subject) => (
+                <SubjectPickRow
+                  key={subject.id}
+                  subject={subject}
+                  lang={lang}
+                  mode="check"
+                  selected={selectedIds.has(subject.id)}
+                  onClick={() => toggle(subject)}
+                />
               ))}
-            </select>
+            </ul>
           )}
-        </label>
-        <div className="ml-auto flex items-center gap-2">
-          <span className="font-semibold text-primary-color">
-            Selected: {selectSubjects.length}
-          </span>
+        </section>
+      </div>
+
+      {/* Sticky action bar: always shows what will happen before it happens. */}
+      <div className="sticky bottom-0 z-10 border-t border-gray-100 bg-white/95 backdrop-blur">
+        <div className="mx-auto flex w-full max-w-3xl items-center gap-3 px-4 py-3 md:px-6">
+          <div className="flex min-w-0 flex-1 items-center gap-2 text-sm">
+            {selected.length > 0 ? (
+              <>
+                <span className="truncate font-semibold text-icon-color">
+                  {t.selected(lang, selected.length)}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setSelected([])}
+                  disabled={loading}
+                  className="shrink-0 rounded-full px-2.5 py-1 font-medium text-primary-color hover:bg-primary-color/10 disabled:opacity-50"
+                >
+                  {t.clearSelection(lang)}
+                </button>
+              </>
+            ) : (
+              <span className="truncate text-icon-color/60">
+                {t.selectHint(lang)}
+              </span>
+            )}
+          </div>
           <button
-            disabled={loading || selectSubjects.length === 0}
+            type="button"
             onClick={handleExport}
-            className="main-button flex items-center gap-2 disabled:bg-gray-400"
+            disabled={loading || selected.length === 0}
+            className="flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-primary-color px-5 text-sm font-semibold text-white transition hover:bg-primary-color-hover disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <FiShare /> Export
+            {loading ? <LoadingSpinner /> : <FiShare aria-hidden />}
+            {loading ? t.copying(lang) : t.copyTo(lang, selected.length)}
           </button>
         </div>
-      </header>
-
-      {loading && <LoadingBar />}
-
-      <main className="grid w-full grid-cols-1 gap-5 overflow-auto pb-20 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
-        {subjectData.map((subject) => {
-          const isSelected = selectSubjects.some((s) => s.id === subject.id);
-          return (
-            <div
-              key={subject.id}
-              className={`relative transition-all duration-200`}
-            >
-              <div
-                className={` ${isSelected ? "absolute bottom-0 left-0 right-0 top-0 z-40 h-full w-full rounded-xl bg-blue-600/50" : ""}`}
-              ></div>
-              <div
-                onClick={() => handleSelectSubject(subject)}
-                className="absolute inset-0 z-50 cursor-pointer"
-              ></div>
-              <SubjectCard
-                subject={subject}
-                teachers={subject.teachers}
-                classroom={subject.class}
-                onClick={() => handleSelectSubject(subject)}
-              />
-              {isSelected && (
-                <div className="absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-primary-color text-white shadow-md">
-                  ✓
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </main>
+      </div>
     </div>
   );
 }

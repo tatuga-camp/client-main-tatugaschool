@@ -40,12 +40,14 @@ export function useGetGradeSummaryReportOnClassroom(
 export function useGetClassroom(
   input: RequestGetClassByIdService & {
     initialData?: ResponseGetClassByIdService;
+    enabled?: boolean;
   }
 ) {
   return useQuery({
     queryKey: ["classroom", { id: input.classId }],
-    queryFn: () => GetClassByIdService(input),
+    queryFn: () => GetClassByIdService({ classId: input.classId }),
     initialData: input.initialData,
+    enabled: input.enabled ?? true,
   });
 }
 

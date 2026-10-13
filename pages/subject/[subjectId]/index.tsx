@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { GetServerSideProps } from "next";
 import Head from "next/head";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { Toast } from "primereact/toast";
 import React, { useCallback, useEffect, useState } from "react";
@@ -36,8 +37,14 @@ import { defaultBlurHash, MenuSubject } from "../../../data";
 import { subjectDataLanguage } from "../../../data/languages";
 import { useSound } from "../../../hook";
 import useClickOutside from "../../../hook/useClickOutside";
-import { ErrorMessages, StudentOnSubject } from "../../../interfaces";
+import { ErrorMessages, Language, StudentOnSubject } from "../../../interfaces";
 import {
+  fullGradeLabel,
+  shortGradeLabel,
+  splitLevel,
+} from "../../../utils/classLevel";
+import {
+  useGetClassroom,
   useGetLanguage,
   useGetSchool,
   useGetStudentOnSubject,
@@ -64,17 +71,28 @@ type Props = {
   subjectId: string;
 };
 
+function classroomFullLevel(level: string, language: Language) {
+  const { grade, room } = splitLevel(level);
+  if (!grade) return "";
+  return `${fullGradeLabel(grade, language)}${room ? `/${room}` : ""}`;
+}
+
 function Index({ subjectId }: Props) {
   const toast = React.useRef<Toast>(null);
   const queryClient = useQueryClient();
   const ding = useSound("/sounds/ding.mp3");
   const language = useGetLanguage();
+  const lang = language.data ?? "en";
   const router = useRouter();
   const subject = useGetSubject({
     subjectId: subjectId,
   });
   const school = useGetSchool({
     schoolId: subject.data?.schoolId ?? "",
+  });
+  const classroom = useGetClassroom({
+    classId: subject.data?.classId ?? "",
+    enabled: !!subject.data?.classId,
   });
   const studentOnSubjects = useGetStudentOnSubject({
     subjectId: subjectId,
@@ -388,13 +406,48 @@ function Index({ subjectId }: Props) {
                 className="-z-20 object-cover"
               />
             )}
-            <div className="flex flex-col justify-end gap-1">
+            <div className="flex min-w-0 flex-col justify-end gap-1">
               <h1 className="line-clamp-2 w-full text-lg font-semibold text-white [text-shadow:-1px_-1px_0_#000,1px_-1px_0_#000,-1px_1px_0_#000,1px_1px_0_#000] lg:w-8/12">
                 {subject.data ? subject.data?.title : "Loading..."}
               </h1>
               <p className="line-clamp-2 w-full text-lg font-bold text-white [text-shadow:-1px_-1px_0_#000,1px_-1px_0_#000,-1px_1px_0_#000,1px_1px_0_#000] lg:w-11/12">
                 {subject.data ? subject.data?.description : "Loading..."}
               </p>
+              {classroom.data ? (
+                <Link
+                  href={`/classroom/${classroom.data.id}`}
+                  title={[
+                    classroomFullLevel(classroom.data.level, lang),
+                    classroom.data.title,
+                    classroom.data.description,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                  className="mb-1 flex w-max min-w-0 max-w-full items-center gap-2.5 rounded-2xl bg-white/90 py-1.5 pl-1.5 pr-3 text-icon-color shadow-sm backdrop-blur transition hover:bg-white lg:max-w-md"
+                >
+                  <span className="max-w-40 shrink-0 truncate rounded-xl bg-primary-color/10 px-2 py-1 text-xs font-bold text-primary-color xl:max-w-60">
+                    {classroomFullLevel(classroom.data.level, lang)}
+                  </span>
+                  <span className="flex min-w-0 items-center gap-2">
+                    <span className="truncate text-sm font-semibold">
+                      {classroom.data.title}
+                    </span>
+                    {classroom.data.description && (
+                      <span className="truncate text-xs text-icon-color/60">
+                        {classroom.data.description}
+                      </span>
+                    )}
+                  </span>
+                </Link>
+              ) : (
+                subject.data?.classId &&
+                classroom.isLoading && (
+                  <span
+                    aria-hidden
+                    className="mb-1 h-10 w-48 animate-pulse rounded-2xl bg-white/60"
+                  />
+                )
+              )}
               <div className="flex flex-wrap gap-2">
                 <div className="w-max rounded-2xl bg-red-600 px-2 py-1">
                   <h2 className="text-xs text-white">
@@ -463,7 +516,7 @@ function Index({ subjectId }: Props) {
                     />
                   </label>
                 </div>
-                <div className="mt-2 flex flex-wrap gap-3">
+                <div className="mt-2 flex flex-wrap justify-end gap-3">
                   {teacherOnSubjects.data ? (
                     <ListMemberCircle
                       setTrigger={setTriggerInviteTeacher}

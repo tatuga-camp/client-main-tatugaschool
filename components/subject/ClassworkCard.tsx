@@ -47,21 +47,21 @@ type PropsClassworkCard = {
 };
 
 // Static class maps: Tailwind only generates classes it can see literally.
-const TYPE_TILE: Record<Assignment["type"], string> = {
+export const TYPE_TILE: Record<Assignment["type"], string> = {
   Assignment: "bg-primary-color/10 text-primary-color",
   VideoQuiz: "bg-rose-50 text-rose-500",
   Material: "bg-success-color/10 text-success-color",
   Quiz: "bg-warning-color/10 text-warning-color",
 };
 
-function TypeIcon({ type }: { type: Assignment["type"] }) {
+export function TypeIcon({ type }: { type: Assignment["type"] }) {
   if (type === "Material") return <BiBook />;
   if (type === "VideoQuiz") return <MdOndemandVideo />;
   if (type === "Quiz") return <MdQuiz />;
   return <MdAssignment />;
 }
 
-function typeLabel(type: Assignment["type"], language: Language) {
+export function typeLabel(type: Assignment["type"], language: Language) {
   if (type === "Material") return t.typeMaterial(language);
   if (type === "VideoQuiz") return t.typeVideoQuiz(language);
   if (type === "Quiz") return t.typeQuiz(language);
