@@ -17,14 +17,15 @@ export type TrailNode = {
   id: string;
 };
 
-type Props = { trail: TrailNode[]; onNavigate?: () => void };
-type RowProps = { node: TrailNode; current: boolean; onNavigate?: () => void };
+type Props = { trail: TrailNode[] };
+type RowProps = { node: TrailNode; current: boolean };
 
-const INDENT = ["pl-0", "pl-4", "pl-8"];
-const CONNECTOR_LEFT = ["", "left-2.5", "left-[1.625rem]"];
+// Indent only from `lg`; the rail below it stacks centered icons.
+const INDENT = ["lg:pl-0", "lg:pl-4", "lg:pl-8"];
+const CONNECTOR_LEFT = ["", "lg:left-2.5", "lg:left-[1.625rem]"];
 
 /** Stacked "you are here" trail: School › Classroom › Subject. */
-function SidebarTrail({ trail, onNavigate }: Props) {
+function SidebarTrail({ trail }: Props) {
   return (
     <nav aria-label="Location" className="w-full font-Anuphan">
       <ol className="flex w-full flex-col gap-0.5">
@@ -38,13 +39,12 @@ function SidebarTrail({ trail, onNavigate }: Props) {
               {depth > 0 && (
                 <span
                   aria-hidden
-                  className={`absolute bottom-1/2 ${CONNECTOR_LEFT[depth]} h-5 w-1.5 rounded-bl-md border-b border-l border-icon-color/20`}
+                  className={`absolute bottom-1/2 hidden ${CONNECTOR_LEFT[depth]} h-5 w-1.5 rounded-bl-md border-b border-l border-icon-color/20 lg:block`}
                 />
               )}
               <TrailRow
                 node={node}
                 current={index === trail.length - 1}
-                onNavigate={onNavigate}
               />
             </li>
           );
@@ -60,12 +60,11 @@ function TrailRow(props: RowProps) {
   return <SubjectTrailRow {...props} />;
 }
 
-function SchoolTrailRow({ node, current, onNavigate }: RowProps) {
+function SchoolTrailRow({ node, current }: RowProps) {
   const school = useGetSchool({ schoolId: node.id });
   return (
     <TrailRowShell
       current={current}
-      onNavigate={onNavigate}
       href={`/school/${node.id}`}
       label={school.data?.title}
       badge={school.data ? <PlanBadge plan={school.data.plan} /> : undefined}
@@ -88,12 +87,11 @@ function SchoolTrailRow({ node, current, onNavigate }: RowProps) {
   );
 }
 
-function ClassroomTrailRow({ node, current, onNavigate }: RowProps) {
+function ClassroomTrailRow({ node, current }: RowProps) {
   const classroom = useGetClassroom({ classId: node.id });
   return (
     <TrailRowShell
       current={current}
-      onNavigate={onNavigate}
       href={`/classroom/${node.id}`}
       label={classroom.data?.title}
       leading={<BsPeopleFill className="text-primary-color" />}
@@ -101,12 +99,11 @@ function ClassroomTrailRow({ node, current, onNavigate }: RowProps) {
   );
 }
 
-function SubjectTrailRow({ node, current, onNavigate }: RowProps) {
+function SubjectTrailRow({ node, current }: RowProps) {
   const subject = useGetSubject({ subjectId: node.id });
   return (
     <TrailRowShell
       current={current}
-      onNavigate={onNavigate}
       href={`/subject/${node.id}`}
       label={subject.data?.title}
       leading={<SiGoogleclassroom className="text-primary-color" />}
@@ -116,14 +113,12 @@ function SubjectTrailRow({ node, current, onNavigate }: RowProps) {
 
 function TrailRowShell({
   current,
-  onNavigate,
   href,
   label,
   leading,
   badge,
 }: {
   current: boolean;
-  onNavigate?: () => void;
   href: string;
   label?: string;
   leading: React.ReactNode;
@@ -135,23 +130,24 @@ function TrailRowShell({
         {leading}
       </span>
       {label ? (
-        <span title={label} className="min-w-0 flex-1 truncate text-left">
+        <span className="hidden min-w-0 flex-1 truncate text-left lg:block">
           {label}
         </span>
       ) : (
-        <span className="h-3 w-24 animate-pulse rounded bg-icon-color/10" />
+        <span className="hidden h-3 w-24 animate-pulse rounded bg-icon-color/10 lg:block" />
       )}
-      {badge && <span className="shrink-0">{badge}</span>}
+      {badge && <span className="hidden shrink-0 lg:block">{badge}</span>}
     </>
   );
 
   const base =
-    "flex w-full min-w-0 items-center gap-2 rounded-xl px-1.5 py-1 text-sm";
+    "flex w-full min-w-0 items-center justify-center gap-2 rounded-xl py-1 text-sm lg:justify-start lg:px-1.5";
 
   if (current) {
     return (
       <div
         aria-current="location"
+        title={label}
         className={`${base} bg-primary-color/10 font-semibold text-icon-color`}
       >
         {content}
@@ -161,7 +157,7 @@ function TrailRowShell({
   return (
     <Link
       href={href}
-      onClick={onNavigate}
+      title={label}
       className={`${base} text-icon-color/80 transition-colors hover:bg-primary-color/10 hover:text-icon-color`}
     >
       {content}

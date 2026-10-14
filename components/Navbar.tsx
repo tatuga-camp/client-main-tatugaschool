@@ -5,11 +5,6 @@ import { IoMdNotifications } from "react-icons/io";
 import { IoMenu } from "react-icons/io5";
 import { defaultCanvas } from "../data";
 import { navbarLanguageData } from "../data/languages";
-import {
-  isSidebarPersistent,
-  shouldCloseOnNavigate,
-  shouldLockScrollForSidebar,
-} from "../hook/useResponsiveSidebar";
 import useClickOutside from "../hook/useClickOutside";
 import {
   useGetLanguage,
@@ -27,8 +22,6 @@ import Feedback from "./common/Feedback";
 
 type Props = {
   schoolId?: string;
-  setTrigger: React.Dispatch<React.SetStateAction<boolean | null>>;
-  trigger: boolean | null;
   breadcrumbs?: { label: string; href: string }[];
   menuLists: { title: string; icon: ReactNode; url?: string }[];
   sidebarTrail?: TrailNode[];
@@ -36,8 +29,6 @@ type Props = {
 };
 function Navbar({
   schoolId,
-  setTrigger,
-  trigger,
   menuLists,
   breadcrumbs,
   sidebarTrail,
@@ -59,7 +50,8 @@ function Navbar({
 
   const unreadCount = notifications?.filter((n) => !n.isRead).length || 0;
   const hasSidebar = menuLists.length > 0 && !!schoolId;
-  const overlayOpen = hasSidebar && trigger === true;
+  // Phones only: the rail overlays content, so it starts hidden.
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Effect for animation
   useEffect(() => {
@@ -74,16 +66,6 @@ function Navbar({
     setIsNotificationOpen(false);
   });
 
-  useEffect(() => {
-    if (!overlayOpen) return;
-    if (!shouldLockScrollForSidebar()) return;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [overlayOpen]);
-
   return (
     <>
       {triggerFeedback && (
@@ -97,20 +79,16 @@ function Navbar({
       )}
       <div className="relative z-50 flex h-20 w-full min-w-0 flex-row items-center justify-between gap-2 border-b-2 border-black bg-white p-2 text-white sm:gap-4 sm:p-4">
         <div className="flex min-w-0 items-center gap-2">
-          {menuLists.length > 0 && (
+          {hasSidebar && (
             <button
               type="button"
               aria-label="Toggle menu"
-              aria-expanded={Boolean(trigger)}
+              aria-expanded={sidebarOpen}
               aria-controls="school-sidebar"
-              onClick={() =>
-                setTrigger((current) =>
-                  current === null ? !isSidebarPersistent() : !current,
-                )
-              }
-              className={`flex shrink-0 text-black ${
-                trigger ? "rotate-90" : "rotate-0"
-              } items-center justify-center rounded-full border-2 border-gray-200 bg-white p-2 text-xl transition duration-150 hover:bg-primary-color hover:text-white`}
+              onClick={() => setSidebarOpen((open) => !open)}
+              className={`flex shrink-0 items-center justify-center rounded-full border-2 border-gray-200 bg-white p-2 text-xl text-black transition duration-150 hover:bg-primary-color hover:text-white md:hidden ${
+                sidebarOpen ? "rotate-90" : "rotate-0"
+              }`}
             >
               <IoMenu />
             </button>
@@ -199,26 +177,21 @@ function Navbar({
           </div>
         </div>
       </div>
-      {hasSidebar && overlayOpen && (
+      {hasSidebar && sidebarOpen && (
         <button
           type="button"
           aria-label="Close menu"
-          className="fixed inset-0 z-30 bg-black/40 xl:hidden"
-          onClick={() => setTrigger(false)}
+          className="fixed inset-0 top-20 z-30 bg-black/30 md:hidden"
+          onClick={() => setSidebarOpen(false)}
         />
       )}
       {hasSidebar && (
         <Sidebar
+          open={sidebarOpen}
+          onNavigate={() => setSidebarOpen(false)}
           menuList={menuLists}
-          active={trigger}
-          schoolId={schoolId}
           trail={sidebarTrail ?? [{ kind: "school", id: schoolId }]}
           defaultMenu={sidebarDefaultMenu ?? menuLists[0]?.title ?? ""}
-          onNavigate={() => {
-            if (shouldCloseOnNavigate()) {
-              setTrigger(false);
-            }
-          }}
         />
       )}
     </>

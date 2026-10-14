@@ -1,17 +1,15 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { MdLock } from "react-icons/md";
 import { menuSubjectList } from "../../data";
 import { subjectIsLockedDataLanguage } from "../../data/languages/subscription";
-import useClickOutside from "../../hook/useClickOutside";
-import {
-  isSidebarPersistent,
-  sidebarContentOffsetClass,
-  useResponsiveSidebar,
-} from "../../hook/useResponsiveSidebar";
 import { useGetLanguage, useGetSubject } from "../../react-query";
 import Navbar from "../Navbar";
+import {
+  SIDEBAR_CONTENT_OFFSET,
+  SIDEBAR_FIXED_LEFT,
+} from "../sidebar/sidebarLayout";
 import FooterSubject, { ListMenuFooter } from "../subject/FooterSubject";
 
 type LayoutProps = {
@@ -30,15 +28,8 @@ function SubjectLayout({
   const subject = useGetSubject({
     subjectId,
   });
-  const navbarRef = useRef<HTMLDivElement>(null);
-  const [active, setActive] = useResponsiveSidebar();
   const language = useGetLanguage();
   const [triggerShowLock, setTriggerShowLock] = useState(false);
-  useClickOutside(navbarRef, () => {
-    if (!isSidebarPersistent()) {
-      setActive(false);
-    }
-  });
   React.useLayoutEffect(() => {
     document.body.style.overflow = "auto";
   }, []);
@@ -50,11 +41,10 @@ function SubjectLayout({
   }, [subject.isSuccess]);
   return (
     <section className="min-h-screen max-w-full bg-background-color font-Anuphan">
-      <div ref={navbarRef} className="sticky top-0 z-40">
+      <div className="sticky top-0 z-40">
         {subject.data && (
           <Navbar
             menuLists={menuSubjectList()}
-            trigger={active}
             breadcrumbs={[
               {
                 label: "Home",
@@ -73,7 +63,6 @@ function SubjectLayout({
                 href: `/subject/${subject.data.id}`,
               },
             ]}
-            setTrigger={setActive}
             schoolId={subject.data?.schoolId}
             sidebarTrail={[
               { kind: "school", id: subject.data.schoolId },
@@ -119,8 +108,8 @@ function SubjectLayout({
           </div>
         </div>
       )}
-      <div className={sidebarContentOffsetClass(active)}>{children}</div>
-      <div className="fixed bottom-0 z-30 w-full bg-white pb-safe">
+      <div className={SIDEBAR_CONTENT_OFFSET}>{children}</div>
+      <div className={`fixed bottom-0 z-30 bg-white pb-safe ${SIDEBAR_FIXED_LEFT}`}>
         <FooterSubject
           selectFooter={selectFooter}
           setSelectFooter={setSelectFooter}

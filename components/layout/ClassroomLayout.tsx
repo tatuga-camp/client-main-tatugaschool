@@ -1,13 +1,8 @@
 import type { ReactNode } from "react";
 import React from "react";
 import { menuClassroomList } from "../../data";
-import useClickOutside from "../../hook/useClickOutside";
-import {
-  isSidebarPersistent,
-  sidebarContentOffsetClass,
-  useResponsiveSidebar,
-} from "../../hook/useResponsiveSidebar";
 import Navbar from "../Navbar";
+import { SIDEBAR_CONTENT_OFFSET } from "../sidebar/sidebarLayout";
 import { useGetClassroom } from "../../react-query";
 
 type LayoutProps = {
@@ -17,19 +12,12 @@ type LayoutProps = {
 };
 
 function ClassroomLayout({ children, classroomId, schoolId }: LayoutProps) {
-  const navbarRef = React.useRef<HTMLDivElement>(null);
-  const [active, setActive] = useResponsiveSidebar();
   const classroom = useGetClassroom({
     classId: classroomId,
   });
-  useClickOutside(navbarRef, () => {
-    if (!isSidebarPersistent()) {
-      setActive(false);
-    }
-  });
   return (
     <section className="min-h-screen max-w-full bg-background-color font-Anuphan">
-      <div ref={navbarRef} className="sticky top-0 z-50">
+      <div className="sticky top-0 z-50">
         {classroom.data && (
           <Navbar
             menuLists={menuClassroomList()}
@@ -48,8 +36,6 @@ function ClassroomLayout({ children, classroomId, schoolId }: LayoutProps) {
                 href: `/classroom/${classroom.data.id}`,
               },
             ]}
-            setTrigger={setActive}
-            trigger={active}
             sidebarTrail={[
               { kind: "school", id: classroom.data.schoolId },
               { kind: "classroom", id: classroom.data.id },
@@ -58,7 +44,7 @@ function ClassroomLayout({ children, classroomId, schoolId }: LayoutProps) {
           />
         )}
       </div>
-      <div className={sidebarContentOffsetClass(active)}>{children}</div>
+      <div className={SIDEBAR_CONTENT_OFFSET}>{children}</div>
     </section>
   );
 }
