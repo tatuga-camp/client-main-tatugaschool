@@ -4,7 +4,9 @@ export async function urlToFile(
   mimeType: string = "image/jpeg",
 ) {
   try {
-    const response = await fetch(url);
+    // no-store: R2 omits `Vary: Origin` on non-CORS responses, so an earlier <img>
+    // load of the same URL would be reused from the HTTP cache without CORS headers.
+    const response = await fetch(url, { cache: "no-store" });
     const blob = await response.blob();
     const file = new File([blob], fileName, { type: blob.type || mimeType });
     return file;
@@ -15,7 +17,7 @@ export async function urlToFile(
 }
 
 export async function imageUrlToBase64(url: string): Promise<string> {
-  const response = await fetch(url);
+  const response = await fetch(url, { cache: "no-store" });
   const blob = await response.blob();
 
   return new Promise<string>((resolve, reject) => {
