@@ -1,13 +1,8 @@
-import { useRef, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import Navbar from "../Navbar";
 import React from "react";
-import useClickOutside from "../../hook/useClickOutside";
-import {
-  isSidebarPersistent,
-  sidebarContentOffsetClass,
-  useResponsiveSidebar,
-} from "../../hook/useResponsiveSidebar";
 import { menuSchoolList } from "../../data";
+import { SIDEBAR_CONTENT_OFFSET } from "../sidebar/sidebarLayout";
 import SubscriptionExpireBar from "../subscription/SubscriptionExpireBar";
 
 type LayoutProps = {
@@ -17,17 +12,9 @@ type LayoutProps = {
 };
 
 function SchoolLayout({ children, selectMenu, schoolId }: LayoutProps) {
-  const navbarRef = useRef<HTMLDivElement>(null);
-  const [active, setActive] = useResponsiveSidebar();
-  useClickOutside(navbarRef, () => {
-    if (!isSidebarPersistent()) {
-      setActive(false);
-    }
-  });
-
   return (
     <section className="min-h-screen max-w-full bg-background-color font-Anuphan">
-      <div ref={navbarRef} className="sticky top-0 z-50">
+      <div className="sticky top-0 z-50">
         <Navbar
           menuLists={menuSchoolList()}
           schoolId={schoolId}
@@ -41,13 +28,11 @@ function SchoolLayout({ children, selectMenu, schoolId }: LayoutProps) {
               href: `/school/${schoolId}`,
             },
           ]}
-          setTrigger={setActive}
-          trigger={active}
           sidebarTrail={[{ kind: "school", id: schoolId }]}
           sidebarDefaultMenu="School"
         />
       </div>
-      <div className={sidebarContentOffsetClass(active)}>{children}</div>
+      <div className={SIDEBAR_CONTENT_OFFSET}>{children}</div>
       <SubscriptionExpireBar schoolId={schoolId} />
     </section>
   );

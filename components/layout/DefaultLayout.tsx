@@ -4,7 +4,7 @@ import Navbar from "../Navbar";
 const DefaultLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="min-h-screen w-full bg-background-color font-Anuphan">
-      <Navbar trigger={false} setTrigger={() => {}} menuLists={[]} />
+      <Navbar menuLists={[]} />
       {children}
       <AskNotification />
     </div>

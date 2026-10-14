@@ -4,6 +4,7 @@ import { IoMdClose } from "react-icons/io";
 import { MdOutlineTimer } from "react-icons/md";
 import { RenewDataLanguage } from "../../data/languages/renew";
 import { useGetLanguage, useGetSchool, useGetUser } from "../../react-query";
+import { SIDEBAR_FIXED_LEFT } from "../sidebar/sidebarLayout";
 
 const DAY_MS = 86_400_000;
 
@@ -47,7 +48,7 @@ function SubscriptionExpireBar({ schoolId }: { schoolId: string }) {
     !!user.data && user.data.id === school.data.billingManagerId;
 
   return (
-    <div className="fixed bottom-0 z-10 flex w-full items-center justify-center gap-3 border-b border-warning-color bg-warning-color px-4 py-2 font-Anuphan text-sm text-icon-color">
+    <div className={`fixed bottom-0 z-10 flex ${SIDEBAR_FIXED_LEFT} items-center justify-center gap-3 border-b border-warning-color bg-warning-color px-4 py-2 font-Anuphan text-sm text-icon-color`}>
       <MdOutlineTimer className="shrink-0 text-warning-color" />
       <span>
         {RenewDataLanguage.barMessage(lang, school.data.plan, daysLeft)}
