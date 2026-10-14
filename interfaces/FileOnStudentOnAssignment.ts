@@ -13,4 +13,9 @@ export interface FileOnStudentOnAssignment {
   studentOnAssignmentId: string;
 }
 
-export type StudentAssignmentContentType = "FILE" | "TEXT";
+export type StudentAssignmentContentType = "FILE" | "TEXT" | "LINK";
+
+// Links were stored as FILE + type "link-url" before contentType LINK existed.
+export const isLinkFile = (
+  file: Pick<FileOnStudentOnAssignment, "contentType" | "type">,
+) => file.contentType === "LINK" || file.type === "link-url";
