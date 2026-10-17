@@ -294,9 +294,11 @@ export default function QuestionList({
     if (canGenerate) return openGenerate(formFromJob(job, lang));
     void Swal.fire({
       icon: "warning",
-      title: readOnly
-        ? quizLanguage.generationLocked(lang)
-        : quizLanguage.generateNeedsDraft(lang),
+      title: locked
+        ? quizLanguage.lockedBanner(lang)
+        : readOnly
+          ? quizLanguage.generationLocked(lang)
+          : quizLanguage.generateNeedsDraft(lang),
     });
   };
 
