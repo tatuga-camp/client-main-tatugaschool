@@ -1,9 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AssignmentOnQuiz } from "../interfaces";
+import { useEffect, useRef } from "react";
 import {
+  AssignmentOnQuiz,
+  QuizGenerationJob,
+  QuizGenerationView,
+} from "../interfaces";
+import {
+  CreateQuizGenerationService,
   CreateQuizQuestionService,
   DeleteQuizQuestionService,
   DuplicateQuizService,
+  GetQuizGenerationService,
   GetQuizMonitorService,
   GetQuizQuestionsService,
   GetQuizReviewService,
@@ -13,6 +20,11 @@ import {
   UpdateQuizQuestionService,
 } from "../services/quiz";
 import { isQuizLockedError, reorderByIds } from "../utils/quizDraft";
+import {
+  isGenerationActive,
+  isQuizGeneratingError,
+} from "../utils/quizGeneration";
+import { generationTransition } from "../utils/quizGenerationTransition";
 
 export const keyQuiz = {
   questions: (assignmentId: string) =>
@@ -21,6 +33,8 @@ export const keyQuiz = {
     ["quiz-monitor", { assignmentId }] as const,
   review: (studentOnAssignmentId: string) =>
     ["quiz-review", { studentOnAssignmentId }] as const,
+  generation: (assignmentId: string) =>
+    ["quiz-generation", { assignmentId }] as const,
 };
 
 export function useGetQuizQuestions(input: { assignmentId: string }) {
@@ -36,6 +50,8 @@ function useLockRefresh() {
   return (error: unknown) => {
     if (isQuizLockedError(error))
       queryClient.invalidateQueries({ queryKey: ["quiz-monitor"] });
+    if (isQuizGeneratingError(error))
+      queryClient.invalidateQueries({ queryKey: ["quiz-generation"] });
   };
 }
 
@@ -192,4 +208,60 @@ export function useResetQuizAttempt(assignmentId: string) {
       });
     },
   });
+}
+
+export function useGetQuizGeneration(input: {
+  assignmentId: string;
+  enabled?: boolean;
+}) {
+  return useQuery<QuizGenerationView>({
+    queryKey: keyQuiz.generation(input.assignmentId),
+    queryFn: () => GetQuizGenerationService({ assignmentId: input.assignmentId }),
+    enabled: input.enabled ?? true,
+    staleTime: 0,
+    refetchInterval: (query) =>
+      isGenerationActive(query.state.data?.job) ? 5_000 : false,
+  });
+}
+
+export function useCreateQuizGeneration() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["create-quiz-generation"],
+    mutationFn: CreateQuizGenerationService,
+    onSuccess: (job, variables) => {
+      const key = keyQuiz.generation(variables.assignmentId);
+      // Never seed an unloaded cache; the invalidate below fetches the real view.
+      queryClient.setQueryData<QuizGenerationView>(key, (prev) =>
+        prev ? { usage: prev.usage, job } : prev,
+      );
+      queryClient.invalidateQueries({ queryKey: key });
+    },
+  });
+}
+
+/** When the watched job finishes while the page is open, refresh questions + maxScore once. */
+export function useQuizGenerationEffects(input: {
+  assignmentId: string;
+  job: QuizGenerationJob | null | undefined;
+  onDone?: (createdCount: number) => void;
+}) {
+  const queryClient = useQueryClient();
+  const prevRef = useRef<QuizGenerationJob | null | undefined>(undefined);
+  const onDoneRef = useRef(input.onDone);
+  onDoneRef.current = input.onDone;
+
+  useEffect(() => {
+    const event = generationTransition(prevRef.current, input.job);
+    prevRef.current = input.job;
+    if (event?.kind === "done") {
+      queryClient.invalidateQueries({
+        queryKey: keyQuiz.questions(input.assignmentId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["assignment", { id: input.assignmentId }],
+      });
+      onDoneRef.current?.(event.createdCount);
+    }
+  }, [input.job, input.assignmentId, queryClient]);
 }

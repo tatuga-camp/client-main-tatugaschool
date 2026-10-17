@@ -9,6 +9,38 @@ import {
 const t = (en: string, th: string) => (language: Language) =>
   language === "th" ? th : en;
 
+/** EN/TH copy for each QuizGenerationJob.error code. */
+const generationErrorCopy = {
+  SOURCE_UNREADABLE: t(
+    "We couldn't read the source. Check that the file opens, the video is public, or the page is reachable.",
+    "อ่านต้นฉบับไม่ได้ ตรวจสอบว่าไฟล์เปิดได้ วิดีโอเป็นสาธารณะ หรือหน้าเว็บเข้าถึงได้",
+  ),
+  SOURCE_TOO_LARGE: t(
+    "The source is too long for the AI to read. Try a shorter file, video or page.",
+    "ต้นฉบับยาวเกินกว่าที่ AI จะอ่านได้ ลองใช้ไฟล์ วิดีโอ หรือหน้าเว็บที่สั้นกว่านี้",
+  ),
+  NO_QUESTIONS: t(
+    "The AI couldn't write usable questions from this source. Try a different source or fewer question types.",
+    "AI เขียนคำถามที่ใช้ได้จากต้นฉบับนี้ไม่ได้ ลองเปลี่ยนต้นฉบับหรือลดประเภทคำถาม",
+  ),
+  AI_FAILED: t(
+    "The AI service returned an error. Please try again in a moment.",
+    "บริการ AI ขัดข้อง กรุณาลองใหม่อีกครั้งในอีกสักครู่",
+  ),
+  TIMEOUT: t(
+    "Generation took too long and was stopped. Try again, or use a shorter source.",
+    "การสร้างใช้เวลานานเกินไปจึงถูกหยุด ลองอีกครั้งหรือใช้ต้นฉบับที่สั้นกว่านี้",
+  ),
+  ASSIGNMENT_GONE: t(
+    "This quiz was deleted or changed before generation finished.",
+    "แบบทดสอบนี้ถูกลบหรือเปลี่ยนแปลงก่อนที่การสร้างจะเสร็จ",
+  ),
+  INTERNAL: t(
+    "Something went wrong on our side. Please try again.",
+    "เกิดข้อผิดพลาดในระบบ กรุณาลองอีกครั้ง",
+  ),
+};
+
 export const quizLanguage = {
   untitled: t("Untitled quiz", "แบบทดสอบไม่มีชื่อ"),
   tabQuestions: t("Questions", "คำถาม"),
@@ -380,4 +412,111 @@ export const quizLanguage = {
   ),
   previewChooseOne: t("Choose one answer", "เลือกคำตอบเดียว"),
   previewChooseAll: t("Choose all that apply", "เลือกได้หลายคำตอบ"),
+
+  // AI generation — entry points
+  generateWithAi: t("Generate with AI", "สร้างด้วย AI"),
+  writeAQuestion: t("Write a question", "เขียนคำถามเอง"),
+  generateNeedsDraft: t(
+    "Move the quiz to draft to generate questions with AI.",
+    "ย้ายแบบทดสอบไปเป็นแบบร่างก่อน จึงจะสร้างคำถามด้วย AI ได้",
+  ),
+  generationLocked: t(
+    "Questions are being generated. Editing is paused until it finishes.",
+    "กำลังสร้างคำถามอยู่ จะแก้ไขได้อีกครั้งเมื่อเสร็จ",
+  ),
+
+  // AI generation — dialog
+  generateTitle: t("Generate questions with AI", "สร้างคำถามด้วย AI"),
+  generateSubtitle: t(
+    "Give it a PDF, an image, a YouTube video or a web page and it writes the questions for you.",
+    "ใส่ไฟล์ PDF รูปภาพ วิดีโอ YouTube หรือลิงก์เว็บไซต์ แล้ว AI จะเขียนคำถามให้",
+  ),
+  sourceFile: t("Upload file", "อัปโหลดไฟล์"),
+  sourceYoutube: t("YouTube link", "ลิงก์ YouTube"),
+  sourceWebsite: t("Website link", "ลิงก์เว็บไซต์"),
+  dropFileHint: t(
+    "Drop a PDF or image here, or browse · PDF up to 50 MB, image up to 5 MB",
+    "วางไฟล์ PDF หรือรูปภาพที่นี่ หรือเลือกไฟล์ · PDF ไม่เกิน 50 MB รูปภาพไม่เกิน 5 MB",
+  ),
+  generationFileNotSupported: t(
+    "This file type isn't supported. Use a PDF or an image.",
+    "ไม่รองรับไฟล์ประเภทนี้ ใช้ไฟล์ PDF หรือรูปภาพ",
+  ),
+  youtubePlaceholder: t(
+    "https://www.youtube.com/watch?v=…",
+    "https://www.youtube.com/watch?v=…",
+  ),
+  websitePlaceholder: t("https://example.com/article", "https://example.com/article"),
+  numberOfQuestions: t("Number of questions", "จำนวนคำถาม"),
+  questionTypes: t("Question types", "ประเภทคำถาม"),
+  choicesPerQuestion: t("Choices per question", "จำนวนตัวเลือกต่อข้อ"),
+  outputLanguage: t("Language", "ภาษาของคำถาม"),
+  extraInstructions: t("Extra instructions (optional)", "คำสั่งเพิ่มเติม (ไม่บังคับ)"),
+  extraInstructionsPlaceholder: t(
+    "e.g. Focus on chapter 2, use simple words for grade 4, include one question about the diagram",
+    "เช่น เน้นบทที่ 2, ใช้คำง่าย ๆ สำหรับ ป.4, มีคำถามเกี่ยวกับแผนภาพ 1 ข้อ",
+  ),
+  generationsLeft: (l: Language, used: number, limit: number) => {
+    const left = Math.max(0, limit - used);
+    return l === "th"
+      ? `สร้างได้อีก ${left} จาก ${limit} ครั้งในเดือนนี้`
+      : `${left} of ${limit} generation${limit === 1 ? "" : "s"} left this month`;
+  },
+  quotaReached: t(
+    "Your school has used all of this month's AI generations. It resets on the 1st.",
+    "โรงเรียนของคุณใช้สิทธิ์สร้างด้วย AI ของเดือนนี้ครบแล้ว จะเริ่มนับใหม่วันที่ 1 ของเดือนถัดไป",
+  ),
+  generate: t("Generate", "สร้างคำถาม"),
+
+  // AI generation — active / failed card
+  queuedTitle: t("Queued…", "อยู่ในคิว…"),
+  generatingTitle: t("We're generating your quiz…", "กำลังสร้างแบบทดสอบของคุณ…"),
+  generatingBody: t(
+    "This usually takes about a minute. You can close this page and come back later — the questions will be here.",
+    "โดยปกติใช้เวลาประมาณ 1 นาที คุณปิดหน้านี้แล้วกลับมาทีหลังได้ คำถามจะอยู่ที่นี่",
+  ),
+  generatingStepRead: t("Reading the source", "กำลังอ่านต้นฉบับ"),
+  generatingStepWrite: t("Writing questions", "กำลังเขียนคำถาม"),
+  generatingStepCheck: t("Checking answers", "กำลังตรวจคำตอบ"),
+  generationFailed: t("Generation failed", "สร้างคำถามไม่สำเร็จ"),
+  tryAgain: t("Try again", "ลองอีกครั้ง"),
+  dismiss: t("Dismiss", "ปิด"),
+  generatedCount: (l: Language, n: number) =>
+    l === "th"
+      ? `เพิ่มคำถาม ${n} ข้อแล้ว`
+      : `Added ${n} question${n === 1 ? "" : "s"}`,
+  /** "10 questions" for the card's meta row (what the job was asked for). */
+  questionCountLabel: (l: Language, n: number) =>
+    l === "th" ? `${n} ข้อ` : `${n} question${n === 1 ? "" : "s"}`,
+
+  // AI generation — job.error codes
+  generationError: generationErrorCopy,
+  /** Localized reason for a failed job; unknown or missing codes read as INTERNAL. */
+  generationErrorText: (l: Language, code: string | null | undefined) => {
+    const map = generationErrorCopy as Record<string, (language: Language) => string>;
+    return (map[code ?? ""] ?? generationErrorCopy.INTERNAL)(l);
+  },
+
+  // AI generation — form validation
+  formIssue: {
+    noSource: t("Choose a PDF or image first.", "กรุณาเลือกไฟล์ PDF หรือรูปภาพก่อน"),
+    badYoutube: t(
+      "Paste a YouTube video link, e.g. https://youtu.be/…",
+      "วางลิงก์วิดีโอ YouTube เช่น https://youtu.be/…",
+    ),
+    badUrl: t(
+      "Paste a full web address starting with http:// or https://",
+      "วางลิงก์เว็บไซต์แบบเต็มที่เริ่มด้วย http:// หรือ https://",
+    ),
+    noTypes: t("Choose at least one question type.", "เลือกประเภทคำถามอย่างน้อย 1 แบบ"),
+    badCount: t("Choose between 1 and 30 questions.", "เลือกจำนวนคำถามระหว่าง 1 ถึง 30 ข้อ"),
+    badChoices: t(
+      "Choose between 2 and 6 choices per question.",
+      "เลือกจำนวนตัวเลือกระหว่าง 2 ถึง 6 ตัวเลือกต่อข้อ",
+    ),
+    tooLongInstructions: t(
+      "Extra instructions must be 1000 characters or fewer.",
+      "คำสั่งเพิ่มเติมต้องไม่เกิน 1000 ตัวอักษร",
+    ),
+  },
 };

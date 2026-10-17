@@ -2,14 +2,17 @@ import Swal, { SweetAlertOptions } from "sweetalert2";
 import { quizLanguage } from "../../data/languages";
 import { ErrorMessages, Language } from "../../interfaces";
 import { isQuizLockedError } from "../../utils/quizDraft";
+import { isQuizGeneratingError } from "../../utils/quizGeneration";
 
-/** Alert options for a failed quiz request. A 409 QUIZ_LOCKED gets the localized lock message; anything else (e.g. a 400) shows the server's error and message. */
+/** Alert options for a failed quiz request. A 409 QUIZ_LOCKED / QUIZ_GENERATING gets the localized lock message; anything else (e.g. a 400) shows the server's error and message. */
 export function quizErrorAlertOptions(
   error: unknown,
   lang: Language,
 ): SweetAlertOptions {
   if (isQuizLockedError(error))
     return { title: quizLanguage.lockedBanner(lang), icon: "warning" };
+  if (isQuizGeneratingError(error))
+    return { title: quizLanguage.generationLocked(lang), icon: "warning" };
   const result = error as ErrorMessages | null | undefined;
   return {
     title: result?.error ?? "Error",

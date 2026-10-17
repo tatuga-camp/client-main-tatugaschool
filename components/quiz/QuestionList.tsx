@@ -17,7 +17,13 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useRouter } from "next/router";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   MdClose,
   MdContentCopy,
@@ -26,9 +32,13 @@ import {
   MdPhoneIphone,
   MdQuiz,
 } from "react-icons/md";
+import { RiSparkling2Line } from "react-icons/ri";
+import Swal from "sweetalert2";
 import { quizLanguage } from "../../data/languages";
 import {
   AssignmentOnQuiz,
+  QuizGenerationJob,
+  QuizGenerationView,
   QuizQuestionInput,
   QuizQuestionType,
 } from "../../interfaces";
@@ -41,10 +51,49 @@ import {
   useReorderQuizQuestions,
 } from "../../react-query";
 import { defaultQuestion } from "../../utils/quizDraft";
+import {
+  formFromJob,
+  GenerationForm,
+  isGenerationActive,
+} from "../../utils/quizGeneration";
 import { previewQuestions } from "../../utils/quizPreview";
 import QuestionCard from "./QuestionCard";
+import QuizGenerateDialog from "./QuizGenerateDialog";
+import QuizGenerationCard from "./QuizGenerationCard";
 import { showQuizError } from "./quizErrorAlert";
 import StudentPreview from "./StudentPreview";
+
+/** sessionStorage key remembering which FAILED job's card the teacher dismissed. */
+const dismissedKey = (assignmentId: string) =>
+  `quiz-gen-dismissed:${assignmentId}`;
+
+function readDismissed(assignmentId: string): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.sessionStorage.getItem(dismissedKey(assignmentId));
+  } catch {
+    return null;
+  }
+}
+
+function writeDismissed(assignmentId: string, jobId: string) {
+  try {
+    window.sessionStorage.setItem(dismissedKey(assignmentId), jobId);
+  } catch {
+    // Private mode / blocked storage: the card simply reappears on reload.
+  }
+}
+
+/** Which generation job card to show above the questions, if any. */
+export function visibleGenerationJob(
+  job: QuizGenerationJob | null | undefined,
+  dismissedJobId: string | null,
+): QuizGenerationJob | null {
+  if (!job) return null;
+  if (isGenerationActive(job)) return job;
+  if (job.status === "FAILED" && job.id !== dismissedJobId) return job;
+  return null;
+}
 
 type CardHooks = {
   onDirtyChange?: (questionId: string, dirty: boolean) => void;
@@ -118,19 +167,31 @@ function SortableQuestion({
 export default function QuestionList({
   assignmentId,
   subjectId,
+  schoolId,
   locked,
   readOnly = locked,
+  isPublished,
+  generation,
   onDirtyChange,
+  onGenerationSubmitted,
   saveAllRef,
 }: {
   assignmentId: string;
   subjectId: string;
+  /** The quiz's school: uploads for AI generation go under its prefix. */
+  schoolId: string;
   /** A student has started: show the banner and Duplicate. */
   locked: boolean;
-  /** Cards cannot be edited (locked, or the lock check is still loading). */
+  /** Cards cannot be edited (locked, generating, or the lock check is still loading). */
   readOnly?: boolean;
+  /** Generation needs a Draft quiz: the Generate buttons give way to a hint. */
+  isPublished: boolean;
+  /** Newest AI generation job + this month's usage (polled by the page). */
+  generation: QuizGenerationView | undefined;
   /** Lifts each card's unsaved state so the page can warn before leaving the tab or publishing. */
   onDirtyChange?: (questionId: string, dirty: boolean) => void;
+  /** A generation job was just submitted from the dialog. */
+  onGenerationSubmitted?: () => void;
   /** Filled with "save every card now"; resolves with how many still are not saved. */
   saveAllRef?: React.MutableRefObject<(() => Promise<number>) | null>;
 }) {
@@ -141,8 +202,23 @@ export default function QuestionList({
   const create = useCreateQuizQuestion();
   const reorder = useReorderQuizQuestions();
   const duplicate = useDuplicateQuiz();
-  const [menuOpen, setMenuOpen] = useState(false);
+  // The question-type menu opens under whichever button asked for it.
+  const [menuAnchor, setMenuAnchor] = useState<"empty" | "row" | null>(null);
   const assignment = useGetAssignment({ id: assignmentId });
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogInitial, setDialogInitial] = useState<GenerationForm | undefined>(
+    undefined,
+  );
+  const [dismissedJobId, setDismissedJobId] = useState<string | null>(() =>
+    readDismissed(assignmentId),
+  );
+  // Client-side navigation to another quiz keeps this component mounted.
+  useEffect(() => {
+    setDismissedJobId(readDismissed(assignmentId));
+  }, [assignmentId]);
+  const generationJob = visibleGenerationJob(generation?.job, dismissedJobId);
+  // Entry points live only on an editable Draft quiz.
+  const canGenerate = !readOnly && !isPublished;
   const [drafts, setDrafts] = useState<
     Record<string, QuizQuestionInput | undefined>
   >({});
@@ -167,14 +243,14 @@ export default function QuestionList({
     () => ({ onDirtyChange, onDraftChange, registerSave }),
     [onDirtyChange, onDraftChange, registerSave],
   );
-  if (saveAllRef) {
-    saveAllRef.current = async () => {
-      const results = await Promise.all(
-        [...saves.current.values()].map((save) => save().catch(() => false)),
-      );
-      return results.filter((ok) => !ok).length;
-    };
-  }
+  /** Saves every card now; resolves with how many still are not saved. */
+  const saveAll = async () => {
+    const results = await Promise.all(
+      [...saves.current.values()].map((save) => save().catch(() => false)),
+    );
+    return results.filter((ok) => !ok).length;
+  };
+  if (saveAllRef) saveAllRef.current = saveAll;
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 4 } }),
     useSensor(TouchSensor, {
@@ -199,13 +275,75 @@ export default function QuestionList({
   const fail = (error: unknown) => showQuizError(error, lang);
 
   const add = async (type: QuizQuestionType) => {
-    setMenuOpen(false);
+    setMenuAnchor(null);
     try {
       await create.mutateAsync({ assignmentId, ...defaultQuestion(type) });
     } catch (error) {
       fail(error);
     }
   };
+
+  const openGenerate = (initial?: GenerationForm) => {
+    setMenuAnchor(null);
+    setDialogInitial(initial);
+    setDialogOpen(true);
+  };
+
+  /** "Try again" on a failed card: the card stays visible even when generating is not allowed. */
+  const retryGeneration = (job: QuizGenerationJob) => {
+    if (canGenerate) return openGenerate(formFromJob(job, lang));
+    void Swal.fire({
+      icon: "warning",
+      title: locked
+        ? quizLanguage.lockedBanner(lang)
+        : readOnly
+          ? quizLanguage.generationLocked(lang)
+          : quizLanguage.generateNeedsDraft(lang),
+    });
+  };
+
+  const dismissGeneration = (jobId: string) => {
+    setDismissedJobId(jobId);
+    writeDismissed(assignmentId, jobId);
+  };
+
+  const typeMenu = (
+    <div className="absolute left-1/2 top-full z-20 mt-2 flex w-64 -translate-x-1/2 flex-col rounded-2xl border border-gray-100 bg-white p-1 shadow-lg">
+      {(["SINGLE", "MULTIPLE", "FILL_BLANK"] as QuizQuestionType[]).map(
+        (type) => (
+          <button
+            key={type}
+            type="button"
+            onClick={() => add(type)}
+            className="rounded-xl px-3 py-2 text-left text-sm text-icon-color hover:bg-primary-color/10"
+          >
+            {type === "SINGLE"
+              ? quizLanguage.typeSingle(lang)
+              : type === "MULTIPLE"
+                ? quizLanguage.typeMultiple(lang)
+                : quizLanguage.typeFillBlank(lang)}
+          </button>
+        ),
+      )}
+    </div>
+  );
+
+  const generateButton = (
+    <button
+      type="button"
+      onClick={() => openGenerate()}
+      className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-primary-color/30 py-4 font-medium text-primary-color transition hover:bg-primary-color/5"
+    >
+      <RiSparkling2Line aria-hidden="true" className="text-lg" />
+      {quizLanguage.generateWithAi(lang)}
+    </button>
+  );
+
+  const needsDraftHint = (
+    <p className="text-center text-sm text-icon-color/60">
+      {quizLanguage.generateNeedsDraft(lang)}
+    </p>
+  );
 
   const onDragEnd = async ({ active, over }: DragEndEvent) => {
     if (readOnly || !over || active.id === over.id) return;
@@ -247,8 +385,17 @@ export default function QuestionList({
           </div>
         )}
 
+        {generationJob && (
+          <QuizGenerationCard
+            job={generationJob}
+            language={lang}
+            onRetry={retryGeneration}
+            onDismiss={dismissGeneration}
+          />
+        )}
+
         {list.length === 0 && !questions.isLoading && (
-          <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-gray-200 bg-white p-10 text-center">
+          <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-gray-200 bg-white p-6 text-center sm:p-10">
             <MdQuiz className="text-4xl text-primary-color/60" />
             <p className="font-semibold text-icon-color">
               {quizLanguage.emptyTitle(lang)}
@@ -256,6 +403,39 @@ export default function QuestionList({
             <p className="text-sm text-icon-color/60">
               {quizLanguage.emptyHint(lang)}
             </p>
+            {!readOnly && (
+              <div className="relative mt-3 flex w-full flex-col items-stretch gap-2 sm:w-auto sm:flex-row sm:items-center">
+                {canGenerate && (
+                  <button
+                    type="button"
+                    onClick={() => openGenerate()}
+                    className="flex items-center justify-center gap-2 rounded-2xl bg-primary-color px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-color-hover focus:bg-primary-color-focus"
+                  >
+                    <RiSparkling2Line aria-hidden="true" className="text-lg" />
+                    {quizLanguage.generateWithAi(lang)}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() =>
+                    setMenuAnchor((a) => (a === "empty" ? null : "empty"))
+                  }
+                  disabled={create.isPending}
+                  aria-expanded={menuAnchor === "empty"}
+                  className={`flex items-center justify-center gap-2 rounded-2xl px-5 py-2.5 text-sm font-semibold transition ${
+                    canGenerate
+                      ? "text-primary-color ring-1 ring-primary-color/30 hover:bg-primary-color/10"
+                      : "bg-primary-color text-white hover:bg-primary-color-hover focus:bg-primary-color-focus"
+                  }`}
+                >
+                  {quizLanguage.writeAQuestion(lang)}
+                </button>
+                {menuAnchor === "empty" && typeMenu}
+              </div>
+            )}
+            {!readOnly && isPublished && (
+              <div className="mt-1">{needsDraftHint}</div>
+            )}
           </div>
         )}
 
@@ -282,39 +462,50 @@ export default function QuestionList({
           </SortableContext>
         </DndContext>
 
-        {!readOnly && (
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setMenuOpen((o) => !o)}
-              disabled={create.isPending}
-              className="w-full rounded-2xl border-2 border-dashed border-primary-color/30 py-4 font-medium text-primary-color transition hover:bg-primary-color/5"
+        {/* The empty state above carries its own CTAs; this row follows a non-empty list. */}
+        {!readOnly && list.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <div
+              className={`grid grid-cols-1 gap-3 ${canGenerate ? "sm:grid-cols-2" : ""}`}
             >
-              + {quizLanguage.newQuestion(lang)}
-            </button>
-            {menuOpen && (
-              <div className="absolute left-1/2 top-full z-20 mt-2 flex w-64 -translate-x-1/2 flex-col rounded-2xl border border-gray-100 bg-white p-1 shadow-lg">
-                {(
-                  ["SINGLE", "MULTIPLE", "FILL_BLANK"] as QuizQuestionType[]
-                ).map((type) => (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => add(type)}
-                    className="rounded-xl px-3 py-2 text-left text-sm text-icon-color hover:bg-primary-color/10"
-                  >
-                    {type === "SINGLE"
-                      ? quizLanguage.typeSingle(lang)
-                      : type === "MULTIPLE"
-                        ? quizLanguage.typeMultiple(lang)
-                        : quizLanguage.typeFillBlank(lang)}
-                  </button>
-                ))}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setMenuAnchor((a) => (a === "row" ? null : "row"))
+                  }
+                  disabled={create.isPending}
+                  aria-expanded={menuAnchor === "row"}
+                  className="w-full rounded-2xl border-2 border-dashed border-primary-color/30 py-4 font-medium text-primary-color transition hover:bg-primary-color/5"
+                >
+                  + {quizLanguage.newQuestion(lang)}
+                </button>
+                {menuAnchor === "row" && typeMenu}
               </div>
-            )}
+              {canGenerate && generateButton}
+            </div>
+            {isPublished && needsDraftHint}
           </div>
         )}
       </div>
+
+      {dialogOpen && (
+        <QuizGenerateDialog
+          assignmentId={assignmentId}
+          schoolId={schoolId}
+          usage={generation?.usage}
+          initial={dialogInitial}
+          beforeSubmit={async () => {
+            // Same flush Publish does: land pending card edits before the job locks the editor.
+            await saveAll();
+          }}
+          onClose={() => setDialogOpen(false)}
+          onSubmitted={() => {
+            setDialogOpen(false);
+            onGenerationSubmitted?.();
+          }}
+        />
+      )}
 
       {/* Student preview: beside the cards on wide screens, a sheet on smaller ones. */}
       <aside className="sticky top-4 hidden shrink-0 xl:block">
