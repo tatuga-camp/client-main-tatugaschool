@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { quizLanguage } from "../../data/languages";
 import { quizErrorAlertOptions } from "./quizErrorAlert";
 
 test("a 400 from the score override surfaces the server's error and message", () => {
@@ -23,6 +24,16 @@ test("a 409 QUIZ_LOCKED gets the localized lock message", () => {
   );
   assert.equal(opts.icon, "warning");
   assert.notEqual(opts.title, "Conflict");
+});
+
+test("a 409 QUIZ_GENERATING gets the localized generation-lock message", () => {
+  const opts = quizErrorAlertOptions(
+    { statusCode: 409, error: "Conflict", message: "QUIZ_GENERATING" },
+    "en",
+  );
+  assert.equal(opts.icon, "warning");
+  assert.equal(opts.title, quizLanguage.generationLocked("en"));
+  assert.equal(opts.text, undefined);
 });
 
 test("an unknown error still produces an alert", () => {

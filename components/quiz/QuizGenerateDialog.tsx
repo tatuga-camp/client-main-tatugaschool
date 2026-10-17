@@ -57,6 +57,8 @@ type Props = {
   usage: QuizGenerationUsage | undefined;
   /** Pre-filled form ("Try again" from a failed job). */
   initial?: GenerationForm;
+  /** Awaited before the job is created: flushes pending question-card autosaves. */
+  beforeSubmit?: () => Promise<void>;
   onClose: () => void;
   onSubmitted: (job: QuizGenerationJob) => void;
 };
@@ -109,6 +111,7 @@ export default function QuizGenerateDialog({
   schoolId,
   usage,
   initial,
+  beforeSubmit,
   onClose,
   onSubmitted,
 }: Props): JSX.Element {
@@ -148,9 +151,8 @@ export default function QuizGenerateDialog({
   const startUpload = async (file: File) => {
     const kind = kindForMime(fileMimeType(file));
     if (kind !== "IMAGE" && kind !== "PDF") {
-      // Only PDF and images can be read by the generator; the drop hint
-      // already states the accepted kinds and limits, so it doubles as the error.
-      showQuizError({ error: quizLanguage.dropFileHint(lang) }, lang);
+      // Only PDF and images can be read by the generator.
+      showQuizError({ error: quizLanguage.generationFileNotSupported(lang) }, lang);
       return;
     }
     const check = checkAttachmentFile(file, kind === "IMAGE" ? "image" : "file");
@@ -242,6 +244,9 @@ export default function QuizGenerateDialog({
     event.preventDefault();
     if (!canSubmit) return;
     try {
+      // Cards cannot be edited once the job is active, so land their edits first.
+      await beforeSubmit?.();
+      if (!mountedRef.current) return;
       const job = await create.mutateAsync({
         assignmentId,
         data: toGenerationInput(form),
@@ -423,6 +428,9 @@ export default function QuizGenerateDialog({
     <PopupLayout onClose={onClose}>
       <form
         onSubmit={submit}
+        // The URL inputs are type="url"; only validateGenerationForm decides
+        // submittability, so the browser's own bubble must not pre-empt our copy.
+        noValidate
         aria-labelledby="quiz-generate-title"
         className="flex min-h-dvh w-full max-w-xl flex-col gap-5 bg-white p-5 font-Anuphan text-icon-color sm:min-h-0 sm:max-h-dvh sm:overflow-y-auto sm:rounded-2xl md:p-6"
       >

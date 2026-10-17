@@ -438,6 +438,10 @@ export const quizLanguage = {
     "Drop a PDF or image here, or browse · PDF up to 50 MB, image up to 5 MB",
     "วางไฟล์ PDF หรือรูปภาพที่นี่ หรือเลือกไฟล์ · PDF ไม่เกิน 50 MB รูปภาพไม่เกิน 5 MB",
   ),
+  generationFileNotSupported: t(
+    "This file type isn't supported. Use a PDF or an image.",
+    "ไม่รองรับไฟล์ประเภทนี้ ใช้ไฟล์ PDF หรือรูปภาพ",
+  ),
   youtubePlaceholder: t(
     "https://www.youtube.com/watch?v=…",
     "https://www.youtube.com/watch?v=…",

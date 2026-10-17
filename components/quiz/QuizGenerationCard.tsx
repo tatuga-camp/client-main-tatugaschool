@@ -157,14 +157,14 @@ export default function QuizGenerationCard({
           <button
             type="button"
             onClick={() => onDismiss(job.id)}
-            className="w-full rounded-xl px-4 py-2 text-sm font-medium text-icon-color/70 transition hover:bg-icon-color/5 hover:text-icon-color sm:w-auto"
+            className="w-full rounded-xl px-4 py-2 text-sm font-medium text-icon-color/70 transition hover:bg-icon-color/5 hover:text-icon-color focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-color/40 sm:w-auto"
           >
             {quizLanguage.dismiss(lang)}
           </button>
           <button
             type="button"
             onClick={() => onRetry(job)}
-            className="w-full rounded-xl bg-primary-color px-4 py-2 text-sm font-medium text-white transition hover:bg-primary-color-hover focus:bg-primary-color-focus sm:w-auto"
+            className="w-full rounded-xl bg-primary-color px-4 py-2 text-sm font-medium text-white transition hover:bg-primary-color-hover focus:bg-primary-color-focus focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-color/40 sm:w-auto"
           >
             {quizLanguage.tryAgain(lang)}
           </button>

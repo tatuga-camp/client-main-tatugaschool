@@ -17,7 +17,13 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useRouter } from "next/router";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   MdClose,
   MdContentCopy,
@@ -27,6 +33,7 @@ import {
   MdQuiz,
 } from "react-icons/md";
 import { RiSparkling2Line } from "react-icons/ri";
+import Swal from "sweetalert2";
 import { quizLanguage } from "../../data/languages";
 import {
   AssignmentOnQuiz,
@@ -205,6 +212,10 @@ export default function QuestionList({
   const [dismissedJobId, setDismissedJobId] = useState<string | null>(() =>
     readDismissed(assignmentId),
   );
+  // Client-side navigation to another quiz keeps this component mounted.
+  useEffect(() => {
+    setDismissedJobId(readDismissed(assignmentId));
+  }, [assignmentId]);
   const generationJob = visibleGenerationJob(generation?.job, dismissedJobId);
   // Entry points live only on an editable Draft quiz.
   const canGenerate = !readOnly && !isPublished;
@@ -232,14 +243,14 @@ export default function QuestionList({
     () => ({ onDirtyChange, onDraftChange, registerSave }),
     [onDirtyChange, onDraftChange, registerSave],
   );
-  if (saveAllRef) {
-    saveAllRef.current = async () => {
-      const results = await Promise.all(
-        [...saves.current.values()].map((save) => save().catch(() => false)),
-      );
-      return results.filter((ok) => !ok).length;
-    };
-  }
+  /** Saves every card now; resolves with how many still are not saved. */
+  const saveAll = async () => {
+    const results = await Promise.all(
+      [...saves.current.values()].map((save) => save().catch(() => false)),
+    );
+    return results.filter((ok) => !ok).length;
+  };
+  if (saveAllRef) saveAllRef.current = saveAll;
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 4 } }),
     useSensor(TouchSensor, {
@@ -276,6 +287,17 @@ export default function QuestionList({
     setMenuAnchor(null);
     setDialogInitial(initial);
     setDialogOpen(true);
+  };
+
+  /** "Try again" on a failed card: the card stays visible even when generating is not allowed. */
+  const retryGeneration = (job: QuizGenerationJob) => {
+    if (canGenerate) return openGenerate(formFromJob(job, lang));
+    void Swal.fire({
+      icon: "warning",
+      title: readOnly
+        ? quizLanguage.generationLocked(lang)
+        : quizLanguage.generateNeedsDraft(lang),
+    });
   };
 
   const dismissGeneration = (jobId: string) => {
@@ -365,7 +387,7 @@ export default function QuestionList({
           <QuizGenerationCard
             job={generationJob}
             language={lang}
-            onRetry={(job) => openGenerate(formFromJob(job, lang))}
+            onRetry={retryGeneration}
             onDismiss={dismissGeneration}
           />
         )}
@@ -471,6 +493,10 @@ export default function QuestionList({
           schoolId={schoolId}
           usage={generation?.usage}
           initial={dialogInitial}
+          beforeSubmit={async () => {
+            // Same flush Publish does: land pending card edits before the job locks the editor.
+            await saveAll();
+          }}
           onClose={() => setDialogOpen(false)}
           onSubmitted={() => {
             setDialogOpen(false);

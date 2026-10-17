@@ -9,6 +9,7 @@ import Swal from "sweetalert2";
 import QuestionList from "../../../../components/quiz/QuestionList";
 import QuizMonitor from "../../../../components/quiz/QuizMonitor";
 import QuizSettingsPanel from "../../../../components/quiz/QuizSettingsPanel";
+import { showQuizError } from "../../../../components/quiz/quizErrorAlert";
 import ClassStudentAssignWork from "../../../../components/subject/ClassStudentAssignWork";
 import ClassworkExport from "../../../../components/subject/ClassworkExport";
 import useClickOutside from "../../../../hook/useClickOutside";
@@ -22,6 +23,7 @@ import {
 } from "../../../../data/languages";
 import { ErrorMessages } from "../../../../interfaces";
 import {
+  keyQuiz,
   useDeleteAssignment,
   useGetAssignment,
   useGetLanguage,
@@ -38,7 +40,10 @@ import {
   runIfConfirmed,
 } from "../../../../utils/confirmDelete";
 import { withDirtyId } from "../../../../utils/quizDraft";
-import { isGenerationActive } from "../../../../utils/quizGeneration";
+import {
+  isGenerationActive,
+  isQuizGeneratingError,
+} from "../../../../utils/quizGeneration";
 import {
   editorLockState,
   quizEditorLoadState,
@@ -95,10 +100,11 @@ export default function QuizEditorPage({
         showConfirmButton: false,
       }),
   });
-  // Read-only until the first lock check returns, so a locked quiz never flashes editable.
+  // Read-only until both lock sources (student attempts, AI generation) have
+  // answered, so a locked quiz never flashes editable.
   const { locked, readOnly, generating } = editorLockState(
     monitor.data?.locked,
-    monitor.isLoading,
+    monitor.isLoading || generation.isLoading,
     isGenerationActive(generation.data?.job),
   );
   // Question cards with unsaved edits; leaving the tab or publishing asks first.
@@ -161,12 +167,14 @@ export default function QuizEditorPage({
   };
 
   const fail = (error: unknown) => {
-    const result = error as ErrorMessages;
-    Swal.fire({
-      title: result?.error ?? "Error",
-      text: result?.message?.toString(),
-      icon: "error",
-    });
+    showQuizError(error, lang);
+    // A job started elsewhere (another tab): refetch so the header locks right away
+    // instead of waiting for the next poll.
+    if (isQuizGeneratingError(error)) {
+      void queryClient.invalidateQueries({
+        queryKey: keyQuiz.generation(assignmentId),
+      });
+    }
   };
 
   const saveTitle = async () => {

@@ -234,6 +234,32 @@ test("toGenerationInput: keeps trimmed instructions, trims WEBSITE url, maps fil
   });
 });
 
+test("toGenerationInput: FILL_BLANK-only forms send an in-range choicesPerQuestion", () => {
+  const { minChoices, maxChoices } = GENERATION_LIMITS;
+  const inRange = (n: number) => n >= minChoices && n <= maxChoices;
+
+  // The choices input is hidden for FILL_BLANK-only, so a stale 1 (or 99) must
+  // not reach the server's range validator.
+  const low = toGenerationInput(form({ allowedTypes: ["FILL_BLANK"], choicesPerQuestion: 1 }));
+  assert.ok(inRange(low.choicesPerQuestion), `got ${low.choicesPerQuestion}`);
+  const high = toGenerationInput(form({ allowedTypes: ["FILL_BLANK"], choicesPerQuestion: 99 }));
+  assert.ok(inRange(high.choicesPerQuestion), `got ${high.choicesPerQuestion}`);
+  const bad = toGenerationInput(form({ allowedTypes: ["FILL_BLANK"], choicesPerQuestion: NaN }));
+  assert.ok(inRange(bad.choicesPerQuestion), `got ${bad.choicesPerQuestion}`);
+  // An already valid value is kept as-is.
+  assert.equal(
+    toGenerationInput(form({ allowedTypes: ["FILL_BLANK"], choicesPerQuestion: 3 }))
+      .choicesPerQuestion,
+    3,
+  );
+  // With choice types the value is sent untouched (validateGenerationForm guards it).
+  assert.equal(
+    toGenerationInput(form({ allowedTypes: ["SINGLE"], choicesPerQuestion: 5 }))
+      .choicesPerQuestion,
+    5,
+  );
+});
+
 test("formFromJob round-trips a YOUTUBE job", () => {
   const j = job({
     questionCount: 7,

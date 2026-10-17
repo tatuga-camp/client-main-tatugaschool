@@ -129,6 +129,15 @@ export function validateGenerationForm(form: GenerationForm): FormIssue | null {
   return null;
 }
 
+const DEFAULT_CHOICES = 4;
+
+/** `value` clamped to the allowed choices range; the default when it is not a whole number. */
+function clampChoices(value: number): number {
+  if (!Number.isInteger(value)) return DEFAULT_CHOICES;
+  const { minChoices, maxChoices } = GENERATION_LIMITS;
+  return Math.min(maxChoices, Math.max(minChoices, value));
+}
+
 /** Request body for POST /generation. Call `validateGenerationForm` first. */
 export function toGenerationInput(form: GenerationForm): QuizGenerationInput {
   const { source } = form;
@@ -155,7 +164,11 @@ export function toGenerationInput(form: GenerationForm): QuizGenerationInput {
     source: wire,
     questionCount: form.questionCount,
     allowedTypes: [...form.allowedTypes],
-    choicesPerQuestion: form.choicesPerQuestion,
+    // The choices input is hidden (and unvalidated) for FILL_BLANK-only forms,
+    // so a stale value must still pass the server's range check.
+    choicesPerQuestion: needsChoices(form.allowedTypes)
+      ? form.choicesPerQuestion
+      : clampChoices(form.choicesPerQuestion),
     language: form.language,
   };
   const instructions = form.instructions.trim();
