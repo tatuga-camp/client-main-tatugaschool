@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect, useRef, useState } from "react";
 import {
   MdClose,
@@ -16,7 +17,11 @@ import type {
   QuizGenerationUsage,
   QuizQuestionType,
 } from "../../interfaces";
-import { useCreateQuizGeneration, useGetLanguage } from "../../react-query";
+import {
+  keyQuiz,
+  useCreateQuizGeneration,
+  useGetLanguage,
+} from "../../react-query";
 import {
   getSignedURLTeacherService,
   UploadSignURLWithProgressService,
@@ -117,6 +122,7 @@ export default function QuizGenerateDialog({
   const fileInput = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const mountedRef = useRef(true);
+  const queryClient = useQueryClient();
   const create = useCreateQuizGeneration();
 
   useEffect(() => {
@@ -243,10 +249,24 @@ export default function QuizGenerateDialog({
       if (mountedRef.current) onSubmitted(job);
     } catch (error) {
       if (!mountedRef.current) return;
+      // The generation view (job + usage) is only polled while a job is active, so
+      // a stale cache does not refresh itself; invalidate so the footer's usage
+      // and the page's status card catch up to what the server just told us.
+      const refreshGeneration = () =>
+        queryClient.invalidateQueries({
+          queryKey: keyQuiz.generation(assignmentId),
+        });
       if (isQuotaError(error)) {
-        void Swal.fire({ icon: "warning", title: quizLanguage.quotaReached(lang) });
+        void refreshGeneration();
+        void Swal.fire({
+          icon: "warning",
+          title: quizLanguage.quotaReached(lang),
+          text: quizLanguage.generationsLeft(lang, error.used, error.limit),
+        });
       } else if (isQuizGeneratingError(error)) {
-        // A job is already active; the status card shows it once the query refetches.
+        // A job is already active (started elsewhere); refetch so the status
+        // card appears on the page, then close.
+        void refreshGeneration();
         onClose();
       } else if (isQuizNotDraftError(error)) {
         onClose();
