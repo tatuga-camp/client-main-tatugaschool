@@ -481,6 +481,9 @@ export const quizLanguage = {
     l === "th"
       ? `เพิ่มคำถาม ${n} ข้อแล้ว`
       : `Added ${n} question${n === 1 ? "" : "s"}`,
+  /** "10 questions" for the card's meta row (what the job was asked for). */
+  questionCountLabel: (l: Language, n: number) =>
+    l === "th" ? `${n} ข้อ` : `${n} question${n === 1 ? "" : "s"}`,
 
   // AI generation — job.error codes
   generationError: generationErrorCopy,
