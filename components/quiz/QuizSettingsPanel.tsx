@@ -39,8 +39,11 @@ const toForm = (a: Assignment): Form => ({
 
 export default function QuizSettingsPanel({
   assignment,
+  disabled = false,
 }: {
   assignment: Assignment;
+  /** Every input, switch and the save button are off (e.g. while AI generation runs). */
+  disabled?: boolean;
 }) {
   const language = useGetLanguage();
   const lang = language.data ?? "en";
@@ -70,7 +73,7 @@ export default function QuizSettingsPanel({
   ) => setForm((f) => ({ ...f, settings: { ...f.settings, [key]: value } }));
 
   const save = async () => {
-    if (beginDateMissing) return;
+    if (beginDateMissing || disabled) return;
     try {
       const saved = await update.mutateAsync({
         query: { assignmentId: assignment.id },
@@ -112,7 +115,7 @@ export default function QuizSettingsPanel({
           <p className="mt-1 max-w-prose text-sm text-icon-color/60">{hint}</p>
         )}
       </div>
-      <Switch checked={checked} setChecked={onChange} />
+      <Switch checked={checked} setChecked={onChange} disabled={disabled} />
     </div>
   );
 
@@ -120,7 +123,9 @@ export default function QuizSettingsPanel({
     <button
       type="button"
       onClick={() => setSetting("scoringMode", mode)}
-      className={`flex-1 rounded-2xl border p-3 text-left transition ${
+      disabled={disabled}
+      aria-pressed={form.settings.scoringMode === mode}
+      className={`flex-1 rounded-2xl border p-3 text-left transition disabled:cursor-not-allowed disabled:opacity-60 ${
         form.settings.scoringMode === mode
           ? "border-primary-color bg-primary-color/5 ring-2 ring-primary-color/20"
           : "border-gray-200 hover:border-primary-color/40"
@@ -132,12 +137,24 @@ export default function QuizSettingsPanel({
   );
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 p-4 font-Anuphan md:p-6">
+    <div
+      aria-disabled={disabled || undefined}
+      className="mx-auto flex w-full max-w-3xl flex-col gap-4 p-4 font-Anuphan md:p-6"
+    >
+      {disabled && (
+        <p
+          role="status"
+          className="rounded-2xl border border-primary-color/20 bg-primary-color/5 px-4 py-3 text-sm text-icon-color"
+        >
+          {quizLanguage.generationLocked(lang)}
+        </p>
+      )}
       <section className="rounded-2xl border border-gray-100 bg-white p-4">
         <label className="flex flex-col gap-1 text-sm font-medium text-icon-color">
           {quizLanguage.description(lang)}
           <textarea
             rows={3}
+            disabled={disabled}
             value={form.description}
             onChange={(e) =>
               setForm((f) => ({ ...f, description: e.target.value }))
@@ -150,6 +167,7 @@ export default function QuizSettingsPanel({
             {quizLanguage.beginDate(lang)}
             <input
               type="datetime-local"
+              disabled={disabled}
               value={form.beginDate}
               onChange={(e) =>
                 setForm((f) => ({ ...f, beginDate: e.target.value }))
@@ -167,6 +185,7 @@ export default function QuizSettingsPanel({
             {quizLanguage.dueDate(lang)}
             <input
               type="datetime-local"
+              disabled={disabled}
               value={form.dueDate}
               onChange={(e) =>
                 setForm((f) => ({ ...f, dueDate: e.target.value }))
@@ -204,6 +223,7 @@ export default function QuizSettingsPanel({
             type="number"
             min={1}
             max={600}
+            disabled={disabled}
             value={form.settings.timeLimitMinutes ?? ""}
             onChange={(e) =>
               setSetting(
@@ -253,8 +273,9 @@ export default function QuizSettingsPanel({
       <button
         type="button"
         onClick={save}
-        disabled={update.isPending || beginDateMissing}
-        className="self-end rounded-2xl bg-primary-color px-6 py-2 font-medium text-white hover:bg-primary-color-hover disabled:opacity-50"
+        disabled={disabled || update.isPending || beginDateMissing}
+        title={disabled ? quizLanguage.generationLocked(lang) : undefined}
+        className="self-end rounded-2xl bg-primary-color px-6 py-2 font-medium text-white hover:bg-primary-color-hover disabled:cursor-not-allowed disabled:opacity-50"
       >
         {quizLanguage.saveSettings(lang)}
       </button>

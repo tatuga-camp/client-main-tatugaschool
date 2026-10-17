@@ -61,14 +61,16 @@ export function formatDuration(ms: number): string {
 /**
  * Lock state for the question editor. The server decides (`locked` on the monitor view): any started
  * attempt locks questions, assigned or not. While the monitor is still loading, the editor is
- * read-only but shows no banner yet.
+ * read-only but shows no banner yet. An active AI generation job (`generating`) also makes the
+ * editor read-only, without the student-lock banner: the generation card explains it instead.
  */
 export function editorLockState(
   serverLocked: boolean | undefined,
   isLoading: boolean,
-): { locked: boolean; readOnly: boolean } {
+  generating = false,
+): { locked: boolean; readOnly: boolean; generating: boolean } {
   const locked = serverLocked === true;
-  return { locked, readOnly: locked || isLoading };
+  return { locked, readOnly: locked || generating || isLoading, generating };
 }
 
 /**

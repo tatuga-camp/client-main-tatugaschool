@@ -25,8 +25,10 @@ import {
   useDeleteAssignment,
   useGetAssignment,
   useGetLanguage,
+  useGetQuizGeneration,
   useGetQuizMonitor,
   useGetQuizQuestions,
+  useQuizGenerationEffects,
   useUpdateAssignment,
   forgetDeletedAssignment,
 } from "../../../../react-query";
@@ -36,6 +38,7 @@ import {
   runIfConfirmed,
 } from "../../../../utils/confirmDelete";
 import { withDirtyId } from "../../../../utils/quizDraft";
+import { isGenerationActive } from "../../../../utils/quizGeneration";
 import {
   editorLockState,
   quizEditorLoadState,
@@ -78,10 +81,25 @@ export default function QuizEditorPage({
     enabled: tab === "questions",
     poll: false,
   });
+  // AI generation is watched on every tab: the header must lock everywhere while a
+  // job runs. The query polls itself every 5 s only while the job is active.
+  const generation = useGetQuizGeneration({ assignmentId });
+  useQuizGenerationEffects({
+    assignmentId,
+    job: generation.data?.job,
+    onDone: (createdCount) =>
+      Swal.fire({
+        icon: "success",
+        title: quizLanguage.generatedCount(lang, createdCount),
+        timer: 2000,
+        showConfirmButton: false,
+      }),
+  });
   // Read-only until the first lock check returns, so a locked quiz never flashes editable.
-  const { locked, readOnly } = editorLockState(
+  const { locked, readOnly, generating } = editorLockState(
     monitor.data?.locked,
     monitor.isLoading,
+    isGenerationActive(generation.data?.job),
   );
   // Question cards with unsaved edits; leaving the tab or publishing asks first.
   const [dirtyIds, setDirtyIds] = useState<Set<string>>(() => new Set());
@@ -152,7 +170,7 @@ export default function QuizEditorPage({
   };
 
   const saveTitle = async () => {
-    if (!assignment.data) return;
+    if (!assignment.data || generating) return;
     const next = title.trim();
     if (!next || next === assignment.data.title) {
       setTitle(assignment.data.title);
@@ -193,7 +211,8 @@ export default function QuizEditorPage({
   };
 
   const setStatus = async (next: "Draft" | "Published") => {
-    if (!assignment.data || assignment.data.status === next) return;
+    if (!assignment.data || assignment.data.status === next || generating)
+      return;
     if (next === "Published") {
       const ok = await confirmUnsaved(
         quizLanguage.unsavedPublishText(lang),
@@ -340,7 +359,9 @@ export default function QuizEditorPage({
               placeholder={quizLanguage.untitled(lang)}
               onChange={(e) => setTitle(e.target.value)}
               onBlur={saveTitle}
-              className="min-w-0 flex-1 border-b-2 border-transparent bg-transparent py-1 text-lg font-semibold text-icon-color outline-none focus:border-primary-color md:text-xl"
+              disabled={generating}
+              title={generating ? quizLanguage.generationLocked(lang) : undefined}
+              className="min-w-0 flex-1 border-b-2 border-transparent bg-transparent py-1 text-lg font-semibold text-icon-color outline-none focus:border-primary-color disabled:cursor-not-allowed disabled:opacity-60 md:text-xl"
             />
             <span className="hidden text-sm text-icon-color/60 sm:inline">
               {quizLanguage.totalPoints(lang, assignment.data.maxScore ?? 0)}
@@ -365,13 +386,15 @@ export default function QuizEditorPage({
                 onClick={() =>
                   isPublished ? saveChanges() : setStatus("Published")
                 }
-                disabled={busy || cannotPublish}
+                disabled={busy || generating || cannotPublish}
                 title={
-                  cannotPublish
-                    ? quizLanguage.needQuestionsToPublish(lang)
-                    : undefined
+                  generating
+                    ? quizLanguage.generationLocked(lang)
+                    : cannotPublish
+                      ? quizLanguage.needQuestionsToPublish(lang)
+                      : undefined
                 }
-                className="flex h-10 items-center justify-center gap-2 rounded-l-xl bg-primary-color px-5 text-sm font-semibold text-white transition hover:bg-primary-color-hover disabled:opacity-60"
+                className="flex h-10 items-center justify-center gap-2 rounded-l-xl bg-primary-color px-5 text-sm font-semibold text-white transition hover:bg-primary-color-hover disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {busy && <LoadingSpinner />}
                 {isPublished
@@ -394,6 +417,7 @@ export default function QuizEditorPage({
                     const isDelete = menu.title === "Delete";
                     const disabled =
                       busy ||
+                      generating ||
                       (menu.title === "Mark as Draft" && !isPublished) ||
                       (menu.title === "Publish" &&
                         (isPublished || cannotPublish));
@@ -414,15 +438,21 @@ export default function QuizEditorPage({
                         <button
                           type="button"
                           onClick={run}
-                          disabled={isDelete ? remove.isPending : disabled}
+                          disabled={
+                            isDelete ? remove.isPending || generating : disabled
+                          }
                           title={
-                            menu.title === "Publish" && cannotPublish
-                              ? quizLanguage.needQuestionsToPublish(lang)
-                              : undefined
+                            generating
+                              ? quizLanguage.generationLocked(lang)
+                              : menu.title === "Publish" && cannotPublish
+                                ? quizLanguage.needQuestionsToPublish(lang)
+                                : undefined
                           }
                           className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-medium transition ${
                             isDelete
-                              ? "text-error-color hover:bg-error-color/10"
+                              ? generating
+                                ? "cursor-not-allowed text-error-color/40"
+                                : "text-error-color hover:bg-error-color/10"
                               : disabled
                                 ? "cursor-not-allowed text-gray-300"
                                 : "text-gray-700 hover:bg-gray-50"
@@ -473,14 +503,20 @@ export default function QuizEditorPage({
             <QuestionList
               assignmentId={assignmentId}
               subjectId={subjectId}
+              schoolId={assignment.data.schoolId}
               locked={locked}
               readOnly={readOnly}
+              isPublished={isPublished}
+              generation={generation.data}
               onDirtyChange={onDirtyChange}
               saveAllRef={saveAllRef}
             />
           )}
           {tab === "settings" && (
-            <QuizSettingsPanel assignment={assignment.data} />
+            <QuizSettingsPanel
+              assignment={assignment.data}
+              disabled={generating}
+            />
           )}
           {tab === "monitor" && <QuizMonitor assignmentId={assignmentId} />}
           {tab === "manageassigning" && (

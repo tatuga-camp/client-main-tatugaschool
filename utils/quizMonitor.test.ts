@@ -86,22 +86,52 @@ test("editorLockState: server locked flag locks, loading is read-only without th
   assert.deepEqual(editorLockState(undefined, true), {
     locked: false,
     readOnly: true,
+    generating: false,
   });
   assert.deepEqual(editorLockState(undefined, false), {
     locked: false,
     readOnly: false,
+    generating: false,
   });
   assert.deepEqual(editorLockState(false, false), {
     locked: false,
     readOnly: false,
+    generating: false,
   });
   assert.deepEqual(editorLockState(true, false), {
     locked: true,
     readOnly: true,
+    generating: false,
   });
   assert.deepEqual(editorLockState(true, true), {
     locked: true,
     readOnly: true,
+    generating: false,
+  });
+});
+
+test("editorLockState: an active AI generation makes the editor read-only without the student-lock banner", () => {
+  assert.deepEqual(editorLockState(false, false, true), {
+    locked: false,
+    readOnly: true,
+    generating: true,
+  });
+  assert.deepEqual(editorLockState(undefined, false, true), {
+    locked: false,
+    readOnly: true,
+    generating: true,
+  });
+  // Both at once: the banner still shows (a student started) and edits stay off.
+  assert.deepEqual(editorLockState(true, false, true), {
+    locked: true,
+    readOnly: true,
+    generating: true,
+  });
+  // Explicit false behaves like the default.
+  assert.deepEqual(editorLockState(true, false, false), {
+    locked: true,
+    readOnly: true,
+    generating: false,
   });
 });
 
