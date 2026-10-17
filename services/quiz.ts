@@ -1,6 +1,9 @@
 import {
   Assignment,
   AssignmentOnQuiz,
+  QuizGenerationInput,
+  QuizGenerationJob,
+  QuizGenerationView,
   QuizMonitorView,
   QuizQuestionInput,
   QuizReviewView,
@@ -110,5 +113,27 @@ export function ResetQuizAttemptService(input: {
   return call<StudentOnAssignment>({
     method: "POST",
     url: `/v1/quiz/student-on-assignment/${input.studentOnAssignmentId}/reset`,
+  });
+}
+
+// --- AI generation ---
+
+/** Newest generation job for the quiz (any status) plus this month's usage. */
+export function GetQuizGenerationService(input: { assignmentId: string }) {
+  return call<QuizGenerationView>({
+    method: "GET",
+    url: `/v1/quiz/assignment/${input.assignmentId}/generation`,
+  });
+}
+
+/** Queues a generation job. Errors: 409 QUIZ_LOCKED | QUIZ_NOT_DRAFT | QUIZ_GENERATING, 403 AI_QUOTA_EXCEEDED, 503 AI_GENERATION_UNAVAILABLE, 502 AI_GENERATION_PUBLISH_FAILED. */
+export function CreateQuizGenerationService(input: {
+  assignmentId: string;
+  data: QuizGenerationInput;
+}) {
+  return call<QuizGenerationJob>({
+    method: "POST",
+    url: `/v1/quiz/assignment/${input.assignmentId}/generation`,
+    data: input.data,
   });
 }

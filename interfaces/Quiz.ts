@@ -178,3 +178,64 @@ export type QuizReviewView = {
   items: { question: AssignmentOnQuiz; answer: StudentOnQuiz | null }[];
   events: QuizReviewEvent[];
 };
+
+// --- AI generation (QuizGenerationJob; see docs/superpowers/specs/2026-10-17-quiz-ai-generation-design.md) ---
+
+export type QuizGenerationStatus = "PENDING" | "RUNNING" | "DONE" | "FAILED";
+export type QuizGenerationSourceKind = "PDF" | "IMAGE" | "YOUTUBE" | "WEBSITE";
+
+export type QuizGenerationSource = {
+  kind: QuizGenerationSourceKind;
+  url: string;
+  /** File name for PDF/IMAGE; the page/video title is not fetched. */
+  name?: string | null;
+  /** PDF/IMAGE only. */
+  mimeType?: string | null;
+  /** Bytes, PDF/IMAGE only. */
+  size?: number | null;
+};
+
+export type QuizGenerationJob = {
+  id: string;
+  createAt: string;
+  updateAt: string;
+  status: QuizGenerationStatus;
+  source: QuizGenerationSource;
+  questionCount: number;
+  allowedTypes: QuizQuestionType[];
+  choicesPerQuestion: number;
+  language: "th" | "en";
+  instructions: string | null;
+  createdCount: number;
+  /** Machine code: SOURCE_UNREADABLE | SOURCE_TOO_LARGE | NO_QUESTIONS | AI_FAILED | TIMEOUT | ASSIGNMENT_GONE | INTERNAL */
+  error: string | null;
+  attempts: number;
+  startedAt: string | null;
+  finishedAt: string | null;
+  assignmentId: string;
+  subjectId: string;
+  schoolId: string;
+  userId: string;
+};
+
+export type QuizGenerationUsage = {
+  used: number;
+  limit: number;
+  plan: "FREE" | "BASIC" | "PREMIUM" | "ENTERPRISE";
+};
+
+/** GET /v1/quiz/assignment/:assignmentId/generation */
+export type QuizGenerationView = {
+  job: QuizGenerationJob | null;
+  usage: QuizGenerationUsage;
+};
+
+/** POST /v1/quiz/assignment/:assignmentId/generation body */
+export type QuizGenerationInput = {
+  source: QuizGenerationSource;
+  questionCount: number;
+  allowedTypes: QuizQuestionType[];
+  choicesPerQuestion: number;
+  language: "th" | "en";
+  instructions?: string;
+};
