@@ -164,4 +164,84 @@ export const SubscriptionDataLanguage = {
         return "/mo";
     }
   },
+  save_up_to: (language: Language, percent: number) => {
+    switch (language) {
+      case "th":
+        return `ประหยัดสูงสุด ${percent}%`;
+      default:
+        return `Save up to ${percent}%`;
+    }
+  },
+  available: (language: Language) => {
+    switch (language) {
+      case "th":
+        return "มีให้บริการ";
+      default:
+        return "Available";
+    }
+  },
+  not_available: (language: Language) => {
+    switch (language) {
+      case "th":
+        return "ไม่มีให้บริการ";
+      default:
+        return "Not available";
+    }
+  },
+  annual_only: (language: Language) => {
+    switch (language) {
+      case "th":
+        return "สมัครได้เฉพาะรายปี";
+      default:
+        return "Annual billing only";
+    }
+  },
+  get_started: (language: Language) => {
+    switch (language) {
+      case "th":
+        return "เริ่มต้นใช้งาน";
+      default:
+        return "Get started";
+    }
+  },
+  upgrade: (language: Language) => {
+    switch (language) {
+      case "th":
+        return "อัปเกรด";
+      default:
+        return "Upgrade";
+    }
+  },
+  current_plan: (language: Language) => {
+    switch (language) {
+      case "th":
+        return "แผนปัจจุบันของคุณ";
+      default:
+        return "You are on this plan";
+    }
+  },
+  update_members: (language: Language) => {
+    switch (language) {
+      case "th":
+        return "อัปเดตจำนวนสมาชิก";
+      default:
+        return "Update members";
+    }
+  },
+  members_label: (language: Language) => {
+    switch (language) {
+      case "th":
+        return "จำนวนคุณครู (4 - 500)";
+      default:
+        return "Number of teachers (4 - 500)";
+    }
+  },
+  ai_quiz_per_month: (language: Language, count: number) => {
+    switch (language) {
+      case "th":
+        return `สร้างแบบทดสอบด้วย AI ${count.toLocaleString()} ครั้ง/เดือน`;
+      default:
+        return `${count.toLocaleString()} AI quiz generations / month`;
+    }
+  },
 } as const;
