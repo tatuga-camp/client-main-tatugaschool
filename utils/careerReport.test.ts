@@ -1,34 +1,45 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
-  barPercent,
-  EXPECTED_MARKER_PERCENT,
+  keySkills,
   localizeSector,
-  skillBand,
+  strengthIds,
   summarizeSkills,
 } from "./careerReport";
 
-test("skillBand thresholds", () => {
-  assert.equal(skillBand(1.2), "above");
-  assert.equal(skillBand(1), "above");
-  assert.equal(skillBand(0.99), "close");
-  assert.equal(skillBand(0.8), "close");
-  assert.equal(skillBand(0.79), "below");
-  assert.equal(skillBand(0), "below");
-  assert.equal(skillBand(Number.NaN), "below");
-  assert.equal(skillBand(Number.POSITIVE_INFINITY), "below");
+const e = (id: string, emphasis: number) => ({ id, emphasis });
+
+test("keySkills keeps the two skills that stand out most, highest first", () => {
+  assert.deepEqual(
+    keySkills([e("a", 0.5), e("b", 2.3), e("c", -1), e("d", 1.1)]),
+    [e("b", 2.3), e("d", 1.1)],
+  );
 });
 
-test("barPercent clamps to 0–100 and puts expectation at the marker", () => {
-  assert.equal(barPercent(0), 0);
-  assert.equal(barPercent(-1), 0);
-  assert.equal(barPercent(Number.NaN), 0);
-  assert.equal(barPercent(3), 100);
-  assert.equal(barPercent(1.5), 100);
-  assert.ok(Math.abs(barPercent(1) - EXPECTED_MARKER_PERCENT) < 1e-9);
+test("keySkills leaves out skills that don't stand out", () => {
+  assert.deepEqual(keySkills([e("a", 1.4), e("b", 0), e("c", -0.2)]), [
+    e("a", 1.4),
+  ]);
+  assert.deepEqual(keySkills([e("a", Number.NaN)]), []);
 });
 
 const k = (id: string, avg: number) => ({ id, avg });
+
+test("strengthIds picks skills above the student's own average", () => {
+  // Average of 90, 60, 60 is 70.
+  assert.deepEqual(
+    strengthIds([k("a", 90), k("b", 60), k("c", 60)]),
+    new Set(["a"]),
+  );
+});
+
+test("strengthIds ignores non-finite averages and flat profiles", () => {
+  assert.deepEqual(
+    strengthIds([k("a", 80), k("b", Number.NaN), k("c", 40)]),
+    new Set(["a"]),
+  );
+  assert.deepEqual(strengthIds([k("a", 70), k("b", 70)]), new Set());
+});
 
 test("summarizeSkills splits without overlap", () => {
   assert.deepEqual(summarizeSkills([]), { strongest: [], toGrow: [] });
