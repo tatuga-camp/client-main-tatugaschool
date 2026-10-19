@@ -18,6 +18,7 @@ type ResponseGetSuggestCareerService = {
       above: number;
       below: number;
       matchPoint: number;
+      emphasis: number;
     })[];
   })[];
 };

@@ -1,23 +1,29 @@
 import type { Language } from "../interfaces";
 import type { CareerSector } from "../data/career";
 
-export type SkillBand = "above" | "close" | "below";
+const MAX_KEY_SKILLS = 2;
 
-// matchPoint = student average ÷ the career's expected level for that skill
-// (servers/server-main-tatugaschool/src/career/career.service.ts).
-export const BAR_MAX_RATIO = 1.5;
-export const EXPECTED_MARKER_PERCENT = (1 / BAR_MAX_RATIO) * 100;
-
-export function skillBand(matchPoint: number): SkillBand {
-  if (!Number.isFinite(matchPoint)) return "below";
-  if (matchPoint >= 1) return "above";
-  if (matchPoint >= 0.8) return "close";
-  return "below";
+// emphasis = how much a career's survey respondents rated this skill above
+// other careers, relative to the career's own baseline
+// (servers/server-main-tatugaschool/src/career/career-match.ts).
+// Careers are ranked by these skills, so they explain the ranking.
+export function keySkills<T extends { emphasis: number }>(skills: T[]): T[] {
+  return skills
+    .filter((skill) => Number.isFinite(skill.emphasis) && skill.emphasis > 0)
+    .sort((a, b) => b.emphasis - a.emphasis)
+    .slice(0, MAX_KEY_SKILLS);
 }
 
-export function barPercent(matchPoint: number): number {
-  if (!Number.isFinite(matchPoint) || matchPoint <= 0) return 0;
-  return (Math.min(matchPoint, BAR_MAX_RATIO) / BAR_MAX_RATIO) * 100;
+// Skills scoring above the student's own average — the same "relative
+// strength" the career ranking compares against.
+export function strengthIds(skills: { id: string; avg: number }[]): Set<string> {
+  const finite = skills.filter((skill) => Number.isFinite(skill.avg));
+  if (finite.length === 0) return new Set();
+  const average =
+    finite.reduce((sum, skill) => sum + skill.avg, 0) / finite.length;
+  return new Set(
+    finite.filter((skill) => skill.avg > average).map((skill) => skill.id),
+  );
 }
 
 // Top two averages are "strongest"; up to two of the remaining lowest are

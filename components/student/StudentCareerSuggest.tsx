@@ -2,7 +2,7 @@ import Image from "next/image";
 import React, { useState } from "react";
 import { BsChatDots } from "react-icons/bs";
 import { FaUsers, FaUserTie } from "react-icons/fa";
-import { FiArrowLeft } from "react-icons/fi";
+import { FiArrowLeft, FiCheck } from "react-icons/fi";
 import { MdComputer } from "react-icons/md";
 import { RiLightbulbLine, RiPaintBrushLine } from "react-icons/ri";
 import { defaultBlurHash } from "../../data";
@@ -11,11 +11,9 @@ import { classroomUiLanguage } from "../../data/languages";
 import { useGetCareerSuggestion, useGetLanguage } from "../../react-query";
 import { decodeBlurhashToCanvas } from "../../utils";
 import {
-  barPercent,
-  EXPECTED_MARKER_PERCENT,
+  keySkills,
   localizeSector,
-  skillBand,
-  SkillBand,
+  strengthIds,
   summarizeSkills,
 } from "../../utils/careerReport";
 
@@ -37,12 +35,6 @@ const getSkillStyles = (skillTitle: string) => {
   return { icon: <RiLightbulbLine />, tint: "text-icon-color/70 bg-background-color" };
 };
 
-const bandStyles: Record<SkillBand, { bar: string; text: string }> = {
-  above: { bar: "bg-success-color", text: "text-success-color" },
-  close: { bar: "bg-primary-color", text: "text-primary-color" },
-  below: { bar: "bg-icon-color/40", text: "text-icon-color/60" },
-};
-
 const VISIBLE_CAREERS = 3;
 
 type Props = {
@@ -56,13 +48,6 @@ function StudentCareerSuggest({ studentId, studentName, onClose }: Props) {
   const lang = language.data ?? "en";
   const careers = useGetCareerSuggestion({ studentId });
   const [showAll, setShowAll] = useState(false);
-
-  const bandLabel = (band: SkillBand) =>
-    band === "above"
-      ? classroomUiLanguage.bandAbove(lang)
-      : band === "close"
-        ? classroomUiLanguage.bandClose(lang)
-        : classroomUiLanguage.bandBelow(lang);
 
   const backLink = (
     <button
@@ -129,7 +114,10 @@ function StudentCareerSuggest({ studentId, studentName, onClose }: Props) {
     return message(classroomUiLanguage.noCareers(lang, studentName));
   }
 
-  const { strongest, toGrow } = summarizeSkills(careers.data?.student.skills ?? []);
+  const studentSkills = careers.data?.student.skills ?? [];
+  const { strongest, toGrow } = summarizeSkills(studentSkills);
+  const strengths = strengthIds(studentSkills);
+  const strongerSkillText = classroomUiLanguage.strongerSkillOf(lang, studentName);
   const sectorFor = (title: string) => {
     const sector = careerSectors.find((item) => item.title === title);
     return sector ? localizeSector(sector, lang) : null;
@@ -234,13 +222,19 @@ function StudentCareerSuggest({ studentId, studentName, onClose }: Props) {
             {classroomUiLanguage.rankedCareers(lang)}
           </h3>
           <p className="flex items-center gap-1.5 text-xs text-icon-color/60">
-            <span aria-hidden className="h-3 w-0.5 rounded bg-icon-color" />
-            {classroomUiLanguage.expectedLevel(lang)}
+            <span
+              aria-hidden
+              className="flex h-4 w-4 items-center justify-center rounded-full bg-success-color text-[10px] text-white"
+            >
+              <FiCheck />
+            </span>
+            {strongerSkillText}
           </p>
         </div>
         <ol className="flex flex-col gap-3">
           {shown.map((career, index) => {
             const sector = sectorFor(career.title);
+            const key = keySkills(career.skills);
             return (
               <li
                 key={career.id ?? career.title}
@@ -261,34 +255,42 @@ function StudentCareerSuggest({ studentId, studentName, onClose }: Props) {
                     )}
                   </div>
                 </div>
-                <ul className="mt-4 flex flex-col gap-3">
-                  {career.skills.map((skill) => {
-                    const band = skillBand(skill.matchPoint);
-                    return (
-                      <li key={skill.id}>
-                        <div className="flex flex-wrap items-center justify-between gap-x-3 text-sm">
-                          <span className="font-medium text-icon-color">
+                {key.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-xs font-medium text-icon-color/60">
+                      {classroomUiLanguage.keySkillsHeading(lang)}
+                    </p>
+                    <ul className="mt-2 flex flex-wrap gap-2">
+                      {key.map((skill) => {
+                        const strong = strengths.has(skill.id);
+                        const styles = getSkillStyles(skill.title);
+                        return (
+                          <li
+                            key={skill.id}
+                            className={`flex items-center gap-1.5 rounded-full py-1 pl-1 pr-3 text-sm font-medium ${
+                              strong
+                                ? "bg-success-color/10 text-success-color ring-1 ring-success-color/30"
+                                : "bg-background-color text-icon-color"
+                            }`}
+                          >
+                            <span
+                              aria-hidden
+                              className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${
+                                strong ? "bg-success-color text-white" : styles.tint
+                              }`}
+                            >
+                              {strong ? <FiCheck /> : styles.icon}
+                            </span>
                             {skill.title}
-                          </span>
-                          <span className={`text-xs font-semibold ${bandStyles[band].text}`}>
-                            {bandLabel(band)}
-                          </span>
-                        </div>
-                        <div className="relative mt-1.5 h-2 rounded-full bg-background-color">
-                          <div
-                            className={`h-2 rounded-full ${bandStyles[band].bar}`}
-                            style={{ width: `${barPercent(skill.matchPoint)}%` }}
-                          />
-                          <span
-                            aria-hidden
-                            className="absolute -top-1 h-4 w-0.5 rounded bg-icon-color"
-                            style={{ left: `${EXPECTED_MARKER_PERCENT}%` }}
-                          />
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ul>
+                            {strong && (
+                              <span className="sr-only">. {strongerSkillText}</span>
+                            )}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                )}
               </li>
             );
           })}

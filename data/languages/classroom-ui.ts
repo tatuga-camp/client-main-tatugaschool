@@ -172,12 +172,14 @@ export const classroomUiLanguage = {
   exampleJobs: (l: Language) => pick(l, "Example jobs", "ตัวอย่างอาชีพ"),
   rankedCareers: (l: Language) =>
     pick(l, "All matching career areas", "กลุ่มอาชีพทั้งหมดที่เข้ากัน"),
-  bandAbove: (l: Language) =>
-    pick(l, "Above what this career needs", "สูงกว่าที่อาชีพนี้ต้องการ"),
-  bandClose: (l: Language) => pick(l, "Close", "ใกล้เคียง"),
-  bandBelow: (l: Language) => pick(l, "Below", "ต่ำกว่า"),
-  expectedLevel: (l: Language) =>
-    pick(l, "Line = level this career expects", "เส้น = ระดับที่อาชีพนี้ต้องการ"),
+  keySkillsHeading: (l: Language) =>
+    pick(l, "Key skills in this area", "ทักษะสำคัญของกลุ่มอาชีพนี้"),
+  strongerSkillOf: (l: Language, name: string) =>
+    pick(
+      l,
+      `One of ${name}'s stronger skills`,
+      `หนึ่งในทักษะที่โดดเด่นของ ${name}`,
+    ),
   showMore: (l: Language, n: number) =>
     pick(l, `Show ${n} more`, `แสดงอีก ${n} รายการ`),
   showLess: (l: Language) => pick(l, "Show less", "แสดงน้อยลง"),
