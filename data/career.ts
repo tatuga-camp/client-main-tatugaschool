@@ -26,7 +26,7 @@ export const careerSectors: CareerSector[] = [
     descriptionTh:
       "อาชีพด้านเกษตรกรรมและทรัพยากรธรรมชาติเกี่ยวข้องกับสิ่งแวดล้อมเป็นหลัก ผู้ที่ทำงานในสายอาชีพนี้ช่วยให้มนุษย์ใช้ทรัพยากรของโลกอย่างยั่งยืน ด้านล่างคือตัวอย่างอาชีพด้านเกษตรกรรมและทรัพยากรธรรมชาติ",
     picture:
-      "https://storage.googleapis.com/public-tatugaschool/careers/Agriculture.png",
+      "https://storage.tatugaschool.com/public/Agriculture%20and%20natural%20resources%20careers.jpg",
     blurhash: "LRJaPx$gNG$|.mI=WDbGGvV]afWX",
     description:
       "Careers in agriculture and natural resources are centred around the environment. Occupations within this career ensure humans are using the planet's resources sustainably. Below are some examples of jobs in agriculture and natural resources.",
@@ -57,7 +57,7 @@ export const careerSectors: CareerSector[] = [
     descriptionTh:
       "หากคุณสนใจอาคารสมัยใหม่และกระบวนการสร้างสรรค์อาคาร สถาปัตยกรรมและการก่อสร้างอาจเป็นอาชีพที่เหมาะกับคุณ อุตสาหกรรมนี้มีงานที่ต้องลงมือปฏิบัติจริงและใช้การคิดเชิงตรรกะหลายประเภท ด้านล่างคือตัวอย่างอาชีพในกลุ่มนี้",
     picture:
-      "https://storage.googleapis.com/public-tatugaschool/careers/Architecture.png",
+      "https://storage.tatugaschool.com/public/Architecture%20and%20Construction.webp",
     blurHash: "LLNK0Bt8~XNG%1oft6sm_4ad%Moz",
     description:
       "If you are interested in modern buildings and their creative process, architecture and construction could be the career for you. This industry has a cluster of hands-on jobs that require logical thinking. Here are a couple of occupations within this career type.",
@@ -88,7 +88,7 @@ export const careerSectors: CareerSector[] = [
     descriptionTh:
       "หากคุณถนัดด้านการบริหารหรือตัวเลข คุณอาจพิจารณาอาชีพด้านการบริหารธุรกิจหรืองานธุรการ ด้านล่างคือตัวอย่างอาชีพ",
     picture:
-      "https://storage.googleapis.com/public-tatugaschool/careers/Business.png",
+      "https://storage.tatugaschool.com/public/businesspeople-standing-together-office-1-1200x800.jpg",
     blurhash: "LMKdxco}Iqs:_Nt7%goe.8e.Nxo0",
     description:
       "If you have a flair for management or numbers, you may consider a career in business management or administration. Below are some examples.",
@@ -118,8 +118,7 @@ export const careerSectors: CareerSector[] = [
     titleTh: "อาชีพด้านการศึกษา",
     descriptionTh:
       "เมื่อพูดถึงอาชีพที่ให้คุณค่าทางใจ การศึกษาเป็นหนึ่งในอันดับต้น ๆ อุตสาหกรรมการศึกษาช่วยให้คนรุ่นใหม่พัฒนาทักษะทั้งด้านส่วนตัวและด้านอาชีพ ด้านล่างคือตัวอย่างอาชีพในวงการการศึกษา",
-    picture:
-      "https://storage.googleapis.com/public-tatugaschool/careers/Education.png",
+    picture: "https://storage.tatugaschool.com/public/Education%20careers.webp",
     blurhash: "LKJacR#Q%2RR_MR,?Hoz_2S%SwjY",
     description:
       "When considering rewarding careers, education is near the top of the list. The education industry helps the younger generations to develop personal and professional skills. Below are a few jobs within the education industry.",
@@ -150,7 +149,7 @@ export const careerSectors: CareerSector[] = [
     descriptionTh:
       "อาชีพด้านศิลปะ การตลาด และการสื่อสารเหมาะกับผู้ที่ชอบแสดงออกและมีความคิดสร้างสรรค์ หากคุณชอบคิดค้นสิ่งใหม่และมีความเป็นตัวของตัวเอง คุณอาจพิจารณาอาชีพในสายนี้ ด้านล่างคือตัวอย่างอาชีพ",
     picture:
-      "https://storage.googleapis.com/public-tatugaschool/careers/Arts.png",
+      "https://storage.tatugaschool.com/public/Arts%2C%20marketing%20and%20communication%20careers.jpg",
     blurhash: "LSN,PXOF.SxC%Mn$afof?wt7RPR-",
     description:
       "Arts, marketing and communication careers are for expressive and creative types. You may contemplate a career in this field if you enjoy being inventive and original. Here are some examples.",
@@ -181,7 +180,7 @@ export const careerSectors: CareerSector[] = [
     descriptionTh:
       "หากคุณมีใจรักในการช่วยเหลือผู้อื่น คุณอาจสนใจอาชีพในสายวิทยาศาสตร์สุขภาพ ด้านล่างคือตัวอย่างอาชีพ",
     picture:
-      "https://storage.googleapis.com/public-tatugaschool/careers/health.png",
+      "https://storage.tatugaschool.com/public/Careers%20in%20health%20science.jpg",
     blurhash: "LHM%cUof?^IB-:WWNyIooxNHWBax",
     description:
       "If you are passionate about helping others, you may be interested in a career in the health science sector. Here are some exemplary roles.",
@@ -212,7 +211,7 @@ export const careerSectors: CareerSector[] = [
     descriptionTh:
       "หากคุณชอบทำงานกับคอมพิวเตอร์หรือข้อมูล อาชีพด้านเทคโนโลยีสารสนเทศอาจเหมาะกับคุณ และสามารถทำงานด้านไอทีได้แม้ไม่มีปริญญา ด้านล่างคือตัวอย่างอาชีพด้านไอทีที่น่าสนใจ",
     picture:
-      "https://storage.googleapis.com/public-tatugaschool/careers/technology.png",
+      "https://storage.tatugaschool.com/public/Information%20technology.jpg",
     description:
       "If you enjoy working with computers or data, a career in information technology could be for you. It's possible to get a role in IT without a degree. Here are a few IT jobs to consider.",
     careers: [
@@ -242,7 +241,7 @@ export const careerSectors: CareerSector[] = [
     descriptionTh:
       "กฎหมาย ความปลอดภัยสาธารณะ งานราชทัณฑ์ และงานรักษาความปลอดภัย ล้วนเป็นทางเลือกอาชีพที่มั่นคง หากคุณชอบช่วยเหลือชุมชน อาชีพด้านกฎหมายและความปลอดภัยสาธารณะอาจเหมาะกับคุณ ด้านล่างคือตัวอย่างอาชีพในกลุ่มนี้",
     picture:
-      "https://storage.googleapis.com/public-tatugaschool/careers/law.png",
+      "https://storage.tatugaschool.com/public/Careers%20in%20law%20and%20public%20safety%20careers.jpg",
     blurhash: "LKJkWJ|@zpVY~V+]wcR:JAD*xu-;",
     description:
       "Law, public safety, corrections and security are all strong career choices. If you enjoy helping the community, a career in law and public safety could be for you. Here are a couple of examples of jobs within this industry.",
@@ -273,7 +272,7 @@ export const careerSectors: CareerSector[] = [
     descriptionTh:
       "อาชีพด้านวิทยาศาสตร์และวิศวกรรมเป็นรากฐานสำคัญของสังคมและการดำเนินชีวิตประจำวัน หากคุณต้องการอาชีพที่มีคุณค่าและรายได้สูง อาชีพต่อไปนี้อาจน่าพิจารณา",
     picture:
-      "https://storage.googleapis.com/public-tatugaschool/careers/Science.png",
+      "https://storage.tatugaschool.com/public/Science%20and%20Engineering.jpeg",
     blurhash: "L6Efsa9EU^*0^-H=.89Y00%#On$6",
     description:
       "Science and engineering careers are fundamental to society and its daily operations. If you want a rewarding career that pays a high salary, then the following jobs may be worth considering.",
@@ -304,7 +303,7 @@ export const careerSectors: CareerSector[] = [
     descriptionTh:
       "อาชีพด้านการท่องเที่ยวและการบริการมีทั้งงานโดยตรง เช่น พนักงานต้อนรับบนเครื่องบิน มัคคุเทศก์ และพนักงานบนเรือสำราญ และงานที่เกี่ยวข้อง เช่น ตัวแทนท่องเที่ยว ผู้จัดการโรงแรม และฝ่ายสำรองที่พักขององค์กร งานเหล่านี้มักเกี่ยวกับการบริการลูกค้า การต้อนรับ และความรักในการเดินทาง มีโอกาสตั้งแต่งานด่านหน้าไปจนถึงงานบริหารและงานเฉพาะทาง",
     picture:
-      "https://storage.googleapis.com/public-tatugaschool/careers/Travel%20and%20Services.png",
+      "https://storage.tatugaschool.com/public/Travel%20and%20Services.jpg",
     blurhash: "L6Efsa9EU^*0^-H=.89Y00%#On$6",
     description:
       "Careers in travel and services include direct roles like flight attendant, tour guide, and cruise ship staff, as well as related fields such as travel agent, hotel manager, and corporate reservations. These jobs often involve customer service, hospitality, and a love for travel, with opportunities ranging from front-line positions to management and specialized roles. ",
@@ -344,7 +343,7 @@ export const careerSectors: CareerSector[] = [
     descriptionTh:
       "อาชีพด้านศิลปะ การตลาด และการสื่อสารเน้นความคิดสร้างสรรค์ การแสดงออก และการสื่อสารข้อความ มีตั้งแต่งานด้านทัศนศิลป์และศิลปะการแสดง เช่น นักออกแบบกราฟิกหรือนักดนตรี ไปจนถึงงานเชิงกลยุทธ์ด้านการตลาด เช่น ผู้จัดการแบรนด์หรือนักวางกลยุทธ์ดิจิทัล และงานด้านการสื่อสาร เช่น การประชาสัมพันธ์หรือการเขียนเชิงเทคนิค งานเหล่านี้เกี่ยวกับการสร้างเนื้อหา การเชื่อมต่อกับผู้ชม และการสร้างอัตลักษณ์ของแบรนด์",
     picture:
-      "https://storage.googleapis.com/public-tatugaschool/careers/Arts%2C%20marketing%20%26%20communication.png",
+      "https://storage.tatugaschool.com/public/Arts%2C%20marketing%20%26%20communication.jpg",
     blurhash: "L6Efsa9EU^*0^-H=.89Y00%#On$6",
     description:
       "Careers in arts, marketing, and communication focus on creativity, expression, and messaging. Roles can range from visual and performing arts, like graphic designer or musician, to strategic business roles in marketing, like brand manager or digital strategist, and communication fields like public relations or technical writing. These jobs involve creating content, connecting with audiences, and building brand identity.",
