@@ -13,6 +13,7 @@ import { decodeBlurhashToCanvas } from "../../utils";
 import {
   keySkills,
   localizeSector,
+  localizeSkillTitle,
   strengthIds,
   summarizeSkills,
 } from "../../utils/careerReport";
@@ -139,7 +140,7 @@ function StudentCareerSuggest({ studentId, studentName, onClose }: Props) {
         >
           {styles.icon}
         </span>
-        {skill.title}
+        {localizeSkillTitle(skill.title, lang)}
       </li>
     );
   };
@@ -281,7 +282,7 @@ function StudentCareerSuggest({ studentId, studentName, onClose }: Props) {
                             >
                               {strong ? <FiCheck /> : styles.icon}
                             </span>
-                            {skill.title}
+                            {localizeSkillTitle(skill.title, lang)}
                             {strong && (
                               <span className="sr-only">. {strongerSkillText}</span>
                             )}
