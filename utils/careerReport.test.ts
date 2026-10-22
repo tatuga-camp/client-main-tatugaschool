@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   keySkills,
   localizeSector,
+  localizeSkillTitle,
   strengthIds,
   summarizeSkills,
 } from "./careerReport";
@@ -87,4 +88,23 @@ test("localizeSector falls back to English per field", () => {
     careers: [{ title: "ครูมัธยมศึกษา", description: "Teaches." }],
   });
   assert.equal(localizeSector(sector, "en").title, "Education careers");
+});
+
+test("localizeSkillTitle gives the Thai name for each of the six skills", () => {
+  assert.equal(localizeSkillTitle("Leadership", "th"), "ภาวะผู้นำ");
+  assert.equal(localizeSkillTitle("Communication", "th"), "การสื่อสาร");
+  assert.equal(localizeSkillTitle("Critical thinking", "th"), "การคิดเชิงวิพากษ์");
+  assert.equal(localizeSkillTitle("Digital literacy", "th"), "ความรู้ด้านดิจิทัล");
+  assert.equal(localizeSkillTitle("Creativity", "th"), "ความคิดสร้างสรรค์");
+  assert.equal(localizeSkillTitle("Collaboration", "th"), "การทำงานร่วมกัน");
+});
+
+test("localizeSkillTitle ignores case and extra spaces like getSkillStyles", () => {
+  assert.equal(localizeSkillTitle("Critical Thinking", "th"), "การคิดเชิงวิพากษ์");
+  assert.equal(localizeSkillTitle("  digital literacy ", "th"), "ความรู้ด้านดิจิทัล");
+});
+
+test("localizeSkillTitle keeps English in English mode and for unknown skills", () => {
+  assert.equal(localizeSkillTitle("Leadership", "en"), "Leadership");
+  assert.equal(localizeSkillTitle("Financial literacy", "th"), "Financial literacy");
 });

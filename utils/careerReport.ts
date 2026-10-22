@@ -63,3 +63,21 @@ export function localizeSector(
     })),
   };
 }
+
+const SKILL_TITLES_TH: [string, string][] = [
+  ["leadership", "ภาวะผู้นำ"],
+  ["communication", "การสื่อสาร"],
+  ["critical thinking", "การคิดเชิงวิพากษ์"],
+  ["digital literacy", "ความรู้ด้านดิจิทัล"],
+  ["creativity", "ความคิดสร้างสรรค์"],
+  ["collaboration", "การทำงานร่วมกัน"],
+];
+
+// Matches the same way getSkillStyles does (lowercase + includes), so a title
+// that gets an icon also gets a Thai name. Unknown titles stay as they are.
+export function localizeSkillTitle(title: string, language: Language): string {
+  if (language !== "th") return title;
+  const lower = title.toLowerCase();
+  const match = SKILL_TITLES_TH.find(([key]) => lower.includes(key));
+  return match ? match[1] : title;
+}
