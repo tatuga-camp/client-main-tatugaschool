@@ -1,14 +1,16 @@
-import React, { memo } from "react";
+import React, { memo, useState } from "react";
 import { Student, StudentOnSubject } from "../../interfaces";
 import Image from "next/image";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { MdDragIndicator } from "react-icons/md";
+import { MdDragIndicator, MdStar } from "react-icons/md";
 import { FaCheck } from "react-icons/fa";
 import { studentPointsLanguage } from "../../data/languages";
 import { useGetLanguage } from "../../react-query";
 import { decodeBlurhashToCanvas } from "../../utils";
 import { defaultBlurHash } from "../../data";
+import { mascotForPhoto } from "../../utils/mascot";
+import MascotAvatar from "./MascotAvatar";
 
 type Props = {
   student: (StudentOnSubject | Student) & { select?: boolean };
@@ -19,14 +21,26 @@ type Props = {
   isDragable?: boolean;
 };
 
-// Points bubble colour: green for a positive total, red for negative, neutral
+// Points chip colour: green for a positive total, red for negative, neutral
 // at zero so an untouched class doesn't read as a wall of green.
 function pointsTone(points: number) {
   if (points > 0) return "bg-success-color text-white";
   if (points < 0) return "bg-error-color text-white";
-  return "bg-white text-gray-500 ring-1 ring-gray-200";
+  return "bg-white/80 text-gray-500 backdrop-blur-sm";
 }
 
+// Grid is 2 columns on phones up to 7 on wide screens.
+const AVATAR_SIZES = "(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 240px";
+
+// Built-in cartoon avatars are square full-body art, so they sit whole in a
+// square at the top of the tile; uploaded photos fill the tile instead.
+const isCartoonAvatar = (photo: string) =>
+  photo.startsWith("https://storage.tatugaschool.com/AVATAR/");
+
+/**
+ * Student tile: the avatar (animated mascot or photo) fills the card and the
+ * name sits on a frosted label over its feet, like a character picker.
+ */
 function StudentCard({
   student,
   setSelectStudent,
@@ -53,32 +67,51 @@ function StudentCard({
   const isSelected = showSelect && !!student.select;
   const points =
     "totalSpeicalScore" in student ? student.totalSpeicalScore : undefined;
+  const mascot = mascotForPhoto(student.photo);
+  const [hovered, setHovered] = useState(false);
+  const fullName = `${student.firstName} ${student.lastName}`;
 
   return (
     <div
       ref={setNodeRef}
       style={style}
       className={`group relative h-full w-full ${isDragging ? "z-20 opacity-60" : ""}`}
+      onPointerEnter={(e) => {
+        if (mascot && e.pointerType === "mouse") setHovered(true);
+      }}
+      onPointerLeave={() => setHovered(false)}
     >
       <button
         type="button"
         aria-pressed={showSelect ? isSelected : undefined}
+        aria-label={fullName}
+        title={fullName}
         onClick={() => setSelectStudent(student)}
-        className={`flex h-full w-full select-none flex-col items-center gap-3 rounded-2xl border px-3 pb-4 pt-5 text-center font-Anuphan transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-color active:scale-[0.98] ${
+        className={`relative block aspect-[4/5] w-full select-none overflow-hidden rounded-2xl bg-background-color text-left font-Anuphan transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-color focus-visible:ring-offset-2 active:scale-[0.98] ${
           isSelected
-            ? "border-primary-color bg-primary-color/5 ring-1 ring-primary-color"
-            : "border-gray-200 bg-white hover:border-primary-color/40 hover:shadow-sm"
+            ? "ring-2 ring-primary-color ring-offset-2"
+            : "ring-1 ring-gray-200/80 hover:shadow-md hover:ring-primary-color/40"
         } ${isDragging ? "shadow-lg" : ""}`}
       >
-        <div className="relative">
-          <div
-            className={`relative h-16 w-16 overflow-hidden rounded-full bg-background-color ring-4 sm:h-20 sm:w-20 ${
-              isSelected ? "ring-primary-color/20" : "ring-background-color"
-            }`}
-          >
+        <span
+          className={`absolute inset-x-0 top-0 ${
+            mascot || isCartoonAvatar(student.photo)
+              ? "aspect-square"
+              : "bottom-0"
+          }`}
+        >
+          {mascot ? (
+            <MascotAvatar
+              id={student.id}
+              clips={mascot}
+              alt={student.firstName}
+              active={hovered}
+              sizes={AVATAR_SIZES}
+            />
+          ) : (
             <Image
               fill
-              sizes="80px"
+              sizes={AVATAR_SIZES}
               src={student.photo}
               alt={student.firstName}
               blurDataURL={decodeBlurhashToCanvas(
@@ -87,40 +120,40 @@ function StudentCard({
               placeholder="blur"
               className="object-cover"
             />
-          </div>
-          {points !== undefined && (
-            <span
-              title={`${points} ${studentPointsLanguage.points(lang)}`}
-              className={`absolute -bottom-1 -right-3 flex h-7 min-w-7 max-w-16 items-center justify-center truncate rounded-full px-1.5 text-xs font-semibold tabular-nums shadow-sm ring-2 ring-white ${pointsTone(
-                points,
-              )}`}
-            >
-              {points}
-            </span>
           )}
-        </div>
-        <div className="flex w-full min-w-0 flex-col items-center">
-          {student.title && (
-            <span className="max-w-full truncate text-xs text-gray-400">
-              {student.title}
-            </span>
-          )}
-          <span className="line-clamp-2 w-full break-words text-sm font-semibold leading-snug text-icon-color">
-            {student.firstName} {student.lastName}
+        </span>
+        {isSelected && (
+          <span aria-hidden className="absolute inset-0 bg-primary-color/10" />
+        )}
+        <span className="absolute inset-x-2 bottom-2 flex flex-col rounded-xl bg-white/70 px-2.5 py-1.5 shadow-sm ring-1 ring-white/60 backdrop-blur-md">
+          <span className="truncate text-sm font-semibold leading-snug text-icon-color">
+            {fullName}
           </span>
-          <span className="mt-0.5 text-xs text-gray-500">
+          <span className="truncate text-[11px] leading-tight text-gray-500">
             {studentPointsLanguage.number(lang)} {student.number}
+            {student.title && ` · ${student.title}`}
           </span>
-        </div>
+        </span>
       </button>
+
+      {points !== undefined && (
+        <span
+          title={`${points} ${studentPointsLanguage.points(lang)}`}
+          className={`pointer-events-none absolute right-2 top-2 flex h-7 min-w-7 max-w-16 items-center justify-center truncate rounded-full px-2 text-xs font-semibold tabular-nums shadow-sm ${pointsTone(
+            points,
+          )}`}
+        >
+          <MdStar /> {points}
+        </span>
+      )}
 
       {showSelect && (
         <span
           aria-hidden
-          className={`pointer-events-none absolute right-2.5 top-2.5 flex h-5 w-5 items-center justify-center rounded-full border text-[10px] transition ${
+          className={`pointer-events-none absolute left-2 top-2 flex h-6 w-6 items-center justify-center rounded-full border text-[11px] shadow-sm transition ${
             isSelected
               ? "border-primary-color bg-primary-color text-white"
-              : "border-gray-300 bg-white text-transparent"
+              : "border-gray-300 bg-white/80 text-transparent backdrop-blur-sm"
           }`}
         >
           <FaCheck />
@@ -136,7 +169,7 @@ function StudentCard({
           aria-label={studentPointsLanguage.dragToReorder(lang)}
           title={studentPointsLanguage.dragToReorder(lang)}
           style={{ cursor: isDragging ? "grabbing" : "grab" }}
-          className="absolute left-1.5 top-1.5 flex h-8 w-6 touch-none items-center justify-center rounded-lg text-gray-400 transition hover:bg-background-color hover:text-icon-color focus-visible:opacity-100 md:opacity-0 md:group-hover:opacity-100"
+          className="absolute left-2 top-2 flex h-8 w-7 touch-none items-center justify-center rounded-lg bg-white/70 text-gray-500 shadow-sm backdrop-blur-sm transition hover:bg-white hover:text-icon-color focus-visible:opacity-100 md:opacity-0 md:group-hover:opacity-100"
         >
           <MdDragIndicator />
         </button>

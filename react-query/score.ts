@@ -23,6 +23,7 @@ import {
 
 import { ScoreOnStudent, ScoreOnSubject } from "../interfaces";
 import { gradeKey } from "./grade";
+import { moodForPoints, reactMascot } from "../utils/mascot";
 
 export const scoretKey = {
   getScoreOnSubjectBySubjectId: (subjectId: string) => [
@@ -139,6 +140,8 @@ export function useCreateScoreOnStudent() {
     mutationFn: (request: RequestCreateScoreOnStudentService) =>
       CreateScoreOnStudentService(request),
     onSuccess(data, variables, context) {
+      const mood = moodForPoints(data.score);
+      if (mood) reactMascot(variables.studentOnSubjectId, mood);
       queryClient.setQueryData(
         scoretKey.getScoreOnStudentBySubjectId(data.subjectId),
         (prev: ScoreOnStudent[] | undefined) => {

@@ -155,7 +155,7 @@ export default function SpotlightReveal({
                 <CardBack />
               </div>
               <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)]">
-                <CardFace student={student} lang={lang} />
+                <CardFace student={student} lang={lang} revealed={shown} />
               </div>
             </div>
           </div>

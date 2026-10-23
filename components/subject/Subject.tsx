@@ -535,11 +535,12 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
                         return (
                           <div
                             key={index}
-                            className="flex min-h-44 animate-pulse flex-col items-center gap-3 rounded-2xl border border-gray-100 bg-white px-3 pb-4 pt-5"
+                            className="relative aspect-[4/5] w-full animate-pulse rounded-2xl bg-background-color ring-1 ring-gray-100"
                           >
-                            <div className="h-16 w-16 rounded-full bg-background-color sm:h-20 sm:w-20" />
-                            <div className="h-3 w-3/4 rounded-full bg-background-color" />
-                            <div className="h-3 w-1/3 rounded-full bg-background-color" />
+                            <div className="absolute inset-x-2 bottom-2 flex flex-col gap-1.5 rounded-xl bg-white/70 px-2.5 py-2">
+                              <div className="h-3 w-3/4 rounded-full bg-gray-200" />
+                              <div className="h-2.5 w-1/3 rounded-full bg-gray-200" />
+                            </div>
                           </div>
                         );
                       })
