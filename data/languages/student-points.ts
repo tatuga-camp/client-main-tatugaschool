@@ -119,4 +119,14 @@ export const studentPointsLanguage = {
   skillCreated: t("Skill created", "สร้างทักษะแล้ว"),
   skillUpdated: t("Skill updated", "แก้ไขทักษะแล้ว"),
   skillDeleted: t("Skill deleted", "ลบทักษะแล้ว"),
+
+  // Single-student popup (PopUpStudent) and its result screen.
+  changeAvatar: t("Change avatar", "เปลี่ยนอวาตาร์"),
+  close: t("Close", "ปิด"),
+  totalPoints: t("Total points", "คะแนนรวม"),
+  done: t("Done", "เสร็จสิ้น"),
+  greatJob: (name: string) => (language: Language) =>
+    language === "th" ? `เยี่ยมมาก ${name}!` : `Great job, ${name}!`,
+  keepGoing: (name: string) => (language: Language) =>
+    language === "th" ? `สู้ต่อไปนะ ${name}` : `Keep going, ${name}`,
 };
