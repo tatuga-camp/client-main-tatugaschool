@@ -121,6 +121,62 @@ const MASCOTS: Record<string, MascotClips> = {
     ],
     sad: [clip("mascot_10", "Thumbs down")],
   },
+  "https://storage.tatugaschool.com/AVATAR/11.png": {
+    poster: "/animation/mascot_11/original.png",
+    happy: [
+      clip("mascot_11", "Does a funny dance"),
+      clip("mascot_11", "Does smart show-off pose"),
+    ],
+    sad: [clip("mascot_11", "Thumbs down")],
+  },
+  "https://storage.tatugaschool.com/AVATAR/12.png": {
+    poster: "/animation/mascot_12/original.png",
+    happy: [
+      clip("mascot_12", "Does a happy dance"),
+      clip("mascot_12", "Does cute pose"),
+    ],
+    sad: [clip("mascot_12", "Thumbs down")],
+  },
+  "https://storage.tatugaschool.com/AVATAR/13.png": {
+    poster: "/animation/mascot_13/original.png",
+    happy: [
+      clip("mascot_13", "Does a smart cool"),
+      clip("mascot_13", "Jumps for joy"),
+    ],
+    sad: [clip("mascot_13", "Thumbs down")],
+  },
+  "https://storage.tatugaschool.com/AVATAR/14.png": {
+    poster: "/animation/mascot_14/original.png",
+    happy: [
+      clip("mascot_14", "Spin and say hello"),
+      clip("mascot_14", "Does a happy dance"),
+    ],
+    sad: [clip("mascot_14", "Thumbs down")],
+  },
+  "https://storage.tatugaschool.com/AVATAR/15.png": {
+    poster: "/animation/mascot_15/original.png",
+    happy: [
+      clip("mascot_15", "Jumps for joy"),
+      clip("mascot_15", "Laughs out loud"),
+    ],
+    sad: [clip("mascot_15", "Thumbs down")],
+  },
+  "https://storage.tatugaschool.com/AVATAR/17.png": {
+    poster: "/animation/mascot_17/original.png",
+    happy: [
+      clip("mascot_17", "Does a cute funny"),
+      clip("mascot_17", "Nods yes with happy"),
+    ],
+    sad: [clip("mascot_17", "Thumbs down")],
+  },
+  "https://storage.tatugaschool.com/AVATAR/18.png": {
+    poster: "/animation/mascot_18/original.png",
+    happy: [
+      clip("mascot_18", "Waves hello"),
+      clip("mascot_18", "Does a cute dance"),
+    ],
+    sad: [clip("mascot_18", "Thumbs down")],
+  },
 };
 
 export function mascotForPhoto(photo: string | undefined): MascotClips | null {
