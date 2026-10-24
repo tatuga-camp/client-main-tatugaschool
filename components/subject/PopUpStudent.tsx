@@ -108,7 +108,7 @@ function PopUpStudent({ student, onClose, toast }: Props) {
         onClick={handleCloseModal}
         aria-label={studentPointsLanguage.close(lang)}
         title={studentPointsLanguage.close(lang)}
-        className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full text-xl text-gray-500 transition hover:bg-background-color hover:text-icon-color"
+        className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/70 text-xl text-gray-500 backdrop-blur-sm transition hover:bg-background-color hover:text-icon-color"
       >
         <IoMdClose />
       </button>
@@ -123,41 +123,37 @@ function PopUpStudent({ student, onClose, toast }: Props) {
         />
       ) : (
         <>
-          <aside
-            className="flex items-center gap-4 border-b border-gray-100 bg-background-color/60 p-4 pr-14 md:w-60 md:shrink-0 md:flex-col md:justify-center md:gap-3 md:border-b-0 md:border-r md:p-6 md:text-center"
-          >
-            {/* The mask is a no-op that makes Safari clip a playing video
-                (or any transformed child) to the rounded corners. */}
-            <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full bg-white ring-4 ring-white [mask-image:radial-gradient(white,black)] md:h-32 md:w-32">
-              {mascot ? (
-                // Zoomed from the top so head and shoulders fill the circle;
-                // the legs, and the head when it jumps, slip under the edge.
-                <span className="absolute inset-0 origin-[50%_2%] scale-[1.5]">
-                  <MascotAvatar
-                    id={student.id}
-                    clips={mascot}
-                    alt={student.firstName}
-                    tapToPlay
-                    greetOnMount
-                    sizes="192px"
-                  />
-                </span>
-              ) : (
-                <Image
-                  src={image}
+          {/* The mask is a no-op that makes Safari clip a playing video to
+              the rounded corners. */}
+          <aside className="relative flex h-72 shrink-0 flex-col justify-end overflow-hidden rounded-t-2xl bg-background-color p-3 [mask-image:radial-gradient(white,black)] md:h-auto md:min-h-[28rem] md:w-64 md:rounded-l-2xl md:rounded-tr-none">
+            {mascot ? (
+              // A square as tall as the panel, centred: the mascot only uses
+              // the middle of its frame, so the cropped sides are empty.
+              <span className="absolute inset-y-0 left-1/2 aspect-square -translate-x-1/2">
+                <MascotAvatar
+                  id={student.id}
+                  clips={mascot}
                   alt={student.firstName}
-                  fill
-                  sizes="128px"
-                  placeholder="blur"
-                  blurDataURL={decodeBlurhashToCanvas(
-                    student.blurHash ?? defaultBlurHash,
-                  )}
-                  className="object-cover"
+                  tapToPlay
+                  greetOnMount
+                  sizes="(min-width: 768px) 448px, 288px"
                 />
-              )}
-            </div>
-            <div className="flex min-w-0 flex-col items-start gap-1.5 md:items-center">
-              <div className="flex min-w-0 flex-col md:items-center">
+              </span>
+            ) : (
+              <Image
+                src={image}
+                alt={student.firstName}
+                fill
+                sizes="(min-width: 768px) 256px, 100vw"
+                placeholder="blur"
+                blurDataURL={decodeBlurhashToCanvas(
+                  student.blurHash ?? defaultBlurHash,
+                )}
+                className="object-cover"
+              />
+            )}
+            <div className="pointer-events-none relative flex min-w-0 flex-col items-center gap-1.5 rounded-xl bg-white/70 px-3 py-2.5 text-center shadow-sm ring-1 ring-white/60 backdrop-blur-md">
+              <div className="flex min-w-0 max-w-full flex-col items-center">
                 {student.title && (
                   <span className="max-w-full truncate text-xs text-gray-400">
                     {student.title}
@@ -185,7 +181,7 @@ function PopUpStudent({ student, onClose, toast }: Props) {
                 type="button"
                 aria-pressed={triggerAvartar}
                 onClick={() => setSetTriggerAvatar((prev) => !prev)}
-                className={`mt-1 flex h-9 items-center gap-1.5 rounded-xl border px-3 text-sm font-medium transition ${
+                className={`pointer-events-auto mt-1 flex h-9 items-center gap-1.5 rounded-xl border px-3 text-sm font-medium transition ${
                   triggerAvartar
                     ? "border-primary-color bg-primary-color/5 text-primary-color"
                     : "border-gray-200 bg-white text-icon-color hover:bg-background-color"
