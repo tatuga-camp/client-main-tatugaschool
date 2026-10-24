@@ -3,3 +3,23 @@
   to = "https://tatugaschool.com/news"
   status = 301
   force = true
+
+# Static files in public/ rarely change, so let browsers reuse them for 7 days
+# instead of Netlify's default max-age=0 (a revalidation on every use). The
+# Netlify edge already caches them until the next deploy. A file replaced under
+# the same name can stay stale in browsers for up to 7 days, so rename it.
+# Left out on purpose: sw.js and pdf.worker.min.mjs must update with each deploy.
+[[headers]]
+  for = "/sounds/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+[[headers]]
+  for = "/svg/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
