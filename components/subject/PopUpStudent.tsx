@@ -126,16 +126,22 @@ function PopUpStudent({ student, onClose, toast }: Props) {
           <aside
             className="flex items-center gap-4 border-b border-gray-100 bg-background-color/60 p-4 pr-14 md:w-60 md:shrink-0 md:flex-col md:justify-center md:gap-3 md:border-b-0 md:border-r md:p-6 md:text-center"
           >
-            <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full bg-white ring-4 ring-white md:h-32 md:w-32">
+            {/* The mask is a no-op that makes Safari clip a playing video
+                (or any transformed child) to the rounded corners. */}
+            <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full bg-white ring-4 ring-white [mask-image:radial-gradient(white,black)] md:h-32 md:w-32">
               {mascot ? (
-                <MascotAvatar
-                  id={student.id}
-                  clips={mascot}
-                  alt={student.firstName}
-                  tapToPlay
-                  greetOnMount
-                  sizes="128px"
-                />
+                // Zoomed from the top so head and shoulders fill the circle;
+                // the legs, and the head when it jumps, slip under the edge.
+                <span className="absolute inset-0 origin-[50%_2%] scale-[1.5]">
+                  <MascotAvatar
+                    id={student.id}
+                    clips={mascot}
+                    alt={student.firstName}
+                    tapToPlay
+                    greetOnMount
+                    sizes="192px"
+                  />
+                </span>
               ) : (
                 <Image
                   src={image}
