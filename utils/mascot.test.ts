@@ -11,10 +11,10 @@ import {
 
 const ids = (n: number) => Array.from({ length: n }, (_, i) => `s${i}`);
 
-test("mascotForPhoto maps avatar 16 only", () => {
+test("mascotForPhoto maps cartoon avatars only", () => {
   assert.ok(mascotForPhoto("https://storage.tatugaschool.com/AVATAR/16.png"));
   assert.equal(
-    mascotForPhoto("https://storage.tatugaschool.com/AVATAR/15.png"),
+    mascotForPhoto("https://storage.tatugaschool.com/students/photo.jpg"),
     null,
   );
   assert.equal(mascotForPhoto(undefined), null);
@@ -64,13 +64,13 @@ test("mascotVideoFormat serves HEVC to WebKit-only browsers, WebM elsewhere", ()
 test("mascot clips point at both formats with encoded names", () => {
   const clips = mascotForPhoto("https://storage.tatugaschool.com/AVATAR/16.png");
   assert.deepEqual(clips?.happy[0], {
-    webm: "/animation/mascot_16/Jumps%20for%20joy.webm",
-    hevc: "/animation/mascot_16/Jumps%20for%20joy.mov",
+    webm: "https://storage.tatugaschool.com/AVATAR/animation/mascot_16/Jumps%20for%20joy.webm",
+    hevc: "https://storage.tatugaschool.com/AVATAR/animation/mascot_16/Jumps%20for%20joy.mov",
   });
   assert.deepEqual(clips?.sad, [
     {
-      webm: "/animation/mascot_16/Thumbs%20down%20gesture.webm",
-      hevc: "/animation/mascot_16/Thumbs%20down%20gesture.mov",
+      webm: "https://storage.tatugaschool.com/AVATAR/animation/mascot_16/Thumbs%20down%20gesture.webm",
+      hevc: "https://storage.tatugaschool.com/AVATAR/animation/mascot_16/Thumbs%20down%20gesture.mov",
     },
   ]);
 });
