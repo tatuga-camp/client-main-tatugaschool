@@ -24,16 +24,22 @@ export type MascotMood = "happy" | "sad";
 
 export type MascotVideoFormat = keyof MascotClip;
 
+// Served from R2 (zero egress) rather than the Netlify deploy. Clips are
+// fetched cross-origin, so the bucket's CORS must allow the app origin.
+const MASCOT_BASE = "https://storage.tatugaschool.com/AVATAR/animation";
+
 const clip = (folder: string, name: string): MascotClip => {
-  const base = `/animation/${folder}/${encodeURIComponent(name)}`;
+  const base = `${MASCOT_BASE}/${folder}/${encodeURIComponent(name)}`;
   return { webm: `${base}.webm`, hevc: `${base}.mov` };
 };
 
-// Test mapping: only avatar 16 has a mascot so far. Once the set is final the
+const poster = (folder: string) => `${MASCOT_BASE}/${folder}/original.png`;
+
+// Keyed on the cartoon avatar photo URLs. Once the set is final the
 // avatar photos can be migrated and this lookup keyed on something sturdier.
 const MASCOTS: Record<string, MascotClips> = {
   "https://storage.tatugaschool.com/AVATAR/16.png": {
-    poster: "/animation/mascot_16/original.png",
+    poster: poster("mascot_16"),
     happy: [
       clip("mascot_16", "Jumps for joy"),
       clip("mascot_16", "Laughs out loud"),
@@ -42,7 +48,7 @@ const MASCOTS: Record<string, MascotClips> = {
     sad: [clip("mascot_16", "Thumbs down gesture")],
   },
   "https://storage.tatugaschool.com/AVATAR/1.png": {
-    poster: "/animation/mascot_1/original.png",
+    poster: poster("mascot_1"),
     happy: [
       clip("mascot_1", "Does a happy dance"),
       clip("mascot_1", "Waves hello"),
@@ -50,7 +56,7 @@ const MASCOTS: Record<string, MascotClips> = {
     sad: [clip("mascot_1", "Shakes its head no")],
   },
   "https://storage.tatugaschool.com/AVATAR/2.png": {
-    poster: "/animation/mascot_2/original.png",
+    poster: poster("mascot_2"),
     happy: [
       clip("mascot_2", "Be quiet gesture"),
       clip("mascot_2", "Laughs out loud"),
@@ -58,7 +64,7 @@ const MASCOTS: Record<string, MascotClips> = {
     sad: [clip("mascot_2", "Thumbs down")],
   },
   "https://storage.tatugaschool.com/AVATAR/3.png": {
-    poster: "/animation/mascot_3/original.png",
+    poster: poster("mascot_3"),
     happy: [
       clip("mascot_3", "Does a happy dance"),
       clip("mascot_3", "Laughs out loud"),
@@ -66,7 +72,7 @@ const MASCOTS: Record<string, MascotClips> = {
     sad: [clip("mascot_3", "Thumbs down")],
   },
   "https://storage.tatugaschool.com/AVATAR/4.png": {
-    poster: "/animation/mascot_4/original.png",
+    poster: poster("mascot_4"),
     happy: [
       clip("mascot_4", "Does a happy dance"),
       clip("mascot_4", "Waves hello"),
@@ -74,7 +80,7 @@ const MASCOTS: Record<string, MascotClips> = {
     sad: [clip("mascot_4", "Thumbs down")],
   },
   "https://storage.tatugaschool.com/AVATAR/5.png": {
-    poster: "/animation/mascot_5/original.png",
+    poster: poster("mascot_5"),
     happy: [
       clip("mascot_5", "Does a happy dance"),
       clip("mascot_5", "Waves hello"),
@@ -82,7 +88,7 @@ const MASCOTS: Record<string, MascotClips> = {
     sad: [clip("mascot_5", "Thumbs down")],
   },
   "https://storage.tatugaschool.com/AVATAR/6.png": {
-    poster: "/animation/mascot_6/original.png",
+    poster: poster("mascot_6"),
     happy: [
       clip("mascot_6", "Does a happy dance"),
       clip("mascot_6", "Waves hello"),
@@ -90,7 +96,7 @@ const MASCOTS: Record<string, MascotClips> = {
     sad: [clip("mascot_6", "Thumbs down")],
   },
   "https://storage.tatugaschool.com/AVATAR/7.png": {
-    poster: "/animation/mascot_7/original.png",
+    poster: poster("mascot_7"),
     happy: [
       clip("mascot_7", "Does a happy dance"),
       clip("mascot_7", "Waves hello"),
@@ -98,7 +104,7 @@ const MASCOTS: Record<string, MascotClips> = {
     sad: [clip("mascot_7", "Thumbs down")],
   },
   "https://storage.tatugaschool.com/AVATAR/8.png": {
-    poster: "/animation/mascot_8/original.png",
+    poster: poster("mascot_8"),
     happy: [
       clip("mascot_8", "Does a happy dance"),
       clip("mascot_8", "Laughs out loud"),
@@ -106,7 +112,7 @@ const MASCOTS: Record<string, MascotClips> = {
     sad: [clip("mascot_8", "Shakes its head no")],
   },
   "https://storage.tatugaschool.com/AVATAR/9.png": {
-    poster: "/animation/mascot_9/original.png",
+    poster: poster("mascot_9"),
     happy: [
       clip("mascot_9", "Does a happy dance"),
       clip("mascot_9", "Laughs out loud"),
@@ -114,7 +120,7 @@ const MASCOTS: Record<string, MascotClips> = {
     sad: [clip("mascot_9", "Thumbs down")],
   },
   "https://storage.tatugaschool.com/AVATAR/10.png": {
-    poster: "/animation/mascot_10/original.png",
+    poster: poster("mascot_10"),
     happy: [
       clip("mascot_10", "Does a happy dance"),
       clip("mascot_10", "Waves hello"),
@@ -122,7 +128,7 @@ const MASCOTS: Record<string, MascotClips> = {
     sad: [clip("mascot_10", "Thumbs down")],
   },
   "https://storage.tatugaschool.com/AVATAR/11.png": {
-    poster: "/animation/mascot_11/original.png",
+    poster: poster("mascot_11"),
     happy: [
       clip("mascot_11", "Does a funny dance"),
       clip("mascot_11", "Does smart show-off pose"),
@@ -130,7 +136,7 @@ const MASCOTS: Record<string, MascotClips> = {
     sad: [clip("mascot_11", "Thumbs down")],
   },
   "https://storage.tatugaschool.com/AVATAR/12.png": {
-    poster: "/animation/mascot_12/original.png",
+    poster: poster("mascot_12"),
     happy: [
       clip("mascot_12", "Does a happy dance"),
       clip("mascot_12", "Does cute pose"),
@@ -138,7 +144,7 @@ const MASCOTS: Record<string, MascotClips> = {
     sad: [clip("mascot_12", "Thumbs down")],
   },
   "https://storage.tatugaschool.com/AVATAR/13.png": {
-    poster: "/animation/mascot_13/original.png",
+    poster: poster("mascot_13"),
     happy: [
       clip("mascot_13", "Does a smart cool"),
       clip("mascot_13", "Jumps for joy"),
@@ -146,7 +152,7 @@ const MASCOTS: Record<string, MascotClips> = {
     sad: [clip("mascot_13", "Thumbs down")],
   },
   "https://storage.tatugaschool.com/AVATAR/14.png": {
-    poster: "/animation/mascot_14/original.png",
+    poster: poster("mascot_14"),
     happy: [
       clip("mascot_14", "Spin and say hello"),
       clip("mascot_14", "Does a happy dance"),
@@ -154,7 +160,7 @@ const MASCOTS: Record<string, MascotClips> = {
     sad: [clip("mascot_14", "Thumbs down")],
   },
   "https://storage.tatugaschool.com/AVATAR/15.png": {
-    poster: "/animation/mascot_15/original.png",
+    poster: poster("mascot_15"),
     happy: [
       clip("mascot_15", "Jumps for joy"),
       clip("mascot_15", "Laughs out loud"),
@@ -162,7 +168,7 @@ const MASCOTS: Record<string, MascotClips> = {
     sad: [clip("mascot_15", "Thumbs down")],
   },
   "https://storage.tatugaschool.com/AVATAR/17.png": {
-    poster: "/animation/mascot_17/original.png",
+    poster: poster("mascot_17"),
     happy: [
       clip("mascot_17", "Does a cute funny"),
       clip("mascot_17", "Nods yes with happy"),
@@ -170,7 +176,7 @@ const MASCOTS: Record<string, MascotClips> = {
     sad: [clip("mascot_17", "Thumbs down")],
   },
   "https://storage.tatugaschool.com/AVATAR/18.png": {
-    poster: "/animation/mascot_18/original.png",
+    poster: poster("mascot_18"),
     happy: [
       clip("mascot_18", "Waves hello"),
       clip("mascot_18", "Does a cute dance"),
