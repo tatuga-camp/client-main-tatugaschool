@@ -59,7 +59,7 @@ function CommentList({ comment, index, studentOnAssignmentId }: Props) {
         <button
           disabled={isDelete}
           onClick={() => handleDeleteComment(comment.id)}
-          className="absolute hidden group-hover:block
+          className="absolute [@media(hover:hover)]:hidden [@media(hover:hover)]:group-hover:block
      hover:bg-red-200 rounded-full p-1 transition active:scale-105
    top-2 right-2 text-red-500"
         >

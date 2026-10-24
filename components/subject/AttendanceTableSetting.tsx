@@ -569,7 +569,7 @@ const AttendanceStatusRow = memo(
           disabled={deleteStatus.isPending}
           aria-label={attendanceTableSettingLanguage.delete(language)}
           title={attendanceTableSettingLanguage.delete(language)}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-400 transition hover:bg-error-color/10 hover:text-error-color md:opacity-0 md:focus:opacity-100 md:group-hover:opacity-100"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-400 transition hover:bg-error-color/10 hover:text-error-color md:focus:opacity-100 [@media(hover:hover)]:md:opacity-0 [@media(hover:hover)]:md:group-hover:opacity-100"
         >
           <TbTrash />
         </button>

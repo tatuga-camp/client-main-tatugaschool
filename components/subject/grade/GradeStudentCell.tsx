@@ -78,7 +78,7 @@ function GradeStudentCell({
           target="_blank"
           title={gradeTableData.report(language)}
           aria-label={gradeTableData.report(language)}
-          className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-xl text-icon-color transition hover:bg-white md:flex md:opacity-0 md:group-hover:opacity-100"
+          className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-xl text-icon-color transition hover:bg-white md:flex [@media(hover:hover)]:md:opacity-0 [@media(hover:hover)]:md:group-hover:opacity-100"
         >
           <TbFileDownload />
         </Link>

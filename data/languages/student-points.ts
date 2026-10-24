@@ -85,8 +85,8 @@ export const studentPointsLanguage = {
   // ScorePanel
   panelTitle: t("Give points", "ให้คะแนน"),
   panelHint: t(
-    "Pick a skill, adjust the points, then give.",
-    "เลือกทักษะ ปรับคะแนน แล้วกดให้คะแนน",
+    "Pick a skill, adjust the points, then give. Double-tap a skill to give it right away.",
+    "เลือกทักษะ ปรับคะแนน แล้วกดให้คะแนน หรือแตะทักษะสองครั้งเพื่อให้คะแนนทันที",
   ),
   addSkill: t("Add skill", "เพิ่มทักษะ"),
   editSkill: t("Edit skill", "แก้ไขทักษะ"),

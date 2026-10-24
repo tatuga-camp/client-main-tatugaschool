@@ -163,7 +163,7 @@ function StudentCard({
           aria-label={studentPointsLanguage.dragToReorder(lang)}
           title={studentPointsLanguage.dragToReorder(lang)}
           style={{ cursor: isDragging ? "grabbing" : "grab" }}
-          className="absolute left-2 top-2 flex h-8 w-7 touch-none items-center justify-center rounded-lg bg-white/70 text-gray-500 shadow-sm backdrop-blur-sm transition hover:bg-white hover:text-icon-color focus-visible:opacity-100 md:opacity-0 md:group-hover:opacity-100"
+          className="absolute left-2 top-2 flex h-8 w-7 touch-none items-center justify-center rounded-lg bg-white/70 text-gray-500 shadow-sm backdrop-blur-sm transition hover:bg-white hover:text-icon-color focus-visible:opacity-100 [@media(hover:hover)]:md:opacity-0 [@media(hover:hover)]:md:group-hover:opacity-100"
         >
           <MdDragIndicator />
         </button>

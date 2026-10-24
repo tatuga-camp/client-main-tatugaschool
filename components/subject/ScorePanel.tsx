@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { InputNumber } from "primereact/inputnumber";
 import { Toast } from "primereact/toast";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { FiMinus, FiPlus } from "react-icons/fi";
 import { IoArrowBack, IoStar } from "react-icons/io5";
 import { MdEdit } from "react-icons/md";
@@ -20,6 +20,9 @@ import { decodeBlurhashToCanvas } from "../../utils";
 import LoadingSpinner from "../common/LoadingSpinner";
 import ConfirmDeleteMessage from "../common/ConfirmDeleteMessage";
 import LoadingBar from "../common/LoadingBar";
+
+/** Two taps (or clicks) on one skill within this window give its points. */
+const DOUBLE_TAP_MS = 400;
 
 type Props = {
   subjectId: string;
@@ -62,6 +65,8 @@ function ScorePanel({
   const [inputScore, setInputScore] = useState<number>(
     selectScore?.inputScore ?? 0,
   );
+  // The last skill tap, so a second quick tap on it gives the points at once.
+  const lastTap = useRef<{ id: string; time: number } | null>(null);
 
   const changePoints = (value: number) => {
     setInputScore(value);
@@ -122,8 +127,23 @@ function ScorePanel({
                         score: score,
                         inputScore: score.score,
                       });
+                      // Timed by hand rather than onDoubleClick, which iPad
+                      // Safari doesn't fire reliably for taps.
+                      const now = performance.now();
+                      const last = lastTap.current;
+                      if (
+                        last?.id === score.id &&
+                        now - last.time < DOUBLE_TAP_MS &&
+                        onCreateScore &&
+                        !isLoading
+                      ) {
+                        lastTap.current = null;
+                        onCreateScore({ score, inputScore: score.score });
+                        return;
+                      }
+                      lastTap.current = { id: score.id, time: now };
                     }}
-                    className={`flex h-28 w-full flex-col items-center justify-center gap-2 rounded-2xl border p-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-color active:scale-95 ${
+                    className={`flex h-28 w-full touch-manipulation flex-col items-center justify-center gap-2 rounded-2xl border p-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-color active:scale-95 ${
                       isSelected
                         ? "border-primary-color bg-primary-color/5 ring-1 ring-primary-color"
                         : "border-gray-200 bg-white hover:border-primary-color/40 hover:bg-background-color"
@@ -162,9 +182,12 @@ function ScorePanel({
                     aria-label={studentPointsLanguage.editSkill(lang)}
                     title={studentPointsLanguage.editSkill(lang)}
                     className={`absolute right-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full text-gray-400 transition hover:bg-white hover:text-primary-color focus-visible:opacity-100 ${
+                      // Hide-until-hover only where hover is real: on iPad a
+                      // tap that reveals hidden content is treated as a hover
+                      // and swallows the click, so skills needed two taps.
                       isSelected
                         ? "opacity-100"
-                        : "md:opacity-0 md:group-hover:opacity-100"
+                        : "[@media(hover:hover)]:md:opacity-0 [@media(hover:hover)]:md:group-hover:opacity-100"
                     }`}
                   >
                     <MdEdit />

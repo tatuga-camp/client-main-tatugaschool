@@ -85,7 +85,7 @@ export const CommentTemplates: React.FC<Props> = ({
             <button
               type="button"
               onClick={() => persist(templates.filter((_, j) => j !== i))}
-              className="rounded p-1 text-gray-400 opacity-0 transition group-hover:opacity-100 hover:bg-red-50 hover:text-red-500"
+              className="rounded p-1 text-gray-400 transition hover:bg-red-50 focus-visible:opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 hover:text-red-500"
               title="Delete"
             >
               <IoMdClose />

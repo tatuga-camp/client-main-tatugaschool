@@ -125,7 +125,7 @@ export default function DeckDrawer({
                         {CardPickerLanguage.number_label(lang, student.number)}
                       </span>
                     </span>
-                    <span className="shrink-0 text-xs font-semibold text-primary-color opacity-0 transition group-hover:opacity-100">
+                    <span className="shrink-0 text-xs font-semibold text-primary-color transition [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100">
                       {tab === "deck"
                         ? CardPickerLanguage.move_to_picked(lang)
                         : (labels?.moveToPool ?? CardPickerLanguage.move_to_deck(lang))}
