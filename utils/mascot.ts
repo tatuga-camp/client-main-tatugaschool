@@ -156,6 +156,7 @@ const MASCOTS: Record<string, MascotClips> = {
     happy: [
       clip("mascot_14", "Spin and say hello"),
       clip("mascot_14", "Does a happy dance"),
+      clip("mascot_14", "Does a B-boy dance"),
     ],
     sad: [clip("mascot_14", "Thumbs down")],
   },
@@ -182,6 +183,22 @@ const MASCOTS: Record<string, MascotClips> = {
       clip("mascot_18", "Does a cute dance"),
     ],
     sad: [clip("mascot_18", "Thumbs down")],
+  },
+  "https://storage.tatugaschool.com/AVATAR/19.png": {
+    poster: poster("mascot_19"),
+    happy: [
+      clip("mascot_19", "Do muslim greet gesture"),
+      clip("mascot_19", "Jumps for joy"),
+    ],
+    sad: [clip("mascot_19", "Thumbs down")],
+  },
+  "https://storage.tatugaschool.com/AVATAR/20.png": {
+    poster: poster("mascot_20"),
+    happy: [
+      clip("mascot_20", "Do muslim greet gesture"),
+      clip("mascot_20", "Does a happy Thai"),
+    ],
+    sad: [clip("mascot_20", "Say no with strong")],
   },
 };
 
@@ -250,8 +267,7 @@ export function createPlaySlots(
   now: () => number = Date.now,
 ): PlaySlots {
   let playing = 0;
-  const queue: { start: () => void; drop: () => void; expires: number }[] =
-    [];
+  const queue: { start: () => void; drop: () => void; expires: number }[] = [];
 
   const tryAcquire = (limit = max) => {
     if (playing >= Math.min(limit, max)) return false;

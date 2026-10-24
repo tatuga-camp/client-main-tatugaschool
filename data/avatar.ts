@@ -17,4 +17,6 @@ export const studentAvatars = [
   "https://storage.tatugaschool.com/AVATAR/16.png",
   "https://storage.tatugaschool.com/AVATAR/17.png",
   "https://storage.tatugaschool.com/AVATAR/18.png",
+  "https://storage.tatugaschool.com/AVATAR/19.png",
+  "https://storage.tatugaschool.com/AVATAR/20.png",
 ];
