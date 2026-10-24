@@ -194,8 +194,22 @@ export function mascotForPhoto(photo: string | undefined): MascotClips | null {
 export const IDLE_PLAY_RATIO = 0.2;
 
 /**
+ * Most mascot videos playing at once, page-wide. Transparent video is decoded
+ * in software on Chrome and Firefox and Safari has few hardware decoders, so
+ * a class of 40 must never decode 40 clips together.
+ */
+export const MAX_PLAYING = 6;
+
+/** Ambient (idle) plays only start while fewer than this many videos play. */
+export const MAX_IDLE_PLAYING = 2;
+
+/** A queued tap or score reaction is dropped if no slot frees up in time. */
+export const PLAY_WAIT_MS = 6000;
+
+/**
  * Which idle cards to start this tick so no more than `ratio` of all mascot
- * cards play at once (always at least one when any exist).
+ * cards (and never more than `max`) play at once, always at least one when
+ * any exist.
  */
 export function pickIdleToPlay(
   idleIds: string[],
@@ -203,9 +217,10 @@ export function pickIdleToPlay(
   totalCount: number,
   random: () => number = Math.random,
   ratio: number = IDLE_PLAY_RATIO,
+  max: number = MAX_IDLE_PLAYING,
 ): string[] {
   if (totalCount === 0) return [];
-  const cap = Math.max(1, Math.floor(totalCount * ratio));
+  const cap = Math.min(max, Math.max(1, Math.floor(totalCount * ratio)));
   const room = Math.min(cap - playingCount, idleIds.length);
   if (room <= 0) return [];
   const pool = [...idleIds];
@@ -215,6 +230,65 @@ export function pickIdleToPlay(
     picked.push(pool.splice(index, 1)[0]);
   }
   return picked;
+}
+
+export type PlaySlots = {
+  readonly playing: number;
+  /** Take a slot now if fewer than `limit` are in use. */
+  tryAcquire: (limit?: number) => boolean;
+  /**
+   * Take a slot now, or queue for the next free one; `drop` runs instead of
+   * `start` if none frees up within PLAY_WAIT_MS. Returns a cancel.
+   */
+  acquire: (start: () => void, drop: () => void) => () => void;
+  release: () => void;
+};
+
+/** Page-wide budget of concurrently playing mascot videos. */
+export function createPlaySlots(
+  max: number = MAX_PLAYING,
+  now: () => number = Date.now,
+): PlaySlots {
+  let playing = 0;
+  const queue: { start: () => void; drop: () => void; expires: number }[] =
+    [];
+
+  const tryAcquire = (limit = max) => {
+    if (playing >= Math.min(limit, max)) return false;
+    playing += 1;
+    return true;
+  };
+
+  return {
+    get playing() {
+      return playing;
+    },
+    tryAcquire,
+    acquire(start, drop) {
+      if (tryAcquire()) {
+        start();
+        return () => {};
+      }
+      const entry = { start, drop, expires: now() + PLAY_WAIT_MS };
+      queue.push(entry);
+      return () => {
+        const index = queue.indexOf(entry);
+        if (index >= 0) queue.splice(index, 1);
+      };
+    },
+    release() {
+      playing = Math.max(0, playing - 1);
+      while (playing < max && queue.length > 0) {
+        const next = queue.shift()!;
+        if (next.expires < now()) {
+          next.drop();
+          continue;
+        }
+        playing += 1;
+        next.start();
+      }
+    },
+  };
 }
 
 /**

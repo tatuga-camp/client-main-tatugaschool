@@ -36,7 +36,6 @@ function PopUpStudent({ student, onClose, toast }: Props) {
   const [triggerAvartar, setSetTriggerAvatar] = useState<boolean>(false);
   const createScoreOnStudent = useCreateScoreOnStudent();
   const [image, setImage] = useState<string>(student.photo);
-  const [hovered, setHovered] = useState(false);
   const [result, setResult] = useState<ScoreResult | null>(null);
 
   const [totalScore, setTotalScore] = React.useState<number>(
@@ -125,10 +124,6 @@ function PopUpStudent({ student, onClose, toast }: Props) {
       ) : (
         <>
           <aside
-            onPointerEnter={(e) => {
-              if (mascot && e.pointerType === "mouse") setHovered(true);
-            }}
-            onPointerLeave={() => setHovered(false)}
             className="flex items-center gap-4 border-b border-gray-100 bg-background-color/60 p-4 pr-14 md:w-60 md:shrink-0 md:flex-col md:justify-center md:gap-3 md:border-b-0 md:border-r md:p-6 md:text-center"
           >
             <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full bg-white ring-4 ring-white md:h-32 md:w-32">
@@ -137,7 +132,8 @@ function PopUpStudent({ student, onClose, toast }: Props) {
                   id={student.id}
                   clips={mascot}
                   alt={student.firstName}
-                  active={hovered}
+                  tapToPlay
+                  greetOnMount
                   sizes="128px"
                 />
               ) : (

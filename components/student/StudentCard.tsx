@@ -1,4 +1,4 @@
-import React, { memo, useState } from "react";
+import React, { memo } from "react";
 import { Student, StudentOnSubject } from "../../interfaces";
 import Image from "next/image";
 import { useSortable } from "@dnd-kit/sortable";
@@ -68,7 +68,6 @@ function StudentCard({
   const points =
     "totalSpeicalScore" in student ? student.totalSpeicalScore : undefined;
   const mascot = mascotForPhoto(student.photo);
-  const [hovered, setHovered] = useState(false);
   const fullName = `${student.firstName} ${student.lastName}`;
 
   return (
@@ -76,10 +75,6 @@ function StudentCard({
       ref={setNodeRef}
       style={style}
       className={`group relative h-full w-full ${isDragging ? "z-20 opacity-60" : ""}`}
-      onPointerEnter={(e) => {
-        if (mascot && e.pointerType === "mouse") setHovered(true);
-      }}
-      onPointerLeave={() => setHovered(false)}
     >
       <button
         type="button"
@@ -105,7 +100,6 @@ function StudentCard({
               id={student.id}
               clips={mascot}
               alt={student.firstName}
-              active={hovered}
               sizes={AVATAR_SIZES}
             />
           ) : (

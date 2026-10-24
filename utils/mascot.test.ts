@@ -1,6 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
+  createPlaySlots,
+  MAX_IDLE_PLAYING,
+  PLAY_WAIT_MS,
   mascotForPhoto,
   mascotVideoFormat,
   moodForPoints,
@@ -21,9 +24,68 @@ test("mascotForPhoto maps cartoon avatars only", () => {
 });
 
 test("pickIdleToPlay caps concurrent plays at 20% of cards", () => {
-  assert.equal(pickIdleToPlay(ids(40), 0, 40).length, 8);
-  assert.equal(pickIdleToPlay(ids(35), 5, 40).length, 3);
-  assert.deepEqual(pickIdleToPlay(ids(32), 8, 40), []);
+  const noMax = Infinity;
+  assert.equal(pickIdleToPlay(ids(40), 0, 40, Math.random, 0.2, noMax).length, 8);
+  assert.equal(pickIdleToPlay(ids(35), 5, 40, Math.random, 0.2, noMax).length, 3);
+  assert.deepEqual(pickIdleToPlay(ids(32), 8, 40, Math.random, 0.2, noMax), []);
+});
+
+test("pickIdleToPlay never idles more than MAX_IDLE_PLAYING in a big class", () => {
+  assert.equal(pickIdleToPlay(ids(40), 0, 40).length, MAX_IDLE_PLAYING);
+  assert.equal(pickIdleToPlay(ids(39), 1, 40).length, MAX_IDLE_PLAYING - 1);
+  assert.deepEqual(pickIdleToPlay(ids(38), MAX_IDLE_PLAYING, 40), []);
+});
+
+test("createPlaySlots caps concurrent plays and hands freed slots to the queue", () => {
+  const slots = createPlaySlots(2);
+  const started: string[] = [];
+  const dropped: string[] = [];
+  const play = (name: string) =>
+    slots.acquire(
+      () => started.push(name),
+      () => dropped.push(name),
+    );
+  play("a");
+  play("b");
+  play("c");
+  const cancelD = play("d");
+  assert.deepEqual(started, ["a", "b"]);
+  assert.equal(slots.tryAcquire(), false);
+  cancelD();
+  slots.release();
+  assert.deepEqual(started, ["a", "b", "c"]);
+  assert.equal(slots.playing, 2);
+  slots.release();
+  assert.equal(slots.playing, 1);
+  assert.deepEqual(dropped, []);
+});
+
+test("createPlaySlots: idle limit is lower than the full budget", () => {
+  const slots = createPlaySlots(3);
+  assert.equal(slots.tryAcquire(2), true);
+  assert.equal(slots.tryAcquire(2), true);
+  assert.equal(slots.tryAcquire(2), false);
+  assert.equal(slots.tryAcquire(), true);
+});
+
+test("createPlaySlots drops queued plays that waited too long", () => {
+  let time = 0;
+  const slots = createPlaySlots(1, () => time);
+  const started: string[] = [];
+  const dropped: string[] = [];
+  const play = (name: string) =>
+    slots.acquire(
+      () => started.push(name),
+      () => dropped.push(name),
+    );
+  play("a");
+  play("late");
+  time = PLAY_WAIT_MS / 2;
+  play("fresh");
+  time = PLAY_WAIT_MS + 1;
+  slots.release();
+  assert.deepEqual(started, ["a", "fresh"]);
+  assert.deepEqual(dropped, ["late"]);
 });
 
 test("pickIdleToPlay lets at least one card play in a small class", () => {
@@ -33,7 +95,7 @@ test("pickIdleToPlay lets at least one card play in a small class", () => {
 });
 
 test("pickIdleToPlay never picks the same card twice", () => {
-  const picked = pickIdleToPlay(ids(10), 0, 50, () => 0);
+  const picked = pickIdleToPlay(ids(10), 0, 50, () => 0, 0.2, Infinity);
   assert.deepEqual(picked, ["s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9"]);
 });
 

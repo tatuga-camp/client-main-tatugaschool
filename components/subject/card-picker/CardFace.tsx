@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { CardPickerLanguage } from "../../../data/languages";
 import { Language, StudentOnSubject } from "../../../interfaces";
 import { mascotForPhoto, reactMascot } from "../../../utils/mascot";
@@ -46,7 +46,6 @@ export default function CardFace({
   revealed?: boolean;
 }) {
   const mascot = mascotForPhoto(student.photo);
-  const [hovered, setHovered] = useState(false);
 
   useEffect(() => {
     if (revealed && mascot) reactMascot(student.id, "happy");
@@ -54,10 +53,6 @@ export default function CardFace({
 
   return (
     <div
-      onPointerEnter={(e) => {
-        if (mascot && e.pointerType === "mouse") setHovered(true);
-      }}
-      onPointerLeave={() => setHovered(false)}
       className={`relative flex h-full w-full flex-col items-center rounded-2xl border-4 border-white bg-white pb-3 shadow-[0_24px_50px_rgba(0,0,0,0.35)] ${
         mascot ? "px-0 pt-5" : "px-3 pt-9"
       }`}
@@ -76,7 +71,7 @@ export default function CardFace({
             id={student.id}
             clips={mascot}
             alt={student.firstName}
-            active={hovered}
+            tapToPlay
             sizes="208px"
           />
         </div>
