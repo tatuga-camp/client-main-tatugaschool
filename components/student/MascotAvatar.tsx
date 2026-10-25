@@ -44,7 +44,8 @@ const clipCache = new Map<string, Promise<string>>();
 function loadClip(url: string): Promise<string> {
   let pending = clipCache.get(url);
   if (!pending) {
-    pending = fetch(url)
+    // ?v= skips browser-cached copies saved without CORS headers (bump to bust).
+    pending = fetch(`${url}?v=2`)
       .then((res) => {
         if (!res.ok) throw new Error(`Mascot clip ${res.status}`);
         return res.blob();
@@ -66,8 +67,9 @@ function videoFormat(): MascotVideoFormat | null {
   if (detectedFormat === undefined) {
     detectedFormat = mascotVideoFormat(
       navigator.userAgent,
-      document.createElement("video").canPlayType('video/mp4; codecs="hvc1"') !==
-        "",
+      document
+        .createElement("video")
+        .canPlayType('video/mp4; codecs="hvc1"') !== "",
     );
   }
   return detectedFormat;
