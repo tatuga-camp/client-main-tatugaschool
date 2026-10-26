@@ -99,6 +99,7 @@ const MASCOTS: Record<string, MascotClips> = {
     poster: poster("mascot_7"),
     happy: [
       clip("mascot_7", "Does a happy dance"),
+      clip("mascot_7", "Does a The 67"),
       clip("mascot_7", "Waves hello"),
     ],
     sad: [clip("mascot_7", "Thumbs down")],
