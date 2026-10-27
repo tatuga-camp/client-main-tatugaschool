@@ -219,6 +219,16 @@ export const classworkCardDataLanguage = {
         return "Drag to reorder";
     }
   },
+  moreActions: (language: Language) => {
+    switch (language) {
+      case "en":
+        return "More actions for";
+      case "th":
+        return "ตัวเลือกเพิ่มเติมสำหรับ";
+      default:
+        return "More actions for";
+    }
+  },
 } as const;
 
 export const classworkHeadMenuBarDataLanguage = {

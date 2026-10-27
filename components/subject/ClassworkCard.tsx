@@ -4,7 +4,7 @@ import Link from "next/link";
 import { CSSProperties } from "react";
 import { BiBook } from "react-icons/bi";
 import { FaRegFile, FaRegFileImage } from "react-icons/fa6";
-import { FiCalendar, FiChevronDown, FiPaperclip } from "react-icons/fi";
+import { FiCalendar, FiChevronDown, FiCopy, FiPaperclip, FiTrash2 } from "react-icons/fi";
 import {
   MdAssignment,
   MdChecklist,
@@ -15,6 +15,7 @@ import {
 } from "react-icons/md";
 import {
   classworkCardDataLanguage as t,
+  classworkHeadMenuBarDataLanguage,
   rubricLanguage,
 } from "../../data/languages";
 import { Assignment, FileOnAssignment, Language } from "../../interfaces";
@@ -23,10 +24,11 @@ import {
   classworkHref,
   classworkShowsAttachments,
 } from "../../utils/classworkLinks";
+import RowActionsMenu, { type RowAction } from "../common/RowActionsMenu";
 import TextEditor from "../common/TextEditor";
 import AssignmentTagEditor from "./AssignmentTagEditor";
 
-type Classwork = Assignment & {
+export type Classwork = Assignment & {
   files: FileOnAssignment[];
   studentAssign: number;
   reviewNumber: number;
@@ -44,6 +46,10 @@ type PropsClassworkCard = {
   subjectId: string;
   uniqueTags: string[];
   onSelect: (classwork: Assignment) => void;
+  /** Menu action: open the copy/export flow for this classwork. */
+  onCopy?: (classwork: Classwork) => void;
+  /** Menu action: confirm then delete this classwork. */
+  onDelete?: (classwork: Classwork) => void;
 };
 
 // Static class maps: Tailwind only generates classes it can see literally.
@@ -107,6 +113,8 @@ function ClassworkCard({
   subjectId,
   uniqueTags,
   onSelect,
+  onCopy,
+  onDelete,
 }: PropsClassworkCard) {
   const canDrag = !disabled && reorderable;
   const sortable = useSortable({ id: classwork.id, disabled: !canDrag });
@@ -127,6 +135,26 @@ function ClassworkCard({
     !!classwork.dueDate && new Date(classwork.dueDate).getTime() < Date.now();
   const files = classwork.files ?? [];
   const panelId = `classwork-details-${classwork.id}`;
+
+  // Card menu (⋯): copy/export and delete without opening the classwork.
+  const menuActions: RowAction[] = [];
+  if (onCopy) {
+    menuActions.push({
+      key: "copy",
+      label: classworkHeadMenuBarDataLanguage.button.duplicate(lang),
+      icon: <FiCopy aria-hidden />,
+      onSelect: () => onCopy(classwork),
+    });
+  }
+  if (onDelete) {
+    menuActions.push({
+      key: "delete",
+      label: classworkHeadMenuBarDataLanguage.button.delete(lang),
+      icon: <FiTrash2 aria-hidden />,
+      danger: true,
+      onSelect: () => onDelete(classwork),
+    });
+  }
 
   return (
     <article
@@ -198,6 +226,14 @@ function ClassworkCard({
             >
               {isDraft ? t.Draft(lang) : t.Published(lang)}
             </span>
+            {!disabled && menuActions.length > 0 && (
+              <div className="relative z-10 shrink-0">
+                <RowActionsMenu
+                  label={`${t.moreActions(lang)} ${classwork.title}`}
+                  actions={menuActions}
+                />
+              </div>
+            )}
           </header>
 
           <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-medium">

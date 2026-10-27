@@ -23,13 +23,17 @@ import {
   MdChecklist,
   MdImportContacts,
 } from "react-icons/md";
+import { useQueryClient } from "@tanstack/react-query";
+import Swal from "sweetalert2";
 import {
   announcementDataLanguage,
   classworksDataLanguage as t,
   rubricLanguage,
 } from "../../data/languages";
-import { Assignment, Language } from "../../interfaces";
+import { Assignment, ErrorMessages, Language } from "../../interfaces";
 import {
+  forgetDeletedAssignment,
+  useDeleteAssignment,
   useGetAnnouncementsTeacher,
   useGetAssignments,
   useGetLanguage,
@@ -37,12 +41,14 @@ import {
   useReoderAssignment,
 } from "../../react-query";
 import { ResponseGetAssignmentsService } from "../../services";
+import { deleteConfirmOptions, runIfConfirmed } from "../../utils/confirmDelete";
 import PopupLayout from "../layout/PopupLayout";
 import AnnouncementCard from "./announcement/AnnouncementCard";
 import AnnouncementCreate from "./announcement/AnnouncementCreate";
 import AssignmentTagFilterBar from "./AssignmentTagFilterBar";
-import ClassworkCard from "./ClassworkCard";
+import ClassworkCard, { type Classwork } from "./ClassworkCard";
 import ClassworkCreate from "./ClassworkCreate";
+import ClassworkExport from "./ClassworkExport";
 import ImportAssignment from "./ImportAssignment";
 import RubricList from "./rubric/RubricList";
 
@@ -71,6 +77,12 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
   const [triggerManageRubric, setTriggerManageRubric] = useState(false);
   const [classworksData, setClassworksData] =
     React.useState<ResponseGetAssignmentsService>([]);
+  // Card menu: copy (export) popup target; delete is confirmed on the spot.
+  const [exportClasswork, setExportClasswork] = useState<Classwork | null>(
+    null,
+  );
+  const deleteAssignment = useDeleteAssignment();
+  const queryClient = useQueryClient();
   const reorderAssignment = useReoderAssignment();
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
 
@@ -192,6 +204,46 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
     }
   }, [classworks.data]);
 
+  // Same confirmation + cache-cleanup flow as the classwork editor page.
+  const handleDeleteClasswork = useCallback(
+    async (classwork: Classwork) => {
+      try {
+        await runIfConfirmed(
+          () =>
+            Swal.fire(
+              deleteConfirmOptions(
+                classwork.type === "Quiz" ? "quiz" : "assignment",
+                lang,
+              ),
+            ),
+          async () => {
+            await deleteAssignment.mutateAsync({ assignmentId: classwork.id });
+            forgetDeletedAssignment(queryClient, classwork.id);
+            setSelectClasswork((prev) =>
+              prev?.id === classwork.id ? null : prev,
+            );
+            Swal.fire({
+              title: "Success",
+              text: "Assignment has been deleted",
+              icon: "success",
+            });
+          },
+        );
+      } catch (error) {
+        const result = error as ErrorMessages;
+        Swal.fire({
+          title: result.error ? result.error : "Something Went Wrong",
+          text: result.message?.toString() || (error as Error).message,
+          footer: result.statusCode
+            ? "Code Error: " + result.statusCode?.toString()
+            : "",
+          icon: "error",
+        });
+      }
+    },
+    [deleteAssignment, lang, queryClient],
+  );
+
   const announcementCount = announcements.data?.length ?? 0;
   const statusOptions: { key: StatusFilter; label: string }[] = [
     { key: "all", label: t.filterAll(lang) },
@@ -271,6 +323,27 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
               </button>
             </div>
             <RubricList subjectId={subjectId} toast={toast} />
+          </div>
+        </PopupLayout>
+      )}
+      {exportClasswork && (
+        <PopupLayout
+          onClose={() => {
+            document.body.style.overflow = "auto";
+            setExportClasswork(null);
+          }}
+        >
+          <div className="h-screen w-screen bg-background-color">
+            <ClassworkExport
+              assignment={exportClasswork}
+              files={exportClasswork.files ?? []}
+              schoolId={schoolId}
+              currentSubjectId={subjectId}
+              onClose={() => {
+                document.body.style.overflow = "auto";
+                setExportClasswork(null);
+              }}
+            />
           </div>
         </PopupLayout>
       )}
@@ -495,6 +568,8 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
                                 return classwork;
                               });
                             }}
+                            onCopy={(classwork) => setExportClasswork(classwork)}
+                            onDelete={handleDeleteClasswork}
                           />
                         </li>
                       ))}
