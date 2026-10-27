@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FiShare } from "react-icons/fi";
+import { FiShare, FiX } from "react-icons/fi";
 import Swal from "sweetalert2";
 import {
   classworkTransferLanguage as t,
@@ -35,6 +35,8 @@ type Props = {
   files: FileOnAssignment[];
   schoolId: string;
   currentSubjectId: string;
+  /** Popup usage: shows a close button in the header. */
+  onClose?: () => void;
 };
 
 function ClassworkExport({
@@ -42,6 +44,7 @@ function ClassworkExport({
   files,
   schoolId,
   currentSubjectId,
+  onClose,
 }: Props) {
   const language = useGetLanguage();
   const lang = language.data ?? "en";
@@ -186,7 +189,7 @@ function ClassworkExport({
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-color/10 text-xl text-primary-color">
             <FiShare aria-hidden />
           </span>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <h2 className="font-semibold text-icon-color">
               {t.exportHeading(lang)}
             </h2>
@@ -194,6 +197,16 @@ function ClassworkExport({
               {isQuiz ? t.exportBodyQuiz(lang) : t.exportBody(lang)}
             </p>
           </div>
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label={t.close(lang)}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-icon-color/60 transition hover:bg-background-color hover:text-icon-color focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-color"
+            >
+              <FiX aria-hidden />
+            </button>
+          )}
         </section>
 
         <section className="rounded-2xl border border-gray-100 bg-white p-4">
