@@ -1,4 +1,4 @@
-import { Feedback, FeedbackTag } from "../interfaces";
+import { Feedback, FeedbackRewardResult, FeedbackTag } from "../interfaces";
 import createAxiosInstance from "./api-service";
 
 const axiosInstance = createAxiosInstance();
@@ -23,6 +23,10 @@ export type ResponseFeedbackService = Feedback & {
   }[];
 };
 
+export type ResponseCreateFeedbackService = ResponseFeedbackService & {
+  reward: FeedbackRewardResult | null;
+};
+
 export type RequestGetFeedbacksService = {
   page?: number;
   limit?: number;
@@ -39,7 +43,7 @@ export type ResponseGetFeedbacksService = {
 
 export async function CreateFeedbackService(
   input: RequestCreateFeedbackService,
-): Promise<ResponseFeedbackService> {
+): Promise<ResponseCreateFeedbackService> {
   try {
     const response = await axiosInstance({
       method: "POST",
@@ -74,6 +78,20 @@ export async function DeleteFeedbackService(
     const response = await axiosInstance({
       method: "DELETE",
       url: `/v1/feedbacks/${feedbackId}`,
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data;
+  }
+}
+
+export async function GetMyFeedbackRewardService(): Promise<{
+  hasReward: boolean;
+}> {
+  try {
+    const response = await axiosInstance({
+      method: "GET",
+      url: "/v1/feedbacks/reward/me",
     });
     return response.data;
   } catch (error: any) {
