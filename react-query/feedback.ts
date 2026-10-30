@@ -1,5 +1,6 @@
 import {
   useMutation,
+  useQueryClient,
   UseMutationResult,
   useQuery,
   UseQueryResult,
@@ -8,21 +9,29 @@ import {
   CreateFeedbackService,
   DeleteFeedbackService,
   GetFeedbacksService,
+  GetMyFeedbackRewardService,
   RequestCreateFeedbackService,
   RequestGetFeedbacksService,
+  ResponseCreateFeedbackService,
   ResponseFeedbackService,
   ResponseGetFeedbacksService,
 } from "../services/feedback";
 
+const FEEDBACK_REWARD_ME_KEY = ["feedback-reward", "me"];
+
 export function useCreateFeedback(): UseMutationResult<
-  ResponseFeedbackService,
+  ResponseCreateFeedbackService,
   Error,
   RequestCreateFeedbackService
 > {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ["feedback"],
     mutationFn: (input: RequestCreateFeedbackService) =>
       CreateFeedbackService(input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: FEEDBACK_REWARD_ME_KEY });
+    },
   });
 }
 
@@ -43,5 +52,15 @@ export function useDeleteFeedback(): UseMutationResult<
   return useMutation({
     mutationKey: ["deleteFeedback"],
     mutationFn: ({ feedbackId }) => DeleteFeedbackService(feedbackId),
+  });
+}
+
+export function useGetMyFeedbackReward(): UseQueryResult<
+  { hasReward: boolean },
+  Error
+> {
+  return useQuery({
+    queryKey: FEEDBACK_REWARD_ME_KEY,
+    queryFn: () => GetMyFeedbackRewardService(),
   });
 }
