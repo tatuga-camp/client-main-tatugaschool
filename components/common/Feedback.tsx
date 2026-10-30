@@ -4,8 +4,14 @@ import {
   BsFillImageFill,
   BsFileEarmarkTextFill,
 } from "react-icons/bs";
-import { useCreateFeedback } from "../../react-query/feedback";
-import { useGetLanguage } from "../../react-query/language";
+import {
+  useCreateFeedback,
+  useGetMyFeedbackReward,
+} from "../../react-query/feedback";
+import { useGetLanguage, useGetUser } from "../../react-query";
+import { ResponseCreateFeedbackService } from "../../services/feedback";
+import { rewardFormState } from "../../utils/feedbackReward";
+import FeedbackThankYou from "./FeedbackThankYou";
 import { feedbackLanguageData } from "../../data/languages";
 import { FeedbackTag } from "../../interfaces";
 import {
@@ -19,17 +25,32 @@ type FileWithPreview = {
   previewUrl: string;
 };
 
-function Feedback() {
+function Feedback({
+  variant = "popup",
+}: {
+  variant?: "popup" | "campaign";
+}) {
   const language = useGetLanguage();
   const lang = language.data ?? "en";
-  const { mutate: createFeedback } = useCreateFeedback();
+  const user = useGetUser();
+  const rewardQuery = useGetMyFeedbackReward();
+  const { mutateAsync: createFeedback } = useCreateFeedback();
   const [loading, setLoading] = useState(false);
   const [body, setBody] = useState("");
-  const [tag, setTag] = useState<FeedbackTag | null>(null);
+  const [tag, setTag] = useState<FeedbackTag | null>("COMPLIMENT");
   const [isIncognito, setIsIncognito] = useState(false);
   const [files, setFiles] = useState<FileWithPreview[]>([]);
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [result, setResult] = useState<ResponseCreateFeedbackService | null>(
+    null,
+  );
   const [error, setError] = useState<string | null>(null);
+
+  const rewardState = rewardFormState({
+    hasReward: rewardQuery.data?.hasReward,
+    isAnonymous: isIncognito,
+    body,
+  });
+  const hint = variant === "campaign" ? "hidden" : rewardState.hint;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -60,7 +81,6 @@ function Feedback() {
     e.preventDefault();
     setError(null);
 
-    setLoading(true);
     if (!body.trim()) {
       setError(feedbackLanguageData.errorRequiredBody(lang));
       return;
@@ -69,6 +89,8 @@ function Feedback() {
       setError(feedbackLanguageData.errorRequiredTag(lang));
       return;
     }
+
+    setLoading(true);
 
     try {
       const uploadedFiles: { url: string; type: string; size: number }[] = [];
@@ -93,26 +115,17 @@ function Feedback() {
         });
       }
 
-      createFeedback(
-        {
-          body,
-          tag,
-          private: isIncognito,
-          files: uploadedFiles,
-        },
-        {
-          onSuccess: () => {
-            setIsSuccess(true);
-            setBody("");
-            setTag(null);
-            setIsIncognito(false);
-            setFiles([]);
-          },
-          onError: (err) => {
-            setError(err.message || "An error occurred");
-          },
-        },
-      );
+      const response = await createFeedback({
+        body,
+        tag,
+        private: isIncognito,
+        files: uploadedFiles,
+      });
+      setResult(response);
+      setBody("");
+      setTag("COMPLIMENT");
+      setIsIncognito(false);
+      setFiles([]);
     } catch (err: any) {
       setError(err.message || "Failed to upload files");
     } finally {
@@ -120,20 +133,8 @@ function Feedback() {
     }
   };
 
-  if (isSuccess) {
-    return (
-      <div className="flex w-full max-w-lg flex-col items-center justify-center gap-4 rounded-3xl bg-white p-8 text-center shadow-xl">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-100 text-5xl text-green-500">
-          🎉
-        </div>
-        <h2 className="text-2xl font-bold text-gray-800">
-          {feedbackLanguageData.successTitle(lang)}
-        </h2>
-        <p className="text-gray-600">
-          {feedbackLanguageData.successMessage(lang)}
-        </p>
-      </div>
-    );
+  if (result) {
+    return <FeedbackThankYou reward={result.reward} email={user.data?.email} />;
   }
 
   return (
@@ -146,6 +147,25 @@ function Feedback() {
           {feedbackLanguageData.subtitle(lang)}
         </p>
       </div>
+
+      {hint !== "hidden" && (
+        <div
+          className={`flex items-center gap-2.5 rounded-2xl px-3 py-2.5 text-sm font-semibold ${
+            hint === "show"
+              ? "bg-[#EAF3FC] text-[#1d5fa6]"
+              : "bg-gray-100 text-gray-400"
+          }`}
+        >
+          <div
+            className={`flex h-6 w-6 flex-none items-center justify-center rounded-full text-[11px] font-extrabold text-white ${
+              hint === "show" ? "bg-primary-color" : "bg-gray-300"
+            }`}
+          >
+            %
+          </div>
+          <div>{feedbackLanguageData.rewardHint(lang)}</div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         <div className="flex flex-col gap-2">
@@ -180,6 +200,22 @@ function Feedback() {
             placeholder={feedbackLanguageData.bodyPlaceholder(lang)}
             className="h-32 w-full resize-none rounded-2xl border-2 border-gray-200 bg-gray-50 p-4 outline-none transition duration-200 focus:border-primary-color focus:bg-white"
           />
+          {rewardState.counter && (
+            <p
+              className={`text-xs font-semibold ${
+                rewardState.counter === "ready"
+                  ? "text-success-color"
+                  : "text-primary-color"
+              }`}
+            >
+              {rewardState.counter === "ready"
+                ? feedbackLanguageData.rewardCounterReady(lang)
+                : feedbackLanguageData.rewardCounterRemaining(
+                    lang,
+                    rewardState.counter.remaining,
+                  )}
+            </p>
+          )}
         </div>
 
         <div className="flex flex-col gap-2">
@@ -277,6 +313,13 @@ function Feedback() {
           </span>
         </div>
 
+        {rewardState.showAnonymousWarning && (
+          <div className="flex gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-snug text-amber-800">
+            <div className="font-bold">!</div>
+            <div>{feedbackLanguageData.anonymousNoReward(lang)}</div>
+          </div>
+        )}
+
         {error && (
           <div className="rounded-xl bg-red-50 p-3 text-center text-sm font-semibold text-red-600">
             {error}
@@ -292,6 +335,11 @@ function Feedback() {
             ? feedbackLanguageData.submitting(lang)
             : feedbackLanguageData.submit(lang)}
         </button>
+        {variant === "campaign" && (
+          <p className="text-center text-xs text-gray-500">
+            {feedbackLanguageData.campaignNote(lang)}
+          </p>
+        )}
       </form>
     </div>
   );
