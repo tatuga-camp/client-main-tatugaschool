@@ -127,7 +127,7 @@ function Feedback({
       setIsIncognito(false);
       setFiles([]);
     } catch (err: any) {
-      setError(err.message || "Failed to upload files");
+      setError(err?.message || "Failed to upload files");
     } finally {
       setLoading(false);
     }

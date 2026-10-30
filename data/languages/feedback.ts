@@ -286,11 +286,11 @@ export const feedbackLanguageData = {
   rewardWhereToUse: (language: Language) => {
     switch (language) {
       case "en":
-        return "Enter it at checkout or renewal in School → Billing. If you're not your school's billing manager, share the code with them.";
+        return "Enter it at checkout or renewal in School → Billing & Plan. If you're not your school's billing manager, share the code with them.";
       case "th":
-        return "กรอกโค้ดตอนชำระเงินหรือต่ออายุที่ School → Billing หากคุณไม่ใช่ผู้จัดการการเรียกเก็บเงินของโรงเรียน โปรดแชร์โค้ดนี้ให้ผู้ที่รับผิดชอบ";
+        return "กรอกโค้ดตอนชำระเงินหรือต่ออายุที่ โรงเรียน → ระบบสมาชิก หากคุณไม่ใช่บัญชีจัดการระบบสมาชิกของโรงเรียน โปรดแชร์โค้ดนี้ให้เจ้าของบัญชีดังกล่าว";
       default:
-        return "Enter it at checkout or renewal in School → Billing. If you're not your school's billing manager, share the code with them.";
+        return "Enter it at checkout or renewal in School → Billing & Plan. If you're not your school's billing manager, share the code with them.";
     }
   },
   alreadyReceivedLead: (language: Language) => {
