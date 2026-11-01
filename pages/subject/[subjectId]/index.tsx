@@ -34,7 +34,10 @@ import WheelPicker from "../../../components/subject/WheelPicker";
 import FacePicker from "../../../components/subject/FacePicker";
 import Subject from "../../../components/subject/Subject";
 import { defaultBlurHash, MenuSubject } from "../../../data";
-import { subjectDataLanguage } from "../../../data/languages";
+import {
+  subjectDataLanguage,
+  subjectUiLanguage,
+} from "../../../data/languages";
 import { useSound } from "../../../hook";
 import useClickOutside from "../../../hook/useClickOutside";
 import { ErrorMessages, Language, StudentOnSubject } from "../../../interfaces";
@@ -63,6 +66,7 @@ import {
   generateBlurHash,
   localStorageGetRemoveRandomStudents,
 } from "../../../utils";
+import { isSubjectArchived } from "../../../utils/subjectArchive";
 import VerifyConnectLine from "../../../components/subject/VerifyConnectLine";
 import { FaCheck, FaLine } from "react-icons/fa6";
 import QrCodeLineConnect from "../../../components/subject/QrCodeLineConnect";
@@ -87,6 +91,7 @@ function Index({ subjectId }: Props) {
   const subject = useGetSubject({
     subjectId: subjectId,
   });
+  const archived = isSubjectArchived(subject.data);
   const school = useGetSchool({
     schoolId: subject.data?.schoolId ?? "",
   });
@@ -239,7 +244,7 @@ function Index({ subjectId }: Props) {
       <Toast ref={toast} />
       {triggerStopWatch && <StopWatch onClose={handleCloseStopWatch} />}
 
-      {selectFooter === "AttendanceQRCode" && (
+      {selectFooter === "AttendanceQRCode" && !archived && (
         <PopupLayout onClose={() => setSelectFooter("EMTY")}>
           <AttendanceQRcode
             toast={toast}
@@ -309,7 +314,7 @@ function Index({ subjectId }: Props) {
           />
         </PopupLayout>
       )}
-      {selectFooter === "Attendance" && (
+      {selectFooter === "Attendance" && !archived && (
         <PopupLayout onClose={() => setSelectFooter("EMTY")}>
           <AttendanceChecker
             toast={toast}
@@ -382,14 +387,14 @@ function Index({ subjectId }: Props) {
                 ? "animate-pulse bg-gray-500/50"
                 : subject.data?.backgroundImage
                   ? ""
-                  : subject.data?.isLocked === true
+                  : subject.data?.isLocked === true || archived
                     ? "bg-gray-400/90"
                     : "gradient-bg"
             } lg:rounded-2xl`}
           >
             {subject.data?.backgroundImage && (
               <div
-                className={`${subject.data.isLocked === true ? "bg-gray-400/90" : ""} absolute bottom-0 left-0 right-0 top-0 -z-10 m-auto h-full w-full`}
+                className={`${subject.data.isLocked === true || archived ? "bg-gray-400/90" : ""} absolute bottom-0 left-0 right-0 top-0 -z-10 m-auto h-full w-full`}
               ></div>
             )}
             {subject.data?.backgroundImage && (
@@ -490,6 +495,11 @@ function Index({ subjectId }: Props) {
                       <MdLock />
                     </div>
                   )}
+                  {archived && (
+                    <span className="flex w-max items-center justify-center rounded-full bg-white/80 px-2 py-0.5 text-xs font-medium text-icon-color/70">
+                      {subjectUiLanguage.archived(lang)}
+                    </span>
+                  )}
                   <button
                     onClick={() => {
                       router.replace({
@@ -501,20 +511,22 @@ function Index({ subjectId }: Props) {
                     <CiCircleInfo />
                     {subjectDataLanguage.moreInfo(language.data ?? "en")}
                   </button>
-                  <label
-                    title="Change Background Image (Recommended size 1600x500 - Ratio 16:5)"
-                    className="flex w-max cursor-pointer items-center justify-center gap-1 rounded-2xl bg-white px-2 py-1 text-primary-color hover:bg-primary-color hover:text-white active:scale-110"
-                  >
-                    <SlPicture />
-                    <input
-                      disabled={loading}
-                      accept="image/*"
-                      id="dropzone-file"
-                      onChange={handleUploadImage}
-                      type="file"
-                      className="hidden"
-                    />
-                  </label>
+                  {!archived && (
+                    <label
+                      title="Change Background Image (Recommended size 1600x500 - Ratio 16:5)"
+                      className="flex w-max cursor-pointer items-center justify-center gap-1 rounded-2xl bg-white px-2 py-1 text-primary-color hover:bg-primary-color hover:text-white active:scale-110"
+                    >
+                      <SlPicture />
+                      <input
+                        disabled={loading}
+                        accept="image/*"
+                        id="dropzone-file"
+                        onChange={handleUploadImage}
+                        type="file"
+                        className="hidden"
+                      />
+                    </label>
+                  )}
                 </div>
                 <div className="mt-2 flex flex-wrap justify-end gap-3">
                   {teacherOnSubjects.data ? (

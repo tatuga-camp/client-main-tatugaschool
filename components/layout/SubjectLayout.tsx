@@ -5,11 +5,13 @@ import { MdLock } from "react-icons/md";
 import { menuSubjectList } from "../../data";
 import { subjectIsLockedDataLanguage } from "../../data/languages/subscription";
 import { useGetLanguage, useGetSubject } from "../../react-query";
+import { isSubjectArchived } from "../../utils/subjectArchive";
 import Navbar from "../Navbar";
 import {
   SIDEBAR_CONTENT_OFFSET,
   SIDEBAR_FIXED_LEFT,
 } from "../sidebar/sidebarLayout";
+import ArchivedSubjectBanner from "../subject/ArchivedSubjectBanner";
 import FooterSubject, { ListMenuFooter } from "../subject/FooterSubject";
 
 type LayoutProps = {
@@ -29,6 +31,7 @@ function SubjectLayout({
     subjectId,
   });
   const language = useGetLanguage();
+  const archived = isSubjectArchived(subject.data);
   const [triggerShowLock, setTriggerShowLock] = useState(false);
   React.useLayoutEffect(() => {
     document.body.style.overflow = "auto";
@@ -108,11 +111,17 @@ function SubjectLayout({
           </div>
         </div>
       )}
-      <div className={SIDEBAR_CONTENT_OFFSET}>{children}</div>
-      <div className={`fixed bottom-0 z-30 bg-white pb-safe ${SIDEBAR_FIXED_LEFT}`}>
+      <div className={SIDEBAR_CONTENT_OFFSET}>
+        <ArchivedSubjectBanner subjectId={subjectId} />
+        {children}
+      </div>
+      <div
+        className={`pb-safe fixed bottom-0 z-30 bg-white ${SIDEBAR_FIXED_LEFT}`}
+      >
         <FooterSubject
           selectFooter={selectFooter}
           setSelectFooter={setSelectFooter}
+          archived={archived}
         />
       </div>
     </section>

@@ -82,6 +82,33 @@ export const subjectUiLanguage = {
   creating: (l: Language) => pick(l, "Creating…", "กำลังสร้าง…"),
   goToClasses: (l: Language) =>
     pick(l, "Go to Classrooms", "ไปที่หน้าห้องเรียน"),
+  archived: (l: Language) => pick(l, "Archived", "เก็บถาวร"),
+  archiveSubject: (l: Language) =>
+    pick(l, "Archive subject", "เก็บรายวิชาถาวร"),
+  archivedManageLink: (l: Language) =>
+    pick(l, "Manage in settings", "จัดการในการตั้งค่า"),
+  archiveSubjectHint: (l: Language) =>
+    pick(
+      l,
+      "Teachers and students can still open everything, but nothing can be changed.",
+      "ครูและนักเรียนยังเปิดดูได้ทั้งหมด แต่แก้ไขอะไรไม่ได้",
+    ),
+  archivedByClassHint: (l: Language) =>
+    pick(
+      l,
+      "This subject's class is archived. Un-archive the class first.",
+      "ห้องเรียนของรายวิชานี้ถูกเก็บถาวร ให้ยกเลิกการเก็บถาวรห้องเรียนก่อน",
+    ),
+  archivedBanner: (l: Language) =>
+    pick(
+      l,
+      "This subject is archived — read only",
+      "รายวิชานี้ถูกเก็บถาวร — ดูได้อย่างเดียว",
+    ),
+  subjectArchivedToast: (l: Language) =>
+    pick(l, "Subject archived", "เก็บรายวิชาถาวรแล้ว"),
+  subjectUnarchivedToast: (l: Language) =>
+    pick(l, "Subject is active again", "รายวิชากลับมาใช้งานแล้ว"),
   classroomSubjectsHint: (l: Language) =>
     pick(
       l,

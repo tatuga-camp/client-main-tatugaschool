@@ -18,9 +18,11 @@ import Swal from "sweetalert2";
 function ClassStudentAssignWork({
   assignmentId,
   subjectId,
+  readOnly = false,
 }: {
   assignmentId: string;
   subjectId: string;
+  readOnly?: boolean;
 }) {
   const studentOnAssignments = useGetStudentOnAssignments({
     assignmentId,
@@ -115,7 +117,7 @@ function ClassStudentAssignWork({
                 <div className="flex items-center justify-center gap-2 text-base font-normal">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full focus-within:bg-primary-color/50 hover:bg-primary-color/50 active:bg-primary-color/60">
                     <input
-                      disabled={loading}
+                      disabled={loading || readOnly}
                       type="checkbox"
                       checked={assignAll}
                       onChange={handleAssignAll}
@@ -174,6 +176,7 @@ function ClassStudentAssignWork({
                         student={student}
                         odd={odd}
                         setStudentData={setStudentData}
+                        readOnly={readOnly}
                       />
                     );
                   })}
@@ -194,12 +197,14 @@ type StudentListProps = {
     >,
   ) => void;
   odd: boolean;
+  readOnly?: boolean;
 };
 
 const StudentList = React.memo(function StudentList({
   student,
   odd,
   setStudentData,
+  readOnly = false,
 }: StudentListProps) {
   const update = useUpdateStudentOnAssignments();
   const handleChangeCheck = React.useCallback(
@@ -270,7 +275,7 @@ const StudentList = React.memo(function StudentList({
       <th className="">
         <div className="flex justify-center">
           <input
-            disabled={update.isPending}
+            disabled={update.isPending || readOnly}
             checked={student.isAssigned}
             onChange={(e) =>
               handleChangeCheck({

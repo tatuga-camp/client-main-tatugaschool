@@ -4,7 +4,13 @@ import Link from "next/link";
 import { CSSProperties } from "react";
 import { BiBook } from "react-icons/bi";
 import { FaRegFile, FaRegFileImage } from "react-icons/fa6";
-import { FiCalendar, FiChevronDown, FiCopy, FiPaperclip, FiTrash2 } from "react-icons/fi";
+import {
+  FiCalendar,
+  FiChevronDown,
+  FiCopy,
+  FiPaperclip,
+  FiTrash2,
+} from "react-icons/fi";
 import {
   MdAssignment,
   MdChecklist,
@@ -42,6 +48,7 @@ type PropsClassworkCard = {
   disabled?: boolean;
   /** False hides the drag handle (e.g. while the list is searched/filtered). */
   reorderable?: boolean;
+  readOnly?: boolean;
   selectClasswork: Assignment | null;
   subjectId: string;
   uniqueTags: string[];
@@ -109,6 +116,7 @@ function ClassworkCard({
   classwork,
   disabled = false,
   reorderable = true,
+  readOnly = false,
   selectClasswork,
   subjectId,
   uniqueTags,
@@ -281,6 +289,7 @@ function ClassworkCard({
               value={classwork.tags ?? []}
               suggestions={uniqueTags}
               size="sm"
+              disabled={readOnly}
               onChange={(next) =>
                 updateAssignment.mutate({
                   query: { assignmentId: classwork.id },

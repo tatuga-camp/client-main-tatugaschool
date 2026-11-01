@@ -28,6 +28,7 @@ export interface Subject {
   allowSendNotificationMorningSummaryToLine?: boolean;
   allowSendNotificationOnAnnouncementToLine?: boolean;
   isLocked: boolean;
+  isAchieved?: boolean;
   publicProgressToken?: string | null;
   publicProgressLevel?: PublicProgressLevel;
 }

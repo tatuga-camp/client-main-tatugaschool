@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-query";
 import { EducationYear, Subject, TeacherOnSubject } from "../interfaces";
 import {
+  ArchiveSubjectService,
   CreatePublicProgressService,
   CreateSubjectService,
   DeletePublicProgressService,
@@ -177,6 +178,28 @@ export function useUpdateSubject() {
     },
   });
   return updateSubject;
+}
+
+export function useArchiveSubject() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["archiveSubject"],
+    mutationFn: (request: {
+      subjectId: string;
+      isAchieved: boolean;
+      schoolId: string;
+    }) =>
+      ArchiveSubjectService({
+        subjectId: request.subjectId,
+        isAchieved: request.isAchieved,
+      }),
+    onSuccess(data, variables) {
+      queryClient.setQueryData(["subject", { id: variables.subjectId }], data);
+      queryClient.invalidateQueries({
+        queryKey: ["subjects", { schoolId: variables.schoolId }],
+      });
+    },
+  });
 }
 
 export function useDeleteTeacherOnSubject() {

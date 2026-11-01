@@ -67,6 +67,11 @@ export function useUpdateClassroom() {
       queryClient.refetchQueries({
         queryKey: ["classrooms", { schoolId: data.schoolId }],
       });
+      // Archiving a class cascades to its subjects
+      queryClient.invalidateQueries({
+        queryKey: ["subjects", { schoolId: data.schoolId }],
+      });
+      queryClient.invalidateQueries({ queryKey: ["subject"] });
     },
   });
 }

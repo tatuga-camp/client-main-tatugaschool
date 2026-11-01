@@ -137,73 +137,88 @@ export type ListMenuFooter = MenuItem["title"] | "EMTY";
 type Props = {
   setSelectFooter: React.Dispatch<React.SetStateAction<ListMenuFooter>>;
   selectFooter: ListMenuFooter;
+  archived?: boolean;
 };
 
-function FooterSubject({ setSelectFooter, selectFooter }: Props) {
+const WRITE_TOOLS: MenuItem["title"][] = ["Attendance", "AttendanceQRCode"];
+
+function FooterSubject({ setSelectFooter, selectFooter, archived }: Props) {
   const language = useGetLanguage();
   const [openGroup, setOpenGroup] = useState<string | null>(null);
 
   return (
     <div className="relative w-full max-w-full border-t-2 border-black">
-      <div className="grid h-14 w-full grid-cols-4 bg-white md:flex md:flex-nowrap md:items-center md:justify-center md:gap-3 md:px-3">
-        {menuGroups.map((group, idx) => {
-          const isOpen = openGroup === group.group;
-          const groupActive = group.items.some((i) => i.title === selectFooter);
-          return (
-            <div key={group.group} className="relative flex w-full md:w-auto">
-              <button
-                onClick={() =>
-                  setOpenGroup((prev) =>
-                    prev === group.group ? null : group.group,
-                  )
-                }
-                className={`flex h-full w-full flex-col items-center justify-center gap-0.5 px-1 text-[10px] font-semibold transition-colors duration-200 md:h-auto md:w-auto md:flex-row md:gap-1 md:rounded-2xl md:px-4 md:py-2 md:text-xs ${
-                  groupActive || isOpen
-                    ? "bg-primary-color text-white"
-                    : "bg-background-color text-icon-color hover:bg-gray-200"
-                }`}
-              >
-                <span className="text-lg md:text-xs">{group.icon}</span>
-                <span className="max-w-full truncate">
-                  {footerGroupLanguage[group.group](language.data ?? "en")}
-                </span>
-                <span className="hidden text-[10px] opacity-60 md:inline">
-                  ▾
-                </span>
-              </button>
-
-              {isOpen && (
-                <div
-                  className={`absolute bottom-full z-50 mb-2 flex w-max max-w-[calc(100vw-1rem)] flex-col gap-2 rounded-2xl border border-gray-200 bg-white p-2 shadow-xl ${
-                    idx < 2 ? "left-0" : "right-0"
-                  } md:left-1/2 md:right-auto md:max-w-none md:-translate-x-1/2`}
+      <div
+        className={`grid h-14 w-full ${archived ? "grid-cols-3" : "grid-cols-4"} bg-white md:flex md:flex-nowrap md:items-center md:justify-center md:gap-3 md:px-3`}
+      >
+        {menuGroups
+          .map((group) => ({
+            ...group,
+            items: archived
+              ? group.items.filter((i) => !WRITE_TOOLS.includes(i.title))
+              : group.items,
+          }))
+          .filter((group) => group.items.length > 0)
+          .map((group, idx) => {
+            const isOpen = openGroup === group.group;
+            const groupActive = group.items.some(
+              (i) => i.title === selectFooter,
+            );
+            return (
+              <div key={group.group} className="relative flex w-full md:w-auto">
+                <button
+                  onClick={() =>
+                    setOpenGroup((prev) =>
+                      prev === group.group ? null : group.group,
+                    )
+                  }
+                  className={`flex h-full w-full flex-col items-center justify-center gap-0.5 px-1 text-[10px] font-semibold transition-colors duration-200 md:h-auto md:w-auto md:flex-row md:gap-1 md:rounded-2xl md:px-4 md:py-2 md:text-xs ${
+                    groupActive || isOpen
+                      ? "bg-primary-color text-white"
+                      : "bg-background-color text-icon-color hover:bg-gray-200"
+                  }`}
                 >
-                  {group.items.map((menu) => (
-                    <button
-                      key={menu.title}
-                      onClick={() => {
-                        setSelectFooter(() =>
-                          selectFooter === menu.title ? "EMTY" : menu.title,
-                        );
-                        setOpenGroup(null);
-                      }}
-                      className={`flex items-center justify-start gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs font-semibold transition-colors duration-200 ${
-                        selectFooter === menu.title
-                          ? menu.activeClasses
-                          : menu.inactiveClasses
-                      }`}
-                    >
-                      {menu.icon}
-                      {footerOnSubjectDataLangugae[
-                        menu.title as keyof typeof footerOnSubjectDataLangugae
-                      ](language.data ?? "en")}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
+                  <span className="text-lg md:text-xs">{group.icon}</span>
+                  <span className="max-w-full truncate">
+                    {footerGroupLanguage[group.group](language.data ?? "en")}
+                  </span>
+                  <span className="hidden text-[10px] opacity-60 md:inline">
+                    ▾
+                  </span>
+                </button>
+
+                {isOpen && (
+                  <div
+                    className={`absolute bottom-full z-50 mb-2 flex w-max max-w-[calc(100vw-1rem)] flex-col gap-2 rounded-2xl border border-gray-200 bg-white p-2 shadow-xl ${
+                      idx < 2 ? "left-0" : "right-0"
+                    } md:left-1/2 md:right-auto md:max-w-none md:-translate-x-1/2`}
+                  >
+                    {group.items.map((menu) => (
+                      <button
+                        key={menu.title}
+                        onClick={() => {
+                          setSelectFooter(() =>
+                            selectFooter === menu.title ? "EMTY" : menu.title,
+                          );
+                          setOpenGroup(null);
+                        }}
+                        className={`flex items-center justify-start gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs font-semibold transition-colors duration-200 ${
+                          selectFooter === menu.title
+                            ? menu.activeClasses
+                            : menu.inactiveClasses
+                        }`}
+                      >
+                        {menu.icon}
+                        {footerOnSubjectDataLangugae[
+                          menu.title as keyof typeof footerOnSubjectDataLangugae
+                        ](language.data ?? "en")}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
       </div>
 
       {openGroup && (

@@ -23,9 +23,15 @@ type Props = {
   announcement: Announcement;
   subjectId: string;
   userId: string;
+  archived?: boolean;
 };
 
-function AnnouncementCard({ announcement, subjectId, userId }: Props) {
+function AnnouncementCard({
+  announcement,
+  subjectId,
+  userId,
+  archived = false,
+}: Props) {
   const language = useGetLanguage();
   const [showComments, setShowComments] = React.useState(false);
   const [showEdit, setShowEdit] = React.useState(false);
@@ -128,7 +134,7 @@ function AnnouncementCard({ announcement, subjectId, userId }: Props) {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          {isAuthor && (
+          {isAuthor && !archived && (
             <button
               onClick={() => setShowEdit(true)}
               className="text-icon-color hover:text-primary-color"
@@ -137,6 +143,7 @@ function AnnouncementCard({ announcement, subjectId, userId }: Props) {
               <FiEdit2 />
             </button>
           )}
+          {!archived && (
           <button
             disabled={deleteAnnouncement.isPending}
             onClick={handleDelete}
@@ -145,6 +152,7 @@ function AnnouncementCard({ announcement, subjectId, userId }: Props) {
           >
             <FiTrash2 />
           </button>
+          )}
         </div>
       </div>
 

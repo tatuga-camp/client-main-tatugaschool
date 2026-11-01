@@ -23,8 +23,14 @@ type Props = {
     },
   ) => void;
   isPending: boolean;
+  disabled?: boolean;
 };
-function SubjectPermission({ subjectId, onSummit, isPending }: Props) {
+function SubjectPermission({
+  subjectId,
+  onSummit,
+  isPending,
+  disabled = false,
+}: Props) {
   const subject = useGetSubject({ subjectId });
   const language = useGetLanguage();
   const [permission, setPermission] = React.useState<{
@@ -264,7 +270,7 @@ function SubjectPermission({ subjectId, onSummit, isPending }: Props) {
         </div>
       </div>
       <button
-        disabled={isPending}
+        disabled={isPending || disabled}
         className="main-button mt-5 flex w-full items-center justify-center sm:w-60"
       >
         {isPending ? (

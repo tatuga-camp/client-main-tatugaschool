@@ -14,7 +14,12 @@ import {
   ScoreOnSubject,
   StudentOnSubject,
 } from "../../interfaces";
-import { useCreateScoreOnStudent, useGetLanguage } from "../../react-query";
+import {
+  useCreateScoreOnStudent,
+  useGetLanguage,
+  useGetSubject,
+} from "../../react-query";
+import { isSubjectArchived } from "../../utils/subjectArchive";
 import { decodeBlurhashToCanvas } from "../../utils";
 import { mascotForPhoto, moodForPoints } from "../../utils/mascot";
 import MascotAvatar from "../student/MascotAvatar";
@@ -31,6 +36,8 @@ type ScoreResult = { score: ScoreOnSubject; points: number; total: number };
 
 function PopUpStudent({ student, onClose, toast }: Props) {
   const language = useGetLanguage();
+  const subject = useGetSubject({ subjectId: student.subjectId });
+  const archived = isSubjectArchived(subject.data);
   const lang = language.data ?? "en";
   const [isModalOpen, setIsModalOpen] = useState(true);
   const [triggerAvartar, setSetTriggerAvatar] = useState<boolean>(false);
@@ -177,23 +184,25 @@ function PopUpStudent({ student, onClose, toast }: Props) {
               >
                 {totalScore} {studentPointsLanguage.points(lang)}
               </span>
-              <button
-                type="button"
-                aria-pressed={triggerAvartar}
-                onClick={() => setSetTriggerAvatar((prev) => !prev)}
-                className={`pointer-events-auto mt-1 flex h-9 items-center gap-1.5 rounded-xl border px-3 text-sm font-medium transition ${
-                  triggerAvartar
-                    ? "border-primary-color bg-primary-color/5 text-primary-color"
-                    : "border-gray-200 bg-white text-icon-color hover:bg-background-color"
-                }`}
-              >
-                <MdImage /> {studentPointsLanguage.changeAvatar(lang)}
-              </button>
+              {!archived && (
+                <button
+                  type="button"
+                  aria-pressed={triggerAvartar}
+                  onClick={() => setSetTriggerAvatar((prev) => !prev)}
+                  className={`pointer-events-auto mt-1 flex h-9 items-center gap-1.5 rounded-xl border px-3 text-sm font-medium transition ${
+                    triggerAvartar
+                      ? "border-primary-color bg-primary-color/5 text-primary-color"
+                      : "border-gray-200 bg-white text-icon-color hover:bg-background-color"
+                  }`}
+                >
+                  <MdImage /> {studentPointsLanguage.changeAvatar(lang)}
+                </button>
+              )}
             </div>
           </aside>
 
           <div className="min-w-0 flex-1">
-            {triggerAvartar === false && (
+            {!archived && triggerAvartar === false && (
               <ScorePanel
                 subjectId={student.subjectId}
                 onSelectScore={({ inputScore, score }) => {
@@ -207,7 +216,7 @@ function PopUpStudent({ student, onClose, toast }: Props) {
                 onCreateScore={handleCreateScore}
               />
             )}
-            {triggerAvartar === true && (
+            {!archived && triggerAvartar === true && (
               <div className="p-5">
                 <AvatarSetting
                   onUpdatePhoto={(url) => setImage(url)}

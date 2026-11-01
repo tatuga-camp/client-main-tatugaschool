@@ -52,6 +52,7 @@ function ClassworkExport({
   const picker = useSubjectPicker({
     schoolId,
     excludeSubjectId: currentSubjectId,
+    writableOnly: true,
   });
   // Selections survive filter changes, so a teacher can pick across years.
   const [selected, setSelected] = useState<PickerSubject[]>([]);

@@ -24,6 +24,7 @@ import {
   MdImportContacts,
 } from "react-icons/md";
 import { useQueryClient } from "@tanstack/react-query";
+import { isSubjectArchived } from "../../utils/subjectArchive";
 import Swal from "sweetalert2";
 import {
   announcementDataLanguage,
@@ -37,11 +38,15 @@ import {
   useGetAnnouncementsTeacher,
   useGetAssignments,
   useGetLanguage,
+  useGetSubject,
   useGetUser,
   useReoderAssignment,
 } from "../../react-query";
 import { ResponseGetAssignmentsService } from "../../services";
-import { deleteConfirmOptions, runIfConfirmed } from "../../utils/confirmDelete";
+import {
+  deleteConfirmOptions,
+  runIfConfirmed,
+} from "../../utils/confirmDelete";
 import PopupLayout from "../layout/PopupLayout";
 import AnnouncementCard from "./announcement/AnnouncementCard";
 import AnnouncementCreate from "./announcement/AnnouncementCreate";
@@ -66,6 +71,8 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
   const language = useGetLanguage();
   const lang: Language = language.data ?? "en";
   const user = useGetUser();
+  const subject = useGetSubject({ subjectId });
+  const archived = isSubjectArchived(subject.data);
   const [triggerCreate, setTriggerCreate] = React.useState(false);
   const [showAnnouncementCreate, setShowAnnouncementCreate] =
     React.useState(false);
@@ -357,43 +364,44 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
             <p className="mt-1 text-sm text-gray-500">{t.description(lang)}</p>
           </div>
           <div className="flex shrink-0 flex-wrap items-center gap-2">
-            {view === "classwork" ? (
-              <>
+            {!archived &&
+              (view === "classwork" ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setTriggerManageRubric(true)}
+                    className="second-button flex items-center gap-1.5 border px-3 py-2 text-sm"
+                  >
+                    <MdChecklist aria-hidden />
+                    <span>{t.rubricsShort(lang)}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTriggerImportAssignment(true)}
+                    className="second-button flex items-center gap-1.5 border px-3 py-2 text-sm"
+                  >
+                    <MdImportContacts aria-hidden />
+                    <span>{t.importShort(lang)}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTriggerCreate(true)}
+                    className="main-button flex items-center gap-1.5 px-4 py-2 text-sm"
+                  >
+                    <FaPlus aria-hidden />
+                    <span>{t.create(lang)}</span>
+                  </button>
+                </>
+              ) : (
                 <button
                   type="button"
-                  onClick={() => setTriggerManageRubric(true)}
-                  className="second-button flex items-center gap-1.5 border px-3 py-2 text-sm"
-                >
-                  <MdChecklist aria-hidden />
-                  <span>{t.rubricsShort(lang)}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTriggerImportAssignment(true)}
-                  className="second-button flex items-center gap-1.5 border px-3 py-2 text-sm"
-                >
-                  <MdImportContacts aria-hidden />
-                  <span>{t.importShort(lang)}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTriggerCreate(true)}
+                  onClick={() => setShowAnnouncementCreate(true)}
                   className="main-button flex items-center gap-1.5 px-4 py-2 text-sm"
                 >
                   <FaPlus aria-hidden />
-                  <span>{t.create(lang)}</span>
+                  <span>{announcementDataLanguage.create(lang)}</span>
                 </button>
-              </>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setShowAnnouncementCreate(true)}
-                className="main-button flex items-center gap-1.5 px-4 py-2 text-sm"
-              >
-                <FaPlus aria-hidden />
-                <span>{announcementDataLanguage.create(lang)}</span>
-              </button>
-            )}
+              ))}
           </div>
         </header>
 
@@ -517,14 +525,16 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
                   title={t.emptyTitle(lang)}
                   description={t.emptyDescription(lang)}
                   action={
-                    <button
-                      type="button"
-                      onClick={() => setTriggerCreate(true)}
-                      className="main-button flex items-center gap-1.5 px-4 py-2 text-sm"
-                    >
-                      <FaPlus aria-hidden />
-                      <span>{t.create(lang)}</span>
-                    </button>
+                    archived ? undefined : (
+                      <button
+                        type="button"
+                        onClick={() => setTriggerCreate(true)}
+                        className="main-button flex items-center gap-1.5 px-4 py-2 text-sm"
+                      >
+                        <FaPlus aria-hidden />
+                        <span>{t.create(lang)}</span>
+                      </button>
+                    )
                   }
                 />
               ) : visibleClassworks.length === 0 ? (
@@ -556,7 +566,8 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
                         <li key={classwork.id} className="list-none">
                           <ClassworkCard
                             classwork={classwork}
-                            reorderable={!filtersActive}
+                            reorderable={!filtersActive && !archived}
+                            readOnly={archived}
                             selectClasswork={selectClasswork}
                             subjectId={subjectId}
                             uniqueTags={uniqueTags}
@@ -568,8 +579,12 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
                                 return classwork;
                               });
                             }}
-                            onCopy={(classwork) => setExportClasswork(classwork)}
-                            onDelete={handleDeleteClasswork}
+                            onCopy={(classwork) =>
+                              setExportClasswork(classwork)
+                            }
+                            onDelete={
+                              archived ? undefined : handleDeleteClasswork
+                            }
                           />
                         </li>
                       ))}
@@ -585,18 +600,20 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
             role="tabpanel"
             className="mt-4 flex flex-col gap-3"
           >
-            <button
-              type="button"
-              onClick={() => setShowAnnouncementCreate(true)}
-              className="flex w-full items-center gap-3 rounded-2xl border border-gray-200 bg-white p-3 text-left shadow-sm transition hover:border-primary-color/40 hover:shadow-md sm:p-4"
-            >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-color/10 text-xl text-primary-color">
-                <MdCampaign aria-hidden />
-              </span>
-              <span className="flex-1 rounded-full bg-background-color px-4 py-2.5 text-sm text-gray-400">
-                {t.composerPrompt(lang)}
-              </span>
-            </button>
+            {!archived && (
+              <button
+                type="button"
+                onClick={() => setShowAnnouncementCreate(true)}
+                className="flex w-full items-center gap-3 rounded-2xl border border-gray-200 bg-white p-3 text-left shadow-sm transition hover:border-primary-color/40 hover:shadow-md sm:p-4"
+              >
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-color/10 text-xl text-primary-color">
+                  <MdCampaign aria-hidden />
+                </span>
+                <span className="flex-1 rounded-full bg-background-color px-4 py-2.5 text-sm text-gray-400">
+                  {t.composerPrompt(lang)}
+                </span>
+              </button>
+            )}
 
             {announcements.isLoading ? (
               <div
@@ -617,6 +634,7 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
                       announcement={announcement}
                       subjectId={subjectId}
                       userId={user.data?.id ?? ""}
+                      archived={archived}
                     />
                   </li>
                 ))}

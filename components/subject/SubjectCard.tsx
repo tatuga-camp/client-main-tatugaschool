@@ -11,6 +11,7 @@ import { Classroom, Subject, TeacherOnSubject } from "../../interfaces";
 import { useGetLanguage } from "../../react-query";
 import { decodeBlurhashToCanvas } from "../../utils";
 import { shortGradeLabel, splitLevel } from "../../utils/classLevel";
+import { isSubjectArchived } from "../../utils/subjectArchive";
 import { subjectEmoji, subjectTint } from "../../utils/subjectList";
 import RowActionsMenu from "../common/RowActionsMenu";
 import ListMemberCircle from "../member/ListMemberCircle";
@@ -86,6 +87,11 @@ function SubjectCard({
             {subjectUiLanguage.locked(lang)}
           </span>
         )}
+        {isSubjectArchived(subject) && (
+          <span className="absolute bottom-2 right-2 rounded-full bg-white px-2 py-0.5 text-xs font-medium text-icon-color/70 shadow-sm">
+            {subjectUiLanguage.archived(lang)}
+          </span>
+        )}
       </div>
       <div className="flex grow flex-col gap-1 px-1 pb-3 pt-3">
         <h3 className="line-clamp-2 break-words text-base font-bold leading-snug text-icon-color transition-colors group-hover:text-primary-color">
@@ -120,7 +126,9 @@ function SubjectCard({
       // focus-within lifts the card so its open menu sits above neighbours.
       className={`group relative flex h-full min-w-0 flex-col rounded-3xl bg-white shadow-[0_12px_24px_rgba(145,158,171,0.12)] transition-shadow focus-within:z-10 hover:shadow-[0_16px_32px_rgba(145,158,171,0.24)] ${
         onClick ? "cursor-pointer" : ""
-      } ${isDragging ? "z-20 opacity-80 ring-2 ring-primary-color/40" : ""}`}
+      } ${isDragging ? "z-20 opacity-80 ring-2 ring-primary-color/40" : ""} ${
+        isSubjectArchived(subject) ? "opacity-60" : ""
+      }`}
     >
       {onClick ? (
         body
