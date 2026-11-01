@@ -209,8 +209,8 @@ export const classroomUiLanguage = {
   archiveHint: (l: Language) =>
     pick(
       l,
-      "Archived classrooms move to the Archived list. Students and grades are kept.",
-      "ห้องเรียนที่เก็บถาวรจะย้ายไปอยู่ในรายการเก็บถาวร ข้อมูลนักเรียนและคะแนนยังอยู่ครบ",
+      "Archived classrooms move to the Archived list. Students and grades are kept. All subjects in this class are archived or un-archived with it.",
+      "ห้องเรียนที่เก็บถาวรจะย้ายไปอยู่ในรายการเก็บถาวร ข้อมูลนักเรียนและคะแนนยังอยู่ครบ รายวิชาทั้งหมดในห้องเรียนนี้จะถูกเก็บถาวรหรือยกเลิกพร้อมกัน",
     ),
   deleteOnlyOwner: (l: Language) =>
     pick(

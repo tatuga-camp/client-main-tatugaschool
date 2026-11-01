@@ -240,6 +240,27 @@ export async function CreatePublicProgressService(
   }
 }
 
+export type RequestArchiveSubjectService = {
+  subjectId: string;
+  isAchieved: boolean;
+};
+
+export async function ArchiveSubjectService(
+  input: RequestArchiveSubjectService,
+): Promise<Subject> {
+  try {
+    const response = await axiosInstance({
+      method: "PATCH",
+      url: `/v1/subjects/${input.subjectId}/archive`,
+      data: { isAchieved: input.isAchieved },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Archive subject failed:", error?.response?.data);
+    throw error?.response?.data;
+  }
+}
+
 export async function UpdatePublicProgressLevelService(
   input: RequestPublicProgressService,
 ): Promise<ResponsePublicProgressService> {
