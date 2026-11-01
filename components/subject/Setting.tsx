@@ -8,13 +8,16 @@ import { defaultBlurHash, ListSubjectRoles } from "../../data";
 import {
   settingOnClassroomDataLangugae,
   settingOnSubjectDataLanguage,
+  subjectUiLanguage,
 } from "../../data/languages";
 import useGetRoleOnSchool from "../../hook/useGetRoleOnSchool";
 import useGetRoleOnSubject from "../../hook/useGetRoleOnSubject";
 import { ErrorMessages, MemberRole } from "../../interfaces";
 import {
+  useArchiveSubject,
   useDeleteSubject,
   useDeleteTeacherOnSubject,
+  useGetClassroom,
   useGetLanguage,
   useGetStudentOnSubject,
   useGetSubject,
@@ -24,6 +27,7 @@ import {
   useUpdateSubject,
 } from "../../react-query";
 import { decodeBlurhashToCanvas } from "../../utils";
+import { archiveSwitchState, isSubjectArchived } from "../../utils/subjectArchive";
 import ConfirmDeleteMessage from "../common/ConfirmDeleteMessage";
 import Switch from "../common/Switch";
 import ListMembers from "../member/ListMembers";
@@ -58,6 +62,19 @@ function Setting({ subjectId, schoolId }: Props) {
   const router = useRouter();
   const subject = useGetSubject({
     subjectId: subjectId,
+  });
+
+  const classroom = useGetClassroom({
+    classId: subject.data?.classId ?? "",
+    enabled: !!subject.data?.classId,
+  });
+  const archiveSubject = useArchiveSubject();
+  const subjectArchived = isSubjectArchived(subject.data);
+  const archiveSwitch = archiveSwitchState({
+    subjectArchived,
+    classArchived: classroom.data?.isAchieved === true,
+    roleSubject,
+    roleSchool,
   });
 
   const [members, setMembers] = React.useState<
@@ -107,6 +124,36 @@ function Setting({ subjectId, schoolId }: Props) {
         queryClient: queryClient,
       });
       showSuccess();
+    } catch (error) {
+      console.log(error);
+      let result = error as ErrorMessages;
+      Swal.fire({
+        title: result.error ? result.error : "Something Went Wrong",
+        text: result.message.toString(),
+        footer: result.statusCode
+          ? "Code Error: " + result.statusCode?.toString()
+          : "",
+        icon: "error",
+      });
+    }
+  };
+
+  const handleArchiveToggle = async (checked: boolean) => {
+    if (archiveSubject.isPending) return;
+    try {
+      await archiveSubject.mutateAsync({
+        subjectId: subjectId,
+        isAchieved: checked,
+        schoolId: schoolId,
+      });
+      toast.current?.show({
+        severity: "success",
+        summary: "Success",
+        detail: checked
+          ? subjectUiLanguage.subjectArchivedToast(language.data ?? "en")
+          : subjectUiLanguage.subjectUnarchivedToast(language.data ?? "en"),
+        life: 3000,
+      });
     } catch (error) {
       console.log(error);
       let result = error as ErrorMessages;
@@ -213,12 +260,14 @@ function Setting({ subjectId, schoolId }: Props) {
           subjectId={subjectId}
           onSummit={handleSaveChanges}
           isPending={updateSubject.isPending}
+          disabled={subjectArchived}
         />
 
         <SubjectPermission
           subjectId={subjectId}
           onSummit={handleSaveChanges}
           isPending={updateSubject.isPending}
+          disabled={subjectArchived}
         />
 
         <div className="mt-5 flex min-h-80 flex-col gap-5 rounded-2xl border bg-white p-4">
@@ -319,6 +368,30 @@ function Setting({ subjectId, schoolId }: Props) {
             language.data ?? "en",
           )}
         </h4>
+        {archiveSwitch.visible && (
+          <div className="mt-5 flex flex-col gap-2 rounded-2xl border bg-white p-4">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-base font-medium sm:text-lg">
+                  {subjectUiLanguage.archiveSubject(language.data ?? "en")}
+                </h2>
+                <h4 className="text-xs text-gray-500 sm:text-sm">
+                  {subjectUiLanguage.archiveSubjectHint(language.data ?? "en")}
+                </h4>
+              </div>
+              <Switch
+                checked={archiveSwitch.checked}
+                disabled={archiveSwitch.disabled || archiveSubject.isPending}
+                setChecked={handleArchiveToggle}
+              />
+            </div>
+            {archiveSwitch.hint === "classArchived" && (
+              <h4 className="text-xs text-red-700 sm:text-sm">
+                {subjectUiLanguage.archivedByClassHint(language.data ?? "en")}
+              </h4>
+            )}
+          </div>
+        )}
         <div className="mt-5 flex flex-col items-start gap-5 rounded-2xl border bg-white p-4">
           <h2 className="border-b py-3 text-base font-medium sm:text-lg">
             {settingOnSubjectDataLanguage.deleteSubject(language.data ?? "en")}

@@ -19,8 +19,14 @@ type Props = {
   ) => void;
   subjectId: string;
   isPending?: boolean;
+  disabled?: boolean;
 };
-function SubjectInfomation({ onSummit, subjectId, isPending = false }: Props) {
+function SubjectInfomation({
+  onSummit,
+  subjectId,
+  isPending = false,
+  disabled = false,
+}: Props) {
   const subject = useGetSubject({ subjectId });
   const language = useGetLanguage();
   const [subjectBasicInfo, setSubjectBasicInfo] = React.useState<{
@@ -179,7 +185,7 @@ function SubjectInfomation({ onSummit, subjectId, isPending = false }: Props) {
         </div>
       </div>
       <button
-        disabled={isPending}
+        disabled={isPending || disabled}
         className="main-button mt-5 flex w-60 items-center justify-center"
       >
         {isPending ? (
