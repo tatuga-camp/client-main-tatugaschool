@@ -19,6 +19,7 @@ type Props = {
   studentOnAssignmentId: string;
   toast: React.RefObject<Toast>;
   onGraded: (score: number) => void;
+  readOnly?: boolean;
 };
 
 type Selection = { selectedLevelId: string | null; comment: string };
@@ -33,6 +34,7 @@ function RubricGradingPanel({
   studentOnAssignmentId,
   toast,
   onGraded,
+  readOnly = false,
 }: Props) {
   const rubricQuery = useGetRubricById({ rubricId });
 
@@ -183,7 +185,7 @@ function RubricGradingPanel({
             {rubricLanguage.score(language.data ?? "en")} {displayScore}
             {assignmentMaxScore != null && ` / ${assignmentMaxScore}`}
           </span>
-          {grade.isPending ? (
+          {readOnly ? null : grade.isPending ? (
             <div className="h-8">
               <ProgressSpinner
                 animationDuration="1s"
@@ -245,6 +247,7 @@ function RubricGradingPanel({
                     <button
                       key={level.id}
                       type="button"
+                      disabled={readOnly}
                       onClick={() =>
                         setSelection(criterion.id, {
                           selectedLevelId: level.id,
@@ -281,6 +284,7 @@ function RubricGradingPanel({
                 </span>
                 <textarea
                   value={selection?.comment ?? ""}
+                  disabled={readOnly}
                   onChange={(e) =>
                     setSelection(criterion.id, { comment: e.target.value })
                   }

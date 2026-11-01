@@ -784,7 +784,7 @@ function StudentWork({
   useEnterKey(() => {
     // When a rubric is attached, grading is done via RubricGradingPanel — skip
     // the numeric quick-save so Enter can't overwrite the rubric score.
-    if (!selectFileImage && !assignment.rubricId) {
+    if (!selectFileImage && !assignment.rubricId && !archived) {
       handleSaveChange("REVIEWD");
     }
   });
@@ -843,7 +843,7 @@ function StudentWork({
     <>
       <Toast ref={toast} />
 
-      {selectFileImage && (
+      {selectFileImage && !archived && (
         <PopupLayout
           onClose={() => {
             setSelectFileImage(null);
@@ -1139,6 +1139,7 @@ function StudentWork({
               studentOnAssignmentId={studentOnAssignment.id}
               toast={toast}
               onGraded={() => {}}
+              readOnly={archived}
             />
           </div>
         )}
@@ -1169,6 +1170,7 @@ function StudentWork({
                   onShowText={() => setSelectAssignmentText(file)}
                   onEditImage={() => setSelectFileImage(file)}
                   file={file}
+                  readOnly={archived}
                   key={index}
                 />
               );

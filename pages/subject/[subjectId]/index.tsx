@@ -244,7 +244,7 @@ function Index({ subjectId }: Props) {
       <Toast ref={toast} />
       {triggerStopWatch && <StopWatch onClose={handleCloseStopWatch} />}
 
-      {selectFooter === "AttendanceQRCode" && (
+      {selectFooter === "AttendanceQRCode" && !archived && (
         <PopupLayout onClose={() => setSelectFooter("EMTY")}>
           <AttendanceQRcode
             toast={toast}
@@ -314,7 +314,7 @@ function Index({ subjectId }: Props) {
           />
         </PopupLayout>
       )}
-      {selectFooter === "Attendance" && (
+      {selectFooter === "Attendance" && !archived && (
         <PopupLayout onClose={() => setSelectFooter("EMTY")}>
           <AttendanceChecker
             toast={toast}

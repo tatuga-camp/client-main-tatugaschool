@@ -27,17 +27,25 @@ type Props = {
   file: FileOnStudentOnAssignment;
   onShowText?: (file: FileOnStudentOnAssignment) => void;
   onEditImage?: (file: FileOnStudentOnAssignment) => void;
+  readOnly?: boolean;
 };
-function FileStudentAssignmentCard({ file, onShowText, onEditImage }: Props) {
+function FileStudentAssignmentCard({
+  file,
+  onShowText,
+  onEditImage,
+  readOnly,
+}: Props) {
   if (file.contentType === "FILE" || file.contentType === "LINK") {
-    return <FileCard file={file} onEditImage={onEditImage} />;
+    return (
+      <FileCard file={file} onEditImage={onEditImage} readOnly={readOnly} />
+    );
   }
   if (file.contentType === "TEXT") {
-    return <TextCard file={file} onShowText={onShowText} />;
+    return <TextCard file={file} onShowText={onShowText} readOnly={readOnly} />;
   }
 }
 
-function TextCard({ file, onShowText }: Props) {
+function TextCard({ file, onShowText, readOnly }: Props) {
   const deleteFile = useDeleteFileStudentOnAssignment();
 
   const handleDeleteFile = async () => {
@@ -74,28 +82,30 @@ function TextCard({ file, onShowText }: Props) {
         </button>
       </div>
 
-      <button
-        type="button"
-        onClick={handleDeleteFile}
-        disabled={deleteFile.isPending}
-        className="hidden items-center justify-center rounded-full p-2 text-xl text-red-500 hover:bg-red-300/50 active:scale-105 group-hover:flex"
-      >
-        {deleteFile.isPending ? (
-          <ProgressSpinner
-            animationDuration="1s"
-            style={{ width: "20px" }}
-            className="h-5 w-5"
-            strokeWidth="8"
-          />
-        ) : (
-          <MdDelete />
-        )}
-      </button>
+      {!readOnly && (
+        <button
+          type="button"
+          onClick={handleDeleteFile}
+          disabled={deleteFile.isPending}
+          className="hidden items-center justify-center rounded-full p-2 text-xl text-red-500 hover:bg-red-300/50 active:scale-105 group-hover:flex"
+        >
+          {deleteFile.isPending ? (
+            <ProgressSpinner
+              animationDuration="1s"
+              style={{ width: "20px" }}
+              className="h-5 w-5"
+              strokeWidth="8"
+            />
+          ) : (
+            <MdDelete />
+          )}
+        </button>
+      )}
     </li>
   );
 }
 
-function FileCard({ file, onEditImage }: Props) {
+function FileCard({ file, onEditImage, readOnly }: Props) {
   let fileType: "pdf" | "image" | "unsupported" = "unsupported";
 
   if (file.type.includes("image")) {
@@ -113,8 +123,7 @@ function FileCard({ file, onEditImage }: Props) {
   const cancelRenameRef = React.useRef(false);
 
   const displayName =
-    file.name ??
-    (isLinkFile(file) ? file.body : file.body.split("/").pop());
+    file.name ?? (isLinkFile(file) ? file.body : file.body.split("/").pop());
 
   const handleCommitRename = async () => {
     if (!isEditing) return;
@@ -199,7 +208,7 @@ function FileCard({ file, onEditImage }: Props) {
           )}
         </div>
         <div className="flex items-center justify-center gap-1">
-          {!isEditing && (
+          {!readOnly && !isEditing && (
             <button
               type="button"
               aria-label="Rename file"
@@ -213,7 +222,7 @@ function FileCard({ file, onEditImage }: Props) {
               <MdEdit />
             </button>
           )}
-          {fileType === "image" && (
+          {!readOnly && fileType === "image" && (
             <button
               onClick={() => onEditImage?.(file)}
               type="button"
@@ -222,37 +231,39 @@ function FileCard({ file, onEditImage }: Props) {
               Edit
             </button>
           )}
-          <button
-            type="button"
-            onClick={() => {
-              Swal.fire({
-                title: "Are you sure?",
-                text: "You won't be able to revert this!",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Yes, delete it!",
-              }).then((result) => {
-                if (result.isConfirmed) {
-                  handleDeleteFile();
-                }
-              });
-            }}
-            disabled={deleteFile.isPending}
-            className="flex w-10 items-center justify-center rounded-full p-2 text-xl text-red-500 hover:bg-red-300/50 active:scale-105"
-          >
-            {deleteFile.isPending ? (
-              <ProgressSpinner
-                animationDuration="1s"
-                style={{ width: "20px" }}
-                className="h-5 w-5"
-                strokeWidth="8"
-              />
-            ) : (
-              <MdDelete />
-            )}
-          </button>
+          {!readOnly && (
+            <button
+              type="button"
+              onClick={() => {
+                Swal.fire({
+                  title: "Are you sure?",
+                  text: "You won't be able to revert this!",
+                  icon: "warning",
+                  showCancelButton: true,
+                  confirmButtonColor: "#3085d6",
+                  cancelButtonColor: "#d33",
+                  confirmButtonText: "Yes, delete it!",
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    handleDeleteFile();
+                  }
+                });
+              }}
+              disabled={deleteFile.isPending}
+              className="flex w-10 items-center justify-center rounded-full p-2 text-xl text-red-500 hover:bg-red-300/50 active:scale-105"
+            >
+              {deleteFile.isPending ? (
+                <ProgressSpinner
+                  animationDuration="1s"
+                  style={{ width: "20px" }}
+                  className="h-5 w-5"
+                  strokeWidth="8"
+                />
+              ) : (
+                <MdDelete />
+              )}
+            </button>
+          )}
         </div>
       </section>
       {fileType === "image" && (

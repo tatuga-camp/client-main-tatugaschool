@@ -566,7 +566,7 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
                         <li key={classwork.id} className="list-none">
                           <ClassworkCard
                             classwork={classwork}
-                            reorderable={!filtersActive}
+                            reorderable={!filtersActive && !archived}
                             selectClasswork={selectClasswork}
                             subjectId={subjectId}
                             uniqueTags={uniqueTags}
@@ -581,7 +581,9 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
                             onCopy={(classwork) =>
                               setExportClasswork(classwork)
                             }
-                            onDelete={handleDeleteClasswork}
+                            onDelete={
+                              archived ? undefined : handleDeleteClasswork
+                            }
                           />
                         </li>
                       ))}

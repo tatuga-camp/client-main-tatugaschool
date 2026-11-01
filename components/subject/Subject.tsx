@@ -123,7 +123,7 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
   // Dragging is only enabled without a sort, where the grid shows `order`.
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
-    if (!over || active.id === over.id) return;
+    if (archived || !over || active.id === over.id) return;
     const ordered = [...students].sort((a, b) => a.order - b.order);
     const oldIndex = ordered.findIndex((item) => item.id === active.id);
     const newIndex = ordered.findIndex((item) => item.id === over.id);
@@ -295,7 +295,10 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
   const allSelected =
     students.length > 0 && students.every((item) => item.select);
   const isReorderable =
-    !selectFilter && !triggerSelectMultipleStudent && !studentReorder.isPending;
+    !archived &&
+    !selectFilter &&
+    !triggerSelectMultipleStudent &&
+    !studentReorder.isPending;
 
   const setAllSelected = (select: boolean) => {
     setStudents((prev) => prev.map((item) => ({ ...item, select })));
