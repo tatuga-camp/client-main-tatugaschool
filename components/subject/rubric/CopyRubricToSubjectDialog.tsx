@@ -16,6 +16,7 @@ import {
 } from "../../../react-query";
 import { GetRubricByIdService } from "../../../services";
 import { getDefaultSubjectFilter } from "../../../utils";
+import { writableSubjects } from "../../../utils/subjectArchive";
 import InputEducationYear from "../../common/InputEducationYear";
 import LoadingSpinner from "../../common/LoadingSpinner";
 import PopupLayout from "../../layout/PopupLayout";
@@ -67,8 +68,8 @@ function CopyRubricToSubjectDialog({
   const filtered = useMemo<SubjectWithMeta[]>(() => {
     const term = search.trim().toLowerCase();
     return (
-      subjects.data
-        ?.filter((subject) => subject.id !== currentSubjectId)
+      writableSubjects(subjects.data ?? [])
+        .filter((subject) => subject.id !== currentSubjectId)
         .filter((subject) => {
           if (!term) return true;
           return (
@@ -84,7 +85,7 @@ function CopyRubricToSubjectDialog({
                 teacher.email.toLowerCase().includes(term),
             )
           );
-        }) ?? []
+        })
     );
   }, [subjects.data, search, currentSubjectId]);
 

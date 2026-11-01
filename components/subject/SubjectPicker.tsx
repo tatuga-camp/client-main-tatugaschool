@@ -18,6 +18,7 @@ import {
 import { ResponseGetSubjectBySchoolsService } from "../../services";
 import { decodeBlurhashToCanvas, getDefaultSubjectFilter } from "../../utils";
 import { shortGradeLabel, splitLevel } from "../../utils/classLevel";
+import { isSubjectArchived, writableSubjects } from "../../utils/subjectArchive";
 import {
   filterSubjects,
   subjectEmoji,
@@ -36,9 +37,12 @@ const ALL_TEACHERS = "show-all";
 export function useSubjectPicker({
   schoolId,
   excludeSubjectId,
+  writableOnly = false,
 }: {
   schoolId: string;
   excludeSubjectId?: string;
+  /** Hide archived subjects, for pickers that write into the chosen subject. */
+  writableOnly?: boolean;
 }) {
   const user = useGetUser();
   const members = useGetMemberOnSchoolBySchool({ schoolId });
@@ -67,17 +71,18 @@ export function useSubjectPicker({
   }, [teacherId, user.data]);
 
   const activeTeacher = teacherId ?? ALL_TEACHERS;
-  const visible = useMemo(
-    () =>
-      filterSubjects(
-        (subjects.data ?? []).filter((s) => s.id !== excludeSubjectId),
-        {
-          query: search,
-          teacherId: activeTeacher === ALL_TEACHERS ? "all" : activeTeacher,
-        },
-      ),
-    [subjects.data, excludeSubjectId, search, activeTeacher],
-  );
+  const visible = useMemo(() => {
+    const candidates = (subjects.data ?? []).filter(
+      (s) => s.id !== excludeSubjectId,
+    );
+    return filterSubjects(
+      writableOnly ? writableSubjects(candidates) : candidates,
+      {
+        query: search,
+        teacherId: activeTeacher === ALL_TEACHERS ? "all" : activeTeacher,
+      },
+    );
+  }, [subjects.data, excludeSubjectId, writableOnly, search, activeTeacher]);
 
   return {
     educationYear,
@@ -228,6 +233,11 @@ export function SubjectPickRow({
                 aria-label={subjectUiLanguage.locked(lang)}
                 className="shrink-0 text-icon-color/40"
               />
+            )}
+            {isSubjectArchived(subject) && (
+              <span className="shrink-0 rounded-full bg-icon-color/10 px-2 py-0.5 text-xs font-medium text-icon-color/70">
+                {subjectUiLanguage.archived(lang)}
+              </span>
             )}
           </span>
           <span className="flex min-w-0 items-center gap-2 text-sm text-icon-color/60">
