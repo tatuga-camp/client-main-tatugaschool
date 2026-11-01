@@ -35,8 +35,10 @@ import {
   useGetAttendancesTable,
   useGetLanguage,
   useGetStudentOnSubject,
+  useGetSubject,
 } from "../../react-query";
 import { decodeBlurhashToCanvas } from "../../utils";
+import { isSubjectArchived } from "../../utils/subjectArchive";
 import LoadingSpinner from "../common/LoadingSpinner";
 import PopupLayout from "../layout/PopupLayout";
 import AttendanceChecker from "./AttendanceChecker";
@@ -77,6 +79,8 @@ function Attendance({
   const [triggerCreateAttendanceTable, setTriggerCreateAttendanceTable] =
     React.useState(false);
   const [triggerSetting, setTriggerSetting] = React.useState(false);
+  const subject = useGetSubject({ subjectId });
+  const archived = isSubjectArchived(subject.data);
   const tables = useGetAttendancesTable({
     subjectId,
   });
@@ -137,7 +141,7 @@ function Attendance({
         </PopupLayout>
       )}
 
-      {selectRow && (
+      {selectRow && !archived && (
         <PopupLayout onClose={() => setSelectRow(null)}>
           <AttendanceChecker
             subjectId={subjectId}
@@ -163,7 +167,7 @@ function Attendance({
         </PopupLayout>
       )}
 
-      {triggerCreateAttendanceTable && (
+      {triggerCreateAttendanceTable && !archived && (
         <PopupLayout onClose={() => setTriggerCreateAttendanceTable(false)}>
           <AttendanceTableCreate
             toast={toast}
@@ -207,22 +211,24 @@ function Attendance({
               ]}
             />
           )}
-          <button
-            type="button"
-            onClick={() => setTriggerSetting((prev) => !prev)}
-            disabled={!selectTable}
-            aria-pressed={triggerSetting}
-            className={`${SECONDARY_BUTTON} ${
-              triggerSetting
-                ? "border-primary-color bg-primary-color/10 text-primary-color hover:bg-primary-color/10"
-                : ""
-            }`}
-          >
-            {triggerSetting ? <TbTable /> : <TbAdjustmentsHorizontal />}
-            {triggerSetting
-              ? attendanceLanguageData.view(lang)
-              : attendanceLanguageData.edit(lang)}
-          </button>
+          {!archived && (
+            <button
+              type="button"
+              onClick={() => setTriggerSetting((prev) => !prev)}
+              disabled={!selectTable}
+              aria-pressed={triggerSetting}
+              className={`${SECONDARY_BUTTON} ${
+                triggerSetting
+                  ? "border-primary-color bg-primary-color/10 text-primary-color hover:bg-primary-color/10"
+                  : ""
+              }`}
+            >
+              {triggerSetting ? <TbTable /> : <TbAdjustmentsHorizontal />}
+              {triggerSetting
+                ? attendanceLanguageData.view(lang)
+                : attendanceLanguageData.edit(lang)}
+            </button>
+          )}
           <div ref={exportMenuRef} className="relative">
             <button
               type="button"
@@ -306,28 +312,32 @@ function Attendance({
                 </button>
               );
             })}
-            <button
-              type="button"
-              onClick={() => setTriggerCreateAttendanceTable(true)}
-              className="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-xl border border-dashed border-gray-300 px-3 py-1.5 text-sm font-semibold text-gray-500 transition-colors hover:border-primary-color hover:text-primary-color"
-            >
-              <TbPlus />
-              {attendanceLanguageData.create(lang)}
-            </button>
+            {!archived && (
+              <button
+                type="button"
+                onClick={() => setTriggerCreateAttendanceTable(true)}
+                className="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-xl border border-dashed border-gray-300 px-3 py-1.5 text-sm font-semibold text-gray-500 transition-colors hover:border-primary-color hover:text-primary-color"
+              >
+                <TbPlus />
+                {attendanceLanguageData.create(lang)}
+              </button>
+            )}
           </div>
         ) : (
           <EmptyState
             title={attendanceOverviewData.noTables(lang)}
             hint={attendanceOverviewData.noTablesHint(lang)}
             action={
-              <button
-                type="button"
-                onClick={() => setTriggerCreateAttendanceTable(true)}
-                className="flex items-center gap-1.5 rounded-xl bg-primary-color px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-color-hover"
-              >
-                <TbPlus />
-                {attendanceLanguageData.create(lang)}
-              </button>
+              archived ? undefined : (
+                <button
+                  type="button"
+                  onClick={() => setTriggerCreateAttendanceTable(true)}
+                  className="flex items-center gap-1.5 rounded-xl bg-primary-color px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-color-hover"
+                >
+                  <TbPlus />
+                  {attendanceLanguageData.create(lang)}
+                </button>
+              )
             }
           />
         )}
@@ -390,6 +400,7 @@ function Attendance({
               language={lang}
               setSelectRow={setSelectRow}
               setSelectAttendance={setSelectAttendance}
+              readOnly={archived}
               toast={toast}
               saveImageRef={saveImageRef}
             />
@@ -453,6 +464,7 @@ type Props = {
   >;
   toast: React.RefObject<Toast>;
   saveImageRef: React.MutableRefObject<(() => Promise<void>) | null>;
+  readOnly: boolean;
 };
 function DisplayAttendanceTable({
   selectTable,
@@ -464,6 +476,7 @@ function DisplayAttendanceTable({
   setSelectAttendance,
   toast,
   saveImageRef,
+  readOnly,
 }: Props) {
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
   const tableRef = React.useRef<HTMLTableElement | null>(null);
@@ -656,6 +669,7 @@ function DisplayAttendanceTable({
                         <button
                           type="button"
                           onClick={() => setSelectRow(row)}
+                          disabled={readOnly}
                           title={attendanceOverviewData.openSession(language)}
                           className="flex w-14 flex-col items-start gap-0.5 px-1.5 py-1.5 text-left transition-colors hover:bg-gray-100 md:w-32 md:px-3 md:py-2"
                         >
@@ -800,6 +814,7 @@ function DisplayAttendanceTable({
                             className="border-b border-r border-gray-100 bg-white p-0 group-hover:bg-background-color"
                           >
                             <StatusCell
+                              readOnly={readOnly}
                               attendance={attendance}
                               status={selectTable.statusLists.find(
                                 (s) => s.title === attendance?.status,
@@ -895,7 +910,8 @@ const StatusCell: React.FC<{
   status?: AttendanceStatusList;
   language: Language;
   onClick: () => void;
-}> = ({ attendance, status, language, onClick }) => {
+  readOnly: boolean;
+}> = ({ attendance, status, language, onClick, readOnly }) => {
   const recorded =
     attendance && attendance.status && attendance.status !== "UNKNOW";
   if (!recorded) {
@@ -903,6 +919,7 @@ const StatusCell: React.FC<{
       <button
         type="button"
         onClick={onClick}
+        disabled={readOnly}
         title={attendanceOverviewData.notRecorded(language)}
         className="relative flex h-11 w-full items-center justify-center text-sm text-gray-300 transition hover:bg-gray-100 hover:text-primary-color md:h-14"
       >
@@ -914,6 +931,7 @@ const StatusCell: React.FC<{
     <button
       type="button"
       onClick={onClick}
+      disabled={readOnly}
       title={attendance.note || attendance.status}
       className="relative flex h-11 w-full items-center justify-center px-1 transition hover:shadow-[inset_0_0_0_2px_rgba(44,124,209,0.35)] md:h-14 md:px-2"
       style={{ backgroundColor: tint(status?.color, 0.16) }}

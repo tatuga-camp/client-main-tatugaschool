@@ -39,6 +39,7 @@ import {
   useDeleteFileStudentOnAssignment,
   useDownloadAllFileOnStudentAssignment,
   useGetAssignment,
+  useGetSubject,
   useGetLanguage,
   useGetStudentOnAssignments,
   useUpdateFileStudentOnAssignment,
@@ -51,6 +52,7 @@ import {
 import { decodeBlurhashToCanvas, timeAgo, timeLeft } from "../../utils";
 import ConfirmDeleteMessage from "../common/ConfirmDeleteMessage";
 import DrawCanva from "../common/DrawCanva";
+import { isSubjectArchived } from "../../utils/subjectArchive";
 import InputNumber from "../common/InputNumber";
 import LoadingBar from "../common/LoadingBar";
 import PopupLayout from "../layout/PopupLayout";
@@ -77,7 +79,7 @@ type Props = {
 
 function ClassStudentWork({ assignmentId, onScroll }: Props) {
   const language = useGetLanguage();
-  const { studentOnAssignmentId } = useRouter().query;
+  const { studentOnAssignmentId, subjectId } = useRouter().query;
   const studentOnAssignments = useGetStudentOnAssignments({
     assignmentId,
     refetchInterval: 5000,
@@ -112,6 +114,10 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
   const assignment = useGetAssignment({
     id: assignmentId,
   });
+  const subject = useGetSubject({
+    subjectId: typeof subjectId === "string" ? subjectId : "",
+  });
+  const archived = isSubjectArchived(subject.data);
   const downloadAllFiles = useDownloadAllFileOnStudentAssignment();
 
   const handleDownloadAllFiles = async () => {
@@ -285,8 +291,7 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
               const count =
                 tab.key === "ALL"
                   ? assignedStudents.length
-                  : assignedStudents.filter((s) => s.status === tab.key)
-                      .length;
+                  : assignedStudents.filter((s) => s.status === tab.key).length;
               return (
                 <button
                   key={tab.key}
@@ -395,17 +400,17 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
                     );
                   })
                 : visibleStudents.map((student, index) => {
-                      const odd = index % 2 === 0;
-                      return (
-                        <StudentList
-                          onClick={handleSelectStudentWork}
-                          setStudentData={setStudentData}
-                          key={student.id}
-                          student={student}
-                          odd={odd}
-                        />
-                      );
-                    })}
+                    const odd = index % 2 === 0;
+                    return (
+                      <StudentList
+                        onClick={handleSelectStudentWork}
+                        setStudentData={setStudentData}
+                        key={student.id}
+                        student={student}
+                        odd={odd}
+                      />
+                    );
+                  })}
               {!studentOnAssignments.isLoading &&
                 visibleStudents.length === 0 && (
                   <tr>
@@ -430,11 +435,13 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
           <StudentWork
             studentOnAssignment={selectStudentWork}
             assignment={assignment.data}
+            archived={archived}
           />
         ) : (
           <MultipleReview
             selectStudents={studentData?.filter((s) => s.select === true) ?? []}
             maxScore={assignment.data?.maxScore ?? 0}
+            archived={archived}
           />
         )}
       </section>
@@ -559,8 +566,13 @@ const StudentList = React.memo(function StudentList({
 type MultipleReviewProps = {
   selectStudents: StudentOnAssignment[];
   maxScore: number;
+  archived: boolean;
 };
-function MultipleReview({ selectStudents, maxScore }: MultipleReviewProps) {
+function MultipleReview({
+  selectStudents,
+  maxScore,
+  archived,
+}: MultipleReviewProps) {
   const update = useUpdateStudentOnAssignments();
   const [score, setScore] = useState<number>(0);
   const [loading, setLoading] = useState(false);
@@ -619,23 +631,26 @@ function MultipleReview({ selectStudents, maxScore }: MultipleReviewProps) {
               placeholder={score ? "Enter score" : "Not graded"}
               suffix={`/${maxScore}`}
               max={maxScore}
+              disabled={archived}
             />
           </div>
-          <button
-            disabled={loading}
-            className="second-button flex w-60 items-center justify-center border text-sm"
-          >
-            {loading ? (
-              <ProgressSpinner
-                animationDuration="1s"
-                style={{ width: "20px" }}
-                className="h-5 w-5"
-                strokeWidth="8"
-              />
-            ) : (
-              <span>Save Change</span>
-            )}
-          </button>
+          {!archived && (
+            <button
+              disabled={loading}
+              className="second-button flex w-60 items-center justify-center border text-sm"
+            >
+              {loading ? (
+                <ProgressSpinner
+                  animationDuration="1s"
+                  style={{ width: "20px" }}
+                  className="h-5 w-5"
+                  strokeWidth="8"
+                />
+              ) : (
+                <span>Save Change</span>
+              )}
+            </button>
+          )}
         </form>
       ) : (
         <h1 className="text-3xl">
@@ -677,8 +692,13 @@ type PropsStudentWork = {
     files: FileOnStudentOnAssignment[];
   };
   assignment: Assignment;
+  archived: boolean;
 };
-function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
+function StudentWork({
+  studentOnAssignment,
+  assignment,
+  archived,
+}: PropsStudentWork) {
   const language = useGetLanguage();
   const update = useUpdateStudentOnAssignments();
   const updateFile = useUpdateFileStudentOnAssignment();
@@ -926,81 +946,84 @@ function StudentWork({ studentOnAssignment, assignment }: PropsStudentWork) {
                   }
                   suffix={`/${assignment.maxScore}`}
                   max={assignment.maxScore}
+                  disabled={archived}
                 />
               </div>
             )}
-            <div className="relative flex grow items-center">
-              <button
-                disabled={update.isPending}
-                onClick={() => handleSaveChange("REVIEWD")}
-                className="second-button h-10 w-40 grow rounded-2xl rounded-r-none border border-r-0 p-2 text-base font-medium text-black opacity-85 hover:opacity-100"
-              >
-                {update.isPending ? (
-                  <ProgressSpinner
-                    animationDuration="1s"
-                    style={{ width: "20px" }}
-                    className="h-5 w-5"
-                    strokeWidth="8"
-                  />
-                ) : (
-                  dropdownStatusStudentOnAssignmentLanguage.review(
-                    language.data ?? "en",
-                  )
-                )}
-              </button>
-              <button
-                onClick={() => setTriggerDropdown((prev) => !prev)}
-                type="button"
-                className="second-button h-10 w-max rounded-2xl rounded-l-none border p-2 text-base font-medium text-black"
-              >
-                <IoChevronDownSharp />
-              </button>
-              {triggerDropdown && (
-                <div
-                  ref={dropdownRef}
-                  className="absolute left-6 top-12 z-40 h-max w-60 rounded-2xl border bg-white p-1 drop-shadow"
+            {!archived && (
+              <div className="relative flex grow items-center">
+                <button
+                  disabled={update.isPending}
+                  onClick={() => handleSaveChange("REVIEWD")}
+                  className="second-button h-10 w-40 grow rounded-2xl rounded-r-none border border-r-0 p-2 text-base font-medium text-black opacity-85 hover:opacity-100"
                 >
-                  {menuDropdowns.map((menu) => {
-                    let textColor = "text-gray-400";
-                    let hoverBg = "hover:bg-primary-color";
-                    let status: StudentAssignmentStatus = "REVIEWD";
-                    if (menu.title === "improve") {
-                      status = "IMPROVED";
-                      hoverBg = "hover:bg-info-color";
-                    } else if (menu.title === "delete") {
-                      status = "PENDDING";
-                      textColor = "text-red-400";
-                      hoverBg = "hover:bg-error-color";
-                    }
+                  {update.isPending ? (
+                    <ProgressSpinner
+                      animationDuration="1s"
+                      style={{ width: "20px" }}
+                      className="h-5 w-5"
+                      strokeWidth="8"
+                    />
+                  ) : (
+                    dropdownStatusStudentOnAssignmentLanguage.review(
+                      language.data ?? "en",
+                    )
+                  )}
+                </button>
+                <button
+                  onClick={() => setTriggerDropdown((prev) => !prev)}
+                  type="button"
+                  className="second-button h-10 w-max rounded-2xl rounded-l-none border p-2 text-base font-medium text-black"
+                >
+                  <IoChevronDownSharp />
+                </button>
+                {triggerDropdown && (
+                  <div
+                    ref={dropdownRef}
+                    className="absolute left-6 top-12 z-40 h-max w-60 rounded-2xl border bg-white p-1 drop-shadow"
+                  >
+                    {menuDropdowns.map((menu) => {
+                      let textColor = "text-gray-400";
+                      let hoverBg = "hover:bg-primary-color";
+                      let status: StudentAssignmentStatus = "REVIEWD";
+                      if (menu.title === "improve") {
+                        status = "IMPROVED";
+                        hoverBg = "hover:bg-info-color";
+                      } else if (menu.title === "delete") {
+                        status = "PENDDING";
+                        textColor = "text-red-400";
+                        hoverBg = "hover:bg-error-color";
+                      }
 
-                    return (
-                      <button
-                        key={menu.title}
-                        type="button"
-                        onClick={() => {
-                          if (menu.title === "delete") {
-                            ConfirmDeleteMessage({
-                              language: language.data ?? "en",
-                              async callback() {
-                                handleSaveChange(status);
-                              },
-                            });
-                          } else {
-                            handleSaveChange(status);
-                          }
-                        }}
-                        className={`flex h-10 w-full items-center justify-start gap-10 px-4 ${textColor} hover:scale-105 ${hoverBg} hover:text-white`}
-                      >
-                        {menu.icon}
-                        {dropdownStatusStudentOnAssignmentLanguage[
-                          menu.title as keyof typeof dropdownStatusStudentOnAssignmentLanguage
-                        ](language.data ?? "en")}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+                      return (
+                        <button
+                          key={menu.title}
+                          type="button"
+                          onClick={() => {
+                            if (menu.title === "delete") {
+                              ConfirmDeleteMessage({
+                                language: language.data ?? "en",
+                                async callback() {
+                                  handleSaveChange(status);
+                                },
+                              });
+                            } else {
+                              handleSaveChange(status);
+                            }
+                          }}
+                          className={`flex h-10 w-full items-center justify-start gap-10 px-4 ${textColor} hover:scale-105 ${hoverBg} hover:text-white`}
+                        >
+                          {menu.icon}
+                          {dropdownStatusStudentOnAssignmentLanguage[
+                            menu.title as keyof typeof dropdownStatusStudentOnAssignmentLanguage
+                          ](language.data ?? "en")}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </header>
         <ul className="grid lg:grid-cols-1 xl:grid-cols-3">

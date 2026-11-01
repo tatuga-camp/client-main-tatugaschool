@@ -33,9 +33,11 @@ import {
   useGetScoreOnStudent,
   useGetSortConfigOnSubject,
   useGetStudentOnSubject,
+  useGetSubject,
   useReorderStudentOnSubject,
   useUpdateSortConfigOnSubject,
 } from "../../react-query";
+import { isSubjectArchived } from "../../utils/subjectArchive";
 import Filter, { FilterTitle } from "../common/Filter";
 import PopupLayout from "../layout/PopupLayout";
 import StudentCard from "../student/StudentCard";
@@ -72,6 +74,8 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
   const updateSortConfig = useUpdateSortConfigOnSubject();
   const removeSortConfig = useDeleteSortConfigOnSubject();
   const createStudentScore = useCreateScoreOnStudent();
+  const subject = useGetSubject({ subjectId });
+  const archived = isSubjectArchived(subject.data);
   const [selectScore, setSelectScore] = React.useState<
     { score?: ScoreOnSubject } & { inputScore: number }
   >({
@@ -320,7 +324,7 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
           />
         </PopupLayout>
       )}
-      {triggerChooseScore && (
+      {triggerChooseScore && !archived && (
         <PopupLayout
           onClose={() => {
             setTriggerChooseScore(false);
@@ -485,42 +489,44 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
               </div>
             )}
             <section className="grid grid-cols-2 gap-3 pb-28 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-7">
-              <button
-                type="button"
-                aria-pressed={triggerSelectMultipleStudent}
-                onClick={() =>
-                  triggerSelectMultipleStudent
-                    ? exitSelectMode()
-                    : setTriggerSelectMultipleStudent(true)
-                }
-                className={`flex min-h-44 w-full select-none flex-col items-center justify-center gap-3 rounded-2xl border border-dashed px-3 py-4 text-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-color active:scale-[0.98] ${
-                  triggerSelectMultipleStudent
-                    ? "border-primary-color bg-primary-color text-white"
-                    : "border-primary-color/40 bg-primary-color/5 text-primary-color hover:bg-primary-color/10"
-                }`}
-              >
-                <span
-                  className={`flex h-16 w-16 items-center justify-center rounded-full text-3xl sm:h-20 sm:w-20 ${
+              {!archived && (
+                <button
+                  type="button"
+                  aria-pressed={triggerSelectMultipleStudent}
+                  onClick={() =>
                     triggerSelectMultipleStudent
-                      ? "bg-white/15"
-                      : "bg-white ring-4 ring-primary-color/10"
+                      ? exitSelectMode()
+                      : setTriggerSelectMultipleStudent(true)
+                  }
+                  className={`flex min-h-44 w-full select-none flex-col items-center justify-center gap-3 rounded-2xl border border-dashed px-3 py-4 text-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-color active:scale-[0.98] ${
+                    triggerSelectMultipleStudent
+                      ? "border-primary-color bg-primary-color text-white"
+                      : "border-primary-color/40 bg-primary-color/5 text-primary-color hover:bg-primary-color/10"
                   }`}
                 >
-                  <MdChecklist />
-                </span>
-                <span className="flex flex-col">
-                  <span className="text-sm font-semibold">
-                    {triggerSelectMultipleStudent
-                      ? studentPointsLanguage.selecting(lang)
-                      : studentPointsLanguage.selectSeveral(lang)}
+                  <span
+                    className={`flex h-16 w-16 items-center justify-center rounded-full text-3xl sm:h-20 sm:w-20 ${
+                      triggerSelectMultipleStudent
+                        ? "bg-white/15"
+                        : "bg-white ring-4 ring-primary-color/10"
+                    }`}
+                  >
+                    <MdChecklist />
                   </span>
-                  {!triggerSelectMultipleStudent && (
-                    <span className="mt-0.5 text-xs text-primary-color/70">
-                      {studentPointsLanguage.selectSeveralHint(lang)}
+                  <span className="flex flex-col">
+                    <span className="text-sm font-semibold">
+                      {triggerSelectMultipleStudent
+                        ? studentPointsLanguage.selecting(lang)
+                        : studentPointsLanguage.selectSeveral(lang)}
                     </span>
-                  )}
-                </span>
-              </button>
+                    {!triggerSelectMultipleStudent && (
+                      <span className="mt-0.5 text-xs text-primary-color/70">
+                        {studentPointsLanguage.selectSeveralHint(lang)}
+                      </span>
+                    )}
+                  </span>
+                </button>
+              )}
               <DndContext
                 sensors={sensors}
                 collisionDetection={closestCenter}

@@ -29,6 +29,7 @@ import {
   getSlateColorStyle,
   GradeViewMode,
 } from "../../utils";
+import { isSubjectArchived } from "../../utils/subjectArchive";
 import LoadingSpinner from "../common/LoadingSpinner";
 import PopupLayout from "../layout/PopupLayout";
 import GradeLeaderboard from "./GradeLeaderboard";
@@ -282,7 +283,11 @@ function Grade({
             value={view}
             onChange={setView}
             options={[
-              { value: "table", label: gradeData.table(lang), icon: <FaTable /> },
+              {
+                value: "table",
+                label: gradeData.table(lang),
+                icon: <FaTable />,
+              },
               {
                 value: "leaderboard",
                 label: gradeData.leaderboard(lang),
@@ -318,16 +323,20 @@ function Grade({
               <span className="h-2 w-2 rounded-full bg-success-color" />
             )}
             <TbShare />
-            {isShared ? gradeTableData.shared(lang) : gradeTableData.share(lang)}
+            {isShared
+              ? gradeTableData.shared(lang)
+              : gradeTableData.share(lang)}
           </button>
-          <button
-            type="button"
-            onClick={() => setTriggerGradeSetting(true)}
-            className={SECONDARY_BUTTON}
-          >
-            <IoMdSettings />
-            {gradeData.setting(lang)}
-          </button>
+          {!isSubjectArchived(subject.data) && (
+            <button
+              type="button"
+              onClick={() => setTriggerGradeSetting(true)}
+              className={SECONDARY_BUTTON}
+            >
+              <IoMdSettings />
+              {gradeData.setting(lang)}
+            </button>
+          )}
           <button
             type="button"
             disabled={loading}
@@ -355,7 +364,9 @@ function Grade({
             students={activeStudents}
             totalsByStudentId={totalsByStudentId}
             totalMax={total_score}
-            loading={assignmentsOverview.isLoading || studentOnSubjects.isLoading}
+            loading={
+              assignmentsOverview.isLoading || studentOnSubjects.isLoading
+            }
             onToggleGroup={toggleGroup}
             onOpenAssignment={(assignment, studentOnAssignment) =>
               setSelectStudentOnAssignment({ assignment, studentOnAssignment })

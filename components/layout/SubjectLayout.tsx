@@ -3,8 +3,12 @@ import type { ReactNode } from "react";
 import React, { useEffect, useState } from "react";
 import { MdLock } from "react-icons/md";
 import { menuSubjectList } from "../../data";
+import { subjectUiLanguage } from "../../data/languages";
 import { subjectIsLockedDataLanguage } from "../../data/languages/subscription";
+import useGetRoleOnSchool from "../../hook/useGetRoleOnSchool";
+import useGetRoleOnSubject from "../../hook/useGetRoleOnSubject";
 import { useGetLanguage, useGetSubject } from "../../react-query";
+import { isSubjectArchived } from "../../utils/subjectArchive";
 import Navbar from "../Navbar";
 import {
   SIDEBAR_CONTENT_OFFSET,
@@ -29,6 +33,12 @@ function SubjectLayout({
     subjectId,
   });
   const language = useGetLanguage();
+  const archived = isSubjectArchived(subject.data);
+  const roleSubject = useGetRoleOnSubject({ subjectId });
+  const roleSchool = useGetRoleOnSchool({
+    schoolId: subject.data?.schoolId ?? "",
+  });
+  const canManage = roleSubject === "ADMIN" || roleSchool === "ADMIN";
   const [triggerShowLock, setTriggerShowLock] = useState(false);
   React.useLayoutEffect(() => {
     document.body.style.overflow = "auto";
@@ -108,11 +118,34 @@ function SubjectLayout({
           </div>
         </div>
       )}
-      <div className={SIDEBAR_CONTENT_OFFSET}>{children}</div>
-      <div className={`fixed bottom-0 z-30 bg-white pb-safe ${SIDEBAR_FIXED_LEFT}`}>
+      <div className={SIDEBAR_CONTENT_OFFSET}>
+        {archived && (
+          <div
+            role="status"
+            className="flex w-full flex-wrap items-center justify-center gap-x-3 gap-y-1 bg-amber-50 px-4 py-2 text-center text-sm text-amber-900"
+          >
+            <span>
+              {subjectUiLanguage.archivedBanner(language.data ?? "en")}
+            </span>
+            {canManage && (
+              <Link
+                href={`/subject/${subjectId}?menu=SettingSubject`}
+                className="font-semibold underline"
+              >
+                {subjectUiLanguage.archiveSubject(language.data ?? "en")}
+              </Link>
+            )}
+          </div>
+        )}
+        {children}
+      </div>
+      <div
+        className={`pb-safe fixed bottom-0 z-30 bg-white ${SIDEBAR_FIXED_LEFT}`}
+      >
         <FooterSubject
           selectFooter={selectFooter}
           setSelectFooter={setSelectFooter}
+          archived={archived}
         />
       </div>
     </section>
