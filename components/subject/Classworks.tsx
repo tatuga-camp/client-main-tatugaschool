@@ -634,6 +634,7 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
                       announcement={announcement}
                       subjectId={subjectId}
                       userId={user.data?.id ?? ""}
+                      archived={archived}
                     />
                   </li>
                 ))}

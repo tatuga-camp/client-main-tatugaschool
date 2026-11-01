@@ -1,11 +1,12 @@
 import React, { useState } from "react";
+import Swal from "sweetalert2";
 import { PiCloudFog } from "react-icons/pi";
 import { IoMdClose } from "react-icons/io";
 import { FaPlus, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import QRCode from "../QRCode";
 import WordCloudView from "./WordCloudView";
 import WordCloudBars from "./WordCloudBars";
-import { WordCloudAccess } from "../../../interfaces";
+import { ErrorMessages, WordCloudAccess } from "../../../interfaces";
 import {
   useAppendWordCloudQuestion,
   useCreateWordCloudSet,
@@ -58,16 +59,35 @@ function WordCloudPanel({ subjectId, onClose }: Props) {
     ? `${process.env.NEXT_PUBLIC_STUDENT_CLIENT_URL}/word-cloud/set/${activeSetId}`
     : "";
 
+  // Surface server rejections (e.g. archived subject) instead of failing silently.
+  const showError = (error: unknown) => {
+    const result = error as ErrorMessages | undefined;
+    Swal.fire({
+      title: result?.error ? result.error : "Something Went Wrong",
+      text: result?.message?.toString(),
+      footer: result?.statusCode
+        ? "Code Error: " + result.statusCode.toString()
+        : "",
+      icon: "error",
+    });
+  };
+
   const handleCreate = async () => {
     const cleaned = questions.map((q) => q.trim()).filter((q) => q.length > 0);
     if (cleaned.length === 0) return;
-    const created = await create.mutateAsync({
-      subjectId,
-      questions: cleaned,
-      title: title.trim() || undefined,
-      accessMode,
-      allowMultiple,
-    });
+    let created;
+    try {
+      created = await create.mutateAsync({
+        subjectId,
+        questions: cleaned,
+        title: title.trim() || undefined,
+        accessMode,
+        allowMultiple,
+      });
+    } catch (error) {
+      showError(error);
+      return;
+    }
     setQuestions([""]);
     setNewQuestion("");
     setTitle("");
@@ -93,7 +113,10 @@ function WordCloudPanel({ subjectId, onClose }: Props) {
     const advanceTo = (index: number) => {
       const target = ordered[index];
       if (!target) return;
-      update.mutate({ setId: set.id, activeWordCloudId: target.wordCloud.id });
+      update.mutate(
+        { setId: set.id, activeWordCloudId: target.wordCloud.id },
+        { onError: showError },
+      );
       setViewIndex(index);
     };
 
@@ -156,11 +179,15 @@ function WordCloudPanel({ subjectId, onClose }: Props) {
             label={wordCloudLanguage.addQuestion(lang)}
             onAdd={async () => {
               if (!newQuestion.trim()) return;
-              await append.mutateAsync({
-                setId: set.id,
-                question: newQuestion.trim(),
-              });
-              setNewQuestion("");
+              try {
+                await append.mutateAsync({
+                  setId: set.id,
+                  question: newQuestion.trim(),
+                });
+                setNewQuestion("");
+              } catch (error) {
+                showError(error);
+              }
             }}
           />
         </div>
@@ -240,7 +267,10 @@ function WordCloudPanel({ subjectId, onClose }: Props) {
                 onBlur={(e) => {
                   const next = e.target.value.trim();
                   if (next !== (set.title ?? "")) {
-                    update.mutate({ setId: set.id, title: next });
+                    update.mutate(
+                      { setId: set.id, title: next },
+                      { onError: showError },
+                    );
                   }
                 }}
                 className="mb-3 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-primary-color"
@@ -250,10 +280,10 @@ function WordCloudPanel({ subjectId, onClose }: Props) {
                   type="checkbox"
                   checked={set.allowMultiple}
                   onChange={(e) =>
-                    update.mutate({
-                      setId: set.id,
-                      allowMultiple: e.target.checked,
-                    })
+                    update.mutate(
+                      { setId: set.id, allowMultiple: e.target.checked },
+                      { onError: showError },
+                    )
                   }
                 />
                 {wordCloudLanguage.allowMultiple(lang)}
@@ -310,10 +340,13 @@ function WordCloudPanel({ subjectId, onClose }: Props) {
             </div>
             <button
               onClick={() =>
-                update.mutate({
-                  setId: set.id,
-                  status: set.status === "OPEN" ? "CLOSED" : "OPEN",
-                })
+                update.mutate(
+                  {
+                    setId: set.id,
+                    status: set.status === "OPEN" ? "CLOSED" : "OPEN",
+                  },
+                  { onError: showError },
+                )
               }
               className="w-full rounded-lg bg-warning-color px-3 py-2 text-xs font-bold text-icon-color"
             >

@@ -130,6 +130,8 @@ type Props = {
   onUpdateFile?: (file: FileClasswork) => void;
   subjectId: string;
   schoolId: string;
+  /** Archived subject: show data, hide/disable every write control. */
+  readOnly?: boolean;
 };
 function ClassworkView({
   classwork,
@@ -142,7 +144,10 @@ function ClassworkView({
   subjectId,
   schoolId,
   uniqueTags = [],
+  readOnly = false,
 }: Props) {
+  // `inert` blocks pointer and keyboard interaction (React 18 passes it through).
+  const inertProps = (readOnly ? { inert: "" } : {}) as object;
   const refetchSkill = useUpdateSkillToAssignment();
   const language = useGetLanguage();
   const updateFile = useUpdateFileOnAssignment();
@@ -278,7 +283,9 @@ function ClassworkView({
       {/* Left column */}
       <section className="flex min-w-0 flex-col gap-5 pb-24">
         {assignmentType === "VideoQuiz" && classwork && (
-          <VideoConfigurator assignment={classwork} />
+          <div {...inertProps}>
+            <VideoConfigurator assignment={classwork} />
+          </div>
         )}
 
         {assignmentType !== "VideoQuiz" && (
@@ -288,7 +295,7 @@ function ClassworkView({
                 language.data ?? "en",
               )}
             />
-            <div className="h-96 w-full pb-5">
+            <div className="h-96 w-full pb-5" {...inertProps}>
               <TextEditor
                 schoolId={schoolId}
                 value={description}
@@ -301,7 +308,7 @@ function ClassworkView({
               />
             </div>
             {classwork && (
-              <section className="mt-6 flex flex-col gap-1">
+              <section className="mt-6 flex flex-col gap-1" {...inertProps}>
                 <span className="text-sm font-medium text-icon-color">
                   {tagsDataLanguage.sectionTitle(language.data ?? "en")}
                 </span>
@@ -371,94 +378,101 @@ function ClassworkView({
                           {file.name}
                         </a>
                       )}
-                      <div className="flex shrink-0 items-center">
-                        {isVideo && (
+                      {!readOnly && (
+                        <div className="flex shrink-0 items-center">
+                          {isVideo && (
+                            <button
+                              type="button"
+                              aria-label="Video settings"
+                              onClick={() => setConfiguringVideo(file)}
+                              className="rounded-full p-2 text-lg text-gray-400 transition hover:bg-gray-100 hover:text-icon-color"
+                            >
+                              <MdSettings />
+                            </button>
+                          )}
                           <button
                             type="button"
-                            aria-label="Video settings"
-                            onClick={() => setConfiguringVideo(file)}
+                            aria-label="Rename"
+                            onClick={() => handleStartRename(file)}
                             className="rounded-full p-2 text-lg text-gray-400 transition hover:bg-gray-100 hover:text-icon-color"
                           >
-                            <MdSettings />
+                            <MdEdit />
                           </button>
-                        )}
-                        <button
-                          type="button"
-                          aria-label="Rename"
-                          onClick={() => handleStartRename(file)}
-                          className="rounded-full p-2 text-lg text-gray-400 transition hover:bg-gray-100 hover:text-icon-color"
-                        >
-                          <MdEdit />
-                        </button>
-                        <button
-                          type="button"
-                          aria-label="Delete"
-                          onClick={() => {
-                            if (confirm("Do you want to delete?"))
-                              onDeleteFile(file);
-                          }}
-                          className="rounded-full p-2 text-lg text-gray-400 transition hover:bg-error-color/10 hover:text-error-color"
-                        >
-                          <MdDelete />
-                        </button>
-                      </div>
+                          <button
+                            type="button"
+                            aria-label="Delete"
+                            onClick={() => {
+                              if (confirm("Do you want to delete?"))
+                                onDeleteFile(file);
+                            }}
+                            className="rounded-full p-2 text-lg text-gray-400 transition hover:bg-error-color/10 hover:text-error-color"
+                          >
+                            <MdDelete />
+                          </button>
+                        </div>
+                      )}
                     </li>
                   );
                 })}
               </ul>
             )}
-            <div className="flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-gray-200 p-6">
-              <span className="text-sm text-gray-400">
-                {classworkViewDataLanguage.fileDescription(
-                  language.data ?? "en",
-                )}
-              </span>
-              <div className="flex flex-wrap justify-center gap-2">
-                <label
-                  htmlFor="upload"
-                  className={`${outlineButton} cursor-pointer`}
-                >
-                  <MdOutlineFileUpload className="text-lg" />
-                  {classworkViewDataLanguage.uploadButton(
+            {!readOnly && (
+              <div className="flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-gray-200 p-6">
+                <span className="text-sm text-gray-400">
+                  {classworkViewDataLanguage.fileDescription(
                     language.data ?? "en",
                   )}
-                  <input
-                    onChange={(e) => {
-                      const files = e.target.files;
-                      if (!files) return;
-                      const filesArray = Array.from(files).map((file) => {
-                        return {
-                          file,
-                          data: null,
-                          id: null,
-                          fileOnAssignment: null,
-                          type: file.type,
-                          name: file.name,
-                          url: URL.createObjectURL(file),
-                        };
-                      });
-                      onUploadFile(filesArray);
-                    }}
-                    id="upload"
-                    type="file"
-                    multiple
-                    className="hidden"
-                  />
-                </label>
-                <button
-                  onClick={() => setTriggerLink(true)}
-                  type="button"
-                  className={outlineButton}
-                >
-                  <MdLink className="text-lg" /> Link
-                </button>
+                </span>
+                <div className="flex flex-wrap justify-center gap-2">
+                  <label
+                    htmlFor="upload"
+                    className={`${outlineButton} cursor-pointer`}
+                  >
+                    <MdOutlineFileUpload className="text-lg" />
+                    {classworkViewDataLanguage.uploadButton(
+                      language.data ?? "en",
+                    )}
+                    <input
+                      onChange={(e) => {
+                        const files = e.target.files;
+                        if (!files) return;
+                        const filesArray = Array.from(files).map((file) => {
+                          return {
+                            file,
+                            data: null,
+                            id: null,
+                            fileOnAssignment: null,
+                            type: file.type,
+                            name: file.name,
+                            url: URL.createObjectURL(file),
+                          };
+                        });
+                        onUploadFile(filesArray);
+                      }}
+                      id="upload"
+                      type="file"
+                      multiple
+                      className="hidden"
+                    />
+                  </label>
+                  <button
+                    onClick={() => setTriggerLink(true)}
+                    type="button"
+                    className={outlineButton}
+                  >
+                    <MdLink className="text-lg" /> Link
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         )}
 
         {assignmentType === "Assignment" && classwork && (
-          <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+          <div
+            className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm"
+            {...inertProps}
+          >
             <div className="mb-3 flex items-start justify-between gap-3">
               <div className="flex flex-col">
                 <h2 className="flex items-center gap-2 text-base font-semibold text-icon-color">
@@ -541,7 +555,7 @@ function ClassworkView({
         </div>
 
         {!triggerSildeOption && (
-          <div className="mt-4 flex flex-col gap-4">
+          <div className="mt-4 flex flex-col gap-4" {...inertProps}>
             <div>
               {classwork?.status === "Draft" && (
                 <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">

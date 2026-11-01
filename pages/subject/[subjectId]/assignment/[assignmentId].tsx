@@ -476,6 +476,7 @@ function Index({
                   )}
                   className="min-w-0 flex-1 border-b-2 border-transparent bg-transparent py-1 text-lg font-semibold text-icon-color outline-none transition focus:border-primary-color md:text-xl"
                   value={assignmentTitle ?? ""}
+                  disabled={archived}
                   onChange={(e) => setAssignmentTitle(e.target.value)}
                 />
                 <div className="hidden md:block">
@@ -644,6 +645,7 @@ function Index({
               }
               subjectId={subjectId}
               schoolId={assignment.data?.schoolId}
+              readOnly={archived}
               files={files}
               onDeleteFile={(file) => handleDeleteFile(file)}
               onUploadFile={(file) => handleUploadFile(file)}
@@ -664,6 +666,7 @@ function Index({
             <ClassStudentAssignWork
               assignmentId={assignmentId}
               subjectId={subjectId}
+              readOnly={archived}
             />
           )}
           {selectMenu === "exportclasswork" && assignment.data && (

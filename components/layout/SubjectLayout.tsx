@@ -3,10 +3,7 @@ import type { ReactNode } from "react";
 import React, { useEffect, useState } from "react";
 import { MdLock } from "react-icons/md";
 import { menuSubjectList } from "../../data";
-import { subjectUiLanguage } from "../../data/languages";
 import { subjectIsLockedDataLanguage } from "../../data/languages/subscription";
-import useGetRoleOnSchool from "../../hook/useGetRoleOnSchool";
-import useGetRoleOnSubject from "../../hook/useGetRoleOnSubject";
 import { useGetLanguage, useGetSubject } from "../../react-query";
 import { isSubjectArchived } from "../../utils/subjectArchive";
 import Navbar from "../Navbar";
@@ -35,11 +32,6 @@ function SubjectLayout({
   });
   const language = useGetLanguage();
   const archived = isSubjectArchived(subject.data);
-  const roleSubject = useGetRoleOnSubject({ subjectId });
-  const roleSchool = useGetRoleOnSchool({
-    schoolId: subject.data?.schoolId ?? "",
-  });
-  const canManage = roleSubject === "ADMIN" || roleSchool === "ADMIN";
   const [triggerShowLock, setTriggerShowLock] = useState(false);
   React.useLayoutEffect(() => {
     document.body.style.overflow = "auto";

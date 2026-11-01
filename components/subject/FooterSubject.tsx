@@ -148,7 +148,9 @@ function FooterSubject({ setSelectFooter, selectFooter, archived }: Props) {
 
   return (
     <div className="relative w-full max-w-full border-t-2 border-black">
-      <div className="grid h-14 w-full grid-cols-4 bg-white md:flex md:flex-nowrap md:items-center md:justify-center md:gap-3 md:px-3">
+      <div
+        className={`grid h-14 w-full ${archived ? "grid-cols-3" : "grid-cols-4"} bg-white md:flex md:flex-nowrap md:items-center md:justify-center md:gap-3 md:px-3`}
+      >
         {menuGroups
           .map((group) => ({
             ...group,

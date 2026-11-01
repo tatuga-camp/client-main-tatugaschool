@@ -63,6 +63,18 @@ test("archiveSwitchState: archived by class is checked and disabled", () => {
   assert.equal(s.hint, "classArchived");
 });
 
+test("archiveSwitchState: class archived but subject not is visible, unchecked, enabled", () => {
+  const s = archiveSwitchState({
+    ...base,
+    subjectArchived: false,
+    classArchived: true,
+  });
+  assert.equal(s.visible, true);
+  assert.equal(s.checked, false);
+  assert.equal(s.disabled, false);
+  assert.equal(s.hint, null);
+});
+
 test("writableSubjects drops archived subjects", () => {
   const out = writableSubjects([
     { id: "a" },

@@ -539,7 +539,7 @@ export default function QuizEditorPage({
           {tab === "settings" && (
             <QuizSettingsPanel
               assignment={assignment.data}
-              disabled={generating}
+              disabled={generating || archived}
             />
           )}
           {tab === "monitor" && <QuizMonitor assignmentId={assignmentId} />}
@@ -547,6 +547,7 @@ export default function QuizEditorPage({
             <ClassStudentAssignWork
               assignmentId={assignmentId}
               subjectId={subjectId}
+              readOnly={archived}
             />
           )}
           {tab === "exportclasswork" && (

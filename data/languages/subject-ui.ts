@@ -85,6 +85,8 @@ export const subjectUiLanguage = {
   archived: (l: Language) => pick(l, "Archived", "เก็บถาวร"),
   archiveSubject: (l: Language) =>
     pick(l, "Archive subject", "เก็บรายวิชาถาวร"),
+  archivedManageLink: (l: Language) =>
+    pick(l, "Manage in settings", "จัดการในการตั้งค่า"),
   archiveSubjectHint: (l: Language) =>
     pick(
       l,

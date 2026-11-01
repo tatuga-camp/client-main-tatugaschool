@@ -81,6 +81,7 @@ function Attendance({
   const [triggerSetting, setTriggerSetting] = React.useState(false);
   const subject = useGetSubject({ subjectId });
   const archived = isSubjectArchived(subject.data);
+  const showSetting = triggerSetting && !archived;
   const tables = useGetAttendancesTable({
     subjectId,
   });
@@ -193,7 +194,7 @@ function Attendance({
           </span>
         </section>
         <section className="flex flex-wrap items-center justify-center gap-2 lg:justify-end">
-          {!triggerSetting && (
+          {!showSetting && (
             <GradeSegmentedControl
               value={view}
               onChange={setView}
@@ -342,7 +343,7 @@ function Attendance({
           />
         )}
 
-        {selectTable && !triggerSetting && (
+        {selectTable && !showSetting && (
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="flex min-w-0 flex-col gap-2">
               {selectTable.description && (
@@ -382,7 +383,7 @@ function Attendance({
       </div>
 
       <main className={`${PAGE_WIDTH} mt-3 flex flex-col px-3 pb-10 md:px-0`}>
-        {triggerSetting && selectTable ? (
+        {showSetting && selectTable ? (
           <div className="w-full">
             <AttendanceTableSetting
               table={selectTable}
