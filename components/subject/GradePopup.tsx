@@ -25,12 +25,14 @@ type Props = {
   onClose: () => void;
   assignment: Assignment;
   studentOnAssignment: StudentOnAssignment | undefined;
+  readOnly?: boolean;
 };
 function GradePopup({
   toast,
   onClose,
   assignment,
   studentOnAssignment,
+  readOnly = false,
 }: Props) {
   const update = useUpdateAssignmentOverview();
   const [assignmentData, setAssignmentData] = React.useState<
@@ -44,6 +46,7 @@ function GradePopup({
         onClose={onClose}
         assignment={assignment}
         studentOnAssignment={studentOnAssignment}
+        readOnly={readOnly}
       />
     );
   }
@@ -172,6 +175,7 @@ type PropsStudentUpdateGrade = {
   onClose: () => void;
   assignment: Assignment;
   studentOnAssignment: StudentOnAssignment;
+  readOnly?: boolean;
 };
 
 function StudentUpdateGrade({
@@ -179,6 +183,7 @@ function StudentUpdateGrade({
   onClose,
   assignment,
   studentOnAssignment,
+  readOnly = false,
 }: PropsStudentUpdateGrade) {
   const [score, setScore] = React.useState<number | undefined>(
     studentOnAssignment.score,
@@ -229,6 +234,7 @@ function StudentUpdateGrade({
                 assignmentMaxScore={assignment.maxScore ?? null}
                 studentOnAssignmentId={studentOnAssignment.id}
                 toast={toast}
+                readOnly={readOnly}
                 onGraded={() => {
                   onClose();
                   refetch();
@@ -278,7 +284,7 @@ function StudentUpdateGrade({
         className="flex h-max w-full flex-col items-start gap-2 md:min-w-96"
       >
         <div className="flex w-full items-center justify-end gap-2 border-b pb-2">
-          {update.isPending ? (
+          {readOnly ? null : update.isPending ? (
             <div className="h-8">
               <ProgressSpinner
                 animationDuration="1s"
@@ -336,6 +342,7 @@ function StudentUpdateGrade({
                   }}
                   onValueChange={(e) => {}}
                   required
+                  disabled={readOnly}
                   maxFractionDigits={3}
                   value={score}
                   min={0}

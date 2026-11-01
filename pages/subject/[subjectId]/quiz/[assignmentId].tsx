@@ -10,12 +10,14 @@ import QuestionList from "../../../../components/quiz/QuestionList";
 import QuizMonitor from "../../../../components/quiz/QuizMonitor";
 import QuizSettingsPanel from "../../../../components/quiz/QuizSettingsPanel";
 import { showQuizError } from "../../../../components/quiz/quizErrorAlert";
+import ArchivedSubjectBanner from "../../../../components/subject/ArchivedSubjectBanner";
 import ClassStudentAssignWork from "../../../../components/subject/ClassStudentAssignWork";
 import ClassworkExport from "../../../../components/subject/ClassworkExport";
 import useClickOutside from "../../../../hook/useClickOutside";
 import useUnsavedQuizGuard from "../../../../hook/useUnsavedQuizGuard";
 import { menuClassworkList } from "../../../../components/subject/ClassworkCreate";
 import LoadingSpinner from "../../../../components/common/LoadingSpinner";
+import { isSubjectArchived } from "../../../../utils/subjectArchive";
 import { MenuSubject } from "../../../../data";
 import {
   classworkHeadMenuBarDataLanguage,
@@ -30,6 +32,7 @@ import {
   useGetQuizGeneration,
   useGetQuizMonitor,
   useGetQuizQuestions,
+  useGetSubject,
   useQuizGenerationEffects,
   useUpdateAssignment,
   forgetDeletedAssignment,
@@ -102,11 +105,17 @@ export default function QuizEditorPage({
   });
   // Read-only until both lock sources (student attempts, AI generation) have
   // answered, so a locked quiz never flashes editable.
-  const { locked, readOnly, generating } = editorLockState(
+  const archived = isSubjectArchived(useGetSubject({ subjectId }).data);
+  const {
+    locked,
+    readOnly: lockedReadOnly,
+    generating,
+  } = editorLockState(
     monitor.data?.locked,
     monitor.isLoading || generation.isLoading,
     isGenerationActive(generation.data?.job),
   );
+  const readOnly = lockedReadOnly || archived;
   // Question cards with unsaved edits; leaving the tab or publishing asks first.
   const [dirtyIds, setDirtyIds] = useState<Set<string>>(() => new Set());
   const onDirtyChange = useCallback(
@@ -367,8 +376,10 @@ export default function QuizEditorPage({
               placeholder={quizLanguage.untitled(lang)}
               onChange={(e) => setTitle(e.target.value)}
               onBlur={saveTitle}
-              disabled={generating}
-              title={generating ? quizLanguage.generationLocked(lang) : undefined}
+              disabled={generating || archived}
+              title={
+                generating ? quizLanguage.generationLocked(lang) : undefined
+              }
               className="min-w-0 flex-1 border-b-2 border-transparent bg-transparent py-1 text-lg font-semibold text-icon-color outline-none focus:border-primary-color disabled:cursor-not-allowed disabled:opacity-60 md:text-xl"
             />
             <span className="hidden text-sm text-icon-color/60 sm:inline">
@@ -385,100 +396,104 @@ export default function QuizEditorPage({
                 ? quizLanguage.published(lang)
                 : quizLanguage.draft(lang)}
             </span>
-            <section
-              ref={menuRef}
-              className="flex shrink-0 items-center md:relative"
-            >
-              <button
-                type="button"
-                onClick={() =>
-                  isPublished ? saveChanges() : setStatus("Published")
-                }
-                disabled={busy || generating || cannotPublish}
-                title={
-                  generating
-                    ? quizLanguage.generationLocked(lang)
-                    : cannotPublish
-                      ? quizLanguage.needQuestionsToPublish(lang)
-                      : undefined
-                }
-                className="flex h-10 items-center justify-center gap-2 rounded-l-xl bg-primary-color px-5 text-sm font-semibold text-white transition hover:bg-primary-color-hover disabled:cursor-not-allowed disabled:opacity-60"
+            {!archived && (
+              <section
+                ref={menuRef}
+                className="flex shrink-0 items-center md:relative"
               >
-                {busy && <LoadingSpinner />}
-                {isPublished
-                  ? classworkHeadMenuBarDataLanguage.button.saveChange(lang)
-                  : classworkHeadMenuBarDataLanguage.button.publish(lang)}
-              </button>
-              <button
-                onClick={() => setMenuOpen((prev) => !prev)}
-                type="button"
-                aria-label="More actions"
-                aria-expanded={menuOpen}
-                className="flex h-10 items-center justify-center rounded-r-xl border-l border-white/20 bg-primary-color px-2.5 text-white transition hover:bg-primary-color-hover"
-              >
-                <IoChevronDownSharp />
-              </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    isPublished ? saveChanges() : setStatus("Published")
+                  }
+                  disabled={busy || generating || cannotPublish}
+                  title={
+                    generating
+                      ? quizLanguage.generationLocked(lang)
+                      : cannotPublish
+                        ? quizLanguage.needQuestionsToPublish(lang)
+                        : undefined
+                  }
+                  className="flex h-10 items-center justify-center gap-2 rounded-l-xl bg-primary-color px-5 text-sm font-semibold text-white transition hover:bg-primary-color-hover disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {busy && <LoadingSpinner />}
+                  {isPublished
+                    ? classworkHeadMenuBarDataLanguage.button.saveChange(lang)
+                    : classworkHeadMenuBarDataLanguage.button.publish(lang)}
+                </button>
+                <button
+                  onClick={() => setMenuOpen((prev) => !prev)}
+                  type="button"
+                  aria-label="More actions"
+                  aria-expanded={menuOpen}
+                  className="flex h-10 items-center justify-center rounded-r-xl border-l border-white/20 bg-primary-color px-2.5 text-white transition hover:bg-primary-color-hover"
+                >
+                  <IoChevronDownSharp />
+                </button>
 
-              {menuOpen && (
-                <div className="absolute right-4 top-full z-40 mt-1 w-56 max-w-[calc(100vw-2rem)] rounded-2xl border border-gray-100 bg-white p-1.5 shadow-lg md:right-0 md:mt-2">
-                  {menuClassworkList.map((menu) => {
-                    const isDelete = menu.title === "Delete";
-                    const disabled =
-                      busy ||
-                      generating ||
-                      (menu.title === "Mark as Draft" && !isPublished) ||
-                      (menu.title === "Publish" &&
-                        (isPublished || cannotPublish));
-                    const run = () => {
-                      setMenuOpen(false);
-                      if (isDelete) return deleteQuiz();
-                      if (menu.title === "Publish")
-                        return setStatus("Published");
-                      if (menu.title === "Mark as Draft")
-                        return setStatus("Draft");
-                      return saveChanges();
-                    };
-                    return (
-                      <React.Fragment key={menu.value}>
-                        {isDelete && (
-                          <div className="my-1 border-t border-gray-100" />
-                        )}
-                        <button
-                          type="button"
-                          onClick={run}
-                          disabled={
-                            isDelete ? remove.isPending || generating : disabled
-                          }
-                          title={
-                            generating
-                              ? quizLanguage.generationLocked(lang)
-                              : menu.title === "Publish" && cannotPublish
-                                ? quizLanguage.needQuestionsToPublish(lang)
-                                : undefined
-                          }
-                          className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-medium transition ${
-                            isDelete
-                              ? generating
-                                ? "cursor-not-allowed text-error-color/40"
-                                : "text-error-color hover:bg-error-color/10"
-                              : disabled
-                                ? "cursor-not-allowed text-gray-300"
-                                : "text-gray-700 hover:bg-gray-50"
-                          }`}
-                        >
-                          <span className="text-lg">{menu.icon}</span>
-                          {isDelete
-                            ? quizLanguage.deleteQuiz(lang)
-                            : classworkHeadMenuBarDataLanguage.button[
-                                menu.value as keyof typeof classworkHeadMenuBarDataLanguage.button
-                              ](lang)}
-                        </button>
-                      </React.Fragment>
-                    );
-                  })}
-                </div>
-              )}
-            </section>
+                {menuOpen && (
+                  <div className="absolute right-4 top-full z-40 mt-1 w-56 max-w-[calc(100vw-2rem)] rounded-2xl border border-gray-100 bg-white p-1.5 shadow-lg md:right-0 md:mt-2">
+                    {menuClassworkList.map((menu) => {
+                      const isDelete = menu.title === "Delete";
+                      const disabled =
+                        busy ||
+                        generating ||
+                        (menu.title === "Mark as Draft" && !isPublished) ||
+                        (menu.title === "Publish" &&
+                          (isPublished || cannotPublish));
+                      const run = () => {
+                        setMenuOpen(false);
+                        if (isDelete) return deleteQuiz();
+                        if (menu.title === "Publish")
+                          return setStatus("Published");
+                        if (menu.title === "Mark as Draft")
+                          return setStatus("Draft");
+                        return saveChanges();
+                      };
+                      return (
+                        <React.Fragment key={menu.value}>
+                          {isDelete && (
+                            <div className="my-1 border-t border-gray-100" />
+                          )}
+                          <button
+                            type="button"
+                            onClick={run}
+                            disabled={
+                              isDelete
+                                ? remove.isPending || generating
+                                : disabled
+                            }
+                            title={
+                              generating
+                                ? quizLanguage.generationLocked(lang)
+                                : menu.title === "Publish" && cannotPublish
+                                  ? quizLanguage.needQuestionsToPublish(lang)
+                                  : undefined
+                            }
+                            className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-medium transition ${
+                              isDelete
+                                ? generating
+                                  ? "cursor-not-allowed text-error-color/40"
+                                  : "text-error-color hover:bg-error-color/10"
+                                : disabled
+                                  ? "cursor-not-allowed text-gray-300"
+                                  : "text-gray-700 hover:bg-gray-50"
+                            }`}
+                          >
+                            <span className="text-lg">{menu.icon}</span>
+                            {isDelete
+                              ? quizLanguage.deleteQuiz(lang)
+                              : classworkHeadMenuBarDataLanguage.button[
+                                  menu.value as keyof typeof classworkHeadMenuBarDataLanguage.button
+                                ](lang)}
+                          </button>
+                        </React.Fragment>
+                      );
+                    })}
+                  </div>
+                )}
+              </section>
+            )}
           </nav>
           <div className="flex h-12 w-full items-center justify-start gap-1 overflow-x-auto border-b border-gray-100 bg-white px-4 md:h-14 md:px-6">
             {TABS.map((t) => {
@@ -506,6 +521,7 @@ export default function QuizEditorPage({
             })}
           </div>
         </header>
+        <ArchivedSubjectBanner subjectId={subjectId} />
         <main className="flex-1 overflow-auto">
           {tab === "questions" && (
             <QuestionList

@@ -567,6 +567,7 @@ function Classworks({ toast, subjectId, schoolId }: Props) {
                           <ClassworkCard
                             classwork={classwork}
                             reorderable={!filtersActive && !archived}
+                            readOnly={archived}
                             selectClasswork={selectClasswork}
                             subjectId={subjectId}
                             uniqueTags={uniqueTags}

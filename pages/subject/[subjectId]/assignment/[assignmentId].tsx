@@ -16,6 +16,7 @@ import {
   deleteConfirmOptions,
   runIfConfirmed,
 } from "../../../../utils/confirmDelete";
+import ArchivedSubjectBanner from "../../../../components/subject/ArchivedSubjectBanner";
 import ClassStudentAssignWork from "../../../../components/subject/ClassStudentAssignWork";
 import ClassStudentWork from "../../../../components/subject/ClassStudentWork";
 import { menuClassworkList } from "../../../../components/subject/ClassworkCreate";
@@ -23,6 +24,7 @@ import ClassworkExport from "../../../../components/subject/ClassworkExport";
 import ClasswordView, {
   FileClasswork,
 } from "../../../../components/subject/ClassworkView";
+import { isSubjectArchived } from "../../../../utils/subjectArchive";
 import { MenuSubject } from "../../../../data";
 import {
   classworkHeadMenuBarDataLanguage,
@@ -126,6 +128,7 @@ function Index({
   const router = useRouter();
 
   const subject = useGetSubject({ subjectId });
+  const archived = isSubjectArchived(subject.data);
   const language = useGetLanguage();
   const [triggerOption, setTriggerOption] = React.useState(false);
   const [files, setFiles] = React.useState<FileClasswork[]>([]);
@@ -444,7 +447,9 @@ function Index({
       <div className="flex h-dvh flex-col bg-background-color">
         <form
           onSubmit={
-            selectMenu === "classwork" ? handleUpdateClasswork : undefined
+            selectMenu === "classwork" && !archived
+              ? handleUpdateClasswork
+              : undefined
           }
           className="flex shrink-0 flex-col bg-white font-Anuphan"
         >
@@ -481,7 +486,7 @@ function Index({
                 </div>
               </div>
             </section>
-            {selectMenu === "classwork" && (
+            {selectMenu === "classwork" && !archived && (
               <section className="flex shrink-0 items-center md:relative">
                 <button
                   type="submit"
@@ -621,6 +626,7 @@ function Index({
               })}
           </div>
         </form>
+        <ArchivedSubjectBanner subjectId={subjectId} />
         <main
           ref={bodyRef}
           className={`min-h-0 w-full flex-1 overflow-auto font-Anuphan`}

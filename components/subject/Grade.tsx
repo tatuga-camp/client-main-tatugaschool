@@ -83,6 +83,7 @@ function Grade({
 
   const [triggerGradeSetting, setTriggerGradeSetting] = useState(false);
   const subject = useGetSubject({ subjectId });
+  const archived = isSubjectArchived(subject.data);
   const [triggerShare, setTriggerShare] = useState(false);
   const isShared = !!subject.data?.publicProgressToken;
   const [view, setView] = useState<"table" | "leaderboard">("table");
@@ -203,6 +204,7 @@ function Grade({
                 selectStudentOnAssignment.studentOnAssignment
               }
               assignment={selectStudentOnAssignment.assignment}
+              readOnly={archived}
               toast={toast}
               onClose={() => {
                 document.body.style.overflow = "auto";
@@ -327,7 +329,7 @@ function Grade({
               ? gradeTableData.shared(lang)
               : gradeTableData.share(lang)}
           </button>
-          {!isSubjectArchived(subject.data) && (
+          {!archived && (
             <button
               type="button"
               onClick={() => setTriggerGradeSetting(true)}
@@ -368,16 +370,20 @@ function Grade({
               assignmentsOverview.isLoading || studentOnSubjects.isLoading
             }
             onToggleGroup={toggleGroup}
-            onOpenAssignment={(assignment, studentOnAssignment) =>
-              setSelectStudentOnAssignment({ assignment, studentOnAssignment })
-            }
-            onOpenSpecial={(scoreOnSubject, student) =>
+            onOpenAssignment={(assignment, studentOnAssignment) => {
+              // Archived: the column-header weight editor stays closed; the
+              // per-student popup opens read-only.
+              if (archived && !studentOnAssignment) return;
+              setSelectStudentOnAssignment({ assignment, studentOnAssignment });
+            }}
+            onOpenSpecial={(scoreOnSubject, student) => {
+              if (archived) return;
               setSelectScoreOnSubject(
                 student
                   ? { ...scoreOnSubject, studentOnSubject: student }
                   : scoreOnSubject,
-              )
-            }
+              );
+            }}
           />
         )}
         {view === "leaderboard" &&

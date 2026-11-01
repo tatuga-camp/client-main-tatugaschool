@@ -14,6 +14,7 @@ import {
   SIDEBAR_CONTENT_OFFSET,
   SIDEBAR_FIXED_LEFT,
 } from "../sidebar/sidebarLayout";
+import ArchivedSubjectBanner from "../subject/ArchivedSubjectBanner";
 import FooterSubject, { ListMenuFooter } from "../subject/FooterSubject";
 
 type LayoutProps = {
@@ -119,24 +120,7 @@ function SubjectLayout({
         </div>
       )}
       <div className={SIDEBAR_CONTENT_OFFSET}>
-        {archived && (
-          <div
-            role="status"
-            className="flex w-full flex-wrap items-center justify-center gap-x-3 gap-y-1 bg-amber-50 px-4 py-2 text-center text-sm text-amber-900"
-          >
-            <span>
-              {subjectUiLanguage.archivedBanner(language.data ?? "en")}
-            </span>
-            {canManage && (
-              <Link
-                href={`/subject/${subjectId}?menu=SettingSubject`}
-                className="font-semibold underline"
-              >
-                {subjectUiLanguage.archiveSubject(language.data ?? "en")}
-              </Link>
-            )}
-          </div>
-        )}
+        <ArchivedSubjectBanner subjectId={subjectId} />
         {children}
       </div>
       <div
