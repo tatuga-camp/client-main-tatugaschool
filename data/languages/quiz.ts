@@ -41,6 +41,31 @@ const generationErrorCopy = {
   ),
 };
 
+/** EN/TH alert copy for the 400 WEBSITE_* codes returned when a link is not public. */
+const websiteSourceErrorCopy = {
+  WEBSITE_LOGIN_REQUIRED: {
+    title: t("This page needs sign-in", "หน้านี้ต้องเข้าสู่ระบบก่อน"),
+    text: t(
+      "The AI can only open links that anyone can see without an account. Use a public page, or download the material and upload it as a PDF.",
+      "AI เปิดได้เฉพาะลิงก์ที่ทุกคนดูได้โดยไม่ต้องมีบัญชี ใช้หน้าที่เป็นสาธารณะ หรือดาวน์โหลดเนื้อหาแล้วอัปโหลดเป็นไฟล์ PDF",
+    ),
+  },
+  WEBSITE_NO_READABLE_CONTENT: {
+    title: t("No readable content on this page", "ไม่พบเนื้อหาที่อ่านได้ในหน้านี้"),
+    text: t(
+      "Without signing in, this page shows no text for the AI to read. It may need an account or only work inside an app. Use a public page, or download the material and upload it as a PDF.",
+      "หากไม่เข้าสู่ระบบ หน้านี้ไม่มีข้อความให้ AI อ่าน อาจต้องใช้บัญชีหรือเปิดได้เฉพาะในแอป ใช้หน้าที่เป็นสาธารณะ หรือดาวน์โหลดเนื้อหาแล้วอัปโหลดเป็นไฟล์ PDF",
+    ),
+  },
+  WEBSITE_UNREACHABLE: {
+    title: t("We couldn't open this link", "เปิดลิงก์นี้ไม่ได้"),
+    text: t(
+      "Check that the address is correct and that the page opens in a private browser window, then try again.",
+      "ตรวจสอบว่าที่อยู่ถูกต้อง และเปิดหน้าได้ในหน้าต่างไม่ระบุตัวตน (private window) แล้วลองอีกครั้ง",
+    ),
+  },
+};
+
 export const quizLanguage = {
   untitled: t("Untitled quiz", "แบบทดสอบไม่มีชื่อ"),
   tabQuestions: t("Questions", "คำถาม"),
@@ -496,6 +521,8 @@ export const quizLanguage = {
     const map = generationErrorCopy as Record<string, (language: Language) => string>;
     return (map[code ?? ""] ?? generationErrorCopy.INTERNAL)(l);
   },
+  // AI generation — submit refused because the website link is not public
+  websiteSourceError: websiteSourceErrorCopy,
 
   // AI generation — form validation
   formIssue: {
