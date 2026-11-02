@@ -1,9 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import {
-  classroomUiLanguage,
-  subjectUiLanguage,
-} from "../data/languages";
+import { classroomUiLanguage, subjectUiLanguage } from "../data/languages";
 
 // Spec 2026-11-02-archived-subject-block: students can no longer open an
 // archived subject, and teachers are told plainly what archiving does.
