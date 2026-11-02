@@ -370,14 +370,21 @@ function Setting({ subjectId, schoolId }: Props) {
         </h4>
         {archiveSwitch.visible && (
           <div className="mt-5 flex flex-col gap-2 rounded-2xl border bg-white p-4">
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-base font-medium sm:text-lg">
                   {subjectUiLanguage.archiveSubject(language.data ?? "en")}
                 </h2>
-                <h4 className="text-xs text-gray-500 sm:text-sm">
-                  {subjectUiLanguage.archiveSubjectHint(language.data ?? "en")}
-                </h4>
+                <p className="text-xs text-gray-500 sm:text-sm">
+                  {subjectUiLanguage.archiveSubjectLead(language.data ?? "en")}
+                </p>
+                <ul className="mt-1 list-disc space-y-0.5 pl-5 text-xs text-gray-500 sm:text-sm">
+                  {subjectUiLanguage
+                    .archiveSubjectEffects(language.data ?? "en")
+                    .map((effect) => (
+                      <li key={effect}>{effect}</li>
+                    ))}
+                </ul>
               </div>
               <Switch
                 checked={archiveSwitch.checked}

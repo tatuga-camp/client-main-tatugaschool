@@ -87,12 +87,26 @@ export const subjectUiLanguage = {
     pick(l, "Archive subject", "เก็บรายวิชาถาวร"),
   archivedManageLink: (l: Language) =>
     pick(l, "Manage in settings", "จัดการในการตั้งค่า"),
-  archiveSubjectHint: (l: Language) =>
+  archiveSubjectLead: (l: Language) =>
     pick(
       l,
-      "Teachers and students can still open everything, but nothing can be changed.",
-      "ครูและนักเรียนยังเปิดดูได้ทั้งหมด แต่แก้ไขอะไรไม่ได้",
+      "Use this when the subject has ended. What happens:",
+      "ใช้เมื่อรายวิชาจบแล้ว สิ่งที่จะเกิดขึ้น:",
     ),
+  archiveSubjectEffects: (l: Language): string[] =>
+    l === "th"
+      ? [
+          "นักเรียนเปิดรายวิชานี้ไม่ได้อีก รายวิชาจะหายไปจากรายการของนักเรียน และรหัสหรือลิงก์เข้าร่วมจะใช้ไม่ได้",
+          "คุณและครูคนอื่นยังเปิดดูได้ทั้งหมดแบบอ่านอย่างเดียว แก้ไขงาน คะแนน เกรด หรือการเช็กชื่อไม่ได้",
+          "ข้อมูลไม่ถูกลบ ยกเลิกการเก็บถาวรได้ทุกเมื่อ (ยกเว้นเมื่อห้องเรียนถูกเก็บถาวร)",
+          "การแจ้งเตือน LINE ของรายวิชานี้จะหยุด",
+        ]
+      : [
+          "Students can't open this subject anymore. It disappears from their subject list, and its class code or link stops working.",
+          "You and the other teachers can still open everything, read-only: no changes to work, scores, grades or attendance.",
+          "Nothing is deleted. You can un-archive at any time, unless the class is archived.",
+          "LINE notifications for this subject stop.",
+        ],
   archivedByClassHint: (l: Language) =>
     pick(
       l,
@@ -102,8 +116,8 @@ export const subjectUiLanguage = {
   archivedBanner: (l: Language) =>
     pick(
       l,
-      "This subject is archived — read only",
-      "รายวิชานี้ถูกเก็บถาวร — ดูได้อย่างเดียว",
+      "This subject is archived: read-only, and students can't open it.",
+      "รายวิชานี้ถูกเก็บถาวร: ดูได้อย่างเดียว และนักเรียนเปิดไม่ได้",
     ),
   subjectArchivedToast: (l: Language) =>
     pick(l, "Subject archived", "เก็บรายวิชาถาวรแล้ว"),
