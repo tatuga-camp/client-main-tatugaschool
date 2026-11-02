@@ -44,6 +44,7 @@ import {
   needsChoices,
   toGenerationInput,
   validateGenerationForm,
+  websiteSourceErrorCode,
 } from "../../utils/quizGeneration";
 import { UploadAbortedError } from "../../utils/uploadWithRetry";
 import InputNumber from "../common/InputNumber";
@@ -261,7 +262,12 @@ export default function QuizGenerateDialog({
         queryClient.invalidateQueries({
           queryKey: keyQuiz.generation(assignmentId),
         });
-      if (isQuotaError(error)) {
+      const websiteError = websiteSourceErrorCode(error);
+      if (websiteError) {
+        // The link is not public; keep the dialog open so the teacher can change it.
+        const copy = quizLanguage.websiteSourceError[websiteError];
+        void Swal.fire({ icon: "warning", title: copy.title(lang), text: copy.text(lang) });
+      } else if (isQuotaError(error)) {
         void refreshGeneration();
         void Swal.fire({
           icon: "warning",

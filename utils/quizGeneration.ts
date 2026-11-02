@@ -214,6 +214,22 @@ export function isQuizNotDraftError(error: unknown): boolean {
   return !!e && e.statusCode === 409 && e.message === "QUIZ_NOT_DRAFT";
 }
 
+export const WEBSITE_SOURCE_ERROR_CODES = [
+  "WEBSITE_LOGIN_REQUIRED",
+  "WEBSITE_NO_READABLE_CONTENT",
+  "WEBSITE_UNREACHABLE",
+] as const;
+export type WebsiteSourceErrorCode = (typeof WEBSITE_SOURCE_ERROR_CODES)[number];
+
+/** 400 WEBSITE_*: the server opened the link without an account and could not read it. */
+export function websiteSourceErrorCode(error: unknown): WebsiteSourceErrorCode | null {
+  const e = asServerError(error);
+  if (!e || e.statusCode !== 400) return null;
+  return (WEBSITE_SOURCE_ERROR_CODES as readonly unknown[]).includes(e.message)
+    ? (e.message as WebsiteSourceErrorCode)
+    : null;
+}
+
 /** 403 AI_QUOTA_EXCEEDED with the school's `used` and `limit` for this month. */
 export function isQuotaError(
   error: unknown,

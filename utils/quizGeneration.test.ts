@@ -13,6 +13,7 @@ import {
   sourceLabel,
   toGenerationInput,
   validateGenerationForm,
+  websiteSourceErrorCode,
   youtubeVideoId,
   type GenerationForm,
 } from "./quizGeneration";
@@ -340,4 +341,23 @@ test("error predicates match the server's 409/403 bodies", () => {
   }
   assert.equal(isQuotaError({ statusCode: 403, message: "Forbidden" }), false);
   assert.equal(isQuotaError(undefined), false);
+});
+
+test("websiteSourceErrorCode: the server's 400 WEBSITE_* codes only", () => {
+  for (const code of [
+    "WEBSITE_LOGIN_REQUIRED",
+    "WEBSITE_NO_READABLE_CONTENT",
+    "WEBSITE_UNREACHABLE",
+  ]) {
+    assert.equal(websiteSourceErrorCode({ statusCode: 400, message: code }), code);
+  }
+  assert.equal(
+    websiteSourceErrorCode({ statusCode: 409, message: "WEBSITE_UNREACHABLE" }),
+    null,
+  );
+  assert.equal(
+    websiteSourceErrorCode({ statusCode: 400, message: "This website address is not allowed" }),
+    null,
+  );
+  assert.equal(websiteSourceErrorCode(undefined), null);
 });
