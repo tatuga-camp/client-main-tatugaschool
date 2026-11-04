@@ -1,4 +1,5 @@
 import { QuizMonitorRow, QuizMonitorStatus } from "../interfaces";
+import { compareStudentNumber } from "./studentRoster";
 
 export type RiskBand = "LOW" | "MEDIUM" | "HIGH";
 
@@ -24,7 +25,7 @@ export function sortMonitorRows(rows: QuizMonitorRow[]): QuizMonitorRow[] {
     const sa = STATUS_PRIORITY[a.status];
     const sb = STATUS_PRIORITY[b.status];
     if (sa !== sb) return sa - sb;
-    return (Number(a.number) || 0) - (Number(b.number) || 0);
+    return compareStudentNumber(a.number, b.number);
   });
 }
 

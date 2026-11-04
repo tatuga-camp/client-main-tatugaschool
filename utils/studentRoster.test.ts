@@ -1,8 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
+  byStudentNumber,
   compareStudentNumber,
   filterStudents,
+  normalizeStudentNumber,
   sortStudents,
   studentDisplayName,
 } from "./studentRoster";
@@ -45,6 +47,25 @@ test("compareStudentNumber treats numbers naturally", () => {
   assert.ok(compareStudentNumber("2", "10") < 0);
   assert.ok(compareStudentNumber("", "1") > 0);
   assert.equal(compareStudentNumber("", ""), 0);
+});
+
+test("Thai digits sort by value and mix with Arabic digits", () => {
+  assert.equal(normalizeStudentNumber(" ๑๐ "), "10");
+  assert.equal(normalizeStudentNumber("๒a"), "2a");
+  assert.equal(normalizeStudentNumber(null), "");
+  assert.ok(compareStudentNumber("๒", "๑๐") < 0);
+  assert.ok(compareStudentNumber("๙", "10") < 0);
+  assert.ok(compareStudentNumber("๑๐", "9") > 0);
+  assert.equal(compareStudentNumber("๑๐", "10"), 0);
+  const ids = sortStudents(
+    [s("a", "๑๐"), s("b", "๒"), s("c", "3"), s("d", "๑"), s("e", ""), s("f", "11")],
+    "Default",
+  ).map((x) => x.id);
+  assert.deepEqual(ids, ["d", "b", "c", "a", "f", "e"]);
+  assert.deepEqual(
+    [{ number: "๓" }, { number: "1" }, { number: "๒" }].sort(byStudentNumber),
+    [{ number: "1" }, { number: "๒" }, { number: "๓" }],
+  );
 });
 
 test("filterStudents matches name, title, number and full name; trims", () => {

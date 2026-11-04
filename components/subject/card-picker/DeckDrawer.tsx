@@ -4,6 +4,7 @@ import { IoClose } from "react-icons/io5";
 import { CardPickerLanguage } from "../../../data/languages";
 import { Language, StudentOnSubject } from "../../../interfaces";
 import { StudentPhoto } from "./CardFace";
+import { byStudentNumber } from "../../../utils/studentRoster";
 
 type Props = {
   open: boolean;
@@ -19,8 +20,7 @@ type Props = {
 };
 
 // Roster order, not deck order — listing deck order would reveal who's next.
-const byNumber = (a: StudentOnSubject, b: StudentOnSubject) =>
-  a.number.localeCompare(b.number, undefined, { numeric: true });
+const byNumber = byStudentNumber;
 
 export default function DeckDrawer({
   open,

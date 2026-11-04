@@ -62,6 +62,7 @@ import FileStudentAssignmentCard from "./FileStudentAssignmentCard";
 import StatusAssignmentButton from "./StatusAssignmentButton";
 import RubricGradingPanel from "./rubric/RubricGradingPanel";
 import { useRouter } from "next/router";
+import { byStudentNumber } from "../../utils/studentRoster";
 
 const studentStatusTabs = [
   { key: "ALL", label: "all" },
@@ -109,7 +110,7 @@ function ClassStudentWork({ assignmentId, onScroll }: Props) {
   const visibleStudents = (studentData ?? [])
     .filter((d) => d.isAssigned === true)
     .filter((d) => selectStatusTab === "ALL" || d.status === selectStatusTab)
-    .sort((a, b) => Number(a.number) - Number(b.number));
+    .sort(byStudentNumber);
 
   const assignment = useGetAssignment({
     id: assignmentId,

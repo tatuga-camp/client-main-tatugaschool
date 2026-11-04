@@ -6,6 +6,7 @@ import {
   computeGroupTotals,
   specialContribution,
 } from "./gradeColumns";
+import { byStudentNumber } from "./studentRoster";
 
 export type StudentTotal = {
   student: StudentOnSubject;
@@ -34,7 +35,7 @@ export function calculateStudentTotals(
 ): StudentTotal[] {
   const activeStudents = studentOnSubjects
     .filter((s) => s.isActive)
-    .sort((a, b) => Number(a.number) - Number(b.number));
+    .sort(byStudentNumber);
 
   const unranked = activeStudents.map((student) => {
     let totalScore = overview.assignments.reduce((prev, current) => {
