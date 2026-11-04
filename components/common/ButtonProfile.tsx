@@ -104,12 +104,12 @@ function ButtonProfile({ user, onTriggerFeedback, schoolId }: Props) {
         onClick={() => setIsOpen(!isOpen)}
         className="flex h-10 items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-2 transition-colors hover:bg-gray-50"
       >
-        <div className="relative h-7 w-7 overflow-hidden rounded-full">
+        <div className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full">
           <Image
             src={user.data?.photo || defaultCanvas}
             alt="User Avatar"
             fill
-            sizes="(max-width: 768px) 100vw, 33vw"
+            sizes="28px"
             placeholder="blur"
             blurDataURL={decodeBlurhashToCanvas(
               user.data?.blurHash ?? defaultBlurHash,
@@ -138,7 +138,7 @@ function ButtonProfile({ user, onTriggerFeedback, schoolId }: Props) {
                 src={user.data?.photo || defaultCanvas}
                 alt="User Avatar"
                 fill
-                sizes="(max-width: 768px) 100vw, 33vw"
+                sizes="48px"
                 placeholder="blur"
                 blurDataURL={decodeBlurhashToCanvas(
                   user.data?.blurHash ?? defaultBlurHash,
