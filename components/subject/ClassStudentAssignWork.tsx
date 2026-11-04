@@ -255,7 +255,7 @@ const StudentList = React.memo(function StudentList({
               alt={student.firstName}
               fill
               placeholder="blur"
-              sizes="(max-width: 768px) 100vw, 33vw"
+              sizes="40px"
               blurDataURL={decodeBlurhashToCanvas(
                 student.blurHash ?? defaultBlurHash,
               )}

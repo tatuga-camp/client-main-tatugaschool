@@ -12,6 +12,7 @@ export const AuthHeader = () => (
         placeholder="blur"
         blurDataURL={defaultCanvas}
         fill
+        sizes="24px"
         alt="logo tatuga school"
       />
     </div>

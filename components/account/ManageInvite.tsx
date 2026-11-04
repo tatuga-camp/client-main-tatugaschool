@@ -94,7 +94,7 @@ function ManageInvite() {
                       fill
                       blurDataURL={member.school.blurHash ?? defaultBlurHash}
                       placeholder="blur"
-                      sizes="(max-width: 768px) 100vw, 33vw"
+                      sizes="80px"
                       className="object-contain"
                     />
                   </div>
