@@ -51,6 +51,7 @@ import PointsDateFilter, {
 import ShowGroups from "./groupOnSubject/ShowGroups";
 import ScorePanel from "./ScorePanel";
 import SubjectNoStudentsNotification from "./SubjectNoStudentsNotification";
+import { compareStudentNumber } from "../../utils/studentRoster";
 
 type Props = {
   subjectId: string;
@@ -187,7 +188,7 @@ function Subject({ subjectId, setSelectStudent, toast }: Props) {
         case "Sort by Name":
           return dir * a.firstName.localeCompare(b.firstName);
         case "Sort By Number":
-          return dir * (Number(a.number) - Number(b.number));
+          return dir * compareStudentNumber(a.number, b.number);
         default:
           return a.order - b.order;
       }

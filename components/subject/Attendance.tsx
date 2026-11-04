@@ -49,6 +49,7 @@ import AttendanceView from "./AttendanceView";
 import GradeSegmentedControl, {
   SECONDARY_BUTTON,
 } from "./grade/GradeSegmentedControl";
+import { byStudentNumber } from "../../utils/studentRoster";
 
 type AttendanceViewMode = "attendances" | "summary";
 
@@ -509,7 +510,7 @@ function DisplayAttendanceTable({
             .toLowerCase()
             .includes(query),
       )
-      .sort((a, b) => Number(a.number) - Number(b.number));
+      .sort(byStudentNumber);
   }, [studentOnSubjects.data, search]);
 
   // Latest session first in view: jump to the right edge once data arrives.

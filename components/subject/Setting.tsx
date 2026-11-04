@@ -33,6 +33,7 @@ import Switch from "../common/Switch";
 import ListMembers from "../member/ListMembers";
 import SubjectInfomation from "./SubjectInfomation";
 import SubjectPermission from "./SubjectPermission";
+import { byStudentNumber } from "../../utils/studentRoster";
 
 type Props = {
   subjectId: string;
@@ -305,7 +306,7 @@ function Setting({ subjectId, schoolId }: Props) {
           </h4>
           <ul className="grid max-h-96 grid-cols-1 overflow-auto">
             {studentOnSubjects.data
-              ?.sort((a, b) => Number(a.number) - Number(b.number))
+              ?.sort(byStudentNumber)
               .map((student, index) => {
                 const odd = index % 2 === 0;
                 return (

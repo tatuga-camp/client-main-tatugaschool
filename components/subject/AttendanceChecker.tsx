@@ -53,6 +53,7 @@ import {
   TablePills,
 } from "./AttendanceSessionFields";
 import QRCode from "./QRCode";
+import { byStudentNumber } from "../../utils/studentRoster";
 
 type Props = {
   subjectId: string;
@@ -410,7 +411,7 @@ function AttendanceChecker({
     () =>
       (studentAttendances ?? [])
         .filter((s) => s.isActive)
-        .sort((a, b) => Number(a.number) - Number(b.number)),
+        .sort(byStudentNumber),
     [studentAttendances],
   );
 

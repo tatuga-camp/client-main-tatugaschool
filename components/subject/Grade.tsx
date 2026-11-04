@@ -42,6 +42,7 @@ import GradeSegmentedControl, {
 } from "./grade/GradeSegmentedControl";
 import GradeSharePopup from "./grade/GradeSharePopup";
 import GradeTable from "./grade/GradeTable";
+import { byStudentNumber } from "../../utils/studentRoster";
 
 // Per-viewer UI preferences; storage can be unavailable (private mode) —
 // fall back silently.
@@ -126,7 +127,7 @@ function Grade({
     () =>
       (studentOnSubjects.data ?? [])
         .filter((s) => s.isActive)
-        .sort((a, b) => Number(a.number) - Number(b.number)),
+        .sort(byStudentNumber),
     [studentOnSubjects.data],
   );
   const handleExportExcel = async () => {

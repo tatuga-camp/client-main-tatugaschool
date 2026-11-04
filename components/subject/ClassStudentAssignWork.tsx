@@ -14,6 +14,7 @@ import Image from "next/image";
 import { decodeBlurhashToCanvas } from "../../utils";
 import { defaultBlurHash } from "../../data";
 import Swal from "sweetalert2";
+import { byStudentNumber } from "../../utils/studentRoster";
 
 function ClassStudentAssignWork({
   assignmentId,
@@ -167,7 +168,7 @@ function ClassStudentAssignWork({
                         (s) => s.id === studentOnAssignment.studentOnSubjectId,
                       )?.isActive,
                   )
-                  .sort((a, b) => Number(a.number) - Number(b.number))
+                  .sort(byStudentNumber)
                   .map((student, index) => {
                     const odd = index % 2 === 0;
                     return (
