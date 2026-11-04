@@ -19,6 +19,8 @@ type Props = {
   maxShow?: number;
   setTrigger?: React.Dispatch<React.SetStateAction<boolean>>;
 };
+const AVATAR_PX = 24;
+
 function ListMemberCircle({ members, setTrigger, maxShow }: Props) {
   const membersToShow = maxShow ? members.slice(0, maxShow) : members;
   const remainingMembersCount = maxShow ? members.length - maxShow : 0;
@@ -29,20 +31,27 @@ function ListMemberCircle({ members, setTrigger, maxShow }: Props) {
           <div
             title={`${teacher.firstName} ${teacher.lastName} : ${teacher.email}`}
             style={{ left: `-${index * 5}px` }}
-            className={`relative h-6 w-6 overflow-hidden rounded-full bg-white ring-1 ring-white`}
+            className="relative h-6 w-6 shrink-0 overflow-hidden rounded-full bg-gray-200 ring-1 ring-white"
             key={teacher.id}
           >
-            <Image
-              src={teacher.photo}
-              alt="User Avatar"
-              fill
-              sizes="(max-width: 768px) 100vw, 33vw"
-              placeholder="blur"
-              blurDataURL={decodeBlurhashToCanvas(
-                teacher.blurHash ?? defaultBlurHash,
-              )}
-              className="cursor-pointer object-cover"
-            />
+            {teacher.photo ? (
+              <Image
+                src={teacher.photo}
+                alt={`${teacher.firstName} ${teacher.lastName}`}
+                fill
+                // Rendered at 24px: let next/image pick a 1x/2x source that size.
+                sizes={`${AVATAR_PX}px`}
+                placeholder="blur"
+                blurDataURL={decodeBlurhashToCanvas(
+                  teacher.blurHash || defaultBlurHash,
+                )}
+                className="cursor-pointer object-cover"
+              />
+            ) : (
+              <span className="flex h-full w-full items-center justify-center text-[10px] font-semibold uppercase text-gray-600">
+                {(teacher.firstName || teacher.email || "?").charAt(0)}
+              </span>
+            )}
           </div>
         );
       })}
@@ -50,7 +59,7 @@ function ListMemberCircle({ members, setTrigger, maxShow }: Props) {
       {/* Display count of remaining members if maxShow is used */}
       {remainingMembersCount > 0 && (
         <div
-          className="relative flex h-6 w-6 items-center justify-center rounded-full bg-gray-300 text-xs font-bold text-gray-700 ring-1 ring-white"
+          className="relative flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gray-300 text-xs font-bold text-gray-700 ring-1 ring-white"
           style={{ left: `-${membersToShow.length * 5}px` }}
           title={`${remainingMembersCount} more members`}
         >

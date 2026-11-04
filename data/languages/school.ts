@@ -204,3 +204,30 @@ export const schoolDataLanguage = {
     }
   },
 } as const;
+
+export const memberSectionLanguage = {
+  title: (language: Language) => (language === "th" ? "สมาชิก" : "Members"),
+  subtitle: (language: Language) =>
+    language === "th"
+      ? "ครูและผู้ดูแลที่เข้าถึงโรงเรียนนี้ได้"
+      : "Teachers and admins who can access this school",
+  admins: (language: Language) => (language === "th" ? "ผู้ดูแล" : "Admins"),
+  teachers: (language: Language) => (language === "th" ? "ครู" : "Teachers"),
+  pending: (language: Language) =>
+    language === "th" ? "รอตอบรับ" : "Pending",
+  searchPlaceholder: (language: Language) =>
+    language === "th"
+      ? "ค้นหาด้วยชื่อหรืออีเมล..."
+      : "Search by name or email...",
+  noMatch: (language: Language) =>
+    language === "th" ? "ไม่พบสมาชิกที่ค้นหา" : "No members match your search",
+  clearSearch: (language: Language) =>
+    language === "th" ? "ล้างการค้นหา" : "Clear search",
+  loadError: (language: Language) =>
+    language === "th" ? "โหลดรายชื่อสมาชิกไม่สำเร็จ" : "Couldn't load members",
+  retry: (language: Language) => (language === "th" ? "ลองอีกครั้ง" : "Try again"),
+  roleSaveError: (language: Language) =>
+    language === "th"
+      ? "เปลี่ยนบทบาทไม่สำเร็จ กรุณาลองใหม่"
+      : "Couldn't change the role. Please try again.",
+} as const;
