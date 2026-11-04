@@ -72,7 +72,7 @@ function VerifyConnectLine({ verifyLineToken, subjectId }: Props) {
               placeholder="blur"
               blurDataURL={defaultCanvas}
               fill
-              sizes="(max-width: 768px) 100vw, 33vw"
+              sizes="40px"
               alt="logo tatuga school"
             />
           </div>

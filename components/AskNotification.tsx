@@ -92,7 +92,7 @@ function AskNotification() {
             <div className="relative h-10 w-10">
               <Image
                 fill
-                sizes="(max-width: 768px) 100vw, 33vw"
+                sizes="40px"
                 src="/favicon.ico"
                 alt="logo"
               />

@@ -508,7 +508,7 @@ const StudentList = React.memo(function StudentList({
               alt={student.firstName}
               fill
               placeholder="blur"
-              sizes="(max-width: 768px) 100vw, 33vw"
+              sizes="(min-width: 1280px) 40px, 20px"
               blurDataURL={decodeBlurhashToCanvas(
                 student.blurHash ?? defaultBlurHash,
               )}
@@ -907,7 +907,7 @@ function StudentWork({
                 alt={studentOnAssignment.firstName}
                 fill
                 placeholder="blur"
-                sizes="(max-width: 768px) 100vw, 33vw"
+                sizes="40px"
                 blurDataURL={decodeBlurhashToCanvas(
                   studentOnAssignment.blurHash ?? defaultBlurHash,
                 )}

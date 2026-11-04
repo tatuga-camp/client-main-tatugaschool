@@ -84,7 +84,7 @@ const ProfileUpload: React.FC<{
           <Image
             src={school?.logo ?? previewUrl}
             layout="fill"
-            sizes="(max-width: 768px) 100vw, 33vw"
+            sizes="192px"
             blurDataURL={decodeBlurhashToCanvas(
               school?.blurHash || defaultBlurHash
             )}

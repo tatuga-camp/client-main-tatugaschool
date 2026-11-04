@@ -77,7 +77,7 @@ function CommentSection({ studentOnAssignmentId, schoolId }: Props) {
             alt="avatar"
             fill
             placeholder="blur"
-            sizes="(max-width: 768px) 100vw, 33vw"
+            sizes="40px"
             blurDataURL={
               user.data?.blurHash ? user.data?.blurHash : defaultBlurHash
             }

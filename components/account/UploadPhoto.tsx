@@ -80,7 +80,7 @@ function UploadPhoto({ user, updateUser }: Prosp) {
             src={previewUrl}
             alt="Preview"
             fill
-            sizes="(max-width: 768px) 100vw, 33vw"
+            sizes="128px"
             placeholder="blur"
             blurDataURL={decodeBlurhashToCanvas(defaultBlurHash)}
             className="object-cover "

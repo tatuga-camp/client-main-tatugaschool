@@ -240,7 +240,7 @@ function InviteTeacher({ subjectId, setTrigger, schoolId }: Props) {
                           <Image
                             src={member.photo}
                             fill
-                            sizes="(max-width: 768px) 100vw, 33vw"
+                            sizes="40px"
                             placeholder="blur"
                             blurDataURL={decodeBlurhashToCanvas(
                               member.blurHash ?? defaultBlurHash,

@@ -273,7 +273,7 @@ function FileCard({ file, onEditImage, readOnly }: Props) {
             placeholder="blur"
             src={file.body}
             quality={60}
-            sizes="(max-width: 768px) 100vw, 33vw"
+            sizes="(min-width: 1280px) 50vw, 100vw"
             className="object-contain"
             fill
             alt={displayName ?? "Image"}

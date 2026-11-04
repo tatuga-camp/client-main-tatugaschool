@@ -109,7 +109,7 @@ function GradeLeaderboard({ studentTotals }: Props) {
                     src={item.student.photo}
                     alt={item.student.firstName}
                     fill
-                    sizes="(max-width: 768px) 100vw, 33vw"
+                    sizes="(min-width: 768px) 64px, 48px"
                     placeholder="blur"
                     blurDataURL={decodeBlurhashToCanvas(
                       item.student.blurHash ?? defaultBlurHash,
@@ -158,7 +158,7 @@ function GradeLeaderboard({ studentTotals }: Props) {
                     src={item.student.photo}
                     alt={item.student.firstName}
                     fill
-                    sizes="(max-width: 768px) 100vw, 33vw"
+                    sizes="32px"
                     placeholder="blur"
                     blurDataURL={decodeBlurhashToCanvas(
                       item.student.blurHash ?? defaultBlurHash,

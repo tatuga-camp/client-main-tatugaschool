@@ -65,7 +65,7 @@ function SubjectCard({
           <Image
             src={subject.backgroundImage}
             fill
-            sizes="(max-width: 768px) 100vw, 33vw"
+            sizes="(min-width: 1280px) 33vw, (min-width: 640px) 50vw, 100vw"
             placeholder="blur"
             blurDataURL={decodeBlurhashToCanvas(
               subject.blurHash ?? defaultBlurHash,

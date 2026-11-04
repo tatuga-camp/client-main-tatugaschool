@@ -322,7 +322,7 @@ function Setting({ subjectId, schoolId }: Props) {
                           src={student.photo}
                           alt={student.firstName}
                           fill
-                          sizes="(max-width: 768px) 100vw, 33vw"
+                          sizes="40px"
                           placeholder="blur"
                           blurDataURL={decodeBlurhashToCanvas(
                             student.blurHash ?? defaultBlurHash,

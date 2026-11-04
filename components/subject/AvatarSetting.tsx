@@ -206,7 +206,7 @@ function AvatarSetting({
                 src={url}
                 fill
                 alt="student avatar"
-                sizes="(max-width: 768px) 100vw, 33vw"
+                sizes="96px"
               />
             </li>
           );

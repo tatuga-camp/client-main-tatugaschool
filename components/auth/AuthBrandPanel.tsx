@@ -23,6 +23,7 @@ export const AuthBrandPanel = () => {
             placeholder="blur"
             blurDataURL={defaultCanvas}
             fill
+            sizes="(min-width: 1536px) 80px, (min-width: 1280px) 64px, (min-width: 1024px) 56px, 48px"
             alt="logo tatuga school"
           />
         </div>
