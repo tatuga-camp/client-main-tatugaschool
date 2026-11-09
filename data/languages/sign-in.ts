@@ -71,6 +71,14 @@ export const signInData = {
         return "Log in with Google";
     }
   },
+  turnstileRequired: (language: Language) => {
+    switch (language) {
+      case "th":
+        return "กรุณายืนยันการตรวจสอบความปลอดภัยด้านบนปุ่ม";
+      default:
+        return "Complete the security check above the button";
+    }
+  },
   noAccountButton: (language: Language) => {
     switch (language) {
       case "en":
