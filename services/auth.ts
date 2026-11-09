@@ -8,6 +8,7 @@ const axiosInstance = createAxiosInstance();
 type RequestSignInService = {
   email: string;
   password: string;
+  turnstileToken: string;
 };
 
 type ResponseSignInService = {

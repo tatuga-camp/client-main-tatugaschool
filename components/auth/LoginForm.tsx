@@ -1,10 +1,12 @@
 import { GetUserService, SignInService } from "@/services";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import Swal from "sweetalert2";
 import { ErrorMessages } from "../../interfaces";
 import Password from "../common/Password";
 import { FcGoogle } from "react-icons/fc";
+import { MdErrorOutline } from "react-icons/md";
 import { useRouter } from "next/router";
 import { useGetLanguage } from "../../react-query";
 import { requestData, signInData } from "../../data/languages";
@@ -15,8 +17,19 @@ export const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const language = useGetLanguage();
+
+  // Cloudflare Turnstile bot check, same as sign-up. Tokens are single-use,
+  // so the widget is reset after every failed attempt.
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [showTurnstileError, setShowTurnstileError] = useState(false);
+  const turnstileRef = useRef<TurnstileInstance>(null);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!turnstileToken) {
+      setShowTurnstileError(true);
+      return;
+    }
 
     try {
       Swal.fire({
@@ -27,7 +40,11 @@ export const LoginForm = () => {
           Swal.showLoading();
         },
       });
-      const response = await SignInService({ email, password });
+      const response = await SignInService({
+        email,
+        password,
+        turnstileToken,
+      });
       // The axios interceptor gates every request on a refresh_token cookie it can
       // read from THIS origin. The server's Set-Cookie only lands on the server's
       // own host, so when the API runs on a different host (e.g. a tunnel in dev)
@@ -52,6 +69,8 @@ export const LoginForm = () => {
       });
     } catch (error) {
       console.log(error);
+      setTurnstileToken(null);
+      turnstileRef.current?.reset();
       let result = error as ErrorMessages;
       Swal.fire({
         title: result?.error ? result?.error : "Something Went Wrong",
@@ -135,6 +154,34 @@ export const LoginForm = () => {
           Error: {router.query?.error}
         </span>
       )}
+      <div className="mb-3 flex flex-col items-center gap-1.5">
+        <Turnstile
+          ref={turnstileRef}
+          siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY as string}
+          options={{
+            action: "teacher-sign-in",
+            theme: "light",
+            language: language.data ?? "en",
+            size: "flexible",
+          }}
+          className="w-full"
+          onSuccess={(token) => {
+            setTurnstileToken(token);
+            setShowTurnstileError(false);
+          }}
+          onExpire={() => setTurnstileToken(null)}
+          onError={() => setTurnstileToken(null)}
+        />
+        {showTurnstileError && !turnstileToken && (
+          <p
+            role="alert"
+            className="flex items-start gap-1.5 self-start text-left text-sm text-error-color"
+          >
+            <MdErrorOutline aria-hidden className="mt-0.5 shrink-0" />
+            {signInData.turnstileRequired(language.data ?? "en")}
+          </p>
+        )}
+      </div>
       <div className="flex flex-col gap-3">
         <button type="submit" className="main-button min-h-11 w-full p-2">
           {signInData.loginButton(language.data ?? "en")}
