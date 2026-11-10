@@ -15,11 +15,8 @@ import {
   IoRefresh,
   IoShuffle,
   IoSparkles,
-  IoVolumeHigh,
-  IoVolumeMute,
 } from "react-icons/io5";
 import { CardPickerLanguage } from "../../data/languages";
-import { useSound } from "../../hook";
 import { StudentOnSubject } from "../../interfaces";
 import { useGetLanguage } from "../../react-query";
 import PopupLayout from "../layout/PopupLayout";
@@ -27,6 +24,8 @@ import CardFan, { rectToOrigin, type CardOrigin } from "./card-picker/CardFan";
 import DeckDrawer from "./card-picker/DeckDrawer";
 import SpotlightReveal from "./card-picker/SpotlightReveal";
 import { useCardDeck } from "./card-picker/useCardDeck";
+import SoundMenu from "./picker-sound/SoundMenu";
+import { usePickerSound } from "./picker-sound/usePickerSound";
 import PopUpStudent from "./PopUpStudent";
 
 interface StudentCardPickerProps {
@@ -36,16 +35,6 @@ interface StudentCardPickerProps {
   onClose: () => void;
   toast: React.RefObject<Toast>;
 }
-
-const MUTE_KEY = "card-picker:muted";
-
-const readMuted = () => {
-  try {
-    return localStorage.getItem(MUTE_KEY) === "1";
-  } catch {
-    return false;
-  }
-};
 
 const PILL_LIGHT =
   "border-gray-200 bg-white text-icon-color hover:border-primary-color hover:text-primary-color";
@@ -92,24 +81,13 @@ const StudentCardPicker: React.FC<StudentCardPickerProps> = ({
   // Unique per draw: redrawing the same student while the previous spotlight
   // is still exiting must mount a fresh reveal, not revive the exiting one.
   const [drawSeq, setDrawSeq] = useState(0);
-  const [muted, setMuted] = useState(readMuted);
+  const sound = usePickerSound();
 
   const cardRefs = useRef(new Map<string, HTMLDivElement>());
   // Synchronous guards: state updates land a render later, refs don't.
   const revealingRef = useRef(false);
   const stateRef = useRef(state);
   stateRef.current = state;
-
-  const ding = useSound("/sounds/ding.mp3");
-  const cheering = useSound("/sounds/cheering.mp3");
-  const play = useCallback(
-    (audio: HTMLAudioElement | null) => {
-      if (muted || !audio) return;
-      audio.currentTime = 0;
-      audio.play().catch(() => {});
-    },
-    [muted],
-  );
 
   const revealedStudent = state.revealedId
     ? (byId.get(state.revealedId) ?? null)
@@ -156,12 +134,13 @@ const StudentCardPicker: React.FC<StudentCardPickerProps> = ({
         return;
       }
       revealingRef.current = true;
+      sound.unlock(); // still inside the click / drag / key gesture
       setRevealing(true);
       setDrawSeq((n) => n + 1);
       setOrigin(from);
       actions.draw(id);
     },
-    [actions],
+    [actions, sound],
   );
 
   // Button / Space: any card from the fan, launched from where it sits.
@@ -176,11 +155,11 @@ const StudentCardPicker: React.FC<StudentCardPickerProps> = ({
   const handleRevealed = useCallback(() => {
     revealingRef.current = false;
     setRevealing(false);
-    play(cheering);
+    sound.reveal();
     if (!reducedMotion) {
       confetti({ particleCount: 160, spread: 80, origin: { y: 0.5 } });
     }
-  }, [play, cheering, reducedMotion]);
+  }, [sound, reducedMotion]);
 
   // Keep the student picked and return to the fan; the teacher chooses the
   // next card themselves (no automatic draw).
@@ -215,18 +194,6 @@ const StudentCardPicker: React.FC<StudentCardPickerProps> = ({
   const restart = () => {
     actions.restart();
     setShuffleTick((t) => t + 1);
-  };
-
-  const toggleMute = () => {
-    setMuted((m) => {
-      const next = !m;
-      try {
-        localStorage.setItem(MUTE_KEY, next ? "1" : "0");
-      } catch {
-        // ignore
-      }
-      return next;
-    });
   };
 
   const close = () => {
@@ -337,23 +304,12 @@ const StudentCardPicker: React.FC<StudentCardPickerProps> = ({
           </span>
         </button>
         <div className="flex shrink-0 gap-2">
-          <button
-            type="button"
-            onClick={toggleMute}
-            aria-label={
-              muted
-                ? CardPickerLanguage.sound_on(lang)
-                : CardPickerLanguage.sound_off(lang)
-            }
-            title={
-              muted
-                ? CardPickerLanguage.sound_on(lang)
-                : CardPickerLanguage.sound_off(lang)
-            }
-            className={`flex h-10 w-10 items-center justify-center rounded-full border text-lg transition ${pill}`}
-          >
-            {muted ? <IoVolumeMute /> : <IoVolumeHigh />}
-          </button>
+          <SoundMenu
+            sound={sound.sound}
+            onChange={sound.setSound}
+            lang={lang}
+            buttonClassName={pill}
+          />
           <button
             type="button"
             onClick={close}
@@ -441,7 +397,7 @@ const StudentCardPicker: React.FC<StudentCardPickerProps> = ({
             lang={lang}
             isLast={deckEmpty}
             reducedMotion={reducedMotion}
-            onFlipStart={() => play(ding)}
+            onFlipStart={() => sound.tick(1)}
             onRevealed={handleRevealed}
             onPutBack={putBack}
             onGivePoints={givePoints}

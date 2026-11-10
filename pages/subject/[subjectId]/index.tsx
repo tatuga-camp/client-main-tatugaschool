@@ -31,6 +31,7 @@ import SilderPicker from "../../../components/subject/SilderPicker";
 import StopWatch from "../../../components/subject/StopWatch";
 import StudentCardPicker from "../../../components/subject/StudentCardPicker";
 import WheelPicker from "../../../components/subject/WheelPicker";
+import TreasurePicker from "../../../components/subject/TreasurePicker";
 import FacePicker from "../../../components/subject/FacePicker";
 import Subject from "../../../components/subject/Subject";
 import { defaultBlurHash, MenuSubject } from "../../../data";
@@ -301,6 +302,16 @@ function Index({ subjectId }: Props) {
               setSelectFooter("EMTY");
             }}
             subjectId={subjectId}
+          />
+        </PopupLayout>
+      )}
+      {selectFooter === "TreasurePicker" && (
+        <PopupLayout onClose={() => setSelectFooter("EMTY")}>
+          <TreasurePicker
+            students={studentOnSubjects.data ?? []}
+            toast={toast}
+            subjectId={subjectId}
+            onClose={() => setSelectFooter("EMTY")}
           />
         </PopupLayout>
       )}

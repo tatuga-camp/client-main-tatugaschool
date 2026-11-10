@@ -2,7 +2,7 @@ import React, { memo, useState } from "react";
 import { BsQrCode } from "react-icons/bs";
 import { FaRandom, FaStopwatch20, FaWpforms } from "react-icons/fa";
 import { TbArrowsRandom } from "react-icons/tb";
-import { GiCardPick } from "react-icons/gi";
+import { GiCardPick, GiOpenTreasureChest } from "react-icons/gi";
 import { LuScanFace } from "react-icons/lu";
 import { MdHeadphones, MdQrCode2 } from "react-icons/md";
 import { PiCloudFog } from "react-icons/pi";
@@ -20,6 +20,7 @@ type MenuItem = {
     | "WheelOfName"
     | "SlidePicker"
     | "CardPicker"
+    | "TreasurePicker"
     | "FacePicker"
     | "NoisyDetector"
     | "QRCodeGenerator"
@@ -80,6 +81,13 @@ const menuGroups: MenuGroup[] = [
         inactiveClasses:
           "bg-red-100 text-red-700 hover:bg-red-200 active:bg-red-500 active:text-white",
         activeClasses: "bg-red-500 text-white",
+      },
+      {
+        title: "TreasurePicker",
+        icon: <GiOpenTreasureChest />,
+        inactiveClasses:
+          "bg-amber-100 text-amber-800 hover:bg-amber-200 active:bg-amber-500 active:text-amber-950",
+        activeClasses: "bg-amber-500 text-amber-950",
       },
       {
         title: "FacePicker",

@@ -155,22 +155,6 @@ export const CardPickerLanguage = {
         return "Add students to this subject to use the card picker.";
     }
   },
-  sound_on: (language: Language) => {
-    switch (language) {
-      case "th":
-        return "เปิดเสียง";
-      default:
-        return "Sound on";
-    }
-  },
-  sound_off: (language: Language) => {
-    switch (language) {
-      case "th":
-        return "ปิดเสียง";
-      default:
-        return "Sound off";
-    }
-  },
   move_to_picked: (language: Language) => {
     switch (language) {
       case "th":
