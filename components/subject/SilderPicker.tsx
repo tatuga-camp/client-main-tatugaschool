@@ -20,14 +20,8 @@ import {
   IoRefresh,
   IoSparkles,
   IoSync,
-  IoVolumeHigh,
-  IoVolumeMute,
 } from "react-icons/io5";
-import {
-  CardPickerLanguage,
-  SliderPickerLanguage,
-} from "../../data/languages";
-import { useSound } from "../../hook";
+import { CardPickerLanguage, SliderPickerLanguage } from "../../data/languages";
 import { StudentOnSubject } from "../../interfaces";
 import { useGetLanguage } from "../../react-query";
 import {
@@ -43,6 +37,8 @@ import { rectToOrigin, type CardOrigin } from "./card-picker/CardFan";
 import DeckDrawer from "./card-picker/DeckDrawer";
 import SpotlightReveal from "./card-picker/SpotlightReveal";
 import { useCardDeck } from "./card-picker/useCardDeck";
+import SoundMenu from "./picker-sound/SoundMenu";
+import { usePickerSound } from "./picker-sound/usePickerSound";
 import PopUpStudent from "./PopUpStudent";
 import SliderReel, { useReelSize } from "./slider-picker/SliderReel";
 
@@ -53,8 +49,6 @@ interface SilderPickerProps {
   toast: React.RefObject<Toast>;
 }
 
-// Mute is shared with the card picker: one classroom, one preference.
-const MUTE_KEY = "card-picker:muted";
 const SPEED_KEY = "slider-picker:speed";
 
 const readStored = <T extends string>(key: string, fallback: T, ok: T[]) => {
@@ -121,9 +115,11 @@ const SilderPicker = ({
   const [drawSeq, setDrawSeq] = useState(0);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [scoreStudentId, setScoreStudentId] = useState<string | null>(null);
-  const [muted, setMuted] = useState(
-    () => readStored(MUTE_KEY, "0", ["0", "1"]) === "1",
-  );
+  const sound = usePickerSound();
+  const soundRef = useRef(sound);
+  soundRef.current = sound;
+  // Start/end of the running spin, so ticks can climb toward the landing.
+  const spinRange = useRef({ from: 0, to: 1 });
   const [speed, setSpeed] = useState<SpinSpeed>(() =>
     readStored<SpinSpeed>(SPEED_KEY, "quick", ["quick", "dramatic"]),
   );
@@ -143,20 +139,6 @@ const SilderPicker = ({
   stepRef.current = step;
   const spinAnim = useRef<{ stop: () => void } | null>(null);
   const timers = useRef<number[]>([]);
-
-  const ding = useSound("/sounds/ding.mp3");
-  const cheering = useSound("/sounds/cheering.mp3");
-  const play = useCallback(
-    (audio: HTMLAudioElement | null, volume = 1) => {
-      if (muted || !audio) return;
-      audio.volume = volume;
-      audio.currentTime = 0;
-      audio.play().catch(() => {});
-    },
-    [muted],
-  );
-  const playRef = useRef({ play, ding });
-  playRef.current = { play, ding };
 
   const revealedStudent = state.revealedId
     ? (byId.get(state.revealedId) ?? null)
@@ -227,7 +209,8 @@ const SilderPicker = ({
       const now = performance.now();
       if (now - lastAt < 55) return;
       lastAt = now;
-      playRef.current.play(playRef.current.ding, 0.35);
+      const { from, to } = spinRange.current;
+      soundRef.current.tick(to === from ? 1 : (v - from) / (to - from));
     });
   }, [x]);
 
@@ -250,6 +233,8 @@ const SilderPicker = ({
     );
     const s = stepRef.current;
     const end = -target * s;
+    soundRef.current.unlock();
+    spinRange.current = { from: x.get(), to: end };
     setReel(next);
     setLanded(false);
     setSpinning(true);
@@ -301,11 +286,11 @@ const SilderPicker = ({
   const handleRevealed = useCallback(() => {
     busyRef.current = false;
     setRevealing(false);
-    play(cheering);
+    soundRef.current.reveal();
     if (!reducedMotion) {
       confetti({ particleCount: 160, spread: 80, origin: { y: 0.5 } });
     }
-  }, [play, cheering, reducedMotion]);
+  }, [reducedMotion]);
 
   const backToReel = useCallback(() => {
     if (busyRef.current || stateRef.current.revealedId === null) return;
@@ -338,13 +323,6 @@ const SilderPicker = ({
   const changeSpeed = (next: SpinSpeed) => {
     setSpeed(next);
     writeStored(SPEED_KEY, next);
-  };
-
-  const toggleMute = () => {
-    setMuted((m) => {
-      writeStored(MUTE_KEY, m ? "0" : "1");
-      return !m;
-    });
   };
 
   const close = () => {
@@ -458,23 +436,12 @@ const SilderPicker = ({
           </span>
         </button>
         <div className="flex shrink-0 gap-2">
-          <button
-            type="button"
-            onClick={toggleMute}
-            aria-label={
-              muted
-                ? CardPickerLanguage.sound_on(lang)
-                : CardPickerLanguage.sound_off(lang)
-            }
-            title={
-              muted
-                ? CardPickerLanguage.sound_on(lang)
-                : CardPickerLanguage.sound_off(lang)
-            }
-            className={`flex h-10 w-10 items-center justify-center rounded-full border text-lg transition ${pill}`}
-          >
-            {muted ? <IoVolumeMute /> : <IoVolumeHigh />}
-          </button>
+          <SoundMenu
+            sound={sound.sound}
+            onChange={sound.setSound}
+            lang={lang}
+            buttonClassName={pill}
+          />
           <button
             type="button"
             onClick={close}

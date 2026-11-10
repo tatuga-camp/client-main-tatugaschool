@@ -477,6 +477,14 @@ export const footerOnSubjectDataLangugae = {
         return "Card Picker";
     }
   },
+  TreasurePicker: (language: Language) => {
+    switch (language) {
+      case "th":
+        return "หีบสุ่มชื่อ";
+      default:
+        return "Treasure Chest";
+    }
+  },
   FacePicker: (language: Language) => {
     switch (language) {
       case "en":

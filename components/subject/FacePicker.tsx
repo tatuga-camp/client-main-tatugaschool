@@ -5,12 +5,13 @@ import { IoMdClose } from "react-icons/io";
 import { IoCheckmark, IoSettingsOutline } from "react-icons/io5";
 import { useMeasure } from "react-use";
 import { FacePickerLanguage } from "../../data/languages";
-import { useSound } from "../../hook";
 import { useFaceDetector, type FaceBox } from "../../hook/useFaceDetector";
 import { useGetLanguage } from "../../react-query";
 import FaceOverlay from "./face-picker/FaceOverlay";
 import { headRegion } from "./face-picker/overlayMath";
 import { buildRouletteSequence } from "./face-picker/roulette";
+import SoundMenu from "./picker-sound/SoundMenu";
+import { usePickerSound } from "./picker-sound/usePickerSound";
 
 type FacePickerProps = { onClose: () => void };
 type Phase = "live" | "spinning" | "winner";
@@ -44,8 +45,7 @@ export default function FacePicker({ onClose }: FacePickerProps) {
   const facesRef = useRef<FaceBox[]>(faces);
   facesRef.current = faces;
 
-  const ding = useSound("/sounds/ding.mp3");
-  const cheering = useSound("/sounds/cheering.mp3");
+  const sound = usePickerSound();
 
   const isError =
     status === "denied" || status === "no-camera" || status === "error";
@@ -108,6 +108,7 @@ export default function FacePicker({ onClose }: FacePickerProps) {
     // index into the live faces at the moment each step fires, wrapped to the
     // current count so it stays valid even as people enter/leave the frame.
     setPhase("spinning");
+    sound.unlock(); // inside the click, so the browser lets audio start
 
     const sequence = buildRouletteSequence(facesRef.current.length);
     let elapsed = 0;
@@ -119,16 +120,15 @@ export default function FacePicker({ onClose }: FacePickerProps) {
         const idx = step.index % live.length;
         setHighlightIndex(idx);
         if (i < sequence.length - 1) {
-          if (ding) ding.currentTime = 0;
-          ding?.play().catch(() => {});
+          // Rising pitch as the roulette slows toward the pick.
+          sound.tick(i / Math.max(1, sequence.length - 2));
         } else {
           // The pick has landed: crop the head of whoever is actually under
           // the box right now, straight from the live frame — so the capture
           // is aligned with the video instead of a stale start-of-spin box.
           setWinnerCrop(captureHeadCrop(live[idx]));
           setPhase("winner");
-          if (cheering) cheering.currentTime = 0;
-          cheering?.play().catch(() => {});
+          sound.reveal();
           confetti({
             particleCount: 160,
             spread: 80,
@@ -138,7 +138,7 @@ export default function FacePicker({ onClose }: FacePickerProps) {
       }, elapsed);
       timeouts.current.push(t);
     });
-  }, [ding, cheering, captureHeadCrop]);
+  }, [sound, captureHeadCrop]);
 
   const pickAgain = useCallback(() => {
     timeouts.current.forEach(clearTimeout);
@@ -275,6 +275,15 @@ export default function FacePicker({ onClose }: FacePickerProps) {
               )}
             </div>
           )}
+
+          <SoundMenu
+            sound={sound.sound}
+            onChange={sound.setSound}
+            lang={lang}
+            placement="up"
+            disabled={phase === "spinning"}
+            buttonClassName="h-12 w-12 border-gray-300 bg-white text-xl text-icon-color hover:bg-gray-100"
+          />
 
           {phase === "winner" ? (
             <button

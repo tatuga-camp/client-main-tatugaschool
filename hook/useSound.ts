@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 type ListURL =
   | "/sounds/ding.mp3"
   | "/sounds/clock.mp3"
-  | "/sounds/cheering.mp3"
   | "/sounds/fail.mp3"
   | "/sounds/ringing.mp3";
 
