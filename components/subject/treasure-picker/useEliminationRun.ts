@@ -22,12 +22,14 @@ type Options = {
   onStep?: (progress: number) => void;
   onDone?: (winners: string[]) => void;
   reducedMotion?: boolean;
+  /** Wait before the first cut (the chest opening), in ms. */
+  leadIn?: number;
 };
 
 /** Plays an EliminationPlan on a timer chain; the plan already holds the winners. */
 export function useEliminationRun(
   initial: string[],
-  { onStep, onDone, reducedMotion = false }: Options = {},
+  { onStep, onDone, reducedMotion = false, leadIn = 350 }: Options = {},
 ): EliminationRun {
   const [phase, setPhase] = useState<RunPhase>("idle");
   const [alive, setAlive] = useState<Set<string>>(() => new Set(initial));
@@ -85,7 +87,7 @@ export function useEliminationRun(
 
       const left = new Set(everyone);
       const last = plan.steps.length - 1;
-      let at = 350; // a breath before the first cut
+      let at = leadIn; // a breath before the first cut
       plan.steps.forEach((step, i) => {
         at += step.delay;
         const litMs = Math.round(
@@ -106,7 +108,7 @@ export function useEliminationRun(
       });
       timers.current.push(window.setTimeout(() => finish(plan), at + 650));
     },
-    [reducedMotion, finish],
+    [reducedMotion, finish, leadIn],
   );
 
   const skip = useCallback(() => {

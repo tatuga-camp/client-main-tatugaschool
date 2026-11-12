@@ -19,7 +19,13 @@ export const TreasurePickerLanguage = {
   count_label: (language: Language) =>
     language === "th" ? "จำนวนคนที่จะสุ่ม" : "How many students to pick",
   open_hint: (language: Language) =>
-    language === "th" ? "กดเพื่อเปิดหีบ" : "Press to open the chest",
+    language === "th"
+      ? "แตะหีบหรือกด Space เพื่อเปิด"
+      : "Tap the chest or press Space to open",
+  inside: (language: Language, count: number) =>
+    language === "th"
+      ? `นักเรียน ${count} คนอยู่ในหีบ`
+      : `${count} student${count === 1 ? "" : "s"} inside`,
   picked_kicker: (language: Language, count: number) =>
     language === "th"
       ? `สุ่มได้ ${count} คน`

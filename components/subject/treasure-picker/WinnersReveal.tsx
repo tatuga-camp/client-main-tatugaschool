@@ -9,6 +9,7 @@ import { Language, StudentOnSubject } from "../../../interfaces";
 import { mascotForPhoto, reactMascot } from "../../../utils/mascot";
 import MascotAvatar from "../../student/MascotAvatar";
 import { StudentPhoto } from "../card-picker/CardFace";
+import TreasureChest from "./TreasureChest";
 
 // Same blue spotlight as the card/slider/wheel pickers' reveal.
 const SPOTLIGHT_BG =
@@ -75,8 +76,15 @@ export default function WinnersReveal({
         style={{ rotate: rays.rotate, background: RAYS }}
         className="pointer-events-none absolute left-1/2 top-[45%] -ml-[90vmax] -mt-[90vmax] h-[180vmax] w-[180vmax] rounded-full"
       />
-      <animated.div style={title} className="relative mb-6 text-center">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/70">
+      <animated.div style={title} className="relative mb-5 text-center">
+        <TreasureChest
+          open
+          reducedMotion={reducedMotion}
+          className={`mx-auto mb-1 md:h-28 md:w-[7.5rem] [@media(max-height:560px)]:hidden ${
+            big ? "h-24 w-[6.5rem]" : "h-14 w-[3.75rem]"
+          }`}
+        />
+        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-warning-color">
           {TreasurePickerLanguage.picked_kicker(lang, winners.length)}
         </p>
         <h2 className="text-3xl font-bold md:text-4xl">
@@ -91,7 +99,7 @@ export default function WinnersReveal({
             <animated.div
               key={s.id}
               style={style}
-              className={`flex flex-col items-center rounded-3xl bg-white text-icon-color shadow-[0_10px_24px_rgba(0,0,0,0.22)] ${
+              className={`flex flex-col items-center rounded-3xl border-b-4 border-warning-color bg-white text-icon-color shadow-[0_10px_24px_rgba(0,0,0,0.22)] ${
                 big ? "w-64 p-6 md:w-72" : "w-40 p-4 md:w-44"
               }`}
             >
