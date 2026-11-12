@@ -17,7 +17,6 @@ import {
   IoPlaySkipForward,
   IoRefresh,
   IoRemove,
-  IoSparkles,
 } from "react-icons/io5";
 import {
   CardPickerLanguage,
@@ -38,7 +37,8 @@ import SoundMenu from "./picker-sound/SoundMenu";
 import { usePickerSound } from "./picker-sound/usePickerSound";
 import PopUpStudent from "./PopUpStudent";
 import { useEliminationRun } from "./treasure-picker/useEliminationRun";
-import VaultGrid from "./treasure-picker/VaultGrid";
+import TreasureChest from "./treasure-picker/TreasureChest";
+import VaultGrid, { CHEST_LEAD_IN_MS } from "./treasure-picker/VaultGrid";
 import WinnersReveal from "./treasure-picker/WinnersReveal";
 
 interface TreasurePickerProps {
@@ -131,6 +131,7 @@ const TreasurePicker = ({
 
   const run = useEliminationRun(poolIds, {
     reducedMotion,
+    leadIn: CHEST_LEAD_IN_MS,
     onStep: (progress) => sound.tick(progress),
     onDone: (winners) => {
       // Count them as picked right away, like the other pickers do with the
@@ -138,7 +139,12 @@ const TreasurePicker = ({
       winners.forEach((id) => actions.moveToPicked(id));
       sound.reveal();
       if (!reducedMotion) {
-        confetti({ particleCount: 160, spread: 90, origin: { y: 0.45 } });
+        confetti({
+          particleCount: 160,
+          spread: 90,
+          origin: { y: 0.45 },
+          colors: ["#FFCD1B", "#FFE680", "#E0A200", "#569DF8", "#ffffff"],
+        });
       }
     },
   });
@@ -315,7 +321,14 @@ const TreasurePicker = ({
             />
           ) : (
             <EmptyState
-              icon={<IoSparkles />}
+              art={
+                <TreasureChest
+                  open
+                  empty
+                  reducedMotion={reducedMotion}
+                  className="mb-2 h-32 w-36"
+                />
+              }
               title={CardPickerLanguage.empty_deck_title(lang)}
               hint={TreasurePickerLanguage.empty_hint(lang)}
             />
@@ -329,6 +342,10 @@ const TreasurePicker = ({
           phase={phase}
           reducedMotion={reducedMotion}
           ariaLabel={TreasurePickerLanguage.vault_label(lang, stage.length)}
+          caption={TreasurePickerLanguage.inside(lang, stage.length)}
+          hint={TreasurePickerLanguage.open_hint(lang)}
+          openLabel={TreasurePickerLanguage.open_chest(lang)}
+          onOpen={open}
         />
       )}
 
@@ -511,18 +528,22 @@ const TreasurePicker = ({
 
 function EmptyState({
   icon,
+  art,
   title,
   hint,
 }: {
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
+  art?: React.ReactNode;
   title: string;
   hint: string;
 }) {
   return (
     <div className="flex max-w-sm flex-col items-center px-4 text-center">
-      <span className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-primary-color/10 text-2xl text-primary-color">
-        {icon}
-      </span>
+      {art ?? (
+        <span className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-primary-color/10 text-2xl text-primary-color">
+          {icon}
+        </span>
+      )}
       <h3 className="text-lg font-bold text-icon-color">{title}</h3>
       <p className="mt-1 text-sm text-icon-color/60">{hint}</p>
     </div>
