@@ -31,6 +31,8 @@ function TextEditor({
     <>
       {!isLoaded && <span className="animate-pulse">Loading...</span>}
       <Editor
+        // TinyMCE 8 disables the editor unless a license is stated.
+        licenseKey="gpl"
         onInit={() => {
           setIsLoaded(true);
         }}
@@ -52,6 +54,8 @@ function TextEditor({
           paste_data_images: false,
           smart_paste: true,
           branding: false,
+          // TinyMCE's own "Upgrade" ad beside the menubar.
+          promotion: false,
           file_picker_types: "image",
 
           file_picker_callback: async (callback, value, meta) => {
@@ -78,7 +82,6 @@ function TextEditor({
             input.click();
           },
           plugins: [
-            "contextmenu",
             "advlist",
             "autolink",
             "lists",
