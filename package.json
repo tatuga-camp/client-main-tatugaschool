@@ -9,6 +9,7 @@
     "build": "next build",
     "start": "next start -p 8181",
     "lint": "next lint",
+    "typecheck": "bun check",
     "test": "tsx --test \"utils/**/*.test.ts\" \"components/**/*.test.tsx\" \"components/**/*.test.ts\""
   },
   "dependencies": {
