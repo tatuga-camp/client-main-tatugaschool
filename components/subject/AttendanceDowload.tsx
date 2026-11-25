@@ -1,194 +1,279 @@
+import { ProgressBar } from "primereact/progressbar";
+import { Toast } from "primereact/toast";
 import React, { useState } from "react";
+import { IoCloseOutline } from "react-icons/io5";
+import { SiMicrosoftexcel } from "react-icons/si";
+import { TbCalendarEvent, TbDownload, TbPhotoDown } from "react-icons/tb";
+import { attendanceExportData } from "../../data/languages";
+import { useGetLanguage } from "../../react-query";
 import { ExportAttendanceService } from "../../services";
 import { downloadDataUri } from "../../utils";
-import { Toast } from "primereact/toast";
-import { MdDownload, MdInfo, MdTimer } from "react-icons/md";
-import { FiPlus } from "react-icons/fi";
-const timePeriods = [
-  "All",
-  "Last 30 Days",
-  "Today",
-  "Yesterday",
-  "This Month",
-  "Last Month",
-  "Custom Range",
-] as const;
+import {
+  DATE_PRESETS,
+  DateBounds,
+  DatePreset,
+  presetRange,
+  toDateBounds,
+} from "../../utils/attendanceDateRange";
+import LoadingSpinner from "../common/LoadingSpinner";
+import GradeSegmentedControl from "./grade/GradeSegmentedControl";
 
-type TimePeriod = (typeof timePeriods)[number];
-const formatDate = (date: Date): string => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0"); // getMonth() is zero-based
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-};
+export type AttendanceExportFormat = "excel" | "image";
+export type SaveImageResult = "saved" | "empty" | "failed";
+
 type Props = {
   subjectId: string;
   toast: React.RefObject<Toast>;
   onClose: () => void;
+  initialFormat: AttendanceExportFormat;
+  /** What the image will contain; undefined when no table is on screen. */
+  imageTarget?: { tableTitle: string; summary: boolean };
+  onSaveImage: (bounds: DateBounds) => Promise<SaveImageResult>;
 };
-function AttendanceDowload({ subjectId, toast, onClose }: Props) {
+
+const INPUT =
+  "h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-icon-color outline-none transition focus:border-primary-color focus:ring-2 focus:ring-primary-color/20";
+const LABEL = "text-xs font-medium text-icon-color/70";
+
+function AttendanceDowload({
+  subjectId,
+  toast,
+  onClose,
+  initialFormat,
+  imageTarget,
+  onSaveImage,
+}: Props) {
+  const { data: language = "en" } = useGetLanguage();
   const [loading, setLoading] = useState(false);
-  const [timePeriod, setTimePeriod] = useState<TimePeriod>("All");
-  // State for the 'from' date
-  const [fromDate, setFromDate] = useState<string>("");
-  // State for the 'to' date
-  const [toDate, setToDate] = useState<string>("");
-  const handleDolwnloadExcel = async (e: React.FormEvent) => {
+  const [format, setFormat] = useState<AttendanceExportFormat>(
+    imageTarget ? initialFormat : "excel",
+  );
+  const [preset, setPreset] = useState<DatePreset>("all");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+
+  const selectPreset = (next: DatePreset) => {
+    setPreset(next);
+    const range = presetRange(next);
+    setFromDate(range.from);
+    setToDate(range.to);
+  };
+
+  const showError = (detail: string) =>
+    toast.current?.show({
+      severity: "error",
+      summary: "Error",
+      detail,
+      life: 3000,
+    });
+
+  const handleDownload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (loading) return;
+    const bounds = toDateBounds(fromDate, toDate);
+    setLoading(true);
     try {
-      e.preventDefault();
-      setLoading(true);
+      if (format === "image") {
+        const result = await onSaveImage(bounds);
+        if (result === "empty") {
+          toast.current?.show({
+            severity: "warn",
+            summary: attendanceExportData.noSessionsInRange(language),
+            life: 3000,
+          });
+        } else if (result === "failed") {
+          showError(attendanceExportData.imageFailed(language));
+        } else {
+          onClose();
+        }
+        return;
+      }
       const response = await ExportAttendanceService({
         subjectId,
-        ...(fromDate !== "" && {
-          startDate: new Date(fromDate).toISOString(),
-        }),
-        ...(toDate !== "" &&
-          (() => {
-            // Create a new Date object from the toDate string
-            const endDate = new Date(toDate);
-
-            // Set the time to the last millisecond of the day
-            endDate.setHours(23, 59, 59, 999);
-
-            // Return the object with the ISO string
-            return { endDate: endDate.toISOString() };
-          })()),
+        ...(bounds.start && { startDate: bounds.start.toISOString() }),
+        ...(bounds.end && { endDate: bounds.end.toISOString() }),
       });
       downloadDataUri(response, "attendance.xlsx");
-      setLoading(false);
+      onClose();
     } catch (error) {
-      setLoading(false);
       console.error("Failed to download the file", error);
-      toast.current?.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Failed to download the file",
-        life: 3000,
-      });
+      showError(attendanceExportData.excelFailed(language));
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleSwichDateRange = (time: TimePeriod) => {
-    setTimePeriod(time);
-    const today = new Date(); // Current date for consistency
-    let newFromDate = new Date(today);
-    let newToDate = new Date(today);
+  const locale = language === "th" ? "th-TH" : "en-GB";
+  const bounds = toDateBounds(fromDate, toDate);
+  const formatDay = (date: Date) =>
+    date.toLocaleDateString(locale, {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
 
-    switch (time) {
-      case "Today":
-        newFromDate = today;
-        newToDate = today;
-        break;
-      case "Yesterday":
-        newFromDate.setDate(today.getDate() - 1);
-        newToDate.setDate(today.getDate());
-        break;
-      case "This Month":
-        newFromDate = new Date(today.getFullYear(), today.getMonth(), 1);
-        newToDate = today;
-        break;
-      case "Last Month":
-        newFromDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-        newToDate = new Date(today.getFullYear(), today.getMonth(), 0);
-        break;
-      case "Last 30 Days":
-        newFromDate.setDate(today.getDate() - 30);
-        newToDate = today;
-        break;
-      case "All":
-        setFromDate("");
-        setToDate("");
-        return;
-        break;
-      case "Custom Range":
-        // For custom range, we don't set the dates, user will pick them.
-        // You might want to clear them or leave them as they are.
-        setFromDate("");
-        setToDate("");
-        return; // Exit early
-    }
-    setFromDate(formatDate(newFromDate));
-    setToDate(formatDate(newToDate));
-  };
-
-  console.log(toDate);
   return (
     <form
-      onSubmit={handleDolwnloadExcel}
-      className="h-max w-full max-w-96 overflow-hidden rounded-2xl bg-white font-Anuphan"
+      onSubmit={handleDownload}
+      className="flex w-[95vw] max-w-md flex-col overflow-hidden rounded-2xl bg-white font-Anuphan text-icon-color"
     >
-      <header className="flex w-full items-center justify-start gap-3 bg-blue-600 p-3">
-        <div className="flex items-center justify-center rounded-2xl bg-white/50 p-2 text-lg text-white">
-          <MdDownload />
+      <header className="flex items-start justify-between gap-3 border-b p-4 md:px-6">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-color/10 text-xl text-primary-color">
+            <TbDownload />
+          </span>
+          <div className="min-w-0">
+            <h2 className="text-lg font-bold leading-tight">
+              {attendanceExportData.title(language)}
+            </h2>
+            <p className="text-xs text-icon-color/60">
+              {attendanceExportData.description(language)}
+            </p>
+          </div>
         </div>
-        <h1 className="text-white">Dowload Excel</h1>
-      </header>
-      <main className="flex flex-col gap-3 p-2 pb-5">
-        <section className="flex flex-col">
-          <div className="flex items-center justify-start gap-2 font-semibold">
-            <MdTimer className="text-blue-700" />
-            <div>Quick Date Selection</div>
-          </div>
-          <select
-            value={timePeriod}
-            onChange={(e) => handleSwichDateRange(e.target.value as TimePeriod)}
-            className="h-10 w-full rounded-2xl border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-          >
-            {timePeriods.map((time) => (
-              <option key={time} value={time}>
-                {time}
-              </option>
-            ))}
-          </select>
-        </section>
-        <section className="flex flex-col">
-          <div className="flex items-center justify-start gap-2 font-semibold">
-            <MdInfo className="text-gray-700" />
-            <div>Custom Date</div>
-          </div>
-          <div className="flex justify-between gap-2 rounded-2xl bg-gray-100 p-2 text-sm">
-            <label className="flex w-full flex-col">
-              Start Date
-              <input
-                required={toDate !== ""}
-                value={fromDate}
-                onChange={(e) => setFromDate(e.target.value)}
-                disabled={timePeriod !== "Custom Range"}
-                type="date"
-                className="h-10 w-full rounded-2xl border border-gray-300 p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              />
-            </label>
-            <label className="flex w-full flex-col">
-              End Date
-              <input
-                required={fromDate !== ""}
-                value={toDate}
-                min={fromDate}
-                onChange={(e) => setToDate(e.target.value)}
-                disabled={timePeriod !== "Custom Range"}
-                type="date"
-                className="h-10 w-full rounded-2xl border border-gray-300 p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              />
-            </label>
-          </div>
-        </section>
-      </main>
-      <footer className="flex h-14 w-full items-center justify-end gap-3 border-t p-2">
         <button
           type="button"
-          onClick={() => {
-            onClose();
-          }}
-          className="second-button flex items-center justify-center gap-1 border"
+          onClick={() => onClose()}
+          aria-label="Close"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-2xl transition hover:bg-background-color"
         >
-          Cancel
+          <IoCloseOutline />
+        </button>
+      </header>
+
+      {loading && (
+        <ProgressBar
+          mode="indeterminate"
+          style={{ height: "3px", borderRadius: 0 }}
+        />
+      )}
+
+      <div className="flex flex-col gap-5 p-4 md:p-6">
+        <section className="flex flex-col gap-2">
+          <span className={LABEL}>{attendanceExportData.format(language)}</span>
+          {imageTarget ? (
+            <div className="w-max">
+              <GradeSegmentedControl
+                value={format}
+                onChange={setFormat}
+                options={[
+                  {
+                    value: "excel",
+                    label: attendanceExportData.excel(language),
+                    icon: <SiMicrosoftexcel />,
+                  },
+                  {
+                    value: "image",
+                    label: attendanceExportData.image(language),
+                    icon: <TbPhotoDown />,
+                  },
+                ]}
+              />
+            </div>
+          ) : (
+            <div className="flex w-max items-center gap-1.5 rounded-xl bg-primary-color px-3 py-1 text-sm font-semibold text-white">
+              <SiMicrosoftexcel />
+              {attendanceExportData.excel(language)}
+            </div>
+          )}
+          <p className="text-xs text-gray-500">
+            {format === "image" && imageTarget
+              ? attendanceExportData.imageHint(
+                  imageTarget.tableTitle,
+                  imageTarget.summary,
+                )(language)
+              : attendanceExportData.excelHint(language)}
+            {!imageTarget &&
+              ` ${attendanceExportData.imageUnavailable(language)}`}
+          </p>
+        </section>
+
+        <section className="flex flex-col gap-2">
+          <span className={LABEL}>
+            {attendanceExportData.dateRange(language)}
+          </span>
+          <div className="flex flex-wrap gap-1.5">
+            {DATE_PRESETS.map((option) => {
+              const active = option === preset;
+              return (
+                <button
+                  key={option}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => selectPreset(option)}
+                  className={`rounded-xl border px-3 py-1.5 text-sm font-semibold transition-colors ${
+                    active
+                      ? "border-primary-color bg-primary-color/10 text-primary-color"
+                      : "border-gray-200 bg-white text-icon-color hover:bg-background-color"
+                  }`}
+                >
+                  {attendanceExportData.presets[option](language)}
+                </button>
+              );
+            })}
+          </div>
+
+          {preset === "custom" ? (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <label className="flex flex-col gap-1">
+                <span className={LABEL}>
+                  {attendanceExportData.startDate(language)}
+                </span>
+                <input
+                  required
+                  type="date"
+                  value={fromDate}
+                  max={toDate || undefined}
+                  onChange={(e) => setFromDate(e.target.value)}
+                  className={INPUT}
+                />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className={LABEL}>
+                  {attendanceExportData.endDate(language)}
+                </span>
+                <input
+                  required
+                  type="date"
+                  value={toDate}
+                  min={fromDate || undefined}
+                  onChange={(e) => setToDate(e.target.value)}
+                  className={INPUT}
+                />
+              </label>
+            </div>
+          ) : (
+            <p className="flex items-center gap-2 rounded-xl bg-background-color px-3 py-2 text-sm">
+              <TbCalendarEvent className="shrink-0 text-primary-color" />
+              {bounds.start && bounds.end
+                ? `${formatDay(bounds.start)} – ${formatDay(bounds.end)}`
+                : attendanceExportData.allDates(language)}
+            </p>
+          )}
+        </section>
+      </div>
+
+      <footer className="flex items-center justify-end gap-2 border-t p-3 md:px-6">
+        <button
+          type="button"
+          onClick={() => onClose()}
+          className="h-10 rounded-lg px-4 text-sm font-semibold transition hover:bg-background-color"
+        >
+          {attendanceExportData.cancel(language)}
         </button>
         <button
-          disabled={loading}
           type="submit"
-          className="main-button flex w-40 items-center justify-center gap-1"
+          disabled={loading}
+          className="flex h-10 min-w-32 items-center justify-center gap-2 rounded-lg bg-primary-color px-5 text-sm font-semibold text-white transition hover:bg-primary-color-hover active:scale-[0.98] disabled:opacity-60"
         >
-          <FiPlus /> {loading ? "Loading" : "Dowload"}{" "}
+          {loading ? (
+            <LoadingSpinner />
+          ) : (
+            <>
+              <TbDownload />
+              {attendanceExportData.download(language)}
+            </>
+          )}
         </button>
       </footer>
     </form>

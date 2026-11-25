@@ -1,7 +1,8 @@
 import html2canvas from "html2canvas";
 import Image from "next/image";
 import { Toast } from "primereact/toast";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
+import { flushSync } from "react-dom";
 import { BsQrCode } from "react-icons/bs";
 import { IoSearchOutline } from "react-icons/io5";
 import { MdOutlineSpeakerNotes } from "react-icons/md";
@@ -38,11 +39,14 @@ import {
   useGetSubject,
 } from "../../react-query";
 import { decodeBlurhashToCanvas } from "../../utils";
+import { DateBounds, isWithinBounds } from "../../utils/attendanceDateRange";
 import { isSubjectArchived } from "../../utils/subjectArchive";
-import LoadingSpinner from "../common/LoadingSpinner";
 import PopupLayout from "../layout/PopupLayout";
 import AttendanceChecker from "./AttendanceChecker";
-import AttendanceDowload from "./AttendanceDowload";
+import AttendanceDowload, {
+  AttendanceExportFormat,
+  SaveImageResult,
+} from "./AttendanceDowload";
 import AttendanceTableCreate from "./AttendanceTableCreate";
 import AttendanceTableSetting from "./AttendanceTableSetting";
 import AttendanceView from "./AttendanceView";
@@ -52,6 +56,8 @@ import GradeSegmentedControl, {
 import { byStudentNumber } from "../../utils/studentRoster";
 
 type AttendanceViewMode = "attendances" | "summary";
+
+type SaveImage = (bounds: DateBounds) => Promise<SaveImageResult>;
 
 type TableWithStatus = AttendanceTable & {
   statusLists: AttendanceStatusList[];
@@ -86,8 +92,8 @@ function Attendance({
   const tables = useGetAttendancesTable({
     subjectId,
   });
-  const [triggerAttendanceDowload, setTriggerAttendanceDowload] =
-    useState(false);
+  const [exportFormat, setExportFormat] =
+    React.useState<AttendanceExportFormat | null>(null);
   const [selectAttendance, setSelectAttendance] =
     React.useState<SelectAttendance | null>(null);
   const [selectTable, setSelectTable] = React.useState<TableWithStatus | null>(
@@ -98,8 +104,7 @@ function Attendance({
   >(null);
   const [view, setView] = React.useState<AttendanceViewMode>("attendances");
   const [search, setSearch] = React.useState("");
-  const saveImageRef = React.useRef<(() => Promise<void>) | null>(null);
-  const [isSavingImage, setIsSavingImage] = React.useState(false);
+  const saveImageRef = React.useRef<SaveImage | null>(null);
   const [isExportMenuOpen, setIsExportMenuOpen] = React.useState(false);
   const exportMenuRef = React.useRef<HTMLDivElement>(null);
 
@@ -107,15 +112,8 @@ function Attendance({
     setIsExportMenuOpen(false);
   });
 
-  const handleSaveImage = async () => {
-    if (!saveImageRef.current || isSavingImage) return;
-    setIsSavingImage(true);
-    try {
-      await saveImageRef.current();
-    } finally {
-      setIsSavingImage(false);
-    }
-  };
+  // The image is a capture of the table on screen, so it needs one.
+  const canSaveImage = !showSetting && !!selectTable;
 
   useEffect(() => {
     if (!selectTable && tables.data) {
@@ -156,14 +154,23 @@ function Attendance({
           />
         </PopupLayout>
       )}
-      {triggerAttendanceDowload && (
-        <PopupLayout onClose={() => setTriggerAttendanceDowload(false)}>
+      {exportFormat && (
+        <PopupLayout onClose={() => setExportFormat(null)}>
           <AttendanceDowload
             toast={toast}
             subjectId={subjectId}
+            initialFormat={exportFormat}
+            imageTarget={
+              canSaveImage && selectTable
+                ? { tableTitle: selectTable.title, summary: view === "summary" }
+                : undefined
+            }
+            onSaveImage={async (bounds) =>
+              saveImageRef.current ? saveImageRef.current(bounds) : "failed"
+            }
             onClose={() => {
               document.body.style.overflow = "auto";
-              setTriggerAttendanceDowload(false);
+              setExportFormat(null);
             }}
           />
         </PopupLayout>
@@ -234,22 +241,15 @@ function Attendance({
           <div ref={exportMenuRef} className="relative">
             <button
               type="button"
-              disabled={isSavingImage}
               onClick={() => setIsExportMenuOpen((prev) => !prev)}
               aria-expanded={isExportMenuOpen}
               className={`${SECONDARY_BUTTON} min-w-28`}
             >
-              {isSavingImage ? (
-                <LoadingSpinner />
-              ) : (
-                <>
-                  <SiMicrosoftexcel />
-                  {attendanceLanguageData.export(lang)}
-                  <TbChevronDown
-                    className={`transition-transform ${isExportMenuOpen ? "rotate-180" : ""}`}
-                  />
-                </>
-              )}
+              <SiMicrosoftexcel />
+              {attendanceLanguageData.export(lang)}
+              <TbChevronDown
+                className={`transition-transform ${isExportMenuOpen ? "rotate-180" : ""}`}
+              />
             </button>
 
             {isExportMenuOpen && (
@@ -258,7 +258,7 @@ function Attendance({
                   type="button"
                   onClick={() => {
                     setIsExportMenuOpen(false);
-                    setTriggerAttendanceDowload(true);
+                    setExportFormat("excel");
                   }}
                   className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-icon-color transition-colors hover:bg-background-color"
                 >
@@ -267,10 +267,10 @@ function Attendance({
                 </button>
                 <button
                   type="button"
-                  disabled={triggerSetting || !selectTable}
+                  disabled={!canSaveImage}
                   onClick={() => {
                     setIsExportMenuOpen(false);
-                    handleSaveImage();
+                    setExportFormat("image");
                   }}
                   className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-icon-color transition-colors hover:bg-background-color disabled:cursor-not-allowed disabled:opacity-50"
                 >
@@ -465,7 +465,7 @@ type Props = {
     React.SetStateAction<SelectAttendance | null>
   >;
   toast: React.RefObject<Toast>;
-  saveImageRef: React.MutableRefObject<(() => Promise<void>) | null>;
+  saveImageRef: React.MutableRefObject<SaveImage | null>;
   readOnly: boolean;
 };
 function DisplayAttendanceTable({
@@ -499,6 +499,21 @@ function DisplayAttendanceTable({
     [rows.data],
   );
 
+  // Set only while an image is being captured: limits the session columns
+  // (and the summary totals) to the date range picked in the export popup.
+  const [exportBounds, setExportBounds] = React.useState<DateBounds | null>(
+    null,
+  );
+  const visibleRows = React.useMemo(
+    () =>
+      exportBounds
+        ? sortedRows.filter((row) =>
+            isWithinBounds(row.startDate, exportBounds),
+          )
+        : sortedRows,
+    [sortedRows, exportBounds],
+  );
+
   const students = React.useMemo(() => {
     const query = search.trim().toLowerCase();
     return (studentOnSubjects.data ?? [])
@@ -520,12 +535,19 @@ function DisplayAttendanceTable({
     }
   }, [rows.isSuccess, view]);
 
-  const handleSaveImage = async () => {
-    if (!tableRef.current || !scrollRef.current || rows.isLoading) return;
+  const handleSaveImage: SaveImage = async (bounds) => {
+    if (!tableRef.current || !scrollRef.current || rows.isLoading) {
+      return "failed";
+    }
+    if (!sortedRows.some((row) => isWithinBounds(row.startDate, bounds))) {
+      return "empty";
+    }
     const scrollContainer = scrollRef.current;
     const previousScrollLeft = scrollContainer.scrollLeft;
     const previousScrollTop = scrollContainer.scrollTop;
     try {
+      // render the filtered columns now, so the capture below sees them
+      flushSync(() => setExportBounds(bounds));
       // sticky header/name column render offset unless the container sits at 0,0
       scrollContainer.scrollLeft = 0;
       scrollContainer.scrollTop = 0;
@@ -598,14 +620,12 @@ function DisplayAttendanceTable({
       link.href = canvas.toDataURL("image/png");
       link.download = fileName;
       link.click();
+      return "saved";
     } catch (error) {
       console.error("Error saving attendance image:", error);
-      toast.current?.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Failed to save the table as an image",
-      });
+      return "failed";
     } finally {
+      setExportBounds(null);
       scrollContainer.scrollLeft = previousScrollLeft;
       scrollContainer.scrollTop = previousScrollTop;
     }
@@ -649,7 +669,7 @@ function DisplayAttendanceTable({
                 <span>{attendanceOverviewData.student(language)}</span>
                 {!loading && (
                   <span className="font-normal text-gray-400">
-                    {attendanceOverviewData.sessions(sortedRows.length)(
+                    {attendanceOverviewData.sessions(visibleRows.length)(
                       language,
                     )}
                   </span>
@@ -663,7 +683,7 @@ function DisplayAttendanceTable({
                   </th>
                 ))
               : view === "attendances"
-                ? sortedRows.map((row) => {
+                ? visibleRows.map((row) => {
                     const start = new Date(row.startDate);
                     const isToday = isSameDay(start, today);
                     return (
@@ -779,7 +799,7 @@ function DisplayAttendanceTable({
                 colSpan={
                   1 +
                   (view === "attendances"
-                    ? sortedRows.length
+                    ? visibleRows.length
                     : statusLists.length + 1)
                 }
                 className="px-3 py-12 text-left text-sm text-gray-500 md:text-center"
@@ -789,7 +809,7 @@ function DisplayAttendanceTable({
             </tr>
           ) : (
             students.map((student) => {
-              const attendances = sortedRows.flatMap((row) =>
+              const attendances = visibleRows.flatMap((row) =>
                 row.attendances.filter(
                   (a) => a.studentOnSubjectId === student.id,
                 ),
@@ -806,7 +826,7 @@ function DisplayAttendanceTable({
                 <tr key={student.id} className="group">
                   <StudentCell student={student} language={language} />
                   {view === "attendances"
-                    ? sortedRows.map((row) => {
+                    ? visibleRows.map((row) => {
                         const attendance = row.attendances.find(
                           (a) => a.studentOnSubjectId === student.id,
                         );
