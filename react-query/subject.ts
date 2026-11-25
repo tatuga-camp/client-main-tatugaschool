@@ -26,6 +26,7 @@ import {
   RequestReorderSubjectsService,
   RequestPublicProgressService,
   RequestUpdateSubjectService,
+  RequestVerifyLineTokenService,
   ResponseGetSubjectBySchoolsService,
   ResponsePublicProgressService,
   UpdatePublicProgressLevelService,
@@ -315,18 +316,31 @@ export function useUpdateSortConfigOnSubject() {
   });
 }
 
+// The link list is refreshed whether the verify succeeds or fails: a rejected
+// token (expired, replaced, or already handled by a co-teacher) means the
+// pending link on screen is stale and must not stay there.
+export function verifyLineTokenMutationOptions(
+  queryClient: QueryClient,
+  mutationFn: typeof VerifyLineTokenService = VerifyLineTokenService,
+) {
+  return {
+    mutationKey: ["verify-line-token"],
+    mutationFn,
+    onSettled: (
+      _data: unknown,
+      _error: unknown,
+      variables: RequestVerifyLineTokenService,
+    ) => {
+      queryClient.invalidateQueries({
+        queryKey: ["line-groups", { subjectId: variables.body.subjectId }],
+      });
+    },
+  };
+}
+
 export function useVerifyLineToken() {
   const queryClient = useQueryClient();
-  return useMutation({
-    mutationKey: ["verify-line-token"],
-    mutationFn: VerifyLineTokenService,
-    onSuccess: (data, variables) => {
-      queryClient.setQueryData(
-        ["subject", { id: variables.body.subjectId }],
-        data,
-      );
-    },
-  });
+  return useMutation(verifyLineTokenMutationOptions(queryClient));
 }
 
 function writeProgressState(

@@ -17,9 +17,6 @@ type Props = {
       allowStudentViewScoreOnAssignment?: boolean;
       allowStudentDoneAssignmentInOrder?: boolean;
       allowHideStudentList?: boolean;
-      allowSendNotificationOnAssignmentToLine?: boolean;
-      allowSendNotificationMorningSummaryToLine?: boolean;
-      allowSendNotificationOnAnnouncementToLine?: boolean;
     },
   ) => void;
   isPending: boolean;
@@ -41,9 +38,6 @@ function SubjectPermission({
     allowStudentViewScoreOnAssignment?: boolean;
     allowStudentDoneAssignmentInOrder?: boolean;
     allowHideStudentList?: boolean;
-    allowSendNotificationOnAssignmentToLine?: boolean;
-    allowSendNotificationMorningSummaryToLine?: boolean;
-    allowSendNotificationOnAnnouncementToLine?: boolean;
   }>();
 
   React.useEffect(() => {
@@ -58,12 +52,6 @@ function SubjectPermission({
         allowStudentDoneAssignmentInOrder:
           subject.data.allowStudentDoneAssignmentInOrder,
         allowHideStudentList: subject.data.allowHideStudentList,
-        allowSendNotificationOnAssignmentToLine:
-          subject.data.allowSendNotificationOnAssignmentToLine,
-        allowSendNotificationMorningSummaryToLine:
-          subject.data.allowSendNotificationMorningSummaryToLine,
-        allowSendNotificationOnAnnouncementToLine:
-          subject.data.allowSendNotificationOnAnnouncementToLine,
       });
     }
   }, [subject.status]);
@@ -206,63 +194,6 @@ function SubjectPermission({
                 setPermission((prev) => ({
                   ...prev,
                   allowHideStudentList: data,
-                }));
-              }}
-            />
-          </label>
-        </div>
-        <div className="flex gap-5 bg-gray-200/20 p-2 py-4">
-          <label className="flex w-full items-center">
-            <span className="flex-1 text-base text-black">
-              {settingOnSubjectDataLanguage.allowSendNotificationOnAssignmentToLine(
-                language.data ?? "en",
-              )}
-              :
-            </span>
-            <Switch
-              checked={permission?.allowSendNotificationOnAssignmentToLine}
-              setChecked={(data) => {
-                setPermission((prev) => ({
-                  ...prev,
-                  allowSendNotificationOnAssignmentToLine: data,
-                }));
-              }}
-            />
-          </label>
-        </div>
-        <div className="flex gap-5 p-2 py-4">
-          <label className="flex w-full items-center">
-            <span className="flex-1 text-base text-black">
-              {settingOnSubjectDataLanguage.allowSendNotificationMorningSummaryToLine(
-                language.data ?? "en",
-              )}
-              :
-            </span>
-            <Switch
-              checked={permission?.allowSendNotificationMorningSummaryToLine}
-              setChecked={(data) => {
-                setPermission((prev) => ({
-                  ...prev,
-                  allowSendNotificationMorningSummaryToLine: data,
-                }));
-              }}
-            />
-          </label>
-        </div>
-        <div className="flex gap-5 bg-gray-200/20 p-2 py-4">
-          <label className="flex w-full items-center">
-            <span className="flex-1 text-base text-black">
-              {settingOnSubjectDataLanguage.allowSendNotificationOnAnnouncementToLine(
-                language.data ?? "en",
-              )}
-              :
-            </span>
-            <Switch
-              checked={permission?.allowSendNotificationOnAnnouncementToLine}
-              setChecked={(data) => {
-                setPermission((prev) => ({
-                  ...prev,
-                  allowSendNotificationOnAnnouncementToLine: data,
                 }));
               }}
             />

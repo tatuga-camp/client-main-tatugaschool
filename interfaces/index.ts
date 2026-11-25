@@ -41,3 +41,4 @@ export * from "./Rubric";
 export * from "./Analytics";
 export * from "./Issue";
 export * from "./Quiz";
+export * from "./LineGroupOnSubject";

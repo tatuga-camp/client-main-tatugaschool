@@ -901,3 +901,68 @@ export const classworksDataLanguage = {
     }
   },
 } as const;
+
+const pick = (language: Language, th: string, en: string) =>
+  language === "th" ? th : en;
+
+export const lineGroupLanguage = {
+  title: (language: Language) => pick(language, "กลุ่ม LINE", "LINE groups"),
+  connectAnother: (language: Language) =>
+    pick(language, "เชื่อมต่อกลุ่มเพิ่ม", "Connect another group"),
+  allowAssignment: (language: Language) =>
+    pick(language, "งานใหม่", "New assignment"),
+  allowMorningSummary: (language: Language) =>
+    pick(language, "สรุปยามเช้า", "Morning summary"),
+  allowAnnouncement: (language: Language) =>
+    pick(language, "ประกาศ", "Announcement"),
+  allowAi: (language: Language) => pick(language, "ถามตอบ AI", "AI questions"),
+  disconnect: (language: Language) =>
+    pick(language, "ยกเลิกการเชื่อมต่อ", "Disconnect"),
+  waiting: (language: Language) =>
+    pick(language, "รอการยืนยัน", "Waiting for confirmation"),
+  later: (language: Language) => pick(language, "ไว้ทีหลัง", "Later"),
+  manageInSettings: (language: Language) =>
+    pick(language, "จัดการในหน้าตั้งค่า", "Manage in settings"),
+  empty: (language: Language) =>
+    pick(
+      language,
+      "ยังไม่ได้เชื่อมต่อกลุ่ม LINE",
+      "No LINE group connected yet",
+    ),
+  emptyDescription: (language: Language) =>
+    pick(
+      language,
+      "เชื่อมต่อกลุ่ม LINE ของห้องเรียนเพื่อส่งการแจ้งเตือนของรายวิชานี้เข้ากลุ่ม",
+      "Connect a class LINE group to send this subject's notifications to it.",
+    ),
+  warning: (language: Language) =>
+    pick(
+      language,
+      "ยืนยันเฉพาะเมื่อคุณเป็นผู้เพิ่มบอทเข้ากลุ่มนี้เอง กลุ่มนี้จะได้รับการแจ้งเตือนของรายวิชา และสามารถถาม AI เกี่ยวกับคะแนนของนักเรียนได้",
+      "Only confirm if you added the bot to this group yourself. This group will receive this subject's notifications and can ask the AI about students' scores.",
+    ),
+  confirmQuestion: (language: Language, groupName: string) =>
+    pick(
+      language,
+      `เชื่อมต่อรายวิชานี้กับกลุ่ม LINE «${groupName}» หรือไม่?`,
+      `Connect this subject to LINE group «${groupName}»?`,
+    ),
+  confirm: (language: Language) => pick(language, "ยืนยัน", "Confirm"),
+  deny: (language: Language) => pick(language, "ปฏิเสธ", "Deny"),
+  cancel: (language: Language) => pick(language, "ยกเลิก", "Cancel"),
+  disconnectConfirm: (language: Language) =>
+    pick(
+      language,
+      "คุณแน่ใจหรือไม่ว่าต้องการยกเลิกการเชื่อมต่อ?",
+      "Are you sure you want to disconnect?",
+    ),
+  connected: (language: Language) =>
+    pick(language, "กลุ่มที่เชื่อมต่อแล้ว", "Connected groups"),
+  loadError: (language: Language) =>
+    pick(
+      language,
+      "โหลดรายการกลุ่ม LINE ไม่สำเร็จ",
+      "Could not load the LINE groups",
+    ),
+  retry: (language: Language) => pick(language, "ลองอีกครั้ง", "Try again"),
+} as const;

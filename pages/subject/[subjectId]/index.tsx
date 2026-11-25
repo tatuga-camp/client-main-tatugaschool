@@ -41,7 +41,12 @@ import {
 } from "../../../data/languages";
 import { useSound } from "../../../hook";
 import useClickOutside from "../../../hook/useClickOutside";
-import { ErrorMessages, Language, StudentOnSubject } from "../../../interfaces";
+import {
+  ErrorMessages,
+  Language,
+  LineGroupOnSubject,
+  StudentOnSubject,
+} from "../../../interfaces";
 import {
   fullGradeLabel,
   shortGradeLabel,
@@ -50,11 +55,11 @@ import {
 import {
   useGetClassroom,
   useGetLanguage,
+  useGetLineGroups,
   useGetSchool,
   useGetStudentOnSubject,
   useGetSubject,
   useGetTeacherOnSubject,
-  useVerifyLineToken,
 } from "../../../react-query";
 import {
   getSignedURLTeacherService,
@@ -68,6 +73,17 @@ import {
   localStorageGetRemoveRandomStudents,
 } from "../../../utils";
 import { isSubjectArchived } from "../../../utils/subjectArchive";
+import {
+  browserSessionStorage,
+  dismissLineGroup,
+  nextPendingLineGroup,
+  readDismissedLineGroups,
+  shouldResetLineConnect,
+  subjectLinePopup,
+  toggleLineConnect,
+  verifiedLineGroups,
+  writeDismissedLineGroups,
+} from "../../../utils/lineGroup";
 import VerifyConnectLine from "../../../components/subject/VerifyConnectLine";
 import { FaCheck, FaLine } from "react-icons/fa6";
 import QrCodeLineConnect from "../../../components/subject/QrCodeLineConnect";
@@ -120,6 +136,47 @@ function Index({ subjectId }: Props) {
   const [loading, setLoading] = React.useState(false);
   const [triggerQRCode, setTriggerQRCode] = React.useState(false);
   const [triggerLineConnect, setTriggerLineConnect] = React.useState(false);
+  const lineGroups = useGetLineGroups(
+    { subjectId },
+    { refetchInterval: triggerLineConnect ? 15_000 : false },
+  );
+  // "Later" lasts for the browser session: the dismissals ("id:updateAt") start
+  // from sessionStorage and every change is written back. The server render and
+  // the first client render agree, because the link list has not loaded yet.
+  // When the group asks again the link's updateAt changes, so it is offered
+  // again.
+  const [dismissedLineGroups, setDismissedLineGroups] = React.useState<
+    string[]
+  >(() => readDismissedLineGroups(browserSessionStorage()));
+  const pendingLineGroup = nextPendingLineGroup(
+    lineGroups.data,
+    dismissedLineGroups,
+  );
+  const dismissPendingLineGroup = (
+    link: Pick<LineGroupOnSubject, "id" | "updateAt">,
+  ) => {
+    const next = dismissLineGroup(dismissedLineGroups, link);
+    if (next === dismissedLineGroups) return;
+    setDismissedLineGroups(next);
+    writeDismissedLineGroups(browserSessionStorage(), next);
+  };
+  // A pending link showed up while the QR popup was open: reset the popup's
+  // open state so it does not return after Confirm / Deny / Later, and the
+  // 15 s polling above stops. The same happens when the subject becomes
+  // archived: no LINE popup is shown there at all.
+  const resetLineConnect = shouldResetLineConnect(
+    triggerLineConnect,
+    pendingLineGroup,
+    archived,
+  );
+  const linePopup = subjectLinePopup({
+    archived,
+    isConnectOpen: triggerLineConnect,
+    pending: pendingLineGroup,
+  });
+  useEffect(() => {
+    if (resetLineConnect) setTriggerLineConnect(false);
+  }, [resetLineConnect]);
 
   const [triggerStopWatch, setTriggerStopWatch] = React.useState(false);
   const [isMenuVisible, setIsMenuVisible] = useState(false);
@@ -346,7 +403,7 @@ function Index({ subjectId }: Props) {
           />
         </PopupLayout>
       )}
-      {subject.data && triggerLineConnect && (
+      {subject.data && linePopup === "connect" && (
         <PopupLayout onClose={() => setTriggerLineConnect(false)}>
           <QrCodeLineConnect
             subjectId={subject.data.id}
@@ -376,16 +433,18 @@ function Index({ subjectId }: Props) {
           />
         </PopupLayout>
       )}
-      {subject.data &&
-        subject.data.verifyLineToken &&
-        subject.data.isVerifyLine === false && (
-          <PopupLayout onClose={() => {}}>
-            <VerifyConnectLine
-              subjectId={subject.data.id}
-              verifyLineToken={subject.data.verifyLineToken}
-            />
-          </PopupLayout>
-        )}
+      {subject.data && linePopup === "confirm" && pendingLineGroup && (
+        <PopupLayout
+          onClose={() => dismissPendingLineGroup(pendingLineGroup)}
+        >
+          <VerifyConnectLine
+            key={pendingLineGroup.id}
+            subjectId={subject.data.id}
+            link={pendingLineGroup}
+            onLater={() => dismissPendingLineGroup(pendingLineGroup)}
+          />
+        </PopupLayout>
+      )}
       <SubjectLayout
         setSelectFooter={setSelectFooter}
         selectFooter={selectFooter}
@@ -562,12 +621,15 @@ function Index({ subjectId }: Props) {
                   </button>
                   <button
                     onClick={() => {
-                      setTriggerLineConnect((prev) => !prev);
+                      setTriggerLineConnect((prev) =>
+                        toggleLineConnect(prev, archived),
+                      );
                     }}
+                    disabled={archived}
                     aria-label="QR Code Subject"
-                    className="flex w-full max-w-32 items-center justify-center gap-1 rounded-2xl bg-[#00B900] px-2 py-1 text-xs text-white active:scale-110 sm:w-32"
+                    className="flex w-full max-w-32 items-center justify-center gap-1 rounded-2xl bg-[#00B900] px-2 py-1 text-xs text-white active:scale-110 disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100 sm:w-32"
                   >
-                    {subject.data?.isVerifyLine === true ? (
+                    {verifiedLineGroups(lineGroups.data).length > 0 ? (
                       <>
                         CONNECTED <FaCheck />
                       </>

@@ -1,6 +1,7 @@
 import {
   Classroom,
   EducationYear,
+  LineGroupOnSubject,
   PublicProgressLevel,
   Subject,
   TeacherOnSubject,
@@ -200,7 +201,7 @@ export type RequestVerifyLineTokenService = {
 
 export async function VerifyLineTokenService(
   input: RequestVerifyLineTokenService,
-): Promise<Subject> {
+): Promise<LineGroupOnSubject> {
   try {
     const response = await axiosInstance({
       method: "PATCH",

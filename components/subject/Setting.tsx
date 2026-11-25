@@ -33,6 +33,7 @@ import Switch from "../common/Switch";
 import ListMembers from "../member/ListMembers";
 import SubjectInfomation from "./SubjectInfomation";
 import SubjectPermission from "./SubjectPermission";
+import LineGroupSettings from "./LineGroupSettings";
 import { byStudentNumber } from "../../utils/studentRoster";
 
 type Props = {
@@ -270,6 +271,13 @@ function Setting({ subjectId, schoolId }: Props) {
           isPending={updateSubject.isPending}
           disabled={subjectArchived}
         />
+
+        <div id="line-groups">
+          <LineGroupSettings
+            subjectId={subjectId}
+            disabled={subjectArchived}
+          />
+        </div>
 
         <div className="mt-5 flex min-h-80 flex-col gap-5 rounded-2xl border bg-white p-4">
           <h2 className="border-b py-3 text-base font-medium sm:text-lg">
