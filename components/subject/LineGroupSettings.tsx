@@ -16,7 +16,11 @@ import {
   useUpdateLineGroup,
   useVerifyLineToken,
 } from "../../react-query";
-import { lineGroupDisplayName } from "../../utils/lineGroup";
+import {
+  lineGroupDisplayName,
+  pendingLineGroupIds,
+  shouldResetSettingsConnect,
+} from "../../utils/lineGroup";
 import Switch from "../common/Switch";
 import PopupLayout from "../layout/PopupLayout";
 import QrCodeLineConnect from "./QrCodeLineConnect";
@@ -222,15 +226,26 @@ function LineGroupSettings({ subjectId, disabled = false }: Props) {
   const links = lineGroups.data ?? [];
 
   // Once the code typed in LINE shows up as a pending link, the QR popup has
-  // done its job: close it so the confirm step is not hidden behind it.
-  const pendingCount = links.filter((link) => !link.isVerify).length;
-  const previousPendingCount = useRef(pendingCount);
+  // done its job: reset it so the confirm step is not hidden behind it. Ids
+  // are compared, not counts, because one pending link can replace another in
+  // a single refresh. The popup is also reset when the section becomes
+  // disabled, so it does not come back if the subject is restored.
+  const pendingIds = pendingLineGroupIds(links);
+  const pendingIdsKey = JSON.stringify(pendingIds);
+  const previousPendingIds = useRef(pendingIds);
   useEffect(() => {
-    if (pendingCount > previousPendingCount.current) {
+    const currentPendingIds: string[] = JSON.parse(pendingIdsKey);
+    if (
+      shouldResetSettingsConnect({
+        previousPendingIds: previousPendingIds.current,
+        pendingIds: currentPendingIds,
+        disabled,
+      })
+    ) {
       setTriggerConnect(false);
     }
-    previousPendingCount.current = pendingCount;
-  }, [pendingCount]);
+    previousPendingIds.current = currentPendingIds;
+  }, [pendingIdsKey, disabled]);
 
   const connectButton = (
     <button

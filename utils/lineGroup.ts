@@ -141,3 +141,23 @@ export function subjectLinePopup(state: {
 export function toggleLineConnect(isOpen: boolean, archived: boolean): boolean {
   return archived ? false : !isOpen;
 }
+
+// The ids of the links still waiting for confirmation, in list order.
+export function pendingLineGroupIds(
+  links: LineGroupOnSubject[] | undefined,
+): string[] {
+  return (links ?? []).filter((link) => !link.isVerify).map((link) => link.id);
+}
+
+// The QR popup inside the settings section resets its open state when a
+// pending link id appears that was not in the previous list, and when the
+// section becomes disabled (archived subject). Ids are compared, not counts:
+// one pending link can replace another in a single refresh.
+export function shouldResetSettingsConnect(state: {
+  previousPendingIds: string[];
+  pendingIds: string[];
+  disabled: boolean;
+}): boolean {
+  if (state.disabled) return true;
+  return state.pendingIds.some((id) => !state.previousPendingIds.includes(id));
+}

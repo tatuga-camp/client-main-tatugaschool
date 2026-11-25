@@ -8,7 +8,9 @@ import {
   lineGroupDismissalKey,
   lineGroupDisplayName,
   nextPendingLineGroup,
+  pendingLineGroupIds,
   readDismissedLineGroups,
+  shouldResetSettingsConnect,
   shouldResetLineConnect,
   subjectLinePopup,
   toggleLineConnect,
@@ -736,4 +738,108 @@ test('"Later", then the code is typed again: the confirm popup returns, and a se
     storage.items.get("line-group-dismissed"),
     '["p1:2026-11-25T09:15:00.000Z"]',
   );
+});
+
+// ---- B4: the QR popup inside the settings section resets itself ----
+
+const verified = (id: string) =>
+  link({ id, isVerify: true, verifyToken: null, verifiedAt: AT });
+
+test("settings connect popup: pendingLineGroupIds lists the ids of the links that are not verified, in list order", () => {
+  assert.deepEqual(
+    pendingLineGroupIds([
+      verified("v1"),
+      link({ id: "p2" }),
+      link({ id: "p1", verifyToken: null }),
+    ]),
+    ["p2", "p1"],
+  );
+  assert.deepEqual(pendingLineGroupIds([]), []);
+  assert.deepEqual(pendingLineGroupIds(undefined), []);
+});
+
+test("settings connect popup: a pending link id that was not in the previous list resets it", () => {
+  assert.equal(
+    shouldResetSettingsConnect({
+      previousPendingIds: [],
+      pendingIds: ["p1"],
+      disabled: false,
+    }),
+    true,
+  );
+  assert.equal(
+    shouldResetSettingsConnect({
+      previousPendingIds: ["p1"],
+      pendingIds: ["p1", "p2"],
+      disabled: false,
+    }),
+    true,
+  );
+});
+
+test("settings connect popup: one pending link replaced by another (same count, new id) resets it", () => {
+  // At the cap of 3 pending links the server drops the oldest for the new one,
+  // and a link can be denied in the same refresh that brings a new one.
+  assert.equal(
+    shouldResetSettingsConnect({
+      previousPendingIds: ["p1", "p2", "p3"],
+      pendingIds: ["p2", "p3", "p4"],
+      disabled: false,
+    }),
+    true,
+  );
+  assert.equal(
+    shouldResetSettingsConnect({
+      previousPendingIds: ["p1"],
+      pendingIds: ["p2"],
+      disabled: false,
+    }),
+    true,
+  );
+});
+
+test("settings connect popup: the same ids, fewer ids or a different order do not reset it", () => {
+  for (const [previousPendingIds, pendingIds] of [
+    [[], []],
+    [["p1"], ["p1"]],
+    [["p1", "p2"], ["p2", "p1"]],
+    [["p1", "p2"], ["p1"]],
+    [["p1"], []],
+  ]) {
+    assert.equal(
+      shouldResetSettingsConnect({
+        previousPendingIds,
+        pendingIds,
+        disabled: false,
+      }),
+      false,
+      JSON.stringify([previousPendingIds, pendingIds]),
+    );
+  }
+});
+
+test("settings connect popup: a pending link that becomes verified does not reset it", () => {
+  const before = pendingLineGroupIds([link({ id: "p1" })]);
+  const after = pendingLineGroupIds([verified("p1")]);
+  assert.equal(
+    shouldResetSettingsConnect({
+      previousPendingIds: before,
+      pendingIds: after,
+      disabled: false,
+    }),
+    false,
+  );
+});
+
+test("settings connect popup: a disabled section (archived subject) resets it, whatever is pending", () => {
+  for (const pendingIds of [[], ["p1"]]) {
+    assert.equal(
+      shouldResetSettingsConnect({
+        previousPendingIds: pendingIds,
+        pendingIds,
+        disabled: true,
+      }),
+      true,
+    );
+  }
 });
