@@ -2,9 +2,12 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { LineGroupOnSubject } from "../interfaces/LineGroupOnSubject";
 import {
+  LINE_GROUP_DISMISSED_KEY,
   lineGroupDisplayName,
   nextPendingLineGroup,
+  readDismissedLineGroups,
   verifiedLineGroups,
+  writeDismissedLineGroups,
 } from "./lineGroup";
 
 function link(overrides: Partial<LineGroupOnSubject>): LineGroupOnSubject {
@@ -239,4 +242,91 @@ test("nextPendingLineGroup: a dismissed link that the server later replaced (new
   // The 4th pending request replaces the oldest: same group, new link id.
   const replaced = [link({ id: "link-new", lineGroupId: "C123a91f" })];
   assert.equal(nextPendingLineGroup(replaced, ["link-old"])?.id, "link-new");
+});
+
+// ---- "Later" lasts for the browser session (sessionStorage) ----
+
+function memoryStorage(initial: Record<string, string> = {}) {
+  const items = new Map(Object.entries(initial));
+  return {
+    items,
+    getItem: (key: string) => items.get(key) ?? null,
+    setItem: (key: string, value: string) => {
+      items.set(key, value);
+    },
+  };
+}
+
+const brokenStorage = {
+  getItem(): string | null {
+    throw new Error("SecurityError: storage is not available");
+  },
+  setItem(): void {
+    throw new Error("QuotaExceededError");
+  },
+};
+
+test("dismissed ids: the storage key is line-group-dismissed", () => {
+  assert.equal(LINE_GROUP_DISMISSED_KEY, "line-group-dismissed");
+});
+
+test("dismissed ids: written as a JSON array of ids and read back", () => {
+  const storage = memoryStorage();
+  writeDismissedLineGroups(storage, ["a", "b"]);
+  assert.equal(storage.items.get("line-group-dismissed"), '["a","b"]');
+  assert.deepEqual(readDismissedLineGroups(storage), ["a", "b"]);
+});
+
+test("dismissed ids: nothing stored reads as an empty list", () => {
+  assert.deepEqual(readDismissedLineGroups(memoryStorage()), []);
+});
+
+test("dismissed ids: a dismissed link stays dismissed after a reload (new state, same storage)", () => {
+  const storage = memoryStorage();
+  const links = [
+    link({ id: "p1", createAt: "2026-11-25T09:00:00.000Z" }),
+    link({ id: "p2", createAt: "2026-11-25T10:00:00.000Z" }),
+  ];
+  writeDismissedLineGroups(storage, ["p1"]);
+  // After a reload the page starts from what the session stored.
+  const afterReload = readDismissedLineGroups(storage);
+  assert.equal(nextPendingLineGroup(links, afterReload)?.id, "p2");
+});
+
+test("dismissed ids: no storage at all (server render, blocked storage) reads empty and writes nothing", () => {
+  for (const storage of [null, undefined]) {
+    assert.deepEqual(readDismissedLineGroups(storage), []);
+    assert.doesNotThrow(() => writeDismissedLineGroups(storage, ["a"]));
+  }
+});
+
+test("dismissed ids: a storage that throws is treated as empty and never breaks the page", () => {
+  assert.deepEqual(readDismissedLineGroups(brokenStorage), []);
+  assert.doesNotThrow(() => writeDismissedLineGroups(brokenStorage, ["a"]));
+});
+
+test("dismissed ids: a corrupt or foreign value reads as empty", () => {
+  for (const value of ["", "not json", "{", '{"a":1}', '"a"', "null", "42"]) {
+    const storage = memoryStorage({ "line-group-dismissed": value });
+    assert.deepEqual(readDismissedLineGroups(storage), [], value);
+  }
+});
+
+test("dismissed ids: non-string entries are dropped, strings are kept", () => {
+  const storage = memoryStorage({
+    "line-group-dismissed": '["a", 1, null, {"id":"x"}, "b", ""]',
+  });
+  assert.deepEqual(readDismissedLineGroups(storage), ["a", "b"]);
+});
+
+test("dismissed ids: writing removes duplicates and keeps the order", () => {
+  const storage = memoryStorage();
+  writeDismissedLineGroups(storage, ["a", "b", "a"]);
+  assert.equal(storage.items.get("line-group-dismissed"), '["a","b"]');
+});
+
+test("dismissed ids: other keys in the same storage are left alone", () => {
+  const storage = memoryStorage({ other: "keep" });
+  writeDismissedLineGroups(storage, ["a"]);
+  assert.equal(storage.items.get("other"), "keep");
 });

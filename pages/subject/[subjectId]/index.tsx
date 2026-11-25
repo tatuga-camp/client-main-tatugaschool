@@ -69,8 +69,11 @@ import {
 } from "../../../utils";
 import { isSubjectArchived } from "../../../utils/subjectArchive";
 import {
+  browserSessionStorage,
   nextPendingLineGroup,
+  readDismissedLineGroups,
   verifiedLineGroups,
+  writeDismissedLineGroups,
 } from "../../../utils/lineGroup";
 import VerifyConnectLine from "../../../components/subject/VerifyConnectLine";
 import { FaCheck, FaLine } from "react-icons/fa6";
@@ -128,10 +131,19 @@ function Index({ subjectId }: Props) {
     { subjectId },
     { refetchInterval: triggerLineConnect ? 15_000 : false },
   );
-  const [dismissedIds, setDismissedIds] = React.useState<string[]>([]);
+  // "Later" lasts for the browser session: the dismissed ids start from
+  // sessionStorage and every change is written back. The server render and the
+  // first client render agree, because the link list has not loaded yet.
+  const [dismissedIds, setDismissedIds] = React.useState<string[]>(() =>
+    readDismissedLineGroups(browserSessionStorage()),
+  );
   const pendingLineGroup = nextPendingLineGroup(lineGroups.data, dismissedIds);
-  const dismissPendingLineGroup = (id: string) =>
-    setDismissedIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+  const dismissPendingLineGroup = (id: string) => {
+    if (dismissedIds.includes(id)) return;
+    const next = [...dismissedIds, id];
+    setDismissedIds(next);
+    writeDismissedLineGroups(browserSessionStorage(), next);
+  };
 
   const [triggerStopWatch, setTriggerStopWatch] = React.useState(false);
   const [isMenuVisible, setIsMenuVisible] = useState(false);
