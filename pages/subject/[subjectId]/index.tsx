@@ -50,11 +50,11 @@ import {
 import {
   useGetClassroom,
   useGetLanguage,
+  useGetLineGroups,
   useGetSchool,
   useGetStudentOnSubject,
   useGetSubject,
   useGetTeacherOnSubject,
-  useVerifyLineToken,
 } from "../../../react-query";
 import {
   getSignedURLTeacherService,
@@ -68,6 +68,10 @@ import {
   localStorageGetRemoveRandomStudents,
 } from "../../../utils";
 import { isSubjectArchived } from "../../../utils/subjectArchive";
+import {
+  nextPendingLineGroup,
+  verifiedLineGroups,
+} from "../../../utils/lineGroup";
 import VerifyConnectLine from "../../../components/subject/VerifyConnectLine";
 import { FaCheck, FaLine } from "react-icons/fa6";
 import QrCodeLineConnect from "../../../components/subject/QrCodeLineConnect";
@@ -120,6 +124,14 @@ function Index({ subjectId }: Props) {
   const [loading, setLoading] = React.useState(false);
   const [triggerQRCode, setTriggerQRCode] = React.useState(false);
   const [triggerLineConnect, setTriggerLineConnect] = React.useState(false);
+  const lineGroups = useGetLineGroups(
+    { subjectId },
+    { refetchInterval: triggerLineConnect ? 15_000 : false },
+  );
+  const [dismissedIds, setDismissedIds] = React.useState<string[]>([]);
+  const pendingLineGroup = nextPendingLineGroup(lineGroups.data, dismissedIds);
+  const dismissPendingLineGroup = (id: string) =>
+    setDismissedIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
 
   const [triggerStopWatch, setTriggerStopWatch] = React.useState(false);
   const [isMenuVisible, setIsMenuVisible] = useState(false);
@@ -346,7 +358,7 @@ function Index({ subjectId }: Props) {
           />
         </PopupLayout>
       )}
-      {subject.data && triggerLineConnect && (
+      {subject.data && triggerLineConnect && !pendingLineGroup && (
         <PopupLayout onClose={() => setTriggerLineConnect(false)}>
           <QrCodeLineConnect
             subjectId={subject.data.id}
@@ -376,16 +388,18 @@ function Index({ subjectId }: Props) {
           />
         </PopupLayout>
       )}
-      {subject.data &&
-        subject.data.verifyLineToken &&
-        subject.data.isVerifyLine === false && (
-          <PopupLayout onClose={() => {}}>
-            <VerifyConnectLine
-              subjectId={subject.data.id}
-              verifyLineToken={subject.data.verifyLineToken}
-            />
-          </PopupLayout>
-        )}
+      {subject.data && pendingLineGroup && (
+        <PopupLayout
+          onClose={() => dismissPendingLineGroup(pendingLineGroup.id)}
+        >
+          <VerifyConnectLine
+            key={pendingLineGroup.id}
+            subjectId={subject.data.id}
+            link={pendingLineGroup}
+            onLater={() => dismissPendingLineGroup(pendingLineGroup.id)}
+          />
+        </PopupLayout>
+      )}
       <SubjectLayout
         setSelectFooter={setSelectFooter}
         selectFooter={selectFooter}
@@ -567,7 +581,7 @@ function Index({ subjectId }: Props) {
                     aria-label="QR Code Subject"
                     className="flex w-full max-w-32 items-center justify-center gap-1 rounded-2xl bg-[#00B900] px-2 py-1 text-xs text-white active:scale-110 sm:w-32"
                   >
-                    {subject.data?.isVerifyLine === true ? (
+                    {verifiedLineGroups(lineGroups.data).length > 0 ? (
                       <>
                         CONNECTED <FaCheck />
                       </>

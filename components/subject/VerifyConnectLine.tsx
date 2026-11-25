@@ -1,25 +1,31 @@
 import React from "react";
 import Swal from "sweetalert2";
 import { useGetLanguage, useVerifyLineToken } from "../../react-query";
-import { ErrorMessages } from "../../interfaces";
+import { ErrorMessages, LineGroupOnSubject } from "../../interfaces";
 import { FaLine, FaSpinner } from "react-icons/fa";
 import Image from "next/image";
 import { defaultCanvas } from "../../data";
 import { useRouter } from "next/router";
+import { lineGroupLanguage } from "../../data/languages";
+import { lineGroupDisplayName } from "../../utils/lineGroup";
 
 type Props = {
-  verifyLineToken: string;
+  link: LineGroupOnSubject;
   subjectId: string;
+  onLater: () => void;
 };
-function VerifyConnectLine({ verifyLineToken, subjectId }: Props) {
+function VerifyConnectLine({ link, subjectId, onLater }: Props) {
   const language = useGetLanguage();
+  const lang = language.data ?? "en";
+  const groupName = lineGroupDisplayName(link, lang);
   const verifyLineTokenMutation = useVerifyLineToken();
   const router = useRouter();
 
   const handleVerifyLineToken = async (confirm: boolean) => {
+    if (!link.verifyToken) return;
     try {
       await verifyLineTokenMutation.mutateAsync({
-        body: { token: verifyLineToken, confirm, subjectId },
+        body: { token: link.verifyToken, confirm, subjectId },
       });
 
       if (confirm) {
@@ -39,7 +45,9 @@ function VerifyConnectLine({ verifyLineToken, subjectId }: Props) {
           cancelButtonText: language.data === "th" ? "ปิด" : "Close",
         }).then((result) => {
           if (result.isConfirmed) {
-            router.push(`/subject/${subjectId}?menu=SettingSubject#permission`);
+            router.push(
+              `/subject/${subjectId}?menu=SettingSubject#line-groups`,
+            );
           }
         });
       } else {
@@ -85,11 +93,18 @@ function VerifyConnectLine({ verifyLineToken, subjectId }: Props) {
             ? "เชื่อมต่อกลุ่มไลน์"
             : "Connect to Line Group"}
         </h2>
-        <p className="text-center text-sm text-gray-500">
-          {language.data === "th"
-            ? "คุณต้องการเชื่อมต่อรายวิชานี้กับกลุ่มไลน์หรือไม่?"
-            : "Do you want to connect this subject to the Line Group?"}
+        <p
+          title={groupName}
+          className="line-clamp-3 w-full break-words text-center text-sm text-gray-500"
+        >
+          {lineGroupLanguage.confirmQuestion(lang, groupName)}
         </p>
+        <div
+          role="alert"
+          className="mt-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-center text-xs text-amber-800"
+        >
+          {lineGroupLanguage.warning(lang)}
+        </div>
         <div className="mt-2 rounded-lg bg-blue-50 p-3 text-center text-xs text-blue-600">
           {language.data === "th"
             ? "หมายเหตุ: หลังจากเชื่อมต่อสำเร็จแล้ว กรุณาไปที่หน้าตั้งค่าเพื่อเปิดหรือปิดการแจ้งเตือนต่างๆ ตามที่ต้องการ"
@@ -116,7 +131,14 @@ function VerifyConnectLine({ verifyLineToken, subjectId }: Props) {
           disabled={verifyLineTokenMutation.isPending}
           className="w-full rounded-xl bg-gray-100 py-3 font-semibold text-gray-600 transition-all hover:bg-gray-200 active:scale-95 disabled:opacity-50 disabled:active:scale-100"
         >
-          {language.data === "th" ? "ยกเลิก" : "Deny"}
+          {lineGroupLanguage.deny(lang)}
+        </button>
+        <button
+          onClick={onLater}
+          disabled={verifyLineTokenMutation.isPending}
+          className="w-full py-1 text-sm font-medium text-gray-500 underline-offset-2 transition-colors hover:text-gray-700 hover:underline disabled:opacity-50"
+        >
+          {lineGroupLanguage.later(lang)}
         </button>
       </div>
     </div>

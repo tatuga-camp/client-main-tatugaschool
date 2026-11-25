@@ -1,14 +1,13 @@
-import React, { useState } from "react";
+import React from "react";
 import { FaLine } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
-import {
-  useGetLanguage,
-  useGetSubject,
-  useVerifyLineToken,
-} from "../../react-query";
-import { ErrorMessages } from "../../interfaces";
-import Swal from "sweetalert2";
+import { useGetLanguage, useGetLineGroups } from "../../react-query";
 import { useRouter } from "next/router";
+import { lineGroupLanguage } from "../../data/languages";
+import {
+  lineGroupDisplayName,
+  verifiedLineGroups,
+} from "../../utils/lineGroup";
 
 type Props = {
   onClose?: () => void;
@@ -17,26 +16,11 @@ type Props = {
 
 function QrCodeLineConnect({ onClose, subjectId }: Props) {
   const language = useGetLanguage();
-  const subject = useGetSubject({ subjectId });
-  const verifyLineTokenMutation = useVerifyLineToken();
-  const [isConfirmingDisconnect, setIsConfirmingDisconnect] = useState(false);
+  const lang = language.data ?? "en";
+  const lineGroups = useGetLineGroups({ subjectId });
+  const connected = verifiedLineGroups(lineGroups.data);
   const router = useRouter();
 
-  const handleVerifyLineToken = async () => {
-    try {
-      await verifyLineTokenMutation.mutateAsync({
-        body: { token: subjectId, confirm: false, subjectId },
-      });
-    } catch (error: any) {
-      console.log(error);
-      let result = error as ErrorMessages;
-      Swal.fire({
-        title: result.error ? result.error : "Something Went Wrong",
-        text: result.message?.toString(),
-        icon: "error",
-      });
-    }
-  };
   return (
     <div className="relative mx-auto flex w-full max-w-sm flex-col items-center gap-6 rounded-3xl bg-white p-8 shadow-xl">
       {onClose && (
@@ -48,139 +32,102 @@ function QrCodeLineConnect({ onClose, subjectId }: Props) {
         </button>
       )}
 
-      {subject.data?.isVerifyLine ? (
-        <>
-          <div className="flex flex-col items-center gap-2">
-            <div className="mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-[#00B900] shadow-md">
-              <FaLine className="text-4xl text-white" />
-            </div>
-            <h2 className="text-center text-2xl font-bold text-gray-800">
-              {language.data === "th"
-                ? "เชื่อมต่อกลุ่มไลน์สำเร็จ"
-                : "Connected to Line Group"}
-            </h2>
-            <p className="text-center text-sm text-gray-500">
-              {language.data === "th"
-                ? "คุณได้เชื่อมต่อกลุ่มไลน์สำหรับรายวิชานี้เรียบร้อยแล้ว"
-                : "You have successfully connected the Line group for this subject."}
-            </p>
-            <div className="mt-2 rounded-lg bg-blue-50 p-3 text-center text-xs text-blue-600">
-              {language.data === "th"
-                ? "หมายเหตุ: กรุณาไปที่หน้าตั้งค่าเพื่อเปิดหรือปิดการแจ้งเตือนต่างๆ ตามที่ต้องการ"
-                : "Note: Please go to the settings page to toggle notifications on or off as needed."}
-            </div>
-            <button
-              onClick={() => {
-                router.push(
-                  `/subject/${subjectId}?menu=SettingSubject#permission`,
-                );
-                if (onClose) onClose();
-              }}
-              className="mt-2 w-full rounded-xl bg-blue-500 py-3 font-semibold text-white shadow-sm transition-colors hover:bg-blue-600"
-            >
-              {language.data === "th"
-                ? "ไปที่หน้าตั้งค่าการแจ้งเตือน"
-                : "Go to Notification Settings"}
-            </button>
-          </div>
-          {isConfirmingDisconnect ? (
-            <div className="flex w-full flex-col gap-3">
-              <p className="text-center text-sm font-medium text-red-500">
-                {language.data === "th"
-                  ? "คุณแน่ใจหรือไม่ว่าต้องการยกเลิกการเชื่อมต่อ?"
-                  : "Are you sure you want to disconnect?"}
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setIsConfirmingDisconnect(false)}
-                  disabled={verifyLineTokenMutation.isPending}
-                  className="w-full rounded-xl bg-gray-100 py-3 font-semibold text-gray-600 shadow-sm transition-colors hover:bg-gray-200 disabled:opacity-50"
+      {connected.length > 0 && (
+        <div className="flex w-full flex-col gap-3 rounded-2xl border border-gray-100 bg-gray-50 p-4">
+          <h3 className="text-sm font-semibold text-gray-800">
+            {lineGroupLanguage.connected(lang)} ({connected.length})
+          </h3>
+          <ul className="flex max-h-32 flex-col gap-2 overflow-y-auto">
+            {connected.map((link) => {
+              const name = lineGroupDisplayName(link, lang);
+              return (
+                <li
+                  key={link.id}
+                  className="flex min-w-0 items-center gap-2 text-sm text-gray-600"
                 >
-                  {language.data === "th" ? "ยกเลิก" : "Cancel"}
-                </button>
-                <button
-                  onClick={handleVerifyLineToken}
-                  disabled={verifyLineTokenMutation.isPending}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-red-500 py-3 font-semibold text-white shadow-sm transition-colors hover:bg-red-600 disabled:opacity-50"
-                >
-                  {verifyLineTokenMutation.isPending ? (
-                    <span className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
-                  ) : null}
-                  {language.data === "th" ? "ยืนยัน" : "Confirm"}
-                </button>
-              </div>
-            </div>
-          ) : (
-            <button
-              onClick={() => setIsConfirmingDisconnect(true)}
-              className="w-full rounded-xl bg-red-500 py-3 font-semibold text-white shadow-sm transition-colors hover:bg-red-600"
-            >
-              {language.data === "th" ? "ยกเลิกการเชื่อมต่อ" : "Disconnect"}
-            </button>
-          )}
-        </>
-      ) : (
-        <>
-          <div className="flex flex-col items-center gap-2">
-            <div className="mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-[#00B900] shadow-md">
-              <FaLine className="text-4xl text-white" />
-            </div>
-            <h2 className="text-center text-2xl font-bold text-gray-800">
-              {language.data === "th"
-                ? "เชื่อมต่อกลุ่มไลน์"
-                : "Connect to Line Group"}
-            </h2>
-            <p className="text-center text-sm text-gray-500">
-              {language.data === "th"
-                ? "ทำตามขั้นตอนเพื่อเชื่อมต่อรายวิชาของคุณ"
-                : "Follow these steps to connect your subject"}
-            </p>
-          </div>
-
-          <div className="relative flex h-48 w-48 items-center justify-center overflow-hidden rounded-xl border-2 border-gray-100 bg-white p-2 shadow-sm">
-            <img
-              src="https://qr-official.line.me/sid/L/879zapgu.png"
-              className="h-full w-full object-contain"
-              alt="Line QR Code"
-            />
-          </div>
-
-          <div className="w-full rounded-2xl border border-gray-100 bg-gray-50 p-5">
-            <ol className="flex flex-col gap-4 text-sm text-gray-600">
-              <li className="flex items-start gap-3">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#00B900] text-xs font-bold text-white shadow-sm">
-                  1
-                </span>
-                <span className="pt-0.5 leading-snug">
-                  {language.data === "th"
-                    ? "สแกนคิวอาร์โค้ดเพื่อเพิ่มเพื่อน"
-                    : "Scan QR code to add friends"}
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#00B900] text-xs font-bold text-white shadow-sm">
-                  2
-                </span>
-                <span className="pt-0.5 leading-snug">
-                  {language.data === "th"
-                    ? "เชิญ Tatuga School เข้ากลุ่มแชท"
-                    : "Invite Tatuga School to group chat"}
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#00B900] text-xs font-bold text-white shadow-sm">
-                  3
-                </span>
-                <span className="pt-0.5 leading-snug">
-                  {language.data === "th"
-                    ? "เฉพาะ Premium Plan และ Enterprise plan เท่านั้นที่สามารถใช้งานได้"
-                    : "Only Premium Plan and Enterprise plan will work"}
-                </span>
-              </li>
-            </ol>
-          </div>
-        </>
+                  <span
+                    aria-hidden
+                    className="h-2 w-2 shrink-0 rounded-full bg-[#00B900]"
+                  />
+                  <span title={name} className="truncate">
+                    {name}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+          <button
+            onClick={() => {
+              router.push(
+                `/subject/${subjectId}?menu=SettingSubject#line-groups`,
+              );
+              if (onClose) onClose();
+            }}
+            className="w-full rounded-xl bg-blue-500 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-600"
+          >
+            {lineGroupLanguage.manageInSettings(lang)}
+          </button>
+        </div>
       )}
+
+      <div className="flex flex-col items-center gap-2">
+        <div className="mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-[#00B900] shadow-md">
+          <FaLine className="text-4xl text-white" />
+        </div>
+        <h2 className="text-center text-2xl font-bold text-gray-800">
+          {language.data === "th"
+            ? "เชื่อมต่อกลุ่มไลน์"
+            : "Connect to Line Group"}
+        </h2>
+        <p className="text-center text-sm text-gray-500">
+          {language.data === "th"
+            ? "ทำตามขั้นตอนเพื่อเชื่อมต่อรายวิชาของคุณ"
+            : "Follow these steps to connect your subject"}
+        </p>
+      </div>
+
+      <div className="relative flex h-48 w-48 items-center justify-center overflow-hidden rounded-xl border-2 border-gray-100 bg-white p-2 shadow-sm">
+        <img
+          src="https://qr-official.line.me/sid/L/879zapgu.png"
+          className="h-full w-full object-contain"
+          alt="Line QR Code"
+        />
+      </div>
+
+      <div className="w-full rounded-2xl border border-gray-100 bg-gray-50 p-5">
+        <ol className="flex flex-col gap-4 text-sm text-gray-600">
+          <li className="flex items-start gap-3">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#00B900] text-xs font-bold text-white shadow-sm">
+              1
+            </span>
+            <span className="pt-0.5 leading-snug">
+              {language.data === "th"
+                ? "สแกนคิวอาร์โค้ดเพื่อเพิ่มเพื่อน"
+                : "Scan QR code to add friends"}
+            </span>
+          </li>
+          <li className="flex items-start gap-3">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#00B900] text-xs font-bold text-white shadow-sm">
+              2
+            </span>
+            <span className="pt-0.5 leading-snug">
+              {language.data === "th"
+                ? "เชิญ Tatuga School เข้ากลุ่มแชท"
+                : "Invite Tatuga School to group chat"}
+            </span>
+          </li>
+          <li className="flex items-start gap-3">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#00B900] text-xs font-bold text-white shadow-sm">
+              3
+            </span>
+            <span className="pt-0.5 leading-snug">
+              {language.data === "th"
+                ? "เฉพาะ Premium Plan และ Enterprise plan เท่านั้นที่สามารถใช้งานได้"
+                : "Only Premium Plan and Enterprise plan will work"}
+            </span>
+          </li>
+        </ol>
+      </div>
     </div>
   );
 }
