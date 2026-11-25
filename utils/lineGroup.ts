@@ -76,3 +76,14 @@ export function writeDismissedLineGroups(
     // Storage unavailable or full: "Later" then lasts until the page reloads.
   }
 }
+
+// The connect (QR) popup has done its job once the code typed in LINE shows up
+// as a pending link. Its open state must then be reset, not just hidden behind
+// the confirm popup, or it would come back after Confirm / Deny / Later and
+// keep the 15 s polling running.
+export function shouldResetLineConnect(
+  isOpen: boolean,
+  pending: LineGroupOnSubject | null,
+): boolean {
+  return isOpen && pending !== null;
+}

@@ -72,6 +72,7 @@ import {
   browserSessionStorage,
   nextPendingLineGroup,
   readDismissedLineGroups,
+  shouldResetLineConnect,
   verifiedLineGroups,
   writeDismissedLineGroups,
 } from "../../../utils/lineGroup";
@@ -144,6 +145,16 @@ function Index({ subjectId }: Props) {
     setDismissedIds(next);
     writeDismissedLineGroups(browserSessionStorage(), next);
   };
+  // A pending link showed up while the QR popup was open: reset the popup's
+  // open state so it does not return after Confirm / Deny / Later, and the
+  // 15 s polling above stops.
+  const resetLineConnect = shouldResetLineConnect(
+    triggerLineConnect,
+    pendingLineGroup,
+  );
+  useEffect(() => {
+    if (resetLineConnect) setTriggerLineConnect(false);
+  }, [resetLineConnect]);
 
   const [triggerStopWatch, setTriggerStopWatch] = React.useState(false);
   const [isMenuVisible, setIsMenuVisible] = useState(false);

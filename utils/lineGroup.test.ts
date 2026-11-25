@@ -6,6 +6,7 @@ import {
   lineGroupDisplayName,
   nextPendingLineGroup,
   readDismissedLineGroups,
+  shouldResetLineConnect,
   verifiedLineGroups,
   writeDismissedLineGroups,
 } from "./lineGroup";
@@ -329,4 +330,39 @@ test("dismissed ids: other keys in the same storage are left alone", () => {
   const storage = memoryStorage({ other: "keep" });
   writeDismissedLineGroups(storage, ["a"]);
   assert.equal(storage.items.get("other"), "keep");
+});
+
+// ---- the connect (QR) popup closes itself once a pending link shows up ----
+
+test("connect popup: an open popup is reset as soon as there is a pending link to confirm", () => {
+  assert.equal(shouldResetLineConnect(true, link({ id: "p1" })), true);
+});
+
+test("connect popup: it stays open while nothing is waiting for confirmation", () => {
+  assert.equal(shouldResetLineConnect(true, null), false);
+});
+
+test("connect popup: a closed popup needs no reset, with or without a pending link", () => {
+  assert.equal(shouldResetLineConnect(false, null), false);
+  assert.equal(shouldResetLineConnect(false, link({ id: "p1" })), false);
+});
+
+test("connect popup: once reset it does not come back after Confirm, Deny or Later", () => {
+  const pending = link({ id: "p1" });
+  // The teacher opens the QR popup, then the code typed in LINE arrives.
+  let open = true;
+  if (shouldResetLineConnect(open, nextPendingLineGroup([pending], []))) {
+    open = false;
+  }
+  assert.equal(open, false);
+  // Later: the link is dismissed. Confirm / Deny: the link leaves the pending list.
+  for (const next of [
+    nextPendingLineGroup([pending], ["p1"]),
+    nextPendingLineGroup([link({ id: "p1", isVerify: true })], []),
+    nextPendingLineGroup([], []),
+  ]) {
+    assert.equal(next, null);
+    assert.equal(open, false);
+    assert.equal(shouldResetLineConnect(open, next), false);
+  }
 });
