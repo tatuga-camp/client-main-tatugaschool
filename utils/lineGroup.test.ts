@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { LineGroupOnSubject } from "../interfaces/LineGroupOnSubject";
 import {
   LINE_GROUP_DISMISSED_KEY,
+  browserSessionStorage,
   lineGroupDisplayName,
   nextPendingLineGroup,
   readDismissedLineGroups,
@@ -365,4 +366,200 @@ test("connect popup: once reset it does not come back after Confirm, Deny or Lat
     assert.equal(open, false);
     assert.equal(shouldResetLineConnect(open, next), false);
   }
+});
+
+// ---- more on "Later" for the browser session ----
+
+test("browserSessionStorage: null where there is no window (server render)", () => {
+  assert.equal(typeof (globalThis as any).window, "undefined");
+  assert.equal(browserSessionStorage(), null);
+});
+
+test("browserSessionStorage: the tab's sessionStorage in a browser, and null when the browser refuses access to it", () => {
+  const holder = globalThis as any;
+  const storage = memoryStorage();
+  try {
+    holder.window = { sessionStorage: storage };
+    assert.equal(browserSessionStorage(), storage);
+    // Safari private mode / blocked site data: reading the property throws.
+    holder.window = Object.defineProperty({}, "sessionStorage", {
+      get() {
+        throw new Error("SecurityError: The operation is insecure.");
+      },
+    });
+    assert.equal(browserSessionStorage(), null);
+    assert.deepEqual(readDismissedLineGroups(browserSessionStorage()), []);
+    assert.doesNotThrow(() =>
+      writeDismissedLineGroups(browserSessionStorage(), ["a"]),
+    );
+  } finally {
+    delete holder.window;
+  }
+});
+
+test("dismissed ids: a full storage (write throws, read works) keeps what was stored before", () => {
+  const storage = {
+    ...memoryStorage({ "line-group-dismissed": '["a"]' }),
+    setItem(): void {
+      throw new Error("QuotaExceededError");
+    },
+  };
+  assert.doesNotThrow(() => writeDismissedLineGroups(storage, ["a", "b"]));
+  assert.deepEqual(readDismissedLineGroups(storage), ["a"]);
+});
+
+test("dismissed ids: array-like objects and nested arrays are not taken for a list of ids", () => {
+  for (const value of ['{"length":1,"0":"a"}', '[["a"]]', "[[]]", "[{}]"]) {
+    const storage = memoryStorage({ "line-group-dismissed": value });
+    assert.deepEqual(readDismissedLineGroups(storage), [], value);
+  }
+});
+
+test("dismissed ids: an empty list is written as [] and read back as empty", () => {
+  const storage = memoryStorage({ "line-group-dismissed": '["a"]' });
+  writeDismissedLineGroups(storage, []);
+  assert.equal(storage.items.get("line-group-dismissed"), "[]");
+  assert.deepEqual(readDismissedLineGroups(storage), []);
+});
+
+test("dismissed ids: the caller's list is not changed by writing it", () => {
+  const ids = ["a", "b", "a"];
+  writeDismissedLineGroups(memoryStorage(), ids);
+  assert.deepEqual(ids, ["a", "b", "a"]);
+});
+
+// The subject page keeps the dismissed ids in state, starting from the session
+// storage, and writes every change back. This follows that sequence.
+function pageSession(storage: Parameters<typeof readDismissedLineGroups>[0]) {
+  let dismissed = readDismissedLineGroups(storage);
+  return {
+    next: (links: LineGroupOnSubject[]) =>
+      nextPendingLineGroup(links, dismissed),
+    later(id: string) {
+      if (dismissed.includes(id)) return;
+      dismissed = [...dismissed, id];
+      writeDismissedLineGroups(storage, dismissed);
+    },
+  };
+}
+
+const threePending = [
+  link({ id: "p1", createAt: "2026-11-25T09:00:00.000Z" }),
+  link({ id: "p2", createAt: "2026-11-25T10:00:00.000Z" }),
+  link({ id: "p3", createAt: "2026-11-25T11:00:00.000Z" }),
+];
+
+test('"Later" on all three pending links survives a reload of the same tab, and a new tab starts fresh', () => {
+  const storage = memoryStorage();
+  const page = pageSession(storage);
+  for (const expected of ["p1", "p2", "p3"]) {
+    const offered = page.next(threePending);
+    assert.equal(offered?.id, expected);
+    page.later(expected);
+  }
+  assert.equal(page.next(threePending), null);
+  assert.equal(storage.items.get("line-group-dismissed"), '["p1","p2","p3"]');
+  // Reload: new state, same storage.
+  assert.equal(pageSession(storage).next(threePending), null);
+  // Another tab has its own sessionStorage.
+  assert.equal(pageSession(memoryStorage()).next(threePending)?.id, "p1");
+});
+
+test('"Later" after a reload adds to the ids already stored instead of replacing them', () => {
+  const storage = memoryStorage({ "line-group-dismissed": '["p1"]' });
+  const page = pageSession(storage);
+  assert.equal(page.next(threePending)?.id, "p2");
+  page.later("p2");
+  assert.equal(storage.items.get("line-group-dismissed"), '["p1","p2"]');
+});
+
+test('"Later" with storage that throws, or none: the popups still step through until the page reloads', () => {
+  for (const storage of [brokenStorage, null]) {
+    const page = pageSession(storage);
+    page.later("p1");
+    assert.equal(page.next(threePending)?.id, "p2");
+    page.later("p2");
+    page.later("p3");
+    assert.equal(page.next(threePending), null);
+    // Nothing was stored, so a reload offers them again.
+    assert.equal(pageSession(storage).next(threePending)?.id, "p1");
+  }
+});
+
+test('"Later" with malformed stored JSON: the page starts with nothing dismissed and repairs the value on the next "Later"', () => {
+  const storage = memoryStorage({ "line-group-dismissed": '{"p1":true' });
+  const page = pageSession(storage);
+  assert.equal(page.next(threePending)?.id, "p1");
+  page.later("p1");
+  assert.equal(storage.items.get("line-group-dismissed"), '["p1"]');
+  assert.equal(pageSession(storage).next(threePending)?.id, "p2");
+});
+
+// ---- connect popup: more sequences ----
+
+test("connect popup: opened while the only pending link is dismissed it stays open; a code typed in another group then resets it", () => {
+  const dismissed = ["p1"];
+  const first = link({ id: "p1", createAt: "2026-11-25T09:00:00.000Z" });
+  let open = true;
+  assert.equal(
+    shouldResetLineConnect(open, nextPendingLineGroup([first], dismissed)),
+    false,
+  );
+  const second = link({
+    id: "p2",
+    lineGroupId: "Cother",
+    createAt: "2026-11-25T10:00:00.000Z",
+  });
+  const pending = nextPendingLineGroup([first, second], dismissed);
+  assert.equal(pending?.id, "p2");
+  if (shouldResetLineConnect(open, pending)) open = false;
+  assert.equal(open, false);
+});
+
+test("connect popup: verified groups alone never reset it", () => {
+  const verified = [
+    link({ id: "v1", isVerify: true, verifyToken: null }),
+    link({ id: "v2", isVerify: true, verifyToken: null }),
+  ];
+  assert.equal(
+    shouldResetLineConnect(true, nextPendingLineGroup(verified, [])),
+    false,
+  );
+});
+
+// ---- the link type carries verifiedAt (string | null) ----
+
+type Same<A, B> =
+  (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2
+    ? true
+    : false;
+
+test("LineGroupOnSubject.verifiedAt is a required string | null", () => {
+  // Compile-time only: a type checker that reads this file (an editor, or tsc
+  // with test files included) rejects these two lines if the field is missing,
+  // optional or of another type. `bun run typecheck` skips test files.
+  const exact: Same<LineGroupOnSubject["verifiedAt"], string | null> = true;
+  const required: Same<
+    Pick<LineGroupOnSubject, "verifiedAt">,
+    { verifiedAt: string | null }
+  > = true;
+  assert.ok(exact && required);
+  assert.equal(link({}).verifiedAt, null);
+  assert.equal(
+    link({ isVerify: true, verifiedAt: "2026-11-25T08:05:00.000Z" }).verifiedAt,
+    "2026-11-25T08:05:00.000Z",
+  );
+});
+
+test("links with a null verifiedAt (verified before the field existed) are still verified, in server order", () => {
+  const links = [
+    link({ id: "old-1", isVerify: true, verifiedAt: null }),
+    link({ id: "new", isVerify: true, verifiedAt: "2026-11-25T08:05:00.000Z" }),
+    link({ id: "old-2", isVerify: true, verifiedAt: null }),
+  ];
+  assert.deepEqual(
+    verifiedLineGroups(links).map((item) => item.id),
+    ["old-1", "new", "old-2"],
+  );
+  assert.equal(nextPendingLineGroup(links, []), null);
 });
