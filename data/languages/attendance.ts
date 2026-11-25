@@ -138,3 +138,51 @@ export const attendanceOverviewData = {
   noMatch: t("No students match your search", "ไม่พบนักเรียนที่ค้นหา"),
   searchStudent: t("Search name or number", "ค้นหาชื่อหรือเลขที่"),
 } as const;
+
+// Export popup (AttendanceDowload.tsx)
+export const attendanceExportData = {
+  title: t("Export attendance", "ดาวน์โหลดข้อมูลการเช็คชื่อ"),
+  description: t(
+    "Choose a file type and the dates to include.",
+    "เลือกประเภทไฟล์และช่วงวันที่ที่ต้องการ",
+  ),
+  format: t("File type", "ประเภทไฟล์"),
+  excel: t("Excel", "Excel"),
+  image: t("Image", "รูปภาพ"),
+  excelHint: t(
+    "Every attendance table of this subject, as one .xlsx file.",
+    "ทุกตารางเช็คชื่อของรายวิชานี้ ในไฟล์ .xlsx ไฟล์เดียว",
+  ),
+  imageHint: (tableTitle: string, summary: boolean) => (language: Language) =>
+    language === "th"
+      ? `ตาราง "${tableTitle}" ${summary ? "มุมมองสรุป" : "มุมมองข้อมูล"} เป็นไฟล์ .png`
+      : `The "${tableTitle}" table, ${summary ? "summary" : "attendances"} view, as a .png file.`,
+  imageUnavailable: t(
+    "Open an attendance table to save it as an image.",
+    "เปิดตารางเช็คชื่อก่อนเพื่อบันทึกเป็นรูปภาพ",
+  ),
+  dateRange: t("Date range", "ช่วงวันที่"),
+  presets: {
+    all: t("All time", "ทั้งหมด"),
+    today: t("Today", "วันนี้"),
+    yesterday: t("Yesterday", "เมื่อวาน"),
+    last30: t("Last 30 days", "30 วันล่าสุด"),
+    thisMonth: t("This month", "เดือนนี้"),
+    lastMonth: t("Last month", "เดือนที่แล้ว"),
+    custom: t("Custom", "กำหนดเอง"),
+  },
+  startDate: t("Start date", "วันที่เริ่มต้น"),
+  endDate: t("End date", "วันที่สิ้นสุด"),
+  allDates: t("Every session is included.", "รวมการเช็คชื่อทุกครั้ง"),
+  cancel: t("Cancel", "ยกเลิก"),
+  download: t("Download", "ดาวน์โหลด"),
+  noSessionsInRange: t(
+    "No attendance sessions in this date range.",
+    "ไม่มีการเช็คชื่อในช่วงวันที่นี้",
+  ),
+  excelFailed: t("Failed to download the file", "ดาวน์โหลดไฟล์ไม่สำเร็จ"),
+  imageFailed: t(
+    "Failed to save the table as an image",
+    "บันทึกตารางเป็นรูปภาพไม่สำเร็จ",
+  ),
+} as const;
