@@ -78,3 +78,49 @@ test("verify line token: a rejected verify (expired token) also marks the link l
   });
   assert.equal(state?.isInvalidated, true);
 });
+
+test('line groups query: key is ["line-groups", { subjectId }] and is per subject', () => {
+  assert.deepEqual(keyLineGroup.getBySubjectId({ subjectId: "s1" }), [
+    "line-groups",
+    { subjectId: "s1" },
+  ]);
+  assert.notDeepEqual(
+    keyLineGroup.getBySubjectId({ subjectId: "s1" }),
+    keyLineGroup.getBySubjectId({ subjectId: "s2" }),
+  );
+});
+
+test("line groups query: does not run without a subject id", () => {
+  assert.equal(lineGroupsQueryOptions({ subjectId: "" }).enabled, false);
+  assert.equal(lineGroupsQueryOptions({ subjectId: "s1" }).enabled, true);
+});
+
+test("line groups query: the popup's 15 s polling is dropped again when the popup closes", () => {
+  const client = appClient();
+  const open = client.defaultQueryOptions(
+    lineGroupsQueryOptions({ subjectId: "s1" }, { refetchInterval: 15_000 }),
+  );
+  const closed = client.defaultQueryOptions(
+    lineGroupsQueryOptions({ subjectId: "s1" }, { refetchInterval: false }),
+  );
+  assert.equal(open.refetchInterval, 15_000);
+  assert.equal(closed.refetchInterval, 2 * 60 * 1000);
+  assert.equal(closed.refetchOnWindowFocus, "always");
+});
+
+test("verify line token: only the verified subject's link list is marked stale", async () => {
+  const client = appClient();
+  const mine = keyLineGroup.getBySubjectId({ subjectId: "s1" });
+  const other = keyLineGroup.getBySubjectId({ subjectId: "s2" });
+  client.setQueryData(mine, []);
+  client.setQueryData(other, []);
+  const mutation = client.getMutationCache().build(
+    client,
+    verifyLineTokenMutationOptions(client, async () => ({ id: "l" }) as any),
+  );
+  await mutation.execute({
+    body: { subjectId: "s1", token: "token", confirm: false },
+  });
+  assert.equal(client.getQueryState(mine)?.isInvalidated, true);
+  assert.equal(client.getQueryState(other)?.isInvalidated, false);
+});
