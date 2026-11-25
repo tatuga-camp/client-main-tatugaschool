@@ -153,6 +153,18 @@ function mountSettings() {
     defaultOptions: { queries: { staleTime: Infinity, retry: false } },
   });
   client.setQueryData(["language"], "en");
+  // What is asked of the list query during a render: refetchInterval is the
+  // 15 s polling that runs only while the popup's state is open. The section
+  // asks first; the popup, when rendered, reads the same list after it without
+  // an interval of its own.
+  let pollIntervals: unknown[] = [];
+  const defaultQueryOptions = client.defaultQueryOptions.bind(client);
+  client.defaultQueryOptions = ((options: any) => {
+    if (options?.queryKey?.[0] === "line-groups") {
+      pollIntervals.push(options.refetchInterval);
+    }
+    return defaultQueryOptions(options);
+  }) as typeof client.defaultQueryOptions;
   const mine: Session = {
     open: false,
     ref: null,
@@ -168,6 +180,7 @@ function mountSettings() {
   const renderOnce = (disabled: boolean) => {
     mine.claimed = { state: false, ref: false, effect: false };
     mine.effect = null;
+    pollIntervals = [];
     created = [];
     session = mine;
     try {
@@ -224,6 +237,12 @@ function mountSettings() {
     },
     get effectRuns() {
       return mine.effectRuns;
+    },
+    // The refetchInterval the section asked for in the last render
+    // (undefined: the app default).
+    get pollInterval() {
+      assert.ok(pollIntervals.length > 0, "the section reads the list");
+      return pollIntervals[0];
     },
     get html() {
       return html;
@@ -583,4 +602,203 @@ test("B4: mounted on an archived subject with pending links — no popup, Cancel
   assert.equal(view.button("Cancel")[0].props.disabled, false);
   assert.equal(view.button("Confirm")[0].props.disabled, true);
   assert.equal(view.button("Disconnect").length, 1);
+});
+
+// ---- C3: more ways a pending group can ask again, and what must not reset ----
+
+// The list as a refetch delivers it: new objects, same content.
+const refetched = (links: LineGroupOnSubject[]): LineGroupOnSubject[] =>
+  JSON.parse(JSON.stringify(links));
+
+test("C3: refetches that deliver identical data (new objects) never run the reset effect again and leave the popup open", () => {
+  const links = [v1, pending("p1"), pending("p2", { updateAt: LATER })];
+  const view = mountSettings().show(links);
+  view.openPopup(links);
+  const runs = view.effectRuns;
+  for (let poll = 0; poll < 5; poll++) {
+    view.show(refetched(links));
+    assert.equal(view.effectRuns, runs);
+    assert.equal(view.openState, true);
+    assert.equal(view.popupShown, true);
+  }
+});
+
+test("C3: a reset runs the effect exactly once — the re-render it causes does not run it again", () => {
+  const view = mountSettings().show([v1, pending("p1")]);
+  view.openPopup([v1, pending("p1")]);
+  const runs = view.effectRuns;
+  const asked = [v1, pending("p1", { updateAt: LATER })];
+  view.show(asked);
+  assert.equal(view.openState, false);
+  assert.equal(view.effectRuns, runs + 1);
+  view.show(refetched(asked));
+  view.show(refetched(asked));
+  assert.equal(view.effectRuns, runs + 1);
+  assert.equal(view.openState, false);
+});
+
+test("C3: the 15 s polling runs only while the popup is open and stops when a group asking again resets it", () => {
+  const view = mountSettings().show([v1, pending("p1")]);
+  assert.equal(view.pollInterval, undefined);
+  view.openPopup([v1, pending("p1")]);
+  assert.equal(view.pollInterval, 15_000);
+  view.show([v1, pending("p1", { updateAt: LATER })]);
+  assert.equal(view.openState, false);
+  assert.equal(view.pollInterval, undefined);
+});
+
+test("C3: asked again while the popup was closed — a popup opened afterwards survives identical refetches", () => {
+  const asked = [v1, pending("p1", { updateAt: LATER })];
+  const view = mountSettings().show([v1, pending("p1")]);
+  view.show(asked);
+  view.openPopup(asked);
+  assert.equal(view.popupShown, true);
+  view.show(refetched(asked));
+  view.show(refetched(asked));
+  assert.equal(view.openState, true);
+  assert.equal(view.popupShown, true);
+});
+
+test("C3: an updateAt that changes and later returns to an earlier value resets each time (previous list only)", () => {
+  const first = [v1, pending("p1")];
+  const second = [v1, pending("p1", { updateAt: LATER })];
+  const view = mountSettings().show(first);
+  view.openPopup(first);
+  view.show(second);
+  assert.equal(view.openState, false);
+  view.openPopup(second);
+  assert.equal(view.popupShown, true);
+  view.show(refetched(first));
+  assert.equal(view.openState, false);
+  assert.equal(view.popupShown, false);
+});
+
+test("C3: only the last of several pending links asks again, or all of them at once — reset", () => {
+  const before = [pending("p1"), pending("p2"), pending("p3")];
+  const lastAsked = [
+    pending("p1"),
+    pending("p2"),
+    pending("p3", { updateAt: LATER }),
+  ];
+  let view = mountSettings().show(before);
+  view.openPopup(before);
+  view.show(lastAsked);
+  assert.equal(view.openState, false);
+
+  view = mountSettings().show(before);
+  view.openPopup(before);
+  const runs = view.effectRuns;
+  view.show(before.map((item) => ({ ...item, updateAt: LATER })));
+  assert.equal(view.openState, false);
+  assert.equal(view.effectRuns, runs + 1);
+});
+
+test("C3: one pending link leaves while another asks again in the same refetch (fewer pending) — reset", () => {
+  const before = [v1, pending("p1"), pending("p2")];
+  const view = mountSettings().show(before);
+  view.openPopup(before);
+  view.show([v1, pending("p2", { updateAt: LATER })]);
+  assert.equal(view.openState, false);
+  assert.equal(view.popupShown, false);
+});
+
+test("C3: pending links leaving, reordered, or changed without a new updateAt do not reset the popup", () => {
+  const before = [v1, pending("p1"), pending("p2"), pending("p3")];
+  const view = mountSettings().show(before);
+  view.openPopup(before);
+  view.show([pending("p3"), v1, pending("p2", { groupName: "ม.2/2" })]);
+  assert.equal(view.openState, true);
+  view.show([pending("p3", { verifyExpireAt: "2026-11-27T08:00:00.000Z" })]);
+  assert.equal(view.openState, true);
+  assert.equal(view.popupShown, true);
+});
+
+test("C3: every verified link touched at once and reordered, no pending link listed — the popup stays open and keeps polling", () => {
+  const v2 = link({ id: "v2", lineGroupId: "C-v2" });
+  const view = mountSettings().show([v1, v2]);
+  view.openPopup([v1, v2]);
+  const runs = view.effectRuns;
+  view.show([
+    link({ id: "v2", lineGroupId: "C-v2", updateAt: LATER, allowAi: false }),
+    link({ id: "v1", updateAt: LATER, allowAnnouncement: false }),
+  ]);
+  assert.equal(view.openState, true);
+  assert.equal(view.popupShown, true);
+  // Verified links are not part of the effect's dependencies at all.
+  assert.equal(view.effectRuns, runs);
+  assert.equal(view.pollInterval, 15_000);
+});
+
+test("C3: a verified link touched to the very updateAt a listed pending link already has does not reset the popup", () => {
+  const before = [v1, pending("p1", { updateAt: LATER })];
+  const view = mountSettings().show(before);
+  view.openPopup(before);
+  view.show([link({ id: "v1", updateAt: LATER }), before[1]]);
+  assert.equal(view.openState, true);
+  assert.equal(view.popupShown, true);
+});
+
+test("C3: a verified link that goes back to pending (its confirm was reverted) is a pending key not seen before — reset", () => {
+  const before = [v1, link({ id: "p1", lineGroupId: "C-p1" })];
+  const view = mountSettings().show(before);
+  view.openPopup(before);
+  view.show([v1, pending("p1", { updateAt: LATER })]);
+  assert.equal(view.openState, false);
+  assert.equal(view.popupShown, false);
+});
+
+test("C3: the list arrives after mount with a pending link — a popup opened then stays open until that group asks again", () => {
+  const view = mountSettings().show(undefined);
+  view.show([v1, pending("p1")]);
+  assert.equal(view.openState, false);
+  view.openPopup([v1, pending("p1")]);
+  assert.equal(view.popupShown, true);
+  view.show(refetched([v1, pending("p1")]));
+  assert.equal(view.popupShown, true);
+  view.show([v1, pending("p1", { updateAt: LATER })]);
+  assert.equal(view.openState, false);
+  assert.equal(view.popupShown, false);
+});
+
+test("C3: a group asks again while the subject is archived, then it is restored — closed, and a popup opened afterwards is not reset late", () => {
+  const before = [v1, pending("p1")];
+  const asked = [v1, pending("p1", { updateAt: LATER })];
+  const view = mountSettings().show(before);
+  view.openPopup(before);
+  view.show(before, true);
+  assert.equal(view.openState, false);
+  view.show(asked, true);
+  assert.equal(view.popupShown, false);
+  view.show(asked, false);
+  assert.equal(view.openState, false);
+  assert.equal(view.popupShown, false);
+
+  view.openPopup(asked);
+  assert.equal(view.popupShown, true);
+  view.show(refetched(asked));
+  assert.equal(view.openState, true);
+  assert.equal(view.popupShown, true);
+});
+
+test("C3: restored in the same refresh in which the group asks again — a popup that was open before the archive stays reset", () => {
+  const view = mountSettings().show([v1, pending("p1")]);
+  view.openPopup([v1, pending("p1")]);
+  view.show([v1, pending("p1")], true);
+  view.show([v1, pending("p1", { updateAt: LATER })], false);
+  assert.equal(view.openState, false);
+  assert.equal(view.popupShown, false);
+  assert.equal(view.pollInterval, undefined);
+});
+
+test("C3: the teacher closes the popup, the group asks again, the teacher opens it — open, then the next ask resets it", () => {
+  const before = [v1, pending("p1")];
+  const view = mountSettings().show(before);
+  view.openPopup(before);
+  view.closePopup(before);
+  const asked = [v1, pending("p1", { updateAt: LATER })];
+  view.show(asked);
+  view.openPopup(asked);
+  assert.equal(view.popupShown, true);
+  view.show([v1, pending("p1", { updateAt: "2026-11-25T10:00:00.000Z" })]);
+  assert.equal(view.openState, false);
 });
