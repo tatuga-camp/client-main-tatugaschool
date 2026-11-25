@@ -306,6 +306,130 @@ test("useDisconnectLineGroup: a double click sends two requests; the second fail
   assert.deepEqual(client.getQueryData(key), [b]);
 });
 
+// ---- no stale list after a change (in-flight list fetches are cancelled) ----
+
+// Starts a list fetch that stays in flight until `finish` is called with the
+// (by then stale) list. Returns the abort signal React Query handed to it.
+function startListFetch(client: QueryClient, key: readonly unknown[]) {
+  let finish: (list: LineGroupOnSubject[]) => void = () => {};
+  const state: { signal?: AbortSignal } = {};
+  client
+    .fetchQuery({
+      queryKey: key,
+      staleTime: 0,
+      queryFn: ({ signal }) => {
+        state.signal = signal;
+        return new Promise<LineGroupOnSubject[]>((resolve) => {
+          finish = resolve;
+        });
+      },
+    })
+    .catch(() => {});
+  return { state, finish: (list: LineGroupOnSubject[]) => finish(list) };
+}
+
+const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+for (const [name, run] of [
+  [
+    "useUpdateLineGroup",
+    (client: QueryClient) =>
+      runHook(client, () => hooks.useUpdateLineGroup()).mutateAsync({
+        id: "a",
+        body: { allowAi: false },
+      }),
+  ],
+  [
+    "useDisconnectLineGroup",
+    (client: QueryClient) =>
+      runHook(client, () => hooks.useDisconnectLineGroup()).mutateAsync({
+        id: "a",
+      }),
+  ],
+] as const) {
+  const a = link({ id: "a" });
+  const b = link({ id: "b", lineGroupId: "Cb" });
+  const saved = { ...a, allowAi: false };
+  const expected = name === "useUpdateLineGroup" ? [saved, b] : [b];
+
+  test(`${name}: a list fetch already in flight is cancelled before the request is sent, so its stale answer cannot win`, async () => {
+    const client = newClient();
+    const key = keyLineGroup.getBySubjectId({ subjectId: "s1" });
+    client.setQueryData(key, [a, b]);
+    const fetch = startListFetch(client, key);
+    await tick();
+    assert.equal(client.getQueryState(key)?.fetchStatus, "fetching");
+
+    let fetchStatusAtRequest: string | undefined;
+    respond = async () => {
+      fetchStatusAtRequest = client.getQueryState(key)?.fetchStatus;
+      return { data: saved };
+    };
+    await run(client);
+
+    assert.equal(fetchStatusAtRequest, "idle");
+    assert.equal(fetch.state.signal?.aborted, true);
+    // The old fetch answers late with the list as it was before the change.
+    fetch.finish([a, b]);
+    await tick();
+    assert.deepEqual(client.getQueryData(key), expected);
+  });
+
+  test(`${name}: a list fetch that starts while the request is in flight is cancelled before the cache is written`, async () => {
+    const client = newClient();
+    const key = keyLineGroup.getBySubjectId({ subjectId: "s1" });
+    client.setQueryData(key, [a, b]);
+    let fetch: ReturnType<typeof startListFetch> | undefined;
+    respond = async () => {
+      fetch = startListFetch(client, key);
+      await tick();
+      return { data: saved };
+    };
+    await run(client);
+
+    assert.equal(fetch?.state.signal?.aborted, true);
+    assert.equal(client.getQueryState(key)?.fetchStatus, "idle");
+    fetch?.finish([a, b]);
+    await tick();
+    assert.deepEqual(client.getQueryData(key), expected);
+  });
+
+  test(`${name}: the list is invalidated after success, and only that subject's list`, async () => {
+    const client = newClient();
+    const key = keyLineGroup.getBySubjectId({ subjectId: "s1" });
+    const otherKey = keyLineGroup.getBySubjectId({ subjectId: "s2" });
+    client.setQueryData(key, [a, b]);
+    client.setQueryData(otherKey, [link({ id: "z", subjectId: "s2" })]);
+    respond = async () => ({ data: saved });
+    await run(client);
+    assert.deepEqual(client.getQueryData(key), expected);
+    assert.equal(client.getQueryState(key)?.isInvalidated, true);
+    assert.equal(client.getQueryState(otherKey)?.isInvalidated, false);
+  });
+
+  test(`${name}: the list is invalidated after a failure too, and another subject's fetch is left running`, async () => {
+    const client = newClient();
+    const key = keyLineGroup.getBySubjectId({ subjectId: "s1" });
+    const otherKey = keyLineGroup.getBySubjectId({ subjectId: "s2" });
+    const before = [a, b];
+    client.setQueryData(key, before);
+    client.setQueryData(otherKey, [link({ id: "z", subjectId: "s2" })]);
+    const otherFetch = startListFetch(client, otherKey);
+    await tick();
+    respond = async () => {
+      throw httpError(403, "Forbidden");
+    };
+    await assert.rejects(() => run(client));
+    assert.equal(client.getQueryData(key), before);
+    assert.equal(client.getQueryState(key)?.isInvalidated, true);
+    assert.equal(client.getQueryState(otherKey)?.isInvalidated, false);
+    assert.equal(otherFetch.state.signal?.aborted, false);
+    assert.equal(client.getQueryState(otherKey)?.fetchStatus, "fetching");
+    otherFetch.finish([]);
+    await tick();
+  });
+}
+
 // ---- useVerifyLineToken ----
 
 test("useVerifyLineToken: confirm refreshes that subject's link list only, and no longer writes the subject cache", async () => {

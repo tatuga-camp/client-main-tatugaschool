@@ -1,4 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  QueryClient,
+  QueryKey,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { LineGroupOnSubject } from "../interfaces";
 import {
   DisconnectLineGroupService,
@@ -44,19 +50,74 @@ export function useGetLineGroups(
   return useQuery(lineGroupsQueryOptions(input, options));
 }
 
+// A list fetch that was already in flight when a switch is flipped or a group
+// is disconnected answers with the list as it was before the change, and would
+// overwrite the fresh cache. So both mutations cancel in-flight list fetches
+// before the request and again before writing the cache, then invalidate the
+// list once settled so it is read again from the server.
+//
+// The request carries only the link id, so before the request the subject is
+// found by looking for the cached lists that hold that link.
+function listKeysHoldingLink(queryClient: QueryClient, id: string): QueryKey[] {
+  return queryClient
+    .getQueriesData<LineGroupOnSubject[]>({ queryKey: ["line-groups"] })
+    .filter(
+      ([, links]) =>
+        Array.isArray(links) && links.some((link) => link.id === id),
+    )
+    .map(([queryKey]) => queryKey);
+}
+
+async function cancelListsHoldingLink(queryClient: QueryClient, id: string) {
+  const listKeys = listKeysHoldingLink(queryClient, id);
+  await Promise.all(
+    listKeys.map((queryKey) => queryClient.cancelQueries({ queryKey })),
+  );
+  return { listKeys };
+}
+
+function invalidateLists(
+  queryClient: QueryClient,
+  data: LineGroupOnSubject | undefined,
+  context: { listKeys: QueryKey[] } | undefined,
+) {
+  const keys: QueryKey[] = [...(context?.listKeys ?? [])];
+  if (data) {
+    keys.push(keyLineGroup.getBySubjectId({ subjectId: data.subjectId }));
+  }
+  const seen = new Set<string>();
+  return Promise.all(
+    keys
+      .filter((queryKey) => {
+        const hash = JSON.stringify(queryKey);
+        if (seen.has(hash)) return false;
+        seen.add(hash);
+        return true;
+      })
+      .map((queryKey) => queryClient.invalidateQueries({ queryKey })),
+  );
+}
+
 export function useUpdateLineGroup() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: keyLineGroup.update,
     mutationFn: (input: RequestUpdateLineGroupService) =>
       UpdateLineGroupService(input),
-    onSuccess(data) {
+    onMutate: (variables) => cancelListsHoldingLink(queryClient, variables.id),
+    async onSuccess(data) {
+      const queryKey = keyLineGroup.getBySubjectId({
+        subjectId: data.subjectId,
+      });
+      await queryClient.cancelQueries({ queryKey });
       queryClient.setQueryData(
-        keyLineGroup.getBySubjectId({ subjectId: data.subjectId }),
+        queryKey,
         (prev: LineGroupOnSubject[] | undefined) =>
           prev?.map((link) => (link.id === data.id ? data : link)),
       );
     },
+    onSettled: (data, _error, _variables, context) =>
+      invalidateLists(queryClient, data, context),
   });
 }
 
@@ -66,12 +127,19 @@ export function useDisconnectLineGroup() {
     mutationKey: keyLineGroup.disconnect,
     mutationFn: (input: RequestDisconnectLineGroupService) =>
       DisconnectLineGroupService(input),
-    onSuccess(data, variables) {
+    onMutate: (variables) => cancelListsHoldingLink(queryClient, variables.id),
+    async onSuccess(data, variables) {
+      const queryKey = keyLineGroup.getBySubjectId({
+        subjectId: data.subjectId,
+      });
+      await queryClient.cancelQueries({ queryKey });
       queryClient.setQueryData(
-        keyLineGroup.getBySubjectId({ subjectId: data.subjectId }),
+        queryKey,
         (prev: LineGroupOnSubject[] | undefined) =>
           prev?.filter((link) => link.id !== variables.id),
       );
     },
+    onSettled: (data, _error, _variables, context) =>
+      invalidateLists(queryClient, data, context),
   });
 }
