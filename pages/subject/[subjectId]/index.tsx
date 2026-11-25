@@ -73,6 +73,8 @@ import {
   nextPendingLineGroup,
   readDismissedLineGroups,
   shouldResetLineConnect,
+  subjectLinePopup,
+  toggleLineConnect,
   verifiedLineGroups,
   writeDismissedLineGroups,
 } from "../../../utils/lineGroup";
@@ -147,11 +149,18 @@ function Index({ subjectId }: Props) {
   };
   // A pending link showed up while the QR popup was open: reset the popup's
   // open state so it does not return after Confirm / Deny / Later, and the
-  // 15 s polling above stops.
+  // 15 s polling above stops. The same happens when the subject becomes
+  // archived: no LINE popup is shown there at all.
   const resetLineConnect = shouldResetLineConnect(
     triggerLineConnect,
     pendingLineGroup,
+    archived,
   );
+  const linePopup = subjectLinePopup({
+    archived,
+    isConnectOpen: triggerLineConnect,
+    pending: pendingLineGroup,
+  });
   useEffect(() => {
     if (resetLineConnect) setTriggerLineConnect(false);
   }, [resetLineConnect]);
@@ -381,7 +390,7 @@ function Index({ subjectId }: Props) {
           />
         </PopupLayout>
       )}
-      {subject.data && triggerLineConnect && !pendingLineGroup && (
+      {subject.data && linePopup === "connect" && (
         <PopupLayout onClose={() => setTriggerLineConnect(false)}>
           <QrCodeLineConnect
             subjectId={subject.data.id}
@@ -411,7 +420,7 @@ function Index({ subjectId }: Props) {
           />
         </PopupLayout>
       )}
-      {subject.data && pendingLineGroup && (
+      {subject.data && linePopup === "confirm" && pendingLineGroup && (
         <PopupLayout
           onClose={() => dismissPendingLineGroup(pendingLineGroup.id)}
         >
@@ -599,10 +608,13 @@ function Index({ subjectId }: Props) {
                   </button>
                   <button
                     onClick={() => {
-                      setTriggerLineConnect((prev) => !prev);
+                      setTriggerLineConnect((prev) =>
+                        toggleLineConnect(prev, archived),
+                      );
                     }}
+                    disabled={archived}
                     aria-label="QR Code Subject"
-                    className="flex w-full max-w-32 items-center justify-center gap-1 rounded-2xl bg-[#00B900] px-2 py-1 text-xs text-white active:scale-110 sm:w-32"
+                    className="flex w-full max-w-32 items-center justify-center gap-1 rounded-2xl bg-[#00B900] px-2 py-1 text-xs text-white active:scale-110 disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100 sm:w-32"
                   >
                     {verifiedLineGroups(lineGroups.data).length > 0 ? (
                       <>

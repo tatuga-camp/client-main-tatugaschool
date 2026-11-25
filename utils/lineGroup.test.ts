@@ -8,6 +8,8 @@ import {
   nextPendingLineGroup,
   readDismissedLineGroups,
   shouldResetLineConnect,
+  subjectLinePopup,
+  toggleLineConnect,
   verifiedLineGroups,
   writeDismissedLineGroups,
 } from "./lineGroup";
@@ -562,4 +564,61 @@ test("links with a null verifiedAt (verified before the field existed) are still
     ["old-1", "new", "old-2"],
   );
   assert.equal(nextPendingLineGroup(links, []), null);
+});
+
+// ---- B1: an archived subject shows no LINE popup on the subject page ----
+
+test("subject page popup: a pending link shows the confirm popup, over an open connect popup", () => {
+  const pending = link({ id: "p1" });
+  for (const isConnectOpen of [true, false]) {
+    assert.equal(
+      subjectLinePopup({ archived: false, isConnectOpen, pending }),
+      "confirm",
+    );
+  }
+});
+
+test("subject page popup: the connect popup shows only while it is open and nothing is pending", () => {
+  assert.equal(
+    subjectLinePopup({ archived: false, isConnectOpen: true, pending: null }),
+    "connect",
+  );
+  assert.equal(
+    subjectLinePopup({ archived: false, isConnectOpen: false, pending: null }),
+    null,
+  );
+});
+
+test("subject page popup: on an archived subject neither popup is rendered, whatever is pending or open", () => {
+  for (const isConnectOpen of [true, false]) {
+    for (const pending of [null, link({ id: "p1" })]) {
+      assert.equal(
+        subjectLinePopup({ archived: true, isConnectOpen, pending }),
+        null,
+      );
+    }
+  }
+});
+
+test("connect popup: an open popup is reset when the subject becomes archived, with or without a pending link", () => {
+  assert.equal(shouldResetLineConnect(true, null, true), true);
+  assert.equal(shouldResetLineConnect(true, link({ id: "p1" }), true), true);
+  assert.equal(shouldResetLineConnect(false, null, true), false);
+});
+
+test("connect popup: archived then restored — the popup was reset, so it does not come back", () => {
+  let open = true;
+  if (shouldResetLineConnect(open, null, true)) open = false;
+  assert.equal(open, false);
+  assert.equal(
+    subjectLinePopup({ archived: false, isConnectOpen: open, pending: null }),
+    null,
+  );
+});
+
+test("header LINE button: toggles the connect popup, and does nothing on an archived subject", () => {
+  assert.equal(toggleLineConnect(false, false), true);
+  assert.equal(toggleLineConnect(true, false), false);
+  assert.equal(toggleLineConnect(false, true), false);
+  assert.equal(toggleLineConnect(true, true), false);
 });

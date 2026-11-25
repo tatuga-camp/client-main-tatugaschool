@@ -80,10 +80,31 @@ export function writeDismissedLineGroups(
 // The connect (QR) popup has done its job once the code typed in LINE shows up
 // as a pending link. Its open state must then be reset, not just hidden behind
 // the confirm popup, or it would come back after Confirm / Deny / Later and
-// keep the 15 s polling running.
+// keep the 15 s polling running. An archived subject is read-only for LINE
+// links, so the popup is reset there as well.
 export function shouldResetLineConnect(
   isOpen: boolean,
   pending: LineGroupOnSubject | null,
+  archived = false,
 ): boolean {
-  return isOpen && pending !== null;
+  return isOpen && (archived || pending !== null);
+}
+
+// Which LINE popup the subject page renders. An archived subject renders none:
+// nothing may be confirmed or connected there (the settings section still
+// lists the links, so they can be disconnected or cancelled).
+export function subjectLinePopup(state: {
+  archived: boolean;
+  isConnectOpen: boolean;
+  pending: LineGroupOnSubject | null;
+}): "confirm" | "connect" | null {
+  if (state.archived) return null;
+  if (state.pending) return "confirm";
+  return state.isConnectOpen ? "connect" : null;
+}
+
+// The header LINE button toggles the connect popup; on an archived subject the
+// popup cannot be opened.
+export function toggleLineConnect(isOpen: boolean, archived: boolean): boolean {
+  return archived ? false : !isOpen;
 }
