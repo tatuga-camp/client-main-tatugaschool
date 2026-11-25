@@ -7,6 +7,8 @@ export type LineGroupOnSubject = {
   isVerify: boolean;
   verifyToken: string | null;
   verifyExpireAt: string | null;
+  // Set when the link is verified; the server orders links by it for the caps.
+  verifiedAt: string | null;
   allowAssignment: boolean;
   allowMorningSummary: boolean;
   allowAnnouncement: boolean;

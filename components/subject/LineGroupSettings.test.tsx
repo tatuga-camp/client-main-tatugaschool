@@ -24,6 +24,7 @@ function link(overrides: Partial<LineGroupOnSubject>): LineGroupOnSubject {
     isVerify: true,
     verifyToken: null,
     verifyExpireAt: null,
+    verifiedAt: "2026-11-25T08:05:00.000Z",
     allowAssignment: true,
     allowMorningSummary: true,
     allowAnnouncement: true,
@@ -42,6 +43,7 @@ const pendingLink = (overrides: Partial<LineGroupOnSubject> = {}) =>
     isVerify: false,
     verifyToken: "tok",
     verifyExpireAt: "2026-11-26T08:00:00.000Z",
+    verifiedAt: null,
     ...overrides,
   });
 

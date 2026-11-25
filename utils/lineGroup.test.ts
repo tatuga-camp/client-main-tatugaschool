@@ -17,6 +17,7 @@ function link(overrides: Partial<LineGroupOnSubject>): LineGroupOnSubject {
     isVerify: false,
     verifyToken: "token",
     verifyExpireAt: "2026-11-26T08:00:00.000Z",
+    verifiedAt: null,
     allowAssignment: true,
     allowMorningSummary: true,
     allowAnnouncement: true,
