@@ -4,6 +4,8 @@ import { LineGroupOnSubject } from "../interfaces/LineGroupOnSubject";
 import {
   LINE_GROUP_DISMISSED_KEY,
   browserSessionStorage,
+  dismissLineGroup,
+  lineGroupDismissalKey,
   lineGroupDisplayName,
   nextPendingLineGroup,
   readDismissedLineGroups,
@@ -34,6 +36,14 @@ function link(overrides: Partial<LineGroupOnSubject>): LineGroupOnSubject {
     ...overrides,
   };
 }
+
+// A dismissal ("Later") is stored as "<link id>:<link updateAt>". AT is the
+// updateAt that link() gives every link unless a test overrides it.
+const AT = "2026-11-25T08:00:00.000Z";
+const dismissal = (id: string, updateAt = AT) => `${id}:${updateAt}`;
+const A = dismissal("a");
+const B = dismissal("b");
+const stored = (...entries: unknown[]) => JSON.stringify(entries);
 
 test("lineGroupDisplayName: uses the group name when there is one", () => {
   assert.equal(
@@ -80,7 +90,7 @@ test("nextPendingLineGroup: oldest pending link that is not dismissed", () => {
     link({ id: "older", createAt: "2026-11-25T09:00:00.000Z" }),
   ];
   assert.equal(nextPendingLineGroup(links, [])?.id, "older");
-  assert.equal(nextPendingLineGroup(links, ["older"])?.id, "newer");
+  assert.equal(nextPendingLineGroup(links, [dismissal("older")])?.id, "newer");
 });
 
 test("nextPendingLineGroup: null when all dismissed or none pending", () => {
@@ -88,7 +98,7 @@ test("nextPendingLineGroup: null when all dismissed or none pending", () => {
     link({ id: "verified", isVerify: true, verifyToken: null }),
     link({ id: "pending" }),
   ];
-  assert.equal(nextPendingLineGroup(links, ["pending"]), null);
+  assert.equal(nextPendingLineGroup(links, [dismissal("pending")]), null);
   assert.equal(nextPendingLineGroup([links[0]], []), null);
   assert.equal(nextPendingLineGroup([], []), null);
   assert.equal(nextPendingLineGroup(undefined, []), null);
@@ -220,21 +230,23 @@ test("nextPendingLineGroup: three pending links (the cap) are offered one at a t
     link({ id: "p2", createAt: "2026-11-25T11:00:00.000Z" }),
   ];
   const seen: string[] = [];
+  let dismissed: string[] = [];
   for (let i = 0; i < 4; i++) {
-    const next = nextPendingLineGroup(links, seen);
+    const next = nextPendingLineGroup(links, dismissed);
     if (!next) break;
     seen.push(next.id);
+    dismissed = dismissLineGroup(dismissed, next);
   }
   assert.deepEqual(seen, ["p1", "p2", "p3"]);
-  assert.equal(nextPendingLineGroup(links, seen), null);
+  assert.equal(nextPendingLineGroup(links, dismissed), null);
 });
 
-test("nextPendingLineGroup: duplicate and unknown dismissed ids are harmless", () => {
+test("nextPendingLineGroup: duplicate, unknown and empty dismissals are harmless", () => {
   const links = [
     link({ id: "a" }),
     link({ id: "b", createAt: "2026-11-25T09:00:00.000Z" }),
   ];
-  assert.equal(nextPendingLineGroup(links, ["a", "a", "gone", ""])?.id, "b");
+  assert.equal(nextPendingLineGroup(links, [A, A, dismissal("gone"), ""])?.id, "b");
 });
 
 test("nextPendingLineGroup: same createAt keeps the server's order (stable)", () => {
@@ -245,7 +257,7 @@ test("nextPendingLineGroup: same createAt keeps the server's order (stable)", ()
 test("nextPendingLineGroup: a dismissed link that the server later replaced (new id) is offered again", () => {
   // The 4th pending request replaces the oldest: same group, new link id.
   const replaced = [link({ id: "link-new", lineGroupId: "C123a91f" })];
-  assert.equal(nextPendingLineGroup(replaced, ["link-old"])?.id, "link-new");
+  assert.equal(nextPendingLineGroup(replaced, [dismissal("link-old")])?.id, "link-new");
 });
 
 // ---- "Later" lasts for the browser session (sessionStorage) ----
@@ -274,11 +286,14 @@ test("dismissed ids: the storage key is line-group-dismissed", () => {
   assert.equal(LINE_GROUP_DISMISSED_KEY, "line-group-dismissed");
 });
 
-test("dismissed ids: written as a JSON array of ids and read back", () => {
+test("dismissed ids: written as a JSON array of id:updateAt strings and read back", () => {
   const storage = memoryStorage();
-  writeDismissedLineGroups(storage, ["a", "b"]);
-  assert.equal(storage.items.get("line-group-dismissed"), '["a","b"]');
-  assert.deepEqual(readDismissedLineGroups(storage), ["a", "b"]);
+  writeDismissedLineGroups(storage, [A, B]);
+  assert.equal(
+    storage.items.get("line-group-dismissed"),
+    '["a:2026-11-25T08:00:00.000Z","b:2026-11-25T08:00:00.000Z"]',
+  );
+  assert.deepEqual(readDismissedLineGroups(storage), [A, B]);
 });
 
 test("dismissed ids: nothing stored reads as an empty list", () => {
@@ -291,7 +306,7 @@ test("dismissed ids: a dismissed link stays dismissed after a reload (new state,
     link({ id: "p1", createAt: "2026-11-25T09:00:00.000Z" }),
     link({ id: "p2", createAt: "2026-11-25T10:00:00.000Z" }),
   ];
-  writeDismissedLineGroups(storage, ["p1"]);
+  writeDismissedLineGroups(storage, [dismissal("p1")]);
   // After a reload the page starts from what the session stored.
   const afterReload = readDismissedLineGroups(storage);
   assert.equal(nextPendingLineGroup(links, afterReload)?.id, "p2");
@@ -318,15 +333,15 @@ test("dismissed ids: a corrupt or foreign value reads as empty", () => {
 
 test("dismissed ids: non-string entries are dropped, strings are kept", () => {
   const storage = memoryStorage({
-    "line-group-dismissed": '["a", 1, null, {"id":"x"}, "b", ""]',
+    "line-group-dismissed": stored(A, 1, null, { id: "x" }, B, ""),
   });
-  assert.deepEqual(readDismissedLineGroups(storage), ["a", "b"]);
+  assert.deepEqual(readDismissedLineGroups(storage), [A, B]);
 });
 
 test("dismissed ids: writing removes duplicates and keeps the order", () => {
   const storage = memoryStorage();
-  writeDismissedLineGroups(storage, ["a", "b", "a"]);
-  assert.equal(storage.items.get("line-group-dismissed"), '["a","b"]');
+  writeDismissedLineGroups(storage, [A, B, A]);
+  assert.equal(storage.items.get("line-group-dismissed"), stored(A, B));
 });
 
 test("dismissed ids: other keys in the same storage are left alone", () => {
@@ -360,7 +375,7 @@ test("connect popup: once reset it does not come back after Confirm, Deny or Lat
   assert.equal(open, false);
   // Later: the link is dismissed. Confirm / Deny: the link leaves the pending list.
   for (const next of [
-    nextPendingLineGroup([pending], ["p1"]),
+    nextPendingLineGroup([pending], [dismissal("p1")]),
     nextPendingLineGroup([link({ id: "p1", isVerify: true })], []),
     nextPendingLineGroup([], []),
   ]) {
@@ -401,13 +416,13 @@ test("browserSessionStorage: the tab's sessionStorage in a browser, and null whe
 
 test("dismissed ids: a full storage (write throws, read works) keeps what was stored before", () => {
   const storage = {
-    ...memoryStorage({ "line-group-dismissed": '["a"]' }),
+    ...memoryStorage({ "line-group-dismissed": stored(A) }),
     setItem(): void {
       throw new Error("QuotaExceededError");
     },
   };
-  assert.doesNotThrow(() => writeDismissedLineGroups(storage, ["a", "b"]));
-  assert.deepEqual(readDismissedLineGroups(storage), ["a"]);
+  assert.doesNotThrow(() => writeDismissedLineGroups(storage, [A, B]));
+  assert.deepEqual(readDismissedLineGroups(storage), [A]);
 });
 
 test("dismissed ids: array-like objects and nested arrays are not taken for a list of ids", () => {
@@ -437,9 +452,10 @@ function pageSession(storage: Parameters<typeof readDismissedLineGroups>[0]) {
   return {
     next: (links: LineGroupOnSubject[]) =>
       nextPendingLineGroup(links, dismissed),
-    later(id: string) {
-      if (dismissed.includes(id)) return;
-      dismissed = [...dismissed, id];
+    later(id: string, updateAt = AT) {
+      const next = dismissLineGroup(dismissed, { id, updateAt });
+      if (next === dismissed) return;
+      dismissed = next;
       writeDismissedLineGroups(storage, dismissed);
     },
   };
@@ -460,7 +476,10 @@ test('"Later" on all three pending links survives a reload of the same tab, and 
     page.later(expected);
   }
   assert.equal(page.next(threePending), null);
-  assert.equal(storage.items.get("line-group-dismissed"), '["p1","p2","p3"]');
+  assert.equal(
+    storage.items.get("line-group-dismissed"),
+    stored(dismissal("p1"), dismissal("p2"), dismissal("p3")),
+  );
   // Reload: new state, same storage.
   assert.equal(pageSession(storage).next(threePending), null);
   // Another tab has its own sessionStorage.
@@ -468,11 +487,16 @@ test('"Later" on all three pending links survives a reload of the same tab, and 
 });
 
 test('"Later" after a reload adds to the ids already stored instead of replacing them', () => {
-  const storage = memoryStorage({ "line-group-dismissed": '["p1"]' });
+  const storage = memoryStorage({
+    "line-group-dismissed": stored(dismissal("p1")),
+  });
   const page = pageSession(storage);
   assert.equal(page.next(threePending)?.id, "p2");
   page.later("p2");
-  assert.equal(storage.items.get("line-group-dismissed"), '["p1","p2"]');
+  assert.equal(
+    storage.items.get("line-group-dismissed"),
+    stored(dismissal("p1"), dismissal("p2")),
+  );
 });
 
 test('"Later" with storage that throws, or none: the popups still step through until the page reloads', () => {
@@ -493,14 +517,17 @@ test('"Later" with malformed stored JSON: the page starts with nothing dismissed
   const page = pageSession(storage);
   assert.equal(page.next(threePending)?.id, "p1");
   page.later("p1");
-  assert.equal(storage.items.get("line-group-dismissed"), '["p1"]');
+  assert.equal(
+    storage.items.get("line-group-dismissed"),
+    stored(dismissal("p1")),
+  );
   assert.equal(pageSession(storage).next(threePending)?.id, "p2");
 });
 
 // ---- connect popup: more sequences ----
 
 test("connect popup: opened while the only pending link is dismissed it stays open; a code typed in another group then resets it", () => {
-  const dismissed = ["p1"];
+  const dismissed = [dismissal("p1")];
   const first = link({ id: "p1", createAt: "2026-11-25T09:00:00.000Z" });
   let open = true;
   assert.equal(
@@ -621,4 +648,92 @@ test("header LINE button: toggles the connect popup, and does nothing on an arch
   assert.equal(toggleLineConnect(true, false), false);
   assert.equal(toggleLineConnect(false, true), false);
   assert.equal(toggleLineConnect(true, true), false);
+});
+
+// ---- B3: "Later" is forgotten when the group asks again ----
+
+test("dismissal: stored as <link id>:<link updateAt>", () => {
+  assert.equal(
+    lineGroupDismissalKey({ id: "p1", updateAt: "2026-11-25T08:00:00.000Z" }),
+    "p1:2026-11-25T08:00:00.000Z",
+  );
+});
+
+test("dismissal: a pending link is dismissed only while its current id:updateAt is in the list", () => {
+  const before = link({ id: "p1", updateAt: "2026-11-25T08:00:00.000Z" });
+  const dismissed = dismissLineGroup([], before);
+  assert.deepEqual(dismissed, ["p1:2026-11-25T08:00:00.000Z"]);
+  assert.equal(nextPendingLineGroup([before], dismissed), null);
+  // The code is typed in the group again: the server touches updateAt only.
+  const after = { ...before, updateAt: "2026-11-25T08:30:00.000Z" };
+  assert.equal(nextPendingLineGroup([after], dismissed)?.id, "p1");
+});
+
+test("dismissal: entries in the old bare-id format are ignored, on read and when matching", () => {
+  const storage = memoryStorage({
+    "line-group-dismissed": stored("p1", dismissal("p2"), "p3", ":x", "p4:"),
+  });
+  assert.deepEqual(readDismissedLineGroups(storage), [dismissal("p2")]);
+  assert.equal(nextPendingLineGroup([link({ id: "p1" })], ["p1"])?.id, "p1");
+});
+
+test("dismissal: a session that only has old bare ids offers every pending link again", () => {
+  const storage = memoryStorage({
+    "line-group-dismissed": '["p1","p2","p3"]',
+  });
+  assert.equal(pageSession(storage).next(threePending)?.id, "p1");
+});
+
+test("dismissal: Later again after the group asked again replaces the link's older entry", () => {
+  const first = dismissLineGroup([dismissal("other")], {
+    id: "p1",
+    updateAt: "2026-11-25T08:00:00.000Z",
+  });
+  const second = dismissLineGroup(first, {
+    id: "p1",
+    updateAt: "2026-11-25T08:30:00.000Z",
+  });
+  assert.deepEqual(second, [
+    dismissal("other"),
+    "p1:2026-11-25T08:30:00.000Z",
+  ]);
+  // The caller's list is left alone.
+  assert.deepEqual(first, [dismissal("other"), dismissal("p1")]);
+});
+
+test("dismissal: dismissing the same link twice returns the same list", () => {
+  const once = dismissLineGroup([], { id: "p1", updateAt: AT });
+  assert.equal(dismissLineGroup(once, { id: "p1", updateAt: AT }), once);
+});
+
+test("dismissal: an id that is a prefix of another id is a different link", () => {
+  const dismissed = dismissLineGroup([dismissal("p10")], {
+    id: "p1",
+    updateAt: AT,
+  });
+  assert.deepEqual(dismissed, [dismissal("p10"), dismissal("p1")]);
+  assert.equal(
+    nextPendingLineGroup([link({ id: "p10" })], [dismissal("p1")])?.id,
+    "p10",
+  );
+});
+
+test('"Later", then the code is typed again: the confirm popup returns, and a second "Later" holds across a reload', () => {
+  const storage = memoryStorage();
+  const page = pageSession(storage);
+  const asked = link({ id: "p1" });
+  page.later("p1");
+  assert.equal(page.next([asked]), null);
+  assert.equal(pageSession(storage).next([asked]), null);
+  const askedAgain = { ...asked, updateAt: "2026-11-25T09:15:00.000Z" };
+  assert.equal(page.next([askedAgain])?.id, "p1");
+  // A reload in between does not hide it either.
+  assert.equal(pageSession(storage).next([askedAgain])?.id, "p1");
+  page.later("p1", askedAgain.updateAt);
+  assert.equal(page.next([askedAgain]), null);
+  assert.equal(pageSession(storage).next([askedAgain]), null);
+  assert.equal(
+    storage.items.get("line-group-dismissed"),
+    '["p1:2026-11-25T09:15:00.000Z"]',
+  );
 });

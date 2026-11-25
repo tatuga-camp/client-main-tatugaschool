@@ -16,14 +16,48 @@ export function verifiedLineGroups(
   return (links ?? []).filter((link) => link.isVerify);
 }
 
+type DismissableLink = Pick<LineGroupOnSubject, "id" | "updateAt">;
+
+// "Later" is remembered per link AND per time the group asked: the server
+// touches a pending link's updateAt when the code is typed in the group again,
+// which changes this key and so brings the confirm popup back.
+export function lineGroupDismissalKey(link: DismissableLink): string {
+  return `${link.id}:${link.updateAt}`;
+}
+
+// A stored entry in the "<link id>:<link updateAt>" format. Entries in the old
+// bare-id format do not match and are ignored.
+function isDismissalEntry(entry: unknown): entry is string {
+  if (typeof entry !== "string") return false;
+  const separator = entry.indexOf(":");
+  return separator > 0 && separator < entry.length - 1;
+}
+
+// The dismissed list with this link added. An older entry of the same link
+// (dismissed before the group asked again) is replaced. Returns the same list
+// when the link is already dismissed.
+export function dismissLineGroup(
+  dismissed: string[],
+  link: DismissableLink,
+): string[] {
+  const key = lineGroupDismissalKey(link);
+  if (dismissed.includes(key)) return dismissed;
+  return [
+    ...dismissed.filter((entry) => !entry.startsWith(`${link.id}:`)),
+    key,
+  ];
+}
+
 export function nextPendingLineGroup(
   links: LineGroupOnSubject[] | undefined,
-  dismissedIds: string[],
+  dismissed: string[],
 ): LineGroupOnSubject | null {
   const pending = (links ?? [])
     .filter(
       (link) =>
-        !link.isVerify && !!link.verifyToken && !dismissedIds.includes(link.id),
+        !link.isVerify &&
+        !!link.verifyToken &&
+        !dismissed.includes(lineGroupDismissalKey(link)),
     )
     .sort(
       (a, b) => new Date(a.createAt).getTime() - new Date(b.createAt).getTime(),
@@ -31,8 +65,9 @@ export function nextPendingLineGroup(
   return pending[0] ?? null;
 }
 
-// "Later" on the confirm popup lasts for the browser session: the dismissed
-// link ids are kept in sessionStorage under this key, as a JSON array of ids.
+// "Later" on the confirm popup lasts for the browser session: the dismissals
+// are kept in sessionStorage under this key, as a JSON array of
+// "<link id>:<link updateAt>" strings.
 export const LINE_GROUP_DISMISSED_KEY = "line-group-dismissed";
 
 type DismissedStorage = Pick<Storage, "getItem" | "setItem">;
@@ -55,9 +90,7 @@ export function readDismissedLineGroups(
     if (!raw) return [];
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter(
-      (id): id is string => typeof id === "string" && id.length > 0,
-    );
+    return parsed.filter(isDismissalEntry);
   } catch {
     return [];
   }
@@ -65,12 +98,12 @@ export function readDismissedLineGroups(
 
 export function writeDismissedLineGroups(
   storage: DismissedStorage | null | undefined,
-  ids: string[],
+  dismissed: string[],
 ): void {
   try {
     storage?.setItem(
       LINE_GROUP_DISMISSED_KEY,
-      JSON.stringify(Array.from(new Set(ids))),
+      JSON.stringify(Array.from(new Set(dismissed))),
     );
   } catch {
     // Storage unavailable or full: "Later" then lasts until the page reloads.

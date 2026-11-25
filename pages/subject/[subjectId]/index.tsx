@@ -41,7 +41,12 @@ import {
 } from "../../../data/languages";
 import { useSound } from "../../../hook";
 import useClickOutside from "../../../hook/useClickOutside";
-import { ErrorMessages, Language, StudentOnSubject } from "../../../interfaces";
+import {
+  ErrorMessages,
+  Language,
+  LineGroupOnSubject,
+  StudentOnSubject,
+} from "../../../interfaces";
 import {
   fullGradeLabel,
   shortGradeLabel,
@@ -70,6 +75,7 @@ import {
 import { isSubjectArchived } from "../../../utils/subjectArchive";
 import {
   browserSessionStorage,
+  dismissLineGroup,
   nextPendingLineGroup,
   readDismissedLineGroups,
   shouldResetLineConnect,
@@ -134,17 +140,24 @@ function Index({ subjectId }: Props) {
     { subjectId },
     { refetchInterval: triggerLineConnect ? 15_000 : false },
   );
-  // "Later" lasts for the browser session: the dismissed ids start from
-  // sessionStorage and every change is written back. The server render and the
-  // first client render agree, because the link list has not loaded yet.
-  const [dismissedIds, setDismissedIds] = React.useState<string[]>(() =>
-    readDismissedLineGroups(browserSessionStorage()),
+  // "Later" lasts for the browser session: the dismissals ("id:updateAt") start
+  // from sessionStorage and every change is written back. The server render and
+  // the first client render agree, because the link list has not loaded yet.
+  // When the group asks again the link's updateAt changes, so it is offered
+  // again.
+  const [dismissedLineGroups, setDismissedLineGroups] = React.useState<
+    string[]
+  >(() => readDismissedLineGroups(browserSessionStorage()));
+  const pendingLineGroup = nextPendingLineGroup(
+    lineGroups.data,
+    dismissedLineGroups,
   );
-  const pendingLineGroup = nextPendingLineGroup(lineGroups.data, dismissedIds);
-  const dismissPendingLineGroup = (id: string) => {
-    if (dismissedIds.includes(id)) return;
-    const next = [...dismissedIds, id];
-    setDismissedIds(next);
+  const dismissPendingLineGroup = (
+    link: Pick<LineGroupOnSubject, "id" | "updateAt">,
+  ) => {
+    const next = dismissLineGroup(dismissedLineGroups, link);
+    if (next === dismissedLineGroups) return;
+    setDismissedLineGroups(next);
     writeDismissedLineGroups(browserSessionStorage(), next);
   };
   // A pending link showed up while the QR popup was open: reset the popup's
@@ -422,13 +435,13 @@ function Index({ subjectId }: Props) {
       )}
       {subject.data && linePopup === "confirm" && pendingLineGroup && (
         <PopupLayout
-          onClose={() => dismissPendingLineGroup(pendingLineGroup.id)}
+          onClose={() => dismissPendingLineGroup(pendingLineGroup)}
         >
           <VerifyConnectLine
             key={pendingLineGroup.id}
             subjectId={subject.data.id}
             link={pendingLineGroup}
-            onLater={() => dismissPendingLineGroup(pendingLineGroup.id)}
+            onLater={() => dismissPendingLineGroup(pendingLineGroup)}
           />
         </PopupLayout>
       )}
