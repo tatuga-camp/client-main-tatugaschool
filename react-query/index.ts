@@ -25,3 +25,4 @@ export * from "./announcement";
 export * from "./tawk";
 export * from "./issue";
 export * from "./quiz";
+export * from "./line-group";

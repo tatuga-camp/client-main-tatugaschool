@@ -321,10 +321,9 @@ export function useVerifyLineToken() {
     mutationKey: ["verify-line-token"],
     mutationFn: VerifyLineTokenService,
     onSuccess: (data, variables) => {
-      queryClient.setQueryData(
-        ["subject", { id: variables.body.subjectId }],
-        data,
-      );
+      queryClient.invalidateQueries({
+        queryKey: ["line-groups", { subjectId: variables.body.subjectId }],
+      });
     },
   });
 }
