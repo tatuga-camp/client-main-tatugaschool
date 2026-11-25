@@ -273,7 +273,10 @@ function Setting({ subjectId, schoolId }: Props) {
         />
 
         <div id="line-groups">
-          <LineGroupSettings subjectId={subjectId} />
+          <LineGroupSettings
+            subjectId={subjectId}
+            disabled={subjectArchived}
+          />
         </div>
 
         <div className="mt-5 flex min-h-80 flex-col gap-5 rounded-2xl border bg-white p-4">

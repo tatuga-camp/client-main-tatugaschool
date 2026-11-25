@@ -305,6 +305,72 @@ test("settings: links of another subject are not shown", () => {
   assert.ok(html.includes("No LINE group connected yet"));
 });
 
+// ---- LineGroupSettings on an archived subject (disabled) ----
+
+test("settings disabled: switches, Connect another group and Confirm are disabled; Disconnect and Cancel stay enabled", () => {
+  const html = render(<LineGroupSettings subjectId="s1" disabled />, [
+    link({ id: "a" }),
+    link({ id: "b", lineGroupId: "Cb", allowAi: false }),
+    pendingLink(),
+  ]);
+  assert.equal(switches(html).length, 8);
+  assert.ok(switches(html).every(isDisabled));
+  // Disabled switches still show the saved values.
+  assert.deepEqual(switches(html).map(isOn), [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+  ]);
+  const connect = button(html, "Connect another group");
+  assert.equal(connect.length, 1);
+  assert.ok(isDisabled(connect[0]));
+  const confirm = button(html, "Confirm");
+  assert.equal(confirm.length, 1);
+  assert.ok(isDisabled(confirm[0]));
+  const cancel = button(html, "Cancel");
+  assert.equal(cancel.length, 1);
+  assert.ok(!isDisabled(cancel[0]));
+  const disconnect = button(html, "Disconnect");
+  assert.equal(disconnect.length, 2);
+  assert.ok(!disconnect.some(isDisabled));
+});
+
+test("settings disabled: the empty state's connect button is disabled too", () => {
+  const html = render(<LineGroupSettings subjectId="s1" disabled />, []);
+  const connect = button(html, "Connect another group");
+  assert.equal(connect.length, 1);
+  assert.ok(isDisabled(connect[0]));
+});
+
+test("settings disabled: a pending link without a token still cannot be cancelled", () => {
+  const html = render(<LineGroupSettings subjectId="s1" disabled />, [
+    pendingLink({ verifyToken: null }),
+  ]);
+  assert.ok(isDisabled(button(html, "Confirm")[0]));
+  assert.ok(isDisabled(button(html, "Cancel")[0]));
+});
+
+test("settings: disabled={false} leaves every control enabled", () => {
+  const html = render(<LineGroupSettings subjectId="s1" disabled={false} />, [
+    link({}),
+    pendingLink(),
+  ]);
+  assert.ok(!switches(html).some(isDisabled));
+  for (const label of [
+    "Connect another group",
+    "Confirm",
+    "Cancel",
+    "Disconnect",
+  ]) {
+    assert.ok(!isDisabled(button(html, label)[0]), label);
+  }
+});
+
 // ---- VerifyConnectLine ----
 
 const noop = () => {};

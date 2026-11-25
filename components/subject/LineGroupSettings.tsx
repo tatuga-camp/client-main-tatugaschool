@@ -41,9 +41,12 @@ function showError(error: unknown) {
 type CardProps = {
   link: LineGroupOnSubject;
   language: Language;
+  // True on an archived subject: nothing may be switched on or connected, but
+  // removing a connection (Disconnect, Cancel) is always allowed.
+  disabled: boolean;
 };
 
-function VerifiedCard({ link, language }: CardProps) {
+function VerifiedCard({ link, language, disabled }: CardProps) {
   const updateLineGroup = useUpdateLineGroup();
   const disconnectLineGroup = useDisconnectLineGroup();
   const [isConfirmingDisconnect, setIsConfirmingDisconnect] = useState(false);
@@ -55,6 +58,7 @@ function VerifiedCard({ link, language }: CardProps) {
   const name = lineGroupDisplayName(link, language);
 
   const handleSwitch = async (field: LineGroupSwitch, value: boolean) => {
+    if (disabled) return;
     setOptimistic({ [field]: value });
     try {
       await updateLineGroup.mutateAsync({
@@ -135,7 +139,7 @@ function VerifiedCard({ link, language }: CardProps) {
             </span>
             <Switch
               checked={optimistic[field] ?? link[field]}
-              disabled={updateLineGroup.isPending}
+              disabled={disabled || updateLineGroup.isPending}
               setChecked={(value) => handleSwitch(field, value)}
             />
           </label>
@@ -145,12 +149,13 @@ function VerifiedCard({ link, language }: CardProps) {
   );
 }
 
-function PendingCard({ link, language }: CardProps) {
+function PendingCard({ link, language, disabled }: CardProps) {
   const verifyLineToken = useVerifyLineToken();
   const name = lineGroupDisplayName(link, language);
 
   const handleVerify = async (confirm: boolean) => {
     if (!link.verifyToken) return;
+    if (confirm && disabled) return;
     try {
       await verifyLineToken.mutateAsync({
         body: { token: link.verifyToken, confirm, subjectId: link.subjectId },
@@ -160,7 +165,7 @@ function PendingCard({ link, language }: CardProps) {
     }
   };
 
-  const disabled = verifyLineToken.isPending || !link.verifyToken;
+  const busy = verifyLineToken.isPending || !link.verifyToken;
   return (
     <li className="flex flex-wrap items-center justify-between gap-3 bg-amber-50/60 p-4">
       <div className="flex min-w-0 flex-1 items-center gap-2">
@@ -181,7 +186,7 @@ function PendingCard({ link, language }: CardProps) {
         <button
           type="button"
           onClick={() => handleVerify(true)}
-          disabled={disabled}
+          disabled={busy || disabled}
           className="flex items-center gap-2 rounded-xl bg-[#00B900] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#009900] disabled:opacity-50"
         >
           {verifyLineToken.isPending && <FaSpinner className="animate-spin" />}
@@ -190,7 +195,7 @@ function PendingCard({ link, language }: CardProps) {
         <button
           type="button"
           onClick={() => handleVerify(false)}
-          disabled={disabled}
+          disabled={busy}
           className="rounded-xl bg-gray-100 px-3 py-1.5 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-200 disabled:opacity-50"
         >
           {lineGroupLanguage.cancel(language)}
@@ -202,9 +207,11 @@ function PendingCard({ link, language }: CardProps) {
 
 type Props = {
   subjectId: string;
+  // True when the subject is archived (same source as SubjectPermission).
+  disabled?: boolean;
 };
 
-function LineGroupSettings({ subjectId }: Props) {
+function LineGroupSettings({ subjectId, disabled = false }: Props) {
   const language = useGetLanguage();
   const lang = language.data ?? "en";
   const [triggerConnect, setTriggerConnect] = useState(false);
@@ -229,7 +236,8 @@ function LineGroupSettings({ subjectId }: Props) {
     <button
       type="button"
       onClick={() => setTriggerConnect(true)}
-      className="flex shrink-0 items-center justify-center gap-1 rounded-xl bg-[#00B900] px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#009900] active:scale-95"
+      disabled={disabled}
+      className="flex shrink-0 items-center justify-center gap-1 rounded-xl bg-[#00B900] px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#009900] active:scale-95 disabled:opacity-50 disabled:hover:bg-[#00B900] disabled:active:scale-100"
     >
       <IoAdd className="text-lg" />
       {lineGroupLanguage.connectAnother(lang)}
@@ -238,7 +246,7 @@ function LineGroupSettings({ subjectId }: Props) {
 
   return (
     <div className="mt-5 flex flex-col gap-5 rounded-2xl border bg-white p-4">
-      {triggerConnect && (
+      {triggerConnect && !disabled && (
         <PopupLayout onClose={() => setTriggerConnect(false)}>
           <QrCodeLineConnect
             subjectId={subjectId}
@@ -291,9 +299,19 @@ function LineGroupSettings({ subjectId }: Props) {
         <ul className="divide-y overflow-hidden rounded-2xl border">
           {links.map((link) =>
             link.isVerify ? (
-              <VerifiedCard key={link.id} link={link} language={lang} />
+              <VerifiedCard
+                key={link.id}
+                link={link}
+                language={lang}
+                disabled={disabled}
+              />
             ) : (
-              <PendingCard key={link.id} link={link} language={lang} />
+              <PendingCard
+                key={link.id}
+                link={link}
+                language={lang}
+                disabled={disabled}
+              />
             ),
           )}
         </ul>
