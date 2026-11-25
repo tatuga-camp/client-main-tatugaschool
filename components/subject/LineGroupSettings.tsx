@@ -18,7 +18,7 @@ import {
 } from "../../react-query";
 import {
   lineGroupDisplayName,
-  pendingLineGroupIds,
+  pendingLineGroupKeys,
   shouldResetSettingsConnect,
 } from "../../utils/lineGroup";
 import Switch from "../common/Switch";
@@ -226,26 +226,29 @@ function LineGroupSettings({ subjectId, disabled = false }: Props) {
   const links = lineGroups.data ?? [];
 
   // Once the code typed in LINE shows up as a pending link, the QR popup has
-  // done its job: reset it so the confirm step is not hidden behind it. Ids
-  // are compared, not counts, because one pending link can replace another in
-  // a single refresh. The popup is also reset when the section becomes
-  // disabled, so it does not come back if the subject is restored.
-  const pendingIds = pendingLineGroupIds(links);
-  const pendingIdsKey = JSON.stringify(pendingIds);
-  const previousPendingIds = useRef(pendingIds);
+  // done its job: reset it so the confirm step is not hidden behind it. The
+  // same goes for a pending group that asks again (its updateAt changes), so
+  // id:updateAt keys of the pending links are compared — not counts, because
+  // one pending link can replace another in a single refresh. Verified links
+  // are not part of the keys and never reset it. The popup is also reset when
+  // the section becomes disabled, so it does not come back if the subject is
+  // restored.
+  const pendingKeys = pendingLineGroupKeys(links);
+  const pendingKeysJson = JSON.stringify(pendingKeys);
+  const previousPendingKeys = useRef(pendingKeys);
   useEffect(() => {
-    const currentPendingIds: string[] = JSON.parse(pendingIdsKey);
+    const currentPendingKeys: string[] = JSON.parse(pendingKeysJson);
     if (
       shouldResetSettingsConnect({
-        previousPendingIds: previousPendingIds.current,
-        pendingIds: currentPendingIds,
+        previousPendingKeys: previousPendingKeys.current,
+        pendingKeys: currentPendingKeys,
         disabled,
       })
     ) {
       setTriggerConnect(false);
     }
-    previousPendingIds.current = currentPendingIds;
-  }, [pendingIdsKey, disabled]);
+    previousPendingKeys.current = currentPendingKeys;
+  }, [pendingKeysJson, disabled]);
 
   const connectButton = (
     <button

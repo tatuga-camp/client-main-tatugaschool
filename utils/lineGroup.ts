@@ -142,22 +142,29 @@ export function toggleLineConnect(isOpen: boolean, archived: boolean): boolean {
   return archived ? false : !isOpen;
 }
 
-// The ids of the links still waiting for confirmation, in list order.
-export function pendingLineGroupIds(
+// The "<link id>:<link updateAt>" keys (the same key as the "Later" dismissal)
+// of the links still waiting for confirmation, in list order. Verified links
+// are left out, so nothing that happens to them shows up here.
+export function pendingLineGroupKeys(
   links: LineGroupOnSubject[] | undefined,
 ): string[] {
-  return (links ?? []).filter((link) => !link.isVerify).map((link) => link.id);
+  return (links ?? [])
+    .filter((link) => !link.isVerify)
+    .map(lineGroupDismissalKey);
 }
 
 // The QR popup inside the settings section resets its open state when a
-// pending link id appears that was not in the previous list, and when the
-// section becomes disabled (archived subject). Ids are compared, not counts:
-// one pending link can replace another in a single refresh.
+// pending link key appears that was not in the previous list — a new pending
+// link, or one already listed whose group asked again (updateAt touched) — and
+// when the section becomes disabled (archived subject). Keys are compared, not
+// counts: one pending link can replace another in a single refresh.
 export function shouldResetSettingsConnect(state: {
-  previousPendingIds: string[];
-  pendingIds: string[];
+  previousPendingKeys: string[];
+  pendingKeys: string[];
   disabled: boolean;
 }): boolean {
   if (state.disabled) return true;
-  return state.pendingIds.some((id) => !state.previousPendingIds.includes(id));
+  return state.pendingKeys.some(
+    (key) => !state.previousPendingKeys.includes(key),
+  );
 }

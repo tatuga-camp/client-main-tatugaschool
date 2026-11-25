@@ -1,12 +1,12 @@
-// The QR popup inside LineGroupSettings resets itself (spec amendments A7, B4).
+// The QR popup inside LineGroupSettings resets itself (spec amendments A7, B4, C3).
 // The helper that decides is covered in utils/lineGroup.test.ts; this file runs
-// the component's own effect, so the wiring (previous ids kept in a ref, the
+// the component's own effect, so the wiring (previous keys kept in a ref, the
 // effect's dependencies, the popup's render condition) is covered too.
 //
 // There is no DOM here and renderToStaticMarkup never runs effects, so three
 // hooks of the component body are served by a small harness that keeps their
 // values between renders: the popup's open state (the first useState(false)),
-// the previous pending ids (the first useRef of an array) and the reset effect
+// the previous pending keys (the first useRef of an array) and the reset effect
 // (the useEffect whose dependencies are [json string, boolean]). Every other
 // hook call goes to React untouched. The first test proves the harness holds
 // the right hooks before the others rely on it.
@@ -367,17 +367,90 @@ test("B4: pending links that were already listed when the popup opened do not re
   const view = mountSettings().show(links);
   view.openPopup(links);
   assert.equal(view.popupShown, true);
-  // The same links again, in another order, and the group asking again
-  // (updateAt touched, same id): none of these is a new pending link.
+  // The same links again, in another order: none of these is a new pending
+  // link and none asked again.
   view.show([pending("p2"), v1, pending("p1")]);
   assert.equal(view.popupShown, true);
-  view.show([
-    v1,
-    pending("p1", { updateAt: "2026-11-25T09:00:00.000Z" }),
-    pending("p2"),
-  ]);
+  view.show([v1, pending("p1"), pending("p2")]);
   assert.equal(view.popupShown, true);
   assert.equal(view.openState, true);
+});
+
+// ---- C3: a pending group that asks again resets the popup ----
+
+const LATER = "2026-11-25T09:00:00.000Z";
+
+test("C3: a pending link already listed that comes back with a different updateAt resets the popup — state too", () => {
+  const links = [v1, pending("p1"), pending("p2")];
+  const view = mountSettings().show(links);
+  view.openPopup(links);
+  assert.equal(view.popupShown, true);
+  // The group of p1 typed the code again: same id, updateAt touched.
+  view.show([v1, pending("p1", { updateAt: LATER }), pending("p2")]);
+  assert.equal(view.openState, false);
+  assert.equal(view.popupShown, false);
+  // Both pending cards are still there to act on.
+  assert.equal(view.button("Confirm").length, 2);
+});
+
+test("C3: the only pending link asking again resets the popup", () => {
+  const view = mountSettings().show([pending("p1")]);
+  view.openPopup([pending("p1")]);
+  view.show([pending("p1", { updateAt: LATER })]);
+  assert.equal(view.openState, false);
+  assert.equal(view.popupShown, false);
+});
+
+test("C3: once reset by a group asking again, the same list does not reset a popup opened afterwards; asking once more does", () => {
+  const asked = [v1, pending("p1", { updateAt: LATER })];
+  const view = mountSettings().show([v1, pending("p1")]);
+  view.openPopup([v1, pending("p1")]);
+  view.show(asked);
+  assert.equal(view.openState, false);
+
+  view.openPopup(asked);
+  assert.equal(view.popupShown, true);
+  view.show(asked);
+  assert.equal(view.popupShown, true);
+
+  view.show([v1, pending("p1", { updateAt: "2026-11-25T10:00:00.000Z" })]);
+  assert.equal(view.openState, false);
+  assert.equal(view.popupShown, false);
+});
+
+test("C3: changes to verified links never reset the popup — updateAt touched (a switch flipped), with pending links listed", () => {
+  const links = [v1, pending("p1")];
+  const view = mountSettings().show(links);
+  view.openPopup(links);
+  view.show([link({ id: "v1", updateAt: LATER }), pending("p1")]);
+  assert.equal(view.openState, true);
+  view.show([
+    link({ id: "v1", updateAt: LATER, allowAi: false, groupName: "renamed" }),
+    pending("p1"),
+  ]);
+  assert.equal(view.openState, true);
+  assert.equal(view.popupShown, true);
+});
+
+test("C3: a pending link confirmed elsewhere (its updateAt changes as it becomes verified) does not reset the popup", () => {
+  const links = [v1, pending("p1"), pending("p2")];
+  const view = mountSettings().show(links);
+  view.openPopup(links);
+  view.show([
+    v1,
+    link({ id: "p1", lineGroupId: "C-p1", updateAt: LATER }),
+    pending("p2"),
+  ]);
+  assert.equal(view.openState, true);
+  assert.equal(view.popupShown, true);
+});
+
+test("C3: a group asking again while the popup is closed does not stop it being opened afterwards", () => {
+  const view = mountSettings().show([v1, pending("p1")]);
+  view.show([v1, pending("p1", { updateAt: LATER })]);
+  assert.equal(view.openState, false);
+  view.openPopup([v1, pending("p1", { updateAt: LATER })]);
+  assert.equal(view.popupShown, true);
 });
 
 test("B4: a pending link confirmed or denied elsewhere, or a verified group added or removed, does not reset it", () => {

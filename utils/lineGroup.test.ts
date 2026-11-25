@@ -8,7 +8,7 @@ import {
   lineGroupDismissalKey,
   lineGroupDisplayName,
   nextPendingLineGroup,
-  pendingLineGroupIds,
+  pendingLineGroupKeys,
   readDismissedLineGroups,
   shouldResetSettingsConnect,
   shouldResetLineConnect,
@@ -740,37 +740,47 @@ test('"Later", then the code is typed again: the confirm popup returns, and a se
   );
 });
 
-// ---- B4: the QR popup inside the settings section resets itself ----
+// ---- B4 / C3: the QR popup inside the settings section resets itself ----
 
 const verified = (id: string) =>
   link({ id, isVerify: true, verifyToken: null, verifiedAt: AT });
 
-test("settings connect popup: pendingLineGroupIds lists the ids of the links that are not verified, in list order", () => {
+const LATER = "2026-11-25T09:15:00.000Z";
+const keys = (...ids: string[]) => ids.map((id) => dismissal(id));
+
+test("settings connect popup: pendingLineGroupKeys lists the id:updateAt keys of the links that are not verified, in list order", () => {
   assert.deepEqual(
-    pendingLineGroupIds([
+    pendingLineGroupKeys([
       verified("v1"),
-      link({ id: "p2" }),
+      link({ id: "p2", updateAt: LATER }),
       link({ id: "p1", verifyToken: null }),
     ]),
-    ["p2", "p1"],
+    [`p2:${LATER}`, `p1:${AT}`],
   );
-  assert.deepEqual(pendingLineGroupIds([]), []);
-  assert.deepEqual(pendingLineGroupIds(undefined), []);
+  assert.deepEqual(pendingLineGroupKeys([]), []);
+  assert.deepEqual(pendingLineGroupKeys(undefined), []);
+});
+
+test("settings connect popup: pendingLineGroupKeys uses the same key as the Later dismissal (C3)", () => {
+  const asked = link({ id: "p1", updateAt: LATER });
+  assert.deepEqual(pendingLineGroupKeys([asked]), [
+    lineGroupDismissalKey(asked),
+  ]);
 });
 
 test("settings connect popup: a pending link id that was not in the previous list resets it", () => {
   assert.equal(
     shouldResetSettingsConnect({
-      previousPendingIds: [],
-      pendingIds: ["p1"],
+      previousPendingKeys: [],
+      pendingKeys: keys("p1"),
       disabled: false,
     }),
     true,
   );
   assert.equal(
     shouldResetSettingsConnect({
-      previousPendingIds: ["p1"],
-      pendingIds: ["p1", "p2"],
+      previousPendingKeys: keys("p1"),
+      pendingKeys: keys("p1", "p2"),
       disabled: false,
     }),
     true,
@@ -782,49 +792,93 @@ test("settings connect popup: one pending link replaced by another (same count, 
   // and a link can be denied in the same refresh that brings a new one.
   assert.equal(
     shouldResetSettingsConnect({
-      previousPendingIds: ["p1", "p2", "p3"],
-      pendingIds: ["p2", "p3", "p4"],
+      previousPendingKeys: keys("p1", "p2", "p3"),
+      pendingKeys: keys("p2", "p3", "p4"),
       disabled: false,
     }),
     true,
   );
   assert.equal(
     shouldResetSettingsConnect({
-      previousPendingIds: ["p1"],
-      pendingIds: ["p2"],
+      previousPendingKeys: keys("p1"),
+      pendingKeys: keys("p2"),
       disabled: false,
     }),
     true,
   );
 });
 
-test("settings connect popup: the same ids, fewer ids or a different order do not reset it", () => {
-  for (const [previousPendingIds, pendingIds] of [
+test("settings connect popup: a pending link already listed that comes back with a different updateAt resets it (C3)", () => {
+  // The group typed the code again: same link id, updateAt touched.
+  assert.equal(
+    shouldResetSettingsConnect({
+      previousPendingKeys: pendingLineGroupKeys([link({ id: "p1" })]),
+      pendingKeys: pendingLineGroupKeys([link({ id: "p1", updateAt: LATER })]),
+      disabled: false,
+    }),
+    true,
+  );
+  // One of several asks again, the others unchanged.
+  assert.equal(
+    shouldResetSettingsConnect({
+      previousPendingKeys: pendingLineGroupKeys([
+        link({ id: "p1" }),
+        link({ id: "p2" }),
+      ]),
+      pendingKeys: pendingLineGroupKeys([
+        link({ id: "p1" }),
+        link({ id: "p2", updateAt: LATER }),
+      ]),
+      disabled: false,
+    }),
+    true,
+  );
+});
+
+test("settings connect popup: a verified link whose updateAt changes never resets it (C3)", () => {
+  assert.equal(
+    shouldResetSettingsConnect({
+      previousPendingKeys: pendingLineGroupKeys([
+        verified("v1"),
+        link({ id: "p1" }),
+      ]),
+      pendingKeys: pendingLineGroupKeys([
+        { ...verified("v1"), updateAt: LATER },
+        link({ id: "p1" }),
+      ]),
+      disabled: false,
+    }),
+    false,
+  );
+});
+
+test("settings connect popup: the same keys, fewer keys or a different order do not reset it", () => {
+  for (const [previousPendingKeys, pendingKeys] of [
     [[], []],
-    [["p1"], ["p1"]],
-    [["p1", "p2"], ["p2", "p1"]],
-    [["p1", "p2"], ["p1"]],
-    [["p1"], []],
+    [keys("p1"), keys("p1")],
+    [keys("p1", "p2"), keys("p2", "p1")],
+    [keys("p1", "p2"), keys("p1")],
+    [keys("p1"), []],
   ]) {
     assert.equal(
       shouldResetSettingsConnect({
-        previousPendingIds,
-        pendingIds,
+        previousPendingKeys,
+        pendingKeys,
         disabled: false,
       }),
       false,
-      JSON.stringify([previousPendingIds, pendingIds]),
+      JSON.stringify([previousPendingKeys, pendingKeys]),
     );
   }
 });
 
 test("settings connect popup: a pending link that becomes verified does not reset it", () => {
-  const before = pendingLineGroupIds([link({ id: "p1" })]);
-  const after = pendingLineGroupIds([verified("p1")]);
+  const before = pendingLineGroupKeys([link({ id: "p1" })]);
+  const after = pendingLineGroupKeys([{ ...verified("p1"), updateAt: LATER }]);
   assert.equal(
     shouldResetSettingsConnect({
-      previousPendingIds: before,
-      pendingIds: after,
+      previousPendingKeys: before,
+      pendingKeys: after,
       disabled: false,
     }),
     false,
@@ -832,11 +886,11 @@ test("settings connect popup: a pending link that becomes verified does not rese
 });
 
 test("settings connect popup: a disabled section (archived subject) resets it, whatever is pending", () => {
-  for (const pendingIds of [[], ["p1"]]) {
+  for (const pendingKeys of [[], keys("p1")]) {
     assert.equal(
       shouldResetSettingsConnect({
-        previousPendingIds: pendingIds,
-        pendingIds,
+        previousPendingKeys: pendingKeys,
+        pendingKeys,
         disabled: true,
       }),
       true,
