@@ -1,198 +1,344 @@
-import React, { RefObject } from "react";
+import Link from "next/link";
+import { Toast } from "primereact/toast";
+import React, { RefObject, useEffect, useMemo, useRef, useState } from "react";
+import { FiCopy, FiSearch } from "react-icons/fi";
 import { IoMdClose } from "react-icons/io";
+import { MdCheck } from "react-icons/md";
+import Swal from "sweetalert2";
+import {
+  classroomUiLanguage,
+  subjectsDataLanguage,
+  subjectUiLanguage,
+} from "../../data/languages";
+import { EducationYear, ErrorMessages, Subject } from "../../interfaces";
 import {
   useDuplicateSubject,
   useGetClassrooms,
   useGetLanguage,
 } from "../../react-query";
-import LoadingBar from "../common/LoadingBar";
-import { EducationYear, ErrorMessages, Subject } from "../../interfaces";
-import { subjectsDataLanguage } from "../../data/languages";
+import { fullGradeLabel, shortGradeLabel, splitLevel } from "../../utils/classLevel";
+import {
+  filterClassrooms,
+  groupClassroomsByGrade,
+  NO_LEVEL_KEY,
+} from "../../utils/classroomGroups";
+import { subjectEmoji } from "../../utils/subjectList";
+import { describedBy, fieldInputClass, FormField } from "../common/FormField";
 import InputEducationYear from "../common/InputEducationYear";
-import InputWithIcon from "../common/InputWithIcon";
-import { useSound } from "../../hook";
-import { MdOutlineSubtitles } from "react-icons/md";
-import { IoDuplicate } from "react-icons/io5";
-import { Toast } from "primereact/toast";
-import Swal from "sweetalert2";
 
 type Props = {
   onClose: () => void;
   subject: Subject;
   toast: RefObject<Toast>;
 };
+
 function DuplicateSubject({ onClose, subject, toast }: Props) {
   const duplicate = useDuplicateSubject();
   const language = useGetLanguage();
+  const lang = language.data ?? "en";
   const classrooms = useGetClassrooms({
     schoolId: subject.schoolId,
     isAchieved: false,
   });
-  const [data, setData] = React.useState<{
-    title?: string;
-    description?: string;
-    educationYear: EducationYear;
-    classId?: string;
-  }>({
-    title: `Duplicate of ${subject.title}`,
-    description: subject.description,
-    classId: subject.classId,
-    educationYear: subject.educationYear as EducationYear,
-  });
+  const [title, setTitle] = useState(`Duplicate of ${subject.title}`);
+  const [description, setDescription] = useState(subject.description ?? "");
+  const [year, setYear] = useState<EducationYear>(
+    subject.educationYear as EducationYear,
+  );
+  const [classId, setClassId] = useState<string | undefined>(subject.classId);
+  const [classSearch, setClassSearch] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const classListRef = useRef<HTMLDivElement>(null);
+  const scrolledToSelected = useRef(false);
+
+  const groups = useMemo(
+    () => groupClassroomsByGrade(filterClassrooms(classrooms.data ?? [], classSearch)),
+    [classrooms.data, classSearch],
+  );
+
+  // The original subject's classroom is pre-selected; bring it into view once
+  // the list loads. Scrolls only the list, never the dialog body.
+  useEffect(() => {
+    if (scrolledToSelected.current || !classrooms.data) return;
+    scrolledToSelected.current = true;
+    const list = classListRef.current;
+    const selected = list?.querySelector<HTMLElement>('[aria-checked="true"]');
+    if (list && selected) {
+      list.scrollTop =
+        selected.offsetTop - list.clientHeight / 2 + selected.clientHeight / 2;
+    }
+  }, [classrooms.data]);
+
+  const errors = {
+    title: title.trim() ? null : subjectUiLanguage.required(lang),
+    description: description.trim() ? null : subjectUiLanguage.required(lang),
+    classId: classId ? null : subjectUiLanguage.classroomRequired(lang),
+  };
+  const shown = (field: keyof typeof errors) => (submitted ? errors[field] : null);
 
   const handleDuplicateSubject = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitted(true);
+    if (errors.title || errors.description || !classId) {
+      const first = errors.title
+        ? "subject-duplicate-title"
+        : errors.description
+          ? "subject-duplicate-description"
+          : "subject-duplicate-classroom-search";
+      document.getElementById(first)?.focus();
+      return;
+    }
     try {
-      e.preventDefault();
-      if (!data.title || !data.description || !data.classId) {
-        throw new Error("Please fill all the fields");
-      }
       await duplicate.mutateAsync({
-        title: data.title,
-        description: data.description,
-        educationYear: data.educationYear,
-        classroomId: data.classId,
+        title: title.trim(),
+        description: description.trim(),
+        educationYear: year,
+        classroomId: classId,
         subjectId: subject.id,
         ...(subject.backgroundImage && {
           backgroundImage: subject.backgroundImage,
         }),
       });
-
       toast.current?.show({
         severity: "success",
-        summary: "Success",
-        detail: "Subject created",
+        summary: subjectUiLanguage.duplicated(lang),
         life: 3000,
       });
       onClose();
     } catch (error) {
       console.error(error);
-      let result = error as ErrorMessages;
+      const result = error as ErrorMessages | undefined;
       Swal.fire({
-        title: result.error ? result.error : "Something Went Wrong",
-        text: result.message.toString(),
-        footer: result.statusCode
-          ? "Code Error: " + result.statusCode?.toString()
+        title: result?.error ? result.error : "Something Went Wrong",
+        text: result?.message?.toString(),
+        footer: result?.statusCode
+          ? "Code Error: " + result.statusCode.toString()
           : "",
         icon: "error",
       });
     }
   };
 
+  const noClassrooms = classrooms.data?.length === 0;
+
   return (
     <form
+      noValidate
       onSubmit={handleDuplicateSubject}
-      className="flex h-max flex-col gap-2 rounded-2xl bg-white p-3 xl:w-5/12 2xl:w-4/12"
+      className="flex max-h-[min(90dvh,48rem)] w-[min(36rem,calc(100vw-2rem))] flex-col rounded-3xl bg-white font-Anuphan shadow-xl"
     >
-      <header className="flex w-full justify-between border-b">
-        <h1 className="text-lg font-semibold">Duplicate Subject</h1>
+      <header className="flex items-start justify-between gap-3 px-5 pb-2 pt-5 sm:px-6">
+        <div className="min-w-0">
+          <h2 className="text-lg font-bold text-icon-color">
+            {subjectsDataLanguage.duplicate(lang)}
+          </h2>
+          <p className="truncate text-sm text-icon-color/60">
+            {subjectUiLanguage.duplicateOf(lang, subject.title)}
+          </p>
+        </div>
         <button
           type="button"
-          onClick={() => onClose()}
-          className="flex h-6 w-6 items-center justify-center rounded text-lg font-semibold hover:bg-gray-300/50"
+          onClick={onClose}
+          aria-label={classroomUiLanguage.close(lang)}
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xl text-icon-color/70 transition-colors hover:bg-background-color"
         >
-          <IoMdClose />
+          <IoMdClose aria-hidden />
         </button>
       </header>
-      {duplicate.isPending && <LoadingBar />}
-      <div className="flex h-96 flex-col gap-5 overflow-auto p-2 pt-5">
-        <div className="flex flex-col">
-          <span>
-            {subjectsDataLanguage.educationYear(language.data ?? "en")}
+
+      <div className="flex min-h-0 flex-col gap-5 overflow-auto px-5 py-3 sm:px-6">
+        <FormField
+          id="subject-duplicate-title"
+          label={subjectUiLanguage.nameLabel(lang)}
+          error={shown("title")}
+        >
+          <div className="flex items-center gap-3">
+            {/* Live preview of the icon the subject card will show. */}
+            <span
+              aria-hidden
+              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary-color/10 text-2xl"
+            >
+              {subjectEmoji(title)}
+            </span>
+            <input
+              id="subject-duplicate-title"
+              autoFocus
+              onFocus={(e) => e.target.select()}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder={subjectUiLanguage.namePlaceholder(lang)}
+              aria-invalid={!!shown("title")}
+              aria-describedby={describedBy("subject-duplicate-title", shown("title"))}
+              className={fieldInputClass(!!shown("title"))}
+            />
+          </div>
+        </FormField>
+
+        <FormField
+          id="subject-duplicate-description"
+          label={subjectUiLanguage.descriptionLabel(lang)}
+          error={shown("description")}
+        >
+          <textarea
+            id="subject-duplicate-description"
+            rows={2}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder={subjectUiLanguage.descriptionPlaceholder(lang)}
+            aria-invalid={!!shown("description")}
+            aria-describedby={describedBy(
+              "subject-duplicate-description",
+              shown("description"),
+            )}
+            className={`${fieldInputClass(!!shown("description"))} h-auto resize-y py-3 leading-relaxed`}
+          />
+        </FormField>
+
+        <div className="flex flex-col gap-1.5">
+          <span className="text-sm font-medium text-icon-color">
+            {subjectsDataLanguage.educationYear(lang)}
           </span>
           <InputEducationYear
-            required={true}
-            value={data?.educationYear}
-            onChange={(value) => {
-              setData((prev) => ({
-                ...prev,
-                educationYear: value as EducationYear,
-              }));
-            }}
+            required
+            value={year}
+            onChange={(value) => setYear(value as EducationYear)}
           />
         </div>
-        <InputWithIcon
-          required
-          title="Name"
-          value={data?.title ?? ""}
-          onChange={(value) => {
-            setData((prev) => ({ ...prev, title: value }));
-          }}
-          placeholder="Enter subject name"
-          icon={<MdOutlineSubtitles />}
-        />
-        <InputWithIcon
-          required
-          title="Description"
-          value={data.description ?? ""}
-          onChange={(value) => {
-            setData((prev) => ({ ...prev, description: value }));
-          }}
-          placeholder="Enter subject description"
-          icon={<MdOutlineSubtitles />}
-        />
 
-        <label className="flex flex-col">
-          <span className="text-sm">
-            {subjectsDataLanguage.selectClass(language.data ?? "en")}
-          </span>
-          <select
-            disabled={classrooms.isLoading}
-            required
-            className="main-select border"
-            value={data?.classId}
-            onChange={(e) => {
-              setData((prev) => ({ ...prev, classId: e.target.value }));
-            }}
-          >
-            {classrooms.isLoading && <option>Loading...</option>}
-            {classrooms.data
-              ?.sort((a, b) =>
-                (a.creator?.email ?? "").localeCompare(b.creator?.email ?? ""),
-              )
-              .map((classroom) => {
-                return (
-                  <option key={classroom.id} value={classroom.id}>
-                    <div className="">
-                      <span>{classroom.title}</span>
-                      {" - "}
-                      <span className="">{classroom.level}</span>:{" "}
-                      <span className="">
-                        {classroom.creator?.email ?? "No Creator Found"}
-                      </span>
-                    </div>
-                  </option>
-                );
-              })}
-          </select>
-          {classrooms.data && classrooms.data?.length === 0 && (
-            <span className="text-sm text-red-700">
-              {subjectsDataLanguage.create_class_first(language.data ?? "en")}
-            </span>
+        <fieldset className="flex min-w-0 flex-col gap-1.5">
+          <legend className="text-sm font-medium text-icon-color">
+            {subjectUiLanguage.pickClassroom(lang)}
+          </legend>
+          <p className="text-sm text-icon-color/60">
+            {subjectUiLanguage.pickClassroomHint(lang)}
+          </p>
+          {noClassrooms ? (
+            <div className="mt-1 flex flex-col items-start gap-2 rounded-2xl bg-warning-color/15 p-4 text-sm text-icon-color">
+              {subjectsDataLanguage.create_class_first(lang)}
+              <Link
+                href={`/school/${subject.schoolId}?menu=Classes`}
+                className="font-semibold text-primary-color hover:underline"
+              >
+                {subjectUiLanguage.goToClasses(lang)}
+              </Link>
+            </div>
+          ) : (
+            <>
+              <label className="relative mt-1">
+                <span className="sr-only">{subjectUiLanguage.searchClassrooms(lang)}</span>
+                <FiSearch
+                  aria-hidden
+                  className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-icon-color/40"
+                />
+                <input
+                  id="subject-duplicate-classroom-search"
+                  type="search"
+                  value={classSearch}
+                  onChange={(e) => setClassSearch(e.target.value)}
+                  placeholder={subjectUiLanguage.searchClassrooms(lang)}
+                  className={`${fieldInputClass(!!shown("classId"))} pl-11`}
+                />
+              </label>
+              <div
+                ref={classListRef}
+                role="radiogroup"
+                aria-label={subjectUiLanguage.pickClassroom(lang)}
+                className="relative max-h-60 overflow-auto rounded-2xl bg-background-color p-2"
+              >
+                {classrooms.isLoading && (
+                  <div className="h-12 animate-pulse rounded-xl bg-white" />
+                )}
+                {!classrooms.isLoading && groups.length === 0 && (
+                  <p className="px-2 py-4 text-center text-sm text-icon-color/60">
+                    {subjectUiLanguage.noClassroomMatch(lang, classSearch.trim())}
+                  </p>
+                )}
+                {groups.map((group) => (
+                  <div key={group.key} className="mb-2 last:mb-0">
+                    <p className="px-2 pb-1 pt-1 text-xs font-semibold text-icon-color/50">
+                      {group.key === NO_LEVEL_KEY
+                        ? classroomUiLanguage.noLevel(lang)
+                        : fullGradeLabel(group.key, lang)}
+                    </p>
+                    {group.items.map((classroom) => {
+                      const selected = classroom.id === classId;
+                      const { grade, room } = splitLevel(classroom.level);
+                      return (
+                        <button
+                          key={classroom.id}
+                          type="button"
+                          role="radio"
+                          aria-checked={selected}
+                          onClick={() => setClassId(classroom.id)}
+                          className={`mb-1 flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition-colors last:mb-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-color/40 ${
+                            selected
+                              ? "bg-white ring-2 ring-primary-color"
+                              : "bg-white/60 hover:bg-white"
+                          }`}
+                        >
+                          <span className="shrink-0 rounded-lg bg-primary-color/10 px-1.5 py-0.5 text-xs font-bold text-primary-color">
+                            {shortGradeLabel(grade, lang)}
+                            {room ? `/${room}` : ""}
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-sm font-semibold text-icon-color">
+                              {classroom.title}
+                            </span>
+                            {classroom.creator && (
+                              <span className="block truncate text-xs text-icon-color/60">
+                                {classroomUiLanguage.createdBy(
+                                  lang,
+                                  `${classroom.creator.firstName} ${classroom.creator.lastName}`,
+                                )}
+                              </span>
+                            )}
+                          </span>
+                          {selected && (
+                            <MdCheck aria-hidden className="shrink-0 text-lg text-primary-color" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+              {shown("classId") && (
+                <p role="alert" className="text-sm text-error-color">
+                  {shown("classId")}
+                </p>
+              )}
+            </>
           )}
-        </label>
+        </fieldset>
       </div>
 
-      <div className="flex w-full justify-end gap-3 border-t px-3 py-2">
-        <div className="flex items-center justify-center gap-3">
-          <button
-            onClick={() => {
-              onClose();
-            }}
-            type="button"
-            className="second-button flex items-center justify-center gap-1 border"
-          >
-            Cancel
-          </button>
-          <button
-            disabled={duplicate.isPending}
-            type="submit"
-            className="main-button flex items-center justify-center gap-1"
-          >
-            <IoDuplicate />{" "}
-            {subjectsDataLanguage.duplicate(language.data ?? "en")}
-          </button>
-        </div>
-      </div>
+      <footer className="grid grid-cols-2 gap-2 border-t border-icon-color/10 px-5 py-4 sm:flex sm:justify-end sm:px-6">
+        <button
+          type="button"
+          onClick={onClose}
+          className="h-11 rounded-xl border border-icon-color/15 px-5 font-semibold text-icon-color transition-colors hover:bg-background-color"
+        >
+          {classroomUiLanguage.cancel(lang)}
+        </button>
+        <button
+          type="submit"
+          disabled={duplicate.isPending || noClassrooms}
+          aria-busy={duplicate.isPending}
+          className="flex h-11 items-center justify-center gap-2 rounded-xl bg-primary-color px-5 font-semibold text-white transition-colors hover:bg-primary-color-hover disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          {duplicate.isPending ? (
+            <span
+              aria-hidden
+              className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white motion-reduce:animate-none"
+            />
+          ) : (
+            <FiCopy aria-hidden />
+          )}
+          {duplicate.isPending
+            ? subjectUiLanguage.duplicating(lang)
+            : subjectsDataLanguage.duplicate(lang)}
+        </button>
+      </footer>
     </form>
   );
 }

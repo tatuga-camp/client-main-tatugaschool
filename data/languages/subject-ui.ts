@@ -80,6 +80,10 @@ export const subjectUiLanguage = {
     ),
   created: (l: Language) => pick(l, "Subject created", "สร้างวิชาแล้ว"),
   creating: (l: Language) => pick(l, "Creating…", "กำลังสร้าง…"),
+  duplicated: (l: Language) => pick(l, "Subject duplicated", "ทำสำเนาวิชาแล้ว"),
+  duplicating: (l: Language) => pick(l, "Duplicating…", "กำลังทำสำเนา…"),
+  duplicateOf: (l: Language, title: string) =>
+    pick(l, `Copy of “${title}”`, `สำเนาจาก “${title}”`),
   goToClasses: (l: Language) =>
     pick(l, "Go to Classrooms", "ไปที่หน้าห้องเรียน"),
   archived: (l: Language) => pick(l, "Archived", "เก็บถาวร"),
